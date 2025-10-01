@@ -9,10 +9,19 @@
           "manifest": "./src/webparts/appsAndLinks/AppsAndLinksWebPart.manifest.json"
         }
       ]
+    },
+    "banner-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/banner/BannerWebPart.js",
+          "manifest": "./src/webparts/banner/BannerWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "AppsAndLinksWebPartStrings": "lib/webparts/appsAndLinks/loc/{locale}.js"
+    "AppsAndLinksWebPartStrings": "lib/webparts/appsAndLinks/loc/{locale}.js",
+    "BannerWebPartStrings": "lib/webparts/banner/loc/{locale}.js"
   }
 }
