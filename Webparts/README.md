@@ -1,4 +1,4 @@
-# tawasol
+# webparts
 
 ## Summary
 
@@ -20,6 +20,11 @@ Short summary on functionality and used technologies.
 ## Prerequisites
 
 > Any special pre-requisites?
+npm install react-slick --save
+npm i --save-dev @types/react-slick
+npm i slick-carousel
+
+npm install @pnp/sp --save
 
 ## Solution
 
