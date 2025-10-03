@@ -1,12 +1,13 @@
 import * as React from 'react';
-import './LinksAndApps.css';
+// import styles from './AppPanel.module.scss';
 import { Panel, PanelType } from '@fluentui/react/lib/Panel';
 import { DefaultButton } from '@fluentui/react/lib/Button';
 import { TextField } from '@fluentui/react/lib/TextField';
 
 
 interface IMyPanelProps {
-  // Define any props passed to your component
+  isOpen: boolean;
+  onClosePanel: () => void;
 }
 
 interface IMyPanelState {
@@ -24,13 +25,13 @@ class AppPanel extends React.Component<IMyPanelProps, IMyPanelState> {
   }
 
 
-  private _onOpenPanel = (): void => {
-    this.setState({ isPanelOpen: true });
-  };
+  // private _onOpenPanel = (): void => {
+  //   this.setState({ isPanelOpen: true });
+  // };
 
   private _onClosePanel = (): void => {
-    this.setState({ isPanelOpen: false });
-  };
+this.state.isPanelOpen
+  }
 
   private _onInputChange = (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string): void => {
     this.setState({ inputValue: newValue || '' });
@@ -40,7 +41,7 @@ class AppPanel extends React.Component<IMyPanelProps, IMyPanelState> {
   private _onRenderFooterContent = (): JSX.Element => {
     return (
       <div>
-        <DefaultButton onClick={this._onClosePanel} style={{ marginRight: 8 }}>
+        <DefaultButton style={{ marginRight: 8 }}>
           Close
         </DefaultButton>
         <DefaultButton primary onClick={() => alert(`Saved: ${this.state.inputValue}`)}>
@@ -53,7 +54,6 @@ class AppPanel extends React.Component<IMyPanelProps, IMyPanelState> {
   public render(): React.ReactElement<IMyPanelProps> {
     return (
       <div>
-        <DefaultButton text="Open Panel" onClick={this._onOpenPanel} />
 
         <Panel
           isOpen={this.state.isPanelOpen}

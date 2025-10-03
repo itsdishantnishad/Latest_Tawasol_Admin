@@ -17,11 +17,20 @@
           "manifest": "./src/webparts/banner/BannerWebPart.manifest.json"
         }
       ]
+    },
+    "feature-wheel-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/featureWheel/FeatureWheelWebPart.js",
+          "manifest": "./src/webparts/featureWheel/FeatureWheelWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "AppsAndLinksWebPartStrings": "lib/webparts/appsAndLinks/loc/{locale}.js",
-    "BannerWebPartStrings": "lib/webparts/banner/loc/{locale}.js"
+    "BannerWebPartStrings": "lib/webparts/banner/loc/{locale}.js",
+    "FeatureWheelWebPartStrings": "lib/webparts/featureWheel/loc/{locale}.js"
   }
 }
