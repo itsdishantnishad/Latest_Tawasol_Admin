@@ -1,0 +1,45 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "news-story-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/newsStory/NewsStoryWebPart.js",
+          "manifest": "./src/webparts/newsStory/NewsStoryWebPart.manifest.json"
+        }
+      ]
+    },
+    "feature-wheel-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/featureWheel/FeatureWheelWebPart.js",
+          "manifest": "./src/webparts/featureWheel/FeatureWheelWebPart.manifest.json"
+        }
+      ]
+    },
+    "banner-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/banner/BannerWebPart.js",
+          "manifest": "./src/webparts/banner/BannerWebPart.manifest.json"
+        }
+      ]
+    },
+    "apps-and-links-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/appsAndLinks/AppsAndLinksWebPart.js",
+          "manifest": "./src/webparts/appsAndLinks/AppsAndLinksWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "NewsStoryWebPartStrings": "lib/webparts/newsStory/loc/{locale}.js",
+    "FeatureWheelWebPartStrings": "lib/webparts/featureWheel/loc/{locale}.js",
+    "BannerWebPartStrings": "lib/webparts/banner/loc/{locale}.js",
+    "AppsAndLinksWebPartStrings": "lib/webparts/appsAndLinks/loc/{locale}.js"
+  }
+}

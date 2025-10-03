@@ -8,12 +8,12 @@
       "@microsoft/teams-js": "2.12.0"
     },
     "version": "1.18.2",
-    "libraryName": "tawasol",
-    "libraryId": "bad74cb0-b2dd-45af-aa1a-800e983b4b60",
+    "libraryName": "webparts",
+    "libraryId": "14decd7c-567a-4b47-a7dc-a44b653fa4c4",
     "environment": "spo",
     "packageManager": "npm",
-    "solutionName": "tawasol",
-    "solutionShortDescription": "tawasol description",
+    "solutionName": "webparts",
+    "solutionShortDescription": "webparts description",
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "componentType": "webpart"

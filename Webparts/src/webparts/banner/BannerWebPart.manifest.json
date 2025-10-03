@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "e68d8515-4445-4b1d-ba73-060177bfc06a",
+  "id": "d954dc76-6c6a-41cb-b9ff-078730801ffc",
   "alias": "BannerWebPart",
   "componentType": "WebPart",
 
@@ -18,11 +18,11 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Advanced
     "group": { "default": "Advanced" },
-    "title": { "default": "Banner" },
-    "description": { "default": "Banner description" },
+    "title": { "default": "banner" },
+    "description": { "default": "banner description" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "description": "Banner"
+      "description": "banner"
     }
   }]
 }
