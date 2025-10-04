@@ -32,7 +32,7 @@ export enum siteColumn {
 export class listServices {
 
     private sp: SPFI;
- 
+
     constructor(private context: WebPartContext) {
         this.sp = spfi().using(SPFx(this.context));
     }
@@ -49,7 +49,29 @@ export class listServices {
             return results.map((item: any) => {
                 return {
                     Title: item.Title,
-                  //  Description: item.AcronymDetail
+                    //  Description: item.AcronymDetail
+                } as any;
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    public async getApps(listName: string): Promise<any[]> {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        let results: any[] = [];
+        try {
+            results = await this.sp.web.lists.getByTitle(listName)
+                .items
+                .select("Title", "TIRSortOrder", "TIRIconURL", "URL").orderBy("TIRSortOrder", true)();
+            // eslint-disable-line @typescript-eslint/no-explicit-any
+            return results.map((item: any) => {
+                return {
+                    Title: item.Title,
+                    SortOrder: item.TIRSortOrder,
+                    IconURL: item.TIRIconURL ? item.TIRIconURL.Url : "#",
+                    URL: item.URL ? item.URL.Url : "#"
                 } as any;
             });
         } catch (error) {

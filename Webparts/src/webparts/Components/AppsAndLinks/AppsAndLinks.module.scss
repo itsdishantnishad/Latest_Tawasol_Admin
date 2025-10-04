@@ -1,0 +1,45 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.appsAndLinksContainer {
+    background-color: white;
+
+    .appsContent {
+        background-color: white;
+
+
+        .category {
+            font-size: 16px;
+        }
+
+        .apps {
+            display: grid;
+            /* Creates a 3-column layout where each column takes up an equal fraction of the available space */
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0px;
+            /* Adds space between the grid items */
+            padding: 10px;
+        }
+
+        .appItem {
+            padding: 12px;
+            text-align: center;
+            /* Centers the content inside each item */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
+        }
+    }
+
+    .addLinkContent {
+        background-color: white;
+
+        .category {
+            font-size: 16px;
+        }
+
+        .input {
+            display: grid;
+        }
+    }
+}

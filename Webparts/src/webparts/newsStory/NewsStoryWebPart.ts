@@ -24,7 +24,7 @@ export default class NewsStoryWebPart extends BaseClientSideWebPart<INewsStoryWe
     const element: React.ReactElement<INewsStoryProps> = React.createElement(
       NewsStory,
       {
-        interval: 5,
+        interval: 500,
         context: this.context
       }
     );
