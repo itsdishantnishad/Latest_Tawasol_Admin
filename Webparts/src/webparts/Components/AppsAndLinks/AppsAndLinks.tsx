@@ -15,6 +15,13 @@ export interface IAppsAndLinksProps {
 
 export const AppsAndLinks = (props: IAppsAndLinksProps) => {
     const [isAddLinks, setIsAddLinks] = useState(false);
+    const [inputLinkTitle, setInputLinkTitle] = useState('');
+    const [inputLinkURL, setInputLinkURL] = useState('');
+    const [customLinks, setCustomLinks] = useState([{
+        Title: "Add Links",
+        URL: ""
+    }]);
+
     const hideDialog = () => {
         props.hideAppsAndLinks();
     }
@@ -28,8 +35,27 @@ export const AppsAndLinks = (props: IAppsAndLinksProps) => {
     }
 
     const saveAddLink = () => {
+        //const customLink = { inputLinkTitle, inputLinkURL };
+
+        setCustomLinks([
+            ...customLinks,
+            {
+                Title: inputLinkTitle,
+                URL: inputLinkURL
+            }
+        ]);
         closeAddLink();
     }
+
+    const handleInputChange = (event: any) => {
+        setInputLinkTitle(event.target.value);
+        //setInputLinkURL(inputLinkURL);
+    };
+
+    const handleInputChange1 = (event: any) => {
+        // setInputLinkTitle(inputLinkTitle);
+        setInputLinkURL(event.target.value);
+    };
 
     return (
         <Dialog
@@ -62,20 +88,54 @@ export const AppsAndLinks = (props: IAppsAndLinksProps) => {
                     <div className={styles.addLinkContent}>
                         <div className={styles.category}>Links</div>
                         <div>
-                            <div onClick={openAddLink}>
-                                <img src={" https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SiteAssets/AppsIcons/add-square.png"}></img>
-                                <div className="label"> Add Links</div>
+                            <div className={styles.addCustomLinksContent}>
+                                {customLinks.length > 0 && customLinks.map((link: any) => {
+                                    return (
+                                        <div className={styles.customLinksContent}>
+                                            {link.Title === "Add Links" ?
+                                                <div className={styles.customLinks} onClick={openAddLink}>
+                                                    <img src={" https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SiteAssets/AppsIcons/add-square.png"}></img>
+                                                    <div className="label"> Add Links</div>
+                                                </div>
+                                                :
+                                                <div>
+                                                    <div>
+                                                        {link.Title}
+                                                    </div>
+                                                    <div>
+                                                        {link.URL}
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    )
+                                })}
                             </div>
+
                             <div style={{ display: isAddLinks === true ? "block" : "none" }}>
                                 <div>Add Custom Links</div>
                                 <div>
                                     <div className={styles.input}>
                                         <label>Add name</label>
-                                        <input></input>
+                                        <input
+                                            type="text"
+                                            name="newLinksTitle"
+                                            id="my-text-input"
+                                            value={inputLinkTitle}
+                                            onChange={handleInputChange}
+                                            placeholder="Please enter link"
+                                        />
                                     </div>
                                     <div className={styles.input}>
                                         <label>Enter your URL</label>
-                                        <input></input>
+                                        <input
+                                            type="text"
+                                            id="my-text-input"
+                                            name="newLinksURL"
+                                            value={inputLinkURL}
+                                            onChange={handleInputChange1}
+                                            placeholder="Please enter link URL"
+                                        />
                                     </div>
                                     <div>
                                         <a onClick={closeAddLink}>Cancel</a>

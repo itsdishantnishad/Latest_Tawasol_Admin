@@ -36,10 +36,31 @@
 
         .category {
             font-size: 16px;
-        }
 
-        .input {
-            display: grid;
+            .addCustomLinksContent {
+                background-color: white;
+
+                .customLinksContent {
+                    display: grid;
+                    gap: 0;
+                    grid-template-columns: repeat(6, 1fr);
+                    padding: 10px;
+                }
+
+                .customLinks {
+                    align-items: center;
+                    display: -ms-flexbox;
+                    display: flex;
+                    font-family: sans-serif;
+                    justify-content: center;
+                    padding: 12px;
+                    text-align: center;                
+            }
         }
     }
+
+    .input {
+        display: grid;
+    }
+}
 }

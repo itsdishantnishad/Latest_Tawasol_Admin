@@ -25,12 +25,30 @@
           "manifest": "./src/webparts/banner/BannerWebPart.manifest.json"
         }
       ]
-    }   
+    },
+    "news-page-title-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/newsPageTitle/NewsPageTitleWebPart.js",
+          "manifest": "./src/webparts/newsPageTitle/NewsPageTitleWebPart.manifest.json"
+        }
+      ]
+    },
+    "more-for-you-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/moreForYou/MoreForYouWebPart.js",
+          "manifest": "./src/webparts/moreForYou/MoreForYouWebPart.manifest.json"
+        }
+      ]
+    }
   },
   "externals": {},
   "localizedResources": {
     "NewsStoryWebPartStrings": "lib/webparts/newsStory/loc/{locale}.js",
     "FeatureWheelWebPartStrings": "lib/webparts/featureWheel/loc/{locale}.js",
-    "BannerWebPartStrings": "lib/webparts/banner/loc/{locale}.js"   
+    "BannerWebPartStrings": "lib/webparts/banner/loc/{locale}.js",
+    "NewsPageTitleWebPartStrings": "lib/webparts/newsPageTitle/loc/{locale}.js",
+    "MoreForYouWebPartStrings": "lib/webparts/moreForYou/loc/{locale}.js"
   }
 }
