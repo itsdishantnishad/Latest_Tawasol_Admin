@@ -1,7 +1,5 @@
-export interface IBannerProps {
-  description: string;
-  isDarkTheme: boolean;
-  environmentMessage: string;
-  hasTeamsContext: boolean;
-  userDisplayName: string;
+import { IBannerWebPartProps } from "../BannerWebPart";
+
+export interface IBannerProps extends IBannerWebPartProps {
+  bannerType: string;
 }

@@ -1,0 +1,213 @@
+
+.banner {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+//   background: #feecda;
+  border-radius: 8px;
+//   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+//   height: calc(var(--designH) * var(--scale));
+  height: 282px;
+  --centerNudgeX: -8px;
+--design2Top: 128px;
+  --decorW: 540px;      
+  --decorTop: 130px;    
+  --decorBleed: 8px;    
+  --decorTilt: -1.45deg;
+  --rightBottomBump: 10px;
+}
+
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--designW);
+  height: var(--designH);
+  transform-origin: top center;
+  transform: translateX(-50%) scale(var(--scale));
+}
+
+.leftDecor {
+  position: absolute;
+  top: var(--decorTop);
+  left: calc(-1 * var(--decorBleed));
+  width: var(--decorW);
+  height: auto;
+  transform-origin: left center;
+
+  transform: scale(1.12) rotate(var(--decorTilt)); 
+
+  object-fit: contain;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.rightDecor {
+  position: absolute;
+  top: var(--decorTop);
+  right: calc(-1 * var(--decorBleed));
+  width: var(--decorW);
+  height: auto;
+  transform-origin: right center;
+  transform: scaleX(1) scale(1.12) rotate(var(--decorTilt)) translateY(calc(-1 * var(--rightBottomBump)));
+
+  object-fit: contain;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.center {
+  position: absolute;
+  top: 49px;
+  left: 50%;
+  
+  transform: translateX(calc(-50% + var(--centerNudgeX)));
+  width: 920px;
+  height: 282px;
+  z-index: 1;
+}
+
+.flagImage {
+  position: absolute;
+  top: 10.95px;
+  left: 321.01px;
+  width: 278.2446px;
+  height: 237.1974px;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: none;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.flagTextContainer {
+  position: absolute;
+  top: 162.95px;
+  left: 168px;
+  width: 583px;
+  height: 91px;
+  z-index: 1;
+  overflow: visible; 
+}
+
+.occasion {
+  position: absolute;
+  top: 8px;
+  left: 42px;
+  width: 559px;
+  height: auto;          
+  white-space: normal;   
+  overflow: visible;
+
+  font-family: "Instrument Serif", Georgia, "Times New Roman", Times, serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 46px;
+  line-height: 44px;
+  letter-spacing: 0px;
+  text-align: center;
+  margin: 0;
+
+  background: linear-gradient(90deg, #bd1f34 0%, #419c47 50%, #010101 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.slogan {
+  position: absolute;
+  top: 248px;   
+  left: 222px;  
+  width: 475px;
+  height: 24px;
+
+  font-family: "Inter", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0px;
+  text-align: center;
+  color: #101820;
+  margin: 0;
+  z-index: 1;
+}
+
+
+.teams { background: linear-gradient(180deg, #feecda 0%, #f6dfc7 100%); }
+
+.loading, .error { position: absolute; bottom: 8px; left: 16px; }
+.loading { font-style: italic; color: #666; }
+.error { color: #b00020; }
+
+@media (max-width: 991.98px) {
+
+  .banner {
+    height: auto;
+    padding: 16px;
+  }
+
+  .canvas {
+    position: static;
+    width: 100%;
+    height: auto;
+    transform: none;
+  }
+  .leftDecor,
+  .rightDecor {
+    display: none;
+  }
+  .center {
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    height: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    row-gap: 8px; 
+  }
+  .flagImage {
+    position: static;
+    width: clamp(160px, 45vw, 260px);
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .flagTextContainer {
+    position: static;
+    width: 100%;
+    height: auto;
+    text-align: center;
+  }
+
+  .occasion {
+    position: static;           
+    width: auto;
+    max-width: min(583px, 90%);
+    margin: 0 auto;             
+    white-space: normal;        
+    overflow: visible;
+    font-size: clamp(26px, 6vw, 40px);
+    line-height: 1.1;
+  }
+
+  .slogan {
+    position: static;           
+    width: auto;
+    max-width: min(520px, 90%);
+    height: auto;               
+    margin: 4px auto 0;         
+    text-align: center;
+    font-size: clamp(14px, 3.5vw, 16px);
+    line-height: 1.5;
+  }
+}
+
