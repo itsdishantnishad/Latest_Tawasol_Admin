@@ -1,4 +1,4 @@
-declare interface IAppsAndLinksWebPartStrings {
+declare interface IMoreForYouWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
   DescriptionFieldLabel: string;
@@ -13,7 +13,7 @@ declare interface IAppsAndLinksWebPartStrings {
   UnknownEnvironment: string;
 }
 
-declare module 'AppsAndLinksWebPartStrings' {
-  const strings: IAppsAndLinksWebPartStrings;
+declare module 'MoreForYouWebPartStrings' {
+  const strings: IMoreForYouWebPartStrings;
   export = strings;
 }

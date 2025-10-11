@@ -1,56 +1,139 @@
-.ms-HubNav {
-    display: none;
-}
+/* Hide Hub nav */ 
 
-#spSiteHeader {
-    height: 0;
-}
+/* #sp-appBar, */ 
 
-[data-sp-feature-tag="Site header host"],
-div[data-automationid="pageHeader"] {
-    display: none !important;
-}
+/* .sp-App-hubNav, */ 
 
-#SuiteNavWrapper {
-    z-index: 0 !important;
-}
+.ms-HubNav { 
 
-#SuiteNavWrapper.hide {
-    transition: all 0.3s ease-out;
-    height: 0;
-    overflow: hidden;
-    visibility: hidden;
-}
+  display: none; 
 
-#hide-ribbon-wrap {
-    background-image: linear-gradient(to right, #B50007 0%, #B50007 100%);
-    cursor: pointer;
-}
+} 
 
-#hide-ribbon-inner {
-    cursor: pointer;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    height: 12px;
-}
+ 
 
-.hide-ribbon-icon {
-    color: white;
-    padding-top: 4px;
-    font-size: 12px;
-    transition: transform .3s;
-}
+#spSiteHeader { 
 
-.hide-ribbon-icon.open {
-    transform: rotate(180deg);
-    transition: transform .3s;
-}
+  height: 0; 
 
-.icon-button {
-    cursor: pointer;
-    border: none;
-    background-color: transparent;
-    display: flex;
-    align-items: center;
-}
+} 
+
+ 
+
+/* #spCommandBar, */ 
+
+[data-sp-feature-tag="Site header host"], 
+
+div [data-automationid="pageHeader"] { 
+
+  display: none !important; 
+
+} 
+
+ 
+
+#SuiteNavWrapper { 
+
+  z-index: 0 !important; 
+
+} 
+
+ 
+
+#SuiteNavWrapper.hide { 
+
+ transition: all .3s ease-out; 
+
+ height: 0; 
+
+ overflow: hidden; 
+
+ visibility: hidden; 
+
+} 
+
+ 
+
+#SuiteNavWrapper.show { 
+
+  height: 48px; 
+
+  z-index: 12 !important; 
+
+  transition: height .3s ease-out, z-index 0s .4s; 
+
+  visibility: visible; 
+
+} 
+
+ 
+
+#hide-ribbon-wrap { 
+
+  background-image: linear-gradient(to right, #B50007 0%, #B50007 100%); 
+
+  cursor: pointer; 
+
+} 
+
+ 
+
+#hide-ribbon-inner { 
+
+  cursor: pointer; 
+
+  width: 100%; 
+
+  display: flex; 
+
+  justify-content: center; 
+
+  height: 12px; 
+
+} 
+
+ 
+
+.hide-ribbon-icon { 
+
+  color: white; 
+
+  padding-top: 4px; 
+
+  font-size: 12px; 
+
+  transition: transform .3s; 
+
+} 
+
+ 
+
+.hide-ribbon-icon.open { 
+
+  transform: rotate(180deg); 
+
+  transition: transform .3s; 
+
+} 
+
+ 
+
+.icon-button { 
+
+  cursor: pointer; 
+
+  border: none; 
+
+  background-color: transparent; 
+
+  display: flex; 
+
+  align-items: center; 
+
+} 
+
+ 
+
+ 
+
+ 

@@ -2,20 +2,18 @@ import { Log } from '@microsoft/sp-core-library';
 import {
   BaseApplicationCustomizer
 } from '@microsoft/sp-application-base';
-import { Dialog } from '@microsoft/sp-dialog';
+
 
 import * as strings from 'ExtensionsApplicationCustomizerStrings';
 require("../../styles/hideNav.css");
 
+
+
 const LOG_SOURCE: string = 'ExtensionsApplicationCustomizer';
 
-/**
- * If your command set uses the ClientSideComponentProperties JSON input,
- * it will be deserialized into the BaseExtension.properties object.
- * You can define an interface to describe it.
- */
+
 export interface IExtensionsApplicationCustomizerProperties {
-  // This is an example; replace with your own property
+  
   testMessage: string;
 }
 
@@ -23,21 +21,23 @@ export interface IExtensionsApplicationCustomizerProperties {
 export default class ExtensionsApplicationCustomizer
   extends BaseApplicationCustomizer<IExtensionsApplicationCustomizerProperties> {
 
+  public static addClass = (selector: any, ...tokens: any[]) => document.querySelector(selector)?.classList.add(...tokens);
+
+  public static hasClass = (selector: any, className: any) => document.querySelector(selector)?.classList.contains(className);
+
+  public static removeClass = (selector: any, ...tokens: any[]) => document.querySelector(selector)?.classList.remove(...tokens);
 
   public onInit(): Promise<void> {
     Log.info(LOG_SOURCE, `Initialized ${strings.Title}`);
 
-    const ele: any = document.getElementById("SuiteNavWrapper")
-    ele.classList.add('hide');
+    // const ele: any = document.getElementById("SuiteNavWrapper")
+    // ele.classList.add('hide');
+    ExtensionsApplicationCustomizer.addClass('#hide-ribbon-inner', 'ribbonClosed');
+    ExtensionsApplicationCustomizer.addClass('#SuiteNavWrapper', 'hide'); 
 
-    let message: string = this.properties.testMessage;
-    if (!message) {
-      message = '(No properties were provided.)';
-    }
+   
 
-    Dialog.alert(`Hello from ${strings.Title}:\n\n${message}`).catch(() => {
-      /* handle error */
-    });
+    
 
     return Promise.resolve();
   }

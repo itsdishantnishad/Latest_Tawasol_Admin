@@ -1,0 +1,147 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+/* =============================
+   MAIN CONTAINER
+   ============================= */
+.newsDetails {
+  padding: 16px;
+  background: #FFF4EA;
+}
+
+/* =============================
+   HEADER CHIPS SECTION
+   ============================= */
+.headerChips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+/* Category Pill */
+.categoryChip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border-radius: 40px;
+  padding: 6px 10px;
+}
+
+.categoryIcon {
+  width: 25px;
+  height: 25px;
+}
+
+.categoryText {
+  font-weight: 600;
+  color: #3A3B43;
+}
+
+/* Department Pill */
+.departmentChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 30px;
+}
+
+.departmentText {
+  font-weight: 600;
+  color: #6C6C6C;
+}
+
+/* Icon Emoji Styles */
+.emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Divider */
+.divider {
+  width: 1px;
+  height: 28px;
+  background-color: #e0e0e0;
+}
+
+/* Hashtag Styles */
+.hashtagContainer {
+  display: flex;
+  gap: 6px;
+}
+
+.hashtag {
+  color: #D3675B;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+/* =============================
+   TITLE SECTION
+   ============================= */
+.title {
+  font-size: 36px;
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+/* =============================
+   AUTHOR ROW  (aligned layout)
+   ============================= */
+.authorRow {
+  display: flex;
+  justify-content: space-between; /* ✅ Moves meta info to the right */
+  align-items: center;
+  margin-bottom: 16px;
+  color: #555;
+  font-size: 14px;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #777;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author {
+  font-weight: 600;
+  color: #222;
+}
+
+.dot {
+  margin: 0 4px;
+  color: #ccc;
+}
+
+.metaText {
+  font-size: 14px;
+  color: #666;
+}
+.hashtagLink {
+  color: #d3675b;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.hashtagLink:hover {
+  text-decoration: underline;
+  color: #b83f30;
+}

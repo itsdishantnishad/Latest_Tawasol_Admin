@@ -1,0 +1,135 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.wrapper {
+  /* matches page’s sand background + soft inset */
+  background: #fff4ea;
+  padding: 14px 12px 16px;
+  border-radius: 14px;
+  position: relative;
+
+  /* soft top & bottom glow */
+  box-shadow:
+    inset 0 12px 20px -18px rgba(0,0,0,0.35),
+    inset 0 -12px 20px -18px rgba(0,0,0,0.35);
+
+  /* keep the web part narrow like right rail (auto on smaller columns) */
+  max-width: 440px;
+}
+
+/* ===== Heading ===== */
+.heading {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 4px 8px 12px;
+  color: #121212;
+}
+
+/* ===== Grid (always one column like Figma right rail) ===== */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr; /* single column */
+  gap: 12px;
+  width: 100%;
+}
+
+/* ===== Card ===== */
+.card {
+  position: relative;
+  width: 100%;
+  height: 240px;          /* Figma: fixed height */
+  border-radius: 4px;     /* Figma radius */
+  overflow: hidden;
+  cursor: pointer;
+  background: #0b0b0b;    /* behind image to avoid white flashes */
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+  filter: brightness(1.02);
+}
+
+/* ===== Image ===== */
+.imageWrap {
+  position: absolute;
+  inset: 0;                 /* full bleed */
+}
+
+.imageWrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.05) contrast(1.02);
+}
+
+/* strong fades like Figma */
+.fadeTop, .fadeBottom {
+  position: absolute;
+  left: 0; right: 0;
+  height: 50%;
+  pointer-events: none;
+}
+.fadeTop    { top: 0;    background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,0)); }
+.fadeBottom { bottom: 0; background: linear-gradient(0deg,  rgba(0,0,0,.75), rgba(0,0,0,0)); }
+
+/* ===== Overlay Content ===== */
+.contentOverlay {
+  position: absolute;
+  left: 12px; right: 12px; bottom: 12px;
+  color: #fff;
+}
+
+/* Title — two lines, then ellipsis (matches Figma density) */
+.title {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.2;
+  margin: 0 0 8px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Meta line (department • time • read time • category) */
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: #f1f1f1;
+  opacity: 0.95;
+}
+
+/* a pill for department to mimic Figma feel */
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.metaItem.dept {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+  backdrop-filter: blur(2px);
+}
+
+.dotIcon { font-size: 13px; line-height: 1; }
+
+/* ===== Responsive niceties (keeps right-rail look on all screens) ===== */
+@media (min-width: 1366px) {
+  .wrapper { max-width: 424px; } /* fixed like Figma on laptops/desktops */
+}
+
+@media (max-width: 480px) {
+  /* on phones, let the card breathe slightly taller if the column is narrow */
+  .card { height: 220px; }
+}

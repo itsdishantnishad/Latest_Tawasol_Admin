@@ -6,30 +6,25 @@ import {
   PropertyPaneTextField
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
-import * as strings from 'AppsAndLinksWebPartStrings';
-import AppsAndLinks from './components/AppsAndLinks';
-import { IAppsAndLinksProps } from './components/IAppsAndLinksProps';
 
-export interface IAppsAndLinksWebPartProps {
+import * as strings from 'MoreForYouWebPartStrings';
+import MoreForYou from './components/MoreForYou';
+import { IMoreForYouProps } from './components/IMoreForYouProps';
+
+export interface IMoreForYouWebPartProps {
   description: string;
 }
 
-export default class AppsAndLinksWebPart extends BaseClientSideWebPart<IAppsAndLinksWebPartProps> {
+export default class MoreForYouWebPart extends BaseClientSideWebPart<IMoreForYouWebPartProps> {
 
-  private _isDarkTheme: boolean = false;
-  private _environmentMessage: string = '';
+
 
   public render(): void {
-    const element: React.ReactElement<IAppsAndLinksProps> = React.createElement(
-      AppsAndLinks,
+    const element: React.ReactElement<IMoreForYouProps> = React.createElement(
+      MoreForYou,
       {
-        description: this.properties.description,
-        isDarkTheme: this._isDarkTheme,
-        environmentMessage: this._environmentMessage,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+      context: this.context
       }
     );
 
@@ -38,7 +33,7 @@ export default class AppsAndLinksWebPart extends BaseClientSideWebPart<IAppsAndL
 
   protected onInit(): Promise<void> {
     return this._getEnvironmentMessage().then(message => {
-      this._environmentMessage = message;
+      
     });
   }
 
@@ -71,23 +66,7 @@ export default class AppsAndLinksWebPart extends BaseClientSideWebPart<IAppsAndL
     return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
   }
 
-  protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
-    if (!currentTheme) {
-      return;
-    }
-
-    this._isDarkTheme = !!currentTheme.isInverted;
-    const {
-      semanticColors
-    } = currentTheme;
-
-    if (semanticColors) {
-      this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
-      this.domElement.style.setProperty('--link', semanticColors.link || null);
-      this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
-    }
-
-  }
+  
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);

@@ -9,7 +9,9 @@ import "@pnp/sp/files";
 import "@pnp/sp/folders";
 import "@pnp/sp/files/folder";
 import "@pnp/sp/clientside-pages";
-
+import "@pnp/sp/search"
+import { ISearchQuery } from "@pnp/sp/search";
+// import {moment} from "moment"; 
 
 export enum ListName {
     MEET_OUR_TEAM = "Meet Our Team",
@@ -32,24 +34,106 @@ export enum siteColumn {
 export class listServices {
 
     private sp: SPFI;
- 
+
     constructor(private context: WebPartContext) {
         this.sp = spfi().using(SPFx(this.context));
     }
 
+    public static convertToRelativeUrl(absoluteUrl: string) {
+        const parser = document.createElement("a");
+        parser.href = absoluteUrl;
+        return absoluteUrl.replace(`${parser.protocol}//${parser.hostname}`, "");
+    }
+
+
+    public static getImageUrlFromPage(pathToAspxPage: string, imageWidth: any): string {
+        try {
+            const serverRelativePath = listServices.convertToRelativeUrl(pathToAspxPage);
+            const parser = document.createElement("a");
+            parser.href = pathToAspxPage;
+            const sitePath = pathToAspxPage.replace(`${parser.protocol}//${parser.hostname}`, "");
+            const sitePathArray = sitePath.split("/");
+            const sitePathInfo = sitePathArray[0] + "/" + sitePathArray[1] + "/" + sitePathArray[2];
+            if (serverRelativePath.indexOf(".aspx") === -1) {
+                return "";
+            }
+            else {
+                const lastIndex = serverRelativePath ? serverRelativePath.lastIndexOf('/') + 1 : 1;
+                const fileName = serverRelativePath && serverRelativePath.substring(lastIndex, serverRelativePath.length);
+                const fileFinalURL = serverRelativePath.replace(fileName, encodeURIComponent(fileName));
+                const previewUrl = `${sitePathInfo}/_layouts/15/getpreview.ashx?resolution=6&path=${fileFinalURL}&clientType=modernWebPart`;
+                //const previewUrl = `${sitePathInfo}/_layouts/15/getpreview.ashx?resolution=6&path=${encodeURI(serverRelativePath)}&clientType=modernWebPart`; 
+                // return Util.getImageUrl(previewUrl, imageWidth); 
+                return previewUrl;
+            }
+        }
+        catch (err) {
+            return "";
+        }
+    }
+
     // eslint-disable-line @typescript-eslint/no-explicit-any
-    public async getNewsStory(listName: string): Promise<any[]> {
+    public async getNewsStory(): Promise<any[]> {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        let results;
+        const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E0070F67800B7FC224AB6F421620C7A7297*)`;
+        try {
+            results = await this.sp.search({
+                Querytext: "*",
+                RowLimit: 3,
+                TrimDuplicates: false,
+                SelectProperties: [
+                    "Title",
+                    "TIRReadTimeOWSNMBR",
+                    "ViewCount",
+                    "owstaxIdTIRTags",
+                    "owstaxIdTIRDepartment",
+                    "TIRDepartment",
+                    "URL",
+                    "owstaxIdTIRNewsType",
+                    "ModifiedOWSDATE"
+                ],
+                QueryTemplate: `{searchTerms}`,
+                HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
+                //  SortList: sort ? sort : [{ Property: SearchProperties.FIRST_PUBLISHED_DATE, Direction: SortDirection.Descending }], 
+
+                EnableInterleaving: true,
+            } as ISearchQuery);
+
+            // eslint-disable-line @typescript-eslint/no-explicit-any
+            return results.PrimarySearchResults.map((item: any) => {
+                return {
+                    title: item.Title,
+                    readTime: item.TIRReadTimeOWSNMBR,
+                    department: item.owstaxIdTIRDepartment,
+                    tags: item.owstaxIdTIRTags,
+                    pageView: item.ViewCount,
+                    newsImage: listServices.getImageUrlFromPage(item.URL, 200),
+                    newsType: item.owstaxIdTIRNewsType?item.owstaxIdTIRNewsType:"",
+                  //  lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
+                    //  Description: item.AcronymDetail
+                } as any;
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    public async getApps(listName: string): Promise<any[]> {
         // eslint-disable-line @typescript-eslint/no-explicit-any
         let results: any[] = [];
         try {
             results = await this.sp.web.lists.getByTitle(listName)
                 .items
-                .select("Title").orderBy("Title", true)();
+                .select("Title", "TIRSortOrder", "TIRIconURL", "URL").orderBy("TIRSortOrder", true)();
             // eslint-disable-line @typescript-eslint/no-explicit-any
             return results.map((item: any) => {
                 return {
                     Title: item.Title,
-                  //  Description: item.AcronymDetail
+                    SortOrder: item.TIRSortOrder,
+                    IconURL: item.TIRIconURL ? item.TIRIconURL.Url : "#",
+                    URL: item.URL ? item.URL.Url : "#"
                 } as any;
             });
         } catch (error) {

@@ -26,11 +26,19 @@
         }
       ]
     },
-    "apps-and-links-web-part": {
+    "news-page-title-web-part": {
       "components": [
         {
-          "entrypoint": "./lib/webparts/appsAndLinks/AppsAndLinksWebPart.js",
-          "manifest": "./src/webparts/appsAndLinks/AppsAndLinksWebPart.manifest.json"
+          "entrypoint": "./lib/webparts/newsPageTitle/NewsPageTitleWebPart.js",
+          "manifest": "./src/webparts/newsPageTitle/NewsPageTitleWebPart.manifest.json"
+        }
+      ]
+    },
+    "more-for-you-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/moreForYou/MoreForYouWebPart.js",
+          "manifest": "./src/webparts/moreForYou/MoreForYouWebPart.manifest.json"
         }
       ]
     }
@@ -40,6 +48,7 @@
     "NewsStoryWebPartStrings": "lib/webparts/newsStory/loc/{locale}.js",
     "FeatureWheelWebPartStrings": "lib/webparts/featureWheel/loc/{locale}.js",
     "BannerWebPartStrings": "lib/webparts/banner/loc/{locale}.js",
-    "AppsAndLinksWebPartStrings": "lib/webparts/appsAndLinks/loc/{locale}.js"
+    "NewsPageTitleWebPartStrings": "lib/webparts/newsPageTitle/loc/{locale}.js",
+    "MoreForYouWebPartStrings": "lib/webparts/moreForYou/loc/{locale}.js"
   }
 }
