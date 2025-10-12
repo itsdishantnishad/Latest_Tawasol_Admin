@@ -73,7 +73,7 @@ export class listServices {
     }
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
-    public async getNewsStory(): Promise<any[]> {
+    public async getNewsStory(ID?: number): Promise<any[]> {
         // eslint-disable-line @typescript-eslint/no-explicit-any
         let results;
         const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E0070F67800B7FC224AB6F421620C7A7297*)`;
@@ -91,9 +91,12 @@ export class listServices {
                     "TIRDepartment",
                     "URL",
                     "owstaxIdTIRNewsType",
-                    "ModifiedOWSDATE"
+                    "TIRNewsType",
+                    "ModifiedOWSDATE",
+                    "CreatedBy",
+                    "FileRef"
                 ],
-                QueryTemplate: `{searchTerms}`,
+                QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
                 HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
                 //  SortList: sort ? sort : [{ Property: SearchProperties.FIRST_PUBLISHED_DATE, Direction: SortDirection.Descending }], 
 
@@ -105,12 +108,15 @@ export class listServices {
                 return {
                     title: item.Title,
                     readTime: item.TIRReadTimeOWSNMBR,
-                    department: item.owstaxIdTIRDepartment,
+                    department: item.TIRDepartment ? item.TIRDepartment : "",
                     tags: item.owstaxIdTIRTags,
-                    pageView: item.ViewCount,
+                    pageView: item.ViewCount ? Math.trunc(item.ViewCount) : 0,
                     newsImage: listServices.getImageUrlFromPage(item.URL, 200),
-                    newsType: item.owstaxIdTIRNewsType?item.owstaxIdTIRNewsType:"",
-                  //  lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
+                    newsType: item.TIRNewsType ? item.TIRNewsType : "",
+                    author: item.CreatedBy,
+                    path: item.FileRef
+
+                    //  lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
                     //  Description: item.AcronymDetail
                 } as any;
             });
@@ -118,6 +124,9 @@ export class listServices {
             return Promise.reject(error);
         }
     }
+
+
+
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
     public async getApps(listName: string): Promise<any[]> {

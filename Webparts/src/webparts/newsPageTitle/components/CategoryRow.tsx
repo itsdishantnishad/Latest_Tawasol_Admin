@@ -1,6 +1,6 @@
 import * as React from "react";
 import styles from './NewsPageTitle.module.scss';
-
+import NewsType from "../../Components/News/NewsType";
 
 interface IHeaderChipsProps {
   category?: any; // may be string | object | array (SharePoint inconsistency)
@@ -41,14 +41,6 @@ export const CategoryRow: React.FC<IHeaderChipsProps> = ({
   const categoryText = getCategoryText();
   const departmentText = getDepartmentText();
 
-  // ✅ Category icon resolver
-  const getCategoryIcon = (): string | null => {
-   // const c = categoryText.toLowerCase();
-   // if (c.includes("dhre")) return DHREIcon;
-   // if (c.includes("announcement")) return AnnoucIcon;
-   // if (c.includes("around the world")) return ArrTHEWorldIcon;
-    return null;
-  };
 
   // ✅ Department icon resolver
   const getDepartmentIcon = (): string | null => {
@@ -75,11 +67,8 @@ export const CategoryRow: React.FC<IHeaderChipsProps> = ({
   return (
     <div className={styles.headerChips}>
       {/* Category */}
-      {categoryText && (
-        <div className={styles.categoryChip}>
-          {renderIcon(getCategoryIcon())}
-          <span className={styles.categoryText}>{categoryText}</span>
-        </div>
+      {categoryText && (       
+        <NewsType newsType={categoryText}></NewsType>
       )}
 
       {/* Divider */}

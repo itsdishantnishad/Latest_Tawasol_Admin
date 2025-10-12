@@ -41,6 +41,22 @@
           "manifest": "./src/webparts/moreForYou/MoreForYouWebPart.manifest.json"
         }
       ]
+    },
+    "team-organisation-structure-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/teamOrganisationStructure/TeamOrganisationStructureWebPart.js",
+          "manifest": "./src/webparts/teamOrganisationStructure/TeamOrganisationStructureWebPart.manifest.json"
+        }
+      ]
+    },
+    "lets-celebrate-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/letsCelebrate/LetsCelebrateWebPart.js",
+          "manifest": "./src/webparts/letsCelebrate/LetsCelebrateWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -49,6 +65,8 @@
     "FeatureWheelWebPartStrings": "lib/webparts/featureWheel/loc/{locale}.js",
     "BannerWebPartStrings": "lib/webparts/banner/loc/{locale}.js",
     "NewsPageTitleWebPartStrings": "lib/webparts/newsPageTitle/loc/{locale}.js",
-    "MoreForYouWebPartStrings": "lib/webparts/moreForYou/loc/{locale}.js"
+    "MoreForYouWebPartStrings": "lib/webparts/moreForYou/loc/{locale}.js",
+    "TeamOrganisationStructureWebPartStrings": "lib/webparts/teamOrganisationStructure/loc/{locale}.js",
+    "LetsCelebrateWebPartStrings": "lib/webparts/letsCelebrate/loc/{locale}.js"
   }
 }

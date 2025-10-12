@@ -1,0 +1,53 @@
+.wrap {
+  display: grid;
+  gap: 24px;
+}
+
+.section {
+  display: grid;
+  gap: 12px;
+}
+
+.sectionHead {
+  font-weight: 700;
+  color: #1f1f1f;
+  background: #f9ece7;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.collapsible {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  background: #f6e0da;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.chevron {
+  opacity: .7;
+}
+
+/* Reminder buttons */
+.remindBtn,
+.remindBtnActive {
+  padding: 8px 12px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.remindBtn {
+  background: #f2f2f2;
+  color: #444;
+}
+
+.remindBtnActive {
+  background: #1f1f1f;
+  color: #fff;
+}

@@ -8,6 +8,7 @@ import { useRef } from "react";
 import { FontIcon } from '@fluentui/react/lib/Icon';
 import styles from './NewsStory.module.scss';
 import { listServices } from '../../services/listServices';
+import NewsType from '../../Components/News/NewsType';
 
 export interface INewsStoryState {
   promos: any[];
@@ -53,7 +54,7 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
       <div>
         <div className={styles.buttons}>
           <ul style={{ margin: "0px", display: "contents" }}> {dots} </ul>
-          <div style={{ display: 'flex' }}>
+          <div style={{ display: 'flex', paddingLeft: "10px", paddingTop: "15px" }}>
             <div onClick={prev}>
               <FontIcon aria-label="Previous" iconName="ChevronLeftMed" />
             </div>
@@ -88,14 +89,20 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
           return (
             <div className={styles.bannerCard} key={news.id}>
               <div className={styles.bannerCard__PromoDetailsContent}>
-                <div style={{ width: "50%", height: "100%" }}>
-                  <div>{news.newsType}</div>
-                  <div>{news.title}</div>
-                  <div>{news.readTime} min read</div>
-                  <div>{news.pageView} Views</div>
+                <div style={{ width: "50%", height: "100%", marginLeft: "20px" }}>
+                  <div style={{ width: "30%" }}>
+                    <NewsType newsType={news.newsType} />
+                  </div>
+                  <div className={styles.bannerCard__PromoDetailsContent__title}>{news.title}</div>
+                  <div style={{ marginTop: "20px" }}>
+                    <div style={{ display: 'flex' }}>
+                      <div>{news.readTime} min read</div>
+                      <div>{news.pageView} Views</div>
+                    </div>
+                  </div>
                 </div>
                 <div style={{ height: "474px" }}>
-                  <img style={{ height: "100%" }} src={news.newsImage} />
+                  <img style={{ height: "100%",borderRadius:"10px" }} src={news.newsImage} />
                 </div>
                 {/* <div className={styles.bannerCard__PromoDetailsContent__Text}>
                   {promo.Title}
