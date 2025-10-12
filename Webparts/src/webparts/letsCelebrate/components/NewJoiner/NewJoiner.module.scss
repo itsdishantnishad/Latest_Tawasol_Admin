@@ -1,0 +1,100 @@
+/* ==== Feed wrapper ==== */
+.feed {
+  display: grid;
+  gap: 36px;
+}
+
+/* ==== Each person card ==== */
+.card {
+  display: grid;
+  grid-template-columns: 220px 1fr 150px; /* left image | right content | CTA */
+  gap: 20px;
+  align-items: start;
+  padding: 10px 0 26px 0;
+  border-bottom: 1px solid #eee;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 140px 1fr;
+    .ctaCol { grid-column: 1 / -1; justify-content: flex-start; }
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    .left { order: -1; }
+    .ctaCol { grid-column: 1 / -1; }
+  }
+}
+
+/* ==== sides ==== */
+.left {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+
+.right {
+  display: grid;
+  grid-auto-rows: min-content;
+  gap: 10px;               /* spacing between header, meta, body */
+  align-content: start;    /* keep content packed to the top */
+}
+
+/* ==== image ==== */
+.photo {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ==== header (name + role) ==== */
+.header { margin-bottom: 6px; }
+
+.name {
+  margin: 0 0 4px 0;
+  font-family: "Playfair Display", ui-serif, Georgia, serif;
+  font-weight: 600;
+  font-size: 28px;
+  color: #222;
+  line-height: 1.2;
+}
+
+.nameDecor { color: #e85b54; font-style: italic; }
+.role { color: #7a7a7a; font-size: 14px; }
+
+/* ==== meta rows ==== */
+.meta { display: grid; gap: 2px 12px; margin: 8px 0 10px; color: #666; font-size: 14px; }
+.metaRow strong { color: #444; font-weight: 600; }
+
+/* ==== body text ==== */
+.body {
+  display: grid;
+  gap: 10px;          /* vertical spacing between paragraphs */
+  margin-top: 6px;    /* small breathing room after meta */
+}
+
+.para {
+  margin: 0;
+  color: #3b3b3b;
+  line-height: 1.65;
+  font-size: 15px;
+}
+
+/* ==== CTA column & button ==== */
+.ctaCol { display: flex; justify-content: flex-end; }
+
+.sayHello {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-radius: 9999px;
+  background: linear-gradient(180deg, #ffd9b0 0%, #f6b77e 100%);
+  color: #6b2d00; text-decoration: none; font-weight: 600;
+  box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 2px 6px rgba(0,0,0,.08);
+  transition: transform .05s ease, filter .15s ease;
+
+  &:hover { filter: brightness(0.98); }
+  &:active { transform: translateY(1px); }
+}
+
+.helloIcon { font-size: 16px; line-height: 0; }

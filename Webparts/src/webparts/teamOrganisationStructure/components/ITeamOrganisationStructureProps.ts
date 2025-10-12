@@ -1,4 +1,4 @@
-export interface IAppsAndLinksProps {
+export interface ITeamOrganisationStructureProps {
   description: string;
   isDarkTheme: boolean;
   environmentMessage: string;

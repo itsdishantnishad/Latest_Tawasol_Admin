@@ -8,22 +8,22 @@ import {
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
-import * as strings from 'AppsAndLinksWebPartStrings';
-import AppsAndLinks from './components/AppsAndLinks';
-import { IAppsAndLinksProps } from './components/IAppsAndLinksProps';
+import * as strings from 'TeamOrganisationStructureWebPartStrings';
+import TeamOrganisationStructure from './components/TeamOrganisationStructure';
+import { ITeamOrganisationStructureProps } from './components/ITeamOrganisationStructureProps';
 
-export interface IAppsAndLinksWebPartProps {
+export interface ITeamOrganisationStructureWebPartProps {
   description: string;
 }
 
-export default class AppsAndLinksWebPart extends BaseClientSideWebPart<IAppsAndLinksWebPartProps> {
+export default class TeamOrganisationStructureWebPart extends BaseClientSideWebPart<ITeamOrganisationStructureWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
 
   public render(): void {
-    const element: React.ReactElement<IAppsAndLinksProps> = React.createElement(
-      AppsAndLinks,
+    const element: React.ReactElement<ITeamOrganisationStructureProps> = React.createElement(
+      TeamOrganisationStructure,
       {
         description: this.properties.description,
         isDarkTheme: this._isDarkTheme,

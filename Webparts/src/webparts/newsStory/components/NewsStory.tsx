@@ -2,12 +2,13 @@ import * as React from 'react';
 // import styles from './NewsStory.module.scss';
 import type { INewsStoryProps } from './INewsStoryProps';
 import Slider, { Settings } from 'react-slick';
-import "slick-carousel/slick/slick.css"; 
-import "slick-carousel/slick/slick-theme.css"; 
-import { useRef, useState } from "react";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import { useRef } from "react";
 import { FontIcon } from '@fluentui/react/lib/Icon';
 import styles from './NewsStory.module.scss';
 import { listServices } from '../../services/listServices';
+import NewsType from '../../Components/News/NewsType';
 
 export interface INewsStoryState {
   promos: any[];
@@ -22,15 +23,15 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any 
   let sliderRef: any = useRef(null);
   //let pausePlayFlag = false; 
-  const [pausePlayFlag, setPausePlayFlag] = useState(false);
-  const play = (): void => {
-    sliderRef.slickPlay();
-    setPausePlayFlag(false);
-  };
-  const pause = (): void => {
-    sliderRef.slickPause();
-    setPausePlayFlag(true);
-  };
+  // const [pausePlayFlag, setPausePlayFlag] = useState(false);
+  // const play = (): void => {
+  //   sliderRef.slickPlay();
+  //   setPausePlayFlag(false);
+  // };
+  // const pause = (): void => {
+  //   sliderRef.slickPause();
+  //   setPausePlayFlag(true);
+  // };
   const next = (): void => {
     sliderRef.slickNext();
   };
@@ -46,16 +47,22 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
     infinite: props.promos && props.promos.length <= 1 ? false : true,
     slidesToShow: 1,
     slidesToScroll: 1,
-    autoplay: props.interval > 0,
+    //autoplay: props.interval > 0,
     autoplaySpeed: props.interval,
     className: "promotionalBanner",
     appendDots: (dots: React.ReactNode) => (
       <div>
         <div className={styles.buttons}>
-          <div onClick={prev}>
-            <FontIcon aria-label="Previous" iconName="ChevronLeftMed" />
+          <ul style={{ margin: "0px", display: "contents" }}> {dots} </ul>
+          <div style={{ display: 'flex', paddingLeft: "10px", paddingTop: "15px" }}>
+            <div onClick={prev}>
+              <FontIcon aria-label="Previous" iconName="ChevronLeftMed" />
+            </div>
+            <div onClick={next} className={styles.RightArrow}>
+              <FontIcon aria-label="Next" iconName="ChevronRightMed" />
+            </div>
           </div>
-          {props.interval > 0 &&
+          {/* {props.interval > 0 &&
             <div>
               {pausePlayFlag ?
                 <div onClick={play}>
@@ -66,11 +73,10 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
                 </div>
               }
             </div>
-          }
-          <ul style={{ margin: "0px", display: "contents" }}> {dots} </ul>
-          <div onClick={next} className={styles.RightArrow}>
-            <FontIcon aria-label="Next" iconName="ChevronRightMed" />
-          </div>
+          } */}
+
+
+
         </div>
       </div>
     ),
@@ -79,13 +85,28 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
 
     <Slider ref={slider => (sliderRef = slider)}  {...settings}>
       {
-        props.promos.map((promo: any) => {
+        props.promos.map((news: any) => {
           return (
-            <div className={styles.bannerCard} key={promo.id}>
+            <div className={styles.bannerCard} key={news.id}>
               <div className={styles.bannerCard__PromoDetailsContent}>
-                <div className={styles.bannerCard__PromoDetailsContent__Text}>
-                  {promo.Title}
+                <div style={{ width: "50%", height: "100%", marginLeft: "20px" }}>
+                  <div style={{ width: "30%" }}>
+                    <NewsType newsType={news.newsType} />
+                  </div>
+                  <div className={styles.bannerCard__PromoDetailsContent__title}>{news.title}</div>
+                  <div style={{ marginTop: "20px" }}>
+                    <div style={{ display: 'flex' }}>
+                      <div>{news.readTime} min read</div>
+                      <div>{news.pageView} Views</div>
+                    </div>
+                  </div>
                 </div>
+                <div style={{ height: "474px" }}>
+                  <img style={{ height: "100%",borderRadius:"10px" }} src={news.newsImage} />
+                </div>
+                {/* <div className={styles.bannerCard__PromoDetailsContent__Text}>
+                  {promo.Title}
+                </div> */}
               </div>
             </div>
           )
@@ -125,7 +146,7 @@ export default class NewsStory extends React.Component<INewsStoryProps, INewsSto
 
     let listItems: any = [];
 
-    listItems = await this.spService.getNewsStory("Site Pages");
+    listItems = await this.spService.getNewsStory();
     console.log(listItems)
     this.setState({
       promos: listItems

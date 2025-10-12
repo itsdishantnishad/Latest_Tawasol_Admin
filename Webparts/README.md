@@ -23,7 +23,7 @@ Short summary on functionality and used technologies.
 npm install react-slick --save
 npm i --save-dev @types/react-slick
 npm i slick-carousel
-
+npm install moment --save
 npm install @pnp/sp --save
 
 ## Solution

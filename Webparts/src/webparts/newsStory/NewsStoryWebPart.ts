@@ -11,6 +11,7 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import * as strings from 'NewsStoryWebPartStrings';
 import NewsStory from './components/NewsStory';
 import { INewsStoryProps } from './components/INewsStoryProps';
+import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 export interface INewsStoryWebPartProps {
   description: string;
@@ -24,7 +25,7 @@ export default class NewsStoryWebPart extends BaseClientSideWebPart<INewsStoryWe
     const element: React.ReactElement<INewsStoryProps> = React.createElement(
       NewsStory,
       {
-        interval: 5,
+        interval: 500,
         context: this.context
       }
     );
@@ -68,6 +69,24 @@ export default class NewsStoryWebPart extends BaseClientSideWebPart<INewsStoryWe
   }
 
 
+  protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
+      if (!currentTheme) {
+        return;
+      }
+  
+     // this._isDarkTheme = !!currentTheme.isInverted;
+      const {
+        semanticColors
+      } = currentTheme;
+  
+      if (semanticColors) {
+        this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
+        this.domElement.style.setProperty('--link', semanticColors.link || null);
+        this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
+          this.domElement.style.setProperty('--primaryButtonBackground', semanticColors.primaryButtonBackground || null);
+      }
+  
+    }
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
