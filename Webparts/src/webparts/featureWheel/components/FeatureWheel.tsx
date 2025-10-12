@@ -1,68 +1,33 @@
-import * as React from 'react';
-import styles from './FeatureWheel.module.scss';
+import React, { useState } from 'react';
 import type { IFeatureWheelProps } from './IFeatureWheelProps';
-import { AppsAndLinks } from '../../Components/AppsAndLinks/AppsAndLinks';
-import { listServices } from '../../services/listServices';
+import Wheel from '../../Components/Wheel/Wheel';
+import Gallery from '../../Components/Gallery/Gallery';
+import styles from './FeatureWheel.module.scss';
 
-// const apps = [
-//   { name: "Linkedin", icon: "🔗" },
-//   { name: "Meraas.com", icon: "🔗" },
-//   { name: "Workflow", icon: "💲" },
-//   { name: "Tahweel", icon: "🔄" },
-//   { name: "Data Protection", icon: "📋" },
-//   { name: "Leave Request", icon: "📊" },
-//   { name: "Workflow", icon: "⚡" },
-//   { name: "Tahweel", icon: "🔄" },
-//   { name: "Data Protection", icon: "📋" },
-//   { name: "Leave Request", icon: "📊" },
-//   { name: "Workflow", icon: "⚡" },
-// ];
+const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
+  const [selectedFeature, setSelectedFeature] = useState('gallery');
 
-interface IFeatureWheelState {
-  isDialogOpen: boolean;
-  appsLinks: any[];
-}
-
-export default class FeatureWheel extends React.Component<IFeatureWheelProps, IFeatureWheelState> {
-  private spService: listServices;
-  constructor(props: IFeatureWheelProps) {
-    super(props);
-    this.state = {
-      isDialogOpen: true,
-      appsLinks: []
-    };
-    this.spService = new listServices(this.props.context);
-  }
-
-  onOpenDialog = async (): Promise<void> => {
-
-    const appLinks = await this.spService.getApps("Apps");
-    this.setState({
-      isDialogOpen: false,
-      appsLinks: appLinks
-    });
+  const handleViewAll = () => {
+    // Handle view all action - can navigate to gallery page
+    console.log('View all clicked');
   };
 
-  onCloseDialog = () => {
-    this.setState({ isDialogOpen: true });
-  }
+  return (
+    <div className={styles.featureWheelContainer}>
+      {/* Feature Wheel Section */}
+      <section className={styles.wheelSection}>
+        <Wheel
+          selectedFeature={selectedFeature}
+          onFeatureSelect={setSelectedFeature}
+        />
+      </section>
 
-  public render(): React.ReactElement<IFeatureWheelProps> {
-    const {
+      {/* Gallery Section */}
+      <section className={styles.gallerySection}>
+        <Gallery onViewAll={handleViewAll} />
+      </section>
+    </div>
+  );
+};
 
-    } = this.props;
-
-    return (
-      <div className="apps-links-container">
-        <h2>Apps & Links</h2>
-        <div className={styles.grid}>
-          <a onClick={this.onOpenDialog}>Apps And Links</a>
-          <AppsAndLinks
-            isHidden={this.state.isDialogOpen}
-            savedApps={this.state.appsLinks}
-            hideAppsAndLinks={this.onCloseDialog} />
-        </div>
-      </div>
-    );
-  }
-}
+export default FeatureWheel;

@@ -32,7 +32,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
 
   protected onInit(): Promise<void> {
     return this._getEnvironmentMessage().then(message => {
-    
+      console.log(message);
     });
   }
 
