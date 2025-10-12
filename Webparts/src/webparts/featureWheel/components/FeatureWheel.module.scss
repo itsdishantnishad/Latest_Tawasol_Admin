@@ -1,7 +1,6 @@
 @import "~@fluentui/react/dist/sass/References.scss";
 
 .featureWheelContainer {
-  // min-height: 100vh;
   background-color: #ffffff;
 }
 
@@ -11,6 +10,7 @@
 }
 
 .gallerySection {
+  padding-top: 46px;
   background-color: #f8f9fa;
 }
 
@@ -19,4 +19,45 @@
   .wheelSection {
     padding: 40px 16px;
   }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 12px;
+}
+
+.decorativeLineLeft,
+.decorativeLineRight {
+  flex-shrink: 0;
+
+  svg {
+    display: block;
+  }
+}
+
+.title {
+  font-family: "Instrument Serif", serif;
+  font-style: italic;
+  font-size: 42px;
+  line-height: normal;
+  color: #000000;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.subtitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #5b6770;
+  margin: 0;
 }

@@ -10,24 +10,6 @@ interface Feature {
 
 const features: Feature[] = [
     {
-        id: "forms",
-        title: "Forms",
-        subtitle: "Capture data efficiently",
-        icon: "",
-    },
-    {
-        id: "offers",
-        title: "Offers",
-        subtitle: "Exclusive deals just for you",
-        icon: "",
-    },
-    {
-        id: "training",
-        title: "Training",
-        subtitle: "Grow skills, unlock new doors",
-        icon: "",
-    },
-    {
         id: "gallery",
         title: "Image Gallery",
         subtitle: "Past events images and memories",
@@ -43,6 +25,48 @@ const features: Feature[] = [
         id: "events",
         title: "Events",
         subtitle: "Discover whats happening next",
+        icon: "",
+    },
+    {
+        id: "employee_events",
+        title: "Let’s Celebrate",
+        subtitle: "Birthday, anniversary & new joiners",
+        icon: "",
+    },
+    {
+        id: "meetings",
+        title: "Meeting",
+        subtitle: "Connect, discuss, move forward",
+        icon: "",
+    },
+    {
+        id: "service_links",
+        title: "Service Links",
+        subtitle: "Quick access, zero hassle",
+        icon: "",
+    },
+    {
+        id: "forms",
+        title: "Interactive Forms",
+        subtitle: "All interactive forms In one place",
+        icon: "",
+    },
+    {
+        id: "dashboard",
+        title: "Dashboard",
+        subtitle: "Track, analyze, optimize",
+        icon: "",
+    },
+    {
+        id: "offers",
+        title: "Offers",
+        subtitle: "Exclusive deals just for you",
+        icon: "",
+    },
+    {
+        id: "training",
+        title: "Training",
+        subtitle: "Grow skills, unlock new doors",
         icon: "",
     },
 ];
@@ -78,27 +102,6 @@ const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
 
     return (
         <div className={styles.wheelContainer}>
-            {/* Background decorative elements */}
-            {/* <div className={styles.backgroundElements}>
-                
-                <div className={styles.decorationLeft}>
-                    <div className={styles.decorationLeftInner} />
-                </div>
-                <div className={styles.decorationLeft2}>
-                    <div className={styles.decorationCircle} />
-                    <div className={styles.decorationLine} />
-                </div>
-
-                
-                <div className={styles.decorationRight}>
-                    <div className={styles.decorationLeftInner} />
-                </div>
-                <div className={styles.decorationRight2}>
-                    <div className={styles.decorationCircle} />
-                    <div className={styles.decorationLine} />
-                </div>
-            </div> */}
-
             {/* Central arrow pointer */}
             <div className={styles.centralArrow}>
                 <div className={styles.arrow} />
@@ -159,9 +162,7 @@ const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
                                     <div className={`${styles.cardTitle}`}>
                                         {card.title}
                                     </div>
-                                    <div
-                                        className={`${styles.cardSubtitle}`}
-                                    >
+                                    <div className={`${styles.cardSubtitle}`}>
                                         {card.subtitle}
                                     </div>
                                 </div>

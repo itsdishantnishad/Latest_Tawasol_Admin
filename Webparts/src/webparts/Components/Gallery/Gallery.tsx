@@ -35,29 +35,6 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
 
     return (
         <div className={styles.galleryContainer}>
-            {/* Header Section */}
-            <div className={styles.header}>
-                <div className={styles.headerContent}>
-                    <div className={styles.decorativeLineLeft}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                            <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
-                    </div>
-                    <h2 className={styles.title}>A Glimpse through our lens</h2>
-                    <div className={styles.decorativeLineRight}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                            <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
-                    </div>
-                </div>
-                <p className={styles.subtitle}>
-                    Recent milestones and cherished memories we've Immortalised
-                </p>
-            </div>
-
-            {/* Image Grid */}
             <div className={styles.imageGrid}>
                 {/* First Row */}
                 <div className={styles.row}>
