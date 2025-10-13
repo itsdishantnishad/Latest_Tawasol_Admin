@@ -1,0 +1,215 @@
+@import "~@fluentui/react/dist/sass/References.scss";
+
+.dashboardContainer {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 60px 20px;
+  background-color: #e5e7eb;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 12px;
+}
+
+.decorativeLineLeft,
+.decorativeLineRight {
+  flex-shrink: 0;
+
+  svg {
+    display: block;
+  }
+}
+
+.title {
+  font-family: "Instrument Serif", serif;
+  font-style: italic;
+  font-size: 42px;
+  line-height: normal;
+  color: #000000;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.subtitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #5b6770;
+  margin: 0;
+}
+
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1280px;
+  margin: 0 auto 40px;
+}
+
+.dashboardCard {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+
+    .imageOverlay {
+      opacity: 0.5;
+    }
+
+    .arrowIcon {
+      transform: translate(2px, -2px);
+    }
+  }
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.dashboardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.dashboardInfo {
+  padding: 24px;
+}
+
+.dashboardTitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 24px;
+  color: #1a202c;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.arrowIcon {
+  color: #dc2626;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.dashboardDescription {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 20px;
+  color: #718096;
+  margin: 0;
+}
+
+.buttonContainer {
+  text-align: center;
+}
+
+.viewAllButton {
+  background: radial-gradient(
+    circle at top left,
+    rgba(32, 45, 57, 1) 0%,
+    rgba(16, 24, 32, 1) 100%
+  );
+  color: white;
+  border: none;
+  border-radius: 167px;
+  padding: 8px 12px;
+  min-width: 143px;
+  height: 36px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  cursor: pointer;
+  box-shadow: -4px -6px 4px 0px rgba(0, 0, 0, 0.51) inset,
+    0px 4px 4px 0px rgba(118, 139, 158, 1) inset;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: -4px -6px 6px 0px rgba(0, 0, 0, 0.51) inset,
+      0px 6px 6px 0px rgba(118, 139, 158, 1) inset;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Responsive design
+@media (max-width: 1200px) {
+  .headerContent {
+    gap: 20px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboardContainer {
+    padding: 40px 16px;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .decorativeLineLeft,
+  .decorativeLineRight {
+    display: none;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+}

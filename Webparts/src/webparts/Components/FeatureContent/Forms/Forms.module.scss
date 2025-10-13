@@ -1,0 +1,208 @@
+@import "~@fluentui/react/dist/sass/References.scss";
+
+.formsContainer {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 60px 20px;
+  background-color: #e5e7eb;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 12px;
+}
+
+.decorativeLineLeft,
+.decorativeLineRight {
+  flex-shrink: 0;
+
+  svg {
+    display: block;
+  }
+}
+
+.title {
+  font-family: "Instrument Serif", serif;
+  font-style: italic;
+  font-size: 42px;
+  line-height: normal;
+  color: #000000;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.subtitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #5b6770;
+  margin: 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.formsGrid {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  max-width: 1100px;
+  margin: 0 auto 60px;
+  perspective: 1000px;
+}
+
+.formCard {
+  width: 280px;
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.iconContainer {
+  margin-bottom: 24px;
+}
+
+.iconWrapper {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.formIcon {
+  font-size: 40px;
+}
+
+.formInfo {
+  text-align: center;
+}
+
+.formTitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 24px;
+  color: #1a202c;
+  margin: 0 0 8px 0;
+}
+
+.formSubtitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 18px;
+  color: #718096;
+  margin: 0;
+}
+
+.buttonContainer {
+  text-align: center;
+}
+
+.viewAllButton {
+  background: radial-gradient(
+    circle at top left,
+    rgba(32, 45, 57, 1) 0%,
+    rgba(16, 24, 32, 1) 100%
+  );
+  color: white;
+  border: none;
+  border-radius: 167px;
+  padding: 10px 20px;
+  min-width: 200px;
+  height: 40px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  cursor: pointer;
+  box-shadow: -4px -6px 4px 0px rgba(0, 0, 0, 0.51) inset,
+    0px 4px 4px 0px rgba(118, 139, 158, 1) inset;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: -4px -6px 6px 0px rgba(0, 0, 0, 0.51) inset,
+      0px 6px 6px 0px rgba(118, 139, 158, 1) inset;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Responsive design
+@media (max-width: 1200px) {
+  .headerContent {
+    gap: 20px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .formsGrid {
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .formsContainer {
+    padding: 40px 16px;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .decorativeLineLeft,
+  .decorativeLineRight {
+    display: none;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .formsGrid {
+    gap: 20px;
+  }
+
+  .formCard {
+    width: 100%;
+    max-width: 300px;
+  }
+}

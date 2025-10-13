@@ -1,68 +1,109 @@
 import * as React from 'react';
-import styles from './FeatureWheel.module.scss';
+import{ useState } from 'react';
 import type { IFeatureWheelProps } from './IFeatureWheelProps';
-import { AppsAndLinks } from '../../Components/AppsAndLinks/AppsAndLinks';
-import { listServices } from '../../services/listServices';
+import Wheel from '../../Components/Wheel/Wheel';
+import Gallery from '../../Components/Gallery/Gallery';
+import Documents from '../../Components/FeatureContent/Documents/Documents';
+import Events from '../../Components/FeatureContent/Events/Events';
+import LetsCelebrate from '../../Components/FeatureContent/LetsCelebrate/LetsCelebrate';
+import Meeting from '../../Components/FeatureContent/Meeting/Meeting';
+import ServiceLinks from '../../Components/FeatureContent/ServiceLinks/ServiceLinks';
+import Forms from '../../Components/FeatureContent/Forms/Forms';
+import Dashboard from '../../Components/FeatureContent/Dashboard/Dashboard';
+import Offers from '../../Components/FeatureContent/Offers/Offers';
+import Training from '../../Components/FeatureContent/Training/Training';
+import styles from './FeatureWheel.module.scss';
 
-// const apps = [
-//   { name: "Linkedin", icon: "🔗" },
-//   { name: "Meraas.com", icon: "🔗" },
-//   { name: "Workflow", icon: "💲" },
-//   { name: "Tahweel", icon: "🔄" },
-//   { name: "Data Protection", icon: "📋" },
-//   { name: "Leave Request", icon: "📊" },
-//   { name: "Workflow", icon: "⚡" },
-//   { name: "Tahweel", icon: "🔄" },
-//   { name: "Data Protection", icon: "📋" },
-//   { name: "Leave Request", icon: "📊" },
-//   { name: "Workflow", icon: "⚡" },
-// ];
-
-interface IFeatureWheelState {
-  isDialogOpen: boolean;
-  appsLinks: any[];
-}
-
-export default class FeatureWheel extends React.Component<IFeatureWheelProps, IFeatureWheelState> {
-  private spService: listServices;
-  constructor(props: IFeatureWheelProps) {
-    super(props);
-    this.state = {
-      isDialogOpen: true,
-      appsLinks: []
-    };
-    this.spService = new listServices(this.props.context);
-  }
-
-  onOpenDialog = async (): Promise<void> => {
-
-    const appLinks = await this.spService.getApps("Apps");
-    this.setState({
-      isDialogOpen: false,
-      appsLinks: appLinks
-    });
-  };
-
-  onCloseDialog = () => {
-    this.setState({ isDialogOpen: true });
-  }
-
-  public render(): React.ReactElement<IFeatureWheelProps> {
-    const {
-
-    } = this.props;
-
-    return (
-      <div className="apps-links-container">
-        <h2>Apps & Links</h2>
-        <div className={styles.grid}>
-          <a onClick={this.onOpenDialog}>Apps And Links</a>
-          <AppsAndLinks
-            isHidden={this.state.isDialogOpen}
-            savedApps={this.state.appsLinks}
-            hideAppsAndLinks={this.onCloseDialog} />
+const FeatureWheelHeader = ({ title, subtitle }: { title: string, subtitle: string }) => {
+  return (
+    <div className={styles.header}>
+      <div className={styles.headerContent}>
+        <div className={styles.decorativeLineLeft}>
+          <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
+            <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
+          </svg>
+        </div>
+        <h2 className={styles.title}>{title}</h2>
+        <div className={styles.decorativeLineRight}>
+          <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
+            <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
+          </svg>
         </div>
       </div>
-    );
-  }
-}
+      <p className={styles.subtitle}>
+        {subtitle}
+      </p>
+    </div>
+  );
+};
+
+const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
+  const [selectedFeature, setSelectedFeature] = useState('gallery');
+
+  const handleViewAll = () => {
+    // Handle view all action - can navigate to appropriate page
+    console.log('View all clicked for:', selectedFeature);
+  };
+
+  const renderFeatureContent = () => {
+    switch (selectedFeature) {
+      case 'gallery':
+        return (
+          <section className={styles.gallerySection}>
+            <FeatureWheelHeader
+              title="A Glimpse through our lens"
+              subtitle="Recent milestones and cherished memories we've Immortalised"
+            />
+            <Gallery onViewAll={handleViewAll} />
+          </section>
+        );
+      case 'documents':
+        return <Documents onViewAll={handleViewAll} />;
+      case 'events':
+        return <Events onViewAll={handleViewAll} />;
+      case 'employee_events':
+        return <LetsCelebrate onViewAll={handleViewAll} />;
+      case 'meetings':
+        return <Meeting onViewAll={handleViewAll} />;
+      case 'service_links':
+        return <ServiceLinks onViewAll={handleViewAll} />;
+      case 'forms':
+        return <Forms onViewAll={handleViewAll} />;
+      case 'dashboard':
+        return <Dashboard onViewAll={handleViewAll} />;
+      case 'offers':
+        return <Offers onViewAll={handleViewAll} />;
+      case 'training':
+        return <Training onViewAll={handleViewAll} />;
+      default:
+        return (
+          <section className={styles.gallerySection}>
+            <FeatureWheelHeader
+              title="A Glimpse through our lens"
+              subtitle="Recent milestones and cherished memories we've Immortalised"
+            />
+            <Gallery onViewAll={handleViewAll} />
+          </section>
+        );
+    }
+  };
+
+  return (
+    <div className={styles.featureWheelContainer}>
+      {/* Feature Wheel Section */}
+      <section className={styles.wheelSection}>
+        <Wheel
+          selectedFeature={selectedFeature}
+          onFeatureSelect={setSelectedFeature}
+        />
+      </section>
+
+      {/* Dynamic Feature Content */}
+      {renderFeatureContent()}
+    </div>
+  );
+};
+
+export default FeatureWheel;

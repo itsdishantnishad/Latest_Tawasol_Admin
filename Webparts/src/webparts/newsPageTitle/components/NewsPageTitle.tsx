@@ -23,20 +23,20 @@ export default class NewsPageTitle extends React.Component<INewsPageTitleProps, 
       <div className={styles.newsDetails}>
         {/* Chips row */}
         <CategoryRow
-          category={newsItem[0].newsType}
-          department={newsItem[0].department}
+          category={newsItem[0]?.newsType}
+          department={newsItem[0]?.department}
           hashtags={["#internal"]}
           onTagClick={() => { }}
         />
 
-        <h1 className={styles.title}>{newsItem[0].title}</h1>
+        <h1 className={styles.title}>{newsItem[0]?.title}</h1>
 
         {/* Author row */}
         <AuthorRow
-          authorName={newsItem[0].author}
-          authorEmail={newsItem[0].author}
-          readTime={newsItem[0].readTime}
-          views={newsItem[0].pageView}
+          authorName={newsItem[0]?.author}
+          authorEmail={newsItem[0]?.author}
+          readTime={newsItem[0]?.readTime}
+          views={newsItem[0]?.pageView}
           publishedOn={"today"}
         />
       </div>
