@@ -5,7 +5,7 @@ interface IDHRELogoProps {
   newsType: string;
 }
 
-const DHRELogo: string = require("../../assets/DHRE Stories-logo.png");
+const DHRELogo: string = require("../../assets/DHRE-Stories-logo.png");
 
 
 const NewsType = ({ newsType }: IDHRELogoProps): JSX.Element => {

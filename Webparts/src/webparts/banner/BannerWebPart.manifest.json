@@ -3,7 +3,7 @@
   "id": "d954dc76-6c6a-41cb-b9ff-078730801ffc",
   "alias": "BannerWebPart",
   "componentType": "WebPart",
-
+ "supportsFullBleed": true,
   // The "*" signifies that the version should be taken from the package.json
   "version": "*",
   "manifestVersion": 2,
