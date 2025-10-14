@@ -1,0 +1,112 @@
+/* container */
+.banner {
+  position: relative;
+  width: 100%;
+  min-height: 320px;          /* feel like the screenshot; tweak if needed */
+  border-radius: 18px;         /* rounded like the image corners */
+  overflow: hidden;
+  background: #bfc5cc;            /* fallback color */
+  background-size: cover;
+  background-position: center center;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  isolation: isolate;          /* so overlay blends only inside */
+}
+
+/* dark gradient overlay: slightly transparent top -> strong bottom */
+.shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0.45) 35%,
+    rgba(0,0,0,0.70) 100%
+  );
+  z-index: 0;
+}
+
+/* text block */
+.inner {
+  position: relative;
+  z-index: 1;
+  max-width: 980px;      /* keep line length pleasant */
+  padding: 42px 52px;    /* roomy left/bottom padding like the design */
+  color: #fff;
+
+  /* keep content to the left & vertically centered-ish */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+/* “About DHRE” italic serif-like look */
+.heading {
+  margin: 0 0 10px;
+  font-size: 42px;              /* close to the screenshot */
+  font-weight: 600;
+  font-style: Instrument Serif;
+  line-height: 1.1;
+  letter-spacing: .2px;
+  text-shadow: 0 2px 12px rgba(0,0,0,.35);
+}
+
+/* thin line + tiny «chevrons» in the middle-left (like the design) */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 18px;
+}
+
+.line {
+  display: inline-block;
+  width: clamp(120px, 25vw, 260px);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,.7), rgba(255,255,255,.2));
+  border-radius: 1px;
+}
+
+/* create small double-chevron “»” style with borders so it looks crisp on all fonts */
+.chevrons {
+  position: relative;
+  width: 24px; height: 14px;
+}
+
+.chevrons::before,
+.chevrons::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 8px; height: 8px;
+  border-right: 2px solid rgba(255,255,255,.85);
+  border-bottom: 2px solid rgba(255,255,255,.85);
+  transform: translateY(-50%) rotate(-45deg);
+  border-radius: 1px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
+}
+.chevrons::before { left: 2px; }
+.chevrons::after { left: 12px; }
+
+/* paragraph */
+.copy {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.75;
+  color: rgba(255,255,255,.92);
+  text-shadow: 0 2px 8px rgba(0,0,0,.35);
+  max-width: 980px;
+  font-family: Inter;
+}
+
+/* responsive tweaks */
+@media (max-width: 900px) {
+  .banner { min-height: 280px; }
+  .inner { padding: 28px; }
+  .heading { font-size: 34px; }
+}
+@media (max-width: 600px) {
+  .banner { min-height: 240px; border-radius: 14px; }
+  .heading { font-size: 28px; }
+  .line { width: 40vw; }
+  .copy { font-size: 15px; }
+}
