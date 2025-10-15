@@ -72,15 +72,72 @@ export class listServices {
         }
     }
 
-    // eslint-disable-line @typescript-eslint/no-explicit-any
-    public async getNewsStory(ID?: number): Promise<any[]> {
+     // eslint-disable-line @typescript-eslint/no-explicit-any
+    public async getNewsStory(): Promise<any[]> {
         // eslint-disable-line @typescript-eslint/no-explicit-any
         let results;
         const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E0070F67800B7FC224AB6F421620C7A7297*)`;
         try {
             results = await this.sp.search({
                 Querytext: "*",
-                RowLimit: 1,
+                RowLimit: 3,
+                TrimDuplicates: false,
+                SelectProperties: [
+                    "Title",
+                    "TIRReadTimeOWSNMBR",
+                    "ViewCount",
+                    "owstaxIdTIRTags",
+                    "owstaxIdTIRDepartment",
+                    "TIRDepartment",
+                    "URL",
+                    "owstaxIdTIRNewsType",
+                    "TIRNewsType",
+                    "ModifiedOWSDATE",
+                    "CreatedBy",
+                    "FileRef",
+                    "AuthorOWSUSER",
+                    "TIRTags",
+                    "Created"
+                ],
+                QueryTemplate: `{searchTerms}`,
+                HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
+                //  SortList: sort ? sort : [{ Property: SearchProperties.FIRST_PUBLISHED_DATE, Direction: SortDirection.Descending }], 
+
+                EnableInterleaving: true,
+            } as ISearchQuery);
+
+            // eslint-disable-line @typescript-eslint/no-explicit-any
+            return results.PrimarySearchResults.map((item: any) => {
+                return {
+                    title: item.Title,
+                    readTime: item.TIRReadTimeOWSNMBR,
+                    department: item.TIRDepartment ? item.TIRDepartment : "",
+                    tags: item.TIRTags,
+                    pageView: item.ViewCount ? Math.trunc(item.ViewCount) : 0,
+                    newsImage: listServices.getImageUrlFromPage(item.URL, 200),
+                    newsType: item.TIRNewsType ? item.TIRNewsType : "",
+                    author: item.CreatedBy,
+                    authorEmail: item.AuthorOWSUSER ? item.AuthorOWSUSER.split('|')[0] : "",
+                    path: item.FileRef,
+                    created: item.Created
+                    //  lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
+                    //  Description: item.AcronymDetail
+                } as any;
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    public async getNewsStorybyID(ID?: number): Promise<any[]> {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        let results;
+        const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E0070F67800B7FC224AB6F421620C7A7297*)`;
+        try {
+            results = await this.sp.search({
+                Querytext: "*",
+                RowLimit: 3,
                 TrimDuplicates: false,
                 SelectProperties: [
                     "Title",

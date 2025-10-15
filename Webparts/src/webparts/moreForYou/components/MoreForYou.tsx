@@ -38,9 +38,6 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
 
         <div className={styles.grid}>
           {this.state.relatedNews && this.state.relatedNews.map((news: any) => {
-            //  const category = normalizeCategory(it.NACategory);
-            // const published = it.FirstPublishedDate || it.Modified || it.Created || "";
-            //const img = getBestImage(it);
 
             return (
               <article
@@ -61,20 +58,9 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
                   <div className={styles.title}>{news.Title}</div>
 
                   <div className={styles.metaRow}>
-                    {/* Department label (may be empty; column exists via CT) */}
-                    {/* {getDeptLabel(it, deptNoteName) && (
-                    <span className={`${styles.metaItem} ${styles.dept}`}>
-                      <span className={styles.dotIcon}>👥</span>{" "}
-                      {getDeptLabel(it, deptNoteName)}
-                    </span>
-                  )} */}
-                    {/* {published && (
-                    // <span className={styles.metaItem}>{timeAgo(published)}</span>
-                  )} */}
                     <span className={styles.metaItem}>
-                   {news.readTime} min read
+                      {news.readTime} min read
                     </span>
-                    {/* {category && <span className={styles.metaItem}>• {category}</span>} */}
                   </div>
                 </div>
               </article>
