@@ -9,9 +9,6 @@ export default class NewsPageTitle extends React.Component<INewsPageTitleProps, 
 
   public constructor(props: INewsPageTitleProps) {
     super(props);
-    this.state = {
-      promos: []
-    };
   }
 
   public render(): React.ReactElement<INewsPageTitleProps> {
@@ -25,7 +22,7 @@ export default class NewsPageTitle extends React.Component<INewsPageTitleProps, 
         <CategoryRow
           category={newsItem[0]?.newsType}
           department={newsItem[0]?.department}
-          hashtags={["#internal"]}
+          hashtags={newsItem[0]?.tags}
           onTagClick={() => { }}
         />
 
@@ -34,10 +31,10 @@ export default class NewsPageTitle extends React.Component<INewsPageTitleProps, 
         {/* Author row */}
         <AuthorRow
           authorName={newsItem[0]?.author}
-          authorEmail={newsItem[0]?.author}
+          authorEmail={newsItem[0]?.authorEmail}
           readTime={newsItem[0]?.readTime}
           views={newsItem[0]?.pageView}
-          publishedOn={"today"}
+          publishedOn={newsItem[0]?.created}
         />
       </div>
     );

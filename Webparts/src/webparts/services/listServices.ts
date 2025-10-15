@@ -80,7 +80,7 @@ export class listServices {
         try {
             results = await this.sp.search({
                 Querytext: "*",
-                RowLimit: 3,
+                RowLimit: 1,
                 TrimDuplicates: false,
                 SelectProperties: [
                     "Title",
@@ -94,7 +94,10 @@ export class listServices {
                     "TIRNewsType",
                     "ModifiedOWSDATE",
                     "CreatedBy",
-                    "FileRef"
+                    "FileRef",
+                    "AuthorOWSUSER",
+                    "TIRTags",
+                    "Created"
                 ],
                 QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
                 HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
@@ -109,13 +112,14 @@ export class listServices {
                     title: item.Title,
                     readTime: item.TIRReadTimeOWSNMBR,
                     department: item.TIRDepartment ? item.TIRDepartment : "",
-                    tags: item.owstaxIdTIRTags,
+                    tags: item.TIRTags,
                     pageView: item.ViewCount ? Math.trunc(item.ViewCount) : 0,
                     newsImage: listServices.getImageUrlFromPage(item.URL, 200),
                     newsType: item.TIRNewsType ? item.TIRNewsType : "",
                     author: item.CreatedBy,
-                    path: item.FileRef
-
+                    authorEmail: item.AuthorOWSUSER ? item.AuthorOWSUSER.split('|')[0] : "",
+                    path: item.FileRef,
+                    created: item.Created
                     //  lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
                     //  Description: item.AcronymDetail
                 } as any;
@@ -125,7 +129,44 @@ export class listServices {
         }
     }
 
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    public async getTraining(ID?: number): Promise<any[]> {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        let results;
+        const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B721B228147AA74E9D35C742E0E4560C00B86D6AF04B11174DB95E36FF7ADB455C*)`;
+        try {
+            results = await this.sp.search({
+                Querytext: "*",
+                RowLimit: 1,
+                TrimDuplicates: false,
+                SelectProperties: [
+                    "Title",
+                    "TIREventEndDate",
+                    "TIREventStartDate",
+                    "TIRLocation"
+                ],
+                QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
+                HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
+                //  SortList: sort ? sort : [{ Property: SearchProperties.FIRST_PUBLISHED_DATE, Direction: SortDirection.Descending }], 
 
+                EnableInterleaving: true,
+            } as ISearchQuery);
+
+            // eslint-disable-line @typescript-eslint/no-explicit-any
+            return results.PrimarySearchResults.map((item: any) => {
+                return {
+                    title: item.Title,
+                    eventEndDate: item.TIREventEndDate,
+                    eventStartDate: item.TIREventStartDate,
+                    location: item.TIRLocation,
+                    //  lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
+                    //  Description: item.AcronymDetail
+                } as any;
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
 
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -150,6 +191,28 @@ export class listServices {
         }
     }
 
+
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    public async getOurPortfolio(listName: string): Promise<any[]> {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        let results: any[] = [];
+        try {
+            results = await this.sp.web.lists.getByTitle(listName)
+                .items
+                .select("Title", "TIRSortOrder", "TIRIconURL", "TIRPortfolioCategory").orderBy("TIRSortOrder", true)();
+            // eslint-disable-line @typescript-eslint/no-explicit-any
+            return results.map((item: any) => {
+                return {
+                    Title: item.Title,
+                    SortOrder: item.TIRSortOrder,
+                    IconURL: item.TIRIconURL ? item.TIRIconURL.Url : "#",
+                    PortfolioCategory: item.TIRPortfolioCategory ? item.TIRPortfolioCategory : ""
+                } as any;
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
 }
 
 

@@ -73,6 +73,14 @@
           "manifest": "./src/webparts/trainingPageDetail/TrainingPageDetailWebPart.manifest.json"
         }
       ]
+    },
+    "our-portfolio-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/ourPortfolio/OurPortfolioWebPart.js",
+          "manifest": "./src/webparts/ourPortfolio/OurPortfolioWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -85,6 +93,7 @@
     "TeamOrganisationStructureWebPartStrings": "lib/webparts/teamOrganisationStructure/loc/{locale}.js",
     "LetsCelebrateWebPartStrings": "lib/webparts/letsCelebrate/loc/{locale}.js",
     "AboutDhrePageTitleWebPartStrings": "lib/webparts/aboutDhrePageTitle/loc/{locale}.js",
-    "TrainingPageDetailWebPartStrings": "lib/webparts/trainingPageDetail/loc/{locale}.js"
+    "TrainingPageDetailWebPartStrings": "lib/webparts/trainingPageDetail/loc/{locale}.js",
+    "OurPortfolioWebPartStrings": "lib/webparts/ourPortfolio/loc/{locale}.js"
   }
 }
