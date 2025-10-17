@@ -79,6 +79,21 @@ interface FeatureWheelProps {
 const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
     const selectedIndex = features.findIndex((f) => f.id === selectedFeature);
     const totalFeatures = features.length;
+
+    // 🔹 minimal addition: map feature id -> background class
+    const bgClassById: Record<string, string> = {
+        gallery: styles.galleryCard,
+        documents: styles.documentsCard,
+        events: styles.eventsCard,
+        employee_events: styles.celebrateCard,
+        meetings: styles.meetingCard,
+        service_links: styles.serviceLinksCard,
+        forms: styles.interactiveFormsCard,
+        dashboard: styles.dashboardCard,
+        offers: styles.offersCard,
+        training: styles.trainingCard,
+    };
+
     // Create an infinite array of cards for seamless scrolling
     const getVisibleCards = () => {
         const visibleCards = [];
@@ -156,7 +171,7 @@ const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
                             }}
                         >
                             <div
-                                className={`${styles.cardInner} ${isSelected ? styles.cardSelected : ""}`}
+                                className={`${styles.cardInner} ${bgClassById[card.id] || ""} ${isSelected ? styles.cardSelected : ""}`}
                             >
                                 <div className={styles.cardTextContainer}>
                                     <div className={`${styles.cardTitle}`}>

@@ -1,0 +1,11 @@
+import { IPropertyFieldCollectionDataProps } from './IPropertyFieldCollectionData';
+/**
+ * PropertyFieldCollectionDataHost properties interface
+ */
+export interface IPropertyFieldCollectionDataHostProps extends IPropertyFieldCollectionDataProps {
+    onChanged: (value: any[]) => void;
+}
+export interface IPropertyFieldCollectionDataHostState {
+    panelOpen: boolean;
+}
+//# sourceMappingURL=IPropertyFieldCollectionDataHost.d.ts.map

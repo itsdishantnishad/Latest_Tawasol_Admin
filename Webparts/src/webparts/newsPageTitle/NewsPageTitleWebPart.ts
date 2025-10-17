@@ -40,11 +40,6 @@ export default class NewsPageTitleWebPart extends BaseClientSideWebPart<INewsPag
     console.log(this.newsItem);
   }
 
-
-
-
-
-
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
   }

@@ -1,0 +1,13 @@
+import * as React from 'react';
+import { IPropertyFieldFilePickerHostProps } from './IPropertyFieldFilePickerHost';
+/**
+ * Renders the control for PropertyFieldFilePicker component
+ */
+export default class PropertyFieldFilePickerHost extends React.Component<IPropertyFieldFilePickerHostProps> {
+    constructor(props: IPropertyFieldFilePickerHostProps);
+    render(): JSX.Element;
+    private handleFileSave;
+    private handleFileChange;
+    private handleCancel;
+}
+//# sourceMappingURL=PropertyFieldFilePickerHost.d.ts.map

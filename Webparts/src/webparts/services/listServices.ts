@@ -1,4 +1,3 @@
-
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import { SPFI, spfi, SPFx } from '@pnp/sp';
 import "@pnp/sp/webs";
@@ -124,10 +123,6 @@ export class listServices {
             return Promise.reject(error);
         }
     }
-
-
-
-
     // eslint-disable-line @typescript-eslint/no-explicit-any
     public async getApps(listName: string): Promise<any[]> {
         // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -151,5 +146,3 @@ export class listServices {
     }
 
 }
-
-

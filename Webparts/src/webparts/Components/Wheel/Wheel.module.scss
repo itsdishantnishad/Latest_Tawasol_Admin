@@ -82,7 +82,99 @@
   margin-top: 6px;
 }
 
-// Responsive design
+
+.dashboardCard {
+  background-color: #ffd198;
+  background-image: url("./assets/Dashboard.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-clip: padding-box;
+}
+
+.galleryCard {
+  background-color: #ffd198;
+  background-image: url("./assets/Image%20Gallery.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-clip: padding-box;
+}
+
+.documentsCard {
+  background-color: #ffd198;
+  background-image: url("./assets/Documents.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-clip: padding-box;
+}
+
+.eventsCard {
+  background-color: #ffd198;
+  background-image: url("./assets/Events.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-clip: padding-box;
+}
+
+.celebrateCard {
+  background-color: #ffd198;
+  /* Let’s Celebrate.svg (apostrophe URL-encoded) */
+  background-image: url("./assets/Let%E2%80%99s%20Celebrate.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-clip: padding-box;
+}
+
+.meetingCard {
+  background-color: #ffd198;
+  background-image: url("./assets/Meeting.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-clip: padding-box;
+}
+
+.serviceLinksCard {
+  background-color: #ffd198;
+  background-image: url("./assets/Service%20Links.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-clip: padding-box;
+}
+
+.interactiveFormsCard {
+  background-color: #ffd198;
+  background-image: url("./assets/Interactive%20Forms.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-clip: padding-box;
+}
+
+.offersCard {
+  background-color: #ffd198;
+  background-image: url("./assets/Offers.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-clip: padding-box;
+}
+
+.trainingCard {
+  background-color: #ffd198;
+  background-image: url("./assets/Training.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-clip: padding-box;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
   .wheelContainer {
     height: 350px;

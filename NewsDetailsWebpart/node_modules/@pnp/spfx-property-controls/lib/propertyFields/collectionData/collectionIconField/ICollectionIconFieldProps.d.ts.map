@@ -1,0 +1,1 @@
+{"version":3,"file":"ICollectionIconFieldProps.d.ts","sourceRoot":"","sources":["../../../../src/propertyFields/collectionData/collectionIconField/ICollectionIconFieldProps.tsx"],"names":[],"mappings":"AAAA,OAAO,EAAE,yBAAyB,EAAE,MAAM,+BAA+B,CAAC;AAE1E,MAAM,MAAM,6BAA6B,GAAG,SAAS,GAAG,QAAQ,CAAC;AAEjE,MAAM,WAAW,yBAA0B,SAAQ,yBAAyB;IAC1E,UAAU,CAAC,EAAE,6BAA6B,CAAC;CAC5C"}
