@@ -1,0 +1,1 @@
+{"version":3,"file":"IItem.d.ts","sourceRoot":"","sources":["../../../../src/propertyFields/propertyFieldGrid/grid/IItem.ts"],"names":[],"mappings":";AAAA,MAAM,WAAW,KAAK;IAClB,GAAG,EAAC,MAAM,CAAC;IACX,IAAI,EAAE,MAAM,GAAG,GAAG,CAAC,OAAO,CAAC;IAC3B,KAAK,EAAE,MAAM,GAAG,GAAG,CAAC,OAAO,CAAC;IAC5B,WAAW,EAAE,MAAM,GAAG,GAAG,CAAC,OAAO,CAAC;CACnC"}

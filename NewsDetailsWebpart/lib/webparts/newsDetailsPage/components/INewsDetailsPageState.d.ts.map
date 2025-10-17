@@ -1,0 +1,1 @@
+{"version":3,"file":"INewsDetailsPageState.d.ts","sourceRoot":"","sources":["../../../../src/webparts/newsDetailsPage/components/INewsDetailsPageState.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,gBAAgB,EAAE,MAAM,2BAA2B,CAAC;AAE7D,MAAM,WAAW,iBAAiB;IAChC,OAAO,EAAE,OAAO,CAAC;IACjB,IAAI,EAAE,gBAAgB,GAAG,IAAI,CAAC;CAC/B"}

@@ -4,7 +4,6 @@ import type { INewsPageTitleProps } from './INewsPageTitleProps';
 import { AuthorRow } from "./AuthorRow";
 import { CategoryRow } from "./CategoryRow";
 
-
 export default class NewsPageTitle extends React.Component<INewsPageTitleProps, {}> {
 
   public constructor(props: INewsPageTitleProps) {

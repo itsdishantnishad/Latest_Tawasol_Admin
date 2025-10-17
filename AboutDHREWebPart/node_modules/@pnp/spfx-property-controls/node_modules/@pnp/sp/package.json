@@ -1,0 +1,29 @@
+{
+    "name": "@pnp/sp",
+    "version": "1.3.11",
+    "description": "pnp - provides a fluent api for working with SharePoint REST",
+    "main": "./dist/sp.es5.umd.js",
+    "typings": "./index",
+    "dependencies": {
+        "tslib": "1.10.0"
+    },
+    "peerDependencies": {
+        "@pnp/common": "1.3.11",
+        "@pnp/logging": "1.3.11",
+        "@pnp/odata": "1.3.11"
+    },
+    "author": {
+        "name": "Microsoft and other contributors"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/pnp/pnpjs/issues"
+    },
+    "homepage": "https://github.com/pnp/pnpjs",
+    "repository": {
+        "type": "git",
+        "url": "git:github.com/pnp/pnpjs"
+    },
+    "module": "./dist/sp.es5.js",
+    "es2015": "./dist/sp.js"
+}
