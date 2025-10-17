@@ -96,7 +96,7 @@ export const CategoryRow: React.FC<IHeaderChipsProps> = ({
             </span>
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 };

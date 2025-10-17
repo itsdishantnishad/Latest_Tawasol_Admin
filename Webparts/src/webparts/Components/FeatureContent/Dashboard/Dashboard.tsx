@@ -1,5 +1,9 @@
 import * as React from 'react';
 import styles from './Dashboard.module.scss';
+// import leftHeadingLine from  "../images/leftArrow.svg";
+// import rightHeadingLine from "../images/rightArrow.svg"
+const leftHeadingLine: string = require("../images/leftArrow.svg");
+const rightHeadingLine: string = require("../images/rightArrow.svg");
 
 export interface IDashboard {
     id: string;
@@ -54,17 +58,19 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
             <div className={styles.header}>
                 <div className={styles.headerContent}>
                     <div className={styles.decorativeLineLeft}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
                             <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
                             <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
+                        </svg> */}
+                        <img src={rightHeadingLine} alt="right headline line" />
                     </div>
                     <h2 className={styles.title}>Dashboards</h2>
                     <div className={styles.decorativeLineRight}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
                             <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
                             <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
+                        </svg> */}
+                        <img src={leftHeadingLine} alt="left headline line" />
                     </div>
                 </div>
                 <p className={styles.subtitle}>

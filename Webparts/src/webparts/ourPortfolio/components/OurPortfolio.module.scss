@@ -1,0 +1,120 @@
+/* ==== Container ==== */
+.wrapper {
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 45px;
+  background: #FFF4EA;
+}
+
+/* ==== Title ==== */
+.heading {
+  text-align: center;
+  margin: 0 0 24px 0;
+  line-height: 100%;
+  letter-spacing: 1px;
+}
+.our {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 42px;
+  line-height: 100%;
+  letter-spacing: 1px;
+  color: #DA291C;
+}
+.portfolio {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 42px;
+  line-height: 100%;
+  letter-spacing: 1px;
+  color: #000;
+}
+
+/* ==== Four columns ==== */
+.brandsColumns {
+  display: grid;
+  grid-template-columns: repeat(4, 311px);
+  gap: 24px;
+  justify-content: center;
+  align-items: start;
+}
+.brandColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ==== Main brand cards (311 × 85) ==== */
+.brandCard {
+  width: 311px;
+  height: 85px;
+  background: #FEEAD6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  border: 0;
+}
+.brandLogo {
+  display: block;
+  max-width: 80%;
+  max-height: 43px;
+  height: auto;
+}
+.brandFallback {
+  font-family: "Instrument Serif", serif;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: #222;
+}
+
+/* ==== Sub-grids: DP/Meraas/Meydan=2 cols, Nakheel=3 cols ==== */
+.subGridCols2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 36px 56px; /* row | col */
+  justify-items: center;
+  align-items: center;
+}
+.subGridCols3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px 40px;
+  justify-items: center;
+  align-items: center;
+}
+
+/* shared cells/logo */
+.subCell {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 84px; line-height: 0;
+}
+.subLogo {
+  display: block;
+  max-width: 260px;
+  max-height: 64px;
+  height: auto;
+  object-fit: contain;
+}
+.subFallback { font-size: 14px; color: #333; }
+
+/* ==== Responsive ==== */
+@media (max-width: 1400px) {
+  .brandsColumns { grid-template-columns: repeat(4, minmax(240px, 311px)); }
+}
+@media (max-width: 1200px) {
+  .subGridCols3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 992px) {
+  .brandsColumns { grid-template-columns: repeat(2, minmax(240px, 311px)); }
+  .subGridCols2 { grid-template-columns: repeat(2, 1fr); }
+  .subGridCols3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .brandsColumns { grid-template-columns: 1fr; }
+  .brandCard { width: 100%; }
+  .subGridCols2, .subGridCols3 { grid-template-columns: 1fr; gap: 28px; }
+}
