@@ -13,7 +13,7 @@ const features: Feature[] = [
         id: "gallery",
         title: "Image Gallery",
         subtitle: "Past events images and memories",
-        icon: "",
+        icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/jira.svg",
     },
     {
         id: "documents",
@@ -79,27 +79,12 @@ interface FeatureWheelProps {
 const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
     const selectedIndex = features.findIndex((f) => f.id === selectedFeature);
     const totalFeatures = features.length;
-
-    // 🔹 minimal addition: map feature id -> background class
-    const bgClassById: Record<string, string> = {
-        gallery: styles.galleryCard,
-        documents: styles.documentsCard,
-        events: styles.eventsCard,
-        employee_events: styles.celebrateCard,
-        meetings: styles.meetingCard,
-        service_links: styles.serviceLinksCard,
-        forms: styles.interactiveFormsCard,
-        dashboard: styles.dashboardCard,
-        offers: styles.offersCard,
-        training: styles.trainingCard,
-    };
-
     // Create an infinite array of cards for seamless scrolling
     const getVisibleCards = () => {
         const visibleCards = [];
         // Show 7 cards: 3 before, selected in center, 3 after
         for (let i = -3; i <= 3; i++) {
-            const index = (selectedIndex + i + totalFeatures * 100) % totalFeatures;
+            const index = (selectedIndex + i + totalFeatures * 300) % totalFeatures;
             visibleCards.push({
                 ...features[index],
                 position: i,
@@ -114,6 +99,19 @@ const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
     };
 
     const visibleCards = getVisibleCards();
+
+    const bgClassById: Record<string, string> = {
+        gallery: styles.galleryCard,
+        documents: styles.documentsCard,
+        events: styles.eventsCard,
+        employee_events: styles.celebrateCard,
+        meetings: styles.meetingCard,
+        service_links: styles.serviceLinksCard,
+        forms: styles.interactiveFormsCard,
+        dashboard: styles.dashboardCard,
+        offers: styles.offersCard,
+        training: styles.trainingCard,
+    };
 
     return (
         <div className={styles.wheelContainer}>
@@ -136,7 +134,7 @@ const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
                     const angle = startAngle + (angleRange / 6) * (position + 3);
 
                     // Arc radius
-                    const radius = 600;
+                    const radius = 800;
                     const radians = (angle * Math.PI) / 180;
                     const x = Math.sin(radians) * radius;
                     const y = -Math.cos(radians) * radius + radius + 10;
@@ -148,17 +146,17 @@ const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
                     const absPosition = Math.abs(position);
                     const opacity = absPosition === 3 ? 0.4 : absPosition === 2 ? 0.7 : absPosition === 1 ? 0.9 : 1;
                     const blur =
-                        absPosition === 3
-                            ? "blur(3px)"
+                        absPosition === 4
+                            ? "blur(0px)"
                             : absPosition === 2
-                                ? "blur(1.5px)"
+                                ? "blur(0px)"
                                 : absPosition === 1
-                                    ? "blur(0.5px)"
-                                    : "blur(0)";
+                                    ? "blur(0px)"
+                                    : "blur(0px)";
                     const scale = isSelected ? 1.05 : 1;
 
                     return (
-                        <button
+                         <button
                             key={`${card.id}-${position}`}
                             onClick={() => handleCardClick(card.id)}
                             className={styles.card}

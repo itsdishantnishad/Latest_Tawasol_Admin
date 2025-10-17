@@ -1,173 +1,188 @@
-@import '~@fluentui/react/dist/sass/References.scss';
+@import "~@fluentui/react/dist/sass/References.scss";
 
-.wrapper {
-  /* matches page’s sand background + soft inset */
-  // background: #fff4ea;
-  padding: 14px 12px 16px;
-  border-radius: 14px;
-  position: relative;
-
-  /* keep the web part narrow like right rail (auto on smaller columns) */
-  max-width: 440px;
+* {
+  box-sizing: border-box;
 }
 
-/* ===== Heading ===== */
-.heading {
-  font-size: 16px;
-  font-weight: 700;
-  margin: 4px 8px 12px;
-  color: #121212;
-}
-
-/* ===== Grid (always one column like Figma right rail) ===== */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr; /* single column */
-  gap: 12px;
-  width: 100%;
-}
-
-/* ===== Card ===== */
-.card {
+.wheelContainer {
   position: relative;
   width: 100%;
-  height: 240px;          /* Figma: fixed height */
-  border-radius: 4px;     /* Figma radius */
+  height: 350px;
   overflow: hidden;
-  cursor: pointer;
-  background: #0b0b0b;    /* behind image to avoid white flashes */
-  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0,0,0,.25);
-  filter: brightness(1.02);
-}
-
-/* ===== Image ===== */
-.imageWrap {
-  position: absolute;
-  inset: 0;                 /* full bleed */
-}
-
-.imageWrap img {
+.backgroundElements {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: saturate(1.05) contrast(1.02);
-}
-
-/* strong fades like Figma */
-.fadeTop, .fadeBottom {
-  position: absolute;
-  left: 0; right: 0;
-  height: 50%;
+  overflow: hidden;
   pointer-events: none;
 }
-.fadeTop    { top: 0;    background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,0)); }
-.fadeBottom { bottom: 0; background: linear-gradient(0deg,  rgba(0,0,0,.75), rgba(0,0,0,0)); }
 
-/* ===== Overlay Content ===== */
-.contentOverlay {
+.centralArrow {
   position: absolute;
-  left: 12px; right: 12px; bottom: 12px;
-  color: #fff;
+  z-index: 20;
+  top: 280px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-/* Title — two lines, then ellipsis (matches Figma density) */
-.title {
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1.2;
-  margin: 0 0 8px;
-  text-shadow: 0 1px 2px rgba(0,0,0,.35);
-
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.arrow {
+  // width: 0;
+  // height: 0;
+  // border-left: 16px solid transparent;
+  // border-right: 16px solid transparent;
+  // border-bottom: 24px solid #da291c;
+  background-image: url(../../featureWheel/images/nav-icon.svg);
+  background-position: center;
+  background-size: 100%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  transition: all ease 0.5s ;
+  &:hover{
+    transform: translateY(-10px);
+  }
 }
 
-/* Meta line (department • time • read time • category) */
-.metaRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 12px;
-  color: #f1f1f1;
-  opacity: 0.95;
+.carouselContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
-/* a pill for department to mimic Figma feel */
-.metaItem {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-.metaItem.dept {
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.14);
-  backdrop-filter: blur(2px);
-}
-
-/* ===== Category icon base (exported so TS sees it) ===== */
-.categoryIcon {
-  width: 18px;
-  height: 18px;
+.card {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  cursor: pointer;
+  transition: transform 5s cubic-bezier(0.4, 0, 0.2, 1),
+  opacity 0.5s ease,
+  z-index 0.01s;
+  background: none;
+  border: none;
   padding: 0;
-  border-radius: 4px;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.cardInner {
+  width: 180px;
+  height: 220px;
+  // background: #ffd198 linear-gradient(to bottom right, #f5deb3, #d2b48c);
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
   background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
+  background-size: cover;
 }
 
-/* ===== Category variants mapped to your actual files ===== */
-/* Folder: src/webparts/assets */
-.cat_announcement {
-  background-image: url("../../assets/AnnouncementIconNewsTag.svg");
-}
-.cat_around_the_world {
-  /* file name has double 'r' at the start: ArroundTheWorld… */
-  background-image: url("../../assets/ArroundTheWorldIconNewsTag.svg");
-}
-.cat_dhre_stories {
-  background-image: url("../../assets/DHREIconNewsTag.svg");
+.cardSelected {
+  border: 6px solid #d97706;
 }
 
-.dotIcon { font-size: 13px; line-height: 1; }
-
-.deptIcon {
-  width: 16px;
-  height: 16px;
-  margin-right: 6px;
-  display: inline-block;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,.25));
+.cardTextContainer {
+  color: #fff;
+  text-align: center;
+  // margin-top: auto;
+  position: absolute;
+  bottom: 15px;
+  padding: 12px;
 }
 
-/* --- Department variants mapped to your actual SVGs --- */
-/* Path is from: src/webparts/moreForYou/components/MoreForYou.module.scss */
-.dept_hc  { background-image: url("../../assets/HumanCapital.svg"); }
-.dept_grc { background-image: url("../../assets/GovernanceRiskandCompliance.svg"); }
-.dept_hse { background-image: url("../../assets/HealthSafetyEnvironment.svg"); }
-.dept_proc{ background-image: url("../../assets/Procurement.svg"); }
-
-/* ===== Responsive niceties (keeps right-rail look on all screens) ===== */
-@media (min-width: 1366px) {
-  .wrapper { max-width: 424px; } /* fixed like Figma on laptops/desktops */
+.cardTitle {
+  font-size: 18px;
+  font-weight: 700;
 }
 
-@media (max-width: 480px) {
-  /* on phones, let the card breathe slightly taller if the column is narrow */
-  .card { height: 220px; }
+.cardSubtitle {
+  font-size: 12px;
+  line-height: 1.2;
+  margin-top: 6px;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .wheelContainer {
+    height: 350px;
+    padding: 0 8px;
+  }
+
+  .cardInner {
+    width: 140px;
+    height: 180px;
+    padding: 16px;
+  }
+
+  .cardTitle {
+    font-size: 16px;
+  }
+
+  .cardSubtitle {
+    font-size: 11px;
+  }
+
+  .decorationLeft,
+  .decorationLeft2,
+  .decorationRight,
+  .decorationRight2 {
+    display: none;
+  }
+}
+
+
+// .serviceLinksArt {
+//   position: absolute;
+//   top: 0;
+//   left: 0;
+//   width: 100%;        
+//   height: 100%;        
+//   object-fit: cover;    
+//   object-position: 50% 36%;
+//   transform: rotate(0.3deg) scale(0.92);
+//   border-radius: inherit;
+//   opacity: 1;
+//   pointer-events: none;
+//   user-select: none;
+// }
+
+.dashboardCard {
+  background-image: url("../FeatureContent/assets/Dashboard.svg");
+}
+ 
+.galleryCard {
+  background-image: url("../FeatureContent/assets/Image\ Gallery.svg");
+}
+ 
+.documentsCard {
+  background-image: url("../FeatureContent/assets/Documents.svg");
+}
+ 
+.eventsCard {
+  background-image: url("../FeatureContent/assets/Events.svg");
+}
+ 
+.celebrateCard {
+  /* Let’s Celebrate.svg (apostrophe URL-encoded) */
+  background-image: url("../FeatureContent/assets/Let’s\ Celebrate.svg");
+}
+ 
+.meetingCard {
+  background-image: url("../FeatureContent/assets/Meeting.svg");
+}
+ 
+.serviceLinksCard {
+  background-image: url("../FeatureContent/assets/Service-Links.svg");
+}
+ 
+.interactiveFormsCard {
+  background-image: url("../FeatureContent/assets/Interactive\ Forms.svg");
+}
+ 
+.offersCard {
+  background-image: url("../FeatureContent/assets/Offers.svg");
+}
+ 
+.trainingCard {
+  background-image: url("../FeatureContent/assets/Training.svg");
 }
