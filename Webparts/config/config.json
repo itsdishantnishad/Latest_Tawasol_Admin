@@ -81,6 +81,14 @@
           "manifest": "./src/webparts/ourPortfolio/OurPortfolioWebPart.manifest.json"
         }
       ]
+    },
+    "task-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/task/TaskWebPart.js",
+          "manifest": "./src/webparts/task/TaskWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -94,6 +102,7 @@
     "LetsCelebrateWebPartStrings": "lib/webparts/letsCelebrate/loc/{locale}.js",
     "AboutDhrePageTitleWebPartStrings": "lib/webparts/aboutDhrePageTitle/loc/{locale}.js",
     "TrainingPageDetailWebPartStrings": "lib/webparts/trainingPageDetail/loc/{locale}.js",
-    "OurPortfolioWebPartStrings": "lib/webparts/ourPortfolio/loc/{locale}.js"
+    "OurPortfolioWebPartStrings": "lib/webparts/ourPortfolio/loc/{locale}.js",
+    "TaskWebPartStrings": "lib/webparts/task/loc/{locale}.js"
   }
 }
