@@ -1,0 +1,10 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.departmentLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border-radius: 40px;
+  padding: 6px 10px;
+}

@@ -1,47 +1,41 @@
 import * as React from 'react';
 import styles from './NewsPageTitle.module.scss';
 import type { INewsPageTitleProps } from './INewsPageTitleProps';
-// import DHREIcon from "../../assets/DHREStoriesCheck.svg";
-// import AnnoucIcon from "../../assets/Announcement.svg";
-// import ArrTHEWorldIcon from "../../assets/ArroundTheWorld.svg";
-// import HumanCapitalIcon from "../../assets/HumanCapital.svg";
 import { AuthorRow } from "./AuthorRow";
 import { CategoryRow } from "./CategoryRow";
 
-
-
 export default class NewsPageTitle extends React.Component<INewsPageTitleProps, {}> {
+
+  public constructor(props: INewsPageTitleProps) {
+    super(props);
+  }
+
   public render(): React.ReactElement<INewsPageTitleProps> {
-
-  const authorName =
-      "Mohit"
-    const authorEmail =
-     "Mohit"; 
-
+    const {
+      newsItem
+    } = this.props;
 
     return (
       <div className={styles.newsDetails}>
         {/* Chips row */}
         <CategoryRow
-          category={"Human capital"}
-          department={"mydep"}
-          hashtags={["#internal"]}
-          onTagClick={()=>{}}
+          category={newsItem[0]?.newsType}
+          department={newsItem[0]?.department}
+          hashtags={newsItem[0]?.tags}
+          onTagClick={() => { }}
         />
 
-       <h1 className={styles.title}>{"title"}</h1>
+        <h1 className={styles.title}>{newsItem[0]?.title}</h1>
 
         {/* Author row */}
         <AuthorRow
-          authorName={authorName}
-          authorEmail={authorEmail}
-          readTime={2}
-          views={200}
-          publishedOn={"today"}
+          authorName={newsItem[0]?.author}
+          authorEmail={newsItem[0]?.authorEmail}
+          readTime={newsItem[0]?.readTime}
+          views={newsItem[0]?.pageView}
+          publishedOn={newsItem[0]?.created}
         />
       </div>
-
-
     );
   }
 }

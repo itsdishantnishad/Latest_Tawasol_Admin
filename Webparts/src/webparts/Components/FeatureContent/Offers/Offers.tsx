@@ -81,7 +81,8 @@ export const Offers: React.FC<IOffersProps> = (props) => {
     const handleNext = () => {
         setCurrentIndex((prev) => (prev < offers.length - 1 ? prev + 1 : 0));
     };
-
+    console.log(handlePrev)
+    console.log(handleNext)
     const getVisibleOffers = () => {
         const visible = [];
         for (let i = -2; i <= 2; i++) {

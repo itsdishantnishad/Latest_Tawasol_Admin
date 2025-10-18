@@ -41,6 +41,54 @@
           "manifest": "./src/webparts/moreForYou/MoreForYouWebPart.manifest.json"
         }
       ]
+    },
+    "team-organisation-structure-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/teamOrganisationStructure/TeamOrganisationStructureWebPart.js",
+          "manifest": "./src/webparts/teamOrganisationStructure/TeamOrganisationStructureWebPart.manifest.json"
+        }
+      ]
+    },
+    "lets-celebrate-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/letsCelebrate/LetsCelebrateWebPart.js",
+          "manifest": "./src/webparts/letsCelebrate/LetsCelebrateWebPart.manifest.json"
+        }
+      ]
+    },
+    "about-dhre-page-title-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/aboutDhrePageTitle/AboutDhrePageTitleWebPart.js",
+          "manifest": "./src/webparts/aboutDhrePageTitle/AboutDhrePageTitleWebPart.manifest.json"
+        }
+      ]
+    },
+    "training-page-detail-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/trainingPageDetail/TrainingPageDetailWebPart.js",
+          "manifest": "./src/webparts/trainingPageDetail/TrainingPageDetailWebPart.manifest.json"
+        }
+      ]
+    },
+    "our-portfolio-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/ourPortfolio/OurPortfolioWebPart.js",
+          "manifest": "./src/webparts/ourPortfolio/OurPortfolioWebPart.manifest.json"
+        }
+      ]
+    },
+    "task-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/task/TaskWebPart.js",
+          "manifest": "./src/webparts/task/TaskWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -49,6 +97,12 @@
     "FeatureWheelWebPartStrings": "lib/webparts/featureWheel/loc/{locale}.js",
     "BannerWebPartStrings": "lib/webparts/banner/loc/{locale}.js",
     "NewsPageTitleWebPartStrings": "lib/webparts/newsPageTitle/loc/{locale}.js",
-    "MoreForYouWebPartStrings": "lib/webparts/moreForYou/loc/{locale}.js"
+    "MoreForYouWebPartStrings": "lib/webparts/moreForYou/loc/{locale}.js",
+    "TeamOrganisationStructureWebPartStrings": "lib/webparts/teamOrganisationStructure/loc/{locale}.js",
+    "LetsCelebrateWebPartStrings": "lib/webparts/letsCelebrate/loc/{locale}.js",
+    "AboutDhrePageTitleWebPartStrings": "lib/webparts/aboutDhrePageTitle/loc/{locale}.js",
+    "TrainingPageDetailWebPartStrings": "lib/webparts/trainingPageDetail/loc/{locale}.js",
+    "OurPortfolioWebPartStrings": "lib/webparts/ourPortfolio/loc/{locale}.js",
+    "TaskWebPartStrings": "lib/webparts/task/loc/{locale}.js"
   }
 }

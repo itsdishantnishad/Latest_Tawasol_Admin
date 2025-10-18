@@ -1,0 +1,131 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.main {
+  width: 100vw;
+  height: 100vh;
+  background: #F9ECE1;
+}
+
+.taskHeader {
+  width: 230px;
+  height: 55px;
+  background: #F9ECE1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; 
+  opacity: 1;
+}
+
+.taskHeaderAbsolute {
+  position: absolute;
+  top: 142px;
+  left: 604.5px;
+}
+
+.taskText {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 42px;
+  line-height: 100%;
+  letter-spacing: 1px;
+  text-align: center;
+  color: #DA291C;
+}
+
+.approvalsText {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 42px;
+  line-height: 100%;
+  letter-spacing: 1px;
+  text-align: center;
+  color: #000000;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 64px;
+    height: 28px;
+    padding: 4px 10px;
+    border-radius: 360px;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.chipHigh {
+    background: #fdede8;
+    color: #ff3a00;
+}
+
+.chipMedium {
+    background: #feefd4;
+    color: #dda338;
+}
+
+.chipLow {
+    background: #e2edfe;
+    color: #2b77d6;
+}
+
+.statusPill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 28px;
+    padding: 8px 12px;
+    gap: 4px;
+    border-radius: 360px;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1;
+    color: #fff;
+}
+.stApproved {
+    background: #0e8732;
+}
+
+.stRejected {
+    background: #da291c;
+}
+
+.stPending {
+    background: #c3a500;
+}
+.statusText {
+    width: 66px;
+    height: 22px;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.value {
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: -0.2px;
+    color: #101820;
+}
+
+
+
+
+
+
+
+
+
+
+
+

@@ -27,10 +27,23 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
     })
   }
 
-  public render(): React.ReactElement<IMoreForYouProps> {
-    const {
+  // helper: "3 hours ago" etc.
+  private timeAgo = (d?: string) => {
+    if (!d) return "";
+    const t = new Date(d).getTime();
+    if (isNaN(t)) return "";
+    const diff = Math.max(0, Date.now() - t);
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return "just now";
+    if (m < 60) return `${m} min ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h} hour${h > 1 ? "s" : ""} ago`;
+    const dyy = Math.floor(h / 24);
+    return `${dyy} day${dyy > 1 ? "s" : ""} ago`;
+  };
 
-    } = this.props;
+  public render(): React.ReactElement<IMoreForYouProps> {
+    const { } = this.props;
 
     return (
       <div className={styles.wrapper}>
@@ -38,43 +51,92 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
 
         <div className={styles.grid}>
           {this.state.relatedNews && this.state.relatedNews.map((news: any) => {
-            //  const category = normalizeCategory(it.NACategory);
-            // const published = it.FirstPublishedDate || it.Modified || it.Created || "";
-            //const img = getBestImage(it);
+            // ------- Category mapping (icons) -------
+            const catKey = String(news.newsType || "")
+              .toLowerCase()
+              .trim()
+              .replace(/\s+/g, "_");
+
+            const catClassByKey: Record<string, string | undefined> = {
+              announcement: styles.cat_announcement,          // src/webparts/assets/AnnouncementIconNewsTag.svg
+              around_the_world: styles.cat_around_the_world,  // src/webparts/assets/ArroundTheWorldIconNewsTag.svg
+              dhre_stories: styles.cat_dhre_stories,          // src/webparts/assets/DHREIconNewsTag.svg
+            };
+
+            // Only show department for Announcement and DHRE Stories
+            const showDept = catKey === "announcement" || catKey === "dhre_stories";
+
+            // ------- Department mapping (icons inside pill) -------
+            const deptKey = String(news.department || "")
+              .toLowerCase()
+              .trim()
+              .replace(/[&＆]/g, "and")
+              .replace(/[^a-z0-9\s_]/g, "")
+              .replace(/\s+/g, "_");
+
+            const deptClassByKey: Record<string, string | undefined> = {
+              human_capital: styles.dept_hc,
+              governance_risk_and_compliance: styles.dept_grc,
+              health_safety_environment: styles.dept_hse,
+              procurement_and_admin: styles.dept_proc,
+              procurement_admin: styles.dept_proc, // safety alias
+            };
+
+            const published =
+              news.publishedOn || news.firstPublishedDate || news.lastModified || news.modified;
+
+            const readTime =
+              Math.max(1, Math.trunc(Number(news.readTime) || 0)) + " min read";
 
             return (
               <article
-                key={news.Id}
+                key={news.Id || news.path || news.title}
                 className={styles.card}
-                onClick={() => (window.location.href = news.FileRef)}
+                onClick={() => (window.location.href = news.path || news.FileRef)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && (window.location.href = news.FileRef)}
+                onKeyDown={(e) => e.key === "Enter" && (window.location.href = news.path || news.FileRef)}
               >
                 <div className={styles.imageWrap}>
-                  <img src={news.newsImage} alt={news.Title} loading="lazy" />
+                  <img src={news.newsImage} alt={news.Title || news.title} loading="lazy" />
                   <div className={styles.fadeTop}></div>
                   <div className={styles.fadeBottom}></div>
                 </div>
 
                 <div className={styles.contentOverlay}>
-                  <div className={styles.title}>{news.Title}</div>
+                  <div className={styles.title}>{news.Title || news.title}</div>
 
                   <div className={styles.metaRow}>
-                    {/* Department label (may be empty; column exists via CT) */}
-                    {/* {getDeptLabel(it, deptNoteName) && (
-                    <span className={`${styles.metaItem} ${styles.dept}`}>
-                      <span className={styles.dotIcon}>👥</span>{" "}
-                      {getDeptLabel(it, deptNoteName)}
-                    </span>
-                  )} */}
-                    {/* {published && (
-                    // <span className={styles.metaItem}>{timeAgo(published)}</span>
-                  )} */}
-                    <span className={styles.metaItem}>
-                   {news.readTime} min read
-                    </span>
-                    {/* {category && <span className={styles.metaItem}>• {category}</span>} */}
+                    {/* Category: icon-only */}
+                    <span
+                      className={`${styles.metaItem} ${styles.categoryIcon} ${catClassByKey[catKey] || ""}`}
+                      aria-label={news.newsType || "category"}
+                      title={news.newsType || ""}
+                    />
+
+                    {/* Department text (pill) – only for Announcement & DHRE Stories */}
+                    {showDept && news.department && (
+                      <span className={`${styles.metaItem} ${styles.dept}`}>
+                        <span
+                          className={`${styles.deptIcon} ${deptClassByKey[deptKey] || ""}`}
+                          aria-hidden="true"
+                        />
+                        {news.department}
+                      </span>
+                    )}
+
+                    {/* Published time */}
+                    {published && (
+                      <span className={styles.metaItem}>{this.timeAgo(published)}</span>
+                    )}
+
+                    {/* Read time */}
+                    <span className={styles.metaItem}>{readTime}</span>
+
+                    {/* Views */}
+                    {typeof news.pageView === "number" && (
+                      <span className={styles.metaItem}>{news.pageView} Views</span>
+                    )}
                   </div>
                 </div>
               </article>

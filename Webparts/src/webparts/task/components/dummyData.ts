@@ -1,0 +1,421 @@
+// src/data/dummyData.ts
+
+export type SFApproval = {
+  workitemId: string;
+  workflowNumber: string;
+  taskType: string;
+  taskTitle: string;
+  taskDescription: string | null | "";
+  status: "Pending" | "Approved" | "Rejected" | string;
+  requestorName: string;
+  requestorDepartment: string | null;
+  priority: "" | "High" | "Medium" | "Low";
+  originSystem: "Salesforce" | "Oracle" | string;
+  dueDate: string;      // ISO
+  createdOn: string;    // ISO
+  assignedTo: string;
+  action: string;       // e.g. "Pending"
+};
+
+export type SFListingResponse = {
+  success: boolean;
+  message: string;
+  oracle: SFApproval[];
+  salesForce: SFApproval[];
+};
+
+
+const sfListingMock: SFListingResponse = {
+  success: true,
+  message: "Success",
+  oracle: [
+    {
+      workitemId: "04iUB000002JFj1YAG",
+      workflowNumber: "E-35961",
+      taskType: "Salary Certificate",
+      taskTitle: "oracle Salary Certificate",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Ayaan Ali",
+      requestorDepartment: "HR",
+      priority: "High",
+      originSystem: "Salesforce",
+      dueDate: "2025-11-03T08:00:00.000Z",
+      createdOn: "2025-10-10T09:30:00.000Z",
+      assignedTo: "005TX0000044AAA",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFj2YAG",
+      workflowNumber: "E-35962",
+      taskType: "Leave Approval",
+      taskTitle: "oracle Annual Leave Approval",
+      taskDescription: "",
+      status: "Approved",
+      requestorName: "Mira Kapoor",
+      requestorDepartment: "Finance",
+      priority: "Medium",
+      originSystem: "Salesforce",
+      dueDate: "2025-11-07T08:00:00.000Z",
+      createdOn: "2025-10-11T10:15:00.000Z",
+      assignedTo: "005TX0000044AAB",
+      action: "Approved"
+    },
+    {
+      workitemId: "04iUB000002JFj3YAG",
+      workflowNumber: "E-35963",
+      taskType: "Account Name Change",
+      taskTitle: "oracle Account Name Change",
+      taskDescription: "",
+      status: "Rejected",
+      requestorName: "Hassan Raza",
+      requestorDepartment: "Sales",
+      priority: "Low",
+      originSystem: "Salesforce",
+      dueDate: "2025-11-12T08:00:00.000Z",
+      createdOn: "2025-10-12T08:05:00.000Z",
+      assignedTo: "005TX0000044AAC",
+      action: "Rejected"
+    },
+    {
+      workitemId: "04iUB000002JFj4YAG",
+      workflowNumber: "E-35964",
+      taskType: "Vendor Creation",
+      taskTitle: "oracle New Vendor Onboarding",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Noor Fatima",
+      requestorDepartment: "Procurement",
+      priority: "High",
+      originSystem: "Salesforce",
+      dueDate: "2025-11-18T08:00:00.000Z",
+      createdOn: "2025-10-13T11:45:00.000Z",
+      assignedTo: "005TX0000044AAD",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFj5YAG",
+      workflowNumber: "E-35965",
+      taskType: "Access Request",
+      taskTitle: "oracleVPN Access for Contractor",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Sara Khan",
+      requestorDepartment: "IT",
+      priority: "Medium",
+      originSystem: "Salesforce",
+      dueDate: "2025-11-25T08:00:00.000Z",
+      createdOn: "2025-10-14T07:20:00.000Z",
+      assignedTo: "005TX0000044AAE",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFj6YAG",
+      workflowNumber: "E-35966",
+      taskType: "Expense Reimbursement",
+      taskTitle: "oracleTravel Expense Reimbursement",
+      taskDescription: "",
+      status: "Rejected",
+      requestorName: "Rohit Mehra",
+      requestorDepartment: "Marketing",
+      priority: "Low",
+      originSystem: "Salesforce",
+      dueDate: "2025-12-02T08:00:00.000Z",
+      createdOn: "2025-10-15T06:10:00.000Z",
+      assignedTo: "005TX0000044AAF",
+      action: "Rejected"
+    },
+    {
+      workitemId: "04iUB000002JFj7YAG",
+      workflowNumber: "E-35967",
+      taskType: "Asset Allocation",
+      taskTitle: "Laptop Allocation",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Zara Sheikh",
+      requestorDepartment: "Engineering",
+      priority: "",
+      originSystem: "Salesforce",
+      dueDate: "2025-12-09T08:00:00.000Z",
+      createdOn: "2025-10-16T12:00:00.000Z",
+      assignedTo: "005TX0000044AAG",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFj8YAG",
+      workflowNumber: "E-35968",
+      taskType: "Account Name Change",
+      taskTitle: "Account Name Change",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Taha Hamid",
+      requestorDepartment: null,
+      priority: "",
+      originSystem: "Salesforce",
+      dueDate: "2025-12-16T08:15:39.000Z",
+      createdOn: "2025-10-07T08:15:39.000Z",
+      assignedTo: "005TX0000044GggYAE",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFj9YAG",
+      workflowNumber: "E-35969",
+      taskType: "Contract Review",
+      taskTitle: "NDA Review",
+      taskDescription: "",
+      status: "Approved",
+      requestorName: "Ibrahim Qureshi",
+      requestorDepartment: "Legal",
+      priority: "High",
+      originSystem: "Salesforce",
+      dueDate: "2025-12-23T08:00:00.000Z",
+      createdOn: "2025-10-18T09:00:00.000Z",
+      assignedTo: "005TX0000044AAH",
+      action: "Approved"
+    },
+    {
+      workitemId: "04iUB000002JFk0YAG",
+      workflowNumber: "E-35970",
+      taskType: "Budget Approval",
+      taskTitle: "Q4 Budget Increase",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Arjun Menon",
+      requestorDepartment: "Finance",
+      priority: "Medium",
+      originSystem: "Salesforce",
+      dueDate: "2025-12-30T08:00:00.000Z",
+      createdOn: "2025-10-19T10:25:00.000Z",
+      assignedTo: "005TX0000044AAI",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFk1YAG",
+      workflowNumber: "E-35971",
+      taskType: "Role Change",
+      taskTitle: "Designation Change",
+      taskDescription: "",
+      status: "Rejected",
+      requestorName: "Laiba Aziz",
+      requestorDepartment: "HR",
+      priority: "Low",
+      originSystem: "Salesforce",
+      dueDate: "2026-01-06T08:00:00.000Z",
+      createdOn: "2025-10-20T08:40:00.000Z",
+      assignedTo: "005TX0000044AAJ",
+      action: "Rejected"
+    },
+    {
+      workitemId: "04iUB000002JFk2YAG",
+      workflowNumber: "E-35972",
+      taskType: "Travel Request",
+      taskTitle: "Client Visit – Riyadh",
+      taskDescription: "",
+      status: "Approved",
+      requestorName: "Omar Khan",
+      requestorDepartment: "Sales",
+      priority: "High",
+      originSystem: "Salesforce",
+      dueDate: "2026-01-13T08:00:00.000Z",
+      createdOn: "2025-10-21T07:35:00.000Z",
+      assignedTo: "005TX0000044AAK",
+      action: "Approved"
+    }
+  ],
+  salesForce: [
+    {
+      workitemId: "04iUB000002JFj1YAG",
+      workflowNumber: "E-35961",
+      taskType: "Salary Certificate",
+      taskTitle: "Sales Salary Certificate",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Ayaan Ali",
+      requestorDepartment: "HR",
+      priority: "High",
+      originSystem: "Salesforce",
+      dueDate: "2025-11-03T08:00:00.000Z",
+      createdOn: "2025-10-10T09:30:00.000Z",
+      assignedTo: "005TX0000044AAA",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFj2YAG",
+      workflowNumber: "E-35962",
+      taskType: "Leave Approval",
+      taskTitle: "Sales Annual Leave Approval",
+      taskDescription: "",
+      status: "Approved",
+      requestorName: "Mira Kapoor",
+      requestorDepartment: "Finance",
+      priority: "Medium",
+      originSystem: "Salesforce",
+      dueDate: "2025-11-07T08:00:00.000Z",
+      createdOn: "2025-10-11T10:15:00.000Z",
+      assignedTo: "005TX0000044AAB",
+      action: "Approved"
+    },
+    {
+      workitemId: "04iUB000002JFj3YAG",
+      workflowNumber: "E-35963",
+      taskType: "Account Name Change",
+      taskTitle: "Sales Account Name Change",
+      taskDescription: "",
+      status: "Rejected",
+      requestorName: "Hassan Raza",
+      requestorDepartment: "Sales",
+      priority: "Low",
+      originSystem: "Salesforce",
+      dueDate: "2025-11-12T08:00:00.000Z",
+      createdOn: "2025-10-12T08:05:00.000Z",
+      assignedTo: "005TX0000044AAC",
+      action: "Rejected"
+    },
+    {
+      workitemId: "04iUB000002JFj4YAG",
+      workflowNumber: "E-35964",
+      taskType: "Vendor Creation",
+      taskTitle: "Sales New Vendor Onboarding",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Noor Fatima",
+      requestorDepartment: "Procurement",
+      priority: "High",
+      originSystem: "Salesforce",
+      dueDate: "2025-11-18T08:00:00.000Z",
+      createdOn: "2025-10-13T11:45:00.000Z",
+      assignedTo: "005TX0000044AAD",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFj5YAG",
+      workflowNumber: "E-35965",
+      taskType: "Access Request",
+      taskTitle: "Sales VPN Access for Contractor",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Sara Khan",
+      requestorDepartment: "IT",
+      priority: "Medium",
+      originSystem: "Salesforce",
+      dueDate: "2025-11-25T08:00:00.000Z",
+      createdOn: "2025-10-14T07:20:00.000Z",
+      assignedTo: "005TX0000044AAE",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFj6YAG",
+      workflowNumber: "E-35966",
+      taskType: "Expense Reimbursement",
+      taskTitle: "Sales Travel Expense Reimbursement",
+      taskDescription: "",
+      status: "Rejected",
+      requestorName: "Rohit Mehra",
+      requestorDepartment: "Marketing",
+      priority: "Low",
+      originSystem: "Salesforce",
+      dueDate: "2025-12-02T08:00:00.000Z",
+      createdOn: "2025-10-15T06:10:00.000Z",
+      assignedTo: "005TX0000044AAF",
+      action: "Rejected"
+    },
+    {
+      workitemId: "04iUB000002JFj7YAG",
+      workflowNumber: "E-35967",
+      taskType: "Asset Allocation",
+      taskTitle: "SalesLaptop Allocation",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Zara Sheikh",
+      requestorDepartment: "Engineering",
+      priority: "",
+      originSystem: "Salesforce",
+      dueDate: "2025-12-09T08:00:00.000Z",
+      createdOn: "2025-10-16T12:00:00.000Z",
+      assignedTo: "005TX0000044AAG",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFj8YAG",
+      workflowNumber: "E-35968",
+      taskType: "Account Name Change",
+      taskTitle: "SalesAccount Name Change",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Taha Hamid",
+      requestorDepartment: null,
+      priority: "",
+      originSystem: "Salesforce",
+      dueDate: "2025-12-16T08:15:39.000Z",
+      createdOn: "2025-10-07T08:15:39.000Z",
+      assignedTo: "005TX0000044GggYAE",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFj9YAG",
+      workflowNumber: "E-35969",
+      taskType: "Contract Review",
+      taskTitle: "SalesNDA Review",
+      taskDescription: "",
+      status: "Approved",
+      requestorName: "Ibrahim Qureshi",
+      requestorDepartment: "Legal",
+      priority: "High",
+      originSystem: "Salesforce",
+      dueDate: "2025-12-23T08:00:00.000Z",
+      createdOn: "2025-10-18T09:00:00.000Z",
+      assignedTo: "005TX0000044AAH",
+      action: "Approved"
+    },
+    {
+      workitemId: "04iUB000002JFk0YAG",
+      workflowNumber: "E-35970",
+      taskType: "Budget Approval",
+      taskTitle: "Sales Q4 Budget Increase",
+      taskDescription: "",
+      status: "Pending",
+      requestorName: "Arjun Menon",
+      requestorDepartment: "Finance",
+      priority: "Medium",
+      originSystem: "Salesforce",
+      dueDate: "2025-12-30T08:00:00.000Z",
+      createdOn: "2025-10-19T10:25:00.000Z",
+      assignedTo: "005TX0000044AAI",
+      action: "Pending"
+    },
+    {
+      workitemId: "04iUB000002JFk1YAG",
+      workflowNumber: "E-35971",
+      taskType: "Role Change",
+      taskTitle: "Sales Designation Change",
+      taskDescription: "",
+      status: "Rejected",
+      requestorName: "Laiba Aziz",
+      requestorDepartment: "HR",
+      priority: "Low",
+      originSystem: "Salesforce",
+      dueDate: "2026-01-06T08:00:00.000Z",
+      createdOn: "2025-10-20T08:40:00.000Z",
+      assignedTo: "005TX0000044AAJ",
+      action: "Rejected"
+    },
+    {
+      workitemId: "04iUB000002JFk2YAG",
+      workflowNumber: "E-35972",
+      taskType: "Travel Request",
+      taskTitle: "Sales Client Visit – Riyadh",
+      taskDescription: "",
+      status: "Approved",
+      requestorName: "Omar Khan",
+      requestorDepartment: "Sales",
+      priority: "High",
+      originSystem: "Salesforce",
+      dueDate: "2026-01-13T08:00:00.000Z",
+      createdOn: "2025-10-21T07:35:00.000Z",
+      assignedTo: "005TX0000044AAK",
+      action: "Approved"
+    }
+  ],
+};
+
+export default sfListingMock;

@@ -1,6 +1,6 @@
 import * as React from "react";
 import styles from './NewsPageTitle.module.scss';
-
+import NewsType from "../../Components/News/NewsType";
 
 interface IHeaderChipsProps {
   category?: any; // may be string | object | array (SharePoint inconsistency)
@@ -12,48 +12,13 @@ interface IHeaderChipsProps {
 export const CategoryRow: React.FC<IHeaderChipsProps> = ({
   category = "",
   department = "",
-  hashtags = [],
-  onTagClick,
+  hashtags = []  
 }) => {
-  /** 🧩 Normalize category text (handles string | object | array) */
-  const getCategoryText = (): string => {
-    if (!category) return "";
-    if (typeof category === "string") return category;
-    if (Array.isArray(category)) return category[0]?.Label || category[0] || "";
-    if (typeof category === "object" && "Label" in category) return (category as any).Label;
-    return String(category);
-  };
-
-  /** 🧩 Normalize department text with guards (avoid showing plain numbers like "1") */
-  const getDepartmentText = (): string => {
-    if (!department) return "";
-    if (typeof department === "number") return "";
-    if (typeof department === "string") {
-      const s = department.trim();
-      if (/^\d+$/.test(s)) return ""; // don’t render bare numeric
-      return s;
-    }
-    if (Array.isArray(department)) return department[0]?.Label || department[0] || "";
-    if (typeof department === "object" && "Label" in department) return (department as any).Label;
-    return String(department);
-  };
-
-  const categoryText = getCategoryText();
-  const departmentText = getDepartmentText();
-
-  // ✅ Category icon resolver
-  const getCategoryIcon = (): string | null => {
-   // const c = categoryText.toLowerCase();
-   // if (c.includes("dhre")) return DHREIcon;
-   // if (c.includes("announcement")) return AnnoucIcon;
-   // if (c.includes("around the world")) return ArrTHEWorldIcon;
-    return null;
-  };
 
   // ✅ Department icon resolver
   const getDepartmentIcon = (): string | null => {
-    const d = departmentText.toLowerCase();
-  //  if (d.includes("human capital")) return HumanCapitalIcon;
+    const d = department.toLowerCase();
+    //  if (d.includes("human capital")) return HumanCapitalIcon;
     if (d.includes("finance")) return "💰";
     if (d.includes("it")) return "💻";
     if (d.includes("marketing")) return "📣";
@@ -75,30 +40,29 @@ export const CategoryRow: React.FC<IHeaderChipsProps> = ({
   return (
     <div className={styles.headerChips}>
       {/* Category */}
-      {categoryText && (
-        <div className={styles.categoryChip}>
-          {renderIcon(getCategoryIcon())}
-          <span className={styles.categoryText}>{categoryText}</span>
-        </div>
+      {category && (
+        <NewsType newsType={category}></NewsType>
       )}
 
       {/* Divider */}
-      {categoryText && departmentText && <div className={styles.divider}></div>}
+      {category && department && <div className={styles.divider}></div>}
 
       {/* Department */}
-      {departmentText && (
+      {department && (
         <div className={styles.departmentChip}>
           {renderIcon(getDepartmentIcon())}
-          <span className={styles.departmentText}>{departmentText}</span>
+          <span className={styles.departmentText}>{department}</span>
         </div>
       )}
 
       {/* Divider before hashtags */}
-      {(categoryText || departmentText) && hashtags.length > 0 && (
+      {(category || department) && hashtags && hashtags?.length > 0 && (
         <div className={styles.divider}></div>
       )}
-
-      {/* Hashtags */}
+      <div className={styles.hashtagContainer}>
+        {hashtags}
+      </div>
+      {/* 
       {hashtags.length > 0 && (
         <div className={styles.hashtagContainer}>
           {hashtags.map((tag, i) => (
@@ -111,7 +75,7 @@ export const CategoryRow: React.FC<IHeaderChipsProps> = ({
             </span>
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 };

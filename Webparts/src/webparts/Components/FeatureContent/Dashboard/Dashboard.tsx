@@ -1,5 +1,9 @@
 import * as React from 'react';
 import styles from './Dashboard.module.scss';
+// import leftHeadingLine from  "../images/leftArrow.svg";
+// import rightHeadingLine from "../images/rightArrow.svg"
+const leftHeadingLine: string = require("../images/leftArrow.svg");
+const rightHeadingLine: string = require("../images/rightArrow.svg");
 
 export interface IDashboard {
     id: string;
@@ -54,56 +58,60 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
             <div className={styles.header}>
                 <div className={styles.headerContent}>
                     <div className={styles.decorativeLineLeft}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
                             <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
                             <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
+                        </svg> */}
+                        <img src={rightHeadingLine} alt="right headline line" />
                     </div>
                     <h2 className={styles.title}>Dashboards</h2>
                     <div className={styles.decorativeLineRight}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
                             <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
                             <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
+                        </svg> */}
+                        <img src={leftHeadingLine} alt="left headline line" />
                     </div>
-                </div>
+                </div >
                 <p className={styles.subtitle}>
                     Track everything at a glance – insights made simple!
                 </p>
-            </div>
+            </div >
 
             {/* Dashboard Grid */}
-            <div className={styles.dashboardGrid}>
-                {dashboards.map((dashboard) => (
-                    <a
-                        key={dashboard.id}
-                        href={dashboard.url}
-                        className={styles.dashboardCard}
-                    >
-                        <div className={styles.imageContainer}>
-                            <img src={dashboard.image} alt={dashboard.title} className={styles.dashboardImage} />
-                            <div className={styles.imageOverlay} />
-                        </div>
-                        <div className={styles.dashboardInfo}>
-                            <h3 className={styles.dashboardTitle}>
-                                {dashboard.title}
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={styles.arrowIcon}>
-                                    <path d="M7 13L13 7M13 7H7M13 7V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </h3>
-                            <p className={styles.dashboardDescription}>{dashboard.description}</p>
-                        </div>
-                    </a>
-                ))}
-            </div>
+            <div className={styles.dashboardGrid} >
+                {
+                    dashboards.map((dashboard) => (
+                        <a
+                            key={dashboard.id}
+                            href={dashboard.url}
+                            className={styles.dashboardCard}
+                        >
+                            <div className={styles.imageContainer}>
+                                <img src={dashboard.image} alt={dashboard.title} className={styles.dashboardImage} />
+                                <div className={styles.imageOverlay} />
+                            </div>
+                            <div className={styles.dashboardInfo}>
+                                <h3 className={styles.dashboardTitle}>
+                                    {dashboard.title}
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={styles.arrowIcon}>
+                                        <path d="M7 13L13 7M13 7H7M13 7V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </h3>
+                                <p className={styles.dashboardDescription}>{dashboard.description}</p>
+                            </div>
+                        </a>
+                    ))
+                }
+            </div >
 
             {/* View All Button */}
-            <div className={styles.buttonContainer}>
+            <div className={styles.buttonContainer} >
                 <button className={styles.viewAllButton} onClick={props.onViewAll}>
                     View All
                 </button>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

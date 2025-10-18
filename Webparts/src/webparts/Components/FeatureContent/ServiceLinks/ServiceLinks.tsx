@@ -1,5 +1,9 @@
 import * as React from 'react';
 import styles from './ServiceLinks.module.scss';
+// import leftHeadingLine from "../../../images/leftArrow.svg"
+// import rightHeadingLine from "../../../images/rightArrow.svg"
+const leftHeadingLine: string = require("../images/leftArrow.svg");
+const rightHeadingLine: string = require("../images/rightArrow.svg");
 
 export interface IServiceLink {
     id: string;
@@ -49,26 +53,28 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
             <div className={styles.header}>
                 <div className={styles.headerContent}>
                     <div className={styles.decorativeLineLeft}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
                             <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
                             <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
+                        </svg> */}
+                        <img src={rightHeadingLine} alt="rightArrow" />
                     </div>
                     <h2 className={styles.title}>Service Links</h2>
                     <div className={styles.decorativeLineRight}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
                             <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
                             <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
+                        </svg> */}
+                        <img src={leftHeadingLine} alt="leftArrow" />
                     </div>
-                </div>
+                </div >
                 <p className={styles.subtitle}>
                     Quickly access your most used service links
                 </p>
-            </div>
+            </div >
 
             {/* Services Grid with Navigation */}
-            <div className={styles.carouselWrapper}>
+            <div className={styles.carouselWrapper} >
                 <button className={styles.navButton} onClick={handlePrev}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -98,18 +104,20 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
             </div>
 
             {/* Pagination Dots */}
-            {totalPages > 1 && (
-                <div className={styles.pagination}>
-                    {Array.from({ length: totalPages }).map((_, index) => (
-                        <button
-                            key={index}
-                            className={`${styles.dot} ${index === currentPage ? styles.activeDot : ''}`}
-                            onClick={() => setCurrentPage(index)}
-                            aria-label={`Go to page ${index + 1}`}
-                        />
-                    ))}
-                </div>
-            )}
+            {
+                totalPages > 1 && (
+                    <div className={styles.pagination}>
+                        {Array.from({ length: totalPages }).map((_, index) => (
+                            <button
+                                key={index}
+                                className={`${styles.dot} ${index === currentPage ? styles.activeDot : ''}`}
+                                onClick={() => setCurrentPage(index)}
+                                aria-label={`Go to page ${index + 1}`}
+                            />
+                        ))}
+                    </div>
+                )
+            }
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
@@ -117,7 +125,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
                     View All
                 </button>
             </div>
-        </div>
+        </div >
     );
 };
 
