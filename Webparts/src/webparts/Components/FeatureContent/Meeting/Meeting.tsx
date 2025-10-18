@@ -96,7 +96,7 @@ export const Meeting: React.FC<IMeetingProps> = (props) => {
             </div >
 
             {/* Carousel */}
-            < div className={styles.carouselContainer} >
+            <div className={styles.carouselContainer} >
                 <div className={styles.carousel}>
                     {meetings.map((meeting, index) => {
                         //const offset = index - currentIndex;
@@ -128,14 +128,14 @@ export const Meeting: React.FC<IMeetingProps> = (props) => {
                         );
                     })}
                 </div>
-            </ >
+            </div >
 
             {/* View All Button */}
-            < div className={styles.buttonContainer} >
+            <div className={styles.buttonContainer} >
                 <button className={styles.viewAllButton} onClick={props.onViewAll}>
                     View All
                 </button>
-            </ >
+            </div>
         </div >
     );
 };
