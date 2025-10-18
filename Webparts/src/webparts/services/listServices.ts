@@ -187,7 +187,7 @@ export class listServices {
     }
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
-    public async getTraining(ID?: number): Promise<any[]> {
+    public async getTrainingByID(ID?: number): Promise<any[]> {
         // eslint-disable-line @typescript-eslint/no-explicit-any
         let results;
         const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B721B228147AA74E9D35C742E0E4560C00B86D6AF04B11174DB95E36FF7ADB455C*)`;
@@ -200,7 +200,8 @@ export class listServices {
                     "Title",
                     "TIREventEndDate",
                     "TIREventStartDate",
-                    "TIRLocation"
+                    "TIRLocation",
+                    "TIR"
                 ],
                 QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
                 HiddenConstraints: `-SitePageFlags:Template ${constraints}`,

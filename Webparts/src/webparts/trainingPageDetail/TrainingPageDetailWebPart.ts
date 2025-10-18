@@ -35,7 +35,7 @@ export default class TrainingPageDetailWebPart extends BaseClientSideWebPart<ITr
     this.spService = new listServices(this.context);
     const pageId = this.context.pageContext.listItem?.id
     pageId ?
-      this.trainingItem = await this.spService.getTraining(pageId) : "";
+      this.trainingItem = await this.spService.getTrainingByID(pageId) : "";
   }
 
 

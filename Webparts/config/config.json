@@ -89,6 +89,14 @@
           "manifest": "./src/webparts/task/TaskWebPart.manifest.json"
         }
       ]
+    },
+    "event-and-training-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/eventAndTraining/EventAndTrainingWebPart.js",
+          "manifest": "./src/webparts/eventAndTraining/EventAndTrainingWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -103,6 +111,7 @@
     "AboutDhrePageTitleWebPartStrings": "lib/webparts/aboutDhrePageTitle/loc/{locale}.js",
     "TrainingPageDetailWebPartStrings": "lib/webparts/trainingPageDetail/loc/{locale}.js",
     "OurPortfolioWebPartStrings": "lib/webparts/ourPortfolio/loc/{locale}.js",
-    "TaskWebPartStrings": "lib/webparts/task/loc/{locale}.js"
+    "TaskWebPartStrings": "lib/webparts/task/loc/{locale}.js",
+    "EventAndTrainingWebPartStrings": "lib/webparts/eventAndTraining/loc/{locale}.js"
   }
 }

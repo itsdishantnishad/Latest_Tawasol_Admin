@@ -36,15 +36,17 @@ export default class OurPortfolio extends React.Component<IOurPortfolioProps, IO
     /** main brands = rows with NO BrandChoice */
     this.state.listItems.map((item) => {
       item.PortfolioCategory === "Main" ?
-        mainBrands.push(item.Title) : "";
+        mainBrands.push({ title: item.Title, item: item }) : "";
     });
-    mainBrands.map((mbItems: any) => {
+    mainBrands.map((mainCat: any) => {
+      let subBrands: any = [];
       this.state.listItems.map((item) => {
-        mbItems === item.PortfolioCategory ? categoryWiseBrands.push({ item, mbItems }) : "";
+        mainCat.title === item.PortfolioCategory ? subBrands.push(item) : "";
       })
+      categoryWiseBrands.push({ mainCat: mainCat.item, subBrands });
     })
 
-    console.log(mainBrands);
+
 
     return (
       <section className={styles.wrapper} aria-labelledby="portfolioHeading">
@@ -54,20 +56,20 @@ export default class OurPortfolio extends React.Component<IOurPortfolioProps, IO
           <span className={styles.portfolio}>Portfolio</span>
         </h2>
         <div className={styles.brandsColumns}>
-          {mainBrands.map((brand: any) => {
+          {categoryWiseBrands.map((brand: any) => {
             return (
               <div className={styles.brandColumn} >
-                <div className={styles.brandCard} title={brand.Title}>
-                  {brand.IconURL ? (
-                    <img className={styles.brandLogo} src={brand.IconURL} alt={brand.IconURL} />
+                <div className={styles.brandCard} title={brand.mainCat.Title}>
+                  {brand.mainCat.IconURL ? (
+                    <img className={styles.brandLogo} src={brand.mainCat.IconURL} alt={brand.mainCat.IconURL} />
                   ) : (
-                    <span className={styles.brandFallback}>{brand.Title}</span>
+                    <span className={styles.brandFallback}>{brand.mainCat.Title}</span>
                   )}
                 </div>
 
                 {/* sub-brands for this brand (using Choice) */}
                 <div className={styles.subGridCols2}>
-                  {this.state.listItems.map((item) => {
+                  {brand.subBrands.map((item: any) => {
 
                     return (
                       <div className={styles.subCell} title={item.Title}>
