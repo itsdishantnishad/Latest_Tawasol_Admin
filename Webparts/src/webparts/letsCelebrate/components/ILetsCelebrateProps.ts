@@ -1,10 +1,7 @@
 import { WebPartContext } from "@microsoft/sp-webpart-base";
+import { ILetsCelebrateWebPartProps } from "../LetsCelebrateWebPart";
 
-export interface ILetsCelebrateProps {
-  description: string;
-  isDarkTheme: boolean;
-  environmentMessage: string;
-  hasTeamsContext: boolean;
-  userDisplayName: string;
+export interface ILetsCelebrateProps extends ILetsCelebrateWebPartProps {
+
   context:WebPartContext
 }

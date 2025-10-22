@@ -97,6 +97,14 @@
           "manifest": "./src/webparts/eventAndTraining/EventAndTrainingWebPart.manifest.json"
         }
       ]
+    },
+    "our-values-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/ourValues/OurValuesWebPart.js",
+          "manifest": "./src/webparts/ourValues/OurValuesWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -112,6 +120,7 @@
     "TrainingPageDetailWebPartStrings": "lib/webparts/trainingPageDetail/loc/{locale}.js",
     "OurPortfolioWebPartStrings": "lib/webparts/ourPortfolio/loc/{locale}.js",
     "TaskWebPartStrings": "lib/webparts/task/loc/{locale}.js",
-    "EventAndTrainingWebPartStrings": "lib/webparts/eventAndTraining/loc/{locale}.js"
+    "EventAndTrainingWebPartStrings": "lib/webparts/eventAndTraining/loc/{locale}.js",
+    "OurValuesWebPartStrings": "lib/webparts/ourValues/loc/{locale}.js"
   }
 }

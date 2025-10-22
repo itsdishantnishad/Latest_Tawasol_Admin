@@ -18,6 +18,7 @@ export interface ITraining {
 export interface ITrainingProps {
     trainings?: ITraining[];
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 const defaultTrainings: ITraining[] = [
@@ -127,9 +128,12 @@ export const Training: React.FC<ITrainingProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
                     View All
-                </button>
+                </a>
+                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                    View All
+                </button> */}
             </div>
         </div>
     );

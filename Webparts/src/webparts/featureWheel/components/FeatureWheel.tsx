@@ -66,11 +66,11 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props:any) => {
           </section>
         );
       case 'documents':
-        return <Documents onViewAll={handleViewAll} />;
+        return <Documents seeAllURL={props.documents} onViewAll={handleViewAll} />;
       case 'events':
-        return <Events onViewAll={handleViewAll} />;
+        return <Events seeAllURL={props.upcomingEvents} onViewAll={handleViewAll} />;
       case 'employee_events':
-        return <LetsCelebrate onViewAll={handleViewAll} />;
+        return <LetsCelebrate seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />;
       case 'meetings':
         return <Meeting onViewAll={handleViewAll} />;
       case 'service_links':
@@ -80,9 +80,9 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props:any) => {
       case 'dashboard':
         return <Dashboard onViewAll={handleViewAll} />;
       case 'offers':
-        return <Offers onViewAll={handleViewAll} />;
+        return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
       case 'training':
-        return <Training onViewAll={handleViewAll} />;
+        return <Training seeAllURL={props.trainingAndDevelopment} onViewAll={handleViewAll} />;
       default:
         return (
           <section className={styles.gallerySection}>

@@ -19,17 +19,14 @@ export enum ListName {
     IMAGE_NAVIGATION = "Image Navigation",
     IMAGE_SUB_NAVIGATION = "Image Sub Navigation",
     USER_SUBSCRIPTIONS = "User Subscriptions",
-    VIDEO_PLAYER = "Video Gallery"
+    VIDEO_PLAYER = "Video Gallery",
+    OUR_VALUES = "Our Values",
+    ORGANISATION_STRUCTURE = "Organization Structure",
 }
 
-export enum siteColumn {
-    ImageURL = "MKImageURL",
-    URL = "MKURL",
-    Level = "MKLevel",
-    OpenInNewTab = "MKOpenInNewTab",
-    SortOrder = "MKSortOrder"
 
-}
+export type OurValueCard = { id: number; title: string; desc: string; icon?: string; sort: number; };
+export type OrgMember = { id: number; name: string; role: string; level: number; sort: number; photoUrl?: string; };
 
 export class listServices {
 
@@ -72,7 +69,7 @@ export class listServices {
         }
     }
 
-     // eslint-disable-line @typescript-eslint/no-explicit-any
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     public async getNewsStory(): Promise<any[]> {
         // eslint-disable-line @typescript-eslint/no-explicit-any
         let results;
@@ -293,6 +290,47 @@ export class listServices {
             return Promise.reject(error);
         }
     }
+
+    public async getOrganisationMembers(listTitle: string = ListName.ORGANISATION_STRUCTURE): Promise<OrgMember[]> {
+        const rows = await this.sp.web.lists.getByTitle(listTitle).items
+            .select("Title,TIRDesignation,TIRLevel,TIRSortOrder,TIRUserPicture")
+            .orderBy("TIRLevel", true)
+            .orderBy("TIRSortOrder", true)();
+
+        const mapped: OrgMember[] = rows.map((it: any) => {
+            const ph = it?.TIRUserPicture;
+            const photoUrl = typeof ph === "string" ? ph : ph?.Url || undefined;
+            return { id: Number(it?.Id) || 0, name: it?.Title || "", role: it?.TIRDesignation || "", level: Number(it?.TIRLevel ?? 99), sort: Number(it?.TIRSortOrder ?? 9999), photoUrl };
+        });
+
+        mapped.sort((a, b) =>
+            a.level !== b.level ? a.level - b.level :
+                a.sort !== b.sort ? a.sort - b.sort :
+                    a.name.localeCompare(b.name)
+        );
+
+        return mapped;
+    }
+
+    public async getOurValues(listName: string): Promise<any[]> {
+        let results: any[] = [];
+        try {
+            results = await this.sp.web.lists.getByTitle(listName)
+                .items
+                .select("Title", "TIRDescription", "TIRIconURL", "TIRSortOrder").orderBy("TIRSortOrder", true)();
+            return results.map((item: any) => {
+                return {
+                    title: item.Title,
+                    description: item.TIRDescription,
+                    icon: item.TIRIconURL ? item.TIRIconURL.Url : "#",
+                    sortOrder: item.TIRSortOrder
+                } as any;
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+
 }
 
 
