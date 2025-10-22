@@ -1,0 +1,447 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.courseListing {
+  background-color: #fff9f4; // Warm beige to match image
+  padding: 32px 60px;
+  border-radius: 16px;
+  font-family: "Segoe UI", sans-serif;
+  color: #1a1a1a;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+}
+
+/* Month Accordion Section */
+.monthSection {
+  margin-bottom: 28px;
+}
+
+.accordionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: #fceee4; // Light beige for accordion headers
+  border: none;
+  border-radius: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background 0.25s ease;
+
+  &:hover {
+    background: #fae6d9; // Slightly darker on hover
+  }
+}
+
+.monthTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.chevron {
+  transition: transform 0.3s ease;
+  color: #333;
+}
+
+.chevronUp {
+  transform: rotate(180deg);
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); // 4 columns for desktop to match image
+  gap: 22px;
+  margin-top: 22px;
+  padding: 20px 0;
+
+  @media (max-width: 1024px) and (min-width: 769px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Learning Links + Content Section */
+.learningSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 48px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.learningColumn {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.learningHeader {
+  margin-bottom: 24px;
+
+  .title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 4px 0;
+  }
+
+  .description {
+    font-size: 14px;
+    color: #6b6b6b;
+    margin: 0;
+  }
+}
+
+/* Ensure LearningLinks grid fits inside learningColumn */
+.learningLinks {
+  .linksGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); // Force 3 columns
+    gap: 16px;
+  }
+}
+
+/* Tabs */
+.tabContainer {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #edebe9; // Subtle border
+  padding-bottom: 8px;
+}
+
+.tabButton {
+  font-size: 16px;
+  font-weight: 500;
+  padding: 12px 0;
+  color: #6b6b6b;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #000;
+  }
+}
+
+.activeTab {
+  color: #000;
+  font-weight: 600;
+}
+
+.activeTab::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #d33a2c; /* Red underline for active tab */
+  border-radius: 2px;
+}
+
+/* My Trainings Grid */
+.myTrainingsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Course Card Styles (Refined for Alignment) */
+.courseCard {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.categoryLabel {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.95);
+  color: #323130;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+  margin-top: 28px; // Space for category label
+}
+
+.headerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.content {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+}
+
+.title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #201f1e;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.metadata {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #605e5c;
+}
+
+.date,
+.duration {
+  color: #605e5c;
+}
+
+.instructor {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.instructorImage {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.instructorInfo {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: #605e5c;
+  line-height: 16px;
+}
+
+.instructorName {
+  color: #201f1e;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.instructorTitle {
+  color: #605e5c;
+  font-size: 12px;
+}
+
+.joinButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #faf9f8;
+  border: 1px solid #edebe9;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #201f1e;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+
+  &:hover:not(:disabled) {
+    background: #f3f2f1;
+    border-color: #c8c6c4;
+  }
+
+  &:disabled {
+    background: #f8f9fa;
+    color: #a19f9d;
+    border-color: #edebe9;
+    cursor: not-allowed;
+  }
+
+  &.registered {
+    background: #d9f4c3;
+    border-color: #107c10;
+    color: #107c10;
+  }
+}
+
+.outlookIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    color: currentColor;
+  }
+}
+
+.infoNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #faf9f8;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: #605e5c;
+  border: 1px solid #edebe9;
+}
+
+.infoIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #0078d4;
+  margin-top: 1px;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.infoText {.learningLinks {
+  background: #fff9f4; // Light beige background to match image
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #f8f4f0; // Subtle border
+
+  .header {
+    margin-bottom: 24px;
+
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0 0 8px 0;
+    }
+
+    .description {
+      font-size: 14px;
+      color: #6b6b6b;
+      margin: 0;
+    }
+  }
+
+  .linksGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); // Fixed 3 columns to match image (adjust if more links)
+    gap: 16px;
+  }
+
+  .linkCard {
+    background: #ffffff;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    padding: 20px 16px;
+    border: 1px solid #f0e9e5; // Light border to match image
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%; // Equal height for cards
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border-color: #e8d9d0;
+    }
+
+    .logoContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 80px;
+      height: 80px; // Square rounded container to match image
+      border-radius: 12px;
+      background-color: #ffffff; // White background for logo container
+      margin-bottom: 12px;
+      border: 1px solid #f0e9e5;
+    }
+
+    .logo {
+      max-width: 70%;
+      max-height: 70%;
+      object-fit: contain;
+    }
+
+    .linkTitle {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      h3 {
+        font-size: 13px;
+        font-weight: 500;
+        color: #333333;
+        margin: 0;
+        text-align: center;
+        line-height: 1.3;
+      }
+    }
+  }
+}
+  color: #605e5c;
+}

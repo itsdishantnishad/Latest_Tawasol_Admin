@@ -249,6 +249,28 @@ export class listServices {
         }
     }
 
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    public async getNewJoiners(listName: string): Promise<any[]> {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        let results: any[] = [];
+        try {
+            results = await this.sp.web.lists.getByTitle(listName)
+                .items
+                .select("Title", "TIRDesignation", "TIRUserPicture", "TIRDescription")();
+            // eslint-disable-line @typescript-eslint/no-explicit-any
+            return results.map((item: any) => {
+                return {
+                    Title: item.Title,
+                    Designation: item.TIRDesignation,
+                    UserPicture: item.TIRUserPicture ? item.TIRUserPicture.Url : "#",
+                    Description: item.TIRDescription
+                } as any;
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
     public async getOurPortfolio(listName: string): Promise<any[]> {

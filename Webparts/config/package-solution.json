@@ -3,7 +3,7 @@
   "solution": {
     "name": "tawasol",
     "id": "14decd7c-567a-4b47-a7dc-a44b653fa4c4",
-    "version": "2.0.0.0",
+    "version": "2.0.0.1",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,

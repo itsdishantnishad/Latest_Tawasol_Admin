@@ -3,6 +3,7 @@ import * as React from 'react';
 import type { IEventAndTrainingProps } from './IEventAndTrainingProps';
 import { SelectTabData, SelectTabEvent, Tab, TabList } from "@fluentui/react-components";
 import AllEvents from '../../Components/Events/AllEvents';
+import Training from '../../Components/Trainings/Training';
 
 export interface IEventAndTrainingState {
   selectedTab: any;
@@ -41,7 +42,7 @@ export default class EventAndTraining extends React.Component<IEventAndTrainingP
           </Tab>
         </TabList>
         {this.state.selectedTab === "events" && <AllEvents {...this.props} />}
-        {this.state.selectedTab === "trainings" && <div>Training Content</div>}
+        {this.state.selectedTab === "trainings" && <Training {...this.props} />}
       </>
     );
   }

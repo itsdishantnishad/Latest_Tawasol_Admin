@@ -1,0 +1,83 @@
+.learningLinks {
+  background: #fff9f4; // Light beige background to match image
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #f8f4f0; // Subtle border
+
+  .header {
+    margin-bottom: 24px;
+
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 0 0 8px 0;
+    }
+
+    .description {
+      font-size: 14px;
+      color: #6b6b6b;
+      margin: 0;
+    }
+  }
+
+  .linksGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); // Fixed 3 columns to match image (adjust if more links)
+    gap: 16px;
+  }
+
+  .linkCard {
+    background: #ffffff;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    padding: 20px 16px;
+    border: 1px solid #f0e9e5; // Light border to match image
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%; // Equal height for cards
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border-color: #e8d9d0;
+    }
+
+    .logoContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 80px;
+      height: 80px; // Square rounded container to match image
+      border-radius: 12px;
+      background-color: #ffffff; // White background for logo container
+      margin-bottom: 12px;
+      border: 1px solid #f0e9e5;
+    }
+
+    .logo {
+      max-width: 70%;
+      max-height: 70%;
+      object-fit: contain;
+    }
+
+    .linkTitle {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      h3 {
+        font-size: 13px;
+        font-weight: 500;
+        color: #333333;
+        margin: 0;
+        text-align: center;
+        line-height: 1.3;
+      }
+    }
+  }
+}

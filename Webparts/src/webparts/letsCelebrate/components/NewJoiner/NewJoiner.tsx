@@ -1,69 +1,67 @@
 import * as React from "react";
 import styles from "./NewJoiner.module.scss";
-import { INewJoiner } from "./NewJoinerData";
+// import { INewJoiner } from "./NewJoinerData";
 
 export interface INewJoinersFeedProps {
-  items: INewJoiner[];
+  items: any[];
   formatDate?: (isoOrText?: string) => string;
   webAbsoluteUrl?: string;
 }
 
 
 
-const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items = [] }) => {
+const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items }) => {
 
 
   return (
     <div className={styles.feed}>
-      {items.map((p: INewJoiner) => {
-        const first = p.firstNameDecor ? p.firstNameDecor : "";
-        const last = p.lastName ? p.lastName : "";
-        const altText = (first + " " + last).trim();
+      {items.map((item: any) => {
+        // const first = p.firstNameDecor ? p.firstNameDecor : "";
+        // const last = p.lastName ? p.lastName : "";
+        // const altText = (first + " " + last).trim();
        
 
         return (
-          <article key={p.id} className={styles.card}>
+          <article  className={styles.card}>
             <div className={styles.left}>
-              <img className={styles.photo} src={""} alt={altText || "Profile photo"} />
+              <img className={styles.photo} src={item.UserPicture} alt={item.Title || "Profile photo"} />
             </div>
 
             <div className={styles.right}>
               <header className={styles.header}>
                 <h2 className={styles.name}>
-                  <span className={styles.nameDecor}>{first}</span> {last}
+                  <span className={styles.nameDecor}>{item.Title}</span> 
                 </h2>
-                <div className={styles.role}>{p.designation}</div>
+                <div className={styles.role}>{item.Designation}</div>
               </header>
 
               <section className={styles.meta}>
-                {p.effectiveDate && (
+                {/* {item.effectiveDate && (
                   <div className={styles.metaRow}>
                     <strong>Effective: </strong>
                     <span>Date</span>
                   </div>
-                )}
-                {p.reportingTo && (
+                )} */}
+                {/* {p.reportingTo && (
                   <div className={styles.metaRow}>
                     <strong>Reports to: </strong>
                     <span>{p.reportingTo}</span>
                   </div>
-                )}
+                )} */}
               </section>
 
-              <section className={styles.body}>
-                {(p.intro || []).map((t: string, i: number) => (
-                  <p key={i} className={styles.para}>{t}</p>
-                ))}
+              <section className={styles.body}>             
+                  <p  dangerouslySetInnerHTML={{__html:item.Description}} className={styles.para}></p>              
               </section>
             </div>
 
             <div className={styles.ctaCol}>
-              {p.sayHelloUrl && (
+              {/* {p.sayHelloUrl && (
                 <a className={styles.sayHello} href={p.sayHelloUrl}>
                   <span className={styles.helloIcon} aria-hidden="true">💬</span>
                   <span>Say Hello</span>
                 </a>
-              )}
+              )} */}
             </div>
           </article>
         );
