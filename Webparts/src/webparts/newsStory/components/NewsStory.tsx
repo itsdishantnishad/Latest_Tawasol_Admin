@@ -90,7 +90,7 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
             <div className={styles.bannerCard} key={news.id}>
               <div className={styles.bannerCard__PromoDetailsContent}>
                 <div style={{ width: "50%", height: "100%", marginLeft: "20px" }}>
-                  <div style={{ width: "30%" }}>
+                  <div style={{ width: "max-content" }}>
                     <NewsType newsType={news.newsType} />
                   </div>
                   <div className={styles.bannerCard__PromoDetailsContent__title}>{news.title}</div>

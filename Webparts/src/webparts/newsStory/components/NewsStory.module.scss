@@ -12,7 +12,7 @@
 
       button {
         &::before {
-          font-size: 30px !important;
+          font-size: 40px !important;
         }
       }
     }
@@ -63,11 +63,12 @@
     padding-left: 5px;
  
     i {
-      font-size: 16px;
+      font-size: 22px;
       cursor: pointer;
-      background: "[theme: primaryButtonBackground, default: #EDE0D2]";
-      padding: 4px;
-      border-radius: 12px;   
+      // background: "[theme: primaryButtonBackground, default: #EDE0D2]";
+      background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #DDA160 0%, #FFDBB4 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
+      padding: 10px;
+      border-radius: 50px;   
     }
   }
 }
