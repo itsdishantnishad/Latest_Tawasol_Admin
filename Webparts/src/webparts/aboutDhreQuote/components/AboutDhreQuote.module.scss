@@ -1,0 +1,75 @@
+
+.wrap {
+  border-radius: 16px;
+  padding: 48px 20px;
+  background: #FFEBDA;
+  color: #0f0f0f;
+}
+
+.inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+
+.quoteIcon {
+  font-size: 56px;
+  line-height: 1;
+  color: #d6362d;
+  font-family: "Instrument Serif", serif;
+  margin-bottom: 18px;
+  user-select: none;
+
+  img {
+    width: 50px;
+    height: auto;
+    margin: 0 auto;
+  }
+}
+
+.desc {
+  font-size: 32px;
+  line-height: 1.6;
+  font-family: "Instrument Serif", serif;
+  margin: 0 auto 28px;
+  max-width: 980px;
+  color: #000000;
+  font-style: italic;
+  font-weight: 400;
+  
+}
+
+.divider {
+  margin: 0 auto 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ArrowImg {
+  width: 280px; /* Adjust to exact figma width */
+  height: auto;
+}
+
+.meta {
+  opacity: 0.95;
+}
+
+.name {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+}
+
+.role {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 13.78px;
+  line-height: 18.37px;
+  color: #6c6c6c;
+  text-align: center;
+}
+

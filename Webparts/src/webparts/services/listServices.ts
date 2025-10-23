@@ -21,7 +21,7 @@ export enum ListName {
     USER_SUBSCRIPTIONS = "User Subscriptions",
     VIDEO_PLAYER = "Video Gallery",
     OUR_VALUES = "Our Values",
-    ORGANISATION_STRUCTURE = "Organization Structure",
+    ORGANISATION_STRUCTURE = "Team Org Structure",
 }
 
 
@@ -94,7 +94,8 @@ export class listServices {
                     "FileRef",
                     "AuthorOWSUSER",
                     "TIRTags",
-                    "Created"
+                    "Created",
+                    "Description"
                 ],
                 QueryTemplate: `{searchTerms}`,
                 HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
@@ -116,7 +117,8 @@ export class listServices {
                     author: item.CreatedBy,
                     authorEmail: item.AuthorOWSUSER ? item.AuthorOWSUSER.split('|')[0] : "",
                     path: item.FileRef,
-                    created: item.Created
+                    created: item.Created,
+                    pageDescription: item.Description,
                     //  lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
                     //  Description: item.AcronymDetail
                 } as any;
@@ -291,7 +293,7 @@ export class listServices {
         }
     }
 
-    public async getOrganisationMembers(listTitle: string = ListName.ORGANISATION_STRUCTURE): Promise<OrgMember[]> {
+    public async getOrganisationMembers(listTitle: string): Promise<OrgMember[]> {
         const rows = await this.sp.web.lists.getByTitle(listTitle).items
             .select("Title,TIRDesignation,TIRLevel,TIRSortOrder,TIRUserPicture")
             .orderBy("TIRLevel", true)

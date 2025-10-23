@@ -19,6 +19,9 @@ export interface IFeatureWheelWebPartProps {
   getOffersAndDiscounts: string;
   imageGallery: string;
   documents: string;
+  meeting: string;
+  interactiveForms: string;
+  dashboard: string;
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
@@ -34,6 +37,9 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
         getOffersAndDiscounts: this.properties.getOffersAndDiscounts,
         imageGallery: this.properties.imageGallery,
         documents: this.properties.documents,
+        meeting: this.properties.meeting,
+        interactiveForms: this.properties.interactiveForms,
+        dashboard: this.properties.dashboard,
         context: this.context
       }
     );
@@ -112,6 +118,15 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
                 }),
                 PropertyPaneTextField('documents', {
                   label: "Please enter URL for 'Documents' see all"
+                }),
+                 PropertyPaneTextField('meeting', {
+                  label: "Please enter URL for 'Meeting' view all"
+                }),
+                PropertyPaneTextField('interactiveForms', {
+                  label: "Please enter URL for 'Interactive Forms' view all"
+                }),
+                  PropertyPaneTextField('dashboard', {
+                  label: "Please enter URL for 'Dashboard' view all"
                 })
               ]
             }

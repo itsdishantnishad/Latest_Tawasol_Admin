@@ -16,6 +16,7 @@ export interface IDashboard {
 export interface IDashboardProps {
     dashboards?: IDashboard[];
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 const defaultDashboards: IDashboard[] = [
@@ -105,9 +106,12 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
                     View All
-                </button>
+                </button> */}
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
+                   View All
+                </a>
             </div>
         </div>
     );

@@ -72,13 +72,13 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props:any) => {
       case 'employee_events':
         return <LetsCelebrate seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />;
       case 'meetings':
-        return <Meeting onViewAll={handleViewAll} />;
+        return <Meeting seeAllURL={props.meeting} onViewAll={handleViewAll} />;
       case 'service_links':
         return <ServiceLinks onViewAll={handleViewAll} />;
       case 'forms':
-        return <Forms onViewAll={handleViewAll} />;
+        return <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />;
       case 'dashboard':
-        return <Dashboard onViewAll={handleViewAll} />;
+        return <Dashboard seeAllURL={props.dashboard} onViewAll={handleViewAll} />;
       case 'offers':
         return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
       case 'training':
