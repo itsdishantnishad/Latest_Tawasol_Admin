@@ -26,7 +26,7 @@ export default class AboutDhrePageTitle extends React.Component<IAboutDhrePageTi
 
           <div className={styles.divider} aria-hidden="true">
             <span className={styles.line} />
-            <span className={styles.chevrons} />
+            {/* <span className={styles.chevrons} /> */}
           </div>
 
           <p className={styles.copy}>{description}</p>
