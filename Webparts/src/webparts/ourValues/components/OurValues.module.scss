@@ -1,9 +1,9 @@
-:root {
+root {
   --ov-text:   #3A3B43;
   --ov-title:  #3A3B43;
   --ov-accent: #DA291C;
 }
-
+ 
 /* Full-bleed #FFF4EA background */
 .fullBleed {
   position: relative;
@@ -11,15 +11,41 @@
 }
 .fullBleed::before {
   content: "";
-  position: absolute; inset: 0;
-  left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw; width: 100vw;
+  position: absolute;
+  inset: 0;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
   background: #FFF4EA;
   z-index: -1;
 }
-
-.container { max-width: 1200px; margin: 0 auto; }
-
-.heading { line-height: 1; letter-spacing: 1px; text-align: center; margin-bottom: 32px; }
+ 
+/* Outer padding around the section */
+.root {
+  padding: 48px 24px;
+}
+ 
+.container {
+  // max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 36px;
+}
+ 
+/* Heading */
+.heading {
+  line-height: 1;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 32px;
+ 
+  /* use flex + gap to mimic Stack tokens */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
 .headingOur {
   font-family: "Instrument Serif", serif;
   font-weight: 400;
@@ -34,7 +60,57 @@
   font-size: 42px;
   color: var(--ov-title);
 }
+ 
+/* Description text for each card */
 .description {
-  margin-top: -4px;
-  color: var(--ov-text);
+  margin-top: 0;
+  font-family: 'Inter';
+  font-size: 16px;
+  color: #3A3B43;
+  line-height: 24px;
+  font-weight: 400;
+}
+ 
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+ 
+@media (max-width: 1100px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+}
+ 
+/* Card */
+.card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #E1DCD6;
+  border-radius: 10px;
+  background: transparent;
+  gap: 10px;
+  height: auto;
+  padding: 30px;
+}
+ 
+/* Icon */
+.icon {
+  max-width: 60px;
+  max-height: 60px;
+  object-fit: contain;
+  width: auto;
+  margin-bottom: 1rem;
+  height: auto;
+}
+ 
+/* Title text */
+.title {
+  color: #3A3B43;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
 }
