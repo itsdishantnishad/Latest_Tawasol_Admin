@@ -74,29 +74,23 @@ import sfListingMock from './dummyData';
 // const columns = ["Workflow No.", "Task Title", "Priority", "Due Date", "Action", "Status"] as const;
 // const labels: readonly Option[] = ["Services", "Oracle", "Salesforce"];
 
-// const fmtDate = (iso: string) =>
-//   new Date(iso).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
 
 export interface ITaskState {
   selectedTab: any;
 }
 
-
-
-
 export default class Task extends React.Component<ITaskProps, ITaskState> {
   constructor(props: ITaskProps) {
     super(props);
     this.state = {
-      selectedTab: "All"
+      selectedTab: "all"
     };
   }
 
-
-
   public render(): React.ReactElement<ITaskProps> {
     const {
-
     } = this.props;
 
     const columns = [
@@ -131,6 +125,56 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
       }
     };
 
+    const tableBody = (item: any): JSX.Element => {
+      return (
+        <TableRow >
+          <TableCell>
+            <TableCellLayout>
+              {item.workflowNumber}
+            </TableCellLayout>
+          </TableCell>
+          <TableCell>
+            <TableCellLayout>
+              {item.taskTitle}
+            </TableCellLayout>
+          </TableCell>
+          <TableCell>
+            <TableCellLayout>
+              <span className={`${styles.chip} 
+              ${item.priority === "High" ? styles.chipHigh :
+                  item.priority === "Medium" ? styles.chipMedium
+                    : styles.chipLow}`}>
+                {item.priority}
+              </span>
+            </TableCellLayout>
+          </TableCell>
+          <TableCell>{fmtDate(item.dueDate)}</TableCell>
+          <TableCell>
+            <TableCellLayout>
+              {item.action}
+            </TableCellLayout>
+          </TableCell>
+          <TableCell>
+            <TableCellLayout>
+              <div className={styles.value}>
+                <span
+                  className={`${styles.statusPill} ${item.status === "Approved"
+                    ? styles.stApproved
+                    : item.status === "Rejected"
+                      ? styles.stRejected
+                      : styles.stPending
+                    }`}
+                >
+                  <span className={styles.statusText}>{item.status}</span>
+                </span>
+              </div>
+
+            </TableCellLayout>
+          </TableCell>
+        </TableRow>
+      )
+    }
+
 
     return (
       <>
@@ -139,126 +183,40 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
             <span className={styles.taskText}>Task</span>
             <span className={styles.approvalsText}> Approvals</span>
           </div>
-        </div>
-        <TabList selectedValue={this.state.selectedTab} onTabSelect={onTabSelect} selectTabOnFocus={true} size="large">
-          <Tab id="All" value="all">
-            All
-          </Tab>
-          <Tab id="Oracle" value="oracle">
-            Oracle
-          </Tab>
-          <Tab id="Salesforce" value="salesforce">
-            Salesforce
-          </Tab>
-        </TabList>
 
-        <Table arial-label="Default table" style={{ minWidth: "510px" }}>
-          <TableHeader>
-            <TableRow>
-              {columns.map((column) => (
-                <TableHeaderCell key={column.columnKey}>
-                  {column.label}
-                </TableHeaderCell>
+          <TabList selectedValue={this.state.selectedTab} onTabSelect={onTabSelect} selectTabOnFocus={true} size="large">
+            <Tab id="All" value="all">
+              All
+            </Tab>
+            <Tab id="Oracle" value="oracle">
+              Oracle
+            </Tab>
+            <Tab id="Salesforce" value="salesforce">
+              Salesforce
+            </Tab>
+          </TabList>
+
+          <Table arial-label="Default table" style={{ minWidth: "510px" }}>
+            <TableHeader>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableHeaderCell key={column.columnKey}>
+                    {column.label}
+                  </TableHeaderCell>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(this.state.selectedTab === "oracle" || this.state.selectedTab === "all") && sfListingMock.oracle.map((orcaItem: any) => (
+                tableBody(orcaItem)
               ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {(this.state.selectedTab === "oracle" || this.state.selectedTab === "all") && sfListingMock.oracle.map((item: any) => (
-              <TableRow >
-                <TableCell>
-                  <TableCellLayout>
-                    {item.workflowNumber}
-                  </TableCellLayout>
-                </TableCell>
-                <TableCell>
-                  <TableCellLayout>
-                    {item.taskTitle}
-                  </TableCellLayout>
-                </TableCell>
-                <TableCell>
-                  <TableCellLayout>
-                    <span className={`${styles.chip} ${item.priority === "High" ? styles.chipHigh :
-                      item.priority === "Medium" ? styles.chipMedium :
-                        styles.chipLow
-                      }`}>{item.priority}</span>
-                    {/* <span className={${styles.chip} ${styles[`chip${item.priority}`]}}>{item.priority}</span> */}
-                  </TableCellLayout>
-                </TableCell>
-                <TableCell>{item.dueDate}</TableCell>
-                <TableCell>
-                  <TableCellLayout>
-                    {item.action}
-                  </TableCellLayout>
-                </TableCell>
-                <TableCell>
-                  <TableCellLayout>
-                    <div className={styles.value}>
-                      <span
-                        className={`${styles.statusPill} ${item.status === "Approved"
-                          ? styles.stApproved
-                          : item.status === "Rejected"
-                            ? styles.stRejected
-                            : styles.stPending
-                          }`}
-                      >
-                        <span className={styles.statusText}>{item.status}</span>
-                      </span>
-                    </div>
-
-                  </TableCellLayout>
-                </TableCell>
-              </TableRow>
-            ))}
-            {(this.state.selectedTab === "salesforce" || this.state.selectedTab === "all") && sfListingMock.salesForce.map((item: any) => (
-              <TableRow >
-                <TableCell>
-                  <TableCellLayout>
-                    {item.workflowNumber}
-                  </TableCellLayout>
-                </TableCell>
-                <TableCell>
-                  <TableCellLayout>
-                    {item.taskTitle}
-                  </TableCellLayout>
-                </TableCell>
-                <TableCell>
-                  <TableCellLayout>
-                    <span className={`${styles.chip} ${item.priority === "High" ? styles.chipHigh :
-                      item.priority === "Medium" ? styles.chipMedium :
-                        styles.chipLow
-                      }`}>{item.priority}</span>
-                    {/* <span className={${styles.chip} ${styles[`chip${item.priority}`]}}>{item.priority}</span> */}
-                  </TableCellLayout>
-                </TableCell>
-                <TableCell>{item.dueDate}</TableCell>
-                <TableCell>
-                  <TableCellLayout>
-                    {item.action}
-                  </TableCellLayout>
-                </TableCell>
-                <TableCell>
-                  <TableCellLayout>
-                    <div className={styles.value}>
-                      <span
-                        className={`${styles.statusPill} ${item.status === "Approved"
-                          ? styles.stApproved
-                          : item.status === "Rejected"
-                            ? styles.stRejected
-                            : styles.stPending
-                          }`}
-                      >
-                        <span className={styles.statusText}>{item.status}</span>
-                      </span>
-                    </div>
-
-                  </TableCellLayout>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+              {(this.state.selectedTab === "salesforce" || this.state.selectedTab === "all") && sfListingMock.salesForce.map((salesItem: any) => (
+                tableBody(salesItem)
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </>
-
     );
   }
 }

@@ -9,7 +9,7 @@ import * as ReactDom from "react-dom";
 
 import TeamOrganisationStructure from "./components/TeamOrganisationStructure";
 import { ITeamOrganisationStructureProps } from "./components/ITeamOrganisationStructureProps";
-import { ListName } from "../services/listServices";
+import { ListName } from "../services/Constants";
 
 export interface ITeamOrganisationStructureWebPartProps {
   listTitle: string;

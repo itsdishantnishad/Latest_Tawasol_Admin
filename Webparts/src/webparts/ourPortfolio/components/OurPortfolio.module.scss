@@ -1,4 +1,3 @@
-/* ==== Container ==== */
 .wrapper {
   width: 100%;
   margin: 0 auto;
@@ -32,23 +31,23 @@
   color: #000;
 }
 
-/* ==== Four columns ==== */
+/* ==== Main row (brands) ==== */
 .brandsColumns {
-  display: grid;
-  grid-template-columns: repeat(4, 311px);
-  gap: 24px;
+  display: flex;
+  flex-wrap: nowrap;        /* keep all four on one row at desktop */
+  gap: 16px;                /* tighter than 24px */
   justify-content: center;
-  align-items: start;
+  align-items: flex-start;
 }
 .brandColumn {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;                /* tighter vertical gap */
 }
 
-/* ==== Main brand cards (311 × 85) ==== */
+/* ==== Main brand cards (dynamic width × 85) ==== */
 .brandCard {
-  width: 311px;
+  width: 100%;              /* stretches to supplied width from TSX */
   height: 85px;
   background: #FEEAD6;
   border-radius: 8px;
@@ -75,14 +74,14 @@
 .subGridCols2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 36px 56px; /* row | col */
+  gap: 28px 40px;           /* row | col (reduced from 36|56) */
   justify-items: center;
   align-items: center;
 }
 .subGridCols3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 36px 40px;
+  gap: 28px 32px;           /* reduced from 36|40 */
   justify-items: center;
   align-items: center;
 }
@@ -94,7 +93,7 @@
 }
 .subLogo {
   display: block;
-  max-width: 260px;
+  max-width: 240px;         /* slightly tighter than 260px */
   max-height: 64px;
   height: auto;
   object-fit: contain;
@@ -102,19 +101,15 @@
 .subFallback { font-size: 14px; color: #333; }
 
 /* ==== Responsive ==== */
-@media (max-width: 1400px) {
-  .brandsColumns { grid-template-columns: repeat(4, minmax(240px, 311px)); }
-}
 @media (max-width: 1200px) {
+  .brandsColumns { flex-wrap: wrap; }          /* allow wrap on smaller screens */
   .subGridCols3 { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 992px) {
-  .brandsColumns { grid-template-columns: repeat(2, minmax(240px, 311px)); }
   .subGridCols2 { grid-template-columns: repeat(2, 1fr); }
   .subGridCols3 { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 640px) {
-  .brandsColumns { grid-template-columns: 1fr; }
   .brandCard { width: 100%; }
-  .subGridCols2, .subGridCols3 { grid-template-columns: 1fr; gap: 28px; }
+  .subGridCols2, .subGridCols3 { grid-template-columns: 1fr; gap: 24px; }
 }

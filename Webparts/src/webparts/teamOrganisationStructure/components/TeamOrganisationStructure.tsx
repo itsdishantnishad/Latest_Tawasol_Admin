@@ -1,7 +1,8 @@
 import * as React from "react";
 import styles from "./TeamOrganisationStructure.module.scss";
 import { ITeamOrganisationStructureProps } from "./ITeamOrganisationStructureProps";
-import { listServices, OrgMember, ListName } from "../../services/listServices";
+import { listServices, OrgMember } from "../../services/listServices";
+import { ListName } from "../../services/Constants";
 
 export interface ITeamOrganisationStructureState {
   items: OrgMember[];

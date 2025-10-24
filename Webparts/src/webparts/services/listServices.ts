@@ -13,17 +13,6 @@ import "@pnp/sp/search"
 import { ISearchQuery } from "@pnp/sp/search";
 // import {moment} from "moment"; 
 
-export enum ListName {
-    MEET_OUR_TEAM = "Meet Our Team",
-    IMAGE_CAROUSEL = "Image Carousel",
-    IMAGE_NAVIGATION = "Image Navigation",
-    IMAGE_SUB_NAVIGATION = "Image Sub Navigation",
-    USER_SUBSCRIPTIONS = "User Subscriptions",
-    VIDEO_PLAYER = "Video Gallery",
-    OUR_VALUES = "Our Values",
-    ORGANISATION_STRUCTURE = "Team Org Structure",
-}
-
 
 export type OurValueCard = { id: number; title: string; desc: string; icon?: string; sort: number; };
 export type OrgMember = { id: number; name: string; role: string; level: number; sort: number; photoUrl?: string; };
@@ -278,14 +267,15 @@ export class listServices {
         try {
             results = await this.sp.web.lists.getByTitle(listName)
                 .items
-                .select("Title", "TIRSortOrder", "TIRIconURL", "TIRPortfolioCategory").orderBy("TIRSortOrder", true)();
+                .select("Title", "TIRSortOrder", "TIRIconURL", "TIRPortfolioCategory","TIRColumnLayout").orderBy("TIRSortOrder", true)();
             // eslint-disable-line @typescript-eslint/no-explicit-any
             return results.map((item: any) => {
                 return {
                     Title: item.Title,
                     SortOrder: item.TIRSortOrder,
                     IconURL: item.TIRIconURL ? item.TIRIconURL.Url : "#",
-                    PortfolioCategory: item.TIRPortfolioCategory ? item.TIRPortfolioCategory : ""
+                    PortfolioCategory: item.TIRPortfolioCategory ? item.TIRPortfolioCategory : "",
+                    ColumnLayout: Number(item.TIRColumnLayout) || 2
                 } as any;
             });
         } catch (error) {

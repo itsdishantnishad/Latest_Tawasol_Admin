@@ -1,7 +1,8 @@
 import * as React from 'react';
 import styles from './OurValues.module.scss';
 import type { IOurValuesProps } from './IOurValuesProps';
-import { ListName, listServices, OurValueCard } from '../../services/listServices';
+import { listServices, OurValueCard } from '../../services/listServices';
+import { ListName } from "../../services/Constants";
 import { Stack, Text, Image, IStackStyles, IStackTokens, IImageStyles } from '@fluentui/react';
 
 type State = { items: OurValueCard[]; loading: boolean; error?: string };
@@ -17,7 +18,7 @@ export default class OurValues extends React.Component<IOurValuesProps, State> {
 
   async componentDidMount(): Promise<void> {
     try {
-      const items:any = await this.spService.getOurValues(ListName.OUR_VALUES);
+      const items: any = await this.spService.getOurValues(ListName.OUR_VALUES);
       this.setState({ items, loading: false });
     } catch (e: any) {
       this.setState({ loading: false, error: e?.message || 'Failed to load items.' });
@@ -60,7 +61,7 @@ export default class OurValues extends React.Component<IOurValuesProps, State> {
 
             {!loading && !error && (
               <Stack styles={gridStyles} className={gridClass}>
-                {items.map((item:any) => (
+                {items.map((item: any) => (
                   <Stack key={item.id} tokens={{ childrenGap: 16 }} styles={cardStyles}>
                     <Stack horizontalAlign="start">
                       {item.icon ? <Image src={item.icon} alt="" styles={iconStyles} /> : null}
@@ -68,8 +69,8 @@ export default class OurValues extends React.Component<IOurValuesProps, State> {
                     <Text variant="large" styles={{ root: { fontWeight: 600, color: '#111' } }}>
                       {item.title}
                     </Text>
-                   
-                    <div className={styles.description}  dangerouslySetInnerHTML={{__html:item.description}}></div>
+
+                    <div className={styles.description} dangerouslySetInnerHTML={{ __html: item.description }}></div>
                   </Stack>
                 ))}
               </Stack>
