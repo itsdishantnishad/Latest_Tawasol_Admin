@@ -79,14 +79,14 @@ export class listServices {
     }
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
-    public async getNewsStory(): Promise<any[]> {
+    public async getNewsStory(rowCount?:number): Promise<any[]> {
         // eslint-disable-line @typescript-eslint/no-explicit-any
         let results;
         const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E0070F67800B7FC224AB6F421620C7A7297*)`;
         try {
             results = await this.sp.search({
                 Querytext: "*",
-                RowLimit: 3,
+                RowLimit: rowCount || 3,
                 TrimDuplicates: false,
                 SelectProperties: [
                     "Title",
@@ -137,6 +137,8 @@ export class listServices {
             return Promise.reject(error);
         }
     }
+
+    
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
     public async getNewsStorybyID(ID?: number): Promise<any[]> {
