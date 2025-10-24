@@ -94,23 +94,23 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
                     <NewsType newsType={news.newsType} />
                   </div>
                   <div className={styles.bannerCard__PromoDetailsContent__title}>
-                    {/* {news.title} */}
-                      How Commercial Real Estate Operators are Using AI to Empower Their Property Teams
+                    {news.title}
+                    {/* How Commercial Real Estate Operators are Using AI to Empower Their Property Teams */}
                   </div>
                   <div style={{ marginTop: "20px" }}>
                     <div className={styles.bannerCard__PromoDetailsContent__values}>
                       {/* <div>{news.readTime} min read</div>
                       <div>{news.pageView} Views</div> */}
-                        <span>3 hours ago</span>
-                        <span style={{backgroundColor: '#6c6c6c', width: '5px', height:'5px', borderRadius: '50%'}}></span>
-                        <span>5 min read</span>
-                        <span style={{backgroundColor: '#6c6c6c', width: '5px', height:'5px', borderRadius: '50%'}}></span>
-                        <span>56 Views</span>
+                      <span>{news.lastModified}</span>
+                      <span style={{ backgroundColor: '#6c6c6c', width: '5px', height: '5px', borderRadius: '50%' }}></span>
+                      <span>{news.readTime} min read</span>
+                      <span style={{ backgroundColor: '#6c6c6c', width: '5px', height: '5px', borderRadius: '50%' }}></span>
+                      <span>{news.pageView} Views</span>
                     </div>
                   </div>
                 </div>
-                <div style={{ height: "100%", display: 'flex', justifyContent:'flex-end', flex: "1 1 50%", overflow: 'hidden' }}>
-                  <img style={{ height: "100%",borderRadius:"10px", width: "100%" }} src={news.newsImage} />
+                <div style={{ height: "100%", display: 'flex', justifyContent: 'flex-end', flex: "1 1 50%", overflow: 'hidden' }}>
+                  <img style={{ height: "100%", borderRadius: "10px", width: "100%" }} src={news.newsImage} />
                 </div>
                 {/* <div className={styles.bannerCard__PromoDetailsContent__Text}>
                   {promo.Title}

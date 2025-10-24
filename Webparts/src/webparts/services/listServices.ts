@@ -11,8 +11,28 @@ import "@pnp/sp/files/folder";
 import "@pnp/sp/clientside-pages";
 import "@pnp/sp/search"
 import { ISearchQuery } from "@pnp/sp/search";
-// import {moment} from "moment"; 
+import * as moment from "moment";
 
+moment.updateLocale('en', {
+    relativeTime : {
+        future: "in %s",
+        past:   "%s ago",
+        s  : 'a few seconds',
+        ss : '%d seconds',
+        m:  "a minute",
+        mm: "%d minutes",
+        h:  "an hour",
+        hh: "%d hours",
+        d:  "a day",
+        dd: "%d days",
+        w:  "a week",
+        ww: "%d weeks",
+        M:  "a month",
+        MM: "%d months",
+        y:  "a year",
+        yy: "%d years"
+    }
+});
 
 export type OurValueCard = { id: number; title: string; desc: string; icon?: string; sort: number; };
 export type OrgMember = { id: number; name: string; role: string; level: number; sort: number; photoUrl?: string; };
@@ -97,7 +117,7 @@ export class listServices {
             return results.PrimarySearchResults.map((item: any) => {
                 return {
                     title: item.Title,
-                    readTime: item.TIRReadTimeOWSNMBR,
+                    readTime: item.TIRReadTimeOWSNMBR ? Math.trunc(item.TIRReadTimeOWSNMBR) : 0,
                     department: item.TIRDepartment ? item.TIRDepartment : "",
                     tags: item.TIRTags,
                     pageView: item.ViewCount ? Math.trunc(item.ViewCount) : 0,
@@ -108,7 +128,8 @@ export class listServices {
                     path: item.FileRef,
                     created: item.Created,
                     pageDescription: item.Description,
-                    //  lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
+                    // lastModified: item.ModifiedOWSDATE,
+                    lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).fromNow() : "",
                     //  Description: item.AcronymDetail
                 } as any;
             });
@@ -267,7 +288,7 @@ export class listServices {
         try {
             results = await this.sp.web.lists.getByTitle(listName)
                 .items
-                .select("Title", "TIRSortOrder", "TIRIconURL", "TIRPortfolioCategory","TIRColumnLayout").orderBy("TIRSortOrder", true)();
+                .select("Title", "TIRSortOrder", "TIRIconURL", "TIRPortfolioCategory", "TIRColumnLayout").orderBy("TIRSortOrder", true)();
             // eslint-disable-line @typescript-eslint/no-explicit-any
             return results.map((item: any) => {
                 return {
