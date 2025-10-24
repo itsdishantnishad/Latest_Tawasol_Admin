@@ -1,5 +1,9 @@
 import * as React from 'react';
 import styles from './Events.module.scss';
+// import leftHeadingLine from "../images/leftArrow.svg"
+// import rightHeadingLine from "../images/rightArrow.svg"
+const leftHeadingLine: string = require("../images/leftArrow.svg");
+const rightHeadingLine: string = require("../images/rightArrow.svg");
 
 export interface IEvent {
     id: string;
@@ -18,6 +22,7 @@ export interface IEvent {
 export interface IEventsProps {
     events?: IEvent[];
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 const defaultEvents: IEvent[] = [
@@ -82,21 +87,23 @@ export const Events: React.FC<IEventsProps> = (props) => {
             <div className={styles.header}>
                 <div className={styles.headerContent}>
                     <div className={styles.decorativeLineLeft}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
                             <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
                             <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
+                        </svg> */}
+                        <img src={rightHeadingLine} alt="rightArrow" />
                     </div>
                     <h2 className={styles.title}>Upcoming events</h2>
                     <div className={styles.decorativeLineRight}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
                             <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
                             <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
+                        </svg> */}
+                        <img src={leftHeadingLine} alt="leftArrow" />
                     </div>
                 </div>
                 <p className={styles.subtitle}>
-                    Stay updated and never miss out on what's happening
+                    Stay updated and never miss out on what’s happening
                 </p>
             </div>
 
@@ -141,9 +148,12 @@ export const Events: React.FC<IEventsProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
                     View All
-                </button>
+                </a>
+                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                    View All
+                </button> */}
             </div>
         </div>
     );

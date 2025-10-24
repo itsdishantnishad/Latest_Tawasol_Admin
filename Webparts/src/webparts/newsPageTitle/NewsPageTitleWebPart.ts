@@ -36,14 +36,9 @@ export default class NewsPageTitleWebPart extends BaseClientSideWebPart<INewsPag
     this.spService = new listServices(this.context);
     const pageId = this.context.pageContext.listItem?.id
     pageId ?
-      this.newsItem = await this.spService.getNewsStory(pageId) : "";
+      this.newsItem = await this.spService.getNewsStorybyID(pageId) : "";
     console.log(this.newsItem);
   }
-
-
-
-
-
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);

@@ -13,7 +13,15 @@ import FeatureWheel from './components/FeatureWheel';
 import { IFeatureWheelProps } from './components/IFeatureWheelProps';
 
 export interface IFeatureWheelWebPartProps {
-  description: string;
+  letsCelebrate: string;
+  trainingAndDevelopment: string;
+  upcomingEvents: string;
+  getOffersAndDiscounts: string;
+  imageGallery: string;
+  documents: string;
+  meeting: string;
+  interactiveForms: string;
+  dashboard: string;
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
@@ -23,6 +31,15 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
     const element: React.ReactElement<IFeatureWheelProps> = React.createElement(
       FeatureWheel,
       {
+        letsCelebrate: this.properties.letsCelebrate,
+        trainingAndDevelopment: this.properties.trainingAndDevelopment,
+        upcomingEvents: this.properties.upcomingEvents,
+        getOffersAndDiscounts: this.properties.getOffersAndDiscounts,
+        imageGallery: this.properties.imageGallery,
+        documents: this.properties.documents,
+        meeting: this.properties.meeting,
+        interactiveForms: this.properties.interactiveForms,
+        dashboard: this.properties.dashboard,
         context: this.context
       }
     );
@@ -32,7 +49,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
 
   protected onInit(): Promise<void> {
     return this._getEnvironmentMessage().then(message => {
-    
+
     });
   }
 
@@ -84,8 +101,32 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
+                PropertyPaneTextField('letsCelebrate', {
+                  label: "Please enter URL for 'Let's Celebrate' see all"
+                }),
+                PropertyPaneTextField('trainingAndDevelopment', {
+                  label: "Please enter URL for 'Training & Development' see all"
+                }),
+                PropertyPaneTextField('upcomingEvents', {
+                  label: "Please enter URL for 'Upcoming events' see all"
+                }),
+                PropertyPaneTextField('getOffersAndDiscounts', {
+                  label: "Please enter URL for 'Get Offers & Discounts' see all"
+                }),
+                PropertyPaneTextField('imageGallery', {
+                  label: "Please enter URL for 'Image Gallery' see all"
+                }),
+                PropertyPaneTextField('documents', {
+                  label: "Please enter URL for 'Documents' see all"
+                }),
+                 PropertyPaneTextField('meeting', {
+                  label: "Please enter URL for 'Meeting' view all"
+                }),
+                PropertyPaneTextField('interactiveForms', {
+                  label: "Please enter URL for 'Interactive Forms' view all"
+                }),
+                  PropertyPaneTextField('dashboard', {
+                  label: "Please enter URL for 'Dashboard' view all"
                 })
               ]
             }

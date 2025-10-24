@@ -1,5 +1,9 @@
 import * as React from 'react';
 import styles from './LetsCelebrate.module.scss';
+// import cakeImage from "../images/Cake.svg";
+const leftHeadingLine: string = require("../images/leftArrow.svg");
+const rightHeadingLine: string = require("../images/rightArrow.svg");
+const cakeImage: string = require("../images/Cake.svg");
 
 export interface ICelebration {
     id: string;
@@ -17,6 +21,7 @@ export interface ILetsCelebrateProps {
         newJoiners: ICelebration[];
     };
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 const defaultCelebrations = {
@@ -56,17 +61,19 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
             <div className={styles.header}>
                 <div className={styles.headerContent}>
                     <div className={styles.decorativeLineLeft}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
                             <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
                             <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
+                        </svg> */}
+                        <img src={rightHeadingLine} alt="rightArrow" />
                     </div>
                     <h2 className={styles.title}>Let's Celebrate</h2>
                     <div className={styles.decorativeLineRight}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
+                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
                             <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
                             <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
+                        </svg> */}
+                        <img src={leftHeadingLine} alt="leftArrow" />
                     </div>
                 </div>
                 <p className={styles.subtitle}>
@@ -92,7 +99,9 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                 {currentCelebrations.length > 0 ? (
                     <div className={styles.celebrationIcon}>
                         {/* Cake emoji as placeholder */}
-                        <span className={styles.emoji}>🎂</span>
+                        <span className={styles.emoji}>
+                            <img src={cakeImage} alt="cake image" />
+                        </span>
                     </div>
                 ) : (
                     <div className={styles.emptyState}>
@@ -103,9 +112,12 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
                     View All
-                </button>
+                </a>
+                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                    View All
+                </button> */}
             </div>
         </div>
     );
