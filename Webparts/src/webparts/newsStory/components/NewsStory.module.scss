@@ -3,16 +3,20 @@
 
 :global {
   .slick-dots {
-    position: initial !important;
+    // position: initial !important;
+    display: flex;
+    bottom: 0;
+    left: 60px;
 
     li {
-      width: 0 !important;
-      margin: 0 10px 0 10px !important;
+      width: 25px !important;
+      margin: 0 !important;
       padding: 0 !important;
 
       button {
+        padding: 0;
         &::before {
-          font-size: 30px !important;
+          font-size: 12px !important;
         }
       }
     }
@@ -27,7 +31,7 @@
           color: #DA291C;
           height: 10px;
           font-size: 0px !important;
-          margin-top: 5px;
+          margin-top: 4px;
           border-radius: 12px;
         }
 
@@ -48,26 +52,27 @@
 
 .promotionalBanner {
   overflow: hidden;
-  padding: 1em;
+  padding: 0;
   color: "[theme:bodyText, default: #323130]";
   color: "#323130";
 
   .buttons {
-    display: block;
-    justify-content: left;
-    text-align: left;
-    position: relative;
-    bottom: 0px;
-    gap: 10px;
-    margin-top: -65px;
-    padding-left: 5px;
+    // display: block;
+    // justify-content: left;
+    // text-align: left;
+    // position: relative;
+    // bottom: 0px;
+    // gap: 10px;
+    // margin-top: -65px;
+    // padding-left: 5px;
  
     i {
-      font-size: 16px;
+      font-size: 22px;
       cursor: pointer;
-      background: "[theme: primaryButtonBackground, default: #EDE0D2]";
-      padding: 4px;
-      border-radius: 12px;   
+      // background: "[theme: primaryButtonBackground, default: #EDE0D2]";
+      background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #DDA160 0%, #FFDBB4 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
+      padding: 10px;
+      border-radius: 50px;   
     }
   }
 }
@@ -143,15 +148,29 @@
     flex-direction: row;
     align-items: center;
     height: 474px;
+    justify-content: space-between;
+    gap: 5rem;
+    padding: 0 60px;
 
     &__title {
       font-family: Instrument Serif;
       font-weight: 400;
       font-style: Italic;
-      font-size: 48px;
-      line-height: 100%;
+      font-size: 45px;
+      line-height: 50px;
       letter-spacing: 0px;
       margin-top: 50px;
+    }
+
+    &__values{
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-family: Inter, sans-serif;
+      color: #6C6C6C;
+      span{
+        position: relative;
+      }
     }
 
     // @media #{$phone} { 
