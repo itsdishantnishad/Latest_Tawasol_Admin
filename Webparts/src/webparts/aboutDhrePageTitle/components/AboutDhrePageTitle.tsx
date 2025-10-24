@@ -11,27 +11,29 @@ export default class AboutDhrePageTitle extends React.Component<IAboutDhrePageTi
     } = this.props;
 
     return (
-      <section
-        role="banner"
-        className={styles.banner}
-        style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : undefined}
-        aria-label={title}
-      >
-        {/* gradient overlay */}
-        <div className={styles.shade} />
+      <div className={styles.bannerBg}>
+        <section
+          role="banner"
+          className={styles.banner}
+          style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : undefined}
+          aria-label={title}
+        >
+          {/* gradient overlay */}
+          <div className={styles.shade} />
 
-        {/* content */}
-        <div className={styles.inner}>
-          <h2 className={styles.heading}>{title}</h2>
+          {/* content */}
+          <div className={styles.inner}>
+            <h2 className={styles.heading}>{title}</h2>
 
-          <div className={styles.divider} aria-hidden="true">
-            <span className={styles.line} />
-            {/* <span className={styles.chevrons} /> */}
+            <div className={styles.divider} aria-hidden="true">
+              <span className={styles.line} />
+              {/* <span className={styles.chevrons} /> */}
+            </div>
+
+            <p className={styles.copy}>{description}</p>
           </div>
-
-          <p className={styles.copy}>{description}</p>
-        </div>
-      </section>
+        </section>
+      </div>
 
     );
   }

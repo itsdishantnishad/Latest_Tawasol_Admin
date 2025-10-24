@@ -1,3 +1,8 @@
+.bannerBg {
+    background: #fff4ea;
+    padding: 40px 60px 0 60px;
+}
+
 /* container */
 .banner {
   position: relative;
@@ -8,7 +13,7 @@
   background: #bfc5cc;            /* fallback color */
   background-size: cover;
   background-position: center center;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  // box-shadow: 0 10px 30px rgba(0,0,0,.25);
   isolation: isolate;          /* so overlay blends only inside */
 }
 
