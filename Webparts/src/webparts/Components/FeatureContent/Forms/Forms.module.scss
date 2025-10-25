@@ -1,11 +1,12 @@
 @import "~@fluentui/react/dist/sass/References.scss";
 
 .formsContainer {
-  width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 60px 20px;
+  // width: 100%;
+  // max-width: 1440px;
+  // margin: 0 auto;
+  // padding: 60px 20px;
   // background-color: #e5e7eb;
+  padding-top: 50px;
 }
 
 .header {
@@ -33,6 +34,7 @@
 .title {
   font-family: "Instrument Serif", serif;
   font-style: italic;
+  font-weight: 400;
   font-size: 42px;
   line-height: normal;
   color: #000000;
@@ -47,9 +49,6 @@
   line-height: 24px;
   color: #5b6770;
   margin: 0;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .formsGrid {
