@@ -27,59 +27,70 @@ export type NewsRow = {
 export interface INewsViewState {
   loading: boolean;
   error?: string;
-  allNewsItems: NewsRow[];
-  announcements: NewsRow[];
-  newsItems: NewsRow[];
-  filteredNewsItems: NewsRow[];
-  tab: TabKey;
-  dept: string;
-  queryText: string;
-  view: ViewMode;
-  deptOpts: { key: string; text: string }[];
-};
 
+  allNewsItems: NewsRow[];
+  announcementItems: NewsRow[];
+
+  activeTab: TabKey;
+  selectedDepartment: string; // "All" or dept name
+  searchQuery: string;
+  viewMode: ViewMode;
+
+  departmentOptions: { key: string; text: string }[];
+}
 
 export default class NewsView extends React.Component<INewsViewProps, INewsViewState> {
-  private spService: listServices;
+  private newsDataService: listServices;
+
   constructor(props: INewsViewProps) {
     super(props);
     this.state = {
       loading: true,
       allNewsItems: [],
-      announcements: [],
-      newsItems: [],
-      filteredNewsItems: [],
-      tab: "All",
-      dept: "All",
-      queryText: "",
-      view: "grid",
-      deptOpts: [{ key: "All", text: "Department : All" }],
+      announcementItems: [],
+
+      activeTab: "All",
+      selectedDepartment: "All",
+      searchQuery: "",
+      viewMode: "grid",
+
+      departmentOptions: [{ key: "All", text: "Department : All" }],
     };
-    this.spService = new listServices(this.props.context);
+
+    this.newsDataService = new listServices(this.props.context);
+
+    // Bind handlers (class-based, explicit)
+    this.handleTabChange = this.handleTabChange.bind(this);
+    this.handleDepartmentChange = this.handleDepartmentChange.bind(this);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
+    this.handleViewModeChange = this.handleViewModeChange.bind(this);
   }
 
   async componentDidMount(): Promise<void> {
     try {
-      const allNewsArticles: NewsRow[] = await this.spService.getNewsStory(30);
-      const depts = Array.from(new Set(allNewsArticles.map((r) => (r.department || "").trim()).filter(Boolean)));
-      const deptOpts = [{ key: "All", text: "Department : All" }, ...depts.map((d) => ({ key: d, text: d }))];
-      let announcements: NewsRow[] = [];
-      let newsItems: NewsRow[] = [];
-      allNewsArticles.filter((news) => {
-        if ((news.newsType || "").toLowerCase().includes("announce")) {
-          announcements.push(news);
-        }
-        else {
-          newsItems.push(news);
-        }
-      })
+      const allNewsArticles: NewsRow[] = await this.newsDataService.getNewsStory(30);
+
+      // Compute announcements once; reuse in filter pipeline
+      const announcementItems: NewsRow[] = allNewsArticles.filter(this.isAnnouncement);
+
+      // Build department dropdown options (unique, non-empty)
+      const uniqueDepartments = Array.from(
+        new Set(
+          allNewsArticles
+            .map(a => (a.department || "").trim())
+            .filter(Boolean)
+        )
+      );
+
+      const departmentOptions = [
+        { key: "All", text: "Department : All" },
+        ...uniqueDepartments.map(name => ({ key: name, text: name })),
+      ];
 
       this.setState({
         allNewsItems: allNewsArticles,
-        announcements: announcements,
-        newsItems: newsItems,
-        filteredNewsItems: [],
-        deptOpts,
+        announcementItems,
+        departmentOptions,
         loading: false
       });
     } catch (e: any) {
@@ -87,48 +98,90 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
     }
   }
 
-  filtered(): NewsRow[] {
-    const queryText = this.state.queryText.trim().toLowerCase();
-    return this.state.allNewsItems.filter((news) => {
-      if (queryText) {
-        const inTitle = (news.title || "").toLowerCase().includes(queryText);
-        if (!inTitle) return false;
-      }
-      return true;
-    });
+  // ======== Reusable predicates / helpers (enterprise-friendly, testable) ========
+
+  private normalize(value?: string): string {
+    return (value || "").trim().toLowerCase();
   }
 
-  private onTab(tab: TabKey) { this.setState({ tab }); }
-  private onDept(dept: string) { this.setState({ dept }); }
-  private onSearch(queryText: string) { this.setState({ queryText }); }
-  private onView(view: ViewMode) { this.setState({ view }); }
+  private isAnnouncement = (item: NewsRow): boolean => {
+    const t = this.normalize(item.newsType);
+    return t.includes("announce"); // covers "Announcement", "Announcements"
+  };
 
+  private matchesTab = (item: NewsRow, tab: TabKey): boolean => {
+    if (tab === "All") return true;
+    // Only announcements for the Announcements tab
+    return this.isAnnouncement(item);
+  };
 
+  private matchesDepartment = (item: NewsRow, selectedDepartment: string): boolean => {
+    if (selectedDepartment === "All") return true;
+    return this.normalize(item.department) === this.normalize(selectedDepartment);
+  };
+
+  private matchesQuery = (item: NewsRow, normalizedQuery: string): boolean => {
+    if (!normalizedQuery) return true;
+
+    const inTitle = this.normalize(item.title).includes(normalizedQuery);
+    const inDept = this.normalize(item.department).includes(normalizedQuery);
+    const inAuthor = this.normalize(item.author).includes(normalizedQuery);
+
+    // tags can be string or string[]
+    let inTags = false;
+    if (Array.isArray(item.tags)) {
+      inTags = item.tags.some(tag => this.normalize(tag).includes(normalizedQuery));
+    } else if (typeof item.tags === "string") {
+      inTags = this.normalize(item.tags).includes(normalizedQuery);
+    }
+
+    return inTitle || inDept || inAuthor || inTags;
+  };
+
+  private getFilteredNews(): NewsRow[] {
+    const { allNewsItems, activeTab, selectedDepartment, searchQuery } = this.state;
+    const normalizedQuery = this.normalize(searchQuery);
+
+    // Start from All items; we use predicates so this is linear and easy to extend
+    return allNewsItems
+      .filter(item => this.matchesTab(item, activeTab))
+      .filter(item => this.matchesDepartment(item, selectedDepartment))
+      .filter(item => this.matchesQuery(item, normalizedQuery));
+  }
+
+  // ======== Event handlers ========
+  private handleTabChange(tab: TabKey) { this.setState({ activeTab: tab }); }
+  private handleDepartmentChange(dept: string) { this.setState({ selectedDepartment: dept }); }
+  private handleSearchChange(queryText: string) { this.setState({ searchQuery: queryText }); }
+  private handleViewModeChange(view: ViewMode) { this.setState({ viewMode: view }); }
+
+  // ======== Render ========
   public render(): React.ReactElement<INewsViewProps> {
-    const { loading, error, tab, dept, queryText, view, deptOpts } = this.state;
+    const {
+      loading, error,
+      activeTab, selectedDepartment, searchQuery, viewMode, departmentOptions
+    } = this.state;
+
     if (loading) return <div>Loading…</div>;
     if (error) return <div style={{ color: "crimson" }}>{error}</div>;
 
-    const rows = this.filtered();
-
+    const filteredRows = this.getFilteredNews();
 
     return (
       <div className={styles.wrapper}>
         <FiltersBar
-          tab={tab}
-          dept={dept}
-          q={queryText}
-          view={view}
-          deptOpts={deptOpts}
-          onTab={this.onTab}
-          onDept={this.onDept}
-          onSearch={this.onSearch}
-          onView={this.onView}
-
+          tab={activeTab}
+          dept={selectedDepartment}
+          q={searchQuery}
+          view={viewMode}
+          deptOpts={departmentOptions}
+          onTab={this.handleTabChange}
+          onDept={this.handleDepartmentChange}
+          onSearch={this.handleSearchChange}
+          onView={this.handleViewModeChange}
         />
-        <NewsResults items={rows} view={view} />
+        <NewsResults items={filteredRows} view={viewMode} />
       </div>
-
     );
   }
 }

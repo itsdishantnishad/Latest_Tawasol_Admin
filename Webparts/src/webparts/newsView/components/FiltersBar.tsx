@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Pivot, PivotItem, Dropdown, SearchBox } from "@fluentui/react";
+import { Pivot, PivotItem, Dropdown, SearchBox, IDropdownOption } from "@fluentui/react";
 import styles from "./NewsView.module.scss";
 import type { TabKey, ViewMode } from "./NewsView";
 
-const gridViewToggleSvg = require("../assets/GridViewToggle.svg");
-const listViewToggleSvg = require("../assets/ListViewToggle.svg");
+const gridViewIconSrc = require("../assets/GridViewToggle.svg");
+const listViewIconSrc = require("../assets/ListViewToggle.svg");
 
 export interface IFiltersBarProps {
   tab: TabKey;
@@ -12,28 +12,32 @@ export interface IFiltersBarProps {
   q: string;
   view: ViewMode;
   deptOpts: { key: string; text: string }[];
-  onTab: (t: TabKey) => void;
-  onDept: (k: string) => void;
-  onSearch: (q: string) => void;
-  onView: (v: ViewMode) => void;
+  onTab: (tab: TabKey) => void;
+  onDept: (deptKey: string) => void;
+  onSearch: (query: string) => void;
+  onView: (mode: ViewMode) => void;
 }
 
 export default class FiltersBar extends React.Component<IFiltersBarProps> {
-  private handleTabChange = (item?: PivotItem) =>
-    this.props.onTab(((item?.props?.itemKey as TabKey) || "All") as TabKey);
+  private handleTabChange = (clickedItem?: PivotItem) => {
+    const nextTab = (clickedItem?.props?.itemKey as TabKey) || "All";
+    this.props.onTab(nextTab);
+  };
 
-  private handleDepartmentChange = (_e: any, option?: any) =>
-    option && this.props.onDept(String(option.key));
+  private handleDepartmentChange = (_event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
+    if (option) this.props.onDept(String(option.key));
+  };
 
-  private handleSearchChange = (_e: any, value?: string) =>
-    this.props.onSearch(value || "");
+  private handleSearchChange = (_event?: React.ChangeEvent<HTMLInputElement>, newValue?: string) => {
+    this.props.onSearch(newValue || "");
+  };
 
   public render(): React.ReactElement<IFiltersBarProps> {
     const {
-      tab,
+      tab: activeTab,
       dept: selectedDepartment,
       q: searchQuery,
-      view: currentView,
+      view: currentViewMode,
       deptOpts: departmentOptions,
       onView: setViewMode,
     } = this.props;
@@ -41,7 +45,7 @@ export default class FiltersBar extends React.Component<IFiltersBarProps> {
     return (
       <div className={styles.controls}>
         <div className={styles.zoneTabs}>
-          <Pivot selectedKey={tab} onLinkClick={this.handleTabChange}>
+          <Pivot selectedKey={activeTab} onLinkClick={this.handleTabChange}>
             <PivotItem headerText="All News" itemKey="All" />
             <PivotItem headerText="Announcements" itemKey="Announcements" />
           </Pivot>
@@ -52,31 +56,33 @@ export default class FiltersBar extends React.Component<IFiltersBarProps> {
             options={departmentOptions}
             selectedKey={selectedDepartment}
             onChange={this.handleDepartmentChange}
+            ariaLabel="Filter by department"
           />
           <SearchBox
             placeholder="Search News"
             value={searchQuery}
             onChange={this.handleSearchChange}
+            ariaLabel="Search news"
           />
         </div>
 
         <div className={styles.zoneToggle}>
           <div className={styles.viewToggle} role="group" aria-label="Toggle view">
             <button
-              className={`${styles.toggleBtn} ${currentView === "grid" ? styles.active : ""}`}
+              className={`${styles.toggleBtn} ${currentViewMode === "grid" ? styles.active : ""}`}
               onClick={() => setViewMode("grid")}
-              aria-pressed={currentView === "grid"}
+              aria-pressed={currentViewMode === "grid"}
               type="button"
             >
-              <img src={gridViewToggleSvg} alt="" />
+              <img src={gridViewIconSrc} alt="Grid view" />
             </button>
             <button
-              className={`${styles.toggleBtn} ${currentView === "list" ? styles.active : ""}`}
+              className={`${styles.toggleBtn} ${currentViewMode === "list" ? styles.active : ""}`}
               onClick={() => setViewMode("list")}
-              aria-pressed={currentView === "list"}
+              aria-pressed={currentViewMode === "list"}
               type="button"
             >
-              <img src={listViewToggleSvg} alt="" />
+              <img src={listViewIconSrc} alt="List view" />
             </button>
           </div>
         </div>
