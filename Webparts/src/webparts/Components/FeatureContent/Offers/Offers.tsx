@@ -15,6 +15,7 @@ export interface IOffer {
 export interface IOffersProps {
     offers?: IOffer[];
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 const defaultOffers: IOffer[] = [
@@ -159,9 +160,12 @@ export const Offers: React.FC<IOffersProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
                     View All
-                </button>
+                </a>
+                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                    View All
+                </button> */}
             </div>
         </div>
     );

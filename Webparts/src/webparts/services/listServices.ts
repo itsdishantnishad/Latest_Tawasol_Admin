@@ -11,25 +11,31 @@ import "@pnp/sp/files/folder";
 import "@pnp/sp/clientside-pages";
 import "@pnp/sp/search"
 import { ISearchQuery } from "@pnp/sp/search";
-// import {moment} from "moment"; 
+import * as moment from "moment";
 
-export enum ListName {
-    MEET_OUR_TEAM = "Meet Our Team",
-    IMAGE_CAROUSEL = "Image Carousel",
-    IMAGE_NAVIGATION = "Image Navigation",
-    IMAGE_SUB_NAVIGATION = "Image Sub Navigation",
-    USER_SUBSCRIPTIONS = "User Subscriptions",
-    VIDEO_PLAYER = "Video Gallery"
-}
+moment.updateLocale('en', {
+    relativeTime : {
+        future: "in %s",
+        past:   "%s ago",
+        s  : 'a few seconds',
+        ss : '%d seconds',
+        m:  "a minute",
+        mm: "%d minutes",
+        h:  "an hour",
+        hh: "%d hours",
+        d:  "a day",
+        dd: "%d days",
+        w:  "a week",
+        ww: "%d weeks",
+        M:  "a month",
+        MM: "%d months",
+        y:  "a year",
+        yy: "%d years"
+    }
+});
 
-export enum siteColumn {
-    ImageURL = "MKImageURL",
-    URL = "MKURL",
-    Level = "MKLevel",
-    OpenInNewTab = "MKOpenInNewTab",
-    SortOrder = "MKSortOrder"
-
-}
+export type OurValueCard = { id: number; title: string; desc: string; icon?: string; sort: number; };
+export type OrgMember = { id: number; name: string; role: string; level: number; sort: number; photoUrl?: string; };
 
 export class listServices {
 
@@ -72,15 +78,15 @@ export class listServices {
         }
     }
 
-     // eslint-disable-line @typescript-eslint/no-explicit-any
-    public async getNewsStory(): Promise<any[]> {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    public async getNewsStory(rowCount?:number): Promise<any[]> {
         // eslint-disable-line @typescript-eslint/no-explicit-any
         let results;
         const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E0070F67800B7FC224AB6F421620C7A7297*)`;
         try {
             results = await this.sp.search({
                 Querytext: "*",
-                RowLimit: 3,
+                RowLimit: rowCount || 3,
                 TrimDuplicates: false,
                 SelectProperties: [
                     "Title",
@@ -97,7 +103,8 @@ export class listServices {
                     "FileRef",
                     "AuthorOWSUSER",
                     "TIRTags",
-                    "Created"
+                    "Created",
+                    "Description"
                 ],
                 QueryTemplate: `{searchTerms}`,
                 HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
@@ -110,7 +117,7 @@ export class listServices {
             return results.PrimarySearchResults.map((item: any) => {
                 return {
                     title: item.Title,
-                    readTime: item.TIRReadTimeOWSNMBR,
+                    readTime: item.TIRReadTimeOWSNMBR ? Math.trunc(item.TIRReadTimeOWSNMBR) : 0,
                     department: item.TIRDepartment ? item.TIRDepartment : "",
                     tags: item.TIRTags,
                     pageView: item.ViewCount ? Math.trunc(item.ViewCount) : 0,
@@ -119,8 +126,10 @@ export class listServices {
                     author: item.CreatedBy,
                     authorEmail: item.AuthorOWSUSER ? item.AuthorOWSUSER.split('|')[0] : "",
                     path: item.FileRef,
-                    created: item.Created
-                    //  lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
+                    created: item.Created,
+                    pageDescription: item.Description,
+                    // lastModified: item.ModifiedOWSDATE,
+                    lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).fromNow() : "",
                     //  Description: item.AcronymDetail
                 } as any;
             });
@@ -128,6 +137,8 @@ export class listServices {
             return Promise.reject(error);
         }
     }
+
+    
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
     public async getNewsStorybyID(ID?: number): Promise<any[]> {
@@ -187,7 +198,7 @@ export class listServices {
     }
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
-    public async getTraining(ID?: number): Promise<any[]> {
+    public async getTrainingByID(ID?: number): Promise<any[]> {
         // eslint-disable-line @typescript-eslint/no-explicit-any
         let results;
         const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B721B228147AA74E9D35C742E0E4560C00B86D6AF04B11174DB95E36FF7ADB455C*)`;
@@ -200,7 +211,8 @@ export class listServices {
                     "Title",
                     "TIREventEndDate",
                     "TIREventStartDate",
-                    "TIRLocation"
+                    "TIRLocation",
+                    "TIR"
                 ],
                 QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
                 HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
@@ -248,6 +260,28 @@ export class listServices {
         }
     }
 
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    public async getNewJoiners(listName: string): Promise<any[]> {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        let results: any[] = [];
+        try {
+            results = await this.sp.web.lists.getByTitle(listName)
+                .items
+                .select("Title", "TIRDesignation", "TIRUserPicture", "TIRDescription")();
+            // eslint-disable-line @typescript-eslint/no-explicit-any
+            return results.map((item: any) => {
+                return {
+                    Title: item.Title,
+                    Designation: item.TIRDesignation,
+                    UserPicture: item.TIRUserPicture ? item.TIRUserPicture.Url : "#",
+                    Description: item.TIRDescription
+                } as any;
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
     public async getOurPortfolio(listName: string): Promise<any[]> {
@@ -256,20 +290,62 @@ export class listServices {
         try {
             results = await this.sp.web.lists.getByTitle(listName)
                 .items
-                .select("Title", "TIRSortOrder", "TIRIconURL", "TIRPortfolioCategory").orderBy("TIRSortOrder", true)();
+                .select("Title", "TIRSortOrder", "TIRIconURL", "TIRPortfolioCategory", "TIRColumnLayout").orderBy("TIRSortOrder", true)();
             // eslint-disable-line @typescript-eslint/no-explicit-any
             return results.map((item: any) => {
                 return {
                     Title: item.Title,
                     SortOrder: item.TIRSortOrder,
                     IconURL: item.TIRIconURL ? item.TIRIconURL.Url : "#",
-                    PortfolioCategory: item.TIRPortfolioCategory ? item.TIRPortfolioCategory : ""
+                    PortfolioCategory: item.TIRPortfolioCategory ? item.TIRPortfolioCategory : "",
+                    ColumnLayout: Number(item.TIRColumnLayout) || 2
                 } as any;
             });
         } catch (error) {
             return Promise.reject(error);
         }
     }
+
+    public async getOrganisationMembers(listTitle: string): Promise<OrgMember[]> {
+        const rows = await this.sp.web.lists.getByTitle(listTitle).items
+            .select("Title,TIRDesignation,TIRLevel,TIRSortOrder,TIRUserPicture")
+            .orderBy("TIRLevel", true)
+            .orderBy("TIRSortOrder", true)();
+
+        const mapped: OrgMember[] = rows.map((it: any) => {
+            const ph = it?.TIRUserPicture;
+            const photoUrl = typeof ph === "string" ? ph : ph?.Url || undefined;
+            return { id: Number(it?.Id) || 0, name: it?.Title || "", role: it?.TIRDesignation || "", level: Number(it?.TIRLevel ?? 99), sort: Number(it?.TIRSortOrder ?? 9999), photoUrl };
+        });
+
+        mapped.sort((a, b) =>
+            a.level !== b.level ? a.level - b.level :
+                a.sort !== b.sort ? a.sort - b.sort :
+                    a.name.localeCompare(b.name)
+        );
+
+        return mapped;
+    }
+
+    public async getOurValues(listName: string): Promise<any[]> {
+        let results: any[] = [];
+        try {
+            results = await this.sp.web.lists.getByTitle(listName)
+                .items
+                .select("Title", "TIRDescription", "TIRIconURL", "TIRSortOrder").orderBy("TIRSortOrder", true)();
+            return results.map((item: any) => {
+                return {
+                    title: item.Title,
+                    description: item.TIRDescription,
+                    icon: item.TIRIconURL ? item.TIRIconURL.Url : "#",
+                    sortOrder: item.TIRSortOrder
+                } as any;
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+    }
+
 }
 
 

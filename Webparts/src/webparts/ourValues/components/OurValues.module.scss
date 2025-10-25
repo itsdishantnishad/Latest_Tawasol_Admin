@@ -1,0 +1,40 @@
+:root {
+  --ov-text:   #3A3B43;
+  --ov-title:  #3A3B43;
+  --ov-accent: #DA291C;
+}
+
+/* Full-bleed #FFF4EA background */
+.fullBleed {
+  position: relative;
+  isolation: isolate;
+}
+.fullBleed::before {
+  content: "";
+  position: absolute; inset: 0;
+  left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw; width: 100vw;
+  background: #FFF4EA;
+  z-index: -1;
+}
+
+.container { max-width: 1200px; margin: 0 auto; }
+
+.heading { line-height: 1; letter-spacing: 1px; text-align: center; margin-bottom: 32px; }
+.headingOur {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 42px;
+  color: var(--ov-accent);
+}
+.headingValues {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 42px;
+  color: var(--ov-title);
+}
+.description {
+  margin-top: -4px;
+  color: var(--ov-text);
+}

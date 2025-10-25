@@ -22,6 +22,7 @@ export interface IEvent {
 export interface IEventsProps {
     events?: IEvent[];
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 const defaultEvents: IEvent[] = [
@@ -147,9 +148,12 @@ export const Events: React.FC<IEventsProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
                     View All
-                </button>
+                </a>
+                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                    View All
+                </button> */}
             </div>
         </div>
     );

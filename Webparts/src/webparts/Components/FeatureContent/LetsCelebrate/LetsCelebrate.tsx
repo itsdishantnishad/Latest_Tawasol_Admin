@@ -21,6 +21,7 @@ export interface ILetsCelebrateProps {
         newJoiners: ICelebration[];
     };
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 const defaultCelebrations = {
@@ -111,9 +112,12 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
                     View All
-                </button>
+                </a>
+                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                    View All
+                </button> */}
             </div>
         </div>
     );

@@ -54,7 +54,7 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
       <div>
         <div className={styles.buttons}>
           <ul style={{ margin: "0px", display: "contents" }}> {dots} </ul>
-          <div style={{ display: 'flex', paddingLeft: "10px", paddingTop: "15px" }}>
+          <div style={{ display: 'flex', paddingLeft: "0px", paddingTop: "25px" }}>
             <div onClick={prev}>
               <FontIcon aria-label="Previous" iconName="ChevronLeftMed" />
             </div>
@@ -89,20 +89,28 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
           return (
             <div className={styles.bannerCard} key={news.id}>
               <div className={styles.bannerCard__PromoDetailsContent}>
-                <div style={{ width: "50%", height: "100%", marginLeft: "20px" }}>
-                  <div style={{ width: "30%" }}>
+                <div style={{ height: "100%", flex: '1 1 50%' }}>
+                  <div style={{ width: "max-content" }}>
                     <NewsType newsType={news.newsType} />
                   </div>
-                  <div className={styles.bannerCard__PromoDetailsContent__title}>{news.title}</div>
+                  <div className={styles.bannerCard__PromoDetailsContent__title}>
+                    {news.title}
+                    {/* How Commercial Real Estate Operators are Using AI to Empower Their Property Teams */}
+                  </div>
                   <div style={{ marginTop: "20px" }}>
-                    <div style={{ display: 'flex' }}>
-                      <div>{news.readTime} min read</div>
-                      <div>{news.pageView} Views</div>
+                    <div className={styles.bannerCard__PromoDetailsContent__values}>
+                      {/* <div>{news.readTime} min read</div>
+                      <div>{news.pageView} Views</div> */}
+                      <span>{news.lastModified}</span>
+                      <span style={{ backgroundColor: '#6c6c6c', width: '5px', height: '5px', borderRadius: '50%' }}></span>
+                      <span>{news.readTime} min read</span>
+                      <span style={{ backgroundColor: '#6c6c6c', width: '5px', height: '5px', borderRadius: '50%' }}></span>
+                      <span>{news.pageView} Views</span>
                     </div>
                   </div>
                 </div>
-                <div style={{ height: "474px" }}>
-                  <img style={{ height: "100%",borderRadius:"10px" }} src={news.newsImage} />
+                <div style={{ height: "100%", display: 'flex', justifyContent: 'flex-end', flex: "1 1 50%", overflow: 'hidden' }}>
+                  <img style={{ height: "100%", borderRadius: "10px", width: "100%" }} src={news.newsImage} />
                 </div>
                 {/* <div className={styles.bannerCard__PromoDetailsContent__Text}>
                   {promo.Title}

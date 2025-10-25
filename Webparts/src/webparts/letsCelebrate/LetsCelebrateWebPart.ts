@@ -3,33 +3,23 @@ import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
   type IPropertyPaneConfiguration,
-  PropertyPaneTextField
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-import { IReadonlyTheme } from '@microsoft/sp-component-base';
-
 import * as strings from 'LetsCelebrateWebPartStrings';
 import LetsCelebrate from './components/LetsCelebrate';
 import { ILetsCelebrateProps } from './components/ILetsCelebrateProps';
 
 export interface ILetsCelebrateWebPartProps {
-  description: string;
+
 }
 
 export default class LetsCelebrateWebPart extends BaseClientSideWebPart<ILetsCelebrateWebPartProps> {
-
-  private _isDarkTheme: boolean = false;
-  private _environmentMessage: string = '';
 
   public render(): void {
     const element: React.ReactElement<ILetsCelebrateProps> = React.createElement(
       LetsCelebrate,
       {
-        description: this.properties.description,
-        isDarkTheme: this._isDarkTheme,
-        environmentMessage: this._environmentMessage,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+        context: this.context
       }
     );
 
@@ -38,7 +28,7 @@ export default class LetsCelebrateWebPart extends BaseClientSideWebPart<ILetsCel
 
   protected onInit(): Promise<void> {
     return this._getEnvironmentMessage().then(message => {
-      this._environmentMessage = message;
+     
     });
   }
 
@@ -71,23 +61,7 @@ export default class LetsCelebrateWebPart extends BaseClientSideWebPart<ILetsCel
     return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
   }
 
-  protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
-    if (!currentTheme) {
-      return;
-    }
-
-    this._isDarkTheme = !!currentTheme.isInverted;
-    const {
-      semanticColors
-    } = currentTheme;
-
-    if (semanticColors) {
-      this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
-      this.domElement.style.setProperty('--link', semanticColors.link || null);
-      this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
-    }
-
-  }
+ 
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
@@ -108,9 +82,7 @@ export default class LetsCelebrateWebPart extends BaseClientSideWebPart<ILetsCel
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
-                })
+               
               ]
             }
           ]

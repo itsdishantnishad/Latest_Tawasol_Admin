@@ -1,43 +1,109 @@
-import * as React from 'react';
-import styles from './TeamOrganisationStructure.module.scss';
-import type { ITeamOrganisationStructureProps } from './ITeamOrganisationStructureProps';
-import { escape } from '@microsoft/sp-lodash-subset';
+import * as React from "react";
+import styles from "./TeamOrganisationStructure.module.scss";
+import { ITeamOrganisationStructureProps } from "./ITeamOrganisationStructureProps";
+import { listServices, OrgMember } from "../../services/listServices";
+import { ListName } from "../../services/Constants";
 
-export default class TeamOrganisationStructure extends React.Component<ITeamOrganisationStructureProps, {}> {
+export interface ITeamOrganisationStructureState {
+  items: OrgMember[];
+  loading: boolean;
+  error?: string | null;
+}
+
+export default class TeamOrganisationStructure
+  extends React.Component<ITeamOrganisationStructureProps, ITeamOrganisationStructureState> {
+
+  private spService: listServices;
+
+  public constructor(props: ITeamOrganisationStructureProps) {
+    super(props);
+    this.state = { items: [], loading: true, error: null };
+    this.spService = new listServices(this.props.context);
+  }
+
+  public async componentDidMount(): Promise<void> {
+    await this.load();
+  }
+
+  public async componentDidUpdate(prevProps: ITeamOrganisationStructureProps): Promise<void> {
+    if ((prevProps.listTitle || "").trim() !== (this.props.listTitle || "").trim()) {
+      await this.load();
+    }
+  }
+
+  private async load(): Promise<void> {
+    try {
+      this.setState({ loading: true, error: null });
+      const listTitle = (this.props.listTitle && this.props.listTitle.trim().length > 0)
+        ? this.props.listTitle!.trim()
+        : ListName.ORGANISATION_STRUCTURE;
+      const data = await this.spService.getOrganisationMembers(listTitle);
+      this.setState({ items: data, loading: false });
+    } catch (e: any) {
+      this.setState({ error: e?.message || "Failed to load.", loading: false });
+    }
+  }
+
   public render(): React.ReactElement<ITeamOrganisationStructureProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      hasTeamsContext,
-      userDisplayName
-    } = this.props;
+    const { items, loading, error } = this.state;
+
+    const top = items.find(m => m.level === 0);
+    const rest = items.filter(m => m.level !== 0);
+
+    // group others by level
+    const levels: Array<{ level: number; people: OrgMember[] }> = [];
+    rest.forEach(p => {
+      const hit = levels.find(g => g.level === p.level);
+      if (hit) hit.people.push(p);
+      else levels.push({ level: p.level, people: [p] });
+    });
+    levels.sort((a, b) => a.level - b.level);
 
     return (
-      <section className={`${styles.teamOrganisationStructure} ${hasTeamsContext ? styles.teams : ''}`}>
-        <div className={styles.welcome}>
-          <img alt="" src={isDarkTheme ? require('../assets/welcome-dark.png') : require('../assets/welcome-light.png')} className={styles.welcomeImage} />
-          <h2>Well done, {escape(userDisplayName)}!</h2>
-          <div>{environmentMessage}</div>
-          <div>Web part property value: <strong>{escape(description)}</strong></div>
-        </div>
-        <div>
-          <h3>Welcome to SharePoint Framework!</h3>
-          <p>
-            The SharePoint Framework (SPFx) is a extensibility model for Microsoft Viva, Microsoft Teams and SharePoint. It&#39;s the easiest way to extend Microsoft 365 with automatic Single Sign On, automatic hosting and industry standard tooling.
-          </p>
-          <h4>Learn more about SPFx development:</h4>
-          <ul className={styles.links}>
-            <li><a href="https://aka.ms/spfx" target="_blank" rel="noreferrer">SharePoint Framework Overview</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-graph" target="_blank" rel="noreferrer">Use Microsoft Graph in your solution</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-teams" target="_blank" rel="noreferrer">Build for Microsoft Teams using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-viva" target="_blank" rel="noreferrer">Build for Microsoft Viva Connections using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-store" target="_blank" rel="noreferrer">Publish SharePoint Framework applications to the marketplace</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-api" target="_blank" rel="noreferrer">SharePoint Framework API reference</a></li>
-            <li><a href="https://aka.ms/m365pnp" target="_blank" rel="noreferrer">Microsoft 365 Developer Community</a></li>
-          </ul>
-        </div>
+      <section className={styles.wrapper} aria-labelledby="teamOrgHeading">
+        <h2 id="teamOrgHeading" className={styles.title}>
+          <span className={styles.teamWord}>Team</span>{" "}
+          <span className={styles.orgWord}>Organisation Structure</span>
+        </h2>
+
+        {loading && <div className={styles.state}>Loading…</div>}
+        {!loading && error && <div className={styles.error}>{error}</div>}
+
+        {!loading && !error && (
+          <>
+            {top && (
+              <div className={styles.topCardWrap}>
+                {this.renderCard(top, "lg")}
+              </div>
+            )}
+
+            {levels.map(g => (
+              <div key={g.level} className={styles.row}>
+                {g.people.map(p => (
+                  <React.Fragment key={p.id}>
+                    {this.renderCard(p, "md")}
+                  </React.Fragment>
+                ))}
+              </div>
+            ))}
+          </>
+        )}
       </section>
+    );
+  }
+
+  private renderCard(member: OrgMember, size: "lg" | "md"): JSX.Element {
+    return (
+      <div className={`${styles.card} ${size === "lg" ? styles.cardLg : (styles as any).cardMd}`}>
+        <div className={styles.photoWrap}>
+          {member.photoUrl
+            ? <img className={styles.photo} src={member.photoUrl} alt={member.name} />
+            : <div className={styles.photoFallback} aria-label="No image" />}
+        </div>
+        <div className={styles.accent} aria-hidden />
+        <div className={styles.name}>{member.name}</div>
+        <div className={styles.role}>{member.role}</div>
+      </div>
     );
   }
 }

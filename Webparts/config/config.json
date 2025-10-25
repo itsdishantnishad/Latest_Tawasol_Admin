@@ -89,6 +89,46 @@
           "manifest": "./src/webparts/task/TaskWebPart.manifest.json"
         }
       ]
+    },
+    "event-and-training-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/eventAndTraining/EventAndTrainingWebPart.js",
+          "manifest": "./src/webparts/eventAndTraining/EventAndTrainingWebPart.manifest.json"
+        }
+      ]
+    },
+    "our-values-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/ourValues/OurValuesWebPart.js",
+          "manifest": "./src/webparts/ourValues/OurValuesWebPart.manifest.json"
+        }
+      ]
+    },
+    "vision-and-mission-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/visionAndMission/VisionAndMissionWebPart.js",
+          "manifest": "./src/webparts/visionAndMission/VisionAndMissionWebPart.manifest.json"
+        }
+      ]
+    },
+    "about-dhre-quote-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/aboutDhreQuote/AboutDhreQuoteWebPart.js",
+          "manifest": "./src/webparts/aboutDhreQuote/AboutDhreQuoteWebPart.manifest.json"
+        }
+      ]
+    },
+    "news-view-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/newsView/NewsViewWebPart.js",
+          "manifest": "./src/webparts/newsView/NewsViewWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -103,6 +143,11 @@
     "AboutDhrePageTitleWebPartStrings": "lib/webparts/aboutDhrePageTitle/loc/{locale}.js",
     "TrainingPageDetailWebPartStrings": "lib/webparts/trainingPageDetail/loc/{locale}.js",
     "OurPortfolioWebPartStrings": "lib/webparts/ourPortfolio/loc/{locale}.js",
-    "TaskWebPartStrings": "lib/webparts/task/loc/{locale}.js"
+    "TaskWebPartStrings": "lib/webparts/task/loc/{locale}.js",
+    "EventAndTrainingWebPartStrings": "lib/webparts/eventAndTraining/loc/{locale}.js",
+    "OurValuesWebPartStrings": "lib/webparts/ourValues/loc/{locale}.js",
+    "VisionAndMissionWebPartStrings": "lib/webparts/visionAndMission/loc/{locale}.js",
+    "AboutDhreQuoteWebPartStrings": "lib/webparts/aboutDhreQuote/loc/{locale}.js",
+    "NewsViewWebPartStrings": "lib/webparts/newsView/loc/{locale}.js"
   }
 }

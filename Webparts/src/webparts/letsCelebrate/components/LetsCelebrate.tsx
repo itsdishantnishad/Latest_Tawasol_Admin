@@ -3,20 +3,31 @@ import * as React from 'react';
 import type { ILetsCelebrateProps } from './ILetsCelebrateProps';
 import { SelectTabData, SelectTabEvent, Tab, TabList } from "@fluentui/react-components";
 import NewJoiner from './NewJoiner/NewJoiner';
-import { NewJoinersData } from './NewJoiner/NewJoinerData';
+// import { NewJoinersData } from './NewJoiner/NewJoinerData';
 import { BirthdayData } from './Birthday/BirthdayData';
 import Birthday from './Birthday/Birthday';
+import { listServices } from '../../services/listServices';
 
 export interface ILetsCelebrateState {
   selectedTab: any;
+  newJoinersData: any[];
 }
 
 export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, ILetsCelebrateState> {
+  private spService: listServices;
   public constructor(props: ILetsCelebrateProps) {
     super(props);
     this.state = {
-      selectedTab: "global"
+      selectedTab: "global",
+      newJoinersData: []
     };
+      this.spService = new listServices(this.props.context);
+  }
+
+  async componentDidMount() {
+    const newJoinerData = await this.spService.getNewJoiners("New Joiner");
+    this.setState({ newJoinersData: newJoinerData });
+
   }
 
   public render(): React.ReactElement<ILetsCelebrateProps> {
@@ -66,10 +77,10 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
           {this.state.selectedTab === "birthday" &&
             <Birthday items={BirthdayData} />}
           {this.state.selectedTab === "newJoiners" &&
-            <NewJoiner items={NewJoinersData}></NewJoiner>
+            <NewJoiner items={this.state.newJoinersData}></NewJoiner>
           }
         </div>
-      </div>
+      </div >
     );
   }
 }

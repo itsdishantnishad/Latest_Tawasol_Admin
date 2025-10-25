@@ -21,6 +21,7 @@ export interface IDocument {
 export interface IDocumentsProps {
     documents?: IDocument[];
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 const defaultDocuments: IDocument[] = [
@@ -153,12 +154,15 @@ export const Documents: React.FC<IDocumentsProps> = (props) => {
             </div >
 
             {/* View All Button */}
-            < div className={styles.buttonContainer} >
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
+            <div className={styles.buttonContainer}>
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
                     View All
-                </button>
-            </div >
-        </div >
+                </a>
+                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                    View All
+                </button> */}
+            </div>
+        </div>
     );
 };
 

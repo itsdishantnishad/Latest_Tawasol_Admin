@@ -16,6 +16,7 @@ export interface IMeeting {
 export interface IMeetingProps {
     meetings?: IMeeting[];
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 const defaultMeetings: IMeeting[] = [
@@ -131,10 +132,13 @@ export const Meeting: React.FC<IMeetingProps> = (props) => {
             </div >
 
             {/* View All Button */}
-            <div className={styles.buttonContainer} >
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
+            <div className={styles.buttonContainer}>
+                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
                     View All
-                </button>
+                </button> */}
+                  <a href={props.seeAllURL} className={styles.viewAllButton}>
+                    View All
+                </a>
             </div>
         </div >
     );

@@ -1,8 +1,8 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
 .main {
-  width: 100vw;
-  height: 100vh;
+ // width: 100vw;
+  // height: 100vh;
   background: #F9ECE1;
 }
 
@@ -18,9 +18,8 @@
 }
 
 .taskHeaderAbsolute {
-  position: absolute;
-  top: 142px;
-  left: 604.5px;
+justify-self: center;
+    text-align: center;
 }
 
 .taskText {

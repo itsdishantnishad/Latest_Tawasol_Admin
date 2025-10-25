@@ -17,6 +17,7 @@ export interface IForm {
 export interface IFormsProps {
     forms?: IForm[];
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 const defaultForms: IForm[] = [
@@ -98,9 +99,12 @@ export const Forms: React.FC<IFormsProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
-                    View All Physical Forms
-                </button>
+                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
+                    View All
+                </button> */}
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
+                     View All Physical Forms
+                </a>
             </div>
         </div>
     );

@@ -1,0 +1,114 @@
+
+/* --- Container --- */
+.wrap {
+  background: #ffebda;         /* same soft peach bg */
+  padding: 36px 24px;
+  border-radius: 12px;
+}
+
+/* two rows (Vision / Mission) */
+.row {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 48px;
+}
+
+.leftPic img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ✅ this was missing earlier */
+.rightCopy {
+  display: block;
+  position: relative;
+}
+
+/* Headings */
+.sectionTitle {
+  margin: 0 0 14px 0;
+  line-height: 1.1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.our {
+  font-family: "Instrument Serif",;
+  font-size: 28px;
+  color: #d6362d;               /* red accent */
+}
+
+.main {
+  font-family: "Instrument Serif", serif;
+  font-size: 42px;
+  color: #111;
+  font-weight: 400;
+}
+
+/* Vision paragraph */
+.visionText {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #3A3B43;
+  max-width: 920px;
+}
+
+/* Mission points */
+/* --- Mission points (UPDATED) --- */
+.points {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 18px;
+}
+
+.point {
+  /* pehle yahan 2-column grid tha; ab vertical stack */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;  /* left align like Figma */
+  gap: 10px;
+}
+
+
+.numImg {
+  width: 86px;    
+  height: auto;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* fallback text number ke liye bhi same placement/size */
+.numTxt {
+  font-family: "Instrument Serif", serif;
+  font-size: 86px;
+  color: #d6362d;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+/* mission description ka color as requested */
+.text {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #3A3B43;  /* <-- new color */
+}
+
+/* --- Responsive tweaks --- */
+@media (max-width: 900px) {
+  .points { gap: 20px; }
+  .numImg { width: 72px; }
+  .numTxt { font-size: 72px; }
+}
+
+@media (max-width: 640px) {
+  .points { grid-template-columns: 1fr; }
+  .numImg { width: 64px; }
+  .numTxt { font-size: 64px; }
+}
