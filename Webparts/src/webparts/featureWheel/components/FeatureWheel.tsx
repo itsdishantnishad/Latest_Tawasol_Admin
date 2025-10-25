@@ -76,7 +76,7 @@ const featureTitleContent: Record<string, { header: string, subHeader: string }>
 }
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
-  const [selectedFeature, setSelectedFeature] = useState('dashboard');
+  const [selectedFeature, setSelectedFeature] = useState('service_links');
 
   const handleViewAll = () => {
     // Handle view all action - can navigate to appropriate page
