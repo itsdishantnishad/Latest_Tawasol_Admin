@@ -36,6 +36,7 @@ moment.updateLocale('en', {
 
 export type OurValueCard = { id: number; title: string; desc: string; icon?: string; sort: number; };
 export type OrgMember = { id: number; name: string; role: string; level: number; sort: number; photoUrl?: string; };
+export type OrgDepartment = { name: string; url?: string; };
 
 export class listServices {
 
@@ -345,6 +346,57 @@ export class listServices {
             return Promise.reject(error);
         }
     }
+
+
+     /** Departments mapped to a member (MM field reused: TIRDepartment) */
+  public async getDepartmentsByMember(listTitle: string, memberDisplayName: string): Promise<OrgDepartment[]> {
+    try {    
+
+      const items: any[] = await this.sp.web.lists.getByTitle(listTitle).items
+        .select(
+          "Id",
+          "Title",
+          "URL",
+          "TIRDepartment",                  // Managed Metadata (same as elsewhere)
+          "TIRDepartmentMember/Title"
+        )
+        .expand("TIRDepartmentMember")();      
+
+      const matches = items.filter(it => {
+        const people: any[] = Array.isArray(it?.TIRDepartmentMember) ? it.TIRDepartmentMember : [];
+        return people.some(p => (p?.Title || "").trim().toLowerCase() === memberDisplayName.trim().toLowerCase());
+      });     
+
+      const result = matches.map(it => {
+        let deptName = "";
+        const mm: any = it?.TIRDepartment;
+
+        if (typeof mm === "string" && mm.length > 0) {
+          deptName = mm.split("|")[0];   // "Label|Guid"
+        } else if (mm && typeof mm?.Label === "string") {
+          deptName = mm.Label;
+        } else {
+          deptName = it?.Title || "";
+        }
+        const urlVal = it?.URL;
+        const url = typeof urlVal === "string" ? urlVal : urlVal?.Url;
+
+        return { name: deptName || "Department", url } as OrgDepartment;
+      });
+
+      // de-dupe by name
+      const unique: OrgDepartment[] = [];
+      const seen = new Set<string>();
+      result.forEach(r => {
+        const key = (r.name || "").toLowerCase();
+        if (!seen.has(key)) { seen.add(key); unique.push(r); }
+      });
+      unique.sort((a, b) => a.name.localeCompare(b.name));      
+      return unique;
+    } catch (error) {     
+      return Promise.reject(error);
+    }
+  }
 
 }
 

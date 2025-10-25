@@ -76,6 +76,7 @@
 .hashtagContainer {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .hashtag {
@@ -84,61 +85,6 @@
   font-size: 15px;
 }
 
-/* =============================
-   TITLE SECTION
-   ============================= */
-.title {
-  font-size: 36px;
-  font-weight: 800;
-  margin: 10px 0;
-}
-
-/* =============================
-   AUTHOR ROW  (aligned layout)
-   ============================= */
-.authorRow {
-  display: flex;
-  justify-content: space-between; /* ✅ Moves meta info to the right */
-  align-items: center;
-  margin-bottom: 16px;
-  color: #555;
-  font-size: 14px;
-}
-
-.leftSection {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.rightSection {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #777;
-}
-
-.avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.author {
-  font-weight: 600;
-  color: #222;
-}
-
-.dot {
-  margin: 0 4px;
-  color: #ccc;
-}
-
-.metaText {
-  font-size: 14px;
-  color: #666;
-}
 .hashtagLink {
   color: #d3675b;
   font-weight: 600;
@@ -150,4 +96,89 @@
 .hashtagLink:hover {
   text-decoration: underline;
   color: #b83f30;
+}
+
+/* =============================
+   TITLE SECTION
+   ============================= */
+.title {
+  font-size: 36px;
+  font-weight: 800;
+  margin: 10px 0 14px;
+  line-height: 1.2;
+  color: #2b2b2b;
+}
+
+/* =============================
+   AUTHOR ROW  (aligned layout)
+   ============================= */
+.authorRow {
+  display: flex;
+  justify-content: space-between; /* Meta to the right */
+  align-items: center;
+  margin-bottom: 16px;
+  color: #555;
+  font-size: 14px;
+  gap: 12px; /* helps when wrapping on small screens */
+  flex-wrap: wrap; /* ensure no cramping on narrow widths */
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0; /* prevent overflow */
+}
+
+.rightSection {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;         /* ✅ more breathing room */
+  flex-wrap: wrap;   /* ✅ allow wrap if narrow */
+  color: #777;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.author {
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+}
+
+.dot {
+  opacity: .5;       /* ✅ lighter separator */
+  margin: 0 4px;     /* ✅ subtle spacing around the dot */
+}
+
+.metaText {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+  white-space: nowrap;  /* ✅ keeps each meta chunk readable */
+}
+
+/* =============================
+   RESPONSIVE TWEAKS
+   ============================= */
+@media (max-width: 768px) {
+  .title {
+    font-size: 28px;
+  }
+
+  .rightSection {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 24px;
+  }
 }

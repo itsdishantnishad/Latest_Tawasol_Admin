@@ -1,39 +1,38 @@
 import * as React from 'react';
 import styles from './NewsPageTitle.module.scss';
 import type { INewsPageTitleProps } from './INewsPageTitleProps';
-import { AuthorRow } from "./AuthorRow";
-import { CategoryRow } from "./CategoryRow";
+import AuthorRow from './AuthorRow';
+import CategoryRow from './CategoryRow';
 
 export default class NewsPageTitle extends React.Component<INewsPageTitleProps, {}> {
-
   public constructor(props: INewsPageTitleProps) {
     super(props);
   }
 
   public render(): React.ReactElement<INewsPageTitleProps> {
-    const {
-      newsItem
-    } = this.props;
+    const { newsItem } = this.props;
+    const row = (Array.isArray(newsItem) ? newsItem[0] : undefined) || {};
 
     return (
       <div className={styles.newsDetails}>
         {/* Chips row */}
         <CategoryRow
-          category={newsItem[0]?.newsType}
-          department={newsItem[0]?.department}
-          hashtags={newsItem[0]?.tags}
-          onTagClick={() => { }}
+          category={row?.newsType}
+          department={row?.department}
+          // ↓ ensure null/undefined becomes []
+          hashtags={(row?.tags as any) ?? []}
+          onTagClick={() => { /* noop for now */ }}
         />
 
-        <h1 className={styles.title}>{newsItem[0]?.title}</h1>
+        <h1 className={styles.title}>{row?.title}</h1>
 
         {/* Author row */}
         <AuthorRow
-          authorName={newsItem[0]?.author}
-          authorEmail={newsItem[0]?.authorEmail}
-          readTime={newsItem[0]?.readTime}
-          views={newsItem[0]?.pageView}
-          publishedOn={newsItem[0]?.created}
+          authorName={row?.author}
+          authorEmail={row?.authorEmail}
+          readTime={row?.readTime}
+          views={row?.pageView}
+          publishedOn={row?.created}
         />
       </div>
     );
