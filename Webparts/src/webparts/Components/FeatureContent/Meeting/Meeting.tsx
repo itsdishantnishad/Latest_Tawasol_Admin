@@ -72,29 +72,6 @@ export const Meeting: React.FC<IMeetingProps> = (props) => {
 
     return (
         <div className={styles.meetingContainer}>
-            {/* Header */}
-            <div className={styles.header}>
-                <div className={styles.headerContent}>
-                    <div className={styles.decorativeLineLeft}>
-                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                            <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg> */}
-                        <img src={rightHeadingLine} alt="right headline line" />
-                    </div>
-                    <h2 className={styles.title}>See your Meetings Scheduled</h2>
-                    <div className={styles.decorativeLineRight}>
-                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                            <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg> */}
-                        <img src={leftHeadingLine} alt="left headline line" />
-                    </div>
-                </div >
-                <p className={styles.subtitle}>
-                    Connect, collaborate, and drive decisions together
-                </p>
-            </div >
 
             {/* Carousel */}
             <div className={styles.carouselContainer} >
@@ -136,7 +113,7 @@ export const Meeting: React.FC<IMeetingProps> = (props) => {
                 {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
                     View All
                 </button> */}
-                  <a href={props.seeAllURL} className={styles.viewAllButton}>
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
                     View All
                 </a>
             </div>

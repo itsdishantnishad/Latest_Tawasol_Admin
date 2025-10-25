@@ -49,29 +49,6 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
 
     return (
         <div className={styles.serviceLinksContainer}>
-            {/* Header */}
-            <div className={styles.header}>
-                <div className={styles.headerContent}>
-                    <div className={styles.decorativeLineLeft}>
-                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                            <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg> */}
-                        <img src={rightHeadingLine} alt="rightArrow" />
-                    </div>
-                    <h2 className={styles.title}>Service Links</h2>
-                    <div className={styles.decorativeLineRight}>
-                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                            <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg> */}
-                        <img src={leftHeadingLine} alt="leftArrow" />
-                    </div>
-                </div >
-                <p className={styles.subtitle}>
-                    Quickly access your most used service links
-                </p>
-            </div >
 
             {/* Services Grid with Navigation */}
             <div className={styles.carouselWrapper} >

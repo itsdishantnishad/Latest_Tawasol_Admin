@@ -13,22 +13,17 @@ import Dashboard from '../../Components/FeatureContent/Dashboard/Dashboard';
 import Offers from '../../Components/FeatureContent/Offers/Offers';
 import Training from '../../Components/FeatureContent/Training/Training';
 import styles from './FeatureWheel.module.scss';
-// import leftHeadingLine from "../images/leftArrow.svg"
-// import rightHeadingLine from "../images/rightArrow.svg"
-// const leftHeadingLine: string = require("../images/leftArrow.svg");
-// const rightHeadingLine: string = require("../images/rightArrow.svg");
 
-const FeatureWheelHeader = ({ header, subHeader }: { header: string, subHeader: string }) => {
+const leftHeadingLine: string = require("../images/leftArrow.svg");
+const rightHeadingLine: string = require("../images/rightArrow.svg");
+
+const FeatureTitle = ({ header, subHeader }: { header: string, subHeader: string }) => {
   return (
-    <div className={styles.header}>
+    <div className={styles.titleContainer}>
       <div className={styles.headerContent}>
-        <div className={styles.decorativeLineLeft}>
-          {/* <img src={rightHeadingLine} alt="rightArrow" /> */}
-        </div>
+        <img src={rightHeadingLine} alt="" />
         <h2 className={styles.title}>{header}</h2>
-        <div className={styles.decorativeLineRight}>
-          {/* <img src={leftHeadingLine} alt="leftArrow" /> */}
-        </div>
+        <img src={leftHeadingLine} alt="" />
       </div>
       <p className={styles.subtitle}>
         {subHeader}
@@ -36,6 +31,49 @@ const FeatureWheelHeader = ({ header, subHeader }: { header: string, subHeader: 
     </div>
   );
 };
+
+const featureTitleContent: Record<string, { header: string, subHeader: string }> = {
+  gallery: {
+    header: "A Glimpse through our lens",
+    subHeader: "Recent milestones and cherished memories we've Immortalised"
+  },
+  documents: {
+    header: "Policy and Procedure",
+    subHeader: "Everything you need, neatly organized"
+  },
+  events: {
+    header: "Upcoming events",
+    subHeader: "Stay updated and never miss out on what’s happening"
+  },
+  employee_events: {
+    header: "Let’s Celebrate",
+    subHeader: "Wish your peers on their special day"
+  },
+  meetings: {
+    header: "See your Meetings Scheduled",
+    subHeader: "Connect, collaborate, and drive decisions together"
+  },
+  service_links: {
+    header: "Service Links",
+    subHeader: "Quickly access your most used service links"
+  },
+  forms: {
+    header: "Interactive Forms",
+    subHeader: "All your essential forms – legacy, claims, business excellence, and more"
+  },
+  dashboard: {
+    header: "Dashboard",
+    subHeader: "Track everything at a glance – insights made simple!"
+  },
+  offers: {
+    header: "Get Offers & Discounts",
+    subHeader: "Save more with benefits designed for you"
+  },
+  training: {
+    header: "Enroll Yourself in Upcoming Trainings",
+    subHeader: "Grow your skills with tailored learning sessions"
+  }
+}
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
   const [selectedFeature, setSelectedFeature] = useState('dashboard');
@@ -78,9 +116,9 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
           onFeatureSelect={setSelectedFeature}
         />
       </section>
-      <FeatureWheelHeader
-        header="A Glimpse through our lens"
-        subHeader="Recent milestones and cherished memories we've Immortalised"
+      <FeatureTitle
+        header={featureTitleContent[selectedFeature].header}
+        subHeader={featureTitleContent[selectedFeature].subHeader}
       />
       {renderFeatureContent()}
     </div>
