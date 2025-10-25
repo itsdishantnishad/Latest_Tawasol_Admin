@@ -15,38 +15,30 @@ import Training from '../../Components/FeatureContent/Training/Training';
 import styles from './FeatureWheel.module.scss';
 // import leftHeadingLine from "../images/leftArrow.svg"
 // import rightHeadingLine from "../images/rightArrow.svg"
-const leftHeadingLine: string = require("../images/leftArrow.svg");
-const rightHeadingLine: string = require("../images/rightArrow.svg");
+// const leftHeadingLine: string = require("../images/leftArrow.svg");
+// const rightHeadingLine: string = require("../images/rightArrow.svg");
 
-const FeatureWheelHeader = ({ title, subtitle }: { title: string, subtitle: string }) => {
+const FeatureWheelHeader = ({ header, subHeader }: { header: string, subHeader: string }) => {
   return (
     <div className={styles.header}>
       <div className={styles.headerContent}>
         <div className={styles.decorativeLineLeft}>
-          {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                  <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                  <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-              </svg> */}
-          <img src={rightHeadingLine} alt="rightArrow" />
+          {/* <img src={rightHeadingLine} alt="rightArrow" /> */}
         </div>
-        <h2 className={styles.title}>A Glimpse through our lens</h2>
+        <h2 className={styles.title}>{header}</h2>
         <div className={styles.decorativeLineRight}>
-          {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                  <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                  <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-              </svg> */}
-          <img src={leftHeadingLine} alt="leftArrow" />
+          {/* <img src={leftHeadingLine} alt="leftArrow" /> */}
         </div>
       </div>
       <p className={styles.subtitle}>
-        Recent milestones and cherished memories we've Immortalised
+        {subHeader}
       </p>
     </div>
   );
 };
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
-  const [selectedFeature, setSelectedFeature] = useState('gallery');
+  const [selectedFeature, setSelectedFeature] = useState('dashboard');
 
   const handleViewAll = () => {
     // Handle view all action - can navigate to appropriate page
@@ -56,15 +48,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
   const renderFeatureContent = () => {
     switch (selectedFeature) {
       case 'gallery':
-        return (
-          <section className={styles.gallerySection}>
-            <FeatureWheelHeader
-              title="A Glimpse through our lens"
-              subtitle="Recent milestones and cherished memories we've Immortalised"
-            />
-            <Gallery onViewAll={handleViewAll} />
-          </section>
-        );
+        return <Gallery onViewAll={handleViewAll} />
       case 'documents':
         return <Documents onViewAll={handleViewAll} />;
       case 'events':
@@ -83,30 +67,21 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
         return <Offers onViewAll={handleViewAll} />;
       case 'training':
         return <Training onViewAll={handleViewAll} />;
-      default:
-        return (
-          <section className={styles.gallerySection}>
-            <FeatureWheelHeader
-              title="A Glimpse through our lens"
-              subtitle="Recent milestones and cherished memories we've Immortalised"
-            />
-            <Gallery onViewAll={handleViewAll} />
-          </section>
-        );
     }
   };
 
   return (
     <div className={styles.featureWheelContainer}>
-      {/* Feature Wheel Section */}
       <section className={styles.wheelSection}>
         <Wheel
           selectedFeature={selectedFeature}
           onFeatureSelect={setSelectedFeature}
         />
       </section>
-
-      {/* Dynamic Feature Content */}
+      <FeatureWheelHeader
+        header="A Glimpse through our lens"
+        subHeader="Recent milestones and cherished memories we've Immortalised"
+      />
       {renderFeatureContent()}
     </div>
   );

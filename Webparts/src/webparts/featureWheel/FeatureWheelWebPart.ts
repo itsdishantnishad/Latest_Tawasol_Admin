@@ -1,29 +1,26 @@
-import * as React from 'react';
-import * as ReactDom from 'react-dom';
-import { Version } from '@microsoft/sp-core-library';
+import * as React from "react";
+import * as ReactDom from "react-dom";
+import { Version } from "@microsoft/sp-core-library";
 import {
   type IPropertyPaneConfiguration,
-  PropertyPaneTextField
-} from '@microsoft/sp-property-pane';
-import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
+  PropertyPaneTextField,
+} from "@microsoft/sp-property-pane";
+import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
 
-
-import * as strings from 'FeatureWheelWebPartStrings';
-import FeatureWheel from './components/FeatureWheel';
-import { IFeatureWheelProps } from './components/IFeatureWheelProps';
+import * as strings from "FeatureWheelWebPartStrings";
+import FeatureWheel from "./components/FeatureWheel";
+import { IFeatureWheelProps } from "./components/IFeatureWheelProps";
 
 export interface IFeatureWheelWebPartProps {
   description: string;
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
-
-
   public render(): void {
     const element: React.ReactElement<IFeatureWheelProps> = React.createElement(
       FeatureWheel,
       {
-        context: this.context
+        context: this.context,
       }
     );
 
@@ -31,28 +28,34 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
   }
 
   protected onInit(): Promise<void> {
-    return this._getEnvironmentMessage().then(message => {
+    return this._getEnvironmentMessage().then((message) => {
       console.log(message);
     });
   }
 
-
-
   private _getEnvironmentMessage(): Promise<string> {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
-          let environmentMessage: string = '';
+    if (!!this.context.sdks.microsoftTeams) {
+      // running in Teams, office.com or Outlook
+      return this.context.sdks.microsoftTeams.teamsJs.app
+        .getContext()
+        .then((context) => {
+          let environmentMessage: string = "";
           switch (context.app.host.name) {
-            case 'Office': // running in Office
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
+            case "Office": // running in Office
+              environmentMessage = this.context.isServedFromLocalhost
+                ? strings.AppLocalEnvironmentOffice
+                : strings.AppOfficeEnvironment;
               break;
-            case 'Outlook': // running in Outlook
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
+            case "Outlook": // running in Outlook
+              environmentMessage = this.context.isServedFromLocalhost
+                ? strings.AppLocalEnvironmentOutlook
+                : strings.AppOutlookEnvironment;
               break;
-            case 'Teams': // running in Teams
-            case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
+            case "Teams": // running in Teams
+            case "TeamsModern":
+              environmentMessage = this.context.isServedFromLocalhost
+                ? strings.AppLocalEnvironmentTeams
+                : strings.AppTeamsTabEnvironment;
               break;
             default:
               environmentMessage = strings.UnknownEnvironment;
@@ -62,7 +65,11 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
         });
     }
 
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
+    return Promise.resolve(
+      this.context.isServedFromLocalhost
+        ? strings.AppLocalEnvironmentSharePoint
+        : strings.AppSharePointEnvironment
+    );
   }
 
   protected onDispose(): void {
@@ -70,7 +77,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
   }
 
   protected get dataVersion(): Version {
-    return Version.parse('1.0');
+    return Version.parse("1.0");
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
@@ -78,20 +85,20 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
       pages: [
         {
           header: {
-            description: strings.PropertyPaneDescription
+            description: strings.PropertyPaneDescription,
           },
           groups: [
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
-                })
-              ]
-            }
-          ]
-        }
-      ]
+                PropertyPaneTextField("description", {
+                  label: strings.DescriptionFieldLabel,
+                }),
+              ],
+            },
+          ],
+        },
+      ],
     };
   }
 }
