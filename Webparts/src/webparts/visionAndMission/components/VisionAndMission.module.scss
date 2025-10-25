@@ -2,17 +2,17 @@
 /* --- Container --- */
 .wrap {
   background: #ffebda;         /* same soft peach bg */
-  padding: 36px 24px;
-  border-radius: 12px;
+  padding: 60px;
+  // border-radius: 12px;
 }
 
 /* two rows (Vision / Mission) */
 .row {
   display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 28px;
-  align-items: start;
-  margin-bottom: 48px;
+  grid-template-columns: 350px 1fr;
+  gap: 60px;
+  align-items: center;
+  margin-bottom: 60px;
 }
 
 .leftPic img {
@@ -29,7 +29,7 @@
 
 /* Headings */
 .sectionTitle {
-  margin: 0 0 14px 0;
+  margin: 0 0 40px 0;
   line-height: 1.1;
   display: flex;
   align-items: baseline;
@@ -38,8 +38,10 @@
 
 .our {
   font-family: "Instrument Serif",;
-  font-size: 28px;
   color: #d6362d;               /* red accent */
+  font-size: 42px;
+  font-weight: 400;
+  font-style: italic;
 }
 
 .main {
@@ -55,7 +57,8 @@
   font-size: 16px;
   line-height: 1.7;
   color: #3A3B43;
-  max-width: 920px;
+  max-width: 100%;
+  margin: 0;
 }
 
 /* Mission points */
@@ -64,7 +67,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 28px;
-  margin-top: 18px;
+  margin-top: 0;
 }
 
 .point {
@@ -72,12 +75,12 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;  /* left align like Figma */
-  gap: 10px;
+  gap: 40px;
 }
 
 
 .numImg {
-  width: 86px;    
+  width: 64px;    
   height: auto;
   display: block;
   margin-bottom: 6px;
