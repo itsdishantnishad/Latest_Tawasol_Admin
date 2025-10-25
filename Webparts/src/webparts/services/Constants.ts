@@ -7,5 +7,6 @@ export enum ListName {
     VIDEO_PLAYER = "Video Gallery",
     OUR_VALUES = "Our Values",
     ORGANISATION_STRUCTURE = "Team Org Structure",
-    OUR_PORTFOLIO = "Our Portfolio"
+    OUR_PORTFOLIO = "Our Portfolio",
+    TEAM_ORG_DEPARTMENTS = "Team Org Departments"
 }

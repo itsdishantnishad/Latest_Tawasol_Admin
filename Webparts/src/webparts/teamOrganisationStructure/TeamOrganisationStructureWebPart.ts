@@ -13,6 +13,7 @@ import { ListName } from "../services/Constants";
 
 export interface ITeamOrganisationStructureWebPartProps {
   listTitle: string;
+  deptListTitle: string;
 }
 
 export default class TeamOrganisationStructureWebPart
@@ -23,7 +24,8 @@ export default class TeamOrganisationStructureWebPart
       TeamOrganisationStructure,
       {
         context: this.context,
-        listTitle: this.properties.listTitle || ListName.ORGANISATION_STRUCTURE
+        listTitle: this.properties.listTitle || ListName.ORGANISATION_STRUCTURE,
+        deptListTitle: this.properties.deptListTitle || ListName.TEAM_ORG_DEPARTMENTS
       }
     );
 
@@ -45,10 +47,13 @@ export default class TeamOrganisationStructureWebPart
           header: { description: "Configure data source" },
           groups: [
             {
-              groupName: "List",
+              groupName: "Lists",
               groupFields: [
                 PropertyPaneTextField("listTitle", {
-                  label: "List Title"                
+                  label: "People List (Team Org Structure)"
+                }),
+                PropertyPaneTextField("deptListTitle", {
+                  label: "Departments Mapping List"
                 }),
               ],
             },

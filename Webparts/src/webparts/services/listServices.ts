@@ -11,11 +11,32 @@ import "@pnp/sp/files/folder";
 import "@pnp/sp/clientside-pages";
 import "@pnp/sp/search"
 import { ISearchQuery } from "@pnp/sp/search";
-// import {moment} from "moment"; 
+import * as moment from "moment";
 
+moment.updateLocale('en', {
+    relativeTime : {
+        future: "in %s",
+        past:   "%s ago",
+        s  : 'a few seconds',
+        ss : '%d seconds',
+        m:  "a minute",
+        mm: "%d minutes",
+        h:  "an hour",
+        hh: "%d hours",
+        d:  "a day",
+        dd: "%d days",
+        w:  "a week",
+        ww: "%d weeks",
+        M:  "a month",
+        MM: "%d months",
+        y:  "a year",
+        yy: "%d years"
+    }
+});
 
 export type OurValueCard = { id: number; title: string; desc: string; icon?: string; sort: number; };
 export type OrgMember = { id: number; name: string; role: string; level: number; sort: number; photoUrl?: string; };
+export type OrgDepartment = { name: string; url?: string; };
 
 export class listServices {
 
@@ -59,14 +80,14 @@ export class listServices {
     }
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
-    public async getNewsStory(): Promise<any[]> {
+    public async getNewsStory(rowCount?:number): Promise<any[]> {
         // eslint-disable-line @typescript-eslint/no-explicit-any
         let results;
         const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E0070F67800B7FC224AB6F421620C7A7297*)`;
         try {
             results = await this.sp.search({
                 Querytext: "*",
-                RowLimit: 3,
+                RowLimit: rowCount || 3,
                 TrimDuplicates: false,
                 SelectProperties: [
                     "Title",
@@ -97,7 +118,7 @@ export class listServices {
             return results.PrimarySearchResults.map((item: any) => {
                 return {
                     title: item.Title,
-                    readTime: item.TIRReadTimeOWSNMBR,
+                    readTime: item.TIRReadTimeOWSNMBR ? Math.trunc(item.TIRReadTimeOWSNMBR) : 0,
                     department: item.TIRDepartment ? item.TIRDepartment : "",
                     tags: item.TIRTags,
                     pageView: item.ViewCount ? Math.trunc(item.ViewCount) : 0,
@@ -108,7 +129,8 @@ export class listServices {
                     path: item.FileRef,
                     created: item.Created,
                     pageDescription: item.Description,
-                    //  lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
+                    // lastModified: item.ModifiedOWSDATE,
+                    lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).fromNow() : "",
                     //  Description: item.AcronymDetail
                 } as any;
             });
@@ -116,6 +138,8 @@ export class listServices {
             return Promise.reject(error);
         }
     }
+
+    
 
     // eslint-disable-line @typescript-eslint/no-explicit-any
     public async getNewsStorybyID(ID?: number): Promise<any[]> {
@@ -267,7 +291,7 @@ export class listServices {
         try {
             results = await this.sp.web.lists.getByTitle(listName)
                 .items
-                .select("Title", "TIRSortOrder", "TIRIconURL", "TIRPortfolioCategory","TIRColumnLayout").orderBy("TIRSortOrder", true)();
+                .select("Title", "TIRSortOrder", "TIRIconURL", "TIRPortfolioCategory", "TIRColumnLayout").orderBy("TIRSortOrder", true)();
             // eslint-disable-line @typescript-eslint/no-explicit-any
             return results.map((item: any) => {
                 return {
@@ -322,6 +346,57 @@ export class listServices {
             return Promise.reject(error);
         }
     }
+
+
+     /** Departments mapped to a member (MM field reused: TIRDepartment) */
+  public async getDepartmentsByMember(listTitle: string, memberDisplayName: string): Promise<OrgDepartment[]> {
+    try {    
+
+      const items: any[] = await this.sp.web.lists.getByTitle(listTitle).items
+        .select(
+          "Id",
+          "Title",
+          "URL",
+          "TIRDepartment",                  // Managed Metadata (same as elsewhere)
+          "TIRDepartmentMember/Title"
+        )
+        .expand("TIRDepartmentMember")();      
+
+      const matches = items.filter(it => {
+        const people: any[] = Array.isArray(it?.TIRDepartmentMember) ? it.TIRDepartmentMember : [];
+        return people.some(p => (p?.Title || "").trim().toLowerCase() === memberDisplayName.trim().toLowerCase());
+      });     
+
+      const result = matches.map(it => {
+        let deptName = "";
+        const mm: any = it?.TIRDepartment;
+
+        if (typeof mm === "string" && mm.length > 0) {
+          deptName = mm.split("|")[0];   // "Label|Guid"
+        } else if (mm && typeof mm?.Label === "string") {
+          deptName = mm.Label;
+        } else {
+          deptName = it?.Title || "";
+        }
+        const urlVal = it?.URL;
+        const url = typeof urlVal === "string" ? urlVal : urlVal?.Url;
+
+        return { name: deptName || "Department", url } as OrgDepartment;
+      });
+
+      // de-dupe by name
+      const unique: OrgDepartment[] = [];
+      const seen = new Set<string>();
+      result.forEach(r => {
+        const key = (r.name || "").toLowerCase();
+        if (!seen.has(key)) { seen.add(key); unique.push(r); }
+      });
+      unique.sort((a, b) => a.name.localeCompare(b.name));      
+      return unique;
+    } catch (error) {     
+      return Promise.reject(error);
+    }
+  }
 
 }
 

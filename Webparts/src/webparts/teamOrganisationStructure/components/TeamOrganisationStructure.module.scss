@@ -1,64 +1,94 @@
 @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap");
 
-.wrapper {
-  background: #FFF4EA;
-  padding: 48px 20px 56px;
-  border-radius: 12px;
-}
+.wrapper { background:#FFF4EA; padding:48px 20px 56px; border-radius:12px; }
 
 .title {
-  margin: 0 0 28px;
-  text-align: center;
-  line-height: 1;
-  letter-spacing: 1px;
-  font-size: 42px;
-  font-family: "Instrument Serif", serif;
-  font-weight: 400;
+  margin:0 0 28px; text-align:center; line-height:1; letter-spacing:1px;
+  font-size:clamp(28px,4vw,42px);
+  font-family:"Instrument Serif",serif; font-weight:400;
 }
 
-.teamWord { font-style: italic; color: #DA291C; }
-.orgWord  { font-style: normal; color: #000000; }
+.teamWord { font-style:italic; color:#DA291C; }
+.orgWord  { font-style:normal; color:#000; }
 
-.state, .error { text-align: center; padding: 12px 0; font-size: 14px; }
-.error { color: #DA291C; }
+.state,.error { text-align:center; padding:12px 0; font-size:14px; }
+.error { color:#DA291C; }
 
-.topCardWrap { display: flex; justify-content: center; margin: 8px 0 28px; }
+.topCardWrap { display:flex; justify-content:center; margin:8px 0 28px; }
 
-.row {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 18px;
-  margin-bottom: 22px;
-
-  @media (max-width: 1200px) { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 900px)  { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 640px)  { grid-template-columns: repeat(2, 1fr); }
+/* ===== People grid ===== */
+.row{
+  display:grid; grid-template-columns:repeat(6, minmax(0,1fr));
+  gap:clamp(14px,1.5vw,18px); margin-bottom:clamp(18px,2vw,22px);
+  @media (max-width:1200px){ grid-template-columns:repeat(4,1fr); }
+  @media (max-width:900px){  grid-template-columns:repeat(3,1fr); }
+  @media (max-width:640px){  grid-template-columns:repeat(2,1fr); }
 }
 
-.card { text-align: center; }
-.cardLg { width: 230px; }
-.cardMd { } /* keep for typings */
+/* Cards */
+.card{
+  text-align:left; position:relative;
+  border-radius:12px; padding:10px;
+  transition:transform .15s ease, box-shadow .15s ease; outline:1px solid transparent;
+}
+.card:hover, .card:focus-within{ transform:translateY(-1px); }
 
-.photoWrap {
-  width: 100%;
-  /* portrait like your Figma; a little taller than wide */
-  aspect-ratio: 4 / 5;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #FFF4EA;
+.cardLg{ width:230px; margin:0 auto; text-align:center; }
+.cardMd{}
+
+/* Selected highlight (Mariam style) */
+.cardSelected{
+  outline:1px solid #F0BB82;
+  border-radius:12px;
+  background: linear-gradient(#FFF4EA,#FFF4EA) padding-box,
+              linear-gradient(180deg,#DDA160 0%, #FFDBB4 100%) border-box;
+  box-shadow: inset 0 4px 4px 0 #FED3A4;
 }
 
-.photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* nudge crop upward so heads are not cut */
-  object-position: center 15%;
-  display: block;
+/* Image */
+.photoWrap{ width:100%; aspect-ratio:4/5; border-radius:12px; overflow:hidden; background:#FFF4EA; }
+.photo{ width:100%; height:100%; object-fit:cover; object-position:center 15%; display:block; }
+.photoFallback{ width:100%; height:100%; }
+
+/* Underline accents */
+.accent{ width:64px; height:4px; background:#DA291C; border-radius:3px; margin:10px 0 8px; }
+.accentCenter{ margin-left:auto; margin-right:auto; }
+
+.name{ font-weight:600; color:#000; margin-bottom:4px; font-size:clamp(14px,1.6vw,16px); }
+.role{ color:#6C6C6C; font-size:12px; line-height:1.2; }
+
+/* ===== Departments band (appears under selected row) ===== */
+.deptBand{ margin:14px 0 26px; padding:22px 10px 6px; position:relative; border-radius:12px; }
+
+.deptTitle{
+  text-align:center; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  font-weight:600; font-size:14px; letter-spacing:3px; line-height:24px; color:#DA291C; margin-bottom:18px;
 }
 
-.photoFallback { width: 100%; height: 100%; }
+/* Rail + stubs (image 5 style) */
+.deptRail{ position:relative; height:22px; margin:0 auto 14px; }
+.deptRail::before{ content:""; position:absolute; left:0; right:0; top:10px; height:1px; background:#CCCACA; opacity:.6; border-radius:1px; }
+.stub{ position:absolute; top:0; width:1px; height:10px; background:rgba(204,202,202,.8); transform:translateX(-50%); }
 
-.accent { width: 64px; height: 4px; background:#DA291C; border-radius:3px; margin:10px auto 8px; }
-.name { font-weight: 600; color:#000000; margin-bottom: 4px; }
-.role { color:#6C6C6C; font-size:12px; line-height:1.2; }
+/* Boxes */
+.deptGrid{
+  display:grid; grid-template-columns:repeat(7, minmax(140px,1fr));
+  gap:clamp(10px,1.4vw,16px); justify-items:center;
+  @media (max-width:1200px){ grid-template-columns:repeat(4,1fr); }
+  @media (max-width:900px){  grid-template-columns:repeat(3,1fr); }
+  @media (max-width:640px){  grid-template-columns:repeat(2,1fr); }
+}
+
+.deptBox{
+  width:100%; max-width:200px; min-height:92px; padding:12px;
+  border-radius:16px; text-align:center; line-height:1.2;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg,#DDA160 0%, #FFDBB4 100%);
+  color:#3a2a10; box-shadow:inset 0 4px 4px 0 #FED3A4; border:1px solid #E9B883;
+}
+.deptLink{ text-decoration:none; color:inherit; }
+
+/* a11y helpers */
+.clickable{ cursor:pointer; }
+.srOnly{ position:absolute!important; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+

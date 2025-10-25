@@ -104,39 +104,50 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
                 </div>
 
                 <div className={styles.contentOverlay}>
-                  <div className={styles.title}>{news.Title || news.title}</div>
-
-                  <div className={styles.metaRow}>
+                  <div className="top">
                     {/* Category: icon-only */}
                     <span
                       className={`${styles.metaItem} ${styles.categoryIcon} ${catClassByKey[catKey] || ""}`}
                       aria-label={news.newsType || "category"}
                       title={news.newsType || ""}
                     />
+                  </div>
+                  <div className="bottom">
+                    <div className={styles.title}>{news.Title || news.title}</div>
+                    <div className={styles.metaRow}>
 
-                    {/* Department text (pill) – only for Announcement & DHRE Stories */}
-                    {showDept && news.department && (
-                      <span className={`${styles.metaItem} ${styles.dept}`}>
-                        <span
-                          className={`${styles.deptIcon} ${deptClassByKey[deptKey] || ""}`}
-                          aria-hidden="true"
-                        />
-                        {news.department}
-                      </span>
-                    )}
+                      <div>
+                        {/* Department text (pill) – only for Announcement & DHRE Stories */}
+                        {showDept && news.department && (
+                          <span className={`${styles.metaItem} ${styles.dept}`}>
+                            <span
+                              className={`${styles.deptIcon} ${deptClassByKey[deptKey] || ""}`}
+                              aria-hidden="true"
+                            />
+                            {news.department}
+                          </span>
+                        )}
+                      </div>
 
-                    {/* Published time */}
-                    {published && (
-                      <span className={styles.metaItem}>{this.timeAgo(published)}</span>
-                    )}
+                      <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', }}>
+                        {/* Published time */}
+                        {published && (
+                          <span className={styles.metaItem}>{this.timeAgo(published)}</span>
+                        )}
 
-                    {/* Read time */}
-                    <span className={styles.metaItem}>{readTime}</span>
+                        {/* <span style={{"backgroundColor":"rgb(108, 108, 108)","width":"5px","height":"5px","borderRadius":"50%"}}></span> */}
 
-                    {/* Views */}
-                    {typeof news.pageView === "number" && (
-                      <span className={styles.metaItem}>{news.pageView} Views</span>
-                    )}
+                        {/* Read time */}
+                        <span className={styles.metaItem}>{readTime}</span>
+
+                        <span style={{"backgroundColor":"#fff","width":"4px","height":"4px","borderRadius":"50%"}}></span>
+
+                        {/* Views */}
+                        {typeof news.pageView === "number" && (
+                          <span className={styles.metaItem}>{news.pageView} Views</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </article>

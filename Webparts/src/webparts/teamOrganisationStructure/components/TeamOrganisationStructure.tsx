@@ -1,13 +1,17 @@
 import * as React from "react";
 import styles from "./TeamOrganisationStructure.module.scss";
 import { ITeamOrganisationStructureProps } from "./ITeamOrganisationStructureProps";
-import { listServices, OrgMember } from "../../services/listServices";
+import { listServices, OrgMember, OrgDepartment } from "../../services/listServices";
 import { ListName } from "../../services/Constants";
 
 export interface ITeamOrganisationStructureState {
   items: OrgMember[];
   loading: boolean;
   error?: string | null;
+  selectedId?: number | null;
+  selectedLevel?: number | null;
+  departments: OrgDepartment[];
+  loadingDepts: boolean;
 }
 
 export default class TeamOrganisationStructure
@@ -15,49 +19,83 @@ export default class TeamOrganisationStructure
 
   private spService: listServices;
 
-  public constructor(props: ITeamOrganisationStructureProps) {
+  constructor(props: ITeamOrganisationStructureProps) {
     super(props);
-    this.state = { items: [], loading: true, error: null };
+    this.state = {
+      items: [],
+      loading: true,
+      error: null,
+      selectedId: null,
+      selectedLevel: null,
+      departments: [],
+      loadingDepts: false
+    };
     this.spService = new listServices(this.props.context);
   }
 
-  public async componentDidMount(): Promise<void> {
-    await this.load();
+  async componentDidMount(): Promise<void> { await this.loadMembers(); }
+
+  async componentDidUpdate(prevProps: ITeamOrganisationStructureProps): Promise<void> {
+    const prevTitle = (prevProps.listTitle || "").trim();
+    const nextTitle = (this.props.listTitle || "").trim();
+    if (prevTitle !== nextTitle) await this.loadMembers();
   }
 
-  public async componentDidUpdate(prevProps: ITeamOrganisationStructureProps): Promise<void> {
-    if ((prevProps.listTitle || "").trim() !== (this.props.listTitle || "").trim()) {
-      await this.load();
-    }
-  }
-
-  private async load(): Promise<void> {
+  private async loadMembers(): Promise<void> {
     try {
-      this.setState({ loading: true, error: null });
-      const listTitle = (this.props.listTitle && this.props.listTitle.trim().length > 0)
-        ? this.props.listTitle!.trim()
-        : ListName.ORGANISATION_STRUCTURE;
-      const data = await this.spService.getOrganisationMembers(listTitle);
-      this.setState({ items: data, loading: false });
-    } catch (e: any) {
-      this.setState({ error: e?.message || "Failed to load.", loading: false });
+      this.setState({ loading: true, error: null, selectedId: null, selectedLevel: null, departments: [] });
+      const sourceList = this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
+      const members = await this.spService.getOrganisationMembers(sourceList);
+      console.log("[TeamOrg] members loaded", members);
+      this.setState({ items: members, loading: false });
+    } catch (err: any) {
+      console.error("[TeamOrg] loadMembers error", err);
+      this.setState({ error: err?.message || "Failed to load.", loading: false });
     }
   }
+
+  private onCardClick = async (member: OrgMember): Promise<void> => {
+    console.log("[TeamOrg] card clicked", member);
+
+    this.setState(prev => {
+      const isSame = prev.selectedId === member.id;
+      return {
+        selectedId: isSame ? null : member.id,
+        selectedLevel: isSame ? null : member.level,
+        departments: isSame ? [] : prev.departments,
+        loadingDepts: !isSame
+      };
+    }, async () => {
+      const { selectedId } = this.state;
+      if (!selectedId) {
+        console.log("[TeamOrg] deselected → hide departments");
+        return;
+      }
+
+      try {
+        console.log("[TeamOrg] fetching departments for", member.name);
+        const depts = await this.spService.getDepartmentsByMember(
+          ListName.TEAM_ORG_DEPARTMENTS,
+          member.name
+        );
+        console.log("[TeamOrg] departments fetched", depts);
+        this.setState({ departments: depts, loadingDepts: false });
+      } catch (e) {
+        console.error("[TeamOrg] getDepartments error", e);
+        this.setState({ departments: [], loadingDepts: false });
+      }
+    });
+  };
 
   public render(): React.ReactElement<ITeamOrganisationStructureProps> {
-    const { items, loading, error } = this.state;
+    const { items, loading, error, selectedLevel } = this.state;
 
-    const top = items.find(m => m.level === 0);
-    const rest = items.filter(m => m.level !== 0);
+    const rootMember = items.find(m => m.level === 0);
+    const nonRoot = items.filter(m => m.level !== 0);
 
-    // group others by level
-    const levels: Array<{ level: number; people: OrgMember[] }> = [];
-    rest.forEach(p => {
-      const hit = levels.find(g => g.level === p.level);
-      if (hit) hit.people.push(p);
-      else levels.push({ level: p.level, people: [p] });
-    });
-    levels.sort((a, b) => a.level - b.level);
+    const membersByLevel: Record<number, OrgMember[]> = {};
+    nonRoot.forEach(m => (membersByLevel[m.level] ||= []).push(m));
+    const orderedLevels = Object.keys(membersByLevel).map(Number).sort((l, r) => l - r);
 
     return (
       <section className={styles.wrapper} aria-labelledby="teamOrgHeading">
@@ -71,20 +109,24 @@ export default class TeamOrganisationStructure
 
         {!loading && !error && (
           <>
-            {top && (
+            {rootMember && (
               <div className={styles.topCardWrap}>
-                {this.renderCard(top, "lg")}
+                {this.renderCard(rootMember, /*isRoot*/ true)}
               </div>
             )}
 
-            {levels.map(g => (
-              <div key={g.level} className={styles.row}>
-                {g.people.map(p => (
-                  <React.Fragment key={p.id}>
-                    {this.renderCard(p, "md")}
-                  </React.Fragment>
-                ))}
-              </div>
+            {orderedLevels.map(level => (
+              <React.Fragment key={level}>
+                <div className={styles.row}>
+                  {membersByLevel[level].map(person => (
+                    <React.Fragment key={person.id}>
+                      {this.renderCard(person, false)}
+                    </React.Fragment>
+                  ))}
+                </div>
+
+                {selectedLevel === level && this.renderDepartmentsBand()}
+              </React.Fragment>
             ))}
           </>
         )}
@@ -92,17 +134,71 @@ export default class TeamOrganisationStructure
     );
   }
 
-  private renderCard(member: OrgMember, size: "lg" | "md"): JSX.Element {
+  private renderCard(member: OrgMember, isRoot: boolean): JSX.Element {
+    const isSelected = this.state.selectedId === member.id;
+
     return (
-      <div className={`${styles.card} ${size === "lg" ? styles.cardLg : (styles as any).cardMd}`}>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-pressed={isSelected}
+        aria-label={`Select ${member.name}`}
+        onClick={() => this.onCardClick(member)}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && this.onCardClick(member)}
+        className={[
+          styles.card,
+          isRoot ? styles.cardLg : (styles as any).cardMd,
+          isSelected ? styles.cardSelected : ""
+        ].join(" ")}
+      >
         <div className={styles.photoWrap}>
           {member.photoUrl
             ? <img className={styles.photo} src={member.photoUrl} alt={member.name} />
             : <div className={styles.photoFallback} aria-label="No image" />}
         </div>
-        <div className={styles.accent} aria-hidden />
+
+        <div className={`${styles.accent} ${isRoot ? styles.accentCenter : ""}`} aria-hidden />
         <div className={styles.name}>{member.name}</div>
         <div className={styles.role}>{member.role}</div>
+      </div>
+    );
+  }
+
+  private renderDepartmentsBand(): JSX.Element {
+    const { departments, loadingDepts } = this.state;
+
+    const count = Math.max(departments.length, 1);
+    const stubs = new Array(count).fill(0).map((_, i) => {
+      const pct = (i + 0.5) * (100 / count);
+      return <span key={i} className={styles.stub} style={{ left: `${pct}%` }} aria-hidden />;
+    });
+
+    return (
+      <div className={styles.deptBand}>
+        <div className={styles.deptTitle}>DEPARTMENTS</div>
+
+        <div className={styles.deptRail} aria-hidden>{stubs}</div>
+
+        {loadingDepts && <div className={styles.state}>Loading departments…</div>}
+
+        {!loadingDepts && (
+          <div className={styles.deptGrid}>
+            {departments.length === 0 && (
+              <div className={styles.state}>No departments mapped for this person.</div>
+            )}
+
+            {departments.map((d, i) => {
+              const inner = (
+                <div className={styles.deptBox} role="group" aria-label={d.name}>
+                  {d.name}
+                </div>
+              );
+              return d.url
+                ? <a key={i} className={styles.deptLink} href={d.url} target="_blank" rel="noopener noreferrer" title={d.name}>{inner}</a>
+                : <div key={i} title={d.name}>{inner}</div>;
+            })}
+          </div>
+        )}
       </div>
     );
   }

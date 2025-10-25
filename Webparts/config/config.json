@@ -121,6 +121,14 @@
           "manifest": "./src/webparts/aboutDhreQuote/AboutDhreQuoteWebPart.manifest.json"
         }
       ]
+    },
+    "news-view-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/newsView/NewsViewWebPart.js",
+          "manifest": "./src/webparts/newsView/NewsViewWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -139,6 +147,7 @@
     "EventAndTrainingWebPartStrings": "lib/webparts/eventAndTraining/loc/{locale}.js",
     "OurValuesWebPartStrings": "lib/webparts/ourValues/loc/{locale}.js",
     "VisionAndMissionWebPartStrings": "lib/webparts/visionAndMission/loc/{locale}.js",
-    "AboutDhreQuoteWebPartStrings": "lib/webparts/aboutDhreQuote/loc/{locale}.js"
+    "AboutDhreQuoteWebPartStrings": "lib/webparts/aboutDhreQuote/loc/{locale}.js",
+    "NewsViewWebPartStrings": "lib/webparts/newsView/loc/{locale}.js"
   }
 }
