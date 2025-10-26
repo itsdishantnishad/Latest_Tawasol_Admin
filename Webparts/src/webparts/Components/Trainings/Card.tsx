@@ -62,8 +62,9 @@ export const AllTrainingCard: React.FC<IAllTrainingCardProps> = ({
         </div>
 
         {/* Join/Registered Button */}
+        {/* ${isRegistered ? styles.registered : ''} */}
         <button 
-          className={`${styles.joinButton} ${isRegistered ? styles.registered : ''}`}
+          className={`${styles.joinButton}`}
           onClick={onJoin}
           disabled={isRegistered}
         >
@@ -73,7 +74,8 @@ export const AllTrainingCard: React.FC<IAllTrainingCardProps> = ({
               <path d="M4 6h8v1H4V6zm0 2h8v1H4V8z"/>
             </svg>
           </div>
-          {isRegistered ? 'Registered' : 'Join'}
+          {/* {isRegistered ? 'Registered' :  */}
+          Join
         </button>
 
         {/* Info Notice (only if not registered) */}
