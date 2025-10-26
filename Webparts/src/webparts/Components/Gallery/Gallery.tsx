@@ -4,6 +4,7 @@ import styles from './Gallery.module.scss';
 export interface IGalleryProps {
     images?: IGalleryImage[];
     onViewAll?: () => void;
+    seeAllURL?: string;
 }
 
 export interface IGalleryImage {
@@ -27,11 +28,11 @@ const defaultImages: IGalleryImage[] = [
 export const Gallery: React.FC<IGalleryProps> = (props) => {
     const images = props.images || defaultImages;
 
-    const handleViewAll = () => {
-        if (props.onViewAll) {
-            props.onViewAll();
-        }
-    };
+    // const handleViewAll = () => {
+    //     if (props.onViewAll) {
+    //         props.onViewAll();
+    //     }
+    // };
 
     return (
         <div className={styles.galleryContainer}>
@@ -65,9 +66,12 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <button className={styles.viewAllButton} onClick={handleViewAll}>
+                {/* <button className={styles.viewAllButton} onClick={handleViewAll}>
                     View All
-                </button>
+                </button> */}
+                <a href={props.seeAllURL} className={styles.viewAllButton}>
+                    View All
+                </a>
             </div>
         </div>
     );
