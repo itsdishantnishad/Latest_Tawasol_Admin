@@ -55,7 +55,14 @@ export default class TeamOrganisationStructure
   }
 
   private onCardClick = async (member: OrgMember): Promise<void> => {
-    console.log("[TeamOrg] card clicked", member);
+
+    try {
+      const depts = await this.spService.getDepartmentsByMember(ListName.TEAM_ORG_DEPARTMENTS, member.user);
+      this.setState({ departments: depts, loadingDepts: false });
+    } catch (e) {
+      console.error("[TeamOrg] getDepartments error", e);
+      this.setState({ departments: [], loadingDepts: false });
+    } 
 
     this.setState(prev => {
       const isSame = prev.selectedId === member.id;
@@ -72,18 +79,7 @@ export default class TeamOrganisationStructure
         return;
       }
 
-      try {
-        console.log("[TeamOrg] fetching departments for", member.name);
-        const depts = await this.spService.getDepartmentsByMember(
-          ListName.TEAM_ORG_DEPARTMENTS,
-          member.name
-        );
-        console.log("[TeamOrg] departments fetched", depts);
-        this.setState({ departments: depts, loadingDepts: false });
-      } catch (e) {
-        console.error("[TeamOrg] getDepartments error", e);
-        this.setState({ departments: [], loadingDepts: false });
-      }
+
     });
   };
 
