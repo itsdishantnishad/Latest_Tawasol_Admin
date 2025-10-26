@@ -6,6 +6,7 @@ import PreviousEventCard from "./PreviousCard/PreviousEvents";
 
 export interface IAlleventsProps {
   AllEventItems:any;
+  context?: any;
 }
 
 
@@ -80,6 +81,7 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
         imageUrl: item.newsImage || "",
         eventDateTime: eventStart,
         isregistered: isRegistered,
+        ID: item.ID,
       };
     });
   }, [props.AllEventItems]);
@@ -120,7 +122,7 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
           <div className={styles.eventsWrapper}>
             {upcomingEvents.length > 0 ? (
               upcomingEvents.map((event:any, index:any) => (
-                <EventCard key={index} {...event} />
+                <EventCard key={index} {...event} context={props.context} />
               ))
             ) : (
               <p>No upcoming events found.</p>

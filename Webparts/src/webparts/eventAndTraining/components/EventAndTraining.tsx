@@ -40,6 +40,7 @@ export default class EventAndTraining extends React.Component<IEventAndTrainingP
         <EventsTrainingsToggle
           Trainingdata={AlltrainingItem}
           Eventdata={AllEventItems}
+          context={this.props.context}
         />
       </>
       // <>

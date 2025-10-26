@@ -9,11 +9,13 @@ export interface IEventsTrainingsToggleProps {
   onSearchChange?: (searchText: string) => void;
   Trainingdata?: any[];
   Eventdata?: any[];
+  context?: any;
 }
 
 const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = ({
   Trainingdata = [],
   Eventdata = [],
+  context,
   onToggleChange,
   onSearchChange
 }) => {
@@ -83,6 +85,7 @@ const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = ({
         {selectedTab === 'events' ? (
           <Allevents          
             AllEventItems={filteredEvents}
+            context={context}
           />
         ) : (
           <Trainingmodule           
