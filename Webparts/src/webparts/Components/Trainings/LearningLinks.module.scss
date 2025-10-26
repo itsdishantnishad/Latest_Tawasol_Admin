@@ -32,13 +32,14 @@
     border-radius: 12px;
     cursor: pointer;
     text-align: center;
-    padding: 20px 16px;
     border: 1px solid #f0e9e5; // Light border to match image
     transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100%; // Equal height for cards
+    height: 157px;
+    padding: 20px 16px;
+    width: 193px;
 
     &:hover {
       transform: translateY(-2px);

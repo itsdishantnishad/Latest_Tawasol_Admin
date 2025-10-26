@@ -28,33 +28,33 @@ const learningLinks: ILearningLink[] = [
   {
     id: 1,
     title: "STRYVE By LinkedIn Learning",
-    logo: "https://stryve.com/wp-content/uploads/2020/09/cropped-STRYVE-Logo-Final-1.png",
+    logo: require("../../assets/stryve.png"),
     logoAlt: "STRYVE",
     url: "https://www.stryve.com/",
-    backgroundColor: "#2F2F2F"
+    backgroundColor: "#FDECDC"
   },
   {
     id: 2,
     title: "eCornell by DHRE",
-    logo: "https://www.edx.org/sites/default/files/styles/edx_3_2x/public/media/logo/eCornell_Logo.png",
+    logo: require("../../assets/ecornell.png"),
     logoAlt: "eCornell",
     url: "https://ecornell.cornell.edu/",
-    backgroundColor: "#0056D2"
+    backgroundColor: "#FDECDC"
   },
   {
     id: 3,
     title: "LMS by DHRE",
-    logo: "https://www.simplilearn.com/ice9/assets/course-logo/learning-management-system.jpg",
+    logo: require("../../assets/LMS.png"),
     logoAlt: "LMS by DHRE",
     url: "https://www.simplilearn.com/learning-management-system-basics-article",
-    backgroundColor: "#A435F0"
+    backgroundColor: "#FDECDC"
   }
 ];
 
 const learningContentLinks = [
-  { id: 1, title: "DHRE Unconscious Bias", logo: "/bias.png", logoAlt: "Bias", url: "#" },
-  { id: 2, title: "DHRE Effective Time Management", logo: "/time.png", logoAlt: "Time", url: "#" },
-  { id: 3, title: "DHRE Priority Matrix Job Aid", logo: "/matrix.png", logoAlt: "Matrix", url: "#" },
+  { id: 1, title: "DHRE Unconscious Bias", logo: require("../../assets/learningconcious.png"), logoAlt: "Bias", url: "#" },
+  { id: 2, title: "DHRE Effective Time Management", logo: require("../../assets/effectivemanagement.png"), logoAlt: "Time", url: "#" },
+  { id: 3, title: "DHRE Priority Matrix Job Aid", logo: require("../../assets/priorityjob.png"), logoAlt: "Matrix", url: "#" },
 ];
 
 // --------------------------
