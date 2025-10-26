@@ -1,0 +1,22 @@
+/* container = 196 x 448 translucent white card with orange border */
+.sideNav{
+  width:196px; min-height:448px;
+  background: rgba(255,255,255,.46);   /* #FFFFFF75 */
+  border:1px solid #FBBF7F; border-radius:16px;
+  padding:8px; display:flex; flex-direction:column; gap:12px;
+  box-shadow: 0 1px 0 rgba(0,0,0,.03), inset 0 0 0 1px rgba(255,255,255,.3);
+}
+
+/* pill = 180 x 40, fully rounded */
+.pill{
+  width:180px; height:40px; margin:0 auto;
+  padding:0 16px; border:none; outline:none; border-radius:360px;
+  background:transparent; color:#1f2937; font-weight:600; font-size:14px;
+  text-align:left; cursor:pointer; transition:all .15s ease;
+}
+.pill:hover{ background:#fff5e9; }
+
+.active{
+  background: linear-gradient(180deg, #fcd6b3 0%, #f9b87e 100%) !important;
+  color:#111; box-shadow: 0 2px 6px rgba(0,0,0,.08), inset 0 0 0 1px rgba(0,0,0,.06);
+}
