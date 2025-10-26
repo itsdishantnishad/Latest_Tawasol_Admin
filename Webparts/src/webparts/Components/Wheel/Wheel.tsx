@@ -156,7 +156,7 @@ const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
                     const scale = isSelected ? 1.05 : 1;
 
                     return (
-                         <button
+                        <button
                             key={`${card.id}-${position}`}
                             onClick={() => handleCardClick(card.id)}
                             className={styles.card}
