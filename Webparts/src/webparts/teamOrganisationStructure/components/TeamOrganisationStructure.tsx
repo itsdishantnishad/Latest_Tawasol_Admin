@@ -45,11 +45,9 @@ export default class TeamOrganisationStructure
     try {
       this.setState({ loading: true, error: null, selectedId: null, selectedLevel: null, departments: [] });
       const sourceList = this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
-      const members = await this.spService.getOrganisationMembers(sourceList);
-      console.log("[TeamOrg] members loaded", members);
+      const members = await this.spService.getOrganisationMembers(sourceList);     
       this.setState({ items: members, loading: false });
-    } catch (err: any) {
-      console.error("[TeamOrg] loadMembers error", err);
+    } catch (err: any) {   
       this.setState({ error: err?.message || "Failed to load.", loading: false });
     }
   }
@@ -59,8 +57,7 @@ export default class TeamOrganisationStructure
     try {
       const depts = await this.spService.getDepartmentsByMember(ListName.TEAM_ORG_DEPARTMENTS, member.user);
       this.setState({ departments: depts, loadingDepts: false });
-    } catch (e) {
-      console.error("[TeamOrg] getDepartments error", e);
+    } catch (e) {   
       this.setState({ departments: [], loadingDepts: false });
     } 
 
@@ -74,12 +71,9 @@ export default class TeamOrganisationStructure
       };
     }, async () => {
       const { selectedId } = this.state;
-      if (!selectedId) {
-        console.log("[TeamOrg] deselected → hide departments");
+      if (!selectedId) {       
         return;
       }
-
-
     });
   };
 
