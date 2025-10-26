@@ -45,17 +45,21 @@ export default class TeamOrganisationStructure
     try {
       this.setState({ loading: true, error: null, selectedId: null, selectedLevel: null, departments: [] });
       const sourceList = this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
-      const members = await this.spService.getOrganisationMembers(sourceList);
-      console.log("[TeamOrg] members loaded", members);
+      const members = await this.spService.getOrganisationMembers(sourceList);     
       this.setState({ items: members, loading: false });
-    } catch (err: any) {
-      console.error("[TeamOrg] loadMembers error", err);
+    } catch (err: any) {   
       this.setState({ error: err?.message || "Failed to load.", loading: false });
     }
   }
 
   private onCardClick = async (member: OrgMember): Promise<void> => {
-    console.log("[TeamOrg] card clicked", member);
+
+    try {
+      const depts = await this.spService.getDepartmentsByMember(ListName.TEAM_ORG_DEPARTMENTS, member.user);
+      this.setState({ departments: depts, loadingDepts: false });
+    } catch (e) {   
+      this.setState({ departments: [], loadingDepts: false });
+    } 
 
     this.setState(prev => {
       const isSame = prev.selectedId === member.id;
@@ -67,22 +71,8 @@ export default class TeamOrganisationStructure
       };
     }, async () => {
       const { selectedId } = this.state;
-      if (!selectedId) {
-        console.log("[TeamOrg] deselected → hide departments");
+      if (!selectedId) {       
         return;
-      }
-
-      try {
-        console.log("[TeamOrg] fetching departments for", member.name);
-        const depts = await this.spService.getDepartmentsByMember(
-          ListName.TEAM_ORG_DEPARTMENTS,
-          member.name
-        );
-        console.log("[TeamOrg] departments fetched", depts);
-        this.setState({ departments: depts, loadingDepts: false });
-      } catch (e) {
-        console.error("[TeamOrg] getDepartments error", e);
-        this.setState({ departments: [], loadingDepts: false });
       }
     });
   };

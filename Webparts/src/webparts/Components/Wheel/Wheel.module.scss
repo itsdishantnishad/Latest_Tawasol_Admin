@@ -39,8 +39,8 @@
   height: 50px;
   cursor: pointer;
   background-repeat: no-repeat;
-  transition: all ease 0.5s ;
-  &:hover{
+  transition: all ease 0.5s;
+  &:hover {
     transform: translateY(-10px);
   }
 }
@@ -56,9 +56,8 @@
   left: 50%;
   top: 0;
   cursor: pointer;
-  transition: transform 5s cubic-bezier(0.4, 0, 0.2, 1),
-  opacity 0.5s ease,
-  z-index 0.01s;
+  transition: transform 5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease,
+    z-index 0.01s;
   background: none;
   border: none;
   padding: 0;
@@ -130,14 +129,13 @@
   }
 }
 
-
 // .serviceLinksArt {
 //   position: absolute;
 //   top: 0;
 //   left: 0;
-//   width: 100%;        
-//   height: 100%;        
-//   object-fit: cover;    
+//   width: 100%;
+//   height: 100%;
+//   object-fit: cover;
 //   object-position: 50% 36%;
 //   transform: rotate(0.3deg) scale(0.92);
 //   border-radius: inherit;
@@ -149,40 +147,40 @@
 .dashboardCard {
   background-image: url("../FeatureContent/assets/Dashboard.svg");
 }
- 
+
 .galleryCard {
   background-image: url("../FeatureContent/assets/ImageGallery.svg");
 }
- 
+
 .documentsCard {
   background-image: url("../FeatureContent/assets/Documents.svg");
 }
- 
+
 .eventsCard {
   background-image: url("../FeatureContent/assets/Events.svg");
 }
- 
+
 .celebrateCard {
   /* Let’s Celebrate.svg (apostrophe URL-encoded) */
   background-image: url("../FeatureContent/assets/LetsCelebrate.svg");
 }
- 
+
 .meetingCard {
   background-image: url("../FeatureContent/assets/Meeting.svg");
 }
- 
+
 .serviceLinksCard {
   background-image: url("../FeatureContent/assets/Service-Links.svg");
 }
- 
+
 .interactiveFormsCard {
   background-image: url("../FeatureContent/assets/InteractiveForms.svg");
 }
- 
+
 .offersCard {
   background-image: url("../FeatureContent/assets/Offers.svg");
 }
- 
+
 .trainingCard {
   background-image: url("../FeatureContent/assets/Training.svg");
 }

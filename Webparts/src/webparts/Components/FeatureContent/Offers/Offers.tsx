@@ -1,5 +1,7 @@
 import * as React from 'react';
 import styles from './Offers.module.scss';
+const leftHeadingLine: string = require("../images/leftArrow.svg");
+const rightHeadingLine: string = require("../images/rightArrow.svg");
 
 export interface IOffer {
     id: string;
@@ -82,8 +84,8 @@ export const Offers: React.FC<IOffersProps> = (props) => {
     const handleNext = () => {
         setCurrentIndex((prev) => (prev < offers.length - 1 ? prev + 1 : 0));
     };
- console.log(handlePrev)
-      console.log(handleNext)
+    console.log(handlePrev)
+    console.log(handleNext)
     const getVisibleOffers = () => {
         const visible = [];
         for (let i = -2; i <= 2; i++) {
@@ -97,27 +99,6 @@ export const Offers: React.FC<IOffersProps> = (props) => {
 
     return (
         <div className={styles.offersContainer}>
-            {/* Header */}
-            <div className={styles.header}>
-                <div className={styles.headerContent}>
-                    <div className={styles.decorativeLineLeft}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                            <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
-                    </div>
-                    <h2 className={styles.title}>Get Offers & Discounts</h2>
-                    <div className={styles.decorativeLineRight}>
-                        <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                            <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg>
-                    </div>
-                </div>
-                <p className={styles.subtitle}>
-                    Save more with benefits designed for you
-                </p>
-            </div>
 
             {/* Carousel */}
             <div className={styles.carouselContainer}>
