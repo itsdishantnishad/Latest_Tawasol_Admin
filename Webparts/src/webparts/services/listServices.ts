@@ -421,6 +421,102 @@ export class listServices {
         }
     }
 
+
+
+    // Function to get all trainings
+    public async getAllTraining(): Promise<any[]> {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    let results;
+    const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B721B228147AA74E9D35C742E0E4560C00B86D6AF04B11174DB95E36FF7ADB455C*)`;
+    try {
+        const searchOptions: ISearchQuery = {
+            Querytext: "*",
+            TrimDuplicates: false,
+            SelectProperties: [
+                "Title",
+                "TIREventEndDate",
+                "TIREventStartDate",
+                "TIRLocation",
+                "URL",
+                "TIRJoiningURLOWSMTXT"
+                
+            ],
+            QueryTemplate: `{searchTerms}`,
+            HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
+            EnableInterleaving: true,
+            // SortList: sort ? sort : [{ Property: SearchProperties.FIRST_PUBLISHED_DATE, Direction: SortDirection.Descending }], 
+        };
+
+        // Set RowLimit dynamically: 1 for specific ID, higher for all (e.g., 500 to respect SharePoint limits)
+        searchOptions.RowLimit = 500;
+
+        results = await this.sp.search(searchOptions);
+
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        return results.PrimarySearchResults.map((item: any) => {
+            return {
+                title: item.Title,
+                eventEndDate: item.TIREventEndDate,
+                eventStartDate: item.TIREventStartDate,
+                location: item.TIRLocation,
+                newsImage: listServices.getImageUrlFromPage(item.URL, 200),
+                joiningURL: item.TIRJoiningURLOWSMTXT,
+                // lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
+                // Description: item.AcronymDetail
+            } as any;
+        });
+    } catch (error) {
+        return Promise.reject(error);
+    }
+    }
+
+     // Function to get all events
+    public async getAllEvents(): Promise<any[]> {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    let results;
+    const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C41180091B43BD03BCDD947979C2884C4C8FF39*)`;
+    try {
+        const searchOptions: ISearchQuery = {
+            Querytext: "*",
+            TrimDuplicates: false,
+            SelectProperties: [
+                "Title",
+                "TIREventEndDate",
+                "TIREventStartDate",
+                "TIRLocation",
+                "TIREventCategory",
+                "URL",
+            ],
+            QueryTemplate: `{searchTerms}`,
+            HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
+            EnableInterleaving: true,
+            // SortList: sort ? sort : [{ Property: SearchProperties.FIRST_PUBLISHED_DATE, Direction: SortDirection.Descending }], 
+        };
+
+        // Set RowLimit dynamically: 1 for specific ID, higher for all (e.g., 500 to respect SharePoint limits)
+        searchOptions.RowLimit = 500;
+
+        results = await this.sp.search(searchOptions);
+
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        return results.PrimarySearchResults.map((item: any) => {
+            return {
+                title: item.Title,
+                eventEndDate: item.TIREventEndDate,
+                eventStartDate: item.TIREventStartDate,
+                location: item.TIRLocation,
+                newsImage: listServices.getImageUrlFromPage(item.URL, 200),
+                category: item.TIREventCategory,
+                // lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
+                // Description: item.AcronymDetail
+            } as any;
+        });
+    } catch (error) {
+        return Promise.reject(error);
+    }
+   }
+
+
 }
 
 

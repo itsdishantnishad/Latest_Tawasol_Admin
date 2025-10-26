@@ -11,7 +11,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'EventAndTrainingWebPartStrings';
 import EventAndTraining from './components/EventAndTraining';
 import { IEventAndTrainingProps } from './components/IEventAndTrainingProps';
-
+import { listServices } from "../services/listServices";
 export interface IEventAndTrainingWebPartProps {
   description: string;
 }
@@ -20,56 +20,27 @@ export default class EventAndTrainingWebPart extends BaseClientSideWebPart<IEven
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
-
+  private trainingItem: any;
+  private EventItem: any;
+  private spService: listServices;
   public render(): void {
     const element: React.ReactElement<IEventAndTrainingProps> = React.createElement(
       EventAndTraining,
-      {
-        description: this.properties.description,
-        isDarkTheme: this._isDarkTheme,
-        environmentMessage: this._environmentMessage,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+      {       
+        trainingItem: this.trainingItem,
+        EventItem: this.EventItem,
       }
     );
 
     ReactDom.render(element, this.domElement);
   }
 
-  protected onInit(): Promise<void> {
-    return this._getEnvironmentMessage().then(message => {
-      this._environmentMessage = message;
-    });
+  async onInit(): Promise<void> {
+    this.spService = new listServices(this.context);
+    this.trainingItem = await this.spService.getAllTraining();
+    this.EventItem = await this.spService.getAllEvents();
   }
-
-
-
-  private _getEnvironmentMessage(): Promise<string> {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
-          let environmentMessage: string = '';
-          switch (context.app.host.name) {
-            case 'Office': // running in Office
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
-              break;
-            case 'Outlook': // running in Outlook
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
-              break;
-            case 'Teams': // running in Teams
-            case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
-              break;
-            default:
-              environmentMessage = strings.UnknownEnvironment;
-          }
-
-          return environmentMessage;
-        });
-    }
-
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
-  }
+ 
 
   protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
     if (!currentTheme) {
