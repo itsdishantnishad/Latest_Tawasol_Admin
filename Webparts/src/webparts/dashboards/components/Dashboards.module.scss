@@ -1,0 +1,112 @@
+/* ---- layout ---- */
+.page { padding: 12px 16px 40px; }
+.top  { margin-bottom: 8px; }
+
+.backbar{
+  display:flex; align-items:center; gap:12px;
+  margin:6px 0 14px;
+  padding-left:220px;
+  font-size:12px; color:#6b7280;
+}
+.backlink{ text-decoration:none; color:#111827; font-weight:600; }
+.crumbs{ opacity:.8; }
+
+.body{
+  display:grid;
+  grid-template-columns: 208px 24px 1fr; /* side | rail | content */
+  align-items:start;
+}
+.side{ display:flex; flex-direction:column; min-height:1px; }
+
+/* vertical divider (vector line) */
+.rail{
+  width:24px; min-height:492px; display:flex; justify-content:center; align-self:stretch;
+}
+.rail::before{
+  content:""; width:1px; height:100%;
+  background:#D2CBC2;
+  background-image:url("../assets/Vector 3479.png");
+  background-repeat:no-repeat; background-position:center; background-size:1px 100%;
+  opacity:1;
+}
+
+.content{ padding-left:0; }
+
+/* ---- cards ---- */
+.cards{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap:18px 22px;
+}
+.cards .card{
+  display:block; background:#fff; border:1px solid rgba(0,0,0,.12);
+  border-radius:12px; padding:14px; box-shadow:0 1px 2px rgba(0,0,0,.06);
+  text-align:left; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.cards .card:hover{ transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.08); border-color:rgba(0,0,0,.16); }
+.cards .card.active{ border-color:#fbbf7f; box-shadow:0 6px 18px rgba(251,191,127,.35); }
+
+.cardThumbWrap{ display:flex; justify-content:center; align-items:center; height:140px; margin-bottom:10px; background:#f8f8f8; border-radius:10px; }
+.cardThumb{ max-width:100%; height:auto; display:block; }
+.cardTitleRow{ display:flex; align-items:center; gap:6px; margin:6px 0 4px; }
+.cardTitle{ font-weight:600; color:#111827; font-size:14px; }
+.chev{ margin-left:auto; color:#9ca3af; }
+.cardDesc{ font-size:12px; line-height:1.4; color:#6b7280; }
+
+/* ---- detail header ---- */
+.detailHero{ margin-bottom:10px; }
+.detailH1{ margin:0 0 6px; font-size:22px; font-weight:700; color:#111827; }
+.detailSub{ margin:0; color:#6b7280; font-size:13px; }
+
+.centerRow{ display:flex; justify-content:center; margin-top:10px; }
+.viewAll{ appearance:none; border:none; border-radius:999px; padding:10px 18px; font-weight:600; background:#111827; color:#fff; cursor:pointer; }
+
+/* ---- Preview (iframe/img) ---- */
+.previewCard{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:14px;
+  padding:14px;
+  display: block;
+}
+.previewHeader{ display:flex; align-items:center; gap:10px; }
+.logoStub{ width:28px; height:28px; border-radius:6px; background:#fde2c6; }
+.previewTitle{ margin:0; font-size:18px; font-weight:700; color:#111827; }
+.previewBody{ margin-top:10px; min-height: 520px; }
+.previewFrame{
+  display:block; width:100%; height: 68vh; min-height: 520px; border:0; border-radius:10px; background:#f6f2ee;
+}
+.previewImg{ display:block; width:100%; height:auto; border-radius:10px; background:#f6f2ee; }
+
+/* ===== DETAIL MODE: NavPills गायब, rail भी हटे, content full-width ===== */
+.isDetail .top{ display:none; }     /* hero hide */
+.isDetail .side{ display:none; }    /* left nav hide */
+.isDetail .rail{ display:none; }    /* divider hide */
+.isDetail .body{ grid-template-columns: 1fr; } /* content full width */
+
+/* responsive */
+@media (max-width: 768px){
+  .body{ grid-template-columns:1fr; }
+  .rail{ display:none; }
+  .content{ padding-left:0; margin-top:16px; }
+}
+@media (max-width: 520px){
+  .previewFrame{ height: 420px; min-height: 420px; }
+}
+
+
+/* ---- layout ---- */
+.page {
+  padding: 12px 16px 40px;
+  background: #FFF4EA; /* ✅ full webpart background same as figma */
+  min-height: 100vh;   /* optional: ensures full height coverage */
+}
+
+.top  { margin-bottom: 8px; }
+
+
+
+
+
+
+

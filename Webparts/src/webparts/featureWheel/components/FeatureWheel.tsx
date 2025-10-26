@@ -86,7 +86,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
   const renderFeatureContent = () => {
     switch (selectedFeature) {
       case 'gallery':
-        return <Gallery onViewAll={handleViewAll} />
+        return <Gallery seeAllURL={props.imageGallery} onViewAll={handleViewAll} />
       case 'documents':
         return <Documents seeAllURL={props.documents} onViewAll={handleViewAll} />;
       case 'events':
@@ -104,7 +104,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
       case 'offers':
         return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
       case 'training':
-        return <Training onViewAll={handleViewAll} />;
+        return <Training seeAllURL={props.trainingAndDevelopment} onViewAll={handleViewAll} />;
     }
   };
 

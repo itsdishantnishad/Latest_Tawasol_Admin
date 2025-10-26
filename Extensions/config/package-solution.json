@@ -15,12 +15,8 @@
       "mpnId": "Undefined-1.18.2"
     },
     "metadata": {
-      "shortDescription": {
-        "default": "extensions description"
-      },
-      "longDescription": {
-        "default": "extensions description"
-      },
+      "shortDescription": { "default": "extensions description" },
+      "longDescription": { "default": "extensions description" },
       "screenshotPaths": [],
       "videoUrl": "",
       "categories": []
@@ -38,6 +34,9 @@
           ]
         }
       }
+    ],
+    "webApiPermissionRequests": [
+      { "resource": "Microsoft Graph", "scope": "People.Read" }
     ]
   },
   "paths": {

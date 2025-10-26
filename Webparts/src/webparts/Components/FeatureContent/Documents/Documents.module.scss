@@ -137,14 +137,16 @@
 .buttonContainer {
   text-align: center;
   margin-top: 40px;
+
+  a {
+    text-decoration: none;
+  }
 }
 
 .viewAllButton {
-  background: radial-gradient(
-    circle at top left,
-    rgba(32, 45, 57, 1) 0%,
-    rgba(16, 24, 32, 1) 100%
-  );
+  background: radial-gradient(circle at top left,
+      rgba(32, 45, 57, 1) 0%,
+      rgba(16, 24, 32, 1) 100%);
   color: white;
   border: none;
   border-radius: 167px;
