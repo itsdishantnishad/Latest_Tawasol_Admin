@@ -437,6 +437,7 @@ export class listServices {
                 "TIREventEndDate",
                 "TIREventStartDate",
                 "TIRLocation",
+                'TIRInstructorOWSUSER',
                 "URL",
                 "TIRJoiningURLOWSMTXT"
                 
@@ -454,6 +455,7 @@ export class listServices {
 
         // eslint-disable-line @typescript-eslint/no-explicit-any
         return results.PrimarySearchResults.map((item: any) => {
+            const instructorInfo = this.parseUserField(item.TIRInstructorOWSUSER);
             return {
                 title: item.Title,
                 eventEndDate: item.TIREventEndDate,
@@ -461,6 +463,7 @@ export class listServices {
                 location: item.TIRLocation,
                 newsImage: listServices.getImageUrlFromPage(item.URL, 200),
                 joiningURL: item.TIRJoiningURLOWSMTXT,
+                instructor: instructorInfo
                 // lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).utc().format("DD MMM, yyyy") : "",
                 // Description: item.AcronymDetail
             } as any;
@@ -469,7 +472,33 @@ export class listServices {
         return Promise.reject(error);
     }
     }
+   // helper function for the instructor name
+   private parseUserField(userFieldValue: string) {
+  if (!userFieldValue) return null;
 
+  try {
+    // Split by " | " — this format: "email | displayName | extraData i:0#.f|membership|email"
+    const parts = userFieldValue.split(" | ").map((p) => p.trim()).filter(Boolean);
+
+    if (parts.length === 0) return null;
+
+    const email = parts[0] || "";
+    const name = parts[1] || "";
+    const role = parts[2]?.includes("i:0#.f|membership|") ? "" : parts[2] || ""; // Optional role, if exists
+
+    return {
+      id: email,
+      name,
+      email,
+      role
+    };
+  } catch (err) {
+    console.error("Error parsing user field:", err, userFieldValue);
+    return null;
+  }
+   }
+
+    
      // Function to get all events
     public async getAllEvents(): Promise<any[]> {
     // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -480,6 +509,7 @@ export class listServices {
             Querytext: "*",
             TrimDuplicates: false,
             SelectProperties: [
+                "Id",
                 "Title",
                 "TIREventEndDate",
                 "TIREventStartDate",
@@ -501,6 +531,7 @@ export class listServices {
         // eslint-disable-line @typescript-eslint/no-explicit-any
         return results.PrimarySearchResults.map((item: any) => {
             return {
+                ID: item.Id,
                 title: item.Title,
                 eventEndDate: item.TIREventEndDate,
                 eventStartDate: item.TIREventStartDate,

@@ -14,6 +14,7 @@ import { IEventAndTrainingProps } from './components/IEventAndTrainingProps';
 import { listServices } from "../services/listServices";
 export interface IEventAndTrainingWebPartProps {
   description: string;
+  context: any;
 }
 
 export default class EventAndTrainingWebPart extends BaseClientSideWebPart<IEventAndTrainingWebPartProps> {
@@ -29,6 +30,7 @@ export default class EventAndTrainingWebPart extends BaseClientSideWebPart<IEven
       {       
         trainingItem: this.trainingItem,
         EventItem: this.EventItem,
+        context:this.context
       }
     );
 
