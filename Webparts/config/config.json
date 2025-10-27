@@ -145,6 +145,22 @@
           "manifest": "./src/webparts/vivaEngageHeader/VivaEngageHeaderWebPart.manifest.json"
         }
       ]
+    },
+    "policies-and-procedures-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/policiesAndProcedures/PoliciesAndProceduresWebPart.js",
+          "manifest": "./src/webparts/policiesAndProcedures/PoliciesAndProceduresWebPart.manifest.json"
+        }
+      ]
+    },
+    "policies-and-procedures-views-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/policiesAndProceduresViews/PoliciesAndProceduresViewsWebPart.js",
+          "manifest": "./src/webparts/policiesAndProceduresViews/PoliciesAndProceduresViewsWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -166,6 +182,8 @@
     "AboutDhreQuoteWebPartStrings": "lib/webparts/aboutDhreQuote/loc/{locale}.js",
     "NewsViewWebPartStrings": "lib/webparts/newsView/loc/{locale}.js",
     "DashboardsWebPartStrings": "lib/webparts/dashboards/loc/{locale}.js",
-    "VivaEngageHeaderWebPartStrings": "lib/webparts/vivaEngageHeader/loc/{locale}.js"
+    "VivaEngageHeaderWebPartStrings": "lib/webparts/vivaEngageHeader/loc/{locale}.js",
+    "PoliciesAndProceduresWebPartStrings": "lib/webparts/policiesAndProcedures/loc/{locale}.js",
+    "PoliciesAndProceduresViewsWebPartStrings": "lib/webparts/policiesAndProceduresViews/loc/{locale}.js"
   }
 }
