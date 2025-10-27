@@ -3,8 +3,7 @@
   "id": "3613bf05-4bca-4a76-90ab-51b81e508c0f",
   "alias": "DashboardsWebPart",
   "componentType": "WebPart",
-
- 
+  "supportsFullBleed": true,
   "version": "*",
   "manifestVersion": 2,
 

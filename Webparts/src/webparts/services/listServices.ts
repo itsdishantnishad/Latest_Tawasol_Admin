@@ -131,6 +131,10 @@ export class listServices {
                     pageDescription: item.Description,
                     // lastModified: item.ModifiedOWSDATE,
                     lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).fromNow() : "",
+                     publishedISO: item.ModifiedOWSDATE
+                    ? String(item.ModifiedOWSDATE).split(';')[0]
+                    : (item.Created ? String(item.Created).split(';')[0] : ""),
+
                     //  Description: item.AcronymDetail
                 } as any;
             });

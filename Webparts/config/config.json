@@ -130,11 +130,19 @@
         }
       ]
     },
-     "dashboards-web-part": {
+    "dashboards-web-part": {
       "components": [
         {
           "entrypoint": "./lib/webparts/dashboards/DashboardsWebPart.js",
           "manifest": "./src/webparts/dashboards/DashboardsWebPart.manifest.json"
+        }
+      ]
+    },
+    "viva-engage-header-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/vivaEngageHeader/VivaEngageHeaderWebPart.js",
+          "manifest": "./src/webparts/vivaEngageHeader/VivaEngageHeaderWebPart.manifest.json"
         }
       ]
     }
@@ -157,7 +165,7 @@
     "VisionAndMissionWebPartStrings": "lib/webparts/visionAndMission/loc/{locale}.js",
     "AboutDhreQuoteWebPartStrings": "lib/webparts/aboutDhreQuote/loc/{locale}.js",
     "NewsViewWebPartStrings": "lib/webparts/newsView/loc/{locale}.js",
-     "DashboardsWebPartStrings": "lib/webparts/dashboards/loc/{locale}.js"
-
+    "DashboardsWebPartStrings": "lib/webparts/dashboards/loc/{locale}.js",
+    "VivaEngageHeaderWebPartStrings": "lib/webparts/vivaEngageHeader/loc/{locale}.js"
   }
 }

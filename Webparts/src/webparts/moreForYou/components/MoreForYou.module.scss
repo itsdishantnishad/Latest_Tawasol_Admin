@@ -7,7 +7,7 @@ wrapper {
   // border-radius: 14px;
   position: relative;
   /* keep the web part narrow like right rail (auto on smaller columns) */
-  max-width: 440px;
+  max-width: 520px;
 }
  
 /* ===== Heading ===== */
@@ -130,7 +130,7 @@ wrapper {
  
 /* XXL — roomy desktop */
 @media (min-width:1600px){
-  .wrapper { max-width: 460px; }
+  .wrapper { max-width: 560px; }
   .card { height: 248px; }
 }
  
@@ -138,12 +138,12 @@ wrapper {
  
 /* LG — ≤1280px */
 @media (max-width:1280px){
-  .wrapper { max-width: 420px; }
+  .wrapper { max-width: 480px; }
 }
  
 /* MD — ≤1024px */
 @media (max-width:1024px){
-  .wrapper { max-width: 400px; }
+  .wrapper { max-width: 460px; }
 }
  
 /* SM — ≤900px (keep one column, right-rail feel) */

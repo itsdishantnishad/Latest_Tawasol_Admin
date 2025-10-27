@@ -1,0 +1,67 @@
+.vivaHeader {
+  /* existing background + layout */
+  background-color: #FFF4EA;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: 59% auto;
+
+  /* ↓ tighten bottom spacing */
+  padding: 64px 12px 8px;   /* was: 56px 12px (or 24px earlier) */
+  margin-bottom: -35px;     /* gentle overlap to remove visible gap */
+
+  min-height: 200px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.wrap {
+  width: min(1335px,96vw);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 47px;
+}
+
+/* Left/Right SVG strips */
+.stripBox { display: flex; align-items: center; }
+.strip {
+  width: 100%;
+  height: 16px;          /* slightly thicker to match the larger header */
+  min-height: 16px;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Title */
+.title {
+  margin: 0;
+  text-align: center;
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 42px;
+  line-height: 100%;
+  letter-spacing: 1px;
+  color: #000;
+  white-space: nowrap;
+}
+.in { margin: 0 6px; }
+
+/* Responsive: keep skyline nice on narrow screens */
+@media (max-width: 1024px) {
+  .vivaHeader { background-size: 170% auto; }
+}
+@media (max-width: 640px) {
+  .title { font-size: 32px; letter-spacing: .5px; }
+  .strip { height: 12px; min-height: 12px; }
+  .vivaHeader {
+    padding: 44px 12px 6px;   /* tighter bottom on mobile too */
+    margin-bottom: -14px;
+    background-size: 190% auto;
+    min-height: 170px;
+  }
+}
