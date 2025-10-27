@@ -16,6 +16,7 @@ import styles from './FeatureWheel.module.scss';
 
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
+const featureWheelBanner: string = require("../images/featureWheelBanner.png");
 
 const FeatureTitle = ({ header, subHeader }: { header: string, subHeader: string }) => {
   return (
@@ -76,7 +77,7 @@ const featureTitleContent: Record<string, { header: string, subHeader: string }>
 }
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
-  const [selectedFeature, setSelectedFeature] = useState('service_links');
+  const [selectedFeature, setSelectedFeature] = useState('gallery');
 
   const handleViewAll = () => {
     // Handle view all action - can navigate to appropriate page
@@ -110,6 +111,8 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
 
   return (
     <div className={styles.featureWheelContainer}>
+
+      <img src={featureWheelBanner} className={styles.featureWheelBanner} alt="Feature Wheel" />
       <section className={styles.wheelSection}>
         <Wheel
           selectedFeature={selectedFeature}
