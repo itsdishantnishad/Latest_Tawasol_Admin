@@ -18,10 +18,10 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
   public constructor(props: ILetsCelebrateProps) {
     super(props);
     this.state = {
-      selectedTab: "global",
+      selectedTab: "birthday",
       newJoinersData: []
     };
-      this.spService = new listServices(this.props.context);
+    this.spService = new listServices(this.props.context);
   }
 
   async componentDidMount() {
@@ -74,7 +74,7 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
           </Tab>
         </TabList>
         <div>
-          {this.state.selectedTab === "birthday" &&
+          {(this.state.selectedTab === "birthday" || this.state.selectedTab === "anniversary") &&
             <Birthday items={BirthdayData} />}
           {this.state.selectedTab === "newJoiners" &&
             <NewJoiner items={this.state.newJoinersData}></NewJoiner>
