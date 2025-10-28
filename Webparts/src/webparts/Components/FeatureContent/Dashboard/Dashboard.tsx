@@ -1,12 +1,16 @@
 import * as React from 'react';
 import styles from './Dashboard.module.scss';
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
-// import rightArrow from '../images/rightArrow.svg';
+// import rightArrow from '../assets/arrow-right.svg';
 // import leftHeadingLine from  "../images/leftArrow.svg";
 // import rightHeadingLine from "../images/rightArrow.svg"
 // const leftHeadingLine: string = require("../images/leftArrow.svg");
 // const rightHeadingLine: string = require("../images/rightArrow.svg");
-
+const rightArrow = require("../images/arrow-right.svg");
+const dashboardImageOne = require("../images/footfall.svg");
+const dashboardImageTwo = require("../images/disqualification.svg");
+const dashboardImageThree = require("../images/cxi-score.svg");
+const dashboardImageFour = require("../images/sales-report.svg");
 export interface IDashboard {
     id: string;
     header: string;
@@ -26,28 +30,28 @@ const defaultDashboards: IDashboard[] = [
         id: '1',
         header: 'Customer Footfall',
         subHeader: 'Analyzes customer traffic patterns to improve staffing, inventory, and marketing strategies.',
-        image: { url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400', alt: "Customer Footfall" },
+        image: { url: dashboardImageOne, alt: "Customer Footfall" },
         url: '#'
     },
     {
         id: '2',
         header: 'Sales Lead Disqualification',
         subHeader: 'Analyzes reasons for lead disqualification to enhance sales strategies.',
-        image: { url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400', alt: "Sales Lead Disqualification" },
+        image: { url: dashboardImageTwo, alt: "Sales Lead Disqualification" },
         url: '#'
     },
     {
         id: '3',
         header: 'CXI Score Dashboard',
         subHeader: 'Analyzes customer experience feedback to identify improvement areas and enhance satisfaction.',
-        image: { url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400', alt: "CXI Score Dashboard" },
+        image: { url: dashboardImageThree, alt: "CXI Score Dashboard" },
         url: '#'
     },
     {
         id: '4',
         header: 'DHRE Sales Report',
         subHeader: 'Access sales data and performance metrics to drive informed decision making.',
-        image: { url: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400', alt: "DHRE Sales Report" },
+        image: { url: dashboardImageFour, alt: "DHRE Sales Report" },
         url: '#'
     },
 ];
@@ -69,7 +73,7 @@ const DashboardCard = ({ image, header, subHeader, targetUrl }: DashboardCardPro
             <div className={styles.dashboardInfo}>
                 <div className={styles.dashboardTitle}>
                     {header}
-                    {/* <img src={rightArrow} alt="rightArrow" width={16} height={16} /> */}
+                    <img src={rightArrow} alt="rightArrow" width={16} height={16} />
                 </div>
                 <div className={`${styles.dashboardDescription} ${styles.mTop8}`}>{subHeader}</div>
             </div>
