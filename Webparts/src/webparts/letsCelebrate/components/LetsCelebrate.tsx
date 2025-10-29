@@ -1,24 +1,27 @@
 import * as React from 'react';
-// import styles from './LetsCelebrate.module.scss';
+import styles from './LetsCelebrate.module.scss';
 import type { ILetsCelebrateProps } from './ILetsCelebrateProps';
-import { SelectTabData, SelectTabEvent, Tab, TabList } from "@fluentui/react-components";
 import NewJoiner from './NewJoiner/NewJoiner';
-// import { NewJoinersData } from './NewJoiner/NewJoinerData';
 import { BirthdayData } from './Birthday/BirthdayData';
 import Birthday from './Birthday/Birthday';
 import { listServices } from '../../services/listServices';
 
+// If you want to reuse the NewJoiner tab styles, import them (optional)
+// import newJoinerStyles from './NewJoiner/NewJoiner.module.scss';
+
 export interface ILetsCelebrateState {
-  selectedTab: any;
+  selectedTab: 'birthdays' | 'anniversaries' | 'newJoiners';
   newJoinersData: any[];
 }
 
 export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, ILetsCelebrateState> {
   private spService: listServices;
-  public constructor(props: ILetsCelebrateProps) {
+
+  constructor(props: ILetsCelebrateProps) {
     super(props);
     this.state = {
-      selectedTab: "birthday",
+      // map old "birthday" -> "birthdays" to follow the new UI naming
+      selectedTab: 'birthdays',
       newJoinersData: []
     };
     this.spService = new listServices(this.props.context);
@@ -27,60 +30,51 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
   async componentDidMount() {
     const newJoinerData = await this.spService.getNewJoiners("New Joiner");
     this.setState({ newJoinersData: newJoinerData });
+  }
 
+  private handleTabClick = (tab: ILetsCelebrateState['selectedTab']) => {
+    this.setState({ selectedTab: tab });
   }
 
   public render(): React.ReactElement<ILetsCelebrateProps> {
-    const {
+    const { selectedTab, newJoinersData } = this.state;
 
-    } = this.props;
-
-
-    const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
-      this.setState({
-        selectedTab: data.value
-      })
-
-      switch (data.value) {
-        case "birthday":
-          // setNewsArticles([...globalNews]);
-          // setNewsType("Company News");
-          return;
-        case "anniversary":
-          // setNewsArticles([...localNews]);
-          // setNewsType("Local News");
-          return;
-        case "newJoiners":
-          // setNewsArticles([...subscribedNews]);
-          // setNewsType("My News");
-          return;
-        default:
-        // setNewsArticles([...globalNews]);
-      }
-    };
-
+    // Simple tab config — adjust labels/classes to match your styles
+    const tabs = [
+      { key: 'birthdays' as const, label: 'Birthdays' },
+      { key: 'anniversaries' as const, label: 'Anniversaries' },
+      { key: 'newJoiners' as const, label: 'New Joiners' },
+    ];
 
     return (
       <div>
-        <TabList selectedValue={this.state.selectedTab} onTabSelect={onTabSelect} selectTabOnFocus={true} size="large">
-          <Tab id="Company News" value="birthday">
-            Birthday
-          </Tab>
-          <Tab id="Local News" value="anniversary">
-            Anniversary
-          </Tab>
-          <Tab id="My News" value="newJoiners">
-            New Joiners
-          </Tab>
-        </TabList>
-        <div>
-          {(this.state.selectedTab === "birthday" || this.state.selectedTab === "anniversary") &&
-            <Birthday items={BirthdayData} />}
-          {this.state.selectedTab === "newJoiners" &&
-            <NewJoiner items={this.state.newJoinersData}></NewJoiner>
-          }
+        {/* New tab UI (button-based). Replace className values with your SCSS names. */}
+        <div className={styles.letsCelebrateTabs}> 
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              className={`${styles.letsCelebrateTab} ${selectedTab === tab.key ? styles.active : ''}`}
+              onClick={() => this.handleTabClick(tab.key)}
+              type="button"
+              aria-pressed={selectedTab === tab.key}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-      </div >
+
+        <div>
+          {(selectedTab === 'birthdays' || selectedTab === 'anniversaries') && (
+            // The old component expected BirthdayData; you can adapt BirthdayData
+            // to contain either birthdays or anniversaries as needed.
+            <Birthday items={BirthdayData} />
+          )}
+
+          {selectedTab === 'newJoiners' && (
+            <NewJoiner items={newJoinersData} />
+          )}
+        </div>
+      </div>
     );
   }
 }
