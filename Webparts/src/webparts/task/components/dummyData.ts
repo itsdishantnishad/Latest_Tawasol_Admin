@@ -36,7 +36,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Ayaan Ali",
       requestorDepartment: "HR",
       priority: "High",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2025-11-03T08:00:00.000Z",
       createdOn: "2025-10-10T09:30:00.000Z",
       assignedTo: "005TX0000044AAA",
@@ -52,7 +52,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Mira Kapoor",
       requestorDepartment: "Finance",
       priority: "Medium",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2025-11-07T08:00:00.000Z",
       createdOn: "2025-10-11T10:15:00.000Z",
       assignedTo: "005TX0000044AAB",
@@ -68,7 +68,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Hassan Raza",
       requestorDepartment: "Sales",
       priority: "Low",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2025-11-12T08:00:00.000Z",
       createdOn: "2025-10-12T08:05:00.000Z",
       assignedTo: "005TX0000044AAC",
@@ -84,7 +84,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Noor Fatima",
       requestorDepartment: "Procurement",
       priority: "High",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2025-11-18T08:00:00.000Z",
       createdOn: "2025-10-13T11:45:00.000Z",
       assignedTo: "005TX0000044AAD",
@@ -100,7 +100,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Sara Khan",
       requestorDepartment: "IT",
       priority: "Medium",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2025-11-25T08:00:00.000Z",
       createdOn: "2025-10-14T07:20:00.000Z",
       assignedTo: "005TX0000044AAE",
@@ -116,7 +116,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Rohit Mehra",
       requestorDepartment: "Marketing",
       priority: "Low",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2025-12-02T08:00:00.000Z",
       createdOn: "2025-10-15T06:10:00.000Z",
       assignedTo: "005TX0000044AAF",
@@ -132,7 +132,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Zara Sheikh",
       requestorDepartment: "Engineering",
       priority: "",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2025-12-09T08:00:00.000Z",
       createdOn: "2025-10-16T12:00:00.000Z",
       assignedTo: "005TX0000044AAG",
@@ -142,13 +142,13 @@ const sfListingMock: SFListingResponse = {
       workitemId: "04iUB000002JFj8YAG",
       workflowNumber: "E-35968",
       taskType: "Account Name Change",
-      taskTitle: "oracle Account Name Change",
+      taskTitle:  "oracle Account Name Change",
       taskDescription: "",
       status: "Pending",
       requestorName: "Taha Hamid",
       requestorDepartment: null,
       priority: "",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2025-12-16T08:15:39.000Z",
       createdOn: "2025-10-07T08:15:39.000Z",
       assignedTo: "005TX0000044GggYAE",
@@ -164,7 +164,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Ibrahim Qureshi",
       requestorDepartment: "Legal",
       priority: "High",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2025-12-23T08:00:00.000Z",
       createdOn: "2025-10-18T09:00:00.000Z",
       assignedTo: "005TX0000044AAH",
@@ -180,7 +180,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Arjun Menon",
       requestorDepartment: "Finance",
       priority: "Medium",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2025-12-30T08:00:00.000Z",
       createdOn: "2025-10-19T10:25:00.000Z",
       assignedTo: "005TX0000044AAI",
@@ -196,7 +196,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Laiba Aziz",
       requestorDepartment: "HR",
       priority: "Low",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2026-01-06T08:00:00.000Z",
       createdOn: "2025-10-20T08:40:00.000Z",
       assignedTo: "005TX0000044AAJ",
@@ -212,7 +212,7 @@ const sfListingMock: SFListingResponse = {
       requestorName: "Omar Khan",
       requestorDepartment: "Sales",
       priority: "High",
-      originSystem: "Oracle",               // ✅ fixed
+      originSystem: "Oracle",
       dueDate: "2026-01-13T08:00:00.000Z",
       createdOn: "2025-10-21T07:35:00.000Z",
       assignedTo: "005TX0000044AAK",

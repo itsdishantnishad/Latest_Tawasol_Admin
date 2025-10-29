@@ -51,7 +51,7 @@
 /* ==== CONTAINER SIZING (fluid) ==== */
 .wrapper {
   width: 100%;
-  max-width: 1280px;       /* stays inside WP container */
+  max-width: 1280px;
   margin: 0 auto;
 }
 
@@ -89,7 +89,7 @@
 .taskText { height: 22px; opacity: 1; font-weight: 400; }
 .detailsText { height: 22px; opacity: 1; font-weight: 500; }
 
-/* card becomes fluid; no fixed height/width */
+/* card becomes fluid */
 .card {
   width: 100%;
   background: #ffffff;
@@ -100,7 +100,30 @@
 }
 .inner { padding: 24px; }
 
-/* flexible inner widths */
+/* header info (the missing classes you flagged) */
+.workflowMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.workflowLabel {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.5px;
+  color: #6c6c6c;
+}
+.workflowValue {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.2px;
+  color: #000;
+}
+
 .headerBlock { width: 100%; }
 .title {
   width: 100%;
@@ -168,42 +191,17 @@
   color: #101820;
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 64px;
-  height: 28px;
-  padding: 4px 10px;
-  border-radius: 360px;
-  font-weight: 500;
-  font-size: 13px;
-}
+.chip { display: inline-flex; align-items: center; justify-content: center; min-width: 64px; height: 28px; padding: 4px 10px; border-radius: 360px; font-weight: 500; font-size: 13px; }
 .chipHigh { background: #fdede8; color: #ff3a00; }
 .chipMedium { background: #feefd4; color: #dda338; }
 .chipLow { background: #e2edfe; color: #2b77d6; }
 
-.statusPill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 360px;
-  font-weight: 700;
-  font-size: 14px;
-  color: #fff;
-}
+.statusPill { display: inline-flex; align-items: center; justify-content: center; height: 28px; padding: 0 12px; border-radius: 360px; font-weight: 700; font-size: 14px; color: #fff; }
 .stApproved { background: #0e8732; }
 .stRejected { background: #da291c; }
-.stPending { background: #c3a500; }
+.stPending  { background: #c3a500; }
 
-.ctaRow {
-  display: flex;
-  justify-content: center;
-  margin-top: 12px;
-}
-
+.ctaRow { display: flex; justify-content: center; margin-top: 12px; }
 .approveBtn {
   width: 120px;
   height: 48px;
@@ -214,7 +212,7 @@
   font-weight: 600;
   font-size: 14px;
   color: #ffffff;
-  background: radial-gradient(circle at 30% 30%, #101820, #202d39);
+  background: #0E8732; /* as requested */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
@@ -222,11 +220,11 @@
 .assigneeAvatar {
   width: 52px;
   height: 52px;
-  border-radius: 100px;   
-  background: #DDDDDD;    
-  background-size: cover; 
+  border-radius: 100px;
+  background: #DDDDDD;
+  background-size: cover;
   background-position: center;
-  flex: 0 0 52px;         
+  flex: 0 0 52px;
 }
 .assigneeName {
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
@@ -238,29 +236,4 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-/* === header meta (adds missing classes used in TSX) === */
-.workflowMeta {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.workflowLabel {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 22px;
-  letter-spacing: -0.5px;
-  color: #6c6c6c;
-}
-
-.workflowValue {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 22px;
-  letter-spacing: -0.2px;
-  color: #000;
 }

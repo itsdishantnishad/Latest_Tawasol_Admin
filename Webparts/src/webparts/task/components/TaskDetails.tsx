@@ -2,13 +2,13 @@ import * as React from "react";
 import styles from "./TaskDetails.module.scss";
 import { SMALL_ARROW_RIGHT_ICON } from "../../assets/constants";
 
-const LeftArrowIcon = () => (
+const LeftArrowIcon: React.FC = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12.5 15L7.5 10L12.5 5" stroke="#000000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-const RightArrowIcon = () => (
+const RightArrowIcon: React.FC = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M6 12L10 8L6 4" stroke="#000000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
@@ -38,9 +38,9 @@ export interface TaskDetailsProps {
   salesforceUrl?: string;
 }
 
-const fmtDate = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString(undefined, {
+const formatIsoDateToDisplay = (isoString?: string) =>
+  isoString
+    ? new Date(isoString).toLocaleDateString(undefined, {
         day: "2-digit",
         month: "short",
         year: "numeric",
@@ -48,14 +48,23 @@ const fmtDate = (iso?: string) =>
     : "—";
 
 const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, salesforceUrl }) => {
-  // ✅ Title now uses the clicked row's task title (fallback to task type)
-  const computedTitle = data.taskTitle || data.taskType || "Task details";
+  const resolvedTitle = data.taskTitle || data.taskType || "Task details";
+
+  const handleBackClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    onBack?.();
+  };
+
+  const handleApproveClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    onApprove?.();
+  };
 
   return (
     <div className={styles.wrapper}>
       {/* Breadcrumb */}
       <div className={styles.breadcrumb}>
-        <button type="button" className={styles.backBtn} onClick={onBack}>
+        <button type="button" className={styles.backBtn} onClick={handleBackClick}>
           <LeftArrowIcon />
           <span>Back</span>
         </button>
@@ -78,25 +87,17 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
             {salesforceUrl ? (
               <a href={salesforceUrl} target="_blank" rel="noopener noreferrer" className={styles.viewBtn}>
                 <span className={styles.viewBtnText}>View Details in Salesforce</span>
-                <span
-                  className={styles.viewBtnIcon}
-                  dangerouslySetInnerHTML={{ __html: SMALL_ARROW_RIGHT_ICON }}
-                />
+                <span className={styles.viewBtnIcon} dangerouslySetInnerHTML={{ __html: SMALL_ARROW_RIGHT_ICON }} />
               </a>
             ) : (
               <span className={styles.viewBtn}>
                 <span className={styles.viewBtnText}>View Details in Salesforce</span>
-                <span
-                  className={styles.viewBtnIcon}
-                  dangerouslySetInnerHTML={{ __html: SMALL_ARROW_RIGHT_ICON }}
-                />
+                <span className={styles.viewBtnIcon} dangerouslySetInnerHTML={{ __html: SMALL_ARROW_RIGHT_ICON }} />
               </span>
             )}
           </div>
 
-          {/* ✅ dynamic title */}
-          <h1 className={styles.title}>{computedTitle}</h1>
-
+          <h1 className={styles.title}>{resolvedTitle}</h1>
           <p className={styles.subtitle}>
             Salary Certificate breakdown Informations Salary Certificate breakdown Informations
           </p>
@@ -149,12 +150,12 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
             <div className={styles.row}>
               <div className={styles.col}>
                 <div className={styles.label}>Created On</div>
-                <div className={styles.value}>{fmtDate(data.createdOn)}</div>
+                <div className={styles.value}>{formatIsoDateToDisplay(data.createdOn)}</div>
               </div>
 
               <div className={styles.col}>
                 <div className={styles.label}>Due Date</div>
-                <div className={styles.value}>{fmtDate(data.dueDate)}</div>
+                <div className={styles.value}>{formatIsoDateToDisplay(data.dueDate)}</div>
               </div>
 
               <div className={styles.col}>
@@ -205,7 +206,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
           <div className={styles.rule} role="separator" aria-hidden="true" />
 
           <div className={styles.ctaRow}>
-            <button type="button" className={styles.approveBtn} onClick={onApprove}>
+            <button type="button" className={styles.approveBtn} onClick={handleApproveClick}>
               Approve
             </button>
           </div>
