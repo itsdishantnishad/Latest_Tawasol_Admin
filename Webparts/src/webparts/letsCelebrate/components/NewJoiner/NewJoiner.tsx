@@ -24,7 +24,7 @@ const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items }) => {
 
         return (
           <article>
-            <div className={styles.card}>
+            <div className={styles.cardTop}>
               <header className={styles.header}>
                 <h2 className={styles.name}>
                   <span className={styles.nameDecor}>{item.Title}</span>
@@ -75,16 +75,6 @@ const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items }) => {
                 </section>
               </div>
             </div>
-
-            {/* <div className={styles.ctaCol}>
-              <a className={styles.sayHello}
-                target="_blank"
-                data-interception="off"
-                href={`${"https://teams.microsoft.com/l/chat/0/0?users=" + item.UserEmail + "&message=Hello"}`} rel="noreferrer">
-                <span className={styles.helloIcon} aria-hidden="true">💬</span>
-                <span>Say Hello</span>
-              </a>
-            </div> */}
           </article>
         );
       })}
