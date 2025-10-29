@@ -1,40 +1,41 @@
 import * as React from "react";
 import styles from "./taskNavBtn.module.scss";
+import { TAB_ACTIVE_SVG } from "../../assets/constants";
 
-export type Option = "Services" | "Oracle" | "Salesforce";
+export type Option = "All" | "Oracle" | "Salesforce";
 
 export interface NavSegmentProps {
-  value?: Option;                         
-  defaultValue?: Option;                 
+  value?: Option;
+  defaultValue?: Option;
   onChange?: (val: Option) => void;
-  absolute?: boolean;
+  absolute?: boolean;           // kept for compatibility; ignored in css
   className?: string;
   labels?: readonly Option[];
 }
 
-const DEFAULT_OPTIONS: readonly Option[] = ["Services", "Oracle", "Salesforce"] as const;
+const DEFAULT_OPTIONS: readonly Option[] = ["All", "Oracle", "Salesforce"] as const;
 
 const NavSegment: React.FC<NavSegmentProps> = ({
   value,
-  defaultValue = "Salesforce",            
+  defaultValue = "All",
   onChange,
-  absolute = true,
+  absolute = false,
   className,
-  labels = DEFAULT_OPTIONS,              
+  labels = DEFAULT_OPTIONS,
 }) => {
   const [internal, setInternal] = React.useState<Option>(defaultValue);
   const selected = value ?? internal;
 
   const handleClick = (opt: Option) => {
-    if (value === undefined) setInternal(opt); 
-    onChange?.(opt);                           
+    if (value === undefined) setInternal(opt);
+    onChange?.(opt);
   };
 
   return (
     <div
       className={[
         styles.segmentWrap,
-        absolute ? styles.segmentWrapAbsolute : "",
+        absolute ? styles.segmentWrapAbsolute : "", 
         className ?? "",
       ].join(" ")}
       role="tablist"
@@ -54,6 +55,13 @@ const NavSegment: React.FC<NavSegmentProps> = ({
             ].join(" ")}
             onClick={() => handleClick(opt)}
           >
+            {/* active background svg as text */}
+            {isActive && (
+              <span
+                className={styles.activeBg}
+                dangerouslySetInnerHTML={{ __html: TAB_ACTIVE_SVG }}
+              />
+            )}
             <span className={styles.segmentText}>{opt}</span>
           </button>
         );
