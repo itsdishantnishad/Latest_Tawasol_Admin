@@ -1,13 +1,12 @@
 import * as React from 'react';
-import styles from './LetsCelebrate.module.scss';
+// import styles from './LetsCelebrate.module.scss';
+import stylesNav from '../../Components/NavTabs/NavTabs.module.scss';
 import type { ILetsCelebrateProps } from './ILetsCelebrateProps';
 import NewJoiner from './NewJoiner/NewJoiner';
 import { BirthdayData } from './Birthday/BirthdayData';
 import Birthday from './Birthday/Birthday';
 import { listServices } from '../../services/listServices';
-
-// If you want to reuse the NewJoiner tab styles, import them (optional)
-// import newJoinerStyles from './NewJoiner/NewJoiner.module.scss';
+import NavTabs, { NavTabsOption } from '../../Components/NavTabs/NavTabs'; // adjust path if needed
 
 export interface ILetsCelebrateState {
   selectedTab: 'birthdays' | 'anniversaries' | 'newJoiners';
@@ -20,7 +19,6 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
   constructor(props: ILetsCelebrateProps) {
     super(props);
     this.state = {
-      // map old "birthday" -> "birthdays" to follow the new UI naming
       selectedTab: 'birthdays',
       newJoinersData: []
     };
@@ -32,41 +30,31 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
     this.setState({ newJoinersData: newJoinerData });
   }
 
-  private handleTabClick = (tab: ILetsCelebrateState['selectedTab']) => {
+  private handleTabChange = (tab: ILetsCelebrateState['selectedTab']) => {
     this.setState({ selectedTab: tab });
   }
 
   public render(): React.ReactElement<ILetsCelebrateProps> {
     const { selectedTab, newJoinersData } = this.state;
 
-    // Simple tab config — adjust labels/classes to match your styles
-    const tabs = [
-      { key: 'birthdays' as const, label: 'Birthdays' },
-      { key: 'anniversaries' as const, label: 'Anniversaries' },
-      { key: 'newJoiners' as const, label: 'New Joiners' },
+    const tabs: NavTabsOption<ILetsCelebrateState['selectedTab']>[] = [
+      { key: 'birthdays', label: 'Birthdays' },
+      { key: 'anniversaries', label: 'Anniversaries' },
+      { key: 'newJoiners', label: 'New Joiners' },
     ];
 
     return (
       <div>
-        {/* New tab UI (button-based). Replace className values with your SCSS names. */}
-        <div className={styles.letsCelebrateTabs}> 
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              className={`${styles.letsCelebrateTab} ${selectedTab === tab.key ? styles.active : ''}`}
-              onClick={() => this.handleTabClick(tab.key)}
-              type="button"
-              aria-pressed={selectedTab === tab.key}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <NavTabs
+          tabs={tabs}
+          value={selectedTab}
+          onChange={this.handleTabChange}
+          className={stylesNav.navTabs} // wrapper styles in LetsCelebrate.module.scss
+          tabClassName={stylesNav.tab} // optional per-tab styles
+        />
 
         <div>
           {(selectedTab === 'birthdays' || selectedTab === 'anniversaries') && (
-            // The old component expected BirthdayData; you can adapt BirthdayData
-            // to contain either birthdays or anniversaries as needed.
             <Birthday items={BirthdayData} />
           )}
 

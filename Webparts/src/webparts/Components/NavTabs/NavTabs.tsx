@@ -1,71 +1,49 @@
 import * as React from "react";
 import styles from "./NavTabs.module.scss";
- 
-export type Option = "All" | "Oracle" | "Salesforce";
- 
-export interface NavSegmentProps {
-  value?: Option;
-  defaultValue?: Option;
-  onChange?: (val: Option) => void;
-  absolute?: boolean;           // kept for compatibility; ignored in css
-  className?: string;
-  labels?: readonly Option[];
+
+export interface NavTabsOption<K extends string = string> {
+  key: K;
+  label: string;
 }
- 
-const DEFAULT_OPTIONS: readonly Option[] = ["All", "Oracle", "Salesforce"] as const;
- 
-const NavSegment: React.FC<NavSegmentProps> = ({
+
+export interface NavTabsProps<K extends string = string> {
+  tabs: NavTabsOption<K>[];
+  value: K;
+  onChange: (key: K) => void;
+  className?: string; // optional wrapper class
+  tabClassName?: string; // optional per-tab extra class
+}
+
+/**
+ * Generic, accessible tab-like nav built with buttons.
+ * - Uses CSS modules (NavTab.module.scss)
+ * - Keeps semantics simple: buttons with aria-pressed
+ */
+function NavTabs<K extends string = string>({
+  tabs,
   value,
-  defaultValue = "All",
   onChange,
-  absolute = false,
-  className,
-  labels = DEFAULT_OPTIONS,
-}) => {
-  const [internal, setInternal] = React.useState<Option>(defaultValue);
-  const selected = value ?? internal;
- 
-  const handleClick = (opt: Option) => {
-    if (value === undefined) setInternal(opt);
-    onChange?.(opt);
-  };
- 
+  className = "",
+  tabClassName = "",
+}: NavTabsProps<K>) {
   return (
-    <div
-      className={[
-        styles.segmentWrap,
-        absolute ? styles.segmentWrapAbsolute : "",
-        className ?? "",
-      ].join(" ")}
-      role="tablist"
-      aria-label="Filter by system"
-    >
-      {labels.map((opt) => {
-        const isActive = selected === opt;
+    <div className={`${styles.navTabs} ${className}`.trim()}>
+      {tabs.map((tab) => {
+        const isActive = tab.key === value;
         return (
           <button
-            key={opt}
+            key={tab.key}
             type="button"
-            role="tab"
-            aria-selected={isActive}
-            className={[
-              styles.segmentBtn,
-              isActive ? styles.segmentBtnActive : styles.segmentBtnIdle,
-            ].join(" ")}
-            onClick={() => handleClick(opt)}
+            className={`${styles.tab} ${isActive ? styles.active : ""} ${tabClassName}`.trim()}
+            aria-pressed={isActive}
+            onClick={() => onChange(tab.key)}
           >
-            {/* active background svg as text */}
-            {isActive && (
-              <span
-                className={styles.activeBg}
-              />
-            )}
-            <span className={styles.segmentText}>{opt}</span>
+            {tab.label}
           </button>
         );
       })}
     </div>
   );
-};
- 
-export default NavSegment; 
+}
+
+export default NavTabs;
