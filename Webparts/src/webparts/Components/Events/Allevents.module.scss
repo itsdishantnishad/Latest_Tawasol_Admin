@@ -197,16 +197,16 @@
 // Container styles for demo
 .eventsContainer {
   min-height: 100vh;
-  background-color: #f9fafb;
-  padding: 32px;
+  background-color: #fef7f0;
+  padding: 40px 60px;
+  
 }
 
 .eventsWrapper {
-  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1em;
 }
 
 .infoBox {
@@ -287,13 +287,19 @@
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 24px;
 }
+
+
 /* Tabs */
 .tabContainer {
   display: flex;
   gap: 24px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
+  padding: 0 60px;
+  background-color: #fef7f0;
+}
+
+.tabContainerInner{
   border-bottom: 1px solid #edebe9; // Subtle border
-  padding-bottom: 8px;
 }
 
 .tabButton {

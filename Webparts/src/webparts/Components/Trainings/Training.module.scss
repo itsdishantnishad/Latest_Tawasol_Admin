@@ -120,9 +120,13 @@
 .tabContainer {
   display: flex;
   gap: 24px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
+  padding: 0 60px;
+  background-color: #fef7f0;
+}
+
+.tabContainerInner{
   border-bottom: 1px solid #edebe9; // Subtle border
-  padding-bottom: 8px;
 }
 
 .tabButton {

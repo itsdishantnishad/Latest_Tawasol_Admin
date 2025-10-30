@@ -143,18 +143,20 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
     <>
       {/* Tabs */}
       <div className={styles.tabContainer}>
-        <button
-          className={`${styles.tabButton} ${activeTab === "all" ? styles.activeTab : ""}`}
-          onClick={() => setActiveTab("all")}
-        >
-          All Trainings
-        </button>
-        <button
-          className={`${styles.tabButton} ${activeTab === "my" ? styles.activeTab : ""}`}
-          onClick={() => setActiveTab("my")}
-        >
-          My Trainings
-        </button>
+        <div className={styles.tabContainerInner}>
+          <button
+            className={`${styles.tabButton} ${activeTab === "all" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("all")}
+          >
+            All Trainings
+          </button>
+          <button
+            className={`${styles.tabButton} ${activeTab === "my" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("my")}
+          >
+            My Trainings
+          </button>
+        </div>
       </div>
 
       {/* Courses */}
