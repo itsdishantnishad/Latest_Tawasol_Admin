@@ -73,14 +73,12 @@
 }
 
 .eventTitle {
-  font-size: 22px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 12px 0;
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  line-height: 1.3;
+  font-size: 18px;
+  font-weight: 500;
+  justify-content: flex-start;
+  line-height: 24px;
+  margin: 0 0 12px 0;
 }
 
 .arrowIcon {
@@ -92,20 +90,22 @@
 }
 
 .eventFooter {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-size: 14px;
   color: #ffffff;
-  opacity: 0.95;
+  display: flex;
+  font-size: 14px;
+  line-height: 22px;
+  justify-content: space-between;
+  letter-spacing: -0.5px;
 }
 
 .imageCount {
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .eventDate {
   font-weight: 400;
+   opacity: 0.75;
 }
 
 // Responsive design
