@@ -1,132 +1,186 @@
-import * as React from "react";
-import styles from "./Dashboards.module.scss";
+import * as React from 'react';
+import { Stack, Text, Separator, Breadcrumb, IBreadcrumbItem } from '@fluentui/react';
+import type { WebPartContext } from '@microsoft/sp-webpart-base';
+import { listServices, DashboardCategory, DashboardItem } from '../../services/listServices';
+import { ListName } from '../../services/Constants';
+import { breadcrumbBeforeBackArrowSVG } from '../../assets/contant';
 
-import HeroBanner from "./HeroBanner";
-import SideNavPills from "./SideNavPills";
-import DashboardCard from "./DashboardCard";
-import DashboardPreview from "./DashboardPreview";
+import CategoryRail from './CategoryRail';
+import DashboardGrid from './DashboardGrid';
+import DashboardDetail from './DashboardDetail';
+import DashboardBanner from './banner/DashboardBanner';
 
-interface DashboardItem { title: string; image?: string; url?: string; desc?: string; }
-export interface IDashboardsProps {
-  heading: string;
-  subtitle?: string;
-  items?: DashboardItem[];
+import styles from './Dashboards.module.scss';
+
+export interface IDashboardProps {
+  context: WebPartContext;
 }
 
-interface State {
-  navActive: number;
-  showDetail: boolean;
-  selectedIndex: number;
-}
+type State = {
+  loading: boolean;
+  error?: string;
 
-const DEFAULT_LABELS = [
-  "Administration","Project Delivery","Marketing","Commercial","DHLE",
-  "Customer Care","RC Dashboards","Management","Finance"
-];
+  categories: DashboardCategory[];
+  selectedCategory?: DashboardCategory;
 
-export default class Dashboards extends React.Component<IDashboardsProps, State> {
-  constructor(props: IDashboardsProps) {
+  dashboards: DashboardItem[];
+
+  active?: DashboardItem;
+  related: DashboardItem[];
+  relatedTop: number;
+  relatedExpanded: boolean;
+  hasMoreRelated: boolean;
+};
+
+export default class Dashboards extends React.Component<IDashboardProps, State> {
+  private spService: listServices;
+
+  constructor(props: IDashboardProps) {
     super(props);
-    this.state = { navActive: 0, showDetail: false, selectedIndex: 0 };
+    this.state = {
+      loading: true,
+      categories: [],
+      dashboards: [],
+      related: [],
+      relatedTop: 4,
+      relatedExpanded: false,
+      hasMoreRelated: false
+    };
+    this.spService = new listServices(this.props.context);
   }
 
-  private openDetail = (i: number) => this.setState({ showDetail: true, selectedIndex: i });
-  private closeDetail = () => this.setState({ showDetail: false });
+  async componentDidMount(): Promise<void> {
+    try {
+      const categories = await this.spService.getDashboardCategories(ListName.DASH_CATEGORIES);
+      const activeCats = categories.filter(c => c.isActive);
+      const selectedCategory = activeCats.length ? activeCats[0] : undefined;
+      this.setState({ categories: activeCats, selectedCategory }, this.loadDashboards);
+    } catch (err: any) {
+      this.setState({ loading: false, error: err?.message || 'Failed to load data.' });
+    }
+  }
 
-  public render(): React.ReactElement {
-    // exactly 6 slots
-    const items: DashboardItem[] = (this.props.items || []).slice(0, 6);
-    while (items.length < 6) items.push({ title: `Dashboard ${items.length + 1}` });
+  private loadDashboards = async (): Promise<void> => {
+    const { selectedCategory } = this.state;
+    if (!selectedCategory) { this.setState({ loading: false, dashboards: [] }); return; }
+    this.setState({ loading: true });
+    try {
+      const dashboards = await this.spService.getDashboards(ListName.DASHBOARDS, selectedCategory.id);
+      this.setState({ dashboards, loading: false });
+    } catch (err: any) {
+      this.setState({ loading: false, error: err?.message || 'Failed to load dashboards.' });
+    }
+  };
 
-    const { showDetail, selectedIndex } = this.state;
-    const selected = items[selectedIndex] || items[0];
+  private onSelectCategory = (category: DashboardCategory): void => {
+    this.setState(
+      { selectedCategory: category, active: undefined, related: [], relatedTop: 4, relatedExpanded: false, hasMoreRelated: false },
+      this.loadDashboards
+    );
+  };
 
-    // detail view: show only 3 others below the preview
-    const allIdx = items.map((_, i) => i);
-    const otherIdx = allIdx.filter(i => i !== selectedIndex);
-    const gridIdx = showDetail ? otherIdx.slice(0, 3) : allIdx;
+  private onOpenDashboard = async (item: DashboardItem): Promise<void> => {
+    try {
+      const take = this.state.relatedTop;
+      const probe = await this.spService.getDashboards(ListName.DASHBOARDS, item.categoryId, take + 1, 0, item.id);
+      const hasMoreRelated = probe.length > take;
+      const visibleRelated = probe.slice(0, take);
+      this.setState({ active: item, related: visibleRelated, relatedExpanded: false, hasMoreRelated });
+    } catch {
+      this.setState({ active: item, related: [], relatedExpanded: false, hasMoreRelated: false });
+    }
+  };
+
+  private onViewAllRelated = async (): Promise<void> => {
+    const { active } = this.state;
+    if (!active) return;
+    try {
+      const all = await this.spService.getDashboards(ListName.DASHBOARDS, active.categoryId, undefined, undefined, active.id);
+      this.setState({ related: all, relatedExpanded: true, hasMoreRelated: false });
+    } catch { /* noop */ }
+  };
+
+  private onBackToMaster = (): void => {
+    this.setState({ active: undefined, related: [], relatedTop: 4, relatedExpanded: false, hasMoreRelated: false });
+  };
+
+  /** Back | Home > Dashboards (Back only in detail view) */
+  private renderTopBar(): React.ReactNode {
+    const { active } = this.state;
+    if (!active) return null;
+
+    const breadcrumbItems: IBreadcrumbItem[] = [
+      { key: 'home', text: 'Home', onClick: () => this.setState({ active: undefined }) },
+      { key: 'dash', text: 'Dashboards', isCurrentItem: true }
+    ];
 
     return (
-      <div className={`${styles.page} ${showDetail ? styles.isDetail : ""}`}>
-
-        {/* Banner — hidden in detail via CSS (.isDetail .top {display:none}) */}
-        <div className={styles.top}>
-          <HeroBanner
-            titleRed="Data Work Bench"
-            titleBlack="Dashboards"
-            subtitle={this.props.subtitle}
+      <div className={styles.topBar}>
+        <button className={styles.backBtn} onClick={this.onBackToMaster} aria-label="Back" title="Back">
+          <span
+            aria-hidden="true"
+            dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }}
           />
-        </div>
+          <span>Back</span>
+        </button>
+        <span className={styles.divider}>|</span>
+        <Breadcrumb items={breadcrumbItems} />
+      </div>
+    );
+  }
 
-        {/* Body grid */}
-        <div className={styles.body}>
+  render(): React.ReactElement<IDashboardProps> {
+    const { loading, error, categories, selectedCategory, dashboards, active, related, relatedExpanded, hasMoreRelated } = this.state;
 
-          {/* Back row — now placed UNDER the banner and INSIDE the grid.
-              Inline style ensures it spans the grid and aligns left of navpills
-              without needing SCSS changes. */}
-          {!showDetail && (
-            <div
-              className={styles.backbar}
-              style={{ gridColumn: "1 / -1", paddingLeft: 0, marginTop: 8, marginBottom: 12 }}
-            >
-              <a
-                className={styles.backlink}
-                href="#"
-                onClick={(e) => { e.preventDefault(); this.closeDetail(); }}
-              >
-                ← Back
-              </a>
-              <span className={styles.crumbs}>Home / Dashboards</span>
+    const showMoreSection = active ? (related.length > 0 || hasMoreRelated) : false;
+    const showViewAll = active ? (!relatedExpanded && hasMoreRelated) : false;
+
+    return (
+      <section>
+        {!active && <DashboardBanner />}
+
+        {this.renderTopBar()}
+
+        <Separator />
+
+        <div className={styles.layout}>
+          {!active && (
+            <div className={styles.rail}>
+              <CategoryRail
+                items={categories}
+                selectedId={selectedCategory?.id}
+                onSelect={this.onSelectCategory}
+              />
             </div>
           )}
 
-          {/* SideNav — hidden in detail via CSS if you’ve set it; otherwise it stays */}
-          <aside className={styles.side}>
-            <SideNavPills
-              items={DEFAULT_LABELS}
-              activeIndex={this.state.navActive}
-              onSelect={(i) => this.setState({ navActive: i })}
-            />
-          </aside>
+          <Stack grow>
+            {loading && <Text>Loading…</Text>}
+            {error && !loading && <Text styles={{ root: { color: '#c00' } }}>{error}</Text>}
 
-          {/* vertical rail — hidden in detail by CSS (.isDetail .rail {display:none}) */}
-          <div className={styles.rail} aria-hidden />
-
-          <main className={styles.content}>
-            {/* detail preview on top when clicked */}
-            {showDetail && (
-              <>
-                <div className={styles.detailHero}>
-                  <h1 className={styles.detailH1}>{selected.title}</h1>
-                  {selected.desc && <p className={styles.detailSub}>{selected.desc}</p>}
-                </div>
-                <DashboardPreview
-                  item={{ title: selected.title, image: selected.image, url: selected.url }}
-                />
-                <div style={{ height: 12 }} />
-              </>
+            {/* Master view */}
+            {!loading && !error && !active && (
+              <DashboardGrid
+                title={selectedCategory?.name || 'Dashboards'}
+                items={dashboards}
+                onOpen={this.onOpenDashboard}
+                showTitle={false}   // HIDE the duplicate heading
+              />
             )}
 
-            {/* cards */}
-            <div className={styles.cards}>
-              {gridIdx.map((i) => (
-                <DashboardCard
-                  key={i}
-                  item={items[i]}
-                  active={false}
-                  onClick={() => this.openDetail(i)}
-                />
-              ))}
-            </div>
-
-            {showDetail && otherIdx.length > 3 && (
-              <div className={styles.centerRow}>
-                <button className={styles.viewAll} onClick={this.closeDetail}>View All</button>
-              </div>
+            {!loading && !error && active && (
+              <DashboardDetail
+                item={active}
+                related={related}
+                onOpen={this.onOpenDashboard}
+                onViewAll={this.onViewAllRelated}
+                showSection={showMoreSection}
+                showViewAll={showViewAll}
+              />
             )}
-          </main>
+          </Stack>
         </div>
-      </div>
+      </section>
     );
   }
 }

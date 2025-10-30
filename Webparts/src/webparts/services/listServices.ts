@@ -1,4 +1,3 @@
-
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import { SPFI, spfi, SPFx } from '@pnp/sp';
 import "@pnp/sp/webs";
@@ -37,6 +36,31 @@ moment.updateLocale('en', {
 export type OurValueCard = { id: number; title: string; desc: string; icon?: string; sort: number; };
 export type OrgMember = { id: number; name: string; role: string; level: number; sort: number; photoUrl?: string; user: string; };
 export type OrgDepartment = { name: string; url?: string; };
+
+/** ===== Dashboards (NEW TYPES) ===== */
+export type DashboardCategory = {
+    id: number;
+    name: string;
+    key?: string;           // optional short key if you add it later
+    sort: number;
+    isActive: boolean;
+};
+
+export type DashboardItem = {
+    id: number;
+    title: string;
+    categoryId: number;
+    categoryName: string;
+    body?: string;          // TIRBody (card description)
+    thumbUrl?: string;      // TIRThumbURL
+    sort: number;
+
+    // embedding + quick links
+    embedUrl?: string;      // TIREmbedURL (SharePoint Online embed URL)
+    linkHome?: string;      // TIRLinkHome
+    linkTasks?: string;     // TIRLinkTasks
+    linkDocs?: string;      // TIRLinkDocs
+};
 
 export class listServices {
 
@@ -131,9 +155,9 @@ export class listServices {
                     pageDescription: item.Description,
                     // lastModified: item.ModifiedOWSDATE,
                     lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).fromNow() : "",
-                     publishedISO: item.ModifiedOWSDATE
-                    ? String(item.ModifiedOWSDATE).split(';')[0]
-                    : (item.Created ? String(item.Created).split(';')[0] : ""),
+                    publishedISO: item.ModifiedOWSDATE
+                        ? String(item.ModifiedOWSDATE).split(';')[0]
+                        : (item.Created ? String(item.Created).split(';')[0] : ""),
 
                     //  Description: item.AcronymDetail
                 } as any;
@@ -551,7 +575,90 @@ export class listServices {
     }
    }
 
+   /* ===================== DASHBOARDS (NEW SERVICES) ===================== */
+
+   /** Load Dashboard categories (left rail on master view) */
+   public async getDashboardCategories(listTitle: string): Promise<DashboardCategory[]> {
+     try {
+       const rows: any[] = await this.sp.web.lists.getByTitle(listTitle).items
+         .select("Id", "Title", "TIRKey", "TIRSortOrder", "TIRIsActive")
+         .orderBy("TIRSortOrder", true)();
+
+       return rows.map((row: any) => {
+         return {
+           id: Number(row?.Id) || 0,
+           name: row?.Title || "",
+           key: row?.TIRKey || "",
+           sort: Number(row?.TIRSortOrder ?? 9999),
+           isActive: Boolean(row?.TIRIsActive)
+         } as DashboardCategory;
+       });
+     } catch (error) {
+       return Promise.reject(error);
+     }
+   }
+   public async getDashboards(
+     listTitle: string,
+     categoryId?: number,
+     top?: number,
+     skip?: number,
+     excludeId?: number
+   ): Promise<DashboardItem[]> {
+     try {
+       let query = this.sp.web.lists.getByTitle(listTitle).items
+         .select(
+           "Id","Title","TIRBody","TIRThumbURL","TIRSortOrder",
+           "TIREmbedURL","TIRCategory/Id","TIRCategory/Title")
+         .expand("TIRCategory")
+         .orderBy("TIRSortOrder", true);
+
+       // compose OData filter
+       const filters: string[] = [];
+       if (typeof categoryId === "number") filters.push(`TIRCategoryId eq ${categoryId}`);
+       if (typeof excludeId === "number") filters.push(`Id ne ${excludeId}`);
+       if (filters.length) query = query.filter(filters.join(" and "));
+
+       if (typeof top === "number" && top > 0)  query = query.top(top);
+       if (typeof skip === "number" && skip > 0) query = query.skip(skip);
+
+       const rows: any[] = await query();
+
+       return rows.map((row: any) => {
+         const thumb = row?.TIRThumbURL;
+         const thumbUrl = typeof thumb === "string" ? thumb : thumb?.Url || undefined;
+
+         const embed = row?.TIREmbedURL;
+         const embedUrl = typeof embed === "string" ? embed : embed?.Url || undefined;
+
+         const cat = row?.TIRCategory || {};
+         const categoryName = cat?.Title || "";
+         const categoryIdValue = Number(cat?.Id || row?.TIRCategoryId || 0);
+
+         return {
+           id: Number(row?.Id) || 0,
+           title: row?.Title || "",
+           categoryId: categoryIdValue,
+           categoryName,
+           body: row?.TIRBody || "",
+           thumbUrl,
+           sort: Number(row?.TIRSortOrder ?? 9999),
+           embedUrl
+         } as DashboardItem;
+       });
+     } catch (error) {
+       return Promise.reject(error);
+     }
+   }
+
+   /** Convenience: fetch a single Dashboard item by ID */
+   public async getDashboardById(listTitle: string, itemId: number): Promise<DashboardItem | null> {
+     try {
+       const allItems = await this.getDashboards(listTitle);
+       const match = allItems.find(it => it.id === itemId);
+       return match || null;
+     } catch (error) {
+       return Promise.reject(error);
+     }
+   }
 
 }
-
-

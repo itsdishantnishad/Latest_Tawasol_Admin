@@ -8,5 +8,7 @@ export enum ListName {
     OUR_VALUES = "Our Values",
     ORGANISATION_STRUCTURE = "Team Org Structure",
     OUR_PORTFOLIO = "Our Portfolio",
-    TEAM_ORG_DEPARTMENTS = "Team Org Departments"
+    TEAM_ORG_DEPARTMENTS = "Team Org Departments",
+    DASH_CATEGORIES = "Dash Categories",
+    DASHBOARDS = "Dashboards"
 }
