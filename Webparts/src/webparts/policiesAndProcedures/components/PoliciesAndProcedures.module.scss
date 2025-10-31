@@ -1,34 +1,188 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
-.policiesAndProcedures {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
-  &.teams {
-    font-family: $ms-font-family-fallbacks;
+/* ---------- Brand tokens (no depth variables) ---------- */
+:root {
+  --pp-bg:            #fff4ea;
+  --pp-card:          #ffffff;
+  --pp-card-soft:     #fff7ef;
+  --pp-card-accent:   #ffeede;
+  --pp-card-accent-2: #fff3e8;
+
+  --pp-border:        #f2e3d7;
+  --pp-border-dash:   #efdfd2;
+
+  --pp-text:          #1b1b1b;
+  --pp-text-muted:    #7a6e62;
+
+  --pp-accent-1:      #edd8c6;
+  --pp-accent-2:      #ffe0c7;
+  --pp-accent-3:      #fff8f1;
+}
+
+/* ---------- Reusable helpers ---------- */
+%tileCard {
+  background: var(--pp-card);
+  border: 1px solid var(--pp-border);
+  border-radius: 12px;
+}
+
+%hoverLift {
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, border-color .12s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    @include ms-depth-8;
   }
 }
 
-.welcome {
-  text-align: center;
-}
-
-.welcomeImage {
-  width: 100%;
-  max-width: 420px;
-}
-
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
-
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
-    }
+%focusRing {
+  &:focus-visible {
+    outline: 2px solid $ms-color-themePrimary;
+    outline-offset: 2px;
+    border-radius: 10px;
   }
+}
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ------------------------------------ Page ------------------------------------ */
+.page {
+  background: var(--pp-bg);
+  padding: 12px clamp(10px, 2vw, 24px) 32px;
+  font-family: 'Inter', sans-serif;
+  color: var(--pp-text);
+}
+
+/* ----------------------------------- Banner ----------------------------------- */
+.banner {
+  position: relative; height: 160px; border-radius: 14px;
+  background: linear-gradient(180deg, #ffe9d7 0%, #ffe0c7 100%);
+  overflow: hidden; display: grid; align-items: center;
+  padding: 20px 24px; margin-bottom: 14px;
+}
+.bannerArtwork { position:absolute; inset:0; opacity:.18; pointer-events:none; }
+.bannerText    { position:relative; z-index:2; }
+.bannerTitle   { font-family: 'Instrument Serif', serif; font-weight:400; font-style:italic; font-size:32px; margin:0; }
+.bannerSub     { margin:6px 0 0; opacity:.8; max-width:760px; }
+
+/* ------------------------------- Home header row ------------------------------- */
+.homeTopRow { display:grid; grid-template-columns: 1fr 360px; gap: 12px; align-items:center; margin: 6px 0 10px; }
+.sectionHeading { font-size:14px; font-weight:600; }
+.searchHome { justify-self:end; }
+
+
+/* ------------------------------- Core grid tiles ------------------------------- */
+.coreGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 200px); /* fixed width like Figma */
+  column-gap: 24px; /* horizontal spacing */
+  row-gap: 20px;    /* vertical spacing */
+  justify-content: start; /* no extra stretch */
+  margin-bottom: 12px;     /* tighter space before “Support Function” */
+}
+.coreTile  {
+  position: relative;
+  width: 200px; height: 213px; /* matches your SVG size */
+  border-radius: 12px; overflow: hidden;
+  cursor: pointer; 
+  @extend %hoverLift; 
+  @extend %focusRing;
+
+  &:hover { @include ms-depth-16; }
+}
+.coreThumb { width: 100%; height: 100%; }
+.svgWrap   { width: 100%; height: 100%; }
+.coreThumb svg { width: 100%; height: 100%; display: block; }
+.coreThumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.coreCaption {
+  position: absolute; left: 0; right: 0; bottom: 0; color: #fff;
+  padding: 10px 12px;
+  font-size: 12px; font-weight: 600; line-height: 1.6; font-family: 'Inter';
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 100%);
+}
+/* ----------------------------- Support grid tiles ----------------------------- */
+.supportGrid { display:grid; grid-template-columns: repeat(6, minmax(160px,1fr)); gap:12px; margin-top:10px; }
+.supportTile  { @extend %tileCard; padding:14px 12px; min-height:110px; display:grid; grid-template-rows:46px auto; gap:8px; cursor:pointer; background: var(--pp-card-accent); @extend %hoverLift; @extend %focusRing; }
+.supportTile:hover { background: var(--pp-card-soft); }
+.supportIcon { display:grid; place-items:center; }
+.supportIcon img { width:46px; height:46px; object-fit:contain; }
+.supportTitle { font-size:12px; font-weight:600; }
+
+/* ----------------------------------- Boards ----------------------------------- */
+.boards { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:18px; }
+.board  { @extend %tileCard; padding:12px; }
+.boardTitle { font-weight:600; margin-bottom:6px; font-size:13px; }
+.boardList { list-style:none; padding:0; margin:0; }
+.boardList li { display:grid; grid-template-columns: 12px 1fr auto; gap:8px; padding:8px 0; border-top:1px dashed var(--pp-border-dash); }
+.boardList li:first-child { border-top:none; }
+.dot  { width:8px; height:8px; border-radius:50%; background:#d9c2ad; align-self:center; }
+.name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.meta { color:var(--pp-text-muted); font-size:12px; }
+
+/* --------------------------- Top bar (detail pages) --------------------------- */
+.topBar { display:grid; grid-template-columns: 100px 1fr 360px; gap:12px; align-items:center; margin-bottom:10px; }
+.backBtn { padding:8px 12px; border-radius:10px; border:1px solid var(--pp-accent-1); background:var(--pp-card); cursor:pointer; @extend %hoverLift; }
+.crumbs  { color:var(--pp-text-muted); }
+.searchWrap { justify-self:end; }
+
+/* --------------------------- Library view split panes -------------------------- */
+.libWrap { display:grid; grid-template-columns: 1fr 420px; gap:14px; }
+.libLeft { @extend %tileCard; padding:10px; }
+.libRight {}
+
+.previewCard { background: var(--pp-card-accent-2); border:1px solid var(--pp-border); border-radius:12px; padding:16px; min-height:260px; display:grid; align-content:center; gap:8px; }
+.previewIcon { width:60px; height:60px; border-radius:16px; background: var(--pp-accent-2); margin:0 auto 6px; }
+.previewTitle { text-align:center; font-weight:600; }
+.previewMeta  { text-align:center; color:var(--pp-text-muted); }
+
+/* Folders + view switch */
+.foldersBar { display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; margin-bottom:8px; }
+.folderItem { background: var(--pp-card-accent); border:1px solid var(--pp-border); border-radius:10px; padding:8px 10px; display:inline-block; margin-right:8px; }
+.viewSwitch { display:flex; gap:6px; }
+.switchBtn, .switchActive { padding:6px 10px; border-radius:8px; border:1px solid var(--pp-accent-1); background:var(--pp-card); cursor:pointer; }
+.switchActive { background: var(--pp-card-soft); }
+
+/* Table list */
+.docTable { width:100%; border-collapse: collapse; }
+.docTable thead th { text-align:left; font-size:12px; color:var(--pp-text-muted); font-weight:600; padding:8px; border-bottom:1px solid var(--pp-border); }
+.docTable tbody td { padding:10px 8px; border-bottom:1px dashed var(--pp-border-dash); font-size:13px; }
+.rowActive { background:#fff9f3; }
+.iconCol { width:36px; }
+.nameCol { max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Grid cards */
+.docGrid { display:grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap:12px; }
+.docCard { @extend %tileCard; padding:12px; cursor:pointer; @extend %hoverLift; }
+.docThumb { height:80px; display:grid; place-items:center; background: var(--pp-accent-3); border:1px dashed var(--pp-border-dash); border-radius:10px; margin-bottom:8px; }
+.docName { font-weight:600; font-size:13px; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.docMeta { color:var(--pp-text-muted); font-size:12px; }
+
+/* File icon mock */
+.fileIcon { width:28px; height:28px; border-radius:7px; display:inline-block; background:#e7d3c1; }
+.fileIcon[data-ext="pdf"]  { background:#ffd1cc; }
+.fileIcon[data-ext="docx"] { background:#cfe0ff; }
+.fileIcon[data-ext="xlsx"] { background:#cfeedd; }
+.fileIcon[data-ext="pptx"] { background:#ffe6bf; }
+
+/* --------------------------------- Responsive --------------------------------- */
+/* Core & Support use fixed 200px tiles; step columns down by viewport width */
+@media (max-width: 1600px) {
+  .coreGrid    { grid-template-columns: repeat(6, 200px); }
+  .supportGrid { grid-template-columns: repeat(6, 200px); }
+}
+@media (max-width: 1360px) {
+  .coreGrid    { grid-template-columns: repeat(5, 200px); }
+  .supportGrid { grid-template-columns: repeat(5, 200px); }
+}
+@media (max-width: 1100px) {
+  .coreGrid    { grid-template-columns: repeat(4, 200px); }
+  .supportGrid { grid-template-columns: repeat(4, 200px); }
+  .libWrap     { grid-template-columns: 1fr; } /* stack preview under list */
+}
+@media (max-width: 800px) {
+  .homeTopRow, .topBar { grid-template-columns: 1fr; }
+  .coreGrid, .supportGrid { grid-template-columns: repeat(3, 200px); }
+  .docGrid { grid-template-columns: repeat(3, minmax(180px, 1fr)); }
+  .boards { grid-template-columns: 1fr; }
 }
