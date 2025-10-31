@@ -161,6 +161,14 @@
           "manifest": "./src/webparts/policiesAndProceduresViews/PoliciesAndProceduresViewsWebPart.manifest.json"
         }
       ]
+    },
+    "event-gallery-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/eventGallery/EventGalleryWebPart.js",
+          "manifest": "./src/webparts/eventGallery/EventGalleryWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -184,6 +192,7 @@
     "DashboardsWebPartStrings": "lib/webparts/dashboards/loc/{locale}.js",
     "VivaEngageHeaderWebPartStrings": "lib/webparts/vivaEngageHeader/loc/{locale}.js",
     "PoliciesAndProceduresWebPartStrings": "lib/webparts/policiesAndProcedures/loc/{locale}.js",
-    "PoliciesAndProceduresViewsWebPartStrings": "lib/webparts/policiesAndProceduresViews/loc/{locale}.js"
+    "PoliciesAndProceduresViewsWebPartStrings": "lib/webparts/policiesAndProceduresViews/loc/{locale}.js",
+    "EventGalleryWebPartStrings": "lib/webparts/eventGallery/loc/{locale}.js"
   }
 }
