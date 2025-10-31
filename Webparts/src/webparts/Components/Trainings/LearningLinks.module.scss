@@ -3,16 +3,19 @@
     margin-bottom: 24px;
 
     .title {
-      font-size: 18px;
+      color: #000;
+      font-size: 20px;
       font-weight: 600;
-      color: #1a1a1a;
       margin: 0 0 8px 0;
+      line-height: 28px;
     }
 
     .description {
-      font-size: 14px;
-      color: #6b6b6b;
+      color: #6C6C6C;
+      font-size: 16px;
       margin: 0;
+      line-height: 24px;
+      font-weight: 500;
     }
   }
 
@@ -24,60 +27,50 @@
 
   .linkCard {
     align-items: center;
-    justify-content: center;
     background-color: #fdecdc;
     border: 1px solid #f0e9e5;
     border-radius: 12px;
     cursor: pointer;
     display: flex;
-    flex-direction: column;
-    height: 157px;
-    padding: 0;
-    text-align: center;
-    transition: all .25s ease;
-    position: relative;
+    height: 200px;
+    justify-content: center;
     overflow: hidden;
-
-    // &:hover {
-    //   transform: translateY(-2px);
-    //   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    //   border-color: #e8d9d0;
-    // }
+    padding: 0;
+    width: 100%;
+    position: relative;
 
     .logoContainer {
-      align-items: center;
-      // border: 1px solid #f0e9e5;
-      border-radius: 12px;
-      display: flex;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
       height: 100%;
-      justify-content: center;
       width: 100%;
-      overflow: hidden;
     }
 
-    .logo {
-      object-fit: contain;
-      width: 100%;  
-    }
+    // .logo {
+    //   object-fit: contain;
+    //   width: 100%;  
+    // }
 
     .linkTitle {
-      flex: 1;
-      display: flex;
       align-items: center;
-      justify-content: center;
-      background-color: #ffffff;
+      background-color: #fff;
+      border-radius: 10px;
+      display: flex;
+      flex: 1;
+      margin-bottom: 5px;
       padding: 15px;
       width: calc(100% - 40px);
-      border-radius: 10px;
-      margin-bottom: 5px;
+      position: absolute;
+      bottom: 0;
 
       h3 {
-        font-size: 13px;
-        font-weight: 500;
-        color: #333333;
-        margin: 0;
-        text-align: center;
-        line-height: 1.3;
+      color: #000;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 22px;
+      margin: 0;
+      text-align: left;
       }
     }
   }
