@@ -52,7 +52,6 @@ export const LearningLinks: React.FC<ILearningLinksProps> = ({
             {/* Logo Section */}
             <div 
               className={styles.logoContainer}
-              style={{ backgroundColor: link.backgroundColor || '#ffffff' }}
             >
               <img 
                 src={link.logo} 
