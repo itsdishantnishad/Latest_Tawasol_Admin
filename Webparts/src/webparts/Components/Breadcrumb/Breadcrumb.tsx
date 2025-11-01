@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ConditionalLink from '../ConditionalLink/ConditionalLink';
 import styles from './Breadcrumb.module.scss';
 
 const LeftArrowIcon: React.FC = () => (
@@ -18,7 +19,7 @@ interface BreadcrumbProps {
     links: { text: string; url?: string }[];
 }
 
-const Breadcrumb = ({ onBack, links }: BreadcrumbProps) => {
+const Breadcrumb: React.FC<BreadcrumbProps> = ({ onBack, links }) => {
 
     return (
         <div className={styles.breadcrumb}>
@@ -30,12 +31,8 @@ const Breadcrumb = ({ onBack, links }: BreadcrumbProps) => {
             <div className={styles.linksContainer}>
                 {links.map((link, index) => (
                     <React.Fragment key={index}>
-                        {link.url ? (
-                            <a href={link.url} className={styles.taskText}>{link.text}</a>
-                        ) : (
-                            <span className={styles.taskText}>{link.text}</span>
-                        )}
-                        {link.url && <RightArrowIcon />}
+                        <ConditionalLink to={link.url}>{link.text}</ConditionalLink>
+                        {index < links.length - 1 && <RightArrowIcon />}
                     </React.Fragment>
                 ))}
             </div>
