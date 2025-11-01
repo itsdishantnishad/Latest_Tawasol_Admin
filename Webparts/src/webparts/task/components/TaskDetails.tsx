@@ -1,18 +1,7 @@
 import * as React from "react";
 import styles from "./TaskDetails.module.scss";
 import { SMALL_ARROW_RIGHT_ICON } from "../../assets/constants";
-
-const LeftArrowIcon: React.FC = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12.5 15L7.5 10L12.5 5" stroke="#000000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const RightArrowIcon: React.FC = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M6 12L10 8L6 4" stroke="#000000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+import Breadcrumb from "../../Components/Breadcrumb/Breadcrumb";
 
 export type TaskDetailsData = {
   workitemId: string;
@@ -33,7 +22,7 @@ export type TaskDetailsData = {
 
 export interface TaskDetailsProps {
   data: TaskDetailsData;
-  onBack?: () => void;
+  onBack: () => void;
   onApprove?: () => void;
   salesforceUrl?: string;
 }
@@ -41,19 +30,14 @@ export interface TaskDetailsProps {
 const formatIsoDateToDisplay = (isoString?: string) =>
   isoString
     ? new Date(isoString).toLocaleDateString(undefined, {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
     : "—";
 
 const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, salesforceUrl }) => {
   const resolvedTitle = data.taskTitle || data.taskType || "Task details";
-
-  const handleBackClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    onBack?.();
-  };
 
   const handleApproveClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -61,21 +45,14 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
   };
 
   return (
-    <div className={styles.wrapper}>
-      {/* Breadcrumb */}
-      <div className={styles.breadcrumb}>
-        <button type="button" className={styles.backBtn} onClick={handleBackClick}>
-          <LeftArrowIcon />
-          <span>Back</span>
-        </button>
-
-        <div className={styles.divider} />
-        <span className={styles.taskText}>Task</span>
-        <RightArrowIcon />
-        <span className={styles.detailsText}>Task Details</span>
-      </div>
-
-      {/* Card */}
+    <>
+      <Breadcrumb
+        onBack={onBack}
+        links={[
+          { text: "Task", url: "/task" },
+          { text: "Task Details" },
+        ]}
+      />
       <section className={styles.card}>
         <div className={styles.inner}>
           <div className={styles.headerBar}>
@@ -131,13 +108,12 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
                 <div className={styles.label}>Status</div>
                 <div className={styles.value}>
                   <span
-                    className={`${styles.statusPill} ${
-                      data.status === "Approved"
-                        ? styles.stApproved
-                        : data.status === "Rejected"
+                    className={`${styles.statusPill} ${data.status === "Approved"
+                      ? styles.stApproved
+                      : data.status === "Rejected"
                         ? styles.stRejected
                         : styles.stPending
-                    }`}
+                      }`}
                   >
                     <span className={styles.statusText}>{data.status}</span>
                   </span>
@@ -212,7 +188,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
           </div>
         </div>
       </section>
-    </div>
+    </>
   );
 };
 

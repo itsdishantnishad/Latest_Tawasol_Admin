@@ -6,6 +6,20 @@
 
 .pageContainer {
   margin: 0 auto;
+  padding: 60px 60px 0;
+}
+
+.taskHeader {
+  width: 230px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tableWrapper {
+  padding: 0 60px;
 }
 
 .table {
@@ -37,6 +51,10 @@
 }
 
 .tableBody {
+  tr {
+    cursor: pointer;
+  }
+
   tr:nth-child(odd) {
     background: #fff4ea;
   }
@@ -44,15 +62,6 @@
   tr:nth-child(even) {
     background: #ffeee0;
   }
-}
-
-.taskHeader {
-  width: 230px;
-  height: 55px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
 }
 
 .taskHeaderAbsolute {
@@ -80,11 +89,6 @@
   letter-spacing: 1px;
   text-align: center;
   color: #000000;
-}
-
-.tableWrapper {
-  width: 100%;
-  overflow-x: auto;
 }
 
 /* action column */
