@@ -18,7 +18,12 @@ const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
 const featureWheelBanner: string = require("../images/featureWheelBanner.png");
 
-const FeatureTitle = ({ header, subHeader }: { header: string, subHeader: string }) => {
+interface FeatureTitleProps {
+  header: string;
+  subHeader: string;
+}
+
+const FeatureTitle: React.FC<FeatureTitleProps> = ({ header, subHeader }) => {
   return (
     <div className={styles.titleContainer}>
       <div className={styles.headerContent}>
