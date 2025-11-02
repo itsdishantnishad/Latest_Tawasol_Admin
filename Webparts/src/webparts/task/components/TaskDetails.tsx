@@ -2,6 +2,8 @@ import * as React from "react";
 import styles from "./TaskDetails.module.scss";
 import { SMALL_ARROW_RIGHT_ICON } from "../../assets/constants";
 import Breadcrumb from "../../Components/Breadcrumb/Breadcrumb";
+import Tag from "../../Components/Tag/Tag";
+import PrimaryButton from "../../Components/PrimaryButton/PrimaryButton";
 
 export type TaskDetailsData = {
   workitemId: string;
@@ -39,10 +41,27 @@ const formatIsoDateToDisplay = (isoString?: string) =>
 const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, salesforceUrl }) => {
   const resolvedTitle = data.taskTitle || data.taskType || "Task details";
 
-  const handleApproveClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
+  const handleApproveClick = () => {
     onApprove?.();
   };
+
+  const statusTagBgColor = {
+    'Approved': '#0e8732',
+    'Rejected': '#da291c',
+    'Pending': '#c3a500',
+  }
+
+  const priorityTagBgColor = {
+    'High': '#fdede8',
+    'Medium': '#feefd4',
+    'Low': '#e2edfe',
+  }
+
+  const priorityTagTextColor = {
+    'High': '#ff3a00',
+    'Medium': '#dda338',
+    'Low': '#2b77d6',
+  }
 
   return (
     <>
@@ -85,13 +104,11 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
             <div className={styles.row}>
               <div className={styles.col}>
                 <div className={styles.label}>Priority</div>
-                <div className={styles.value}>
-                  {data.priority ? (
-                    <span className={`${styles.chip} ${styles[`chip${data.priority}`]}`}>{data.priority}</span>
-                  ) : (
-                    "—"
-                  )}
-                </div>
+                {data.priority && <Tag
+                  label={data.priority}
+                  backgroundColor={priorityTagBgColor[data.priority as keyof typeof priorityTagBgColor]}
+                  textColor={priorityTagTextColor[data.priority as keyof typeof priorityTagTextColor]}
+                />}
               </div>
 
               <div className={styles.col}>
@@ -107,16 +124,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
               <div className={styles.col}>
                 <div className={styles.label}>Status</div>
                 <div className={styles.value}>
-                  <span
-                    className={`${styles.statusPill} ${data.status === "Approved"
-                      ? styles.stApproved
-                      : data.status === "Rejected"
-                        ? styles.stRejected
-                        : styles.stPending
-                      }`}
-                  >
-                    <span className={styles.statusText}>{data.status}</span>
-                  </span>
+                  <Tag label={data.status} backgroundColor={statusTagBgColor[data.status as keyof typeof statusTagBgColor]} />
                 </div>
               </div>
             </div>
@@ -182,9 +190,11 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
           <div className={styles.rule} role="separator" aria-hidden="true" />
 
           <div className={styles.ctaRow}>
-            <button type="button" className={styles.approveBtn} onClick={handleApproveClick}>
-              Approve
-            </button>
+            <PrimaryButton
+              label="Approve"
+              onClick={handleApproveClick}
+              size="large"
+            />
           </div>
         </div>
       </section>
