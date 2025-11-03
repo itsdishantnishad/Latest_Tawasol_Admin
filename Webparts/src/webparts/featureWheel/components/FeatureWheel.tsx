@@ -1,5 +1,5 @@
 import * as React from 'react';
-import  { useState } from 'react';
+import { useState } from 'react';
 import type { IFeatureWheelProps } from './IFeatureWheelProps';
 import Wheel from '../../Components/Wheel/Wheel';
 import Gallery from '../../Components/Gallery/Gallery';
@@ -13,39 +13,75 @@ import Dashboard from '../../Components/FeatureContent/Dashboard/Dashboard';
 import Offers from '../../Components/FeatureContent/Offers/Offers';
 import Training from '../../Components/FeatureContent/Training/Training';
 import styles from './FeatureWheel.module.scss';
-// import leftHeadingLine from "../images/leftArrow.svg"
-// import rightHeadingLine from "../images/rightArrow.svg"
+
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
+const featureWheelBanner: string = require("../images/featureWheelBanner.png");
 
-const FeatureWheelHeader = ({ title, subtitle }: { title: string, subtitle: string }) => {
+interface FeatureTitleProps {
+  header: string;
+  subHeader: string;
+}
+
+const FeatureTitle: React.FC<FeatureTitleProps> = ({ header, subHeader }) => {
   return (
-    <div className={styles.header}>
+    <div className={styles.titleContainer}>
       <div className={styles.headerContent}>
-          <div className={styles.decorativeLineLeft}>
-              {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                  <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                  <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-              </svg> */}
-              <img src={rightHeadingLine} alt="rightArrow" />
-          </div>
-          <h2 className={styles.title}>A Glimpse through our lens</h2>
-          <div className={styles.decorativeLineRight}>
-              {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                  <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                  <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-              </svg> */}
-              <img src={leftHeadingLine} alt="leftArrow" />
-          </div>
+        <img src={rightHeadingLine} alt="" />
+        <h2 className={styles.title}>{header}</h2>
+        <img src={leftHeadingLine} alt="" />
       </div>
       <p className={styles.subtitle}>
-        Recent milestones and cherished memories we've Immortalised
+        {subHeader}
       </p>
     </div>
   );
 };
 
-const FeatureWheel: React.FC<IFeatureWheelProps> = (props:any) => {
+const featureTitleContent: Record<string, { header: string, subHeader: string }> = {
+  gallery: {
+    header: "A Glimpse through our lens",
+    subHeader: "Recent milestones and cherished memories we've Immortalised"
+  },
+  documents: {
+    header: "Policy and Procedure",
+    subHeader: "Everything you need, neatly organized"
+  },
+  events: {
+    header: "Upcoming events",
+    subHeader: "Stay updated and never miss out on what’s happening"
+  },
+  employee_events: {
+    header: "Let’s Celebrate",
+    subHeader: "Wish your peers on their special day"
+  },
+  meetings: {
+    header: "See your Meetings Scheduled",
+    subHeader: "Connect, collaborate, and drive decisions together"
+  },
+  service_links: {
+    header: "Service Links",
+    subHeader: "Quickly access your most used service links"
+  },
+  forms: {
+    header: "Interactive Forms",
+    subHeader: "All your essential forms – legacy, claims, business excellence, and more"
+  },
+  dashboard: {
+    header: "Dashboard",
+    subHeader: "Track everything at a glance – insights made simple!"
+  },
+  offers: {
+    header: "Get Offers & Discounts",
+    subHeader: "Save more with benefits designed for you"
+  },
+  training: {
+    header: "Enroll Yourself in Upcoming Trainings",
+    subHeader: "Grow your skills with tailored learning sessions"
+  }
+}
+
+const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
   const [selectedFeature, setSelectedFeature] = useState('gallery');
 
   const handleViewAll = () => {
@@ -56,15 +92,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props:any) => {
   const renderFeatureContent = () => {
     switch (selectedFeature) {
       case 'gallery':
-        return (
-          <section className={styles.gallerySection}>
-            <FeatureWheelHeader
-              title="A Glimpse through our lens"
-              subtitle="Recent milestones and cherished memories we've Immortalised"
-            />
-            <Gallery onViewAll={handleViewAll} />
-          </section>
-        );
+        return <Gallery seeAllURL={props.imageGallery} onViewAll={handleViewAll} />
       case 'documents':
         return <Documents seeAllURL={props.documents} onViewAll={handleViewAll} />;
       case 'events':
@@ -83,30 +111,23 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props:any) => {
         return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
       case 'training':
         return <Training seeAllURL={props.trainingAndDevelopment} onViewAll={handleViewAll} />;
-      default:
-        return (
-          <section className={styles.gallerySection}>
-            <FeatureWheelHeader
-              title="A Glimpse through our lens"
-              subtitle="Recent milestones and cherished memories we've Immortalised"
-            />
-            <Gallery onViewAll={handleViewAll} />
-          </section>
-        );
     }
   };
 
   return (
     <div className={styles.featureWheelContainer}>
-      {/* Feature Wheel Section */}
+
+      <img src={featureWheelBanner} className={styles.featureWheelBanner} alt="Feature Wheel" />
       <section className={styles.wheelSection}>
         <Wheel
           selectedFeature={selectedFeature}
           onFeatureSelect={setSelectedFeature}
         />
       </section>
-
-      {/* Dynamic Feature Content */}
+      <FeatureTitle
+        header={featureTitleContent[selectedFeature].header}
+        subHeader={featureTitleContent[selectedFeature].subHeader}
+      />
       {renderFeatureContent()}
     </div>
   );

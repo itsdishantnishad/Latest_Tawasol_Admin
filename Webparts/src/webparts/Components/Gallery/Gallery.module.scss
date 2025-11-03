@@ -4,7 +4,7 @@
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 60px 20px;
+  padding: 50px 0;
   // background-color: #f8f9fa;
 }
 
@@ -51,6 +51,10 @@
 .buttonContainer {
   text-align: center;
   margin-top: 40px;
+  
+  a {
+    text-decoration: none;
+  }
 }
 
 .viewAllButton {

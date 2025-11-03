@@ -1,8 +1,6 @@
 import * as React from 'react';
 import styles from './Task.module.scss';
 import type { ITaskProps } from './ITaskProps';
-// import { escape } from '@microsoft/sp-lodash-subset';
-import { SelectTabData, SelectTabEvent, Tab, TabList } from "@fluentui/react-components";
 import {
   TableBody,
   TableCell,
@@ -11,89 +9,159 @@ import {
   TableHeader,
   TableHeaderCell,
   TableCellLayout,
-
 } from "@fluentui/react-components";
-// import TaskRow from './TaskRow';
+import Tag from '../../Components/Tag/Tag';
+
 import sfListingMock from './dummyData';
+import TaskDetails, { TaskDetailsData } from './TaskDetails';
+import NavSegment from './taskNavBtnComp';
+import { ACTION_RED_CROSS_REJECT_SVG, ACTION_GREEN_CHECK_APPROVE_SVG } from '../../assets/constants';
+
+import { SfApprovalService, TaskListApiResponse } from '../../services/Task/SalesforceApprovalService';
 
 
-
-// type Row = {
-//   id: string;
-//   workflowNumber: string;
-//   taskTitle: string;
-//   priority: "" | "High" | "Medium" | "Low";
-//   status: "Pending" | "Approved" | "Rejected" | string;
-//   originSystem: string;
-//   dueDate: string;
-
-//   // --- NEW: carry extra fields through to details ---
-//   createdOn?: string;
-//   assignedTo?: string;
-//   requestorName?: string;
-//   requestorDepartment?: string | null;
-
-// };
-// export type FetchSalesforceListingFn = (email: string) => Promise<SFListingResponse>;
-// export type FetchOracleListingFn = (email: string) => Promise<SFListingResponse>;
-
-
-// Map API approval -> Row (now including the extra fields)
-// const approvalToRow = (a: SFApproval): Row => ({
-//   id: a.workitemId,
-//   workflowNumber: a.workflowNumber,
-//   taskTitle: a.taskTitle || a.taskType || "—",
-//   priority: (a.priority as Row["priority"]) || "",
-//   status: a.status,
-//   originSystem: a.originSystem,
-//   dueDate: a.dueDate,
-
-//   // --- NEW: pass-through fields from API ---
-//   createdOn: a.createdOn,
-//   assignedTo: a.assignedTo,
-//   requestorName: a.requestorName,
-//   requestorDepartment: a.requestorDepartment ?? null,
-// });
-
-// Build TaskDetails payload from Row (now forwarding the extra fields)
-// const toDetails = (row: Row): TaskDetailsData => ({
-//   workitemId: row.id,
-//   workflowNumber: row.workflowNumber,
-//   taskTitle: row.taskTitle,
-//   taskType: row.taskTitle,
-//   priority: row.priority,
-//   originSystem: row.originSystem,
-//   status: row.status,
-//   createdOn: row.createdOn,                  // NEW
-//   dueDate: row.dueDate,
-//   assignedTo: row.assignedTo,                // NEW
-//   requestorName: row.requestorName,          // NEW
-//   requestorDepartment: row.requestorDepartment, // NEW
-// });
-
-// const columns = ["Workflow No.", "Task Title", "Priority", "Due Date", "Action", "Status"] as const;
-// const labels: readonly Option[] = ["Services", "Oracle", "Salesforce"];
-
-const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
 
 export interface ITaskState {
-  selectedTab: any;
+  selectedTabValue: string;
+  selectedTaskDetails: TaskDetailsData | null;
+  isLoading: boolean;
+  errorMessage?: string;
+  oracleItems: any[];
+  salesforceItems: any[];
 }
 
+const formatIsoDateToDisplay = (isoString: string) =>
+  new Date(isoString).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+
 export default class Task extends React.Component<ITaskProps, ITaskState> {
+  private readonly salesforceService: SfApprovalService;
+
   constructor(props: ITaskProps) {
     super(props);
     this.state = {
-      selectedTab: "all"
+      selectedTabValue: "All",
+      selectedTaskDetails: null,
+      isLoading: true,
+      oracleItems: [],
+      salesforceItems: [],
+    };
+
+    // Not passing HttpClient in dev; service is in MOCK mode until cutover.
+    this.salesforceService = new SfApprovalService({
+      // httpClient: this.props.httpClient, // provide at cutover for direct calls
+      salesforceBaseUrl: "https://dubaiproperties--dev.sandbox.my.salesforce.com",
+      // accessToken: "<Bearer token if calling SF directly>",
+    });
+  }
+
+  public async componentDidMount(): Promise<void> {
+    try {
+      // In mock mode the service throws "MOCK_MODE"
+      const currentUserEmail = this.props.userDisplayName || "someone@example.com";
+      const listResponse: TaskListApiResponse = await this.salesforceService.fetchApprovalsByEmail(currentUserEmail);
+
+      const salesforceList = (listResponse.approvals || []).filter(
+        (task) => (task.originSystem || "").toLowerCase() === "salesforce"
+      );
+      const oracleList = (listResponse.approvals || []).filter(
+        (task) => (task.originSystem || "").toLowerCase() === "oracle"
+      );
+
+      this.setState({
+        oracleItems: oracleList,
+        salesforceItems: salesforceList,
+        isLoading: false,
+      });
+    } catch (error: any) {
+      // Fallback to mocks
+      this.setState({
+        oracleItems: sfListingMock.oracle,
+        salesforceItems: sfListingMock.salesForce,
+        isLoading: false,
+        errorMessage: (error?.message && error.message !== "MOCK_MODE") ? error.message : undefined,
+      });
+    }
+  }
+
+  private normalizeOriginSystem(originSystem?: string): string {
+    const lower = (originSystem || "").toLowerCase();
+    if (lower === "oracle") return "Oracle";
+    if (lower === "salesforce") return "Salesforce";
+    return originSystem || "—";
+  }
+
+  private buildTaskDetailsPayload(taskRowData: any): TaskDetailsData {
+    return {
+      workitemId: taskRowData.workitemId,
+      workflowNumber: taskRowData.workflowNumber,
+      taskTitle: taskRowData.taskTitle,
+      taskType: taskRowData.taskType,
+      priority: taskRowData.priority,
+      originSystem: this.normalizeOriginSystem(taskRowData.originSystem),
+      status: taskRowData.status,
+      createdOn: taskRowData.createdOn,
+      dueDate: taskRowData.dueDate,
+      assignedTo: taskRowData.assignedTo,
+      requestorName: taskRowData.requestorName,
+      requestorDepartment: taskRowData.requestorDepartment,
     };
   }
 
+  private handleRowClick = (taskRowData: any) => {
+    const taskDetails: TaskDetailsData = this.buildTaskDetailsPayload(taskRowData);
+    this.setState({ selectedTaskDetails: taskDetails });
+  };
+
+  private handleBackFromDetails = () => {
+    this.setState({ selectedTaskDetails: null });
+  };
+
+  private handleTabChange = (newTabValue: string) => {
+    this.setState({ selectedTabValue: newTabValue, selectedTaskDetails: null });
+  };
+
+  private handleApproveAction = async (taskDetails: TaskDetailsData) => {
+    try {
+      const actionResponse = await this.salesforceService.submitTaskAction({
+        actionType: "Approve",
+        contextId: taskDetails.workitemId,
+      });
+
+      if (actionResponse.success) {
+        alert(`Approved! Status: ${actionResponse.instanceStatus || "Approved"}`);
+        this.setState({ selectedTaskDetails: { ...taskDetails, status: "Approved" } });
+      } else {
+        alert("Approve failed");
+      }
+    } catch {
+      alert("Approve failed");
+    }
+  };
+
   public render(): React.ReactElement<ITaskProps> {
     const {
-    } = this.props;
+      selectedTaskDetails,
+      selectedTabValue,
+      isLoading,
+      oracleItems,
+      salesforceItems
+    } = this.state;
 
-    const columns = [
+    if (selectedTaskDetails) {
+      return (
+        <div className={styles.main}>
+          <div className={styles.pageContainer}>
+            <TaskDetails
+              data={selectedTaskDetails}
+              onBack={this.handleBackFromDetails}
+              onApprove={() => this.handleApproveAction(selectedTaskDetails)}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    const tableColumns = [
       { columnKey: "workflowNumber", label: "Workflow No." },
       { columnKey: "taskTitle", label: "Task Title" },
       { columnKey: "priority", label: "Priority" },
@@ -102,121 +170,111 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
       { columnKey: "status", label: "Status" },
     ];
 
-    const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
-      this.setState({
-        selectedTab: data.value
-      })
-
-      switch (data.value) {
-        case "birthday":
-          // setNewsArticles([...globalNews]);
-          // setNewsType("Company News");
-          return;
-        case "anniversary":
-          // setNewsArticles([...localNews]);
-          // setNewsType("Local News");
-          return;
-        case "newJoiners":
-          // setNewsArticles([...subscribedNews]);
-          // setNewsType("My News");
-          return;
-        default:
-        // setNewsArticles([...globalNews]);
-      }
-    };
-
-    const tableBody = (item: any): JSX.Element => {
-      return (
-        <TableRow >
-          <TableCell>
-            <TableCellLayout>
-              {item.workflowNumber}
-            </TableCellLayout>
-          </TableCell>
-          <TableCell>
-            <TableCellLayout>
-              {item.taskTitle}
-            </TableCellLayout>
-          </TableCell>
-          <TableCell>
-            <TableCellLayout>
-              <span className={`${styles.chip} 
-              ${item.priority === "High" ? styles.chipHigh :
-                  item.priority === "Medium" ? styles.chipMedium
-                    : styles.chipLow}`}>
-                {item.priority}
-              </span>
-            </TableCellLayout>
-          </TableCell>
-          <TableCell>{fmtDate(item.dueDate)}</TableCell>
-          <TableCell>
-            <TableCellLayout>
-              {item.action}
-            </TableCellLayout>
-          </TableCell>
-          <TableCell>
-            <TableCellLayout>
-              <div className={styles.value}>
-                <span
-                  className={`${styles.statusPill} ${item.status === "Approved"
-                    ? styles.stApproved
-                    : item.status === "Rejected"
-                      ? styles.stRejected
-                      : styles.stPending
-                    }`}
-                >
-                  <span className={styles.statusText}>{item.status}</span>
-                </span>
-              </div>
-
-            </TableCellLayout>
-          </TableCell>
-        </TableRow>
-      )
+    const statusTagColor = {
+      'Approved': '#0e8732',
+      'Rejected': '#da291c',
+      'Pending': '#c3a500',
     }
 
+    const priorityTagBgColor = {
+      'High': '#fdede8',
+      'Medium': '#feefd4',
+      'Low': '#e2edfe',
+    }
+
+    const priorityTagTextColor = {
+      'High': '#ff3a00',
+      'Medium': '#dda338',
+      'Low': '#2b77d6',
+    }
+
+    const renderTaskRow = (taskItem: any): JSX.Element => (
+      <TableRow key={taskItem.workitemId} onClick={() => this.handleRowClick(taskItem)}>
+        <TableCell>
+          <TableCellLayout>{taskItem.workflowNumber}</TableCellLayout>
+        </TableCell>
+        <TableCell>
+          <TableCellLayout>{taskItem.taskTitle}</TableCellLayout>
+        </TableCell>
+        <TableCell>
+          <TableCellLayout>
+            <Tag
+              label={taskItem.priority}
+              backgroundColor={priorityTagBgColor[taskItem.priority as keyof typeof priorityTagBgColor]}
+              textColor={priorityTagTextColor[taskItem.priority as keyof typeof priorityTagTextColor]}
+            />
+          </TableCellLayout>
+        </TableCell>
+        <TableCell>{formatIsoDateToDisplay(taskItem.dueDate)}</TableCell>
+        <TableCell>
+          <div className={styles.actionCell}>
+            <span className={styles.actionItem}>
+              <span
+                className={styles.actionIcon}
+                dangerouslySetInnerHTML={{ __html: ACTION_RED_CROSS_REJECT_SVG }}
+              />
+              Reject
+            </span>
+            <span className={styles.actionItem}>
+              <span
+                className={styles.actionIcon}
+                dangerouslySetInnerHTML={{ __html: ACTION_GREEN_CHECK_APPROVE_SVG }}
+              />
+              Approve
+            </span>
+          </div>
+        </TableCell>
+
+        <TableCell>
+          <TableCellLayout>
+            <Tag
+              label={taskItem.status}
+              backgroundColor={statusTagColor[taskItem.status as keyof typeof statusTagColor]}
+            />
+          </TableCellLayout>
+        </TableCell>
+      </TableRow>
+    );
 
     return (
-      <>
-        <div className={styles.main} >
+      <div className={styles.main}>
+        <div className={styles.pageContainer}>
           <div className={`${styles.taskHeader} ${styles.taskHeaderAbsolute}`}>
             <span className={styles.taskText}>Task</span>
             <span className={styles.approvalsText}> Approvals</span>
           </div>
 
-          <TabList selectedValue={this.state.selectedTab} onTabSelect={onTabSelect} selectTabOnFocus={true} size="large">
-            <Tab id="All" value="all">
-              All
-            </Tab>
-            <Tab id="Oracle" value="oracle">
-              Oracle
-            </Tab>
-            <Tab id="Salesforce" value="salesforce">
-              Salesforce
-            </Tab>
-          </TabList>
+          <NavSegment
+            absolute={false}
+            defaultValue={selectedTabValue as any}
+            onChange={this.handleTabChange}
+            labels={["All", "Oracle", "Salesforce"]}
+          />
 
-          <Table arial-label="Default table" style={{ minWidth: "510px" }}>
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHeaderCell key={column.columnKey}>
-                    {column.label}
-                  </TableHeaderCell>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(this.state.selectedTab === "oracle" || this.state.selectedTab === "all") && sfListingMock.oracle.map((orcaItem: any) => (
-                tableBody(orcaItem)
-              ))}
-              {(this.state.selectedTab === "salesforce" || this.state.selectedTab === "all") && sfListingMock.salesForce.map((salesItem: any) => (
-                tableBody(salesItem)
-              ))}
-            </TableBody>
-          </Table>
+          <div className={styles.tableWrapper}>
+            <Table className={styles.table} aria-label="Task Approvals Table">
+              <TableHeader className={styles.tableHeader}>
+                <TableRow>
+                  {tableColumns.map((column) => (
+                    <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>
+                  ))}
+                </TableRow>
+              </TableHeader>
+
+              <TableBody className={styles.tableBody}>
+                {isLoading ? null : (
+                  <>
+                    {(selectedTabValue === "Oracle" || selectedTabValue === "All") &&
+                      oracleItems.map((task) => renderTaskRow(task))}
+                    {(selectedTabValue === "Salesforce" || selectedTabValue === "All") &&
+                      salesforceItems.map((task) => renderTaskRow(task))}
+                  </>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
-      </>
+      </div>
     );
   }
 }

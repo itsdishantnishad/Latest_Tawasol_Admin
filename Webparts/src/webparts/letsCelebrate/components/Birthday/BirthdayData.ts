@@ -11,13 +11,23 @@ export interface IBirthdayPerson {
 
 export const BirthdayData: IBirthdayPerson[] = [
   {
+    id: "b4",
+    firstName: "Mohit",
+    lastName: "Khandelwal",
+    designation: "Lead developer",
+    department: "Information Technology",
+    imageUrl: "SiteAssets/People/mohit.jpg",
+    date: "2025-10-31",
+    wishLink: "https://teams.microsoft.com/l/chat/0/0?users=mohit.khandelwal@contoso.com&message=Happy%20Birthday%20🎉"
+  },
+  {
     id: "b1",
     firstName: "Mairam",
     lastName: "Fathima",
     designation: "Executive Director",
     department: "Administration & Procurement",
     imageUrl: "SiteAssets/People/mairam.jpg",
-    date: "2025-10-09",
+    date: "2025-10-27",
     wishLink: "https://teams.microsoft.com/l/chat/0/0?users=mairam.fathima@contoso.com&message=Happy%20Birthday%20🎉"
   },
   {
@@ -27,7 +37,7 @@ export const BirthdayData: IBirthdayPerson[] = [
     designation: "Senior Manager – Digital Data",
     department: "Operations Management",
     imageUrl: "SiteAssets/People/bianca.jpg",
-    date: "2025-10-11",
+    date: "2025-10-27",
     wishLink: "mailto:bianca@contoso.com?subject=Happy%20Birthday!&body=Have%20a%20wonderful%20year%20ahead%20🎂"
   },
   {
@@ -37,7 +47,7 @@ export const BirthdayData: IBirthdayPerson[] = [
     designation: "UI/UX Designer",
     department: "Information Technology",
     imageUrl: "SiteAssets/People/ribu.jpg",
-    date: "2025-10-12",
+    date: "2025-10-29",
     wishLink: "https://teams.microsoft.com/l/chat/0/0?users=ribu.roy@contoso.com&message=Happy%20Birthday%20🎉"
   }
 ];

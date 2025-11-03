@@ -1,0 +1,60 @@
+@import "~@fluentui/react/dist/sass/References.scss";
+
+.buttonContainer {
+  text-align: center;
+
+  a {
+    text-decoration: none;
+  }
+}
+
+.button {
+  border: none;
+  border-radius: 999px;
+  min-width: 143px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  cursor: pointer;
+
+  &[disabled] {
+    background: #676464;
+    cursor: not-allowed;
+    box-shadow: -4px -6px 4px 0 rgba(0, 0, 0, 0.2) inset,
+      0 4px 4px 0 rgba(118, 139, 158, 0.6) inset;
+  }
+}
+
+.regular {
+  padding: 10px 12px;
+}
+
+.small {
+  padding: 8px 12px;
+}
+
+.large {
+  padding: 14px 12px;
+}
+
+.black {
+  background: radial-gradient(
+    circle at top left,
+    rgba(32, 45, 57, 1) 0%,
+    rgba(16, 24, 32, 1) 100%
+  );
+  box-shadow: -4px -6px 4px 0px rgba(0, 0, 0, 0.51) inset,
+    0px 4px 4px 0px rgba(118, 139, 158, 1) inset;
+  color: #ffffff;
+
+  &:hover {
+    background: #000000;
+  }
+}
+
+.gold {
+  border: 1.5px solid #ffdeba;
+  background: #edbd89;
+  box-shadow: -4px -6px 6px 0 #d7ac7e inset, 3px 4px 4px 0 #ffe8d0 inset;
+}

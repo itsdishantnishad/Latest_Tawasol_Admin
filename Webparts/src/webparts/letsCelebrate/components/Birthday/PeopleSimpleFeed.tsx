@@ -61,7 +61,7 @@ const PeopleSimpleFeed: React.FC<PeopleSimpleFeedProps> = ({ items, webAbsoluteU
               <div className={s.sub}>
                 {(p.designation ? p.designation : "") + (p.department ? " • " + p.department : "")}
               </div>
-              {p.date ? <div className={s.meta}>Date: {p.date}</div> : null}
+              {/* {p.date ? <div className={s.meta}>Date: {p.date}</div> : null} */}
               {p.extraRightText ? <div className={s.meta}>{p.extraRightText}</div> : null}
             </div>
 
@@ -69,8 +69,11 @@ const PeopleSimpleFeed: React.FC<PeopleSimpleFeedProps> = ({ items, webAbsoluteU
               {renderCta
                 ? renderCta(p)
                 : (p.wishLink
-                    ? <a className={s.wishBtn} href={p.wishLink}><span aria-hidden="true">🎉</span>&nbsp; Wish Now</a>
-                    : null)}
+                  ? <a className={s.wishBtn}
+                    target="_blank"
+                    data-interception="off"
+                    href={p.wishLink}><span aria-hidden="true">🎉</span>&nbsp; Wish Now</a>
+                  : null)}
             </div>
           </article>
         );

@@ -101,55 +101,33 @@ export const Documents: React.FC<IDocumentsProps> = (props) => {
 
     return (
         <div className={styles.documentsContainer}>
-            {/* Header */}
-            <div className={styles.header}>
-                <div className={styles.headerContent}>
-                    <div className={styles.decorativeLineLeft}>
-                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                            <circle cx="9" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg> */}
-                        <img src={rightHeadingLine} alt="rightArrow" />
-                    </div>
-                    <h2 className={styles.title}>Policy and Procedure</h2>
-                    <div className={styles.decorativeLineRight}>
-                        {/* <svg width="142" height="19" viewBox="0 0 142 19" fill="none">
-                            <path d="M1 9.5L141 9.5" stroke="#DA291C" strokeWidth="2" />
-                            <circle cx="133" cy="9.5" r="8" stroke="#DA291C" strokeWidth="2" />
-                        </svg> */}
-                        <img src={leftHeadingLine} alt="leftArrow" />
-                    </div>
-                </div>
-                <p className={styles.subtitle}>
-                    Everything you need, neatly organized
-                </p>
-            </div>
-
             {/* Documents Grid */}
-            <div className={styles.documentsGrid}>
-                {documents.map((doc, index) => (
-                    <a
-                        key={doc.id}
-                        href={doc.url}
-                        className={styles.documentCard}
-                        style={{
-                            transform: `rotate(${index % 2 === 0 ? '-2deg' : '2deg'})`,
-                        }}
-                    >
-                        <div className={styles.iconContainer}>
-                            {getIcon(doc.iconType)}
-                        </div>
-                        <div className={styles.documentInfo}>
-                            <h3 className={styles.documentTitle}>{doc.title}</h3>
-                            <p className={styles.modifiedBy}>Modified by : {doc.modifiedBy}</p>
-                            <span className={styles.tag}>
-                                <span className={styles.tagDot}></span>
-                                {doc.tag}
-                            </span>
-                        </div>
-                    </a>
-                ))}
-            </div>
+            <div className={styles.documentsGrid} >
+                {
+                    documents.map((doc, index) => (
+                        <a
+                            key={doc.id}
+                            href={doc.url}
+                            className={styles.documentCard}
+                            style={{
+                                transform: `rotate(${index % 2 === 0 ? '-2deg' : '2deg'})`,
+                            }}
+                        >
+                            <div className={styles.iconContainer}>
+                                {getIcon(doc.iconType)}
+                            </div>
+                            <div className={styles.documentInfo}>
+                                <h3 className={styles.documentTitle}>{doc.title}</h3>
+                                <p className={styles.modifiedBy}>Modified by : {doc.modifiedBy}</p>
+                                <span className={styles.tag}>
+                                    <span className={styles.tagDot}></span>
+                                    {doc.tag}
+                                </span>
+                            </div>
+                        </a>
+                    ))
+                }
+            </div >
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>

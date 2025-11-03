@@ -1,25 +1,72 @@
-@import '~@fluentui/react/dist/sass/References.scss';
+@import "~@fluentui/react/dist/sass/References.scss";
 
 .main {
- // width: 100vw;
-  // height: 100vh;
-  background: #F9ECE1;
+  background: #fff4ea;
+}
+
+.pageContainer {
+  margin: 0 auto;
+  padding: 60px 60px 0;
 }
 
 .taskHeader {
   width: 230px;
   height: 55px;
-  background: #F9ECE1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; 
-  opacity: 1;
+  gap: 8px;
+}
+
+.tableWrapper {
+  padding: 0 60px;
+}
+
+.table {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  overflow: hidden;
+
+  tr {
+    border: none;
+    color: #3a3b43;
+
+    td {
+      height: auto;
+      padding: 12px;
+    }
+  }
+}
+
+.tableHeader {
+  background: #ffebda;
+
+  th {
+    padding: 12px;
+    color: #000000;
+    & > div {
+      min-height: auto;
+    }
+  }
+}
+
+.tableBody {
+  tr {
+    cursor: pointer;
+  }
+
+  tr:nth-child(odd) {
+    background: #fff4ea;
+  }
+
+  tr:nth-child(even) {
+    background: #ffeee0;
+  }
 }
 
 .taskHeaderAbsolute {
-justify-self: center;
-    text-align: center;
+  justify-self: center;
+  text-align: center;
 }
 
 .taskText {
@@ -30,7 +77,7 @@ justify-self: center;
   line-height: 100%;
   letter-spacing: 1px;
   text-align: center;
-  color: #DA291C;
+  color: #da291c;
 }
 
 .approvalsText {
@@ -44,87 +91,23 @@ justify-self: center;
   color: #000000;
 }
 
-.chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 64px;
-    height: 28px;
-    padding: 4px 10px;
-    border-radius: 360px;
-    font-weight: 500;
-    font-size: 13px;
+/* action column */
+.actionCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.chipHigh {
-    background: #fdede8;
-    color: #ff3a00;
+.actionItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 14px;
 }
 
-.chipMedium {
-    background: #feefd4;
-    color: #dda338;
+.actionIcon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
 }
-
-.chipLow {
-    background: #e2edfe;
-    color: #2b77d6;
-}
-
-.statusPill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px;
-    height: 28px;
-    padding: 8px 12px;
-    gap: 4px;
-    border-radius: 360px;
-    font-weight: 600;
-    font-size: 13px;
-    line-height: 1;
-    color: #fff;
-}
-.stApproved {
-    background: #0e8732;
-}
-
-.stRejected {
-    background: #da291c;
-}
-
-.stPending {
-    background: #c3a500;
-}
-.statusText {
-    width: 66px;
-    height: 22px;
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 22px;
-    letter-spacing: -0.5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.value {
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 22px;
-    letter-spacing: -0.2px;
-    color: #101820;
-}
-
-
-
-
-
-
-
-
-
-
-
-

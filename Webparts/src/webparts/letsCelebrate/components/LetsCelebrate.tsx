@@ -1,86 +1,68 @@
 import * as React from 'react';
 // import styles from './LetsCelebrate.module.scss';
+import stylesNav from '../../Components/NavTabs/NavTabs.module.scss';
 import type { ILetsCelebrateProps } from './ILetsCelebrateProps';
-import { SelectTabData, SelectTabEvent, Tab, TabList } from "@fluentui/react-components";
 import NewJoiner from './NewJoiner/NewJoiner';
-// import { NewJoinersData } from './NewJoiner/NewJoinerData';
 import { BirthdayData } from './Birthday/BirthdayData';
 import Birthday from './Birthday/Birthday';
 import { listServices } from '../../services/listServices';
+import NavTabs, { NavTabsOption } from '../../Components/NavTabs/NavTabs'; // adjust path if needed
 
 export interface ILetsCelebrateState {
-  selectedTab: any;
+  selectedTab: 'birthdays' | 'anniversaries' | 'newJoiners';
   newJoinersData: any[];
 }
 
 export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, ILetsCelebrateState> {
   private spService: listServices;
-  public constructor(props: ILetsCelebrateProps) {
+
+  constructor(props: ILetsCelebrateProps) {
     super(props);
     this.state = {
-      selectedTab: "global",
+      selectedTab: 'birthdays',
       newJoinersData: []
     };
-      this.spService = new listServices(this.props.context);
+    this.spService = new listServices(this.props.context);
   }
 
   async componentDidMount() {
     const newJoinerData = await this.spService.getNewJoiners("New Joiner");
     this.setState({ newJoinersData: newJoinerData });
+  }
 
+  private handleTabChange = (tab: ILetsCelebrateState['selectedTab']) => {
+    this.setState({ selectedTab: tab });
   }
 
   public render(): React.ReactElement<ILetsCelebrateProps> {
-    const {
+    const { selectedTab, newJoinersData } = this.state;
 
-    } = this.props;
-
-
-    const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
-      this.setState({
-        selectedTab: data.value
-      })
-
-      switch (data.value) {
-        case "birthday":
-          // setNewsArticles([...globalNews]);
-          // setNewsType("Company News");
-          return;
-        case "anniversary":
-          // setNewsArticles([...localNews]);
-          // setNewsType("Local News");
-          return;
-        case "newJoiners":
-          // setNewsArticles([...subscribedNews]);
-          // setNewsType("My News");
-          return;
-        default:
-        // setNewsArticles([...globalNews]);
-      }
-    };
-
+    const tabs: NavTabsOption<ILetsCelebrateState['selectedTab']>[] = [
+      { key: 'birthdays', label: 'Birthdays' },
+      { key: 'anniversaries', label: 'Anniversaries' },
+      { key: 'newJoiners', label: 'New Joiners' },
+    ];
 
     return (
       <div>
-        <TabList selectedValue={this.state.selectedTab} onTabSelect={onTabSelect} selectTabOnFocus={true} size="large">
-          <Tab id="Company News" value="birthday">
-            Birthday
-          </Tab>
-          <Tab id="Local News" value="anniversary">
-            Anniversary
-          </Tab>
-          <Tab id="My News" value="newJoiners">
-            New Joiners
-          </Tab>
-        </TabList>
+        <NavTabs
+          tabs={tabs}
+          value={selectedTab}
+          onChange={this.handleTabChange}
+          className={stylesNav.navTabs} // wrapper styles in LetsCelebrate.module.scss
+          tabClassName={stylesNav.tab} // optional per-tab styles
+        />
+
         <div>
-          {this.state.selectedTab === "birthday" &&
-            <Birthday items={BirthdayData} />}
-          {this.state.selectedTab === "newJoiners" &&
-            <NewJoiner items={this.state.newJoinersData}></NewJoiner>
-          }
+          {(selectedTab === 'birthdays' || selectedTab === 'anniversaries') && (
+            <Birthday items={BirthdayData} />
+          )}
+
+          {selectedTab === 'newJoiners' && (
+            <NewJoiner items={newJoinersData} />
+          )}
         </div>
-      </div >
+      </div>
     );
   }
 }

@@ -1,11 +1,12 @@
 @import "~@fluentui/react/dist/sass/References.scss";
 
 .documentsContainer {
-  width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 60px 20px;
+  // width: 100%;
+  // max-width: 1440px;
+  // margin: 0 auto;
+  // padding: 60px 20px;
   // background-color: #e5e7eb;
+  padding: 50px 0;
 }
 
 .header {
@@ -33,6 +34,7 @@
 .title {
   font-family: "Instrument Serif", serif;
   font-style: italic;
+  font-weight: 400;
   font-size: 42px;
   line-height: normal;
   color: #000000;
@@ -135,14 +137,16 @@
 .buttonContainer {
   text-align: center;
   margin-top: 40px;
+
+  a {
+    text-decoration: none;
+  }
 }
 
 .viewAllButton {
-  background: radial-gradient(
-    circle at top left,
-    rgba(32, 45, 57, 1) 0%,
-    rgba(16, 24, 32, 1) 100%
-  );
+  background: radial-gradient(circle at top left,
+      rgba(32, 45, 57, 1) 0%,
+      rgba(16, 24, 32, 1) 100%);
   color: white;
   border: none;
   border-radius: 167px;

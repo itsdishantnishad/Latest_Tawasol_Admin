@@ -26,6 +26,6 @@ div [data-automationid="pageHeader"] { display: none !important; }
 div[role="banner"] [data-automationid*="SiteHeader"] .od-SiteHeader-brandText,
 div[role="banner"] [data-automationid*="SiteHeader"] .od-SiteHeader-titleArea,
 div[data-automationid*="TitleRegion"],
-div[data-automationid="pageHeader"] { display:none !important; }
+div[data-automationid="pageHeader"] { display: none !important; }
 
-#spSiteHeader, [data-automationid="SiteHeader"] { height:0 !important; overflow:hidden !important; }
+#spSiteHeader, [data-automationid="SiteHeader"] { height: 0 !important; overflow: hidden !important; }
