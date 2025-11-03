@@ -1,17 +1,14 @@
-
-
 import * as React from "react";
 import styles from "./TaskDetails.module.scss";
+import { SMALL_ARROW_RIGHT_ICON } from "../../assets/constants";
 
-const externalIcon = require("../assets/arrow-right-icon.svg");
-
-const LeftArrowIcon = () => (
+const LeftArrowIcon: React.FC = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12.5 15L7.5 10L12.5 5" stroke="#000000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-const RightArrowIcon = () => (
+const RightArrowIcon: React.FC = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M6 12L10 8L6 4" stroke="#000000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
@@ -28,11 +25,8 @@ export type TaskDetailsData = {
   createdOn?: string;
   dueDate?: string;
   assignedTo?: string;
-
-  // ⬇️ New: enriched fields to show avatar + name
   assignedToName?: string;
   assignedToAvatarUrl?: string | null;
-
   requestorName?: string;
   requestorDepartment?: string | null;
 };
@@ -41,13 +35,12 @@ export interface TaskDetailsProps {
   data: TaskDetailsData;
   onBack?: () => void;
   onApprove?: () => void;
-  /** Optional: full Salesforce URL for this record/work item */
   salesforceUrl?: string;
 }
 
-const fmtDate = (iso?: string) =>
-  iso
-    ? new Date(iso).toLocaleDateString(undefined, {
+const formatIsoDateToDisplay = (isoString?: string) =>
+  isoString
+    ? new Date(isoString).toLocaleDateString(undefined, {
         day: "2-digit",
         month: "short",
         year: "numeric",
@@ -55,60 +48,63 @@ const fmtDate = (iso?: string) =>
     : "—";
 
 const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, salesforceUrl }) => {
+  const resolvedTitle = data.taskTitle || data.taskType || "Task details";
+
+  const handleBackClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    onBack?.();
+  };
+
+  const handleApproveClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    onApprove?.();
+  };
+
   return (
     <div className={styles.wrapper}>
-      {/* Breadcrumb outside card */}
+      {/* Breadcrumb */}
       <div className={styles.breadcrumb}>
-        <button type="button" className={styles.backBtn} onClick={onBack}>
+        <button type="button" className={styles.backBtn} onClick={handleBackClick}>
           <LeftArrowIcon />
           <span>Back</span>
         </button>
 
         <div className={styles.divider} />
-
         <span className={styles.taskText}>Task</span>
-
         <RightArrowIcon />
-
         <span className={styles.detailsText}>Task Details</span>
       </div>
 
       {/* Card */}
       <section className={styles.card}>
         <div className={styles.inner}>
-          {/* Header block */}
-          <div className={styles.headerBlock}>
-            {/* Top row inside header: Workflow no. on left, View button on right */}
-            <div className={styles.headerBar}>
-              <div className={styles.workflowMeta}>
-                <span className={styles.workflowLabel}>Workflow No.</span>
-                <span className={styles.workflowValue}>{data.workflowNumber || "—"}</span>
-              </div>
-
-              {salesforceUrl ? (
-                <a href={salesforceUrl} target="_blank" rel="noopener noreferrer" className={styles.viewBtn}>
-                  <span className={styles.viewBtnText}>View Details in Salesforce</span>
-                  <img src={externalIcon} alt="" aria-hidden="true" className={styles.viewBtnIcon} />
-                </a>
-              ) : (
-                // same look even when URL missing (no disabled styling)
-                <span className={styles.viewBtn}>
-                  <span className={styles.viewBtnText}>View Details in Salesforce</span>
-                  <img src={externalIcon} alt="" aria-hidden="true" className={styles.viewBtnIcon} />
-                </span>
-              )}
+          <div className={styles.headerBar}>
+            <div className={styles.workflowMeta}>
+              <span className={styles.workflowLabel}>Workflow No.</span>
+              <span className={styles.workflowValue}>{data.workflowNumber || "—"}</span>
             </div>
 
-            <h1 className={styles.title}>Salary Certificate breakdown</h1>
-
-            <p className={styles.subtitle}>
-              Salary Certificate breakdown Informations Salary Certificate breakdown Informations
-            </p>
+            {salesforceUrl ? (
+              <a href={salesforceUrl} target="_blank" rel="noopener noreferrer" className={styles.viewBtn}>
+                <span className={styles.viewBtnText}>View Details in Salesforce</span>
+                <span className={styles.viewBtnIcon} dangerouslySetInnerHTML={{ __html: SMALL_ARROW_RIGHT_ICON }} />
+              </a>
+            ) : (
+              <span className={styles.viewBtn}>
+                <span className={styles.viewBtnText}>View Details in Salesforce</span>
+                <span className={styles.viewBtnIcon} dangerouslySetInnerHTML={{ __html: SMALL_ARROW_RIGHT_ICON }} />
+              </span>
+            )}
           </div>
+
+          <h1 className={styles.title}>{resolvedTitle}</h1>
+          <p className={styles.subtitle}>
+            Salary Certificate breakdown Informations Salary Certificate breakdown Informations
+          </p>
+
           <div className={styles.rule} role="separator" aria-hidden="true" />
 
           <div className={styles.rows}>
-           
             <div className={styles.row}>
               <div className={styles.col}>
                 <div className={styles.label}>Priority</div>
@@ -149,19 +145,17 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
               </div>
             </div>
 
-            {/* 2) Rule after row 1 */}
             <div className={styles.rule} role="separator" aria-hidden="true" />
 
-            {/* Row 2: Created, Due, Assigned */}
             <div className={styles.row}>
               <div className={styles.col}>
                 <div className={styles.label}>Created On</div>
-                <div className={styles.value}>{fmtDate(data.createdOn)}</div>
+                <div className={styles.value}>{formatIsoDateToDisplay(data.createdOn)}</div>
               </div>
 
               <div className={styles.col}>
                 <div className={styles.label}>Due Date</div>
-                <div className={styles.value}>{fmtDate(data.dueDate)}</div>
+                <div className={styles.value}>{formatIsoDateToDisplay(data.dueDate)}</div>
               </div>
 
               <div className={styles.col}>
@@ -191,10 +185,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
               <div className={styles.col} />
             </div>
 
-            {/* 3) Rule after row 2 */}
             <div className={styles.rule} role="separator" aria-hidden="true" />
 
-            {/* Row 3: Requester name, dept */}
             <div className={styles.row}>
               <div className={styles.col}>
                 <div className={styles.label}>Requester name</div>
@@ -211,12 +203,10 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
             </div>
           </div>
 
-          {/* 4) Rule before CTA */}
           <div className={styles.rule} role="separator" aria-hidden="true" />
 
-          {/* CTA */}
           <div className={styles.ctaRow}>
-            <button type="button" className={styles.approveBtn} onClick={onApprove}>
+            <button type="button" className={styles.approveBtn} onClick={handleApproveClick}>
               Approve
             </button>
           </div>
@@ -227,4 +217,3 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ data, onBack, onApprove, sale
 };
 
 export default TaskDetails;
-
