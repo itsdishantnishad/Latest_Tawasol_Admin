@@ -1,9 +1,13 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
 .main {
- // width: 100vw;
-  // height: 100vh;
   background: #F9ECE1;
+}
+
+.pageContainer {
+  width: min(1280px, 96vw);
+  margin: 0 auto;
+  padding-bottom: 24px;
 }
 
 .taskHeader {
@@ -13,14 +17,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; 
-  opacity: 1;
+  gap: 8px;
 }
-
-.taskHeaderAbsolute {
-justify-self: center;
-    text-align: center;
-}
+.taskHeaderAbsolute { justify-self: center; text-align: center; }
 
 .taskText {
   font-family: "Instrument Serif", serif;
@@ -32,7 +31,6 @@ justify-self: center;
   text-align: center;
   color: #DA291C;
 }
-
 .approvalsText {
   font-family: "Instrument Serif", serif;
   font-weight: 400;
@@ -44,87 +42,49 @@ justify-self: center;
   color: #000000;
 }
 
-.chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 64px;
-    height: 28px;
-    padding: 4px 10px;
-    border-radius: 360px;
-    font-weight: 500;
-    font-size: 13px;
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
 }
 
-.chipHigh {
-    background: #fdede8;
-    color: #ff3a00;
+/* row zebra to match figma:
+   first row transparent (same as background) ~ #FFF4EA;
+   second row #FFEEE0; then repeat pattern */
+:global(.fui-TableRow):nth-child(odd) {
+  background: #FFF4EA;
+}
+:global(.fui-TableRow):nth-child(even) {
+  background: #FFEEE0;
 }
 
-.chipMedium {
-    background: #feefd4;
-    color: #dda338;
-}
+/* chips and pills */
+.chip { display: inline-flex; align-items: center; justify-content: center; min-width: 64px; height: 28px; padding: 4px 10px; border-radius: 360px; font-weight: 500; font-size: 13px; }
+.chipHigh { background: #fdede8; color: #ff3a00; }
+.chipMedium { background: #feefd4; color: #dda338; }
+.chipLow { background: #e2edfe; color: #2b77d6; }
 
-.chipLow {
-    background: #e2edfe;
-    color: #2b77d6;
-}
-
-.statusPill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px;
-    height: 28px;
-    padding: 8px 12px;
-    gap: 4px;
-    border-radius: 360px;
-    font-weight: 600;
-    font-size: 13px;
-    line-height: 1;
-    color: #fff;
-}
-.stApproved {
-    background: #0e8732;
-}
-
-.stRejected {
-    background: #da291c;
-}
-
-.stPending {
-    background: #c3a500;
-}
+.statusPill { display: inline-flex; align-items: center; justify-content: center; height: 28px; padding: 0 12px; border-radius: 360px; font-weight: 700; font-size: 14px; color: #fff; }
+.stApproved { background: #0e8732; }
+.stRejected { background: #da291c; }
+.stPending  { background: #c3a500; }
 .statusText {
-    width: 66px;
-    height: 22px;
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 22px;
-    letter-spacing: -0.5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  width: 66px; height: 22px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  font-weight: 500; font-size: 14px; line-height: 22px; letter-spacing: -0.5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+
+/* action column */
+.actionCell { display: inline-flex; align-items: center; gap: 16px; }
+.actionItem { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; color: #101820; }
+.actionIcon { width: 16px; height: 16px; display: inline-block; }
+
+/* utility */
 .value {
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 22px;
-    letter-spacing: -0.2px;
-    color: #101820;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.2px;
+  color: #101820;
 }
-
-
-
-
-
-
-
-
-
-
-
-

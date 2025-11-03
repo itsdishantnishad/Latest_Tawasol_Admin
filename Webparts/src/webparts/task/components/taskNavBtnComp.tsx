@@ -1,60 +1,57 @@
 import * as React from "react";
 import styles from "./taskNavBtn.module.scss";
+import { TAB_ACTIVE_SVG } from "../../assets/constants";
 
-export type Option = "Services" | "Oracle" | "Salesforce";
+export type SystemFilterOption = "All" | "Oracle" | "Salesforce";
 
 export interface NavSegmentProps {
-  value?: Option;                         
-  defaultValue?: Option;                 
-  onChange?: (val: Option) => void;
+  value?: SystemFilterOption;
+  defaultValue?: SystemFilterOption;
+  onChange?: (newValue: SystemFilterOption) => void;
   absolute?: boolean;
   className?: string;
-  labels?: readonly Option[];
+  labels?: readonly SystemFilterOption[];
 }
 
-const DEFAULT_OPTIONS: readonly Option[] = ["Services", "Oracle", "Salesforce"] as const;
+const DEFAULT_OPTIONS: readonly SystemFilterOption[] = ["All", "Oracle", "Salesforce"] as const;
 
 const NavSegment: React.FC<NavSegmentProps> = ({
   value,
-  defaultValue = "Salesforce",            
+  defaultValue = "All",
   onChange,
-  absolute = true,
+  absolute = false,
   className,
-  labels = DEFAULT_OPTIONS,              
+  labels = DEFAULT_OPTIONS,
 }) => {
-  const [internal, setInternal] = React.useState<Option>(defaultValue);
-  const selected = value ?? internal;
+  const [internalSelectedValue, setInternalSelectedValue] = React.useState<SystemFilterOption>(defaultValue);
+  const selectedValue: SystemFilterOption = value ?? internalSelectedValue;
 
-  const handleClick = (opt: Option) => {
-    if (value === undefined) setInternal(opt); 
-    onChange?.(opt);                           
+  const handleSegmentClick = (newOption: SystemFilterOption) => {
+    if (value === undefined) setInternalSelectedValue(newOption);
+    onChange?.(newOption);
   };
 
   return (
     <div
-      className={[
-        styles.segmentWrap,
-        absolute ? styles.segmentWrapAbsolute : "",
-        className ?? "",
-      ].join(" ")}
+      className={[styles.segmentWrap, absolute ? styles.segmentWrapAbsolute : "", className ?? ""].join(" ")}
       role="tablist"
       aria-label="Filter by system"
     >
-      {labels.map((opt) => {
-        const isActive = selected === opt;
+      {labels.map((optionLabel) => {
+        const isActive = selectedValue === optionLabel;
         return (
           <button
-            key={opt}
+            key={optionLabel}
             type="button"
             role="tab"
             aria-selected={isActive}
-            className={[
-              styles.segmentBtn,
-              isActive ? styles.segmentBtnActive : styles.segmentBtnIdle,
-            ].join(" ")}
-            onClick={() => handleClick(opt)}
+            className={[styles.segmentBtn, isActive ? styles.segmentBtnActive : styles.segmentBtnIdle].join(" ")}
+            onClick={() => handleSegmentClick(optionLabel)}
           >
-            <span className={styles.segmentText}>{opt}</span>
+            {isActive && (
+              <span className={styles.activeBg} dangerouslySetInnerHTML={{ __html: TAB_ACTIVE_SVG }} />
+            )}
+            <span className={styles.segmentText}>{optionLabel}</span>
           </button>
         );
       })}

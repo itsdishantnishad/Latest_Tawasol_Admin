@@ -1,18 +1,22 @@
 import * as React from "react";
 import styles from "./Allevents.module.scss";
 import EventRegistration from "./Registration/RegistrationModal";
+import { SPFI, spfi, SPFx } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/lists";
+import "@pnp/sp/items";
 
 interface EventCardProps {
   date: string;
   day: string;
   month: string;
-  status: "Upcoming" | "Registered";
   category: string;
+  status: "Upcoming" | "Registered";
   title: string;
   time: string;
   location: string;
   imageUrl: string;
-  eventDateTime: Date | string | null; 
+  eventDateTime: Date | string | null;
   ID: number;
   context?: any;
 }
@@ -29,113 +33,131 @@ const EventCard: React.FC<EventCardProps> = ({
   imageUrl,
   eventDateTime,
   ID,
-  context
+  context,
 }) => {
   const [countdown, setCountdown] = React.useState<string>("");
-  const [isPastEvent, setIsPastEvent] = React.useState<boolean>(false);
-  const [isRegistered, setIsRegistered] = React.useState<boolean>(false);
-  const [showRegisterButton, setShowRegisterButton] =  React.useState<boolean>(false);
+  const [isPastEvent, setIsPastEvent] = React.useState(false);
+  const [isRegistered, setIsRegistered] = React.useState(false);
+  const [newregister, setnewregister] = React.useState(false);
 
+  const sp: SPFI = React.useMemo(() => spfi().using(SPFx(context)), [context]);
+
+  const userEmail = context?.pageContext?.user?.loginName;
+
+  // fetch & check if user registered this event
   React.useEffect(() => {
-    const calculateStatus = () => {
-      const now = new Date();
+    const callCheck = async () => {
+      try {
+        const regItems: any[] = await sp.web.lists
+          .getByTitle("Registered User Event")
+          .items.select("*", "Author/EMail")
+          .expand("Author")();
+
+        const userRow = regItems.find(
+          (r) => r.Author?.EMail?.toLowerCase() === userEmail.toLowerCase()
+        );
+
+        if (userRow?.TIRRegisteredUsers) {
+          const arr = userRow.TIRRegisteredUsers.split(",").map((x: any) =>
+            x.trim()
+          );
+          setIsRegistered(arr.some((v: any) => v.includes(String(ID))));
+        } else {
+          setIsRegistered(false);
+        }
+      } catch (err) {
+        console.error("register check error", err);
+        setIsRegistered(false);
+      }
+    };
+
+    if (userEmail && ID) callCheck();
+  }, [userEmail, ID]);
+
+  // time status logic
+  React.useEffect(() => {
+    const calculate = () => {
       if (!eventDateTime) {
         setIsPastEvent(true);
-        setShowRegisterButton(false);
         return;
       }
-      const eventTime = new Date(eventDateTime);
-      const timeDiff = eventTime.getTime() - now.getTime();
 
-      // Check if event is in the past
-      if (timeDiff < 0) {
+      const now = new Date();
+      const ev = new Date(eventDateTime);
+      const diff = ev.getTime() - now.getTime();
+
+      if (diff <= 0) {
         setIsPastEvent(true);
-        setShowRegisterButton(false);
         return;
       }
 
-      // If event is more than 7 days away, show Register button
-      const daysUntilEvent = timeDiff / (1000 * 60 * 60 * 24);
-      if (daysUntilEvent > 3) {
-        setShowRegisterButton(true);
-        setIsPastEvent(false);
-        return;
-      }
-
-      // Otherwise, show countdown
-      setShowRegisterButton(false);
       setIsPastEvent(false);
 
-      // Calculate countdown
-      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const daysRemaining = diff / (1000 * 60 * 60 * 24);
+      // countdown text
+      const days = Math.floor(daysRemaining);
       const hours = Math.floor(
-        (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
       );
-      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
       if (days > 0) {
         setCountdown(`${days} Day${days > 1 ? "s" : ""}`);
       } else if (hours > 0) {
         setCountdown(
-          `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-            2,
-            "0"
-          )}:${String(seconds).padStart(2, "0")}`
+          `${hours.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
         );
       } else {
         setCountdown(
-          `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
-            2,
-            "0"
-          )}`
+          `${minutes.toString().padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}`
         );
       }
     };
 
-    // Calculate immediately
-    calculateStatus();
+    calculate();
+    const i = setInterval(calculate, 1000);
+    return () => clearInterval(i);
+  }, [eventDateTime, isRegistered]);
 
-    // Update every second
-    const interval = setInterval(calculateStatus, 1000);
-
-    return () => clearInterval(interval);
-  }, [eventDateTime]);
-
-  // Handle Register button click
   const handleRegisterClick = () => {
-    setIsRegistered(true);
+    setnewregister(true);
   };
+
+  const CountdownUI = () => (
+    <div className={styles.countdownWrapper}>
+      <div className={styles.countdownLabel}>Event starts in</div>
+      <div className={styles.countdownTime}>{countdown}</div>
+    </div>
+  );
+
   return (
     <div
       className={`${styles.eventCard} ${isPastEvent ? styles.pastEvent : ""}`}
     >
-      {/* Date Section */}
       <div className={styles.dateSection}>
         <div className={styles.month}>{month}</div>
         <div className={styles.date}>{date}</div>
         <div className={styles.day}>{day}</div>
       </div>
 
-      {/* Image Section */}
       <div className={styles.imageSection}>
         <img src={imageUrl} alt={title} className={styles.eventImage} />
         {!isPastEvent && (
           <span
             className={`${styles.statusBadge} ${
-              status === "Upcoming"
-                ? styles.upcoming
-                : status === "Registered"
-                ? styles.registered
-                : ""
+              isRegistered ? styles.registered : styles.upcoming
             }`}
           >
-            {status}
+            {isRegistered ? "Registered" : "Upcoming"}
           </span>
         )}
       </div>
 
-      {/* Event Details Section */}
       <div className={styles.detailsSection}>
         <div className={styles.category}>{category}</div>
         <h3 className={styles.title}>{title}</h3>
@@ -147,8 +169,8 @@ const EventCard: React.FC<EventCardProps> = ({
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <circle cx="12" cy="12" r="10" strokeWidth="2" />
-            <path strokeWidth="2" d="M12 6v6l4 2" />
+            <circle cx="12" cy="12" r="10" strokeWidth={2} />
+            <path strokeWidth={2} d="M12 6v6l4 2" />
           </svg>
           <span className={styles.infoText}>{time}</span>
         </div>
@@ -161,38 +183,45 @@ const EventCard: React.FC<EventCardProps> = ({
             viewBox="0 0 24 24"
           >
             <path
-              strokeWidth="2"
+              strokeWidth={2}
               d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
             />
-            <path strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span className={styles.infoText}>{location}</span>
         </div>
       </div>
 
-      {/* Action Section */}
       <div className={styles.actionSection}>
         {isPastEvent ? (
           <div className={styles.pastEventLabel}>Past event</div>
-        ) : showRegisterButton ? (
-          <button type="button" className={styles.registerButton} onClick={()=>handleRegisterClick()}>Register</button>
-        ) : (
+        ) : isRegistered ? (
           countdown && (
             <div className={styles.countdownWrapper}>
               <div className={styles.countdownLabel}>Event starts in</div>
               <div className={styles.countdownTime}>{countdown}</div>
             </div>
           )
+        ) : (
+          <button
+            type="button"
+            className={styles.registerButton}
+            onClick={handleRegisterClick}
+          >
+            Register
+          </button>
         )}
       </div>
-      {isRegistered?<EventRegistration
-        isOpen={isRegistered}
-        onDismiss={() => setIsRegistered(false)}
-        context={context}
-        eventId={ID}
-      />:""}
+
+      {newregister && (
+        <EventRegistration
+          isOpen={newregister}
+          onDismiss={() => setnewregister(false)}
+          context={context}
+          eventId={ID}
+        />
+      )}
     </div>
-    
   );
 };
 

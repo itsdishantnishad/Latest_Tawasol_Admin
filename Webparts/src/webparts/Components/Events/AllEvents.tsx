@@ -82,6 +82,7 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
         eventDateTime: eventStart,
         isregistered: isRegistered,
         ID: item.ID,
+        context: props.context
       };
     });
   }, [props.AllEventItems]);
