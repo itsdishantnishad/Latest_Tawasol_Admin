@@ -2,22 +2,25 @@
   width: 392px;
   height: 56px;
   padding: 8px;
-  margin: 20px auto 24px; /* center it; no overlap with table */
+  margin: 32px auto 48px; /* center it; no overlap with table */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   border-radius: 360px;
-  border: 1px solid #FBBF7F;
-  background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.82) 100%);
-  box-shadow:
-    inset 0 1px 2px rgba(0,0,0,0.04),
-    0 0 0 1px rgba(251,191,127,0.25);
+  border: 1px solid #fbbf7f;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.82) 100%
+  );
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(251, 191, 127, 0.25);
 }
 
 /* kept for compatibility; does nothing now */
 .segmentWrapAbsolute {
-  position: static;  
+  position: static;
 }
 
 .segmentBtn {
@@ -36,7 +39,7 @@
 
 .segmentBtnActive {
   /* visual handled by activeBg; keep a subtle border for focus ring match */
-  border: 1px solid #F0BB82;
+  border: 1px solid #f0bb82;
 }
 
 .segmentBtnIdle {
@@ -44,8 +47,8 @@
   border: 1px solid transparent;
 }
 .segmentBtnIdle:hover {
-  background: rgba(255,255,255,0.4);
-  border-color: rgba(0,0,0,0.05);
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(0, 0, 0, 0.05);
 }
 
 .activeBg {
@@ -53,7 +56,12 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  svg { width: 100%; height: 100%; display: block; border-radius: 360px; }
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 360px;
+  }
 }
 
 .segmentText {
@@ -65,5 +73,5 @@
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
   font-weight: 600;
   font-size: 16px;
-  color: #3A3A3A;
+  color: #3a3a3a;
 }

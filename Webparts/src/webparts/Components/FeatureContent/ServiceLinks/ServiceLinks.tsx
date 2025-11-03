@@ -97,6 +97,22 @@ const defaultServices: IServiceLink[] = [
         position: 'right-center',
         relativeTo: 'inner'
     },
+    {
+        id: '10',
+        name: 'Outlook',
+        icon: outlookIcon,
+        url: '#',
+        position: 'top-center',
+        relativeTo: 'inner'
+    },
+    {
+        id: '11',
+        name: 'Microsoft Teams',
+        icon: microsoftTeamsIcon,
+        url: '#',
+        position: 'right-center',
+        relativeTo: 'inner'
+    },
 ];
 
 export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
@@ -183,8 +199,8 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
             {/* Circular Services Layout with Navigation */}
             <div className={styles.wheelWrapper}>
                 <button className={styles.navButton} onClick={handlePrev}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                        <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
 
@@ -230,29 +246,31 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
                 </div>
 
                 <button className={styles.navButton} onClick={handleNext}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
             </div>
 
-            {/* Pagination Dots */}
-            {
-                totalPages > 1 && (
-                    <div className={styles.pagination}>
-                        {Array.from({ length: totalPages }).map((_, index) => (
-                            <button
-                                key={index}
-                                className={`${styles.dot} ${index === currentPage ? styles.activeDot : ''}`}
-                                onClick={() => setCurrentPage(index)}
-                                aria-label={`Go to page ${index + 1}`}
-                            />
-                        ))}
-                    </div>
-                )
-            }
+            <div className={styles.commonButtonArea}>
+                {/* Pagination Dots */}
+                {
+                    totalPages > 1 && (
+                        <div className={styles.pagination}>
+                            {Array.from({ length: totalPages }).map((_, index) => (
+                                <button
+                                    key={index}
+                                    className={`${styles.dot} ${index === currentPage ? styles.activeDot : ''}`}
+                                    onClick={() => setCurrentPage(index)}
+                                    aria-label={`Go to page ${index + 1}`}
+                                />
+                            ))}
+                        </div>
+                    )
+                }
 
-            <PrimaryButton label="View All" onClick={props.onViewAll} />
+                <PrimaryButton label="View All" onClick={props.onViewAll} />
+            </div>
         </div>
     );
 };

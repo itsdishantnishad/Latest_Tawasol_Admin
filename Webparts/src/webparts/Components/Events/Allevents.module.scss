@@ -1,12 +1,14 @@
 // EventCard.module.scss
-
+*{
+  font-family: 'Inter', sans-serif;
+}
 .eventCard {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 30px;
   background-color: #ffffff;
   border-radius: 8px;
-  padding: 16px;
+  padding: 15px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
   &.pastEvent {
@@ -46,28 +48,34 @@
   flex-shrink: 0;
   background-color: #f3f4f6;
   border-radius: 8px;
-  padding: 16px;
-  text-align: center;
-  min-width: 100px;
+  min-width: 80px;
+  height: 100px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .month {
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
+  color: #101820;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
 }
 
 .date {
-  font-size: 48px;
+  color: #101820;
+  font-size: 36px;
   font-weight: 700;
-  color: #111827;
-  line-height: 1;
+  line-height: 44px;
 }
 
 .day {
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
+  color: #6C6C6C;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
 }
 
 // Image Section
@@ -77,21 +85,23 @@
 }
 
 .eventImage {
-  width: 224px;
-  height: 144px;
+  border-radius: 10px;
+  height: 125px;
   object-fit: cover;
-  border-radius: 8px;
+  width: 250px;
+  object-position: center top;
 }
 
 .statusBadge {
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  left: 8px;
+  padding: 4px 10px;
   position: absolute;
   top: 8px;
-  left: 8px;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 4px;
   
   &.upcoming {
     background-color: #ef4444;
@@ -104,30 +114,37 @@
 
 // Details Section
 .detailsSection {
-  flex-grow: 1;
+  // flex-grow: 1;
   min-width: 0;
 }
 
-.category {
+.locationSection{
   font-size: 14px;
-  color: #ef4444;
+}
+
+.category {
+  color: #D3675B;
+  font-size: 14px;
+  line-height: 22px;
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+  letter-spacing: -0.5px;
 }
 
 .title {
+  color: #101820;
   font-size: 20px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 12px 0;
+  line-height: 28px;
+  font-weight: 600;
+  margin: 0;
 }
 
 .infoRow {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #6b7280;
-  margin-bottom: 8px;
+  color: #3A3B43;
+  margin-bottom: 5px;
   
   &:last-child {
     margin-bottom: 0;
@@ -142,6 +159,8 @@
 
 .infoText {
   font-size: 14px;
+  line-height: 22px;
+  font-weight: 400;
 }
 
 // Action Section
@@ -177,15 +196,18 @@
 }
 
 .countdownLabel {
+  color: #3A3B43;
   font-size: 14px;
-  color: #6b7280;
+  line-height: 20px;
   margin-bottom: 4px;
+  font-weight: 500;
 }
 
 .countdownTime {
-  font-size: 20px;
-  font-weight: 700;
-  color: #ef4444;
+  color: #DA291C;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
 }
 
 .pastEventLabel {
@@ -197,16 +219,16 @@
 // Container styles for demo
 .eventsContainer {
   min-height: 100vh;
-  background-color: #f9fafb;
-  padding: 32px;
+  background-color: #fef7f0;
+  padding: 40px 60px;
+  
 }
 
 .eventsWrapper {
-  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1em;
 }
 
 .infoBox {
@@ -276,10 +298,11 @@
 }
 
 .heading {
+  color: #000000;
   font-size: 24px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 24px 0;
+  line-height: 32px;
+  font-weight: 500;
+  margin-bottom: 20px;
 }
 
 .gridLayout {
@@ -287,25 +310,32 @@
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 24px;
 }
+
+
 /* Tabs */
 .tabContainer {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
+  padding: 0 60px;
+  background-color: #fef7f0;
+}
+
+.tabContainerInner{
   border-bottom: 1px solid #edebe9; // Subtle border
-  padding-bottom: 8px;
+  display: flex;
+  gap: 30px;
 }
 
 .tabButton {
-  font-size: 16px;
-  font-weight: 500;
-  padding: 12px 0;
-  color: #6b6b6b;
-  background: none;
+  background: 0 0;
   border: none;
+  color: #6C6C6C;
   cursor: pointer;
+  font-size: 16px;
+  line-height: 25px;
+  font-weight: 500;
+  padding: 15px 0;
   position: relative;
-  transition: color 0.3s ease;
+  transition: color .3s ease;
 
   &:hover {
     color: #000;
@@ -314,16 +344,18 @@
 
 .activeTab {
   color: #000;
-  font-weight: 600;
 }
 
 .activeTab::after {
   content: "";
   position: absolute;
-  bottom: -1px;
   left: 0;
   width: 100%;
-  height: 2px;
-  background-color: #d33a2c; /* Red underline for active tab */
-  border-radius: 2px;
+  height: 4px;
+  left: 0;
+  bottom: 0;
+  position: absolute;
+  width: 100%;
+  border-radius: 20px 20px 0 0;
+  background-color: #DA291C;
 }

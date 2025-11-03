@@ -5,18 +5,12 @@
   width: 100%;
   min-height: 300px;
   padding: 60px 40px;
-  background: linear-gradient(135deg, 
-    #ffd4d4 0%, 
-    #fce4d8 25%, 
-    #fff5e6 50%, 
-    #fef8f0 75%, 
-    #fef5ee 100%
-  );
   border-radius: 20px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(118.6deg, #FCF0E4 15.84%, #FFE6CD 90.98%);
   
   @media (max-width: 768px) {
     padding: 40px 24px;
