@@ -46,33 +46,36 @@ export default class Banner extends React.Component<IBannerProps> {
 
     const { first: firstWord, rest: remainingWords } = this.splitTitleParts(resolvedTitle);
 
-    return (
+return (
       <section className={styles.bannerRoot} role="region" aria-label="Banner">
-        {useCustomImage ? (
-          <img className={styles.customImage} src={customBannerUrl} alt="Custom banner" />
-        ) : (
-          svgMarkup && (
-            <div
-              className={styles.svgHost}
-              dangerouslySetInnerHTML={{ __html: svgMarkup }}
-            />
-          )
-        )}
+        <div className={styles.frame}>
+          {useCustomImage ? (
+            <img className={styles.customImage} src={customBannerUrl} alt="Custom banner" />
+          ) : (
+            svgMarkup && (
+              <div
+                className={styles.svgHost}
+                dangerouslySetInnerHTML={{ __html: svgMarkup }}
+              />
+            )
+          )}
 
-        <div className={styles.textOverlay} aria-hidden="false">
-          <div className={styles.textWrap}>
-            {(firstWord || remainingWords) && (
-              <h2 className={styles.title}>
-                <span className={styles.titleFirst}>{firstWord}</span>
-                {remainingWords ? <>{" "}<span className={styles.titleRest}>{remainingWords}</span></> : null}
-              </h2>
-            )}
-            {resolvedDescription && (
-              <p className={styles.description}>{resolvedDescription}</p>
-            )}
+          <div className={styles.textOverlay} aria-hidden="false">
+            <div className={styles.textWrap}>
+              {(firstWord || remainingWords) && (
+                <h2 className={styles.title}>
+                  <span className={styles.titleFirst}>{firstWord}</span>
+                  {remainingWords ? <>{" "}<span className={styles.titleRest}>{remainingWords}</span></> : null}
+                </h2>
+              )}
+              {resolvedDescription && (
+                <p className={styles.description}>{resolvedDescription}</p>
+              )}
+            </div>
           </div>
         </div>
       </section>
     );
+
   }
 }

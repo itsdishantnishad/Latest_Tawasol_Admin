@@ -1,23 +1,29 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
+/* Outer: controls page spacing around the banner */
 .bannerRoot {
+  --pad: 24px;                
+  padding: var(--pad);
+  box-sizing: border-box; 
+  background: #FFF9F4;  
+}
+
+/* Inner: holds the media + overlay and keeps rounded mask */
+.frame {
   position: relative;
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
-  background: #ffffff;
+  background: #ffffff;       
 }
 
+/* Media fills the inner frame */
 .svgHost {
   width: 100%;
   height: auto;
   display: block;
 
-  svg {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
+  svg { width: 100%; height: auto; display: block; }
 }
 
 .customImage {
@@ -26,21 +32,19 @@
   display: block;
 }
 
+/* Overlay respects the inner frame, not the outer padding */
 .textOverlay {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
   pointer-events: none;
-  padding: 0 16px;
+  padding: 0 16px;         
 }
 
-.textWrap {
-  text-align: center;
-  max-width: 920px;
-}
+.textWrap { text-align: center; max-width: 920px; }
 
-/* ====== Title ====== */
+/* Title + description */
 .title {
   margin: 0;
   font-family: "Instrument Serif", Georgia, "Times New Roman", Times, serif;
@@ -50,22 +54,9 @@
   letter-spacing: 0;
   text-align: center;
 }
+.titleFirst { color: #DA291C; font-style: italic; font-weight: 400; }
+.titleRest  { color: #000000; font-style: normal; font-weight: 400; }
 
-/* First word: italic + red */
-.titleFirst {
-  color: #DA291C;
-  font-style: italic;
-  font-weight: 400;
-}
-
-/* Remaining words: black + regular (non-italic) */
-.titleRest {
-  color: #000000;
-  font-style: normal;
-  font-weight: 400;
-}
-
-/* ====== Description  ====== */
 .description {
   margin-top: 12px;
   font-family: "Inter", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -79,6 +70,7 @@
 }
 
 @media (max-width: 991.98px) {
+  .bannerRoot { --pad: 12px; }   
   .title { font-size: clamp(26px, 6vw, 60px); }
   .description { font-size: clamp(14px, 3.5vw, 16px); }
 }
