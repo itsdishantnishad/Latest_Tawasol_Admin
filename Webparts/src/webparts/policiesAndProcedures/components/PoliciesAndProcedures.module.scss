@@ -74,15 +74,16 @@
 /* ------------------------------- Core grid tiles ------------------------------- */
 .coreGrid {
   display: grid;
-  grid-template-columns: repeat(6, 200px); /* fixed width like Figma */
-  column-gap: 24px; /* horizontal spacing */
-  row-gap: 20px;    /* vertical spacing */
-  justify-content: start; /* no extra stretch */
-  margin-bottom: 12px;     /* tighter space before “Support Function” */
+  grid-template-columns: repeat(6, 200px); 
+  column-gap: 24px;
+  row-gap: 20px;   
+  justify-content: start; 
+  margin-bottom: 12px;    
+  justify-content: center;
 }
 .coreTile  {
   position: relative;
-  width: 200px; height: 213px; /* matches your SVG size */
+  width: 200px; height: 213px; 
   border-radius: 12px; overflow: hidden;
   cursor: pointer; 
   @extend %hoverLift; 
@@ -166,7 +167,6 @@
 .fileIcon[data-ext="pptx"] { background:#ffe6bf; }
 
 /* --------------------------------- Responsive --------------------------------- */
-/* Core & Support use fixed 200px tiles; step columns down by viewport width */
 @media (max-width: 1600px) {
   .coreGrid    { grid-template-columns: repeat(6, 200px); }
   .supportGrid { grid-template-columns: repeat(6, 200px); }
@@ -178,7 +178,7 @@
 @media (max-width: 1100px) {
   .coreGrid    { grid-template-columns: repeat(4, 200px); }
   .supportGrid { grid-template-columns: repeat(4, 200px); }
-  .libWrap     { grid-template-columns: 1fr; } /* stack preview under list */
+  .libWrap     { grid-template-columns: 1fr; } 
 }
 @media (max-width: 800px) {
   .homeTopRow, .topBar { grid-template-columns: 1fr; }
