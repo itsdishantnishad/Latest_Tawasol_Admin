@@ -1,0 +1,37 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "d954dc76-6c6a-41cb-b9ff-078730801ffc",
+  "alias": "BannerWebPart",
+  "componentType": "WebPart",
+  
+  "version": "1.0.1",
+  "manifestVersion": 2,
+  "supportsFullBleed": true,
+
+
+
+  "requiresCustomScript": false,
+  "supportedHosts": [
+    "SharePointWebPart",
+    "TeamsPersonalApp",
+    "TeamsTab",
+    "SharePointFullPage"
+  ],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "Advanced" },
+      "title": { "default": "GLobal Banner" },
+      "description": { "default": "banner description" },
+      "officeFabricIconFontName": "Handwriting",
+      "properties": {
+        "bannerTitle": "",
+        "bannerSubTitle": "",
+        "customBannerUrl": "",
+        "bannerType": "Default Banner"
+      }
+    }
+  ]
+}
