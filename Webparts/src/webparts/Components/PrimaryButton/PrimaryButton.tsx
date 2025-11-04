@@ -5,13 +5,14 @@ export interface IPrimaryButtonProps {
     label?: string;
     disabled?: boolean;
     theme?: 'black' | 'gold';
+    size?: 'small' | 'regular' | 'large';
     onClick?: () => void;
 }
 
-export const PrimaryButton: React.FC<IPrimaryButtonProps> = ({ label = 'Button', disabled = false, theme = 'black', onClick }) => {
+const PrimaryButton: React.FC<IPrimaryButtonProps> = ({ label = 'Button', disabled = false, theme = 'black', size = 'regular', onClick }) => {
     return (
         <div className={styles.buttonContainer}>
-            <button className={`${styles.button}`} onClick={onClick} disabled={disabled}>
+            <button className={`${styles.button} ${styles[theme]} ${styles[size]}`} onClick={onClick} disabled={disabled}>
                 {label}
             </button>
         </div>

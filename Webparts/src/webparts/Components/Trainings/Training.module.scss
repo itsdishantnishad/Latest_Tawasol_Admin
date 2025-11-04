@@ -1,13 +1,15 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
+@font-face {
+    font-family: "Bukra";
+    src: url("../../assets//fonts/Bukra.ttf")format("truetype"),
+}
+
 .courseListing {
-  background-color: #fff9f4; // Warm beige to match image
-  padding: 32px 60px;
+  background-color: #fef7f0;
   border-radius: 16px;
-  font-family: "Segoe UI", sans-serif;
   color: #1a1a1a;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 32px 60px;
 
   @media (max-width: 768px) {
     padding: 20px;
@@ -24,22 +26,18 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  background: #fceee4; // Light beige for accordion headers
+  background: #FDECDB;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 14px 20px;
   cursor: pointer;
-  transition: background 0.25s ease;
-
-  &:hover {
-    background: #fae6d9; // Slightly darker on hover
-  }
 }
 
 .monthTitle {
+  color: #000;
   font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
+  line-height: 24px;
+  font-weight: 500;
   margin: 0;
 }
 
@@ -82,12 +80,14 @@
 }
 
 .learningColumn {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
+  backdrop-filter: blur(30px);
+  background: #ffffff7a;
+  border: 3px solid #fff;
+  border-radius: 14px;
+  cursor: pointer;
+  padding: 24px;
 }
 
 .learningHeader {
@@ -118,11 +118,15 @@
 
 /* Tabs */
 .tabContainer {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
+  padding: 0 60px;
+  background-color: #fef7f0;
+}
+
+.tabContainerInner{
   border-bottom: 1px solid #edebe9; // Subtle border
-  padding-bottom: 8px;
+  display: flex;
+  gap: 30px;
 }
 
 .tabButton {
@@ -149,12 +153,15 @@
 .activeTab::after {
   content: "";
   position: absolute;
-  bottom: -1px;
   left: 0;
   width: 100%;
-  height: 2px;
-  background-color: #d33a2c; /* Red underline for active tab */
-  border-radius: 2px;
+  height: 4px;
+  left: 0;
+  bottom: 0;
+  position: absolute;
+  width: 100%;
+  border-radius: 20px 20px 0 0;
+  background-color: #DA291C;
 }
 
 /* My Trainings Grid */
@@ -167,77 +174,77 @@
 
 /* Course Card Styles (Refined for Alignment) */
 .courseCard {
-  width: 100%;
-  background: #ffffff;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  transition: box-shadow 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  padding: 16px 16px 24px 16px;
+  max-width: 100%;
+  border: 3px solid #ffffff;
+  backdrop-filter: blur(30px);
+  background: #FFFFFF7A;
+  cursor: pointer;
 
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  }
-}
-
-.categoryLabel {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 1;
-  background: rgba(255, 255, 255, 0.95);
-  color: #323130;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(4px);
+  // &:hover {
+  //   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  // }
 }
 
 .imageContainer {
   position: relative;
   width: 100%;
-  height: 140px;
+  height: 180px;
   overflow: hidden;
-  margin-top: 28px; // Space for category label
+  margin-bottom: 15px;
+  .categoryLabel {
+    background: #ffffff;
+    border-radius: 5px;
+    border: 1px solid #FFFCFC;
+    color: #3A3B43;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    left: 12px;
+    padding: 4px 12px;
+    position: absolute;
+    top: 12px;
+    z-index: 1;
+  }
 }
 
 .headerImage {
   width: 100%;
   height: 100%;
+  border-radius: 10px 10px 0 0;
   object-fit: cover;
 }
 
 .content {
-  padding: 16px;
+  padding: 0;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 200px;
+  // min-height: 200px;
+  min-height: auto;
+  gap: 15px;
 }
 
 .title {
-  margin: 0 0 8px 0;
-  font-size: 16px;
+  margin: 0;
+  font-size: 18px;
   font-weight: 600;
-  line-height: 20px;
+  line-height: 28px;
   color: #201f1e;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-family: "Bukra";
 }
 
 .metadata {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-bottom: 12px;
+  margin-bottom: 0;
   font-size: 13px;
   color: #605e5c;
 }
@@ -250,7 +257,7 @@
 .instructor {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 0;
   gap: 8px;
 }
 
@@ -264,39 +271,42 @@
 
 .instructorInfo {
   display: flex;
-  flex-direction: column;
-  font-size: 13px;
-  color: #605e5c;
-  line-height: 16px;
+  gap: 5px;
 }
 
 .instructorName {
-  color: #201f1e;
-  font-weight: 600;
+  color: #6C6C6C;
   font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  letter-spacing: -0.5px;
 }
 
 .instructorTitle {
-  color: #605e5c;
-  font-size: 12px;
+  color: #6C6C6C;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
 }
 
 .joinButton {
-  width: 100%;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: #faf9f8;
-  border: 1px solid #edebe9;
+  background: transparent;
+  border: 1.5px solid #C5B9AC;
   border-radius: 24px;
-  font-size: 14px;
-  font-weight: 600;
   color: #201f1e;
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 12px;
+  display: flex;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 0;
+  padding: 10px;
+  transition: all .2s ease;
+  width: 100%;
 
   &:hover:not(:disabled) {
     background: #f3f2f1;
@@ -332,27 +342,23 @@
 }
 
 .infoNotice {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
-  background: #faf9f8;
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 16px;
+  align-items: flex-end;
   color: #605e5c;
-  border: 1px solid #edebe9;
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+  line-height: 16px;
+  font-weight: 500;
+  padding: 0;
 }
 
 .infoIcon {
-  display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
   color: #0078d4;
-  margin-top: 1px;
+  display: flex;
+  flex-shrink: 0;
+  height: 20px;
+  width: 20px;
 
   svg {
     width: 100%;
@@ -360,12 +366,8 @@
   }
 }
 
-.infoText {.learningLinks {
-  background: #fff9f4; // Light beige background to match image
-  border-radius: 12px;
-  padding: 24px;
-  border: 1px solid #f8f4f0; // Subtle border
-
+.infoText{
+  .learningLinks {
   .header {
     margin-bottom: 24px;
 
@@ -390,40 +392,38 @@
   }
 
   .linkCard {
-    background: #ffffff;
+    align-items: center;
+    justify-content: center;
+    background-color: #fdecdc;
+    border: 1px solid #f0e9e5;
     border-radius: 12px;
     cursor: pointer;
-    text-align: center;
-    padding: 20px 16px;
-    border: 1px solid #f0e9e5; // Light border to match image
-    transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    height: 100%; // Equal height for cards
+    height: 157px;
+    padding: 0;
+    text-align: center;
+    transition: all .25s ease;
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      border-color: #e8d9d0;
-    }
+    // &:hover {
+    //   transform: translateY(-2px);
+    //   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    //   border-color: #e8d9d0;
+    // }
 
     .logoContainer {
-      display: flex;
-      justify-content: center;
       align-items: center;
-      width: 80px;
-      height: 80px; // Square rounded container to match image
-      border-radius: 12px;
-      background-color: #ffffff; // White background for logo container
-      margin-bottom: 12px;
       border: 1px solid #f0e9e5;
+      border-radius: 12px;
+      display: flex;
+      height: 100%;
+      justify-content: center;
+      width: 100%;
     }
 
     .logo {
-      max-width: 70%;
-      max-height: 70%;
       object-fit: contain;
+      width: 100%;  
     }
 
     .linkTitle {

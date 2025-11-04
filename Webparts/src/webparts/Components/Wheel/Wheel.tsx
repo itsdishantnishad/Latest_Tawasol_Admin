@@ -76,19 +76,26 @@ interface FeatureWheelProps {
     selectedFeature: string;
 }
 
-const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
+const Wheel: React.FC<FeatureWheelProps> = ({ onFeatureSelect, selectedFeature }) => {
     const selectedIndex = features.findIndex((f) => f.id === selectedFeature);
     const totalFeatures = features.length;
-    // Create an infinite array of cards for seamless scrolling
+    // Create an array of cards showing all features
     const getVisibleCards = () => {
         const visibleCards = [];
-        // Show 7 cards: 3 before, selected in center, 3 after
-        for (let i = -3; i <= 3; i++) {
-            const index = (selectedIndex + i + totalFeatures * 300) % totalFeatures;
+        // Show all features positioned around the wheel
+        for (let i = 0; i < totalFeatures; i++) {
+            // Calculate position relative to selected feature
+            let relativePosition = i - selectedIndex;
+            // Normalize to -totalFeatures/2 to totalFeatures/2 range
+            if (relativePosition > totalFeatures / 2) {
+                relativePosition -= totalFeatures;
+            } else if (relativePosition < -totalFeatures / 2) {
+                relativePosition += totalFeatures;
+            }
             visibleCards.push({
-                ...features[index],
-                position: i,
-                actualIndex: index,
+                ...features[i],
+                position: relativePosition,
+                actualIndex: i,
             });
         }
         return visibleCards;
@@ -99,6 +106,8 @@ const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
     };
 
     const visibleCards = getVisibleCards();
+    // Calculate max position once for angle normalization
+    const maxPosition = Math.max(...visibleCards.map(c => Math.abs(c.position)));
 
     const bgClassById: Record<string, string> = {
         gallery: styles.galleryCard,
@@ -125,47 +134,38 @@ const Wheel = ({ onFeatureSelect, selectedFeature }: FeatureWheelProps) => {
                 {visibleCards.map((card) => {
                     const isSelected = card.position === 0;
                     const position = card.position;
+                    // Only allow clicks on selected card and immediate neighbors (left: -1, right: +1)
+                    const isClickable = Math.abs(position) <= 1;
 
                     // Calculate arc position
-                    // Cards at positions: -3, -2, -1, 0, 1, 2, 3
-                    const startAngle = -50;
-                    const endAngle = 50;
+                    // Distribute all features across the arc
+                    const startAngle = -100;
+                    const endAngle = 100;
                     const angleRange = endAngle - startAngle;
-                    const angle = startAngle + (angleRange / 6) * (position + 3);
+                    // Normalize position to 0-1 range, then map to angle range
+                    const normalizedPosition = (position + maxPosition) / (maxPosition * 2);
+                    const angle = startAngle + angleRange * normalizedPosition;
 
                     // Arc radius
-                    const radius = 800;
+                    const radius = 650;
                     const radians = (angle * Math.PI) / 180;
                     const x = Math.sin(radians) * radius;
                     const y = -Math.cos(radians) * radius + radius + 10;
 
                     // Card rotation to follow arc
                     const cardRotation = angle;
-
-                    // Calculate opacity and blur based on position
-                    const absPosition = Math.abs(position);
-                    const opacity = absPosition === 3 ? 0.4 : absPosition === 2 ? 0.7 : absPosition === 1 ? 0.9 : 1;
-                    const blur =
-                        absPosition === 4
-                            ? "blur(0px)"
-                            : absPosition === 2
-                                ? "blur(0px)"
-                                : absPosition === 1
-                                    ? "blur(0px)"
-                                    : "blur(0px)";
                     const scale = isSelected ? 1.05 : 1;
 
                     return (
                         <button
-                            key={`${card.id}-${position}`}
-                            onClick={() => handleCardClick(card.id)}
+                            key={card.id}
+                            onClick={() => isClickable && handleCardClick(card.id)}
+                            disabled={!isClickable}
                             className={styles.card}
                             style={{
                                 transform: `translate(calc(-50% + ${x}px), ${y}px) rotate(${cardRotation}deg) scale(${scale})`,
-                                transformOrigin: "center center",
-                                opacity,
-                                filter: blur,
-                                zIndex: isSelected ? 10 : absPosition === 1 ? 8 : absPosition === 2 ? 5 : absPosition === 3 ? 2 : 0,
+                                pointerEvents: isClickable ? 'auto' : 'none',
+                                cursor: isClickable ? 'pointer' : 'default',
                             }}
                         >
                             <div

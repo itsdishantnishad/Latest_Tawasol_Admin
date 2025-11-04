@@ -7,8 +7,22 @@
 .wheelContainer {
   position: relative;
   width: 100%;
-  height: 350px;
+  height: 470px;
   overflow: hidden;
+
+  &::after {
+    content: "";
+    width: 100%;
+    height: 200px;
+    position: absolute;
+    bottom: -4px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 244, 234, 0) 18.05%,
+      #fff4ea 78.82%
+    );
+    filter: blur(2px);
+  }
 }
 
 .backgroundElements {
@@ -21,17 +35,12 @@
 .centralArrow {
   position: absolute;
   z-index: 20;
-  top: 280px;
   left: 50%;
+  bottom: 20%;
   transform: translateX(-50%);
 }
 
 .arrow {
-  // width: 0;
-  // height: 0;
-  // border-left: 16px solid transparent;
-  // border-right: 16px solid transparent;
-  // border-bottom: 24px solid #da291c;
   background-image: url(../../featureWheel/images/nav-icon.svg);
   background-position: center;
   background-size: 100%;
@@ -56,8 +65,8 @@
   left: 50%;
   top: 0;
   cursor: pointer;
-  transition: transform 5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease,
-    z-index 0.01s;
+  transform-origin: center center;
+  transition: transform 1s ease-out;
   background: none;
   border: none;
   padding: 0;
@@ -68,7 +77,6 @@
 .cardInner {
   width: 180px;
   height: 220px;
-  // background: #ffd198 linear-gradient(to bottom right, #f5deb3, #d2b48c);
   border-radius: 15px;
   display: flex;
   justify-content: center;
@@ -83,7 +91,6 @@
 .cardTextContainer {
   color: #fff;
   text-align: center;
-  // margin-top: auto;
   position: absolute;
   bottom: 15px;
   padding: 12px;
@@ -100,7 +107,6 @@
   margin-top: 6px;
 }
 
-// Responsive design
 @media (max-width: 768px) {
   .wheelContainer {
     height: 350px;
@@ -120,29 +126,7 @@
   .cardSubtitle {
     font-size: 11px;
   }
-
-  .decorationLeft,
-  .decorationLeft2,
-  .decorationRight,
-  .decorationRight2 {
-    display: none;
-  }
 }
-
-// .serviceLinksArt {
-//   position: absolute;
-//   top: 0;
-//   left: 0;
-//   width: 100%;
-//   height: 100%;
-//   object-fit: cover;
-//   object-position: 50% 36%;
-//   transform: rotate(0.3deg) scale(0.92);
-//   border-radius: inherit;
-//   opacity: 1;
-//   pointer-events: none;
-//   user-select: none;
-// }
 
 .dashboardCard {
   background-image: url("../FeatureContent/assets/Dashboard.svg");
@@ -161,7 +145,6 @@
 }
 
 .celebrateCard {
-  /* Let’s Celebrate.svg (apostrophe URL-encoded) */
   background-image: url("../FeatureContent/assets/LetsCelebrate.svg");
 }
 

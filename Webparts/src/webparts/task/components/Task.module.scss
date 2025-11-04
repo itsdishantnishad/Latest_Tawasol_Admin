@@ -1,25 +1,73 @@
-@import '~@fluentui/react/dist/sass/References.scss';
+@import "~@fluentui/react/dist/sass/References.scss";
 
 .main {
-  background: #F9ECE1;
+  background: #fff4ea;
 }
 
 .pageContainer {
-  width: min(1280px, 96vw);
   margin: 0 auto;
-  padding-bottom: 24px;
+  padding: 60px 60px 0;
 }
 
 .taskHeader {
   width: 230px;
   height: 55px;
-  background: #F9ECE1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
-.taskHeaderAbsolute { justify-self: center; text-align: center; }
+
+.tableWrapper {
+  padding: 0 60px;
+}
+
+.table {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  overflow: hidden;
+
+  tr {
+    border: none;
+    color: #3a3b43;
+
+    td {
+      height: auto;
+      padding: 12px;
+    }
+  }
+}
+
+.tableHeader {
+  background: #ffebda;
+
+  th {
+    padding: 12px;
+    color: #000000;
+    & > div {
+      min-height: auto;
+    }
+  }
+}
+
+.tableBody {
+  tr {
+    cursor: pointer;
+  }
+
+  tr:nth-child(odd) {
+    background: #fff4ea;
+  }
+
+  tr:nth-child(even) {
+    background: #ffeee0;
+  }
+}
+
+.taskHeaderAbsolute {
+  justify-self: center;
+  text-align: center;
+}
 
 .taskText {
   font-family: "Instrument Serif", serif;
@@ -29,8 +77,9 @@
   line-height: 100%;
   letter-spacing: 1px;
   text-align: center;
-  color: #DA291C;
+  color: #da291c;
 }
+
 .approvalsText {
   font-family: "Instrument Serif", serif;
   font-weight: 400;
@@ -42,49 +91,23 @@
   color: #000000;
 }
 
-.tableWrapper {
-  width: 100%;
-  overflow-x: auto;
-}
-
-/* row zebra to match figma:
-   first row transparent (same as background) ~ #FFF4EA;
-   second row #FFEEE0; then repeat pattern */
-:global(.fui-TableRow):nth-child(odd) {
-  background: #FFF4EA;
-}
-:global(.fui-TableRow):nth-child(even) {
-  background: #FFEEE0;
-}
-
-/* chips and pills */
-.chip { display: inline-flex; align-items: center; justify-content: center; min-width: 64px; height: 28px; padding: 4px 10px; border-radius: 360px; font-weight: 500; font-size: 13px; }
-.chipHigh { background: #fdede8; color: #ff3a00; }
-.chipMedium { background: #feefd4; color: #dda338; }
-.chipLow { background: #e2edfe; color: #2b77d6; }
-
-.statusPill { display: inline-flex; align-items: center; justify-content: center; height: 28px; padding: 0 12px; border-radius: 360px; font-weight: 700; font-size: 14px; color: #fff; }
-.stApproved { background: #0e8732; }
-.stRejected { background: #da291c; }
-.stPending  { background: #c3a500; }
-.statusText {
-  width: 66px; height: 22px;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-  font-weight: 500; font-size: 14px; line-height: 22px; letter-spacing: -0.5px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
 /* action column */
-.actionCell { display: inline-flex; align-items: center; gap: 16px; }
-.actionItem { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; color: #101820; }
-.actionIcon { width: 16px; height: 16px; display: inline-block; }
+.actionCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
 
-/* utility */
-.value {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+.actionItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 500;
   font-size: 14px;
-  line-height: 22px;
-  letter-spacing: -0.2px;
-  color: #101820;
+}
+
+.actionIcon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
 }
