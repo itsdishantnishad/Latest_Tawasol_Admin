@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Stack, Text, Link, Image, PrimaryButton } from '@fluentui/react';
+import { Stack, Text, Image, PrimaryButton } from '@fluentui/react';
 import { DashboardItem } from '../../services/listServices';
 import ui from './Dashboards.module.scss';
 
@@ -24,18 +24,19 @@ export default class DashboardDetail extends React.Component<IDashboardDetailPro
 
         <div className={ui.embedWrap}>
           {item.embedUrl ? (
-            <iframe title={item.title} src={item.embedUrl} width="100%" height={540} frameBorder={0} allowFullScreen />
+            <iframe
+              title={item.title}
+              src={item.embedUrl}
+              width="100%"
+              height={540}
+              frameBorder={0}
+              allowFullScreen
+            />
           ) : (
             <div className={ui.embedPlaceholder}>
               <Text>No embed URL configured.</Text>
             </div>
           )}
-        </div>
-
-        <div className={ui.quickLinks}>
-          {item.linkHome && <Link href={item.linkHome} target="_blank" rel="noopener">Home</Link>}
-          {item.linkTasks && <Link href={item.linkTasks} target="_blank" rel="noopener">Tasks</Link>}
-          {item.linkDocs && <Link href={item.linkDocs} target="_blank" rel="noopener">Documents</Link>}
         </div>
 
         {showSection && (
@@ -44,7 +45,12 @@ export default class DashboardDetail extends React.Component<IDashboardDetailPro
 
             <div className={ui.relatedGrid}>
               {related.map(it => (
-                <div key={it.id} className={ui.card} onClick={() => onOpen(it)} title={it.title}>
+                <div
+                  key={it.id}
+                  className={ui.card}
+                  onClick={() => onOpen(it)}
+                  title={it.title}
+                >
                   {it.thumbUrl ? (
                     <Image src={it.thumbUrl} alt="" className={ui.cardImg} />
                   ) : (
