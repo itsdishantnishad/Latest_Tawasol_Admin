@@ -1,6 +1,6 @@
-import * as React from 'react';
-import { useState } from 'react';
-import styles from './EventGalleryDetail.module.scss';
+import * as React from "react";
+import { useState } from "react";
+import styles from "./EventGalleryDetail.module.scss";
 
 interface IEventDetailProps {
   eventId: number;
@@ -22,15 +22,21 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
   // Dummy photos data - replace with actual images
   const photos: IPhoto[] = Array.from({ length: imageCount }, (_, index) => ({
     id: index + 1,
-    url: `https://images.unsplash.com/photo-${1500000000000 + index * 100000}?w=400&h=400`,
-    alt: `${eventTitle} - Photo ${index + 1}`
+    url: `https://images.unsplash.com/photo-${
+      1500000000000 + index * 100000
+    }?w=400&h=400`,
+    alt: `${eventTitle} - Photo ${index + 1}`,
   }));
 
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [showFindMyPhoto, setShowFindMyPhoto] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>('profile');
+  const [activeTab, setActiveTab] = useState<string>("profile");
   const [faceRecognized, setFaceRecognized] = useState<boolean>(false);
-
+  const profileImageUrl =
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200";
+  const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
+  const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
   const openLightbox = (photoId: number): void => {
     setSelectedPhoto(photoId);
   };
@@ -45,7 +51,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
 
   const handleTabClick = (tab: string): void => {
     setActiveTab(tab);
-    if (tab === 'profile') {
+    if (tab === "profile") {
       // Simulate face recognition after selecting profile picture
       setTimeout(() => {
         setFaceRecognized(true);
@@ -53,7 +59,9 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
     }
   };
 
-  const currentPhotoIndex = selectedPhoto ? photos.findIndex(p => p.id === selectedPhoto) : -1;
+  const currentPhotoIndex = selectedPhoto
+    ? photos.findIndex((p) => p.id === selectedPhoto)
+    : -1;
 
   const goToPrevious = (): void => {
     if (currentPhotoIndex > 0) {
@@ -66,6 +74,52 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       setSelectedPhoto(photos[currentPhotoIndex + 1].id);
     }
   };
+  const handleUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setUploadedPreview(url);
+  };
+
+  const capturePhoto = () => {
+    const canvas = document.createElement("canvas");
+    const video = videoRef.current;
+    if (!video) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d")?.drawImage(video, 0, 0);
+
+    const img = canvas.toDataURL("image/png");
+    setCapturedPreview(img);
+  };
+
+  const useProfilePicture = () => {
+    setFaceRecognized(true);
+  };
+
+  const ProfilePhotoPanel = ({ profileUrl, onUse }:any) => (
+  <div className={styles.tabContent}>
+    <img src={profileUrl} className={styles.previewImage}/>
+    <button className={styles.usePhotoBtn} onClick={onUse}>Use This Photo</button>
+  </div>
+);
+
+const UploadPhotoPanel = ({ onUpload, preview }:any) => (
+  <div className={styles.tabContent}>
+    <input type="file" accept="image/*" onChange={onUpload}/>
+    {preview && <img src={preview} className={styles.previewImage}/>}
+  </div>
+);
+
+const TakePhotoPanel = ({ videoRef, onCapture, preview }:any) => (
+  <div className={styles.tabContent}>
+    <video ref={videoRef} autoPlay playsInline className={styles.cameraVideo}/>
+    <button onClick={onCapture} className={styles.captureBtn}>Capture</button>
+    {preview && <img src={preview} className={styles.previewImage}/>}
+  </div>
+);
+
 
   return (
     <div className={styles.eventDetail}>
@@ -83,40 +137,41 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
           </p>
         </div>
         <div className={styles.findPhotoWrapper}>
-          <button className={styles.findPhotoButton} onClick={toggleFindMyPhoto}>
+          <button
+            className={styles.findPhotoButton}
+            onClick={toggleFindMyPhoto}
+          >
             Find my Photo <span className={styles.dropdownIcon}>▼</span>
           </button>
 
-          {/* Find My Photo Dropdown */}
           {showFindMyPhoto && (
             <div className={styles.findPhotoDropdown}>
               <div className={styles.dropdownContent}>
                 <div className={styles.tabButtons}>
-                  <button 
-                    className={`${styles.tabButton} ${activeTab === 'profile' ? styles.active : ''}`}
-                    onClick={() => handleTabClick('profile')}
-                  >
-                    Use Profile Picture
-                  </button>
-                  <button 
-                    className={`${styles.tabButton} ${activeTab === 'upload' ? styles.active : ''}`}
-                    onClick={() => handleTabClick('upload')}
-                  >
-                    Upload Photo
-                  </button>
-                  <button 
-                    className={`${styles.tabButton} ${activeTab === 'take' ? styles.active : ''}`}
-                    onClick={() => handleTabClick('take')}
-                  >
-                    Take a Picture
-                  </button>
+                  {["profile", "upload", "take"].map((tab) => (
+                    <button
+                      key={tab}
+                      className={`${styles.tabButton} ${
+                        activeTab === tab ? styles.active : ""
+                      }`}
+                      onClick={() => handleTabClick(tab)}
+                    >
+                      {tab === "profile"
+                        ? "Use Profile Picture"
+                        : tab === "upload"
+                        ? "Upload Photo"
+                        : "Take a Picture"}
+                    </button>
+                  ))}
                 </div>
 
                 <div className={styles.recognitionSection}>
                   <h3 className={styles.recognitionTitle}>Face Recognition</h3>
+
                   {!faceRecognized ? (
                     <p className={styles.recognitionMessage}>
-                      We found a photo linked to your account. Please confirm to continue.
+                      We found a photo linked to your account. Please confirm to
+                      continue.
                     </p>
                   ) : (
                     <p className={styles.recognitionMessage}>
@@ -126,9 +181,8 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
 
                   <div className={styles.profileImageWrapper}>
                     <div className={styles.profileImageContainer}>
-                      <img 
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop" 
-                        alt="Profile" 
+                      <img
+                        src={profileImageUrl}
                         className={styles.profileImage}
                       />
                       {faceRecognized && (
@@ -136,6 +190,26 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
                       )}
                     </div>
                   </div>
+
+                  {activeTab === "profile" && (
+                    <ProfilePhotoPanel
+                      profileUrl={profileImageUrl}
+                      onUse={useProfilePicture}
+                    />
+                  )}
+                  {activeTab === "upload" && (
+                    <UploadPhotoPanel
+                      preview={uploadedPreview}
+                      onUpload={handleUploadChange}
+                    />
+                  )}
+                  {activeTab === "take" && (
+                    <TakePhotoPanel
+                      preview={capturedPreview}
+                      videoRef={videoRef}
+                      onCapture={capturePhoto}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -146,8 +220,8 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       {/* Photo Grid */}
       <div className={styles.photoGrid}>
         {photos.map((photo) => (
-          <div 
-            key={photo.id} 
+          <div
+            key={photo.id}
             className={styles.photoItem}
             onClick={() => openLightbox(photo.id)}
           >
@@ -169,22 +243,30 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       {/* Lightbox */}
       {selectedPhoto !== null && (
         <div className={styles.lightbox} onClick={closeLightbox}>
-          <button className={styles.closeButton} onClick={closeLightbox}>×</button>
-          <button 
-            className={`${styles.navButton} ${styles.prevButton}`} 
-            onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
+          <button className={styles.closeButton} onClick={closeLightbox}>
+            ×
+          </button>
+          <button
+            className={`${styles.navButton} ${styles.prevButton}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              goToPrevious();
+            }}
             disabled={currentPhotoIndex === 0}
           >
             ‹
           </button>
-          <img 
-            src={photos[currentPhotoIndex].url} 
+          <img
+            src={photos[currentPhotoIndex].url}
             alt={photos[currentPhotoIndex].alt}
             onClick={(e) => e.stopPropagation()}
           />
-          <button 
-            className={`${styles.navButton} ${styles.nextButton}`} 
-            onClick={(e) => { e.stopPropagation(); goToNext(); }}
+          <button
+            className={`${styles.navButton} ${styles.nextButton}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              goToNext();
+            }}
             disabled={currentPhotoIndex === photos.length - 1}
           >
             ›

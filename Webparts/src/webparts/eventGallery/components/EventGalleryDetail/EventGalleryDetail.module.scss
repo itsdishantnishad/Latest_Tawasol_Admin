@@ -474,3 +474,57 @@
     font-size: 30px;
   }
 }
+.tabContent {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.previewImage {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+}
+
+.usePhotoBtn {
+  background: #0078d4;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s ease all;
+
+  &:hover {
+    opacity: 0.88;
+  }
+}
+.cameraVideo {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+  object-fit: cover;
+}
+
+.captureBtn {
+  margin-top: 10px;
+  background: #0078d4;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s ease all;
+
+  &:hover {
+    opacity: 0.88;
+  }
+}
+
