@@ -99,22 +99,24 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
     <>
       {/* Tabs Section */}
       <div className={styles.tabContainer}>
-        <button
-          className={`${styles.tabButton} ${
-            activeTab === "all" ? styles.activeTab : ""
-          }`}
-          onClick={() => setActiveTab("all")}
-        >
-          All Events
-        </button>
-        <button
-          className={`${styles.tabButton} ${
-            activeTab === "my" ? styles.activeTab : ""
-          }`}
-          onClick={() => setActiveTab("my")}
-        >
-          My Events
-        </button>
+        <div className={styles.tabContainerInner}>
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "all" ? styles.activeTab : ""
+            }`}
+            onClick={() => setActiveTab("all")}
+          >
+            All Events
+          </button>
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "my" ? styles.activeTab : ""
+            }`}
+            onClick={() => setActiveTab("my")}
+          >
+            My Events
+          </button>
+        </div>
       </div>
 
       {/* All Events */}

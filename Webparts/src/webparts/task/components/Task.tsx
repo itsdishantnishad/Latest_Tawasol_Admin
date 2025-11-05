@@ -10,6 +10,7 @@ import {
   TableHeaderCell,
   TableCellLayout,
 } from "@fluentui/react-components";
+import Tag from '../../Components/Tag/Tag';
 
 import sfListingMock from './dummyData';
 import TaskDetails, { TaskDetailsData } from './TaskDetails';
@@ -17,6 +18,8 @@ import NavSegment from './taskNavBtnComp';
 import { ACTION_RED_CROSS_REJECT_SVG, ACTION_GREEN_CHECK_APPROVE_SVG } from '../../assets/constants';
 
 import { SfApprovalService, TaskListApiResponse } from '../../services/Task/SalesforceApprovalService';
+
+
 
 export interface ITaskState {
   selectedTabValue: string;
@@ -167,27 +170,42 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
       { columnKey: "status", label: "Status" },
     ];
 
+    const statusTagColor = {
+      'Approved': '#0e8732',
+      'Rejected': '#da291c',
+      'Pending': '#c3a500',
+    }
+
+    const priorityTagBgColor = {
+      'High': '#fdede8',
+      'Medium': '#feefd4',
+      'Low': '#e2edfe',
+    }
+
+    const priorityTagTextColor = {
+      'High': '#ff3a00',
+      'Medium': '#dda338',
+      'Low': '#2b77d6',
+    }
+
     const renderTaskRow = (taskItem: any): JSX.Element => (
       <TableRow key={taskItem.workitemId} onClick={() => this.handleRowClick(taskItem)}>
-        <TableCell><TableCellLayout>{taskItem.workflowNumber}</TableCellLayout></TableCell>
-        <TableCell><TableCellLayout>{taskItem.taskTitle}</TableCellLayout></TableCell>
+        <TableCell>
+          <TableCellLayout>{taskItem.workflowNumber}</TableCellLayout>
+        </TableCell>
+        <TableCell>
+          <TableCellLayout>{taskItem.taskTitle}</TableCellLayout>
+        </TableCell>
         <TableCell>
           <TableCellLayout>
-            <span
-              className={`${styles.chip} 
-                ${taskItem.priority === "High"
-                  ? styles.chipHigh
-                  : taskItem.priority === "Medium"
-                    ? styles.chipMedium
-                    : styles.chipLow
-                }`}
-            >
-              {taskItem.priority || "—"}
-            </span>
+            <Tag
+              label={taskItem.priority}
+              backgroundColor={priorityTagBgColor[taskItem.priority as keyof typeof priorityTagBgColor]}
+              textColor={priorityTagTextColor[taskItem.priority as keyof typeof priorityTagTextColor]}
+            />
           </TableCellLayout>
         </TableCell>
         <TableCell>{formatIsoDateToDisplay(taskItem.dueDate)}</TableCell>
-
         <TableCell>
           <div className={styles.actionCell}>
             <span className={styles.actionItem}>
@@ -209,17 +227,10 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
 
         <TableCell>
           <TableCellLayout>
-            <span
-              className={`${styles.statusPill} ${
-                taskItem.status === "Approved"
-                  ? styles.stApproved
-                  : taskItem.status === "Rejected"
-                    ? styles.stRejected
-                    : styles.stPending
-              }`}
-            >
-              <span className={styles.statusText}>{taskItem.status}</span>
-            </span>
+            <Tag
+              label={taskItem.status}
+              backgroundColor={statusTagColor[taskItem.status as keyof typeof statusTagColor]}
+            />
           </TableCellLayout>
         </TableCell>
       </TableRow>
@@ -241,8 +252,8 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
           />
 
           <div className={styles.tableWrapper}>
-            <Table aria-label="Task Approvals Table">
-              <TableHeader>
+            <Table className={styles.table} aria-label="Task Approvals Table">
+              <TableHeader className={styles.tableHeader}>
                 <TableRow>
                   {tableColumns.map((column) => (
                     <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>
@@ -250,7 +261,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
                 </TableRow>
               </TableHeader>
 
-              <TableBody>
+              <TableBody className={styles.tableBody}>
                 {isLoading ? null : (
                   <>
                     {(selectedTabValue === "Oracle" || selectedTabValue === "All") &&

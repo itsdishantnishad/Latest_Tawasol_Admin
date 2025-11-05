@@ -161,7 +161,9 @@ const EventCard: React.FC<EventCardProps> = ({
       <div className={styles.detailsSection}>
         <div className={styles.category}>{category}</div>
         <h3 className={styles.title}>{title}</h3>
+      </div>
 
+      <div className={styles.locationSection}>
         <div className={styles.infoRow}>
           <svg
             className={styles.icon}
@@ -169,8 +171,8 @@ const EventCard: React.FC<EventCardProps> = ({
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <circle cx="12" cy="12" r="10" strokeWidth={2} />
-            <path strokeWidth={2} d="M12 6v6l4 2" />
+            <circle cx="12" cy="12" r="10" strokeWidth="1" />
+            <path strokeWidth="1" d="M12 6v6l4 2" />
           </svg>
           <span className={styles.infoText}>{time}</span>
         </div>
@@ -183,10 +185,10 @@ const EventCard: React.FC<EventCardProps> = ({
             viewBox="0 0 24 24"
           >
             <path
-              strokeWidth={2}
+              strokeWidth="1"
               d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
             />
-            <path strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeWidth="1" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span className={styles.infoText}>{location}</span>
         </div>
