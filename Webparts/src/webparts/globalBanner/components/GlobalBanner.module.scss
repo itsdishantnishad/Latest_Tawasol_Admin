@@ -2,19 +2,17 @@
 
 /* Outer: controls page spacing around the banner */
 .bannerRoot {
-  --pad: 24px;                
-  padding: var(--pad);
-  box-sizing: border-box; 
-  background: #FFF9F4;  
+  background: #fef7f0;
+  box-sizing: border-box;
+  padding: 30px 60px;
 }
 
 /* Inner: holds the media + overlay and keeps rounded mask */
 .frame {
   position: relative;
   width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #ffffff;       
+  // border-radius: 8px;
+  overflow: hidden;   
 }
 
 /* Media fills the inner frame */
@@ -47,7 +45,7 @@
 /* Title + description */
 .title {
   margin: 0;
-  font-family: "Instrument Serif", Georgia, "Times New Roman", Times, serif;
+  font-family: "Instrument Serif", serif !important;
   font-weight: 400;
   font-size: 60px;
   line-height: 100%;
@@ -59,7 +57,7 @@
 
 .description {
   margin-top: 12px;
-  font-family: "Inter", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Inter", sans-serif !important;
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
