@@ -35,7 +35,7 @@ root {
  
 /* Heading */
 .heading {
-  line-height: 1;
+  line-height: 100%;
   letter-spacing: 1px;
   text-align: center;
   margin-bottom: 32px;
@@ -51,14 +51,14 @@ root {
   font-weight: 400;
   font-style: italic;
   font-size: 42px;
-  color: var(--ov-accent);
+  color: #DA291C;
 }
 .headingValues {
   font-family: "Instrument Serif", serif;
   font-weight: 400;
   font-style: normal;
   font-size: 42px;
-  color: var(--ov-title);
+  color: #000000;
 }
 
  
@@ -104,18 +104,18 @@ root {
   font-size: 18px;
   font-weight: 600;
   line-height: 24px;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Description container */
  
 /* Description text for each card */
 .description {
-  margin-top: 0;
-  font-family: "Inter", sans-serif;
-  font-size: 16px;
   color: #3A3B43;
-  line-height: 24px;
+  font-family: Inter, sans-serif;
+  font-size: 16px;
   font-weight: 400;
+  line-height: 24px;
 }
  
  

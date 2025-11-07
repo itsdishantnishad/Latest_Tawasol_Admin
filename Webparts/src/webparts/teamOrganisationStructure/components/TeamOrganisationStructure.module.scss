@@ -2,10 +2,14 @@
 
 .wrapper { background:#FFF4EA; padding:48px 20px 56px; border-radius:12px; }
 
-.title {
-  margin:0 0 28px; text-align:center; line-height:1; letter-spacing:1px;
-  font-size:clamp(28px,4vw,42px);
-  font-family:"Instrument Serif",serif; font-weight:400;
+.title{
+  font-family: "Instrument Serif", serif;
+  font-size: 42px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  line-height: 100%;
+  margin: 0 0 28px;
+  text-align: center;
 }
 
 .teamWord { font-style:italic; color:#DA291C; }
@@ -23,6 +27,14 @@
   @media (max-width:1200px){ grid-template-columns:repeat(4,1fr); }
   @media (max-width:900px){  grid-template-columns:repeat(3,1fr); }
   @media (max-width:640px){  grid-template-columns:repeat(2,1fr); }
+  .name{
+    color: #000;
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 0px;
+    line-height: 24px;
+    font-family: 'Inter', sans-serif;
+  }
 }
 
 /* Cards */
@@ -54,8 +66,21 @@
 .accent{ width:64px; height:4px; background:#DA291C; border-radius:3px; margin:10px 0 8px; }
 .accentCenter{ margin-left:auto; margin-right:auto; }
 
-.name{ font-weight:600; color:#000; margin-bottom:4px; font-size:clamp(14px,1.6vw,16px); }
-.role{ color:#6C6C6C; font-size:12px; line-height:1.2; }
+.name{
+  color: #000;
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  line-height: 32px;
+  font-family: 'Inter', sans-serif;
+}
+.role{
+  color: #6C6C6C;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+}
 
 /* ===== Departments band (appears under selected row) ===== */
 .deptBand{ margin:14px 0 26px; padding:22px 10px 6px; position:relative; border-radius:12px; }
