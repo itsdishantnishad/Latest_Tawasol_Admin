@@ -1,4 +1,3 @@
-// src/extensions/extensions/components/Footer.ts
 import styles from '../Extension.module.scss';
 
 export interface IFooterLink { label: string; url: string; }
@@ -17,20 +16,29 @@ export class Footer {
         <div class="${styles.TIRFooterBottom}">
           <span>© 2025 Tawasol. All rights reserved.</span>
           <div class="${styles.TIRFooterBottomCenter}">Made with ❤️ by DHRE Technology Team</div>
-          <div class="${styles.TIRSocials}">
-            <a href="#" aria-label="Instagram"><img src="" alt="Instagram" /></a>
-            <a href="#" aria-label="Facebook"><img src="" alt="Facebook" /></a>
-          </div>
         </div>
       </footer>`;
 
     const host = document.createElement('div');
     host.id = hostId;
     host.innerHTML = html;
-    document.body.appendChild(host);
+
+    // ✅ Try replacing OOTB green footer if present
+    const ootbFooter =
+      document.querySelector('.simpleFooterContainer') ||
+      document.querySelector('[data-automationid="SimpleFooter"]') ||
+      document.querySelector('[data-feature-tag*="SiteFooter"]');
+
+    if (ootbFooter && ootbFooter.parentElement) {
+      ootbFooter.parentElement.replaceChild(host, ootbFooter);
+    } else {
+      // fallback if not found: append after canvas
+      const canvas = document.querySelector('#spPageCanvasContent');
+      (canvas?.parentElement || document.body).appendChild(host);
+    }
   }
 
   public dispose(): void {
-    document.querySelector(`.${styles.TIRFooter}`)?.parentElement?.remove();
+    document.querySelector(`.${styles.TIRFooter}`)?.remove();
   }
 }

@@ -1,3 +1,5 @@
+// Central IDs, URL paths, and helpers for environment-agnostic links.
+
 export const IDS = {
   hosts: {
     header: 'tir-header-host',
@@ -13,15 +15,59 @@ export const IDS = {
   }
 } as const;
 
-export const URLS = {
-  home:  '/sites/IntranetRevampTawasol',
-  feed:  '/sites/IntranetRevampTawasol/SitePages/Feed.aspx',
-  tasks: '/sites/IntranetRevampTawasol/SitePages/Tasks.aspx',
-  offers:'/sites/IntranetRevampTawasol/SitePages/Offers.aspx',
-  docs:  '/sites/IntranetRevampTawasol/SitePages/Documents.aspx'
+/**
+ * Keep ONLY site-relative paths here. We resolve them with the current web/base URL.
+ * If you rename pages later (before ".aspx"), change them here once.
+ */
+export const URL_PATHS = {
+  home:      '/',                         // resolves to current web’s root
+  feed:      '/SitePages/Feed.aspx',
+  tasks:     '/SitePages/Tasks.aspx',
+  offers:    '/SitePages/Offers.aspx',
+  docs:      '/SitePages/Documents.aspx',
+  news:      '/SitePages/News.aspx',
+  trainings: '/SitePages/Trainings.aspx',
+  events:    '/SitePages/Events.aspx'
 } as const;
 
-/** Simple hard-coded notifications (structure kept small & clear) */
+export type ResolvedUrls = {
+  home: string;
+  feed: string;
+  tasks: string;
+  offers: string;
+  docs: string;
+  news: string;
+  trainings: string;
+  events: string;
+};
+
+/** Join base + path without double slashes (ES5-safe, no startsWith). */
+function joinUrl(base: string, path: string): string {
+  if (!path) return base;
+  const b = base.replace(/\/+$/, '');               // trim trailing slashes
+  const needsSlash = path.length > 0 && path.charAt(0) !== '/';
+  return b + (needsSlash ? '/' : '') + path;
+}
+
+/**
+ * Resolve all paths against a base web URL (e.g., context.pageContext.web.absoluteUrl).
+ * Example: resolveUrls('https://contoso.sharepoint.com/sites/MySite')
+ */
+export function resolveUrls(baseWebUrl: string): ResolvedUrls {
+  const root = baseWebUrl.replace(/\/+$/, '');
+  return {
+    home:      baseWebUrl,
+    feed:      joinUrl(root, URL_PATHS.feed),
+    tasks:     joinUrl(root, URL_PATHS.tasks),
+    offers:    joinUrl(root, URL_PATHS.offers),
+    docs:      joinUrl(root, URL_PATHS.docs),
+    news:      joinUrl(root, URL_PATHS.news),
+    trainings: joinUrl(root, URL_PATHS.trainings),
+    events:    joinUrl(root, URL_PATHS.events)
+  };
+}
+
+/** Notifications (unchanged) */
 export type NotifKind = 'party' | 'info' | 'alert' | 'megaphone' | 'check';
 export interface INotif {
   id: string;
@@ -40,8 +86,3 @@ export const HARD_NOTIFS: INotif[] = [
   { id:'4', kind:'megaphone', title:'Lets welcome our New Joiner',                 text:'We are excited to announce that Jones Ray has joined our team as a [Job Title]. Please join us in welcoming th...', time:'12:10 PM', unread:false, section:'yesterday' },
   { id:'5', kind:'check',     title:'Success Alert!',                              text:'Project X has successfully launched; “We’ve secured a major contract with Y;” “Our team surpassed the quart...', time:'10:30 AM', unread:false, section:'yesterday' }
 ];
-
-export const ELEMENT_IDS = {
-  hosts:  { header: 'tir-header-host', nav: 'tir-nav-host', footer: 'tir-footer-host', suggest: 'tir-suggest-host', notif: 'tir-notif-host' },
-  elems:  { brand: 'tir-brand', search: 'tir-search', bell: 'tir-bell' }
-} as const;
