@@ -2,11 +2,8 @@
   "@microsoft/generator-sharepoint": {
     "plusBeta": false,
     "isCreatingSolution": false,
-    "nodeVersion": "18.19.1",
-    "sdksVersions": {
-      "@microsoft/microsoft-graph-client": "3.0.2",
-      "@microsoft/teams-js": "2.12.0"
-    },
+    "nodeVersion": "18.17.1",
+    "sdksVersions": {},
     "version": "1.18.2",
     "libraryName": "webparts",
     "libraryId": "14decd7c-567a-4b47-a7dc-a44b653fa4c4",

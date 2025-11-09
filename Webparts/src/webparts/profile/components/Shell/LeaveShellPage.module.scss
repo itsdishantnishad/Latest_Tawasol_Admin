@@ -1,0 +1,26 @@
+:root { --w-card: 870px; }
+
+.page {
+  min-height: 100vh;
+  width: 100vw;
+  background: #F9ECE1; 
+  display: flex;
+  justify-content: center;
+}
+
+.wrapper {
+  width: 100%;
+  max-width: calc(var(--w-card) + 56px); 
+  padding-top: 16px;
+}
+
+.segmentRow {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.content {
+  display: flex;
+  justify-content: center;
+}

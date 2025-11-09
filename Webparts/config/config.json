@@ -161,6 +161,14 @@
           "manifest": "./src/webparts/globalBanner/GlobalBannerWebPart.manifest.json"
         }
       ]
+    },
+    "profile-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/profile/ProfileWebPart.js",
+          "manifest": "./src/webparts/profile/ProfileWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -184,6 +192,7 @@
     "VivaEngageHeaderWebPartStrings": "lib/webparts/vivaEngageHeader/loc/{locale}.js",
     "PoliciesAndProceduresWebPartStrings": "lib/webparts/policiesAndProcedures/loc/{locale}.js",
     "PoliciesAndProceduresViewsWebPartStrings": "lib/webparts/policiesAndProceduresViews/loc/{locale}.js",
-    "GlobalBannerWebPartStrings": "lib/webparts/globalBanner/loc/{locale}.js"
+    "GlobalBannerWebPartStrings": "lib/webparts/globalBanner/loc/{locale}.js",
+    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js"
   }
 }
