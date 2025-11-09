@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import styles from "./EventGalleryDetail.module.scss";
+import EventGalleryCard from "../EventGalleryHome/EventGalleryCard";
 
 interface IEventDetailProps {
   eventId: number;
@@ -8,6 +9,8 @@ interface IEventDetailProps {
   eventDate: string;
   imageCount: number;
   onBack: () => void;
+  eventdata: any[];
+  images: any[];
 }
 
 interface IPhoto {
@@ -17,17 +20,8 @@ interface IPhoto {
 }
 
 const EventDetail: React.FC<IEventDetailProps> = (props) => {
-  const { eventTitle, eventDate, imageCount, onBack } = props;
-
-  // Dummy photos data - replace with actual images
-  const photos: IPhoto[] = Array.from({ length: imageCount }, (_, index) => ({
-    id: index + 1,
-    url: `https://images.unsplash.com/photo-${
-      1500000000000 + index * 100000
-    }?w=400&h=400`,
-    alt: `${eventTitle} - Photo ${index + 1}`,
-  }));
-
+  const { eventTitle, eventDate, imageCount, onBack, eventdata, images } =
+    props;
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [showFindMyPhoto, setShowFindMyPhoto] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("profile");
@@ -40,7 +34,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
   const openLightbox = (photoId: number): void => {
     setSelectedPhoto(photoId);
   };
-
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const closeLightbox = (): void => {
     setSelectedPhoto(null);
   };
@@ -60,18 +54,18 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
   };
 
   const currentPhotoIndex = selectedPhoto
-    ? photos.findIndex((p) => p.id === selectedPhoto)
-    : -1;
+    ? images.findIndex((p) => p.Id === selectedPhoto)
+    : 0;
 
   const goToPrevious = (): void => {
     if (currentPhotoIndex > 0) {
-      setSelectedPhoto(photos[currentPhotoIndex - 1].id);
+      setSelectedPhoto(images[currentPhotoIndex - 1].Id);
     }
   };
 
   const goToNext = (): void => {
-    if (currentPhotoIndex < photos.length - 1) {
-      setSelectedPhoto(photos[currentPhotoIndex + 1].id);
+    if (currentPhotoIndex < images.length - 1) {
+      setSelectedPhoto(images[currentPhotoIndex + 1].Id);
     }
   };
   const handleUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,34 +87,135 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
     const img = canvas.toDataURL("image/png");
     setCapturedPreview(img);
   };
+  const onContinueWithPhoto = () => {
+    // this is final confirm after capture photo
+    // here you can send preview image to API OR set in state
+    console.log("final captured image: ", capturedPreview);
 
+    // same logic what I do in profile / upload continue flow
+    //  handleFinalSubmit(capturedPreview);
+  };
   const useProfilePicture = () => {
     setFaceRecognized(true);
   };
 
-  const ProfilePhotoPanel = ({ profileUrl, onUse }:any) => (
-  <div className={styles.tabContent}>
-    <img src={profileUrl} className={styles.previewImage}/>
-    <button className={styles.usePhotoBtn} onClick={onUse}>Use This Photo</button>
-  </div>
-);
+  const ProfilePhotoPanel = ({ profileUrl, onUse }: any) => (
+    <div className={styles.profileConfirmWrapper}>
+      <div className={styles.profileConfirmBox}>
+        <img src={profileUrl} className={styles.profileCircleImage} />
+        <div className={styles.checkIcon}>✓</div>
+      </div>
 
-const UploadPhotoPanel = ({ onUpload, preview }:any) => (
-  <div className={styles.tabContent}>
-    <input type="file" accept="image/*" onChange={onUpload}/>
-    {preview && <img src={preview} className={styles.previewImage}/>}
-  </div>
-);
+      <button className={styles.continueBtn} onClick={onUse}>
+        Continue
+      </button>
+    </div>
+  );
 
-const TakePhotoPanel = ({ videoRef, onCapture, preview }:any) => (
-  <div className={styles.tabContent}>
-    <video ref={videoRef} autoPlay playsInline className={styles.cameraVideo}/>
-    <button onClick={onCapture} className={styles.captureBtn}>Capture</button>
-    {preview && <img src={preview} className={styles.previewImage}/>}
-  </div>
-);
+  const UploadPhotoPanel = ({ preview, onUpload }: any) => {
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+    const handleClick = () => fileInputRef.current?.click();
 
+    const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) return;
+      if (file.size > 5 * 1024 * 1024) return;
+      onUpload(file);
+    };
+    return (
+      <div className={styles.uploadWrapper}>
+        <h2 className={styles.panelTitle}>Face Recognition</h2>
+        <p className={styles.panelSub}>
+          File picker modal opens (jpg/png only, &lt;5MB)
+        </p>
+
+        {!preview && (
+          <div className={styles.dropZone} onClick={handleClick}>
+            <div className={styles.uploadIconPlaceholder}></div>
+            <span className={styles.dropText}>
+              Drag an image or{" "}
+              <span className={styles.uploadLink}>Upload a file</span>
+            </span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".jpg, .jpeg, .png"
+              className={styles.hiddenFileInput}
+              onChange={handleFile}
+            />
+          </div>
+        )}
+
+        {preview && (
+          <div className={styles.previewContainer}>
+            <img src={preview} className={styles.previewImage} />
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const TakePhotoPanel = ({
+    preview,
+    videoRef,
+    onCapture,
+    onContinue,
+  }: any) => {
+    // start camera automatically
+    React.useEffect(() => {
+      (async () => {
+        if (videoRef.current) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+            });
+            videoRef.current.srcObject = stream;
+          } catch (err) {
+            console.log("Camera permission denied:", err);
+          }
+        }
+      })();
+    }, [videoRef]);
+
+    return (
+      <div className={styles.uploadWrapper}>
+        <h2 className={styles.panelTitle}>Face Recognition</h2>
+        <p className={styles.panelSub}>
+          Take a picture using your device camera
+        </p>
+
+        {!preview && (
+          <div className={styles.dropZoneCamera}>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className={styles.cameraVideo}
+            ></video>
+            <button className={styles.captureBtn} onClick={onCapture}>
+              Capture
+            </button>
+          </div>
+        )}
+
+        {preview && (
+          <>
+            <div className={styles.previewContainer}>
+              <img src={preview} className={styles.previewImage} />
+            </div>
+            <button className={styles.usePhotoBtn} onClick={onContinue}>
+              Continue
+            </button>
+          </>
+        )}
+      </div>
+    );
+  };
+  const handleEventClick = (event: any): void => {
+    setSelectedEvent(event);
+  };
   return (
     <div className={styles.eventDetail}>
       {/* Header */}
@@ -166,31 +261,24 @@ const TakePhotoPanel = ({ videoRef, onCapture, preview }:any) => (
                 </div>
 
                 <div className={styles.recognitionSection}>
-                  <h3 className={styles.recognitionTitle}>Face Recognition</h3>
+                  {activeTab === "profile" && (
+                    <>
+                      <h3 className={styles.recognitionTitle}>
+                        Face Recognition
+                      </h3>
 
-                  {!faceRecognized ? (
-                    <p className={styles.recognitionMessage}>
-                      We found a photo linked to your account. Please confirm to
-                      continue.
-                    </p>
-                  ) : (
-                    <p className={styles.recognitionMessage}>
-                      Face recognized! Showing your photos...
-                    </p>
-                  )}
-
-                  <div className={styles.profileImageWrapper}>
-                    <div className={styles.profileImageContainer}>
-                      <img
-                        src={profileImageUrl}
-                        className={styles.profileImage}
-                      />
-                      {faceRecognized && (
-                        <div className={styles.checkmarkIcon}>✓</div>
+                      {!faceRecognized ? (
+                        <p className={styles.recognitionMessage}>
+                          We found a photo linked to your account. Please
+                          confirm to continue.
+                        </p>
+                      ) : (
+                        <p className={styles.recognitionMessage}>
+                          Face recognized! Showing your photos...
+                        </p>
                       )}
-                    </div>
-                  </div>
-
+                    </>
+                  )}
                   {activeTab === "profile" && (
                     <ProfilePhotoPanel
                       profileUrl={profileImageUrl}
@@ -208,6 +296,7 @@ const TakePhotoPanel = ({ videoRef, onCapture, preview }:any) => (
                       preview={capturedPreview}
                       videoRef={videoRef}
                       onCapture={capturePhoto}
+                      onContinue={onContinueWithPhoto}
                     />
                   )}
                 </div>
@@ -219,63 +308,84 @@ const TakePhotoPanel = ({ videoRef, onCapture, preview }:any) => (
 
       {/* Photo Grid */}
       <div className={styles.photoGrid}>
-        {photos.map((photo) => (
+        {images.map((photo) => (
           <div
-            key={photo.id}
+            key={photo.Id}
             className={styles.photoItem}
-            onClick={() => openLightbox(photo.id)}
+            onClick={() => openLightbox(photo.Id)}
           >
-            <img src={photo.url} alt={photo.alt} />
+            <img
+              src={`https://orgessence.sharepoint.com${photo.FileRef}`}
+              alt={photo.alt}
+            />
           </div>
         ))}
       </div>
 
+      {/* More Event Gallery Section */}
       {/* More Event Gallery Section */}
       <div className={styles.moreEventsSection}>
         <div className={styles.moreEventsHeader}>
           <h2 className={styles.moreEventsTitle}>
             More Event <span className={styles.galleryHighlight}>Gallery</span>
           </h2>
-          <button className={styles.viewAllButton}>View All</button>
+          <button className={styles.viewAllButton} onClick={onBack}>View All</button>
+        </div>
+
+        <div className={styles.moreEventsCardsRow}>
+          {/* map your event cards here */}
+          {eventdata.slice(0, 2).map((event) => (
+            <EventGalleryCard
+              key={event.id}
+              event={event}
+              onClick={() => handleEventClick(event)}
+            />
+          ))}
         </div>
       </div>
 
       {/* Lightbox */}
-      {selectedPhoto !== null && (
-        <div className={styles.lightbox} onClick={closeLightbox}>
-          <button className={styles.closeButton} onClick={closeLightbox}>
-            ×
-          </button>
-          <button
-            className={`${styles.navButton} ${styles.prevButton}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              goToPrevious();
-            }}
-            disabled={currentPhotoIndex === 0}
-          >
-            ‹
-          </button>
-          <img
-            src={photos[currentPhotoIndex].url}
-            alt={photos[currentPhotoIndex].alt}
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button
-            className={`${styles.navButton} ${styles.nextButton}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              goToNext();
-            }}
-            disabled={currentPhotoIndex === photos.length - 1}
-          >
-            ›
-          </button>
-          <div className={styles.lightboxCounter}>
-            {currentPhotoIndex + 1} / {photos.length}
-          </div>
+    {selectedPhoto !== null && (
+  <div className={styles.lightboxOverlay}>
+    <div className={styles.lightboxContainer} onClick={closeLightbox}>
+
+      <div className={styles.counter}>
+        {currentPhotoIndex + 1} / {images.length}
+      </div>
+
+      <button className={styles.closeBtn} onClick={closeLightbox}>×</button>
+
+      {/* previous preview */}
+      {currentPhotoIndex > 0 && (
+        <div
+          className={styles.sideThumbsLeft}
+          onClick={(e)=>{e.stopPropagation(); goToPrevious();}}
+        >
+          <img src={images[currentPhotoIndex-1].Url} />
         </div>
       )}
+
+      <img
+        className={styles.mainImage}
+        src={images[currentPhotoIndex].Url}
+        alt=""
+        onClick={(e)=>e.stopPropagation()}
+      />
+
+      {/* next preview */}
+      {currentPhotoIndex < images.length-1 && (
+        <div
+          className={styles.sideThumbsRight}
+          onClick={(e)=>{e.stopPropagation(); goToNext();}}
+        >
+          <img src={images[currentPhotoIndex+1].Url} />
+        </div>
+      )}
+
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

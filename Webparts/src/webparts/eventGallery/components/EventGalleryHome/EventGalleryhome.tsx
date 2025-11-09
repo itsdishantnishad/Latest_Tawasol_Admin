@@ -1,8 +1,12 @@
-import * as React from 'react';
-import { useState } from 'react';
-import styles from '../EventGallery.module.scss';
-import EventGalleryDetail from '../EventGalleryDetail/EventGalleryDetail';
-
+import * as React from "react";
+import { useState } from "react";
+import styles from "../EventGallery.module.scss";
+import EventGalleryDetail from "../EventGalleryDetail/EventGalleryDetail";
+import { SPFI, spfi, SPFx } from '@pnp/sp';
+import "@pnp/sp/webs";
+import "@pnp/sp/lists";
+import "@pnp/sp/items";
+import "@pnp/sp/profiles";
 interface IEventItem {
   id: number;
   title: string;
@@ -12,82 +16,55 @@ interface IEventItem {
 }
 
 interface IEventGalleryProps {
-  // Add any props if needed
+    context: any;
+    Allevent: any;
 }
-
-// Dummy JSON data
-const dummyEvents: IEventItem[] = [
-  {
-    id: 1,
-    title: "Workshops and Training Sessions",
-    imageUrl: "https://images.unsplash.com/photo-1540317580384-e5d43616b9aa?w=800",
-    imageCount: 26,
-    date: "1 June 2024"
-  },
-  {
-    id: 2,
-    title: "Live Music",
-    imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800",
-    imageCount: 28,
-    date: "7 June 2024"
-  },
-  {
-    id: 3,
-    title: "Team Event",
-    imageUrl: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=800",
-    imageCount: 30,
-    date: "7 June 2024"
-  },
-  {
-    id: 4,
-    title: "Live Music",
-    imageUrl: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800",
-    imageCount: 26,
-    date: "7 June 2024"
-  },
-  {
-    id: 5,
-    title: "Educational Seminars",
-    imageUrl: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800",
-    imageCount: 26,
-    date: "9 June 2024"
-  },
-  {
-    id: 6,
-    title: "Industry Conferences",
-    imageUrl: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800",
-    imageCount: 26,
-    date: "18 June 2024"
-  },
-  {
-    id: 7,
-    title: "Team building Events",
-    imageUrl: "https://images.unsplash.com/photo-1519999482648-25049ddd37b1?w=800",
-    imageCount: 26,
-    date: "12 June 2024"
-  },
-  {
-    id: 8,
-    title: "Master Class-Finance & Non Finance",
-    imageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800",
-    imageCount: 26,
-    date: "26 June 2024"
-  },
-  {
-    id: 9,
-    title: "Conferences and Seminars",
-    imageUrl: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800",
-    imageCount: 26,
-    date: "29 June 2024"
-  }
-];
 
 const EventGallery: React.FC<IEventGalleryProps> = (props) => {
   const [visibleCount, setVisibleCount] = useState<number>(9);
   const [selectedEvent, setSelectedEvent] = useState<IEventItem | null>(null);
+  const [images, setImages] = useState<any[]>([]);
+    const sp: SPFI = React.useMemo(() => spfi().using(SPFx(props.context)), [props.context]);
+//   Function for prepare data as in required format
+const convertToDummyEvents = (allEvents: any[], baseUrl: string): IEventItem[] => {
+  return allEvents.map((ev, index) => {
+    return {
+      id: index + 1,
+      title: ev.title,
+      imageUrl: ev.newsImage?.startsWith("http")
+        ? ev.newsImage
+        : `${baseUrl}${ev.newsImage}`,
+      imageCount: 26, // static since I don't have count
+      date: ev.eventStartDate?.split("\n")[0] ?? "" ,
+      ...ev
+    };
+  });
+};
+let  dummyEvents = convertToDummyEvents(props.Allevent, props?.context?._pageContext?.web?.absoluteUrl?.split("/sites")[0]);
 
+  //   load images
+  React.useEffect(() => {
+  const loadImages = async () => {
+
+    const result = await sp.web.lists
+      .getByTitle("Image Gallery")
+      .items.select("Id", "Title", "FileLeafRef", "FileRef", "Modified")();
+
+    const formatted = result.map((item:any) => ({
+      ...item,
+      Url: `${props?.context?._pageContext?.web?.absoluteUrl?.split("/sites")[0]}${item.FileRef}`   // <--- final dynamic complete url
+    }));
+
+    console.log("Images loaded", formatted);
+
+    setImages(formatted);
+  };
+  
+   loadImages();
+}, [sp]);
+  
   const loadMore = (): void => {
-    setVisibleCount(prevCount => prevCount + 6);
+    setVisibleCount((prevCount) => prevCount + 6);
   };
 
   const handleEventClick = (event: IEventItem): void => {
@@ -107,6 +84,8 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
         eventDate={selectedEvent.date}
         imageCount={selectedEvent.imageCount}
         onBack={handleBackToGallery}
+        eventdata={dummyEvents}
+        images={images}
       />
     );
   }
@@ -118,8 +97,8 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
     <div className={styles.eventGallery}>
       <div className={styles.galleryGrid}>
         {visibleEvents.map((event) => (
-          <div 
-            key={event.id} 
+          <div
+            key={event.id}
             className={styles.eventCard}
             onClick={() => handleEventClick(event)}
           >
@@ -132,7 +111,9 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
                     <span className={styles.arrow}>›</span>
                   </h3>
                   <div className={styles.cardFooter}>
-                    <span className={styles.imageCount}>{event.imageCount} images</span>
+                    <span className={styles.imageCount}>
+                      {event.imageCount} images
+                    </span>
                     <span className={styles.eventDate}>{event.date}</span>
                   </div>
                 </div>
@@ -141,7 +122,7 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
           </div>
         ))}
       </div>
-      
+
       {visibleCount < dummyEvents.length && (
         <div className={styles.loadMoreContainer}>
           <button className={styles.loadMoreBtn} onClick={loadMore}>

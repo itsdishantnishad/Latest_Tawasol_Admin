@@ -11,7 +11,8 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'EventGalleryWebPartStrings';
 import EventGallery from './components/EventGallery';
 import { IEventGalleryProps } from './components/IEventGalleryProps';
-
+import { spfi, SPFx } from "@pnp/sp";
+import { listServices } from '../services/listServices';
 export interface IEventGalleryWebPartProps {
   description: string;
 }
@@ -20,27 +21,24 @@ export default class EventGalleryWebPart extends BaseClientSideWebPart<IEventGal
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
-
+  private EventItem: any;
+  private spService: listServices;
   public render(): void {
     const element: React.ReactElement<IEventGalleryProps> = React.createElement(
       EventGallery,
       {
-        description: this.properties.description,
-        isDarkTheme: this._isDarkTheme,
-        environmentMessage: this._environmentMessage,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+        context: this.context,
+        EventItem: this.EventItem
       }
     );
 
     ReactDom.render(element, this.domElement);
   }
 
-  protected onInit(): Promise<void> {
-    return this._getEnvironmentMessage().then(message => {
-      this._environmentMessage = message;
-    });
-  }
+   async onInit(): Promise<void> {
+     this.spService = new listServices(this.context);
+     this.EventItem = await this.spService.getAllEvents();
+   }
 
 
 
