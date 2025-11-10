@@ -13,7 +13,8 @@ export default class PoliciesAndProceduresWebPart
 
   public render(): void {
     const element = React.createElement(Landing, {
-      title: this.properties.title || 'Policies & Procedures'
+      title: this.properties.title || 'Policies & Procedures',
+      context: this.context
     });
     ReactDom.render(element, this.domElement);
   }
