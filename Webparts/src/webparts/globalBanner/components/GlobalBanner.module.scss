@@ -5,7 +5,7 @@
   --pad: 24px;                
   padding: var(--pad);
   box-sizing: border-box; 
-  background: #FFF9F4;  
+  background: #fff4ea;  
 }
 
 /* Inner: holds the media + overlay and keeps rounded mask */
@@ -14,7 +14,7 @@
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
-  background: #ffffff;       
+  background: #fff4ea;       
 }
 
 /* Media fills the inner frame */
@@ -47,7 +47,7 @@
 /* Title + description */
 .title {
   margin: 0;
-  font-family: "Instrument Serif", Georgia, "Times New Roman", Times, serif;
+  font-family: "Instrument Serif";
   font-weight: 400;
   font-size: 60px;
   line-height: 100%;
@@ -58,8 +58,9 @@
 .titleRest  { color: #000000; font-style: normal; font-weight: 400; }
 
 .description {
-  margin-top: 12px;
-  font-family: "Inter", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 12px auto 0; 
+  width: 80%; 
+  font-family: "Inter";
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;

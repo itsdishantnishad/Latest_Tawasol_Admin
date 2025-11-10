@@ -5,10 +5,10 @@
   --pp-bg:            #fff4ea;
   --pp-card:          #ffffff;
   --pp-card-soft:     #fff7ef;
-  --pp-card-accent:   #ffeede;
+  --pp-card-accent:   #FDECDC;
   --pp-card-accent-2: #fff3e8;
 
-  --pp-border:        #f2e3d7;
+  --pp-border:        #FDE2C8;
   --pp-border-dash:   #efdfd2;
 
   --pp-text:          #1b1b1b;
@@ -103,12 +103,13 @@
   background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 100%);
 }
 /* ----------------------------- Support grid tiles ----------------------------- */
-.supportGrid { display:grid; grid-template-columns: repeat(6, minmax(160px,1fr)); gap:12px; margin-top:10px; }
-.supportTile  { @extend %tileCard; padding:14px 12px; min-height:110px; display:grid; grid-template-rows:46px auto; gap:8px; cursor:pointer; background: var(--pp-card-accent); @extend %hoverLift; @extend %focusRing; }
-.supportTile:hover { background: var(--pp-card-soft); }
+.supportGrid { display:grid; grid-template-columns:repeat(6,minmax(160px,1fr)); gap:12px; margin-top:10px; justify-content:center; }
+.supportTile { background: var(--pp-card-accent); border:1px solid var(--pp-border); border-radius:12px; padding:14px 12px; min-height:110px; display:grid; grid-template-rows:46px auto; gap:8px; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; color:#000; text-decoration:none; }
+.supportTile:hover { background: var(--pp-card-soft); color:#000; text-decoration:none; }
+.supportTile:focus, .supportTile:active, .supportTile:visited { color:#000; text-decoration:none; }
 .supportIcon { display:grid; place-items:center; }
 .supportIcon img { width:46px; height:46px; object-fit:contain; }
-.supportTitle { font-size:12px; font-weight:600; }
+.supportTitle { font-size:12px; font-weight:600; color:#000; text-decoration:none; }
 
 /* ----------------------------------- Boards ----------------------------------- */
 .boards { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:18px; }
