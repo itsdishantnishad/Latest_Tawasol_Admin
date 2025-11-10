@@ -1,0 +1,206 @@
+/* ================= Layout ================= */
+.wrap {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 14px;
+  align-items: stretch; /* keep */
+}
+
+.left {
+  background: var(--pp-card);
+  border: 1px solid var(--pp-border);
+  border-radius: 12px;
+  /* move bottom spacing to padding so both columns end flush */
+  padding: 10px 10px 0;           /* was: 10px */
+}
+.rightPane {
+  min-height: 1px;
+  display: grid;                  /* NEW: allow child to stretch */
+}
+
+/* ================= Top bar ================= */
+.topBar {
+  display: grid;
+  grid-template-columns: 100px 1fr 360px;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.backBtn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--pp-accent-1);
+  background: var(--pp-card);
+  cursor: pointer;
+}
+.searchSlot { justify-self: end; }
+
+/* ================= Common tokens ================= */
+.meta { color: #A7A7A7; font-size: 12px; } /* requested meta color */
+.nameStrong { font-weight: 600; }
+
+/* ================= Type icons ================= */
+/* Legacy color-box type (kept for back-compat) */
+.fileIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: inline-block;
+  background: #e7d3c1;
+}
+.fileIcon[data-ext="pdf"]  { background: #ffd1cc; }
+.fileIcon[data-ext="docx"] { background: #cfe0ff; }
+.fileIcon[data-ext="xlsx"] { background: #cfeedd; }
+.fileIcon[data-ext="pptx"] { background: #ffe6bf; }
+.folderIcon { background: #FAD08C; }
+
+/* New: real image icons via <img/> */
+.typeIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: inline-block;
+  object-fit: contain;
+}
+
+/* ================= Root file rows (no thead) ================= */
+.row {
+  display: grid;
+  grid-template-columns: 32px 36px 1fr 220px 80px;
+  gap: 8px;
+  padding: 12px 8px;
+  border-top: 1px dashed var(--pp-border-dash);
+  align-items: flex-start;
+}
+.row:first-child { border-top: none; }
+.rowActive { background: #fff9f3; }
+
+.cellCheckbox { /* reserved for typings */ }
+.cellIcon     { /* reserved for typings */ }
+.cellName     { max-width: 420px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cellTag      { /* reserved for typings */ }
+.cellDept     { /* reserved for typings */ }
+
+/* Tag pill — Figma accurate (icon + text) */
+.tagPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #6C6C6C;      
+  font-weight: 500;
+  line-height: 20px;
+}
+.tagIcon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* ================= Folder block ================= */
+.folderBlock { margin-bottom: 10px; }
+
+.folderHeader {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 24px 28px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  background: #FDECDC;
+  border: 1px solid #FDE2C8;
+  cursor: pointer;
+}
+.folderChevron   { font-size: 14px; }
+.folderIconWrap  { display: grid; place-items: center; }
+.folderTitle     { font-weight: 600; color: #1b1b1b; }
+.folderToolbar   { display: flex; gap: 6px; }
+.viewBtn         { /* reserved for typings */ }
+.viewBtnActive   { background: #fff; border-radius: 8px; }
+
+/* ================= Folder content area ================= */
+.folderContent {
+  background: #fff7ef;
+  border: 1px solid var(--pp-border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+/* ================= Action bar ================= */
+.actionBar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.selectAllWrap  { /* reserved for typings */ }
+.actionBarRight { display: flex; align-items: center; gap: 8px; color: #1b1b1b; }
+.exportIcon     { /* reserved for typings */ }
+.exportText     { /* reserved for typings */ }
+
+/* ================= Children ================= */
+.listBody { /* reserved for typings */ }
+.gridBody {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+/* ================= Grid cards ================= */
+.card {
+  background: #fff;
+  border: 1px solid var(--pp-border);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+}
+.cardActive   { background: #fff9f3; }
+.cardThumb    { height: 48px; display: grid; place-items: center; }
+.cardTitle    { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cardMetaRow  { display: flex; gap: 12px; color: #A7A7A7; font-size: 12px; }
+.cardFooter   { display: flex; justify-content: space-between; align-items: center; }
+.cardTag      { @extend .tagPill; }
+.cardDept     { color: #1b1b1b; }
+
+/* ================= Preview ================= */
+.previewCard {
+  background: var(--pp-card-accent-2);
+  border: 1px solid var(--pp-border);
+  border-radius: 12px;
+  padding: 16px;
+  /* min-height: 260px;  REMOVE */
+  height: 100%;                   /* NEW: fill column height */
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+.previewIconImg {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: block;
+  margin: 0 auto 6px;
+}
+.previewTitle { text-align: center; font-weight: 600; color: #4D5257; }  /* requested color */
+.previewMeta  { text-align: center; color: #4D5257; }                   /* requested color */
+.previewFrame { width: 100%; height: 420px; border: 0; border-radius: 12px; }
+
+/* ================= Checkbox styling (Fluent v8) ================= */
+/* Slightly stronger border and requested color/width */
+:global(.ms-Checkbox .ms-Checkbox-box) {
+  border-color: #CCCACA;
+  border-width: 2px;
+}
+.openBtn {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}

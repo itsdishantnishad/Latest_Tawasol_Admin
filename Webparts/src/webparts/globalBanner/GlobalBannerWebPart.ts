@@ -3,7 +3,6 @@ import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
-  PropertyPaneChoiceGroup,
   PropertyPaneTextField
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
@@ -12,21 +11,14 @@ import * as strings from 'GlobalBannerWebPartStrings';
 import Banner from './components/GlobalBanner';
 import { IBannerProps } from './components/IGlobalBannerProps';
 
-export enum BannerType {
-  TYPE_1 = 'Default Banner',
-  TYPE_2 = 'Document Banner',
-  TYPE_3 = 'Plain Banner'
-}
-
 export interface IBannerWebPartProps {
-  bannerTitle: string;        // optional override
-  bannerSubTitle: string;     // optional override
-  bannerType: BannerType;     // strictly selected; no runtime fallback
-  customBannerUrl: string;    // optional; overrides preset SVGs
+  titleFirst: string;
+  titleSecond: string;
+  bannerSubTitle: string;
+  customBannerUrl: string;
 }
 
 export default class BannerWebPart extends BaseClientSideWebPart<IBannerWebPartProps> {
-
   public render(): void {
     const element: React.ReactElement<IBannerProps> = React.createElement(Banner, {
       ...this.properties
@@ -51,25 +43,21 @@ export default class BannerWebPart extends BaseClientSideWebPart<IBannerWebPartP
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneChoiceGroup('bannerType', {
-                  label: 'Select banner type',
-                  options: [
-                    { key: BannerType.TYPE_1, text: BannerType.TYPE_1, iconProps: { officeFabricIconFontName: 'MicrosoftStaffhubLogo' } },
-                    { key: BannerType.TYPE_2, text: BannerType.TYPE_2, iconProps: { officeFabricIconFontName: 'Home' } },
-                    { key: BannerType.TYPE_3, text: BannerType.TYPE_3, iconProps: { officeFabricIconFontName: 'GripperBarHorizontal' } }
-                  ]
+                PropertyPaneTextField('titleFirst', {
+                  label: 'Put the First Title which you want to be in Red Text and Italic',
+                  placeholder: 'e.g., Our'
                 }),
-                PropertyPaneTextField('bannerTitle', {
-                  label: 'Please enter banner title',
-                  placeholder: 'Leave blank to use default from constants.ts'
+                PropertyPaneTextField('titleSecond', {
+                  label: 'Put the Second Title which you want to be in Black Text',
+                  placeholder: 'e.g., Values'
                 }),
                 PropertyPaneTextField('bannerSubTitle', {
-                  label: 'Please enter description below title',
-                  placeholder: 'Leave blank to use default from constants.ts'
+                  label: 'Description below title',
+                  placeholder: 'Leave blank to use Default Banner'
                 }),
                 PropertyPaneTextField('customBannerUrl', {
-                  label: 'Optional: Custom Banner Image URL',
-                  placeholder: 'Paste an image URL to override the preset SVG'
+                  label: 'Banner Image/SVG URL',
+                  placeholder: 'Paste SVG/image URL from Site Assets › Global Banner Folder'
                 })
               ]
             }

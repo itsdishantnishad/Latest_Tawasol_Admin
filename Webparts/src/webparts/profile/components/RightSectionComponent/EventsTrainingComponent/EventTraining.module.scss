@@ -1,0 +1,257 @@
+.metaBlock {
+  width: 376px;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  row-gap: 8px;
+}
+
+.categoryLabel {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 18px;
+  color: #DA291C;
+  text-transform: capitalize;
+  margin: 0;
+}
+
+.eventTitle {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
+}.card {
+  width: 100%;
+  max-width: 424px;
+  min-height: 436px;
+  background: #FFFFFF;
+  border-radius: 6px;
+  box-sizing: border-box;
+  padding: 20px 24px 24px 24px;
+
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  row-gap: 16px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon24 {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+.upcomingText {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
+}
+
+.segmentWrap {
+  width: 376px;
+  height: 52px;
+  border-radius: 360px;
+  border: 1px solid #FBBF7F;
+  background: rgba(255, 255, 255, 0.46);
+  display: grid;
+  place-items: center;
+}
+
+.segmentInner {
+  width: 100%;
+  height: 36px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 16px;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.segBtn {
+  height: 36px;
+  border-radius: 360px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-family: Inter;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0px;
+  color: #3A3B43;
+  cursor: pointer;
+}
+
+.segActive {
+  background: radial-gradient(120% 140% at 30% 25%, #DDA160 0%, #FFDBB4 100%);
+  border: 1px solid #F0BB82;
+  color: #2b2b2b;
+}
+
+.eventCard {
+  width: 376px;
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  row-gap: 12px;
+}
+
+.eventContent {
+  width: 100%;
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  row-gap: 12px;
+}
+
+.imageRow {
+  width: 100%;
+  height: 160px;
+  position: relative;
+}
+
+.eventImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #F2F3F8;
+  display: block;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background: #F2F3F8;
+}
+
+.registerPill,
+.registerPillMuted {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  height: 28px;
+  min-width: 86px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.registerPill {
+  background: #DA291C;
+}
+
+.registerPillMuted {
+  background: #B0B0B0;
+}
+
+.registerText {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+.metaBlock {
+  width: 376px;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  row-gap: 8px;
+}
+
+.eventTitle {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
+}
+
+.dateTimeRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+
+.dateItem,
+.timeItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dateText,
+.timeText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.5px;
+  color: #3A3B43;
+}
+
+.locationRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.locationText {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.5px;
+  color: #3A3B43;
+}
+
+.icon16 {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 16px;
+    min-height: 420px;
+  }
+
+  .segmentWrap,
+  .eventCard,
+  .metaBlock {
+    width: 100%;
+  }
+
+  .imageRow {
+    height: 140px;
+  }
+
+  .imagePlaceholder {
+    height: 140px;
+  }
+}

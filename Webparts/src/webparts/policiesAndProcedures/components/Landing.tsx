@@ -4,83 +4,111 @@ import styles from './PoliciesAndProcedures.module.scss';
 import Tiles from './Tiles';
 import Boards from './Boards';
 
-export interface ILandingProps { title: string; }
+import PoliciesandProceduresView from './view/ViewPage';
+import { WebPartContext } from '@microsoft/sp-webpart-base';
+import { listServices, DocumentFunctionRow } from '../../services/listServices';
+import { ListName } from '../../services/Constants';
 
-/** Core/Support shared item shapes */
+export interface ILandingProps { title: string; context: WebPartContext; }
+
 export interface CategoryItem {
   key: string;
   title: string;
-  imageSrc?: string;   // PNG/JPG fallback
-  svgSrc?: string;     // path to an svg file (if ever needed)
-  svgMarkup?: string;  // inline SVG markup string from DocumentConstant.ts
+  imageSrc?: string;
+  svgSrc?: string;
+  svgMarkup?: string;
+  href?: string;
 }
-export interface DepartmentItem { key: string; title: string; iconSrc: string; }
+export interface DepartmentItem {
+  key: string;
+  title: string;
+  iconSrc: string;
+  href?: string;
+}
 
-/** SVG constants for Core tiles (RAW SVG MARKUP STRINGS) */
-import {
-  ProjectDevelopmentSVG,
-  CommercialSVG,
-  ProjectProcurementandContractSVG,
-  ProjectDeliverySVG,
-  ProjectSecuritySVG,
-  DesignHubSVG
-} from '../assets/DocumentConstant'; // keep your current location
+interface LandingState {
+  searchQuery: string;
+  coreFunctionTiles: CategoryItem[];
+  supportFunctionTiles: DepartmentItem[];
+  activeFunctionDisplayName?: string;
+}
 
-interface ILandingState { search: string; }
+export default class Landing extends React.Component<ILandingProps, LandingState> {
+  public state: LandingState = { searchQuery: '', coreFunctionTiles: [], supportFunctionTiles: [] };
 
-/** Mock JSON – swap with CMS/TermStore later */
-const CORE: CategoryItem[] = [
-  { key: 'proj-dev',      title: 'Project Development',            svgMarkup: ProjectDevelopmentSVG },
-  { key: 'commercial',    title: 'Commercial',                     svgMarkup: CommercialSVG },
-  { key: 'proc-contract', title: 'Project Procurement & Contract', svgMarkup: ProjectProcurementandContractSVG },
-  { key: 'delivery',      title: 'Project Delivery',               svgMarkup: ProjectDeliverySVG },
-  { key: 'security',      title: 'Project Security',               svgMarkup: ProjectSecuritySVG },
-  { key: 'design',        title: 'Design Hub',                     svgMarkup: DesignHubSVG }
-];
+  private handleSearchChange = (_?: any, newValue?: string): void =>
+    this.setState({ searchQuery: newValue || '' });
 
-// /** Support Function tiles (grid) */
-// const DEPTS: DepartmentItem[] = [
-//   { key: 'ap',    title: 'Administration & Procurement',                 iconSrc: require('../assets/dept/admin.svg') },
-//   { key: 'be',    title: 'Business Excellence',                          iconSrc: require('../assets/dept/be.svg') },
-//   { key: 'cc',    title: 'Corporate Culture',                            iconSrc: require('../assets/dept/culture.svg') },
-//   { key: 'esg',   title: 'Environmental, Social and Governance',         iconSrc: require('../assets/dept/esg.svg') },
-//   { key: 'grc',   title: 'Governance, Risk & Compliance',                iconSrc: require('../assets/dept/grc.svg') },
-//   { key: 'hc',    title: 'Human Capital',                                iconSrc: require('../assets/dept/hc.svg') },
-//   { key: 'hse',   title: 'Health & Safety',                              iconSrc: require('../assets/dept/hse.svg') },
-//   { key: 'it',    title: 'Information Technology',                       iconSrc: require('../assets/dept/it.svg') },
-//   { key: 'legal', title: 'Legal',                                        iconSrc: require('../assets/dept/legal.svg') },
-//   { key: 'op',    title: 'Organisational Performance',                   iconSrc: require('../assets/dept/op.svg') },
-//   { key: 'fin',   title: 'Finance',                                      iconSrc: require('../assets/dept/finance.svg') }
-// ];
+  public async componentDidMount(): Promise<void> {
+    const service = new listServices(this.props.context);
+    const functionRows: DocumentFunctionRow[] = await service.getDocumentFunctions(ListName.DOCUMENT_FUNCTION);
 
-export default class Landing extends React.Component<ILandingProps, ILandingState> {
-  public state: ILandingState = { search: '' };
+    const coreTiles = functionRows
+      .filter(row => (row.functionType || '').toLowerCase() === 'core function')
+      .map(row => ({ key: String(row.id), title: row.title, imageSrc: row.iconUrl, href: row.targetUrl } as CategoryItem));
 
-  private handleSearchChange = (_?: any, v?: string): void => this.setState({ search: v || '' });
+    const supportTiles = functionRows
+      .filter(row => (row.functionType || '').toLowerCase() === 'support function')
+      .map(row => ({ key: String(row.id), title: row.title, iconSrc: row.iconUrl || '', href: row.targetUrl } as DepartmentItem));
+
+    this.setState({ coreFunctionTiles: coreTiles, supportFunctionTiles: supportTiles });
+  }
+
+  private openFunctionView = (functionDisplayName: string): void =>
+    this.setState({ activeFunctionDisplayName: functionDisplayName });
+
+  private exitFunctionView = (): void =>
+    this.setState({ activeFunctionDisplayName: undefined });
 
   public render(): React.ReactElement<ILandingProps> {
-    const { search } = this.state;
+    const { searchQuery, coreFunctionTiles, supportFunctionTiles, activeFunctionDisplayName } = this.state;
+
+    if (activeFunctionDisplayName) {
+      return (
+        <PoliciesandProceduresView
+          context={this.props.context}
+          functionDisplayName={activeFunctionDisplayName}
+          onBackToLanding={this.exitFunctionView}
+          // Turn these on in client env:
+          // useSharePointProvider
+          // dmsLibraryRoot="/sites/Intranet/DMS"
+        />
+      );
+    }
 
     return (
       <div className={styles.page}>
-        {/* Banner is a separate WP placed above on the page */}
-
-        {/* Core Function */}
         <div className={styles.homeTopRow}>
           <div className={styles.sectionHeading}>Core Function</div>
           <div className={styles.searchHome}>
             <SearchBox placeholder="Search Documents" onChange={this.handleSearchChange} />
           </div>
         </div>
-        <Tiles variant="core" categories={CORE} departments={[]} searchText={search} />
 
-        {/* Support Function – as TILES GRID */}
-        <div className={styles.sectionHeading}>Support Function</div>
-        {/* <Tiles variant="support" categories={[]} departments={DEPTS} searchText={search} /> */}
+        <Tiles
+          variant="core"
+          categories={coreFunctionTiles}
+          departments={[]}
+          searchText={searchQuery}
+          onOpen={this.openFunctionView}
+        />
 
-        {/* Boards */}
+        <div className={styles.sectionHeading} style={{ marginTop: 12 }}>Support Function</div>
+        <Tiles
+          variant="support"
+          categories={[]}
+          departments={supportFunctionTiles}
+          searchText={searchQuery}
+          onOpen={this.openFunctionView}
+        />
+
         <div style={{ marginTop: 18 }} />
-        <Boards />
+        <Boards
+          // Flip these ON in client env when DMS/search must be live:
+          // useSharePointProvider={true}
+          // dmsLibraryRoot="/sites/Intranet/DMS"
+          context={this.props.context}
+        />
       </div>
     );
   }

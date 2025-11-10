@@ -3,7 +3,7 @@ import { Stack, Text, Separator } from '@fluentui/react';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { listServices, DashboardCategory, DashboardItem } from '../../services/listServices';
 import { ListName } from '../../services/Constants';
-import { breadcrumbBeforeBackArrowSVG } from '../../assets/contant';
+import { breadcrumbBeforeBackArrowSVG } from '../../assets/constants';
 
 // ⬇️ NEW: global breadcrumbs (single .ts utility component)
 import GlobalBreadcrumbs from '../../assets/GlobalBreadcrumbs';

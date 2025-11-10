@@ -8,7 +8,7 @@ import "@pnp/sp/files";
 import "@pnp/sp/folders";
 import "@pnp/sp/files/folder";
 import "@pnp/sp/clientside-pages";
-import "@pnp/sp/search"
+import "@pnp/sp/search";
 import { ISearchQuery } from "@pnp/sp/search";
 import moment from "moment";
 
@@ -37,7 +37,7 @@ export type OurValueCard = { id: number; title: string; desc: string; icon?: str
 export type OrgMember = { id: number; name: string; role: string; level: number; sort: number; photoUrl?: string; user: string; };
 export type OrgDepartment = { name: string; url?: string; };
 
-/** ===== Dashboards (CLEAN TYPES) ===== */
+/** ===== Dashboards ===== */
 export type DashboardCategory = {
   id: number;
   name: string;
@@ -50,14 +50,33 @@ export type DashboardItem = {
   title: string;
   categoryId: number;
   categoryName: string;
-  body?: string;       // TIRBody
-  thumbUrl?: string;   // TIRThumbURL
+  body?: string;
+  thumbUrl?: string;
   sort: number;
-  embedUrl?: string;   // TIREmbedURL
+  embedUrl?: string;
+};
+
+/** ===== Policies & Procedures (Document Function) ===== */
+export type DocumentFunctionRow = {
+  id: number;
+  title: string;
+  functionType: "Core Function" | "Support Function" | string;
+  iconUrl?: string;
+  targetUrl?: string;
+  sortOrder: number;
+};
+
+/** ===== Boards (Recently / Most Used) ===== */
+export type DocumentSummary = {
+  id: string;
+  name: string;
+  url?: string;
+  ext?: string;
+  dept?: string;
+  tag?: string;
 };
 
 export class listServices {
-
   private sp: SPFI;
 
   constructor(private context: WebPartContext) {
@@ -345,7 +364,7 @@ export class listServices {
     }
   }
 
-  /** Departments mapped to a member (MM field reused: TIRDepartment) */
+  /** Departments mapped to a member */
   public async getDepartmentsByMember(listTitle: string, memberDisplayName: string): Promise<OrgDepartment[]> {
     let results: any[] = [];
     try {
@@ -422,26 +441,15 @@ export class listServices {
     }
   }
 
-  // helper function for the instructor name
   private parseUserField(userFieldValue: string) {
     if (!userFieldValue) return null;
-
     try {
-      // Split by " | " — this format: "email | displayName | extraData i:0#.f|membership|email"
       const parts = userFieldValue.split(" | ").map((p) => p.trim()).filter(Boolean);
-
       if (parts.length === 0) return null;
-
       const email = parts[0] || "";
       const name = parts[1] || "";
-      const role = parts[2]?.includes("i:0#.f|membership|") ? "" : parts[2] || ""; // Optional role, if exists
-
-      return {
-        id: email,
-        name,
-        email,
-        role
-      };
+      const role = parts[2]?.includes("i:0#.f|membership|") ? "" : parts[2] || "";
+      return { id: email, name, email, role };
     } catch (err) {
       console.error("Error parsing user field:", err, userFieldValue);
       return null;
@@ -490,9 +498,8 @@ export class listServices {
     }
   }
 
-  /* ===================== DASHBOARDS (NEW SERVICES) ===================== */
+  /* ===================== DASHBOARDS ===================== */
 
-  /** Load Dashboard categories (left rail on master view) */
   public async getDashboardCategories(listTitle: string): Promise<DashboardCategory[]> {
     try {
       const rows: any[] = await this.sp.web.lists.getByTitle(listTitle).items
@@ -510,6 +517,13 @@ export class listServices {
     }
   }
 
+  private static toPlainText(html?: string): string {
+    if (!html) return "";
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    return (tmp.textContent || tmp.innerText || "").replace(/\s+/g, " ").trim();
+  }
+
   public async getDashboards(
     listTitle: string,
     categoryId?: number,
@@ -520,38 +534,49 @@ export class listServices {
     try {
       let query = this.sp.web.lists.getByTitle(listTitle).items
         .select(
-          "Id","Title","TIRBody","TIRThumbURL","TIRSortOrder",
-          "TIREmbedURL","TIRCategory/Id","TIRCategory/Title")
-        .expand("TIRCategory")
+          "Id",
+          "Title",
+          "TIRDescription",
+          "TIRIconURL",
+          "TIRSortOrder",
+          "URL",
+          "TIRCategoryIDId",
+          "TIRCategoryID/Id",
+          "TIRCategoryID/Title"
+        )
+        .expand("TIRCategoryID")
         .orderBy("TIRSortOrder", true);
 
-      // Filter strictly by lookup Id
       const filters: string[] = [];
-      if (typeof categoryId === "number") filters.push(`TIRCategoryId eq ${categoryId}`);
-      if (typeof excludeId === "number") filters.push(`Id ne ${excludeId}`);
+      if (typeof categoryId === "number") filters.push(`TIRCategoryIDId eq ${categoryId}`);
+      if (typeof excludeId === "number")   filters.push(`Id ne ${excludeId}`);
       if (filters.length) query = query.filter(filters.join(" and "));
 
-      if (typeof top === "number" && top > 0)  query = query.top(top);
+      if (typeof top  === "number" && top  > 0) query = query.top(top);
       if (typeof skip === "number" && skip > 0) query = query.skip(skip);
 
       const rows: any[] = await query();
 
       return rows.map((row: any) => {
-        const thumb = row?.TIRThumbURL;
-        const embed = row?.TIREmbedURL;
-        const cat = row?.TIRCategory || {};
+        const icon = row?.TIRIconURL;
+        const thumbUrl = typeof icon === "string" ? icon : icon?.Url || undefined;
+
+        const cat = row?.TIRCategoryID || {};
         const categoryName = cat?.Title || "";
-        const categoryIdValue = Number(cat?.Id || row?.TIRCategoryId || 0);
+        const categoryIdValue = Number(row?.TIRCategoryIDId || cat?.Id || 0);
+
+        const embedField = row?.URL;
+        const embedUrl = typeof embedField === "string" ? embedField : embedField?.Url || undefined;
 
         return {
           id: Number(row?.Id) || 0,
           title: row?.Title || "",
           categoryId: categoryIdValue,
           categoryName,
-          body: row?.TIRBody || "",
-          thumbUrl: typeof thumb === "string" ? thumb : thumb?.Url || undefined,
+          body: listServices.toPlainText(row?.TIRDescription || ""),
+          thumbUrl,
           sort: Number(row?.TIRSortOrder ?? 9999),
-          embedUrl: typeof embed === "string" ? embed : embed?.Url || undefined
+          embedUrl
         } as DashboardItem;
       });
     } catch (error) {
@@ -559,7 +584,6 @@ export class listServices {
     }
   }
 
-  /** Convenience: fetch a single Dashboard item by ID */
   public async getDashboardById(listTitle: string, itemId: number): Promise<DashboardItem | null> {
     try {
       const allItems = await this.getDashboards(listTitle);
@@ -568,5 +592,95 @@ export class listServices {
     } catch (error) {
       return Promise.reject(error);
     }
+  }
+
+  /** ===== Document Function loader ===== */
+  public async getDocumentFunctions(listTitle: string): Promise<DocumentFunctionRow[]> {
+    try {
+      const rows: any[] = await this.sp.web.lists.getByTitle(listTitle).items
+        .select("Id", "Title", "TIRDocumentFunction", "TIRIconURL", "URL", "TIRSortOrder")
+        .orderBy("TIRSortOrder", true)();
+
+      return rows.map((r: any) => {
+        const iconField = r?.TIRIconURL;
+        const urlField = r?.URL;
+
+        return {
+          id: Number(r?.Id) || 0,
+          title: r?.Title || "",
+          functionType: r?.TIRDocumentFunction || "",
+          iconUrl: typeof iconField === "string" ? iconField : iconField?.Url || undefined,
+          targetUrl: typeof urlField === "string" ? urlField : urlField?.Url || undefined,
+          sortOrder: Number(r?.TIRSortOrder ?? 9999)
+        } as DocumentFunctionRow;
+      });
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
+  /* ===================== BOARDS ===================== */
+
+  /** map SPO Search rows -> DocumentSummary[] */
+  private static mapSearchRowsToDocs(rows: any[]): DocumentSummary[] {
+    return (rows || []).map((r: any, idx: number) => {
+      const cells: Record<string, any> = {};
+      (r?.Cells || []).forEach((c: any) => { cells[c.Key] = c.Value; });
+      return {
+        id: cells['WorkId']?.toString() || `row-${idx}`,
+        name: cells['Title'] || cells['Filename'] || 'Document',
+        url: cells['Path'],
+        ext: (cells['FileType'] || '').toLowerCase(),
+        dept: cells['DepartmentOWSTEXT'] || cells['Department'] || 'GRC',
+        tag: cells['ContentType'] || ''
+      } as DocumentSummary;
+    });
+  }
+
+  /** Recently Updated inside a DMS root (LastModifiedTime desc) */
+  public async getRecentlyUpdatedDocuments(
+    dmsLibraryRoot: string,                   // e.g. "/sites/Intranet/DMS"
+    rowLimit: number = 6
+  ): Promise<DocumentSummary[]> {
+    const root = (dmsLibraryRoot || '/sites/Intranet/DMS').replace(/\/$/, '');
+    const query: ISearchQuery = {
+      Querytext: `Path:"${root}/*" IsDocument:True`,
+      RowLimit: rowLimit,
+      TrimDuplicates: true,
+      SelectProperties: [
+        'WorkId','Title','Path','FileType','Filename',
+        'LastModifiedTime','DepartmentOWSTEXT','Department','ContentType'
+      ],
+      SortList: [{ Property: 'LastModifiedTime', Direction: 1 /* desc */ }],
+    };
+    const res: any = await this.sp.search(query);
+    const rows =
+      res?.RawSearchResults?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
+      res?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
+      res?.PrimarySearchResultsTable?.Rows || [];
+    return listServices.mapSearchRowsToDocs(rows);
+  }
+
+  /** Most Used across the CURRENT SITE (ViewsLifeTime desc) */
+  public async getMostUsedDocumentsOnSite(
+    rowLimit: number = 6
+  ): Promise<DocumentSummary[]> {
+    const siteUrl = this.context.pageContext.web.absoluteUrl.replace(/\/$/, '');
+    const query: ISearchQuery = {
+      Querytext: `Path:"${siteUrl}/*" IsDocument:True`,
+      RowLimit: rowLimit,
+      TrimDuplicates: true,
+      SelectProperties: [
+        'WorkId','Title','Path','FileType','Filename',
+        'ViewsLifeTime','DepartmentOWSTEXT','Department','ContentType'
+      ],
+      SortList: [{ Property: 'ViewsLifeTime', Direction: 1 /* desc */ }],
+    };
+    const res: any = await this.sp.search(query);
+    const rows =
+      res?.RawSearchResults?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
+      res?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
+      res?.PrimarySearchResultsTable?.Rows || [];
+    return listServices.mapSearchRowsToDocs(rows);
   }
 }
