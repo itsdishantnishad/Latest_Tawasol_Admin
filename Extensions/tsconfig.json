@@ -1,19 +1,23 @@
 {
   "extends": "./node_modules/@microsoft/rush-stack-compiler-4.7/includes/tsconfig-web.json",
   "compilerOptions": {
-    "target": "es5",
-    "forceConsistentCasingInFileNames": true,
+    /* ---- Modern target & module settings ---- */
+    "target": "es2017",                         /* supports .includes(), async/await, etc. */
     "module": "esnext",
     "moduleResolution": "node",
     "jsx": "react",
+
+    /* ---- Build options ---- */
     "declaration": true,
     "sourceMap": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
     "outDir": "lib",
     "inlineSources": false,
-    "noImplicitAny": true,
 
+    /* ---- Type roots ---- */
     "typeRoots": [
       "./node_modules/@types",
       "./node_modules/@microsoft"
@@ -21,13 +25,17 @@
     "types": [
       "webpack-env"
     ],
+
+    /* ---- Libraries included ---- */
     "lib": [
-      "es5",
       "dom",
-      "es2015.collection",
-      "es2015.promise"
+      "es2015",
+      "es2016",
+      "es2017",
+      "scripthost"
     ]
   },
+
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx"

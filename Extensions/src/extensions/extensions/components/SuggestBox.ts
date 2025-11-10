@@ -13,7 +13,7 @@ export class SuggestBox {
   private activeIndex = -1;
 
   constructor(
-    private readonly attachUnder: HTMLElement, // usually the header wrap
+    private readonly attachUnder: HTMLElement,
     private readonly getWebUrl: () => string,
     private readonly photoSrcForPerson: (upn?: string) => string
   ) {}
@@ -40,21 +40,13 @@ export class SuggestBox {
       row.setAttribute('aria-disabled', 'true');
       row.style.cursor = 'default';
 
-      const thumb = document.createElement('div');
-      thumb.className = styles.TIRSuggestThumb;
-      thumb.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-        xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle cx="11" cy="11" r="7.5" stroke="#C4C4C4" stroke-width="1.5"/>
-        <path d="M16.5 16.5L21 21" stroke="#C4C4C4" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M7 7l8 8" stroke="#C4C4C4" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>`;
-
       const textWrap = document.createElement('div');
       const t1 = document.createElement('div'); t1.className = styles.TIRSuggestTitle; t1.textContent = `No results for “${query}”`;
       const t2 = document.createElement('div'); t2.className = styles.TIRSuggestSub;   t2.textContent = 'Try a different keyword or check the spelling.';
       textWrap.appendChild(t1); textWrap.appendChild(t2);
 
-      row.appendChild(thumb);
+      // no decorative placeholder icon
+      row.appendChild(document.createElement('div'));
       row.appendChild(textWrap);
       list.appendChild(row);
     } else {
@@ -79,13 +71,8 @@ export class SuggestBox {
           img.src = it.imageUrl;
           img.alt = '';
           thumb.appendChild(img);
-        } else {
-          thumb.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" stroke="#C4C4C4" />
-            <path d="M8 8h8v8H8z" fill="#EDEDED" stroke="#C4C4C4"/>
-          </svg>`;
         }
+        // else: no image block
 
         const textWrap = document.createElement('div');
         const t1 = document.createElement('div'); t1.className = styles.TIRSuggestTitle; t1.textContent = it.title;
@@ -95,7 +82,9 @@ export class SuggestBox {
         row.appendChild(thumb);
         row.appendChild(textWrap);
 
-        row.addEventListener('click', () => { window.location.href = it.url; });
+        row.addEventListener('click', () => {
+          if (it.url) window.location.href = it.url;
+        });
 
         list.appendChild(row);
       });
@@ -137,8 +126,8 @@ export class SuggestBox {
 
     if (action === 'enter') {
       if (this.activeIndex < 0 || this.activeIndex >= rows.length) return false;
-      const url = rows[this.activeIndex].getAttribute('data-url') || '#';
-      if (url && url !== '#') { window.location.href = url; return true; }
+      const url = rows[this.activeIndex].getAttribute('data-url') || '';
+      if (url) { window.location.href = url; return true; }
       return false;
     }
 
