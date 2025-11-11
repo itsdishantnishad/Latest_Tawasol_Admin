@@ -1,52 +1,69 @@
 import * as React from 'react';
 import styles from './PoliciesAndProcedures.module.scss';
-import { CategoryItem, DepartmentItem } from './Landing';
+import { FunctionCategory, SupportDepartment } from './Landing';
 import { FocusZone, FocusZoneDirection, Image, ImageFit, Link } from '@fluentui/react';
 
 interface ITilesProps {
   variant: 'core' | 'support';
-  categories: CategoryItem[];
-  departments: DepartmentItem[];
+  categories: FunctionCategory[];
+  departments: SupportDepartment[];
   searchText: string;
-  onOpen: (functionDisplayName: string) => void;
+  onOpenFunctionView: (functionDisplayName: string) => void;
 }
 
 export default class Tiles extends React.Component<ITilesProps> {
-  private match = (t: string, q: string) => !q || t.toLowerCase().indexOf(q.toLowerCase()) >= 0;
+  /** Text match predicate used for filtering items by search text */
+  private matchesSearchQuery = (text: string, query: string) =>
+    !query || text.toLowerCase().includes(query.toLowerCase());
 
-  private handleTileOpen = (title: string, href?: string): void => {
-    // We only need the display name for the view; routing handled by parent
-    this.props.onOpen(title);
+  /** CURRENT: open in-webpart Function View; FUTURE: see commented navigation options */
+  private handleTileSelect = (displayName: string, targetHref?: string): void => {
+    this.props.onOpenFunctionView(displayName);
+
+    /**
+     * FUTURE OPTION — Navigate to a target page instead of opening the in-webpart view.
+     * Uncomment to redirect when a URL is present.
+     */
+    // if (targetHref) {
+    //   window.location.assign(targetHref); // or window.open(targetHref, '_self') / '_blank'
+    //   return;
+    // }
   };
 
   public render(): React.ReactElement<ITilesProps> {
     const { variant, categories, departments, searchText } = this.props;
 
     if (variant === 'core') {
-      const data = categories.filter(c => this.match(c.title, searchText));
+      const visibleCategories = categories.filter(c => this.matchesSearchQuery(c.title, searchText));
       return (
-        <FocusZone isCircularNavigation={true} direction={FocusZoneDirection.bidirectional}>
+        <FocusZone isCircularNavigation direction={FocusZoneDirection.bidirectional}>
           <div className={styles.coreGrid}>
-            {data.map(it => (
+            {visibleCategories.map(cat => (
               <div
-                key={it.key}
+                key={cat.key}
                 className={styles.coreTile}
                 role="button"
-                aria-label={it.title}
+                aria-label={cat.title}
                 tabIndex={0}
-                onClick={() => this.handleTileOpen(it.title, it.href)}
+                onClick={() => this.handleTileSelect(cat.title, cat.href)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.handleTileSelect(cat.title, cat.href);
+                  }
+                }}
               >
                 <div className={styles.coreThumb}>
-                  {it.svgMarkup && (
+                  {cat.svgMarkup && (
                     <div
                       className={styles.svgWrap}
-                      dangerouslySetInnerHTML={{ __html: it.svgMarkup }}
+                      dangerouslySetInnerHTML={{ __html: cat.svgMarkup }}
                     />
                   )}
-                  {!it.svgMarkup && (it.svgSrc || it.imageSrc) && (
+                  {!cat.svgMarkup && (cat.svgSrc || cat.imageSrc) && (
                     <Image
-                      src={(it.svgSrc || it.imageSrc) as string}
-                      alt={it.title}
+                      src={(cat.svgSrc || cat.imageSrc) as string}
+                      alt={cat.title}
                       shouldFadeIn
                       imageFit={ImageFit.cover}
                       width="100%"
@@ -54,7 +71,7 @@ export default class Tiles extends React.Component<ITilesProps> {
                     />
                   )}
                 </div>
-                <div className={styles.coreCaption}><span>{it.title}</span></div>
+                <div className={styles.coreCaption}><span>{cat.title}</span></div>
               </div>
             ))}
           </div>
@@ -62,23 +79,24 @@ export default class Tiles extends React.Component<ITilesProps> {
       );
     }
 
-    const depts = departments.filter(d => this.match(d.title, searchText));
+    const visibleDepartments = departments.filter(d => this.matchesSearchQuery(d.title, searchText));
     return (
-      <FocusZone isCircularNavigation={true} direction={FocusZoneDirection.bidirectional}>
+      <FocusZone isCircularNavigation direction={FocusZoneDirection.bidirectional}>
         <div className={styles.supportGrid}>
-          {depts.map(d => (
+          {visibleDepartments.map(dep => (
             <Link
-              key={d.key}
+              key={dep.key}
               className={styles.supportTile}
               href="#"
               underline={false}
-              aria-label={d.title}
-              onClick={(e) => { e.preventDefault(); this.handleTileOpen(d.title, d.href); }}
+              aria-label={dep.title}
+              onClick={(e) => { e.preventDefault(); this.handleTileSelect(dep.title, dep.href); }}
+              // FUTURE: remove preventDefault and rely on dep.href to navigate directly.
             >
               <div className={styles.supportIcon}>
-                <Image src={d.iconSrc} alt="" imageFit={ImageFit.contain} width={46} height={46} />
+                <Image src={dep.iconSrc} alt="" imageFit={ImageFit.contain} width={46} height={46} />
               </div>
-              <div className={styles.supportTitle}>{d.title}</div>
+              <div className={styles.supportTitle}>{dep.title}</div>
             </Link>
           ))}
         </div>

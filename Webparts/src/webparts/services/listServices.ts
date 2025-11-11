@@ -619,20 +619,29 @@ export class listServices {
     }
   }
 
-  /* ===================== BOARDS ===================== */
+  /* ===================== BOARDS (Only methods below changed) ===================== */
 
-  /** map SPO Search rows -> DocumentSummary[] */
+  /** helper: ensure absolute Path for Search */
+  private toAbsoluteUrl(serverRelative: string): string {
+    const web = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+    return serverRelative.startsWith("http")
+      ? serverRelative
+      : `${web}${serverRelative.startsWith("/") ? "" : "/"}${serverRelative}`;
+  }
+
+  /** map SPO Search rows -> DocumentSummary[] (prefers custom managed props when present) */
   private static mapSearchRowsToDocs(rows: any[]): DocumentSummary[] {
     return (rows || []).map((r: any, idx: number) => {
       const cells: Record<string, any> = {};
       (r?.Cells || []).forEach((c: any) => { cells[c.Key] = c.Value; });
       return {
-        id: cells['WorkId']?.toString() || `row-${idx}`,
-        name: cells['Title'] || cells['Filename'] || 'Document',
-        url: cells['Path'],
-        ext: (cells['FileType'] || '').toLowerCase(),
-        dept: cells['DepartmentOWSTEXT'] || cells['Department'] || 'GRC',
-        tag: cells['ContentType'] || ''
+        id: cells["WorkId"]?.toString() || `row-${idx}`,
+        name: cells["Title"] || cells["Filename"] || "Document",
+        url: cells["Path"],
+        ext: (cells["FileType"] || "").toLowerCase(),
+        // Prefer custom managed properties if available
+        dept: cells["TIRDepartmentOWSTEXT"] || cells["DepartmentOWSTEXT"] || cells["Department"] || "",
+        tag:  cells["TIRTagOWSTEXT"]        || cells["ContentType"]          || ""
       } as DocumentSummary;
     });
   }
@@ -642,16 +651,20 @@ export class listServices {
     dmsLibraryRoot: string,                   // e.g. "/sites/Intranet/DMS"
     rowLimit: number = 6
   ): Promise<DocumentSummary[]> {
-    const root = (dmsLibraryRoot || '/sites/Intranet/DMS').replace(/\/$/, '');
+    const rootRel = (dmsLibraryRoot || "/sites/Intranet/DMS").replace(/\/$/, "");
+    const rootAbs = this.toAbsoluteUrl(rootRel);
     const query: ISearchQuery = {
-      Querytext: `Path:"${root}/*" IsDocument:True`,
+      Querytext: `Path:"${rootAbs}" IsDocument:True`,
       RowLimit: rowLimit,
       TrimDuplicates: true,
       SelectProperties: [
-        'WorkId','Title','Path','FileType','Filename',
-        'LastModifiedTime','DepartmentOWSTEXT','Department','ContentType'
+        "WorkId","Title","Path","FileType","Filename",
+        "LastModifiedTime",
+        // include both custom and generic fields
+        "TIRDepartmentOWSTEXT","TIRTagOWSTEXT",
+        "DepartmentOWSTEXT","Department","ContentType"
       ],
-      SortList: [{ Property: 'LastModifiedTime', Direction: 1 /* desc */ }],
+      SortList: [{ Property: "LastModifiedTime", Direction: 1 /* desc */ }],
     };
     const res: any = await this.sp.search(query);
     const rows =
@@ -665,16 +678,19 @@ export class listServices {
   public async getMostUsedDocumentsOnSite(
     rowLimit: number = 6
   ): Promise<DocumentSummary[]> {
-    const siteUrl = this.context.pageContext.web.absoluteUrl.replace(/\/$/, '');
+    const siteUrl = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
     const query: ISearchQuery = {
       Querytext: `Path:"${siteUrl}/*" IsDocument:True`,
       RowLimit: rowLimit,
       TrimDuplicates: true,
       SelectProperties: [
-        'WorkId','Title','Path','FileType','Filename',
-        'ViewsLifeTime','DepartmentOWSTEXT','Department','ContentType'
+        "WorkId","Title","Path","FileType","Filename",
+        "ViewsLifeTime",
+        // include both custom and generic fields
+        "TIRDepartmentOWSTEXT","TIRTagOWSTEXT",
+        "DepartmentOWSTEXT","Department","ContentType"
       ],
-      SortList: [{ Property: 'ViewsLifeTime', Direction: 1 /* desc */ }],
+      SortList: [{ Property: "ViewsLifeTime", Direction: 1 /* desc */ }],
     };
     const res: any = await this.sp.search(query);
     const rows =
