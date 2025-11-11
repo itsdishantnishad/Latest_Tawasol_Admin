@@ -311,6 +311,12 @@ $muted: #6C6C6C;
   line-height: 24px;
   margin: 0;
   font-family: 'Inter', sans-serif;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
 .bigTitle:hover{ color:#d7d7d7; transition: 0.2s all; }
 .smallTitle{
@@ -320,6 +326,12 @@ $muted: #6C6C6C;
   line-height: 24px;
   margin: 0;
   font-family: 'Inter', sans-serif;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
 .smallTitle:hover{ color:#d7d7d7; transition: 0.2s all; }
 .gridMetaInline{
