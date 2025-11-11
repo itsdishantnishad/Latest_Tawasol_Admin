@@ -113,7 +113,8 @@ export default class ExtensionsApplicationCustomizer
       { label: 'Offers', url: urls.offers },
       { label: 'Trainings', url: urls.trainings },
       { label: 'Events', url: urls.events },
-      { label: 'Docs', url: urls.docs }
+      { label: 'Docs', url: urls.docs },
+      { label: 'About', url: urls.aboutDHRE }
     ]);
   }
 
