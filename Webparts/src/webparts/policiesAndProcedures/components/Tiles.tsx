@@ -8,10 +8,16 @@ interface ITilesProps {
   categories: CategoryItem[];
   departments: DepartmentItem[];
   searchText: string;
+  onOpen: (functionDisplayName: string) => void;
 }
 
 export default class Tiles extends React.Component<ITilesProps> {
   private match = (t: string, q: string) => !q || t.toLowerCase().indexOf(q.toLowerCase()) >= 0;
+
+  private handleTileOpen = (title: string, href?: string): void => {
+    // We only need the display name for the view; routing handled by parent
+    this.props.onOpen(title);
+  };
 
   public render(): React.ReactElement<ITilesProps> {
     const { variant, categories, departments, searchText } = this.props;
@@ -28,17 +34,15 @@ export default class Tiles extends React.Component<ITilesProps> {
                 role="button"
                 aria-label={it.title}
                 tabIndex={0}
+                onClick={() => this.handleTileOpen(it.title, it.href)}
               >
                 <div className={styles.coreThumb}>
-                  {/* 1) Inline SVG markup */}
                   {it.svgMarkup && (
                     <div
                       className={styles.svgWrap}
                       dangerouslySetInnerHTML={{ __html: it.svgMarkup }}
                     />
                   )}
-
-                  {/* 2) External SVG/PNG/JPG path */}
                   {!it.svgMarkup && (it.svgSrc || it.imageSrc) && (
                     <Image
                       src={(it.svgSrc || it.imageSrc) as string}
@@ -58,7 +62,6 @@ export default class Tiles extends React.Component<ITilesProps> {
       );
     }
 
-    // Support Function – tile GRID
     const depts = departments.filter(d => this.match(d.title, searchText));
     return (
       <FocusZone isCircularNavigation={true} direction={FocusZoneDirection.bidirectional}>
@@ -67,9 +70,10 @@ export default class Tiles extends React.Component<ITilesProps> {
             <Link
               key={d.key}
               className={styles.supportTile}
-              href={`#/policies/views/${d.key}`}
+              href="#"
               underline={false}
               aria-label={d.title}
+              onClick={(e) => { e.preventDefault(); this.handleTileOpen(d.title, d.href); }}
             >
               <div className={styles.supportIcon}>
                 <Image src={d.iconSrc} alt="" imageFit={ImageFit.contain} width={46} height={46} />

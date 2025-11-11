@@ -3,7 +3,7 @@ import { Stack, Text, Separator, Breadcrumb, IBreadcrumbItem } from '@fluentui/r
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { listServices, DashboardCategory, DashboardItem } from '../../services/listServices';
 import { ListName } from '../../services/Constants';
-import { breadcrumbBeforeBackArrowSVG } from '../../assets/contant';
+import { breadcrumbBeforeBackArrowSVG } from '../../assets/constants';
 
 import CategoryRail from './CategoryRail';
 import DashboardGrid from './DashboardGrid';

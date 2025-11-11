@@ -1,0 +1,846 @@
+@import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
+
+.eventDetail {
+  padding: 40px 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #F5F3EF;
+  min-height: 100vh;
+}
+
+/* Header Section */
+.header {
+  margin-bottom: 40px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #666;
+  }
+}
+
+.titleSection {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.eventTitle {
+  font-size: 42px;
+  font-weight: 400;
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.oneText {
+  color: #E85D4F;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.eventMeta {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.findPhotoWrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.findPhotoButton {
+  display: inline-flex;
+  margin: 0 auto;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #333;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f8f8f8;
+    border-color: #ccc;
+  }
+}
+
+.dropdownIcon {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+/* Find My Photo Dropdown */
+.findPhotoDropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 10px;
+  background: #FFF9F0;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 24px;
+  min-width: 500px;
+  z-index: 100;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.dropdownContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tabButtons {
+  display: flex;
+  gap: 8px;
+  background: #F0E6D6;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.tabButton {
+  flex: 1;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &.active {
+    background: white;
+    color: #333;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  &:hover:not(.active) {
+    color: #333;
+  }
+}
+
+.recognitionSection {
+  text-align: center;
+}
+
+.recognitionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.recognitionMessage {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.profileImageWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.profileImageContainer {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.profileImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #E0E0E0;
+}
+
+.checkmarkIcon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #4CAF50;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  border: 3px solid #FFF9F0;
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid #E0E0E0;
+}
+
+.iconButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #F0E6D6;
+  }
+}
+
+.icon {
+  font-size: 20px;
+}
+
+.iconLabel {
+  font-size: 11px;
+  color: #666;
+}
+
+/* Photo Grid */
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 60px;
+}
+
+.photoItem {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #e0e0e0;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+/* More Events Section */
+.moreEventsSection {
+  margin-top: 60px;
+  padding-top: 40px;
+  border-top: 1px solid #ddd;
+}
+
+.moreEventsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.moreEventsTitle {
+  font-size: 28px;
+  font-weight: 500;
+  margin: 0;
+  color: #333;
+}
+
+.galleryHighlight {
+  background: #FFD700;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+.viewAllButton {
+  background: #1e293b;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #334155;
+    transform: translateY(-2px);
+  }
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  cursor: pointer;
+
+  img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    cursor: default;
+    border-radius: 4px;
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  line-height: 1;
+  padding: 0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 60px;
+  cursor: pointer;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  line-height: 1;
+  padding: 0;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.prevButton {
+  left: 30px;
+}
+
+.nextButton {
+  right: 30px;
+}
+
+.lightboxCounter {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .eventDetail {
+    padding: 20px;
+  }
+
+  .eventTitle {
+    font-size: 28px;
+  }
+
+  .findPhotoDropdown {
+    min-width: 90vw;
+    left: 5vw;
+    transform: none;
+  }
+
+  .tabButtons {
+    flex-direction: column;
+  }
+
+  .actionButtons {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .photoGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+  }
+
+  .navButton {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+  }
+
+  .prevButton {
+    left: 10px;
+  }
+
+  .nextButton {
+    right: 10px;
+  }
+
+  .closeButton {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
+  }
+}
+.profileConfirmWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 18px;
+  gap: 24px;
+}
+
+.profileConfirmBox {
+  width: 450px;
+  height: 170px;
+  border: 2px dashed #f0c9a8;
+  background: #fdf1e4;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.profileCircleImage {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.checkIcon {
+  width: 30px;
+  height: 30px;
+  background-color: #0da960;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 135px;
+  bottom: 43px;
+}
+
+.continueBtn {
+  background: linear-gradient(180deg, #0d1c2b, #101f2d);
+  color: #fff;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 15px;
+}
+.uploadWrapper {
+  text-align: center;
+  margin-top: 18px;
+}
+
+.panelTitle {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #101f2d;
+}
+
+.panelSub {
+  font-size: 14px;
+  color: #5a5a5a;
+  margin-bottom: 18px;
+}
+
+.dropZone {
+  width: 650px;
+  height: 170px;
+  border: 2px dashed #f0c9a8;
+  background: #fdf1e4;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+.uploadIconPlaceholder {
+  width: 55px;
+  height: 55px;
+  background: #e68969;
+  border-radius: 50%;
+}
+
+.dropText {
+  font-size: 14px;
+  color: #4b4b4b;
+}
+
+.uploadLink {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.previewContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.previewImage {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.dropZoneCamera {
+  width: 650px;
+  height: 270px;
+  border: 2px dashed #f0c9a8;
+  background: #fdf1e4;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  gap: 14px;
+  position: relative;
+}
+
+.cameraVideo {
+  width: 280px;
+  height: 200px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.captureBtn {
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: none;
+  background: #e68969;
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.captureBtn:hover {
+  opacity: 0.85;
+}
+.usePhotoBtn {
+  margin-top: 18px;
+  padding: 10px 22px;
+  border-radius: 30px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s ease;
+  background: #0078d4; // your primary brand (if different you can replace it)
+  color: #fff;
+
+  &:hover {
+    opacity: .85;
+  }
+
+  &:active {
+    transform: scale(.96);
+  }
+}
+
+.moreEventsSection {
+  background: #000;
+  padding: 40px 50px;
+  border-radius: 18px;
+  margin-top: 30px;
+}
+
+.moreEventsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.moreEventsTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.galleryHighlight {
+  color: #676cff; // you can put theme primary if needed
+}
+
+.viewAllButton {
+  background: #1f1f1f;
+  color: #fff;
+  border: none;
+  padding: 12px 32px;
+  font-size: 15px;
+  border-radius: 32px;
+  cursor: pointer;
+  transition: all .2s ease;
+
+  &:hover {
+    opacity: .85;
+  }
+}
+
+.moreEventsCardsRow {
+  display: flex;
+  gap: 32px;
+  overflow-x: auto; // optional scroll like screenshot
+  padding-bottom: 10px;
+}
+.moreEventsCardsRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-top: 24px;
+
+  /* iOS smooth scroll */
+  -webkit-overflow-scrolling: touch;
+
+  /* hide scrollbar */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .miniEventCard {
+    min-width: 260px;
+    background: #ffffff;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    transition: transform .2s ease, box-shadow .2s ease;
+    overflow: hidden;
+    position: relative;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+
+    img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-bottom: 1px solid #eee;
+    }
+
+    .miniContent {
+      padding: 10px 12px;
+
+      .miniTitle {
+        font-size: 14px;
+        font-weight: 600;
+        color: #111;
+        line-height: 1.3;
+      }
+
+      .miniMeta {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+  }
+}
+
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+
+.lightboxContainer {
+  position: relative;
+  max-width: 65vw;
+  max-height: 70vh;
+}
+
+.mainImage {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 14px;
+}
+
+.counter {
+  position: absolute;
+  top: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  color: white;
+}
+
+.closeBtn {
+  position: absolute;
+  top: -40px;
+  right: -10px;
+  font-size: 28px;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.navLeft,
+.navRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 34px;
+  background: white;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  border: none;
+  cursor: pointer;
+}
+
+.navLeft { left: -60px; }
+.navRight { right: -60px; }
+
+.sideThumbsLeft,
+.sideThumbsRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 140px;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.sideThumbsLeft img { object-fit: cover; width: 100%; height: 100%; }
+.sideThumbsRight img { object-fit: cover; width: 100%; height: 100%; }
+
+.sideThumbsLeft { left: -200px; }
+.sideThumbsRight { right: -200px; }
+
+.sideThumbsLeft,
+.sideThumbsRight {
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity .25s ease;
+}
+
+.sideThumbsLeft:hover,
+.sideThumbsRight:hover {
+  opacity: 1;
+}

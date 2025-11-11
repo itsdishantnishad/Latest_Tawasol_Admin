@@ -1,5 +1,3 @@
-import { IBannerWebPartProps, BannerType } from "../GlobalBannerWebPart";
+import { IBannerWebPartProps } from "../GlobalBannerWebPart";
 
-export interface IBannerProps extends IBannerWebPartProps {
-  bannerType: BannerType;
-}
+export interface IBannerProps extends IBannerWebPartProps {}
