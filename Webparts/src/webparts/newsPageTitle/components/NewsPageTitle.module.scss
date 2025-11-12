@@ -49,8 +49,10 @@
 }
 
 .departmentText {
-  font-weight: 600;
   color: #6C6C6C;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .deptIcon {
@@ -86,15 +88,16 @@
 }
 
 .hashtagLink {
-  color: #d3675b;
-  font-weight: 600;
-  font-size: 15px;
+  color: #D3675B;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
   cursor: pointer;
   transition: 0.2s;
 }
 
 .hashtagLink:hover {
-  text-decoration: underline;
+  text-decoration: none;
   color: #b83f30;
 }
 
@@ -102,11 +105,11 @@
    TITLE SECTION
    ============================= */
 .title {
+  color: #000000;
   font-size: 36px;
-  font-weight: 800;
-  margin: 10px 0 14px;
-  line-height: 1.2;
-  color: #2b2b2b;
+  font-weight: 600;
+  line-height: 44px;
+  margin-block: 15px;
 }
 
 /* =============================
@@ -147,9 +150,11 @@
 }
 
 .author {
+  color: #000000;
   font-weight: 600;
-  color: #222;
   white-space: nowrap;
+  font-size: 14px;
+  line-height: 22px;
 }
 
 .dot {
@@ -158,10 +163,11 @@
 }
 
 .metaText {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.4;
-  white-space: nowrap;  /* ✅ keeps each meta chunk readable */
+  color: #6C6C6C;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 /* =============================
