@@ -107,7 +107,7 @@ interface ILeftSectionState {
 const ROUTES: Record<NavKey, string> = {
   storyline: "https://orgessence.sharepoint.com/sites/IntranetRevampProjectTawasol/SitePages/Engage-%E2%80%93-Storyline.aspx",
   activities: "https://orgessence.sharepoint.com/sites/IntranetRevampProjectTawasol/SitePages/Engage-All-Activities.aspx",
-  bookmarks: "https://web.yammer.com/main/saved",
+  bookmarks: "",
 };
 
 export default class LeftSection extends React.Component<ILeftSectionProps, ILeftSectionState> {
