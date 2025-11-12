@@ -1,5 +1,8 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
+*{
+  font-family: Inter, sans-serif;
+}
 
 :global {
   .slick-dots {
@@ -7,16 +10,16 @@
     display: flex;
     bottom: 0;
     left: 60px;
-
     li {
       width: 25px !important;
       margin: 0 !important;
       padding: 0 !important;
-
       button {
         padding: 0;
         &::before {
           font-size: 12px !important;
+          color: #CCCACA !important;
+          opacity: 1 !important;
         }
       }
     }
@@ -24,17 +27,15 @@
     .slick-active {
       // padding-right: 5px !important;
       padding-left: 5px !important;
-
       button {
         &::before {
           background: #DA291C;
-          color: #DA291C;
+          opacity: 1;
           height: 10px;
           font-size: 0px !important;
           margin-top: 4px;
           border-radius: 12px;
         }
-
       }
     }
   }
@@ -67,12 +68,16 @@
     // padding-left: 5px;
  
     i {
-      font-size: 22px;
+      background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #dda160 0, #ffdbb4 100%);
+      border-radius: 50px;
       cursor: pointer;
-      // background: "[theme: primaryButtonBackground, default: #EDE0D2]";
-      background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #DDA160 0%, #FFDBB4 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
-      padding: 10px;
-      border-radius: 50px;   
+      font-size: 20px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #000000;
     }
   }
 }
@@ -164,11 +169,13 @@
     }
 
     &__values{
-      display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-family: Inter, sans-serif;
       color: #6C6C6C;
+      display: flex;
+      gap: .5rem;
+      font-weight: 500;
+      font-size: 13.78px;
+      line-height: 18.37px;
       span{
         position: relative;
       }

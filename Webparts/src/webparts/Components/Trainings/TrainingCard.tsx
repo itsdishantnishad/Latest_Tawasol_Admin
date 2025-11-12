@@ -48,8 +48,6 @@ const TrainingCard: React.FC<TrainingCardProps> = ({
           <div className={styles.weekday}>{startWeekday}</div>
         </div>
 
-        <div className={styles.separator}>–</div>
-
         <div className={styles.dateBox}>
           <div className={styles.month}>{endMonth}</div>
           <div className={styles.day}>{endDay}</div>
@@ -74,7 +72,7 @@ const TrainingCard: React.FC<TrainingCardProps> = ({
         <div className={styles.detailsSection}>
           <div className={styles.category}>{category}</div>
           <h3 className={styles.title}>{title}</h3>
-          <p className={styles.subtitle}>{subtitle}</p>
+          {/* <p className={styles.subtitle}>{subtitle}</p> */}
         </div>
 
         <div className={styles.metaSection}>
