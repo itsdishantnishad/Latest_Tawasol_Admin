@@ -8,7 +8,7 @@ import { breadcrumbBeforeBackArrowSVG } from '../../assets/constants';
 import CategoryRail from './CategoryRail';
 import DashboardGrid from './DashboardGrid';
 import DashboardDetail from './DashboardDetail';
-import DashboardBanner from './banner/DashboardBanner';
+// import DashboardBanner from './banner/DashboardBanner';
 
 import styles from './Dashboards.module.scss';
 
@@ -137,14 +137,15 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
 
     return (
       <section>
-        {!active && <DashboardBanner />}
+        {/* {!active && <DashboardBanner />} */}
 
         {this.renderTopBar()}
 
-        <Separator />
+        {/* <Separator /> */}
 
         <div className={styles.layout}>
           {!active && (
+            <>
             <div className={styles.rail}>
               <CategoryRail
                 items={categories}
@@ -152,7 +153,10 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
                 onSelect={this.onSelectCategory}
               />
             </div>
+            <div className={styles.verticleDivider}></div>
+            </>
           )}
+
 
           <Stack grow>
             {loading && <Text>Loading…</Text>}

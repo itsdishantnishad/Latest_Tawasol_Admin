@@ -64,7 +64,7 @@ export default class DashboardDetail extends React.Component<IDashboardDetailPro
 
             {showViewAll && (
               <div className={ui.viewAllRow}>
-                <PrimaryButton text="View All" onClick={onViewAll} />
+                <PrimaryButton className={ui.viewButtonBlack} text="View All" onClick={onViewAll} />
               </div>
             )}
           </>
