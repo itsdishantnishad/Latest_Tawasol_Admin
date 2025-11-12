@@ -359,3 +359,16 @@
   border-radius: 20px 20px 0 0;
   background-color: #DA291C;
 }
+.viewSwitchContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.viewSwitchContainer .tabButton {
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+

@@ -1,0 +1,48 @@
+.wrap {
+  width: 872px;
+  height: 148px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #E8E8E8;
+  box-sizing: border-box;
+  padding: 20px 24px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.topRow {
+  display: flex; align-items: center; gap: 16px;
+  width: 296px; height: 40px; cursor: text;
+}
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  object-fit: cover;
+  background-color: #F0EDEB; /* profile image bg */
+}
+.prompt {
+  font-family: "29LT Bukra", Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 400; font-size: 14px; line-height: 24px; color: #6C6C6C;
+}
+
+.hr { width: 824px; height: 0; border-top: 1px solid #E8E8E8; }
+
+.actionsRow {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 111px;
+  column-gap: 32px; align-items: center; width: 446px; height: 24px;
+}
+.itemBtn {
+  width: 111px; height: 24px; display: inline-flex; align-items: center;
+  gap: 8px; border: none; background: transparent; padding: 0; cursor: pointer;
+}
+.itemIcon {
+  width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+  img { width: 24px; height: 24px; display: block; }
+}
+.itemText { font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif; font-size: 14px; font-weight: 500; color: #3A3B43; }
+.itemBtn:hover .itemText { text-decoration: underline; }
+
+@media (max-width: 900px) { .wrap, .hr { width: 100%; } }
+@media (max-width: 520px) {
+  .actionsRow { grid-auto-flow: row; grid-template-columns: repeat(2, 1fr); row-gap: 12px; width: 100%; height: auto; }
+}

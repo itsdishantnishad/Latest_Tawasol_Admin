@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, Image } from '@fluentui/react';
+import { Text, Image, ImageFit, Stack } from '@fluentui/react';
 import { DashboardItem } from '../../services/listServices';
 import styles from './Dashboards.module.scss';
 
@@ -7,35 +7,52 @@ export interface IDashboardGridProps {
   title: string;
   items: DashboardItem[];
   onOpen: (item: DashboardItem) => void;
-  showTitle?: boolean; // NEW
+  showTitle?: boolean;
 }
 
-export default class DashboardGrid extends React.Component<IDashboardGridProps, {}> {
-  static defaultProps = { showTitle: true };
+const DashboardGrid: React.FC<IDashboardGridProps> = ({ title, items, onOpen, showTitle = true }) => {
+  const onKey = (e: React.KeyboardEvent, it: DashboardItem) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(it); }
+  };
 
-  render(): React.ReactElement<IDashboardGridProps> {
-    const { title, items, onOpen, showTitle } = this.props;
+  return (
+    <section>
+      {showTitle && <Text variant="xLarge" className={styles.masterTitle}>{title}</Text>}
 
-    return (
-      <section>
-        {showTitle && (
-          <Text variant="xLarge" className={styles.masterTitle}>{title}</Text>
-        )}
+      <div className={styles.grid}>
+        {items.map(it => (
+          <article
+            key={it.id}
+            className={styles.card}
+            role="button"
+            tabIndex={0}
+            aria-label={it.title}
+            onClick={() => onOpen(it)}
+            onKeyDown={(e) => onKey(e, it)}
+            title={it.title}
+          >
+            {it.thumbUrl ? (
+              <Image
+                src={it.thumbUrl}
+                alt=""
+                className={styles.cardImg}
+                imageFit={ImageFit.cover}
+                maximizeFrame
+                loading="lazy"
+              />
+            ) : (
+              <div className={`${styles.placeholder}`} />
+            )}
 
-        <div className={styles.grid}>
-          {items.map(it => (
-            <div key={it.id} className={styles.card} onClick={() => onOpen(it)} title={it.title}>
-              {it.thumbUrl ? (
-                <Image src={it.thumbUrl} alt="" className={styles.cardImg} />
-              ) : (
-                <div className={styles.cardImg} />
-              )}
-              <Text variant="medium" className={styles.cardTitle}>{it.title}</Text>
-              {it.body && <Text variant="small" className={styles.cardBody}>{it.body}</Text>}
-            </div>
-          ))}
-        </div>
-      </section>
-    );
-  }
-}
+            <Stack tokens={{ childrenGap: 2 }}>
+              <Text className={styles.cardTitle}>{it.title}</Text>
+              {it.body && <Text className={styles.cardBody}>{it.body}</Text>}
+            </Stack>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default DashboardGrid;
