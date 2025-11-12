@@ -13,7 +13,7 @@ export interface IDashboardDetailProps {
   showViewAll: boolean;
 }
 
-export default class DashboardDetail extends React.Component<IDashboardDetailProps, {}> {
+export default class DashboardDetail extends React.Component<IDashboardDetailProps> {
   render(): React.ReactElement<IDashboardDetailProps> {
     const { item, related, onOpen, onViewAll, showSection, showViewAll } = this.props;
 

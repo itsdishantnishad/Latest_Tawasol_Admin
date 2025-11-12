@@ -167,16 +167,17 @@
 }
 
 .embedWrap {
-    border: 1px solid #eee;
+    border: 1px solid #ffe5c8;
     border-radius: 10px;
     overflow: hidden
 }
 
 .embedWrap :global(iframe) {
-    width: 100%;
-    height: min(65vh, 560px);
+    // border: 1px solid #fef7f0;
     display: block;
-    border: 0
+    height: 100vh;
+    padding: 15px;
+    width: calc(100% - 30px);
 }
 
 .embedPlaceholder {
