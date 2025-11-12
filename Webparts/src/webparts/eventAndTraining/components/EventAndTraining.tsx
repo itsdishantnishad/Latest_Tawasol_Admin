@@ -34,9 +34,9 @@ export default class EventAndTraining extends React.Component<IEventAndTrainingP
 
     return (
        <>
-        <div className={styles.bannerContainer}>
+        {/* <div className={styles.bannerContainer}>
           <CardTitle />
-        </div>
+        </div> */}
         <EventsTrainingsToggle
           Trainingdata={AlltrainingItem}
           Eventdata={AllEventItems}
