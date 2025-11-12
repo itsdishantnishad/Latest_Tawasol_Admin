@@ -4,6 +4,7 @@ import "@pnp/sp/webs";
 import "@pnp/sp/sites";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
+
 import "@pnp/sp/files";
 import "@pnp/sp/folders";
 import "@pnp/sp/files/folder";
@@ -19,17 +20,17 @@ moment.updateLocale('en', {
     s: 'a few seconds',
     ss: '%d seconds',
     m: "a minute",
-    mm: "%d minutes",
+    mm: '%d minutes',
     h: "an hour",
-    hh: "%d hours",
+    hh: '%d hours',
     d: "a day",
-    dd: "%d days",
+    dd: '%d days',
     w: "a week",
-    ww: "%d weeks",
+    ww: '%d weeks',
     M: "a month",
-    MM: "%d months",
+    MM: '%d months',
     y: "a year",
-    yy: "%d years"
+    yy: '%d years'
   }
 });
 
@@ -74,6 +75,18 @@ export type DocumentSummary = {
   ext?: string;
   dept?: string;
   tag?: string;
+};
+
+/** ===== Announcement Banner ===== */
+export type AnnouncementBannerListItem = {
+  id: number;
+  title: string;
+  description?: string;
+  iconUrl?: string;
+  /** Start/End stored as **LOCAL** ISO strings (normalized from SP’s UTC/offset). */
+  startIso?: string;
+  endIso?: string;
+  isActive: boolean;
 };
 
 export class listServices {
@@ -698,5 +711,75 @@ export class listServices {
       res?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
       res?.PrimarySearchResultsTable?.Rows || [];
     return listServices.mapSearchRowsToDocs(rows);
+  }
+
+  /** ========== Announcement Banner (TIMEZONE NORMALIZED) ========== */
+
+  /**
+   * Convert a SharePoint ISO (UTC or with offset) into **local** ISO string.
+   */
+  private toLocalIso(iso?: string): string | undefined {
+    if (!iso) return undefined;
+    const m = moment.parseZone(iso).local();
+    return m.isValid() ? m.toISOString() : undefined;
+  }
+
+  public async getActiveAnnouncementBannersByListTitle(
+    listTitle: string,
+    currentDateTime: Date = new Date()
+  ): Promise<AnnouncementBannerListItem[]> {
+    try {
+      const sharePointItems: any[] = await this.sp.web.lists
+        .getByTitle(listTitle)
+        .items
+        .select("Id,Title,TIRDescription,TIRIconURL,TIREventStartDate,TIREventEndDate,TIRIsActive")
+        .orderBy("TIREventStartDate", false)(); // newest start first
+
+      const currentLocalMs = currentDateTime.getTime();
+
+      const mappedItems: AnnouncementBannerListItem[] = (sharePointItems || []).map((rawItem: any) => {
+        const rawIconField = rawItem?.TIRIconURL;
+        const resolvedIconUrl = typeof rawIconField === "string" ? rawIconField : rawIconField?.Url || undefined;
+
+        const startIsoRaw = rawItem?.TIREventStartDate ? String(rawItem.TIREventStartDate) : undefined;
+        const endIsoRaw   = rawItem?.TIREventEndDate   ? String(rawItem.TIREventEndDate)   : undefined;
+
+        // Normalize SP UTC/offset to **local** ISO strings
+        const startIsoLocal = this.toLocalIso(startIsoRaw);
+        const endIsoLocal   = this.toLocalIso(endIsoRaw);
+
+        return {
+          id: Number(rawItem?.Id) || 0,
+          title: rawItem?.Title || "",
+          description: rawItem?.TIRDescription || "",
+          iconUrl: resolvedIconUrl,
+          startIso: startIsoLocal,
+          endIso: endIsoLocal,
+          isActive: Boolean(rawItem?.TIRIsActive)
+        };
+      });
+
+      const filteredActiveItems = mappedItems.filter((item) => {
+        if (!item.isActive) return false;
+        const startTimestampMs = item.startIso ? new Date(item.startIso).getTime() : Number.NEGATIVE_INFINITY;
+        const endTimestampMs   = item.endIso   ? new Date(item.endIso).getTime()   : Number.POSITIVE_INFINITY;
+        return startTimestampMs <= currentLocalMs && currentLocalMs <= endTimestampMs;
+      });
+
+      // Sort by nearest end date first, then newest start date
+      filteredActiveItems.sort((left, right) => {
+        const leftEndMs  = left.endIso  ? new Date(left.endIso).getTime()  : Number.POSITIVE_INFINITY;
+        const rightEndMs = right.endIso ? new Date(right.endIso).getTime() : Number.POSITIVE_INFINITY;
+        if (leftEndMs !== rightEndMs) return leftEndMs - rightEndMs;
+
+        const leftStartMs  = left.startIso  ? new Date(left.startIso).getTime()  : 0;
+        const rightStartMs = right.startIso ? new Date(right.startIso).getTime() : 0;
+        return rightStartMs - leftStartMs;
+      });
+
+      return filteredActiveItems;
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 }
