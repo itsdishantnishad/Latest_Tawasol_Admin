@@ -1,18 +1,15 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
 .departmentLogo {
-  display: flex;
   align-items: center;
-  gap: 5px;
-  background: #ffffff;
+  background: #fff;
   border-radius: 40px;
-  padding: 0 10px 0 0;
-  font-weight: 500;
-  font-family: Inter, sans-serif;
   color: #3A3B43;
-  border: 1px solid #E5E5E5;
-  img{
-    width: 31px;
-    height: 30px;
-  }
+  display: flex;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  gap: 5px;
+  padding: 0 10px 0 0;
+  font-size: 10.67px;
+  line-height: 14.22px;
 }

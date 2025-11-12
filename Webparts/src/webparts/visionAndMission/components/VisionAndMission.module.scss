@@ -30,7 +30,8 @@
 /* Headings */
 .sectionTitle {
   margin: 0 0 40px 0;
-  line-height: 1.1;
+  line-height: 100%;
+  letter-spacing: 1px;
   display: flex;
   align-items: baseline;
   gap: 8px;
@@ -47,18 +48,19 @@
 .main {
   font-family: "Instrument Serif", serif;
   font-size: 42px;
-  color: #111;
+  color: #000;
   font-weight: 400;
 }
 
 /* Vision paragraph */
 .visionText {
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.7;
   color: #3A3B43;
-  max-width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
   margin: 0;
+  max-width: 100%;
 }
 
 /* Mission points */
@@ -97,10 +99,13 @@
 
 /* mission description ka color as requested */
 .text {
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
-  font-size: 15px;
-  line-height: 1.7;
-  color: #3A3B43;  /* <-- new color */
+  color: #3A3B43;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  margin: 0;
+  max-width: 100%;
 }
 
 /* --- Responsive tweaks --- */
