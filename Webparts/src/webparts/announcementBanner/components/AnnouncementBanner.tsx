@@ -10,94 +10,96 @@ import {
 } from "../../services/listServices";
 import { ListName } from "../../services/Constants";
 import { FontIcon, PrimaryButton, Text } from "@fluentui/react";
-import ThumbsUpAcknowledgeButton from "./ThumbsUpAcknowledgeButton";
 
 export default class AnnouncementBannerComponent
   extends React.Component<IAnnouncementBannerComponentProps, IAnnouncementBannerComponentState> {
 
   private sharePointService: listServices;
-  private currentUserKey: string;
-  private localStorageAcknowledgedMapKey: string;
-  private thumbsUpHideAnimationMs = 900;
+  private currentUserStorageKey: string;
+  private localStorageAcknowledgedKey: string;
+  private animationDurationMs = 900; // keep in sync with CSS @keyframes timing
 
   constructor(props: IAnnouncementBannerComponentProps) {
     super(props);
 
     this.sharePointService = new listServices(props.context);
 
-    // Build a per-user storage key (prefer email/UPN; fall back to loginName)
-    const user = props.context.pageContext.user as any;
-    const upn: string =
-      (user?.email as string) ||
-      (user?.loginName as string) ||
+    // Per-user storage key (prefer email/UPN; fall back to loginName)
+    const spUser: any = props.context.pageContext.user;
+    const upn =
+      (spUser?.email as string) ||
+      (spUser?.loginName as string) ||
       "anonymous";
-    this.currentUserKey = (upn || "anonymous").toLowerCase();
-    this.localStorageAcknowledgedMapKey = `tir_announcement_ack_v1::${this.currentUserKey}`;
+    this.currentUserStorageKey = (upn || "anonymous").toLowerCase();
+    this.localStorageAcknowledgedKey = `tir_announcement_ack_v1::${this.currentUserStorageKey}`;
 
     this.state = {
       isLoading: true,
-      activeItems: [],
-      acknowledgedItemMap: this.getAcknowledgedMapFromLocalStorage(),
       errorMessage: undefined,
+      activeItems: [],
+      acknowledgedItemMap: this.readAcknowledgedMap(),
       acknowledgingItemId: undefined,
       isShowingThumbsUpAnimation: false
     };
   }
 
   public componentDidMount(): void {
-    void this.loadActiveAnnouncementsFromList();
+    void this.loadActiveAnnouncements();
   }
 
   // ---------- Persistence (per user) ----------
-  private getAcknowledgedMapFromLocalStorage(): Record<number, boolean> {
+  private readAcknowledgedMap(): Record<number, boolean> {
     try {
-      const serialized = window.localStorage.getItem(this.localStorageAcknowledgedMapKey);
-      return serialized ? JSON.parse(serialized) : {};
+      const raw = window.localStorage.getItem(this.localStorageAcknowledgedKey);
+      return raw ? JSON.parse(raw) : {};
     } catch {
       return {};
     }
   }
 
-  private saveAcknowledgedMapToLocalStorage(updatedMap: Record<number, boolean>): void {
+  private writeAcknowledgedMap(map: Record<number, boolean>): void {
     try {
-      window.localStorage.setItem(this.localStorageAcknowledgedMapKey, JSON.stringify(updatedMap));
-    } catch { /* ignore quota errors */ }
+      window.localStorage.setItem(this.localStorageAcknowledgedKey, JSON.stringify(map));
+    } catch { /* ignore */ }
   }
 
   // ---------- Data ----------
-  private async loadActiveAnnouncementsFromList(): Promise<void> {
+  private async loadActiveAnnouncements(): Promise<void> {
     try {
-      const resolvedListTitle = this.props.listTitle || ListName.ANNOUNCEMENT_BANNER;
-      const activeItems = await this.sharePointService.getActiveAnnouncementBannersByListTitle(resolvedListTitle);
+      const listTitle = this.props.listTitle || ListName.ANNOUNCEMENT_BANNER;
+      const activeItems = await this.sharePointService.getActiveAnnouncementBannersByListTitle(listTitle);
       this.setState({ activeItems, isLoading: false, errorMessage: undefined });
-    } catch (loadError: any) {
+    } catch (e: any) {
       this.setState({
         isLoading: false,
-        errorMessage: loadError?.message || "Unable to load announcement banners.",
+        errorMessage: e?.message || "Unable to load announcement banners.",
         activeItems: []
       });
     }
   }
+
+  // ---------- UX: Noted -> CSS 👍 pop -> persist + keep banner with static 👍 ----------
   private handleNotedClick = (itemId: number): void => {
-    const nextAcknowledged = { ...this.state.acknowledgedItemMap, [itemId]: true };
-    this.saveAcknowledgedMapToLocalStorage(nextAcknowledged);
+    const acknowledgedNext = { ...this.state.acknowledgedItemMap, [itemId]: true };
+    this.writeAcknowledgedMap(acknowledgedNext);
+
     this.setState({
-      acknowledgedItemMap: nextAcknowledged,
+      acknowledgedItemMap: acknowledgedNext,
       acknowledgingItemId: itemId,
       isShowingThumbsUpAnimation: true
     });
 
     window.setTimeout(() => {
       this.setState({ isShowingThumbsUpAnimation: false });
-    }, this.thumbsUpHideAnimationMs);
+      // keep acknowledgedItemMap[itemId] = true so after refresh we still show static 👍
+    }, this.animationDurationMs);
   };
 
-  // ---------- Icon source ----------
-  private renderIconForItem(item: AnnouncementBannerListItem): React.ReactNode {
+  // Icon comes from TIRIconURL; fallback only when empty
+  private renderLeadIcon(item: AnnouncementBannerListItem): React.ReactNode {
     if (item.iconUrl) {
       return <img className={styles.iconImg} src={item.iconUrl} alt="" />;
     }
-    // Fallback only if TIRIconURL is empty
     return <FontIcon iconName="Warning" className={styles.iconFallback} aria-label="Announcement" />;
   }
 
@@ -113,16 +115,17 @@ export default class AnnouncementBannerComponent
 
     if (isLoading || errorMessage) return null;
 
+    // Show first active item (if you later want multiple, map over activeItems)
     const firstActiveItem: AnnouncementBannerListItem | undefined = activeItems[0];
     if (!firstActiveItem) return null;
 
-    const isAcknowledgedByThisUser = !!acknowledgedItemMap[firstActiveItem.id];
+    const isAcknowledgedByUser = !!acknowledgedItemMap[firstActiveItem.id];
     const isAnimatingThisItem = isShowingThumbsUpAnimation && acknowledgingItemId === firstActiveItem.id;
 
     return (
       <div className={styles.wrap} role="region" aria-label="Announcement">
         <div className={styles.card}>
-          <div className={styles.iconCol}>{this.renderIconForItem(firstActiveItem)}</div>
+          <div className={styles.iconCol}>{this.renderLeadIcon(firstActiveItem)}</div>
 
           <div className={styles.contentCol}>
             <Text variant="large" className={styles.title}>
@@ -134,13 +137,23 @@ export default class AnnouncementBannerComponent
           </div>
 
           <div className={styles.actionCol}>
-            <ThumbsUpAcknowledgeButton
-              className={undefined /* your own wrapper class if needed */}
-              buttonText="Noted 🤞🏻"
-              acknowledged={!!acknowledgedItemMap[firstActiveItem.id]}
-              onAcknowledge={() => this.handleNotedClick(firstActiveItem.id)}
-              animationDurationMs={900}
-            />
+            {/* When clicked: animate 👍 once */}
+            {isAnimatingThisItem && (
+              <div className={styles.thumbsUpAnimation} aria-hidden="true">👍</div>
+            )}
+
+            {/* After acknowledged: persistent 👍 */}
+            {!isAnimatingThisItem && isAcknowledgedByUser && (
+              <div className={styles.thumbsUpStatic} title="Acknowledged">👍</div>
+            )}
+
+            {/* Before acknowledged: show Noted button */}
+            {!isAnimatingThisItem && !isAcknowledgedByUser && (
+              <PrimaryButton
+                text="Noted 🤞🏻"
+                onClick={() => this.handleNotedClick(firstActiveItem.id)}
+              />
+            )}
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@
   grid-template-columns: 48px 1fr auto;
   align-items: center;
   gap: 14px;
-  background: #101820;
+  background: #0f1923; /* deep navy/charcoal */
   color: #ffffff;
   border-radius: 10px;
   padding: 16px 16px;
@@ -26,7 +26,7 @@
 }
 .iconFallback {
   font-size: 22px;
-  color: #f8c94c;
+  color: #f8c94c; /* amber fallback */
 }
 
 .contentCol { min-width: 0; }
@@ -56,7 +56,7 @@
   }
 }
 
-/* 👍 animation shown after clicking Noted */
+/* 👍 pop animation after click */
 .thumbsUpAnimation {
   font-size: 20px;
   line-height: 1;
@@ -64,7 +64,7 @@
   user-select: none;
 }
 
-/* Persistent 👍 (post-refresh) */
+/* persistent 👍 (post-refresh) */
 .thumbsUpStatic {
   font-size: 20px;
   line-height: 1;

@@ -3,7 +3,7 @@ import { AnnouncementBannerListItem } from "../../services/listServices";
 
 export interface IAnnouncementBannerComponentProps {
   context: WebPartContext;
-  listTitle?: string;
+  listTitle?: string; 
 }
 
 export interface IAnnouncementBannerComponentState {
@@ -11,6 +11,6 @@ export interface IAnnouncementBannerComponentState {
   errorMessage?: string;
   activeItems: AnnouncementBannerListItem[];
   acknowledgedItemMap: Record<number, boolean>;
-  acknowledgingItemId?: number;
+  acknowledgingItemId?: number
   isShowingThumbsUpAnimation: boolean;
 }
