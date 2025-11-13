@@ -238,10 +238,10 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
   private _showingAll: boolean = false;
 
   private _renderRows(rows: any[], ttl: number, cacheKey: string) {
-    const { latest5 } = pickFeatured(rows);
+    const { latest4} = pickFeatured(rows);
 
     const element = React.createElement(MeetingWheelPanel, {
-      latest: latest5,
+      latest: latest4,
       allMeetings: rows,
       showingAll: this._showingAll, 
       onViewAll: () => {
@@ -381,7 +381,7 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
                 }),
                 PropertyPaneSlider('take', {
                   label: 'Fetch count',
-                  min: 5,
+                  min: 4,
                   max: 25
                 }),
                 PropertyPaneSlider('refreshMins', {
