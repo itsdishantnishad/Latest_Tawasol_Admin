@@ -1,0 +1,63 @@
+.greetingsBannerRoot {
+  background: transparent;
+}
+
+/* One centered line with emoji at the end */
+.greetingsBannerCard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; /* space between text and emoji */
+  padding: 8px 0;
+}
+
+/* Wrap to control typography on both parts */
+.greetingsBannerTitle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px; /* comma spacing looks nice */
+  text-align: center;
+  line-height: 100%;
+  font-size: 36px; /* Figma */
+  font-family: "Figtree", Inter, Arial, sans-serif; /* Fallbacks */
+}
+
+/* “Good Morning,” part */
+.greetingText {
+  font-weight: 500; /* Medium */
+  color: #101820;
+}
+
+/* Name with gradient (DA221C -> E6574C) */
+.nameText {
+  font-weight: 600; /* SemiBold */
+  background: linear-gradient(180deg, #DA221C 0%, #E6574C 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Inline emoji/SVG at the end */
+.greetingsBannerEmoji {
+  width: 35px;
+  height: 35px;
+  display: inline-grid;
+  place-items: center;
+
+  > svg {
+    width: 35px;
+    height: 35px;
+    display: block;
+  }
+}
+
+/* keep the subtle subtitle if you use it later */
+.greetingsBannerSubText {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #3A3B43;
+  text-align: center;
+}

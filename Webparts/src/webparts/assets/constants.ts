@@ -187,3 +187,62 @@ export const RightSideRedArrowSVG = `<svg width="286" height="20" viewBox="0 0 2
 <path d="M246.616 9.78172C253.298 12.5541 255.896 14.5601 258.232 18.6029C258.382 18.8638 258.729 18.9365 258.967 18.7518L270.041 10.1644C270.292 9.96955 270.294 9.59084 270.046 9.39284L259.007 0.606701C258.757 0.407699 258.386 0.498075 258.248 0.786348C255.903 5.68927 253.125 7.86444 246.616 9.78172ZM246.616 9.78172L0.00244141 9.78174" stroke="#FF0000"/>
 </svg>
 `;
+
+
+// Greeting Banner SVGs
+
+export const MorningSVG = `<svg width="61" height="61" viewBox="0 0 61 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="30.1016" cy="30.1016" r="30.1016" fill="url(#paint0_linear_24156_21229)"/>
+<circle cx="24.9237" cy="15.0604" r="1.99402" fill="black"/>
+<circle cx="34.8964" cy="15.0604" r="1.99402" fill="black"/>
+<path d="M21.9389 22.5938C21.6785 25.2512 24.4053 28.8577 30.2709 28.8577C37.0405 28.8577 38.8588 24.3021 38.6025 22.5938" stroke="black" stroke-width="0.997008" stroke-linecap="round"/>
+<path d="M33.9609 6.58594L38.5919 6.97185" stroke="#E59B24" stroke-width="1.15775" stroke-linecap="round"/>
+<path d="M26.2422 6.58594L21.6112 6.97185" stroke="#E59B24" stroke-width="1.15775" stroke-linecap="round"/>
+<defs>
+<linearGradient id="paint0_linear_24156_21229" x1="30.1016" y1="0" x2="30.1016" y2="60.2031" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FFD46E"/>
+<stop offset="1" stop-color="#FD7654"/>
+</linearGradient>
+</defs>
+</svg>
+`;
+
+export const AfternoonSVG = `<svg width="61" height="61" viewBox="0 0 61 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="30.1016" cy="30.1016" r="30.1016" fill="url(#paint0_linear_24156_21238)"/>
+<circle cx="24.9237" cy="15.0604" r="1.99402" fill="black"/>
+<circle cx="34.8964" cy="15.0604" r="1.99402" fill="black"/>
+<path d="M21.9389 22.5938C21.6785 25.2512 24.4053 28.8577 30.2709 28.8577C37.0405 28.8577 38.8588 24.3021 38.6025 22.5938" stroke="black" stroke-width="0.997008" stroke-linecap="round"/>
+<path d="M33.9609 6.58594L38.5919 6.97185" stroke="url(#paint1_linear_24156_21238)" stroke-width="1.15775" stroke-linecap="round"/>
+<path d="M26.2422 6.58594L21.6112 6.97185" stroke="url(#paint2_linear_24156_21238)" stroke-width="1.15775" stroke-linecap="round"/>
+<defs>
+<linearGradient id="paint0_linear_24156_21238" x1="30.1016" y1="0" x2="30.1016" y2="60.2031" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FFD673"/>
+<stop offset="1" stop-color="#FB2F2F"/>
+</linearGradient>
+<linearGradient id="paint1_linear_24156_21238" x1="36.2764" y1="6.58594" x2="36.2764" y2="6.97185" gradientUnits="userSpaceOnUse">
+<stop stop-color="#E59B24"/>
+<stop offset="1" stop-color="#F72727"/>
+</linearGradient>
+<linearGradient id="paint2_linear_24156_21238" x1="23.9267" y1="6.58594" x2="23.9267" y2="6.97185" gradientUnits="userSpaceOnUse">
+<stop stop-color="#E59B24"/>
+<stop offset="1" stop-color="#F72727"/>
+</linearGradient>
+</defs>
+</svg>
+`;
+
+export const EveningSVG = `<svg width="61" height="61" viewBox="0 0 61 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="30.1016" cy="30.1016" r="30.1016" fill="url(#paint0_linear_24156_21247)"/>
+<circle cx="24.9237" cy="15.0604" r="1.99402" fill="black"/>
+<circle cx="34.8964" cy="15.0604" r="1.99402" fill="black"/>
+<path d="M21.9389 22.5938C21.6785 25.2512 24.4053 28.8577 30.2709 28.8577C37.0405 28.8577 38.8588 24.3021 38.6025 22.5938" stroke="black" stroke-width="0.997008" stroke-linecap="round"/>
+<path d="M33.9609 6.58594L38.5919 6.97185" stroke="#E59B24" stroke-width="1.15775" stroke-linecap="round"/>
+<path d="M26.2422 6.58594L21.6112 6.97185" stroke="#E59B24" stroke-width="1.15775" stroke-linecap="round"/>
+<defs>
+<linearGradient id="paint0_linear_24156_21247" x1="30.1016" y1="0" x2="30.1016" y2="60.2031" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FFD673"/>
+<stop offset="1" stop-color="#FD987E"/>
+</linearGradient>
+</defs>
+</svg>
+`;
