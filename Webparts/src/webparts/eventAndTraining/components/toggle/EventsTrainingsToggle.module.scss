@@ -25,7 +25,7 @@
 .toggleContainer {
   display: inline-flex;
   background-color: #fff;
-  border: 1.5px solid #FBBF7F;
+  border: 1px solid #FBBF7F;
   border-radius: 50px;
   padding: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -40,34 +40,36 @@
   cursor: pointer;
   border-radius: 50px;
   transition: all 0.3s ease;
-  color: #666;
+  color: #3A3B43;
   white-space: nowrap;
   outline: none;
+  font-family: 'Inter', sans-serif;
 
   &:hover {
-    color: #333;
+    color: #3A3B43;
   }
 
   &.active {
-    background-color: #f5c896;
-    color: #333;
+    background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #DDA160 0%, #FFDBB4 100%);
+    color: #3A3B43;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #F0BB82;
   }
 }
 
 .searchContainer {
-  display: flex;
   align-items: center;
-  background-color: white;
+  background-color: #fff;
+  border: 1px solid #e5e5e5;
   border-radius: 50px;
-  max-width: 400px;
-  padding: 8px 15px;
+  display: flex;
+  flex: 1;
+  width: 255px;
+  padding: 5px 15px;
   position: absolute;
   right: 60px;
-  flex: 1;
-  border: 2px solid #E5E5E5;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  height: 24px;
 
   @media (max-width: 768px) {
     max-width: 100%;
