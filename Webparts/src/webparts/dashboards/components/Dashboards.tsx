@@ -116,12 +116,12 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
     return (
       <div className={styles.topBar}>
         {/* ⬅️ EXISTING BACK BUTTON WITH ICON — kept exactly as-is */}
-        <button className={styles.backBtn} onClick={this.onBackToMaster} aria-label="Back" title="Back">
+        {/* <button className={styles.backBtn} onClick={this.onBackToMaster} aria-label="Back" title="Back">
           <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }} />
           <span>Back</span>
         </button>
 
-        <span className={styles.divider}>|</span>
+        <span className={styles.divider}>|</span> */}
 
         {/* ⬇️ REPLACED Fluent UI Breadcrumb with GlobalBreadcrumbs */}
         <GlobalBreadcrumbs
