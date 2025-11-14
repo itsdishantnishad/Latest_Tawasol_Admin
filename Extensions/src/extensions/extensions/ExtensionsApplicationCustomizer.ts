@@ -16,6 +16,9 @@ export interface IExtensionsApplicationCustomizerProperties {
   testMessage: string;
 }
 
+/** Amplitude API key (project key) */
+const AMPLITUDE_API_KEY: string = 'c8c6db5639af77ddc99ca0e6a6b32f53';
+
 export default class ExtensionsApplicationCustomizer
   extends BaseApplicationCustomizer<IExtensionsApplicationCustomizerProperties> {
 
@@ -58,8 +61,82 @@ export default class ExtensionsApplicationCustomizer
     return !!document.getElementById('spPageChromeAppDiv');
   }
 
+  /** Initialise Amplitude SDK and log a page view for every modern Site Page */
+  private initAmplitude(): void {
+    if (!AMPLITUDE_API_KEY) return;
+
+    const win = window as any;
+
+    // If Amplitude is already available, configure directly
+    if (win.amplitude && win.amplitude.getInstance) {
+      this.configureAmplitude();
+      return;
+    }
+
+    // Inject script only once
+    if (!document.getElementById('amplitude-js')) {
+      const script = document.createElement('script');
+      script.id = 'amplitude-js';
+      script.type = 'text/javascript';
+      script.async = true;
+      script.src = 'https://cdn.amplitude.com/libs/amplitude-8.21.2-min.gz.js';
+
+      script.onload = () => this.configureAmplitude();
+
+      // Optional: silent error handler; no console noise
+      script.onerror = () => { /* ignore */ };
+
+      document.head.appendChild(script);
+    } else {
+      // Script tag exists; give it a moment then configure
+      window.setTimeout(() => this.configureAmplitude(), 1000);
+    }
+  }
+
+  /** Configure Amplitude user + log "SharePoint Page Viewed" */
+  private configureAmplitude(): void {
+    const win = window as any;
+    if (!win.amplitude || !win.amplitude.getInstance) return;
+
+    const instance = win.amplitude.getInstance();
+    const user = this.context.pageContext.user;
+    const web = this.context.pageContext.web;
+
+    const userLogin: string = user.loginName;
+    const userEmail: string = user.email || '';
+    const userDisplayName: string = user.displayName;
+    const siteTitle: string = web.title;
+    const siteId: string = web.id.toString();
+
+    const userId: string = userEmail || userLogin;
+
+    instance.init(AMPLITUDE_API_KEY, userId, {
+      includeUtm: true,
+      includeReferrer: true,
+      saveEvents: true
+    });
+
+    instance.setUserProperties({
+      spLogin: userLogin,
+      spDisplayName: userDisplayName,
+      spEmail: userEmail,
+      siteTitle,
+      siteId
+    });
+
+    instance.logEvent('SharePoint Page Viewed', {
+      url: window.location.href,
+      title: document.title,
+      siteTitle,
+      siteUrl: web.absoluteUrl
+    });
+  }
+
   public onInit(): Promise<void> {
     if (!this.shouldRender()) return Promise.resolve();
+
+    // Amplitude tracking for every modern Site Page
+    this.initAmplitude();
 
     this.injectFont();
     document.body.style.background = '#FFF4EA';
