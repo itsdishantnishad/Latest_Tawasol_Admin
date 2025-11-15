@@ -31,7 +31,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps> 
         const name = (this.props.fullName || "").trim();
         const [first, ...rest] = name.split(" ");
         return (
-            <div>
+            <div className={styles.nameRow}>
                 <Text className={styles.firstName} block>{first}</Text>
                 {rest.length > 0 && <Text className={styles.lastName} block>{" "}{rest.join(" ")}</Text>}
             </div>
