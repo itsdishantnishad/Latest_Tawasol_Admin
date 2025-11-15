@@ -3,18 +3,32 @@ import styles from "./NewsView.module.scss";
 import type { NewsRow, ViewMode } from "./NewsView";
 import { Image, ImageFit, Icon } from "@fluentui/react";
 
-/* Department & Category icon maps with descriptive keys */
+import {
+  GovernanceRiskandComplianceSVG,
+  HealthSafetyEnvironmentSVG,
+  HumanCapitalSVG,
+  ProcurementSVG,
+  AnnouncementIconSVG,
+  ArroundTheWorldIconSVG,
+  DHREIconSVG,
+} from "../../assets/constants";
+
+/* Helper: convert raw SVG string to a data URI */
+const svgToDataUri = (svg: string): string =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
+/* Department & Category icon maps with descriptive keys – now from constants.ts */
 const departmentIconSrcByKey: Record<string, string> = {
-  governance_risk_and_compliance: require("../../assets/GovernanceRiskandCompliance.svg"),
-  health_safety_environment: require("../../assets/HealthSafetyEnvironment.svg"),
-  human_capital: require("../../assets/HumanCapital.svg"),
-  procurement_and_admin: require("../../assets/Procurement.svg"),
+  governance_risk_and_compliance: svgToDataUri(GovernanceRiskandComplianceSVG),
+  health_safety_environment: svgToDataUri(HealthSafetyEnvironmentSVG),
+  human_capital: svgToDataUri(HumanCapitalSVG),
+  procurement_and_admin: svgToDataUri(ProcurementSVG),
 };
 
 const categoryIconSrcByKey: Record<string, string> = {
-  announcement: require("../../assets/AnnouncementIconNewsTag.svg"),
-  dhre_stories: require("../../assets/DHREIconNewsTag.svg"),
-  around_the_world: require("../../assets/ArroundTheWorldIconNewsTag.svg"),
+  announcement: svgToDataUri(AnnouncementIconSVG),
+  dhre_stories: svgToDataUri(DHREIconSVG),
+  around_the_world: svgToDataUri(ArroundTheWorldIconSVG),
 };
 
 const buildUserPhotoUrl = (emailAddress?: string, size: "S" | "M" | "L" = "S") =>
@@ -315,5 +329,5 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
     const { items, view } = this.props;
     if (!items || items.length === 0) return <div className={styles.empty}>No news found.</div>;
     return view === "grid" ? this.renderGrid(items) : this.renderList(items);
-    }
+  }
 }
