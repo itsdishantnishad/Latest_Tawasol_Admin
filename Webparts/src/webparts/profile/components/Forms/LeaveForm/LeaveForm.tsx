@@ -3,16 +3,16 @@ import styles from "./LeaveForm.module.scss";
 
 /* Fluent UI */
 import {
-  Dropdown,
   IDropdownOption,
   DatePicker,
   TextField,
-  PrimaryButton,
   DefaultButton,
 } from "@fluentui/react";
 
+import Dropdown from "../../../../Components/Dropdown/Dropdown";
+import PrimaryButton from "../../../../Components/PrimaryButton/PrimaryButton";
+
 const UploadIcon = require("../../../assets/uploadIcon.svg")
-const DownArrowIcon = require("../../../assets/VectorIcon.svg")
 
 const leaveOptions: IDropdownOption[] = [
   { key: "Sick Leave", text: "Sick Leave" },
@@ -98,15 +98,11 @@ export default class LeaveFormComponent
           <div className={styles.cardHeader}>
             <div className={styles.fieldBlock70}>
               <label className={styles.fieldLabel}>Type</label>
-              <div className={styles.selectShell}>
-                <Dropdown
-                  className={styles.fuiInput}
-                  options={leaveOptions}
-                  selectedKey={this.state.leaveType}
-                  onChange={(_, o) => this.setState({ leaveType: o?.key as string })}
-                  onRenderCaretDown={() => <img src={DownArrowIcon} style={{ width: 24, height: 24 }} />}
-                />
-              </div>
+              <Dropdown
+                options={leaveOptions}
+                selectedKey={this.state.leaveType}
+                onChange={(_, o) => this.setState({ leaveType: o?.key as string })}
+              />
             </div>
           </div>
         </section>
@@ -160,15 +156,11 @@ export default class LeaveFormComponent
           <div className={styles.detailsInner}>
             <div className={styles.reasonWrap}>
               <label className={styles.reasonLabel}>Reason</label>
-              <div className={styles.reasonShell}>
-                <Dropdown
-                  className={styles.fuiInput}
-                  options={reasonOptions}
-                  selectedKey={this.state.reason}
-                  onChange={(_, o) => this.setState({ reason: o?.key as string })}
-                  onRenderCaretDown={() => <img src={DownArrowIcon} style={{ width: 24, height: 24 }} />}
-                />
-              </div>
+              <Dropdown
+                options={reasonOptions}
+                selectedKey={this.state.reason}
+                onChange={(_, o) => this.setState({ reason: o?.key as string })}
+              />
             </div>
 
             <div className={styles.commentsWrap}>
@@ -206,13 +198,10 @@ export default class LeaveFormComponent
         </section>
 
         {/* CTA */}
-        <div className={styles.ctaBar}>
-          <PrimaryButton
-            className={styles.applyBtn}
-            text="Apply New Leave"
-            onClick={this.onSubmit}
-          />
-        </div>
+        <PrimaryButton
+          label="Apply New Leave"
+          onClick={this.onSubmit}
+        />
       </div>
     );
   }
