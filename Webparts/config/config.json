@@ -177,6 +177,14 @@
           "manifest": "./src/webparts/profile/ProfileWebPart.manifest.json"
         }
       ]
+    },
+    "meeting-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/meeting/MeetingWebPart.js",
+          "manifest": "./src/webparts/meeting/MeetingWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -202,6 +210,7 @@
     "PoliciesAndProceduresViewsWebPartStrings": "lib/webparts/policiesAndProceduresViews/loc/{locale}.js",
     "EventGalleryWebPartStrings": "lib/webparts/eventGallery/loc/{locale}.js",
     "GlobalBannerWebPartStrings": "lib/webparts/globalBanner/loc/{locale}.js",
-    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js"
+    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js",
+    "MeetingWebPartStrings": "lib/webparts/meeting/loc/{locale}.js"
   }
 }
