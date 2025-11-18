@@ -177,6 +177,14 @@
           "manifest": "./src/webparts/profile/ProfileWebPart.manifest.json"
         }
       ]
+    },
+    "help-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/help/HelpWebPart.js",
+          "manifest": "./src/webparts/help/HelpWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -202,6 +210,7 @@
     "PoliciesAndProceduresViewsWebPartStrings": "lib/webparts/policiesAndProceduresViews/loc/{locale}.js",
     "EventGalleryWebPartStrings": "lib/webparts/eventGallery/loc/{locale}.js",
     "GlobalBannerWebPartStrings": "lib/webparts/globalBanner/loc/{locale}.js",
-    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js"
+    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js",
+    "HelpWebPartStrings": "lib/webparts/help/loc/{locale}.js"
   }
 }

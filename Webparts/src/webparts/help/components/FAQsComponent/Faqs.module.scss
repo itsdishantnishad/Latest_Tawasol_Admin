@@ -1,0 +1,208 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.wrapper {
+  width: 869px;
+  margin: 0 auto;
+  padding-top: 24px;
+}
+.topTabs {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin-bottom: 8px;
+}
+
+.topTab {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0;
+  color: #b0b0b0;
+  vertical-align: middle;
+}
+
+.topTabActive {
+  color: #000000;
+}
+
+.topTabUnderline {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 113px;
+  height: 4px;
+  bottom: -18px;
+  background-color: #da291c;
+  border-radius: 4px;
+}
+
+.topSeparator {
+  width: 1320px;
+  height: 0;
+  border-bottom: 1px solid #cccaca;
+  margin: 16px 0 32px;
+  margin-left: -206px; 
+}
+
+.faqTitle {
+  margin: 0 0 16px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 32px;
+  color: #000000;
+}
+
+.subHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.subCategoryLabel {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  color: #3a3b43;
+}
+
+.subCategoryDash {
+  flex: 1 1 auto;
+  height: 0;
+  border-bottom: 1px dashed #000000;
+}
+
+.languageToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.langButton {
+  width: 120px;
+  height: 36px;
+  border-radius: 167px;
+  padding: 0 12px;
+  border: none;
+  cursor: pointer;
+
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+}
+.langButtonActive {
+  background: radial-gradient(circle at 0% 0%, #101820, #202d39);
+  color: #ffffff;
+  box-shadow:
+    0px 4px 4px 0px #768b9e inset,
+    -4px -6px 4px 0px #00000082 inset;
+}
+
+.langButtonInactive {
+  background-color: transparent;
+  border: 1.5px solid #c5b9ac;
+  color: #c5b9ac;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faqItemExpanded {
+  width: 869px;
+  min-height: 156px;
+  border-radius: 12px;
+  padding: 20px;
+  background-color: #ffffff80;      
+  box-shadow: 0px 4px 30px 0px #0000001c;
+}
+
+.faqItemCollapsed {
+  width: 869px;
+  padding: 12px 0;                   
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.faqItemButton {
+  display: flex;
+  align-items: center;         
+  gap: 16px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.faqItemExpanded .faqItemButton {
+  align-items: flex-start;
+}
+.iconBox {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 0;
+  opacity: 1;
+}
+
+.iconMinus {
+  width: 18px;
+  height: 2px;
+  background-color: #da291c;
+  border-radius: 1px;
+}
+
+.iconPlus {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 24px;
+  color: #da291c;
+}
+
+.faqContent {
+  flex: 1 1 auto;
+}
+.questionText {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 28px;
+  color: #000000;
+}
+.answerText {
+  margin-top: 16px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #3a3b43;
+}
+
