@@ -2,7 +2,7 @@ import { BaseApplicationCustomizer } from '@microsoft/sp-application-base';
 require('../../styles/hideNav.css');
 
 import styles from './Extension.module.scss';
-import { SPHttpClient } from '@microsoft/sp-http';
+import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { FloatingNav } from './components/FloatingNav';
@@ -18,6 +18,21 @@ export interface IExtensionsApplicationCustomizerProperties {
 
 /** Amplitude API key (project key) */
 const AMPLITUDE_API_KEY: string = 'c8c6db5639af77ddc99ca0e6a6b32f53';
+
+/** Types for window.amplitude so we don't use `any` */
+type AmplitudeProps = Record<string, unknown>;
+
+interface AmplitudeInstance {
+  init(apiKey: string, userId?: string | null, config?: AmplitudeProps): void;
+  setUserProperties(props: AmplitudeProps): void;
+  logEvent(name: string, props?: AmplitudeProps): void;
+}
+
+interface AmplitudeWindow extends Window {
+  amplitude?: {
+    getInstance?: () => AmplitudeInstance;
+  };
+}
 
 export default class ExtensionsApplicationCustomizer
   extends BaseApplicationCustomizer<IExtensionsApplicationCustomizerProperties> {
@@ -61,15 +76,69 @@ export default class ExtensionsApplicationCustomizer
     return !!document.getElementById('spPageChromeAppDiv');
   }
 
+  /**
+   * Read current Site Page Content Type and map to a friendly pageType.
+   * Any CT whose name contains:
+   *  - "news"    -> "News"
+   *  - "event"   -> "Event"
+   *  - "training"-> "Training"
+   *  else        -> "Page"
+   */
+  private async getPageTypeFromContentType():
+    Promise<{ pageType: string; contentTypeName?: string }> {
+
+    try {
+      const ctx = this.context.pageContext;
+
+      if (!ctx.list || !ctx.listItem) {
+        return { pageType: 'Page' };
+      }
+
+      const listId = ctx.list.id.toString();
+      const itemId = ctx.listItem.id;
+
+      const apiUrl =
+        `${ctx.web.absoluteUrl}/_api/web/lists(guid'${listId}')/items(${itemId})` +
+        `?$select=ContentType/Name&$expand=ContentType`;
+
+      const resp: SPHttpClientResponse = await this.context.spHttpClient.get(
+        apiUrl,
+        SPHttpClient.configurations.v1
+      );
+
+      if (!resp.ok) {
+        return { pageType: 'Page' };
+      }
+
+      const data = await resp.json() as { ContentType?: { Name?: string } };
+      const rawName: string = data.ContentType?.Name || '';
+      const ctName = rawName.toLowerCase();
+
+      let pageType = 'Page';
+
+      if (ctName.indexOf('news') >= 0) {
+        pageType = 'News';
+      } else if (ctName.indexOf('event') >= 0) {
+        pageType = 'Event';
+      } else if (ctName.indexOf('training') >= 0) {
+        pageType = 'Training';
+      }
+
+      return { pageType, contentTypeName: rawName };
+    } catch {
+      return { pageType: 'Page' };
+    }
+  }
+
   /** Initialise Amplitude SDK and log a page view for every modern Site Page */
   private initAmplitude(): void {
     if (!AMPLITUDE_API_KEY) return;
 
-    const win = window as any;
+    const win = window as unknown as AmplitudeWindow;
 
     // If Amplitude is already available, configure directly
     if (win.amplitude && win.amplitude.getInstance) {
-      this.configureAmplitude();
+      void this.configureAmplitude();
       return;
     }
 
@@ -81,7 +150,9 @@ export default class ExtensionsApplicationCustomizer
       script.async = true;
       script.src = 'https://cdn.amplitude.com/libs/amplitude-8.21.2-min.gz.js';
 
-      script.onload = () => this.configureAmplitude();
+      script.onload = () => {
+        void this.configureAmplitude();
+      };
 
       // Optional: silent error handler; no console noise
       script.onerror = () => { /* ignore */ };
@@ -89,16 +160,20 @@ export default class ExtensionsApplicationCustomizer
       document.head.appendChild(script);
     } else {
       // Script tag exists; give it a moment then configure
-      window.setTimeout(() => this.configureAmplitude(), 1000);
+      window.setTimeout(() => {
+        void this.configureAmplitude();
+      }, 1000);
     }
   }
 
-  /** Configure Amplitude user + log "SharePoint Page Viewed" */
-  private configureAmplitude(): void {
-    const win = window as any;
+  /** Configure Amplitude user + log "SharePoint Page Viewed" with pageType from CT */
+  private async configureAmplitude(): Promise<void> {
+    const win = window as unknown as AmplitudeWindow;
     if (!win.amplitude || !win.amplitude.getInstance) return;
 
     const instance = win.amplitude.getInstance();
+    if (!instance) return;
+
     const user = this.context.pageContext.user;
     const web = this.context.pageContext.web;
 
@@ -124,11 +199,16 @@ export default class ExtensionsApplicationCustomizer
       siteId
     });
 
+    const { pageType, contentTypeName } = await this.getPageTypeFromContentType();
+
     instance.logEvent('SharePoint Page Viewed', {
       url: window.location.href,
+      pagePath: window.location.pathname || '',
       title: document.title,
       siteTitle,
-      siteUrl: web.absoluteUrl
+      siteUrl: web.absoluteUrl,
+      pageType,          // "News" / "Event" / "Training" / "Page"
+      contentTypeName    // e.g. "TIR News Story"
     });
   }
 
@@ -195,7 +275,9 @@ export default class ExtensionsApplicationCustomizer
     ]);
   }
 
-  private updateSuggest = (): void => this.suggest?.updatePosition();
+  private updateSuggest = (): void => {
+    this.suggest?.updatePosition();
+  };
 
   private wireSearch(input: HTMLInputElement): void {
     input.addEventListener('keydown', (e: KeyboardEvent) => {
@@ -203,9 +285,15 @@ export default class ExtensionsApplicationCustomizer
         const q = input.value.trim();
         const url = `${this.webUrl}/_layouts/15/search.aspx?q=${encodeURIComponent(q)}`;
         window.location.href = q ? url : `${this.webUrl}/_layouts/15/search.aspx`;
-      } else if (e.key === 'ArrowDown') { e.preventDefault(); this.suggest.moveActive('down'); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); this.suggest.moveActive('up'); }
-      else if (e.key === 'Escape') this.suggest.close();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        this.suggest.moveActive('down');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        this.suggest.moveActive('up');
+      } else if (e.key === 'Escape') {
+        this.suggest.close();
+      }
     });
 
     input.addEventListener('input', () => {
@@ -221,14 +309,18 @@ export default class ExtensionsApplicationCustomizer
           ]);
           const results = [...people, ...content].slice(0, 8);
           this.suggest.open(val, results);
-        } catch { this.suggest.open(val, []); }
+        } catch {
+          this.suggest.open(val, []);
+        }
       }, 250);
     });
 
     document.addEventListener('click', (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const host = document.querySelector(`.${styles.TIRSuggestHost}`);
-      if (host && !host.contains(target) && target.id !== IDS.elems.search) this.suggest.close();
+      if (host && !host.contains(target) && target.id !== IDS.elems.search) {
+        this.suggest.close();
+      }
     });
   }
 
