@@ -13,7 +13,7 @@ export interface IDashboardDetailProps {
   showViewAll: boolean;
 }
 
-export default class DashboardDetail extends React.Component<IDashboardDetailProps, {}> {
+export default class DashboardDetail extends React.Component<IDashboardDetailProps> {
   render(): React.ReactElement<IDashboardDetailProps> {
     const { item, related, onOpen, onViewAll, showSection, showViewAll } = this.props;
 
@@ -64,7 +64,7 @@ export default class DashboardDetail extends React.Component<IDashboardDetailPro
 
             {showViewAll && (
               <div className={ui.viewAllRow}>
-                <PrimaryButton text="View All" onClick={onViewAll} />
+                <PrimaryButton className={ui.viewButtonBlack} text="View All" onClick={onViewAll} />
               </div>
             )}
           </>

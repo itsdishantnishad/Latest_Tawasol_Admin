@@ -237,7 +237,13 @@
   margin-bottom: 16px;
 }
 
-.TIRFooterLink { color: #fff; text-decoration: none; font-size: 15px; font-weight: 400; }
+.TIRFooterLink {
+  color: #C4C5C7;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  text-decoration: none;
+}
 .TIRFooterLink:hover { text-decoration: underline; }
 
 .TIRFooterLine { width: 100%; border: none; border-top: 1px solid #444; margin: 16px 0; }
@@ -439,6 +445,50 @@
 }
 
 /* ===================== RESPONSIVE ===================== */
+
+@media (max-width: 1200px) {
+  .TIRSearch { width: 380px; }
+  .TIRBrandLogo { width: 34px; height: 34px; }
+  .TIRAvatar { width: 38px; height: 38px; }
+  .TIRIconBtn { width: 32px; height: 32px; }
+  .TIRSuggestHost { width: 540px; }
+}
+
+@media (max-width: 992px) {
+  .TIRHdr { height: 56px; }
+  .TIRSearch { width: 340px; height: 42px; }
+  .TIRNavLabel { display: none; }
+  .TIRFloatingNav { width: 420px; height: 60px; }
+  .TIRButtonGroup { height: 50px; }
+  .TIRSuggestHost { width: 500px; }
+}
+
+@media (max-width: 900px){
+  .TIRFooterNav{
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .TIRHdr { height: 52px; }
+  .TIRBrandLogo { width: 30px; height: 30px; }
+  .TIRAvatar { width: 36px; height: 36px; }
+  .TIRSearch { width: 300px; }
+  .TIRFloatingNav { width: 360px; bottom: 120px; }
+  .TIRSuggestHost { width: 420px; }
+}
+
+@media (max-width: 576px) {
+  .TIRSearch { width: 260px; height: 40px; }
+  .TIRIconBtn { width: 30px; height: 30px; }
+  .TIRFloatingNav { width: 320px; height: 56px; bottom: 110px; }
+  .TIRSuggestHost { width: 320px; }
+}
+
 @media (max-width: 420px) {
   .TIRHdr { height: 48px; }
   .TIRBrandLogo { width: 28px; height: 28px; }
@@ -454,39 +504,6 @@
   .TIRFooterBottom span:first-child, .TIRFooterBottomCenter, .TIRSocials { justify-self: center; }
   .TIRSuggestHost { width: 280px; }
   .TIRNotifModal { width: 92vw; }
-}
-
-@media (max-width: 576px) {
-  .TIRSearch { width: 260px; height: 40px; }
-  .TIRIconBtn { width: 30px; height: 30px; }
-  .TIRFloatingNav { width: 320px; height: 56px; bottom: 110px; }
-  .TIRSuggestHost { width: 320px; }
-}
-
-@media (max-width: 768px) {
-  .TIRHdr { height: 52px; }
-  .TIRBrandLogo { width: 30px; height: 30px; }
-  .TIRAvatar { width: 36px; height: 36px; }
-  .TIRSearch { width: 300px; }
-  .TIRFloatingNav { width: 360px; bottom: 120px; }
-  .TIRSuggestHost { width: 420px; }
-}
-
-@media (max-width: 992px) {
-  .TIRHdr { height: 56px; }
-  .TIRSearch { width: 340px; height: 42px; }
-  .TIRNavLabel { display: none; }
-  .TIRFloatingNav { width: 420px; height: 60px; }
-  .TIRButtonGroup { height: 50px; }
-  .TIRSuggestHost { width: 500px; }
-}
-
-@media (max-width: 1200px) {
-  .TIRSearch { width: 380px; }
-  .TIRBrandLogo { width: 34px; height: 34px; }
-  .TIRAvatar { width: 38px; height: 38px; }
-  .TIRIconBtn { width: 32px; height: 32px; }
-  .TIRSuggestHost { width: 540px; }
 }
 
 @media (min-width: 1440px) {

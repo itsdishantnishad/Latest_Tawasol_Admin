@@ -23,15 +23,14 @@ const EventCard: React.FC<IEventCardProps> = ({ event, onClick }) => {
       <div className={styles.imageContainer}>
         <img src={event?.imageUrl} alt={event.title} />
         <div className={styles.overlay}>
-          <div className={styles.cardContent}>
-            <h3 className={styles.eventTitle}>
-              {event.title}
-              <span className={styles.arrow}>›</span>
-            </h3>
-            <div className={styles.cardFooter}>
-              <span className={styles.imageCount}>{event.imageCount} images</span>
-              <span className={styles.eventDate}>{event.date}</span>
-            </div>
+          {/* <div className={styles.cardContent}></div> */}
+          <h3 className={styles.eventTitle}>
+            {event.title}
+            <span className={styles.arrow}>›</span>
+          </h3>
+          <div className={styles.cardFooter}>
+            <span className={styles.imageCount}>{event.imageCount} images</span>
+            <span className={styles.eventDate}>{event.date}</span>
           </div>
         </div>
       </div>
