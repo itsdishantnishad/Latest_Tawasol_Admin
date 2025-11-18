@@ -8,6 +8,8 @@ import {
 } from "@fluentui/react";
 import styles from "./NewsView.module.scss";
 import type { TabKey, ViewMode } from "./NewsView";
+
+// SVG strings from constants.ts
 import {
   GRIDViewToggleSVG,
   ListvViewToggleSVG
@@ -17,7 +19,7 @@ import {
 const svgToDataUri = (svg: string): string =>
   `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 
-// Reuse the same variable names used earlier, but now from constants
+// Reuse the same variable names used earlier, but now fed from constants
 const gridViewIconSrc = svgToDataUri(GRIDViewToggleSVG);
 const listViewIconSrc = svgToDataUri(ListvViewToggleSVG);
 
@@ -60,7 +62,7 @@ export default class FiltersBar extends React.Component<IFiltersBarProps> {
       q: searchQuery,
       view: currentViewMode,
       deptOpts: departmentOptions,
-      onView: setViewMode
+      onView: setViewMode,
     } = this.props;
 
     return (

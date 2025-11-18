@@ -246,14 +246,13 @@ export class listServices {
           "Title",
           "TIREventEndDate",
           "TIREventStartDate",
-          "TIRLocation",
-          "TIR"
+          "TIRLocation"
         ],
-        QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
+        QueryTemplate: ID ? `{searchTerms} ListItemId:${ID}` : `{searchTerms}`,
         HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
         EnableInterleaving: true,
       } as ISearchQuery);
-
+    
       return results.PrimarySearchResults.map((item: any) => {
         return {
           title: item.Title,

@@ -3,6 +3,7 @@ import styles from "./NewsView.module.scss";
 import type { NewsRow, ViewMode } from "./NewsView";
 import { Image, ImageFit, Icon } from "@fluentui/react";
 
+// SVGs from shared constants
 import {
   GovernanceRiskandComplianceSVG,
   HealthSafetyEnvironmentSVG,
@@ -13,7 +14,7 @@ import {
   DHREIconSVG,
 } from "../../assets/constants";
 
-/* Helper: convert raw SVG string to a data URI */
+// Helper: convert raw SVG string to a data URI
 const svgToDataUri = (svg: string): string =>
   `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 
