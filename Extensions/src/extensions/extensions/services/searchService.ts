@@ -41,9 +41,30 @@ export class SearchService {
     }));
   }
 
+  /**
+   * Search ONLY modern site pages (Site Pages library):
+   *  - ContentClass: STS_ListItem_WebPageLibrary
+   *  - FileExtension: aspx
+   *  - Path: current site only
+   * Then map CT name -> News / Events / Training / Page.
+   */
   async queryContent(text: string, take: number): Promise<ISuggestItem[]> {
-    // only search in current site
-    const kql = `${text}* AND Path:"${this.webUrl}"`;
+    const q = text.trim();
+    if (!q) return [];
+
+    // KQL restricted to modern Site Pages only
+    const kqlParts: string[] = [
+      `${q}*`,
+      `Path:"${this.webUrl}"`,
+      'ContentClass:STS_ListItem_WebPageLibrary',
+      'FileExtension:aspx',
+      // hard filters to avoid system/internal stuff
+      `-Path:"${this.webUrl}/_layouts/"`,
+      `-Path:"${this.webUrl}/_catalogs/"`,
+      `-Path:"${this.webUrl}/Lists/"`,
+      `-Path:"${this.webUrl}/SiteAssets/"`
+    ];
+    const kql = kqlParts.join(' AND ');
 
     const select = [
       'Title',
@@ -66,7 +87,9 @@ export class SearchService {
     const json: any = await r.json();
     const rows: any[] = json?.PrimaryQueryResult?.RelevantResults?.Table?.Rows || [];
 
-    return rows.map(row => {
+    const items: ISuggestItem[] = [];
+
+    for (const row of rows) {
       const cells: Record<string, string> = {};
       (row?.Cells || []).forEach((c: any) => { cells[c.Key] = c.Value; });
 
@@ -74,45 +97,44 @@ export class SearchService {
       const pathLower = path.toLowerCase();
       const contentClass = (cells['contentclass'] || '').toLowerCase();
       const thumb = cells['PictureThumbnailURL'] || '';
-      const fileType = cells['FileType'] || '';
       const contentType = cells['ContentType'] || '';
 
-      // true only for *real* modern pages in Site Pages
+      // Only *real* modern pages in Site Pages
       const isPage =
         contentClass === 'sts_listitem_webpagelibrary' &&
         pathLower.includes('/sitepages/') &&
         pathLower.endsWith('.aspx');
 
-      const isSiteAsset = pathLower.includes('/siteassets/');
+      // Strict: skip anything that is not a modern Site Page
+      if (!isPage) continue;
 
-      // ---- label to show in subtitle (no site name now) --------------------
-      let scopeLabel = '';
+      // ---- label to show in subtitle (page category) --------------------
+      let scopeLabel = 'Page';
+      const ct = contentType.toLowerCase();
 
-      if (isPage) {
-        const ct = contentType.toLowerCase();
-        if (ct.includes('news'))      scopeLabel = 'News';
-        else if (ct.includes('event')) scopeLabel = 'Events';
-        else                           scopeLabel = 'Page';
-      } else {
-        if (isSiteAsset) {
-          // e.g. SiteAssets/SitePages/... (image web part folders)
-          scopeLabel = 'Site Assets';
-        } else if (fileType) {
-          scopeLabel = fileType.toUpperCase();   // PDF, PPTX, DOCX...
-        } else {
-          scopeLabel = 'Item';
-        }
+      if (ct.includes('news')) {
+        scopeLabel = 'News';
+      } else if (ct.includes('event')) {
+        scopeLabel = 'Events';
+      } else if (ct.includes('training')) {
+        scopeLabel = 'Training';
       }
+      // else keep "Page"
 
-      const subtitle = scopeLabel; // <- only the label, no site title
+      const title =
+        cells['Title'] ||
+        path.split('/').pop() ||
+        '(no title)';
 
-      return {
-        title: cells['Title'] || path.split('/').pop() || '(no title)',
-        subtitle,
+      items.push({
+        title,
+        subtitle: scopeLabel,         // ONLY "News" / "Events" / "Training" / "Page"
         url: path || '#',
-        imageUrl: isPage ? (thumb || undefined) : undefined,
-        kind: isPage ? 'page' : 'doc'
-      } as ISuggestItem;
-    });
+        imageUrl: thumb || undefined, // page preview if available
+        kind: 'page'                  // no docs, images, etc.
+      });
+    }
+
+    return items;
   }
 }
