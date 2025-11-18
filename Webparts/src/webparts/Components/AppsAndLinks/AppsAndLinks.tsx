@@ -91,30 +91,32 @@ export const AppsAndLinks = (props: IAppsAndLinksProps) => {
                             <div className={styles.addCustomLinksContent}>
                                 {customLinks.length > 0 && customLinks.map((link: any) => {
                                     return (
-                                        <div className={styles.customLinksContent}>
-                                            {link.Title === "Add Links" ?
-                                                <div className={styles.customLinks} onClick={openAddLink}>
-                                                    <img src={" https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SiteAssets/AppsIcons/add-square.png"}></img>
-                                                    <div className="label"> Add Links</div>
-                                                </div>
-                                                :
-                                                <div>
-                                                    <div>
-                                                        {link.Title}
+                                        <>
+                                            <div className={styles.customLinksContent}>
+                                                {link.Title === "Add Links" ?
+                                                    <div className={styles.customLinks} onClick={openAddLink}>
+                                                        <img src={" https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SiteAssets/AppsIcons/add-square.png"}></img>
+                                                        <div className="label"> Add Links</div>
                                                     </div>
+                                                    :
                                                     <div>
-                                                        {link.URL}
+                                                        <div>
+                                                            {link.Title}
+                                                        </div>
+                                                        <div>
+                                                            {link.URL}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            }
-                                        </div>
+                                                }
+                                            </div>
+                                        </>
                                     )
                                 })}
                             </div>
 
-                            <div style={{ display: isAddLinks === true ? "block" : "none" }}>
-                                <div>Add Custom Links</div>
-                                <div>
+                            <div style={{ display: isAddLinks === true ? "block" : "none" }} className={styles.openedCustomLinkContent}>
+                                <p>Add Custom Links</p>
+                                <div className={styles.formGroup}>
                                     <div className={styles.input}>
                                         <label>Add name</label>
                                         <input
@@ -124,6 +126,7 @@ export const AppsAndLinks = (props: IAppsAndLinksProps) => {
                                             value={inputLinkTitle}
                                             onChange={handleInputChange}
                                             placeholder="Please enter link"
+                                            className={styles.formControl}
                                         />
                                     </div>
                                     <div className={styles.input}>
@@ -135,12 +138,13 @@ export const AppsAndLinks = (props: IAppsAndLinksProps) => {
                                             value={inputLinkURL}
                                             onChange={handleInputChange1}
                                             placeholder="Please enter link URL"
+                                            className={styles.formControl}
                                         />
                                     </div>
-                                    <div>
-                                        <a onClick={closeAddLink}>Cancel</a>
-                                        <a onClick={saveAddLink}>Save</a>
-                                    </div>
+                                </div>
+                                <div className={styles.buttonGroup}>
+                                    <a onClick={closeAddLink}>Cancel</a>
+                                    <a onClick={saveAddLink}>Save</a>
                                 </div>
                             </div>
                         </div>
