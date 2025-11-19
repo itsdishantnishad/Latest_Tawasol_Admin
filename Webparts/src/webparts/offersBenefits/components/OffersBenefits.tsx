@@ -9,10 +9,13 @@ export interface IOffersBenefitsProps {
   placeholders: { medical: string; privileges: string };
   cacheMinutes: number;
   maxItems: number;
-  /* kept for compatibility; Medical title is NOT rendered */
+
   sectionTitleMedical: string;
-  /* shown above the Privileges grid when that tab is active */
+  
   sectionTitlePrivileges: string;
+
+  /** Optional: builds the "Home" link in breadcrumb */
+  homeUrl?: string;
 }
 
 interface State {
@@ -23,6 +26,35 @@ interface State {
 }
 
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/* ─────────────────────────────
+   Minimal in-file Breadcrumb
+   ───────────────────────────── */
+const Breadcrumb: React.FC<{ homeUrl?: string }> = ({ homeUrl }) => {
+  const goBack = () => window.history.back();
+  const url = homeUrl || '/';
+
+  return (
+    <div className={styles.breadcrumb}>
+      <button type="button" className={styles.backBtn} onClick={goBack}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+          <path d="M12.5 15L7.5 10L12.5 5" stroke="#000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span>Back</span>
+      </button>
+
+      <div className={styles.breadDivider} />
+
+      <div className={styles.linksContainer}>
+        <a className={styles.crumbLink} href={url}>Home</a>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+          <path d="M6 12L10 8L6 4" stroke="#9ba3ae" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span className={styles.crumbCurrent}>Offers &amp; Benefits</span>
+      </div>
+    </div>
+  );
+};
 
 export default class OffersBenefits extends React.Component<IOffersBenefitsProps, State> {
   private abort?: AbortController;
@@ -68,11 +100,10 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
     }
   }
 
-  /* helpers */
   private privItems: [string, string, string, string] =
     [styles.item0, styles.item1, styles.item2, styles.item3];
 
-  /* PRIVILEGES renderer */
+  /* ---------- PRIVILEGES ---------- */
   private renderPrivCard(card: AnyCard, i: number) {
     if (card.type === 'imageCard') {
       const img = (card as any).imageOverride || (card as any).imageUrl;
@@ -93,17 +124,11 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
       const title = (card as any).title as string;
       const accents: string[] = (card as any).accentWords || [];
 
-      // ✅ auto-detect the “Importance…” block to apply Figma rules
+     
       const isImportance =
         /The\s+Importance\s+of\s+Staying\s+Fit\s+and\s+Active\s+for\s+Productivity/i.test(title);
-
-      // red heading when accentTitle=true OR when it's the Importance block
       const accentTitle: boolean = Boolean((card as any).accentTitle) || isImportance;
-
-      // two-column bullets when twoCol=true OR Importance block
       const twoColBullets: boolean = Boolean((card as any).twoCol) || isImportance;
-
-      // optional small heading above bullets (Figma)
       const bulletHeading: string =
         (card as any).bulletHeading || (isImportance ? 'Core Direction Employee Offer' : '');
 
@@ -119,7 +144,6 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
               </div>
             )}
 
-            {/* Title: black with red accents or fully red (Figma) */}
             <div className={`${styles.cardTitle} ${accentTitle ? styles.cardTitleRed : ''}`}>
               {accents.length
                 ? parts.map((p, pi) =>
@@ -132,7 +156,6 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
 
             {(card as any).subtitle && <div className={styles.cardSubtitle}>{(card as any).subtitle}</div>}
 
-            {/* Website link (black) */}
             {showSite && (
               <div className={styles.siteRow}>
                 <a className={styles.siteLink} href={(card as any).ctaUrl} target="_blank" rel="noreferrer">
@@ -142,10 +165,8 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
               </div>
             )}
 
-            {/* Heading above bullets (Figma) */}
             {bulletHeading && <div className={styles.bulletHeading}>{bulletHeading}</div>}
 
-            {/* Bullets — 2×2 grid when requested/auto */}
             {Array.isArray((card as any).bullets) && (
               <ul className={`${styles.bullets} ${twoColBullets ? styles.bulletsTwoCol : ''}`} style={{ marginTop: 12 }}>
                 {(card as any).bullets.map((b: string, bi: number) => <li key={bi}>{b}</li>)}
@@ -158,7 +179,7 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
     return null;
   }
 
-  /* MEDICAL renderer */
+  /* ---------- MEDICAL ---------- */
   private renderMedicalCard(card: AnyCard, i: number) {
     if (card.type === 'imageCard') {
       const img = (card as any).imageOverride || (card as any).imageUrl;
@@ -200,7 +221,6 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
       );
     }
 
-    /* ===== Contact card with image on top like Figma ===== */
     if (card.type === 'infoCard') {
       const rows: any[] = (card as any).rows || [];
       const pick = (label: string) => rows.find(r => (r.label || '').toLowerCase() === label.toLowerCase());
@@ -213,7 +233,7 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
       const whText = (wh?.value || '').trim();
       const whParts = whText.split(/\s*\((.*)\)\s*$/);
       const whMain = whParts[0] || '';
-      const whTz = whParts[1] ? `(${whParts[1]})` : '';
+      const whTz   = whParts[1] ? `(${whParts[1]})` : '';
 
       return (
         <div key={i} className={`${styles.card} ${styles.col4}`}>
@@ -253,11 +273,9 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
       return (
         <div key={i} className={`${styles.promo} ${styles.col12}`}>
           <div className={styles.promoLeft}>
-            {/* Title black; only <em> (e.g., Almadallah) red */}
             <div className={styles.promoTitle} dangerouslySetInnerHTML={{ __html: b.title }} />
             {b.subtitle && <div className={styles.promoSub}>{b.subtitle}</div>}
 
-            {/* Green checkbox bullets */}
             {Array.isArray(b.bullets) && b.bullets.length > 0 && (
               <ul className={styles.promoBullets}>
                 {b.bullets.map((x: string, xi: number) => (
@@ -297,12 +315,13 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
   render() {
     const { payload, loading, activeTab, error } = this.state;
     const isPriv = activeTab === 'privileges';
-
-    // Figma: top caption for privileges in BLACK
     const privTitle = isPriv ? (this.props.sectionTitlePrivileges || '').trim() : '';
 
     return (
       <div className={styles.wrapper}>
+        {/* Breadcrumb */}
+        <Breadcrumb homeUrl={this.props.homeUrl} />
+
         {/* Segmented tabs */}
         <div className={styles.segWrap}>
           <div className={styles.seg}>

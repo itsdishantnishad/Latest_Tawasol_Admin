@@ -1,6 +1,6 @@
 :root{
   --bg:#FFF4EA;
-  --card:#FEEAD1;              /* peach panel like Figma */
+  --card:#FEEAD1;              
   --ink:#2f2f2f;
   --muted:#666;
   --accent:#DA291C;
@@ -33,6 +33,27 @@
   padding:12px 16px 24px;
   border-radius:12px;
 }
+
+/* ───────── Breadcrumb (Figma) ───────── */
+.breadcrumb{
+  display:flex;align-items:center;gap:12px;
+  margin:0 0 12px;
+}
+.backBtn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:transparent;border:0;cursor:pointer;
+  color:#111;font-weight:600;padding:4px 6px;border-radius:8px;
+}
+.backBtn:hover{ background:rgba(0,0,0,.04); }
+.breadDivider{
+  width:1px;height:18px;background:#d9d3cc;border-radius:1px;
+}
+.linksContainer{
+  display:inline-flex;align-items:center;gap:8px;color:#71767c;font-weight:600;
+}
+.crumbLink{ color:#111; text-decoration:none; }
+.crumbLink:hover{ text-decoration:underline; }
+.crumbCurrent{ color:#5c636a; }
 
 /* ========== Segmented tabs (Figma match) ========== */
 .segWrap{display:flex;justify-content:center;margin:18px 0 24px;}
@@ -103,7 +124,7 @@
 .bullets{margin:10px 0 0;padding-left:22px;color:#1f1f1f;}
 .bullets li::marker{ color: var(--accent); }
 
-/* ✅ two-column bullets (Figma 2 left + 2 right) */
+/* two-column bullets (Figma 2 left + 2 right) */
 .bulletsTwoCol{
   margin-top:10px;
   padding-left:0;
@@ -199,6 +220,5 @@
 .infoBlockText{ font-size:13.5px;color:#454545;margin-bottom:4px; }
 .infoBlockMuted{ font-size:12.5px;color:#7a7a7a; }
 
-/* skeleton */
 .skel{background:#eee;border-radius:12px;animation:pulse 1.4s ease-in-out infinite;}
 @keyframes pulse{0%{opacity:.6}50%{opacity:.3}100%{opacity:.6}}

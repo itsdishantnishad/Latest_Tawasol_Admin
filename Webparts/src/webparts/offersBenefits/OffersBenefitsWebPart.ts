@@ -10,7 +10,6 @@ import {
 import OffersBenefits, { IOffersBenefitsProps } from './components/OffersBenefits';
 
 export interface IOffersBenefitsWebPartProps {
-  // pane fields
   source: 'placeholder' | 'api';
   apiBaseUrl?: string;
   apiMedicalPath?: string;
@@ -19,16 +18,16 @@ export interface IOffersBenefitsWebPartProps {
   maxItems: number;
   placeholderMedical: string;
   placeholderPrivileges: string;
-
-  // ✅ ONLY THIS TITLE REMAINS (Medical removed)
   sectionTitlePrivileges?: string;
+  /** optional breadcrumb home */
+  homeUrl?: string;
 }
 
 export default class OffersBenefitsWebPart
   extends BaseClientSideWebPart<IOffersBenefitsWebPartProps> {
 
   public async onInit(): Promise<void> {
-    // sensible defaults
+    // defaults
     this.properties.source = this.properties.source || 'placeholder';
     this.properties.cacheMinutes = this.properties.cacheMinutes ?? 5;
     this.properties.maxItems = this.properties.maxItems || 12;
@@ -38,9 +37,10 @@ export default class OffersBenefitsWebPart
     this.properties.placeholderPrivileges =
       this.properties.placeholderPrivileges || DEFAULT_PLACEHOLDER_PRIV_JSON;
 
-    // default visible title (only for Privileges tab)
     this.properties.sectionTitlePrivileges =
       this.properties.sectionTitlePrivileges ?? 'Core Direction';
+
+    this.properties.homeUrl = this.properties.homeUrl || '/';
   }
 
   public render(): void {
@@ -58,9 +58,11 @@ export default class OffersBenefitsWebPart
       cacheMinutes: this.properties.cacheMinutes,
       maxItems: this.properties.maxItems,
 
-      // kept for compatibility with component props
-      sectionTitleMedical: '',                   // 🔕 not used anymore
-      sectionTitlePrivileges: this.properties.sectionTitlePrivileges || ''
+      // component props (medical title unused but required by type)
+      sectionTitleMedical: '',
+      sectionTitlePrivileges: this.properties.sectionTitlePrivileges || '',
+
+      homeUrl: this.properties.homeUrl
     };
 
     ReactDom.render(React.createElement(OffersBenefits, props), this.domElement);
@@ -93,10 +95,15 @@ export default class OffersBenefitsWebPart
             {
               groupName: 'Section Titles',
               groupFields: [
-                // ✅ Only this field is shown/used
                 PropertyPaneTextField('sectionTitlePrivileges', {
                   label: 'Privileges tab section title'
                 })
+              ]
+            },
+            {
+              groupName: 'Breadcrumb',
+              groupFields: [
+                PropertyPaneTextField('homeUrl', { label: 'Home URL (breadcrumb)', placeholder: '/' })
               ]
             },
             {
@@ -226,8 +233,3 @@ const DEFAULT_PLACEHOLDER_PRIV_JSON = `{
     }
   ]
 }`;
-
-
-
-
-
