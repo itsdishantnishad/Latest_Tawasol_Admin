@@ -177,6 +177,22 @@
           "manifest": "./src/webparts/profile/ProfileWebPart.manifest.json"
         }
       ]
+    },
+    "onboarding-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/onboarding/OnboardingWebPart.js",
+          "manifest": "./src/webparts/onboarding/OnboardingWebPart.manifest.json"
+        }
+      ]
+    },
+    "offers-benefits-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/offersBenefits/OffersBenefitsWebPart.js",
+          "manifest": "./src/webparts/offersBenefits/OffersBenefitsWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -202,6 +218,8 @@
     "PoliciesAndProceduresViewsWebPartStrings": "lib/webparts/policiesAndProceduresViews/loc/{locale}.js",
     "EventGalleryWebPartStrings": "lib/webparts/eventGallery/loc/{locale}.js",
     "GlobalBannerWebPartStrings": "lib/webparts/globalBanner/loc/{locale}.js",
-    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js"
+    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js",
+    "OnboardingWebPartStrings": "lib/webparts/onboarding/loc/{locale}.js",
+    "OffersBenefitsWebPartStrings": "lib/webparts/offersBenefits/loc/{locale}.js"
   }
 }

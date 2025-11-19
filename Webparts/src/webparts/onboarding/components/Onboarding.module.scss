@@ -1,0 +1,87 @@
+/* Palette & base */
+$bg: #FFEDDC;         /* outer colour */
+$cream: #fff3e6;
+$muted: #6b7280;
+
+.wrap {
+  background: $bg;
+  padding: 64px 24px 88px;
+  display: grid;
+  gap: 24px;
+  justify-items: center;
+}
+
+.header { text-align: center; max-width: 820px; }
+.h1 { margin: 0 0 10px; font: 700 34px/1.2 'Segoe UI', system-ui; color: #2b2b2b; }
+.sub { margin: 0; color: $muted; font: 14px/1.6 'Segoe UI', system-ui; }
+
+/* === Card grid & sizing (fixed as requested) === */
+.grid {
+  width: min(1120px, 100%);
+  display: grid;
+  gap: 20px;                                   /* gap: 20px */
+  grid-template-columns: repeat(3, 290px);     /* fixed 290 width */
+  justify-content: center;
+
+  /* responsive: same design, auto-fit columns */
+  @media (max-width: 959px) { grid-template-columns: repeat(2, 290px); }
+  @media (max-width: 639px) { grid-template-columns: 290px; }
+}
+
+.card {
+  width: 290px;                                /* width: 290 */
+  height: 384px;                               /* height: 384 */
+  display: grid;
+  grid-template-rows: 1fr auto auto;           /* art / title / cap */
+  justify-items: center;
+  text-align: center;
+  background: $cream;
+  border-radius: 18px;
+  padding: 24px 20px;
+  box-shadow: 0 12px 32px rgba(17,24,39,.10);
+  color: #2b2b2b;
+  text-decoration: none;
+  transition: transform .2s, box-shadow .25s;
+
+  &:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(17,24,39,.16); }
+}
+
+.art {
+  width: 100%;
+  height: 260px;                               /* fits in 384 total */
+  border-radius: 14px;
+  overflow: hidden;
+  background: radial-gradient(60% 60% at 50% 40%, #ffd9b3 0%, #ffe9cf 60%, #fff3e6 100%);
+  display: grid;
+  place-items: center;
+
+  img { max-width: 88%; height: auto; filter: drop-shadow(0 6px 10px rgba(0,0,0,.08)); }
+  @media (max-width: 639px) { height: 240px; }
+}
+
+.title { margin: 14px 0 2px; font-weight: 600; font-size: 15px; }
+.cap   { color: $muted; font-size: 12px; }
+
+/* === Carousel dots === */
+.dots { display: flex; gap: 10px; margin-top: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 999px; border: 0; background: #e5e7eb; cursor: pointer; }
+.dotActive { width: 50px; height: 8px; border-radius: 40px; background: #ef4444; } /* 50×8 pill */
+
+/* === CTA button (exact size & gradient) === */
+.ctaRow { margin-top: 8px; }
+.cta {
+  width: 180px; height: 48px;                  /* size per spec */
+  border: 0; border-radius: 167px;             /* radius per spec */
+  padding-right: 12px; padding-left: 12px;     /* per spec */
+  font: 600 14px/1 'Segoe UI', system-ui; color: #fff;
+  background: linear-gradient(180deg, #202D39 0%, #101820 100%); /* #202D39 -> #101820 */
+  box-shadow: 0 10px 24px rgba(2,6,23,.25), inset 0 1px 0 rgba(255,255,255,.08);
+  cursor: pointer; transition: transform .15s, box-shadow .2s;
+
+  &:hover { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(2,6,23,.28); }
+  &:active { transform: translateY(0);    box-shadow: 0 8px 18px rgba(2,6,23,.22); }
+}
+
+/* responsive typography/padding only; layout stays same */
+@media (max-width:1024px){ .wrap{ padding:48px 20px 72px } }
+@media (max-width:767px) { .wrap{ padding:32px 16px 64px } .h1{ font-size:26px } .sub{ font-size:13px } }
