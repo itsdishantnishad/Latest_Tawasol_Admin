@@ -76,7 +76,7 @@ export default class Tiles extends React.Component<ITilesProps> {
               onClick={(e) => { e.preventDefault(); this.handleTileOpen(d.title, d.href); }}
             >
               <div className={styles.supportIcon}>
-                <Image src={d.iconSrc} alt="" imageFit={ImageFit.contain} width={46} height={46} />
+                <Image src={d.iconSrc} alt="" imageFit={ImageFit.contain} />
               </div>
               <div className={styles.supportTitle}>{d.title}</div>
             </Link>

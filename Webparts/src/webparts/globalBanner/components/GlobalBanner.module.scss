@@ -13,6 +13,13 @@
   width: 100%;
   // border-radius: 8px;
   overflow: hidden;   
+  @media (max-width: 900px){
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 350px;
+    border-radius: 30px;
+  }
 }
 
 /* Media fills the inner frame */
@@ -28,6 +35,10 @@
   width: 100%;
   height: auto;
   display: block;
+  @media (max-width: 900px){
+    height: 100%;
+    width: fit-content;
+  }
 }
 
 /* Overlay respects the inner frame, not the outer padding */
@@ -37,7 +48,15 @@
   display: grid;
   place-items: center;
   pointer-events: none;
-  padding: 0 16px;         
+  padding: 0 16px;
+  @media (max-width: 900px){
+    display: grid;
+    inset: 0;
+    padding: 0px 25px;
+    place-items: center;
+    pointer-events: none;
+    position: absolute;
+  }
 }
 
 .textWrap { text-align: center; max-width: 920px; }

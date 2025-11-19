@@ -105,17 +105,19 @@ let  dummyEvents = convertToDummyEvents(props.Allevent, props?.context?._pageCon
             <div className={styles.imageContainer}>
               <img src={event.imageUrl} alt={event.title} />
               <div className={styles.overlay}>
-                <div className={styles.cardContent}>
-                  <h3 className={styles.eventTitle}>
-                    {event.title}
-                    <span className={styles.arrow}>›</span>
-                  </h3>
-                  <div className={styles.cardFooter}>
-                    <span className={styles.imageCount}>
-                      {event.imageCount} images
-                    </span>
-                    <span className={styles.eventDate}>{event.date}</span>
-                  </div>
+                {/* <div className={styles.cardContent}></div> */}
+                <h3 className={styles.eventTitle}>
+                  {event.title}
+                  {/* <span className={styles.arrow}>›</span> */}
+                  <svg className={styles.arrow} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </h3>
+                <div className={styles.cardFooter}>
+                  <span className={styles.imageCount}>
+                    {event.imageCount} images
+                  </span>
+                  <span className={styles.eventDate}>{event.date}</span>
                 </div>
               </div>
             </div>

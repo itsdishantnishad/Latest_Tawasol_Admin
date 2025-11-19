@@ -47,10 +47,9 @@
 
 /* ------------------------------------ Page ------------------------------------ */
 .page {
-  background: var(--pp-bg);
-  padding: 12px clamp(10px, 2vw, 24px) 32px;
-  font-family: 'Inter', sans-serif;
-  color: var(--pp-text);
+  background-color: #fef7f0;
+  font-family: Inter, sans-serif;
+  padding: 30px 60px;
 }
 
 /* ----------------------------------- Banner ----------------------------------- */
@@ -66,26 +65,47 @@
 .bannerSub     { margin:6px 0 0; opacity:.8; max-width:760px; }
 
 /* ------------------------------- Home header row ------------------------------- */
-.homeTopRow { display:grid; grid-template-columns: 1fr 360px; gap: 12px; align-items:center; margin: 6px 0 10px; }
-.sectionHeading { font-size:14px; font-weight:600; }
-.searchHome { justify-self:end; }
+.homeTopRow{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0px
+}
+.sectionHeading {
+  color: #000;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  margin: 30px 0 20px;
+}
+.searchHome{
+  & > div{
+    width: 398px;
+    border-radius: 50px;
+    border: 1px solid #E8E8E8;
+    height: 48px;
+    &:focus{
+      outline: 0;
+    }
+  }
+}
 
 
 /* ------------------------------- Core grid tiles ------------------------------- */
 .coreGrid {
-  display: grid;
-  grid-template-columns: repeat(6, 200px); 
-  column-gap: 24px;
-  row-gap: 20px;   
-  justify-content: start; 
-  margin-bottom: 12px;    
-  justify-content: center;
+  display: flex;
+  justify-content: flex-start;
+  gap: 24px;
+  margin-bottom: 60px;
+  flex-wrap: wrap;
 }
 .coreTile  {
   position: relative;
-  width: 200px; height: 213px; 
+  // width: 200px;
+  height: 300px; 
   border-radius: 12px; overflow: hidden;
   cursor: pointer; 
+  flex: 1;
   @extend %hoverLift; 
   @extend %focusRing;
 
@@ -97,19 +117,53 @@
 .coreThumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .coreCaption {
-  position: absolute; left: 0; right: 0; bottom: 0; color: #fff;
-  padding: 10px 12px;
-  font-size: 12px; font-weight: 600; line-height: 1.6; font-family: 'Inter';
-  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 100%);
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .55));
+  bottom: 0;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  left: 0;
+  line-height: 24px;
+  padding: 10px 15px;
+  position: absolute;
+  right: 0;
 }
 /* ----------------------------- Support grid tiles ----------------------------- */
-.supportGrid { display:grid; grid-template-columns:repeat(6,minmax(160px,1fr)); gap:12px; margin-top:10px; justify-content:center; }
-.supportTile { background: var(--pp-card-accent); border:1px solid var(--pp-border); border-radius:12px; padding:14px 12px; min-height:110px; display:grid; grid-template-rows:46px auto; gap:8px; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; color:#000; text-decoration:none; }
+.supportGrid{
+  align-items: center;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(6, 1fr);
+  justify-content: space-between;
+}
+.supportTile{
+  background: var(--pp-card-accent);
+  border: 1px solid var(--pp-border);
+  border-radius: 12px;
+  width: 100%;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: flex-start;
+  min-height: 250px;
+}
 .supportTile:hover { background: var(--pp-card-soft); color:#000; text-decoration:none; }
 .supportTile:focus, .supportTile:active, .supportTile:visited { color:#000; text-decoration:none; }
-.supportIcon { display:grid; place-items:center; }
-.supportIcon img { width:46px; height:46px; object-fit:contain; }
-.supportTitle { font-size:12px; font-weight:600; color:#000; text-decoration:none; }
+.supportIcon img {
+  width: 100%;
+  padding-left: 18px;
+  padding-top: 24px;
+  object-fit: none;
+}
+.supportTitle{
+  color: #000;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  padding: 24px;
+}
 
 /* ----------------------------------- Boards ----------------------------------- */
 .boards { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:18px; }
@@ -169,21 +223,36 @@
 
 /* --------------------------------- Responsive --------------------------------- */
 @media (max-width: 1600px) {
-  .coreGrid    { grid-template-columns: repeat(6, 200px); }
-  .supportGrid { grid-template-columns: repeat(6, 200px); }
+  .supportGrid { grid-template-columns: repeat(6, 1fr); }
 }
 @media (max-width: 1360px) {
-  .coreGrid    { grid-template-columns: repeat(5, 200px); }
-  .supportGrid { grid-template-columns: repeat(5, 200px); }
+  .supportGrid { grid-template-columns: repeat(5, 1fr); }
+  .coreTile{
+    flex: 1 1 auto;
+  }
 }
 @media (max-width: 1100px) {
-  .coreGrid    { grid-template-columns: repeat(4, 200px); }
-  .supportGrid { grid-template-columns: repeat(4, 200px); }
+  .supportGrid { grid-template-columns: repeat(4, 1fr); }
   .libWrap     { grid-template-columns: 1fr; } 
 }
+
+@media (max-width: 991px) {
+  .supportGrid { grid-template-columns: repeat(3, 1fr); }
+}
+
 @media (max-width: 800px) {
-  .homeTopRow, .topBar { grid-template-columns: 1fr; }
-  .coreGrid, .supportGrid { grid-template-columns: repeat(3, 200px); }
+  .topBar { grid-template-columns: 1fr; }
+  .supportGrid { grid-template-columns: repeat(3, 1fr); }
   .docGrid { grid-template-columns: repeat(3, minmax(180px, 1fr)); }
   .boards { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .homeTopRow{flex-wrap: wrap-reverse;}
+  .searchHome{
+    & > div{
+      width: 100%;
+    }
+  }
+  .supportGrid { grid-template-columns: repeat(2, 1fr); }
 }
