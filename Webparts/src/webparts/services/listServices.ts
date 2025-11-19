@@ -777,6 +777,7 @@ export class listServices {
       if (filters.length) query = query.filter(filters.join(" and "));
 
       if (typeof top === "number" && top > 0) query = query.top(top);
+      if (typeof top === "number" && top > 0) query = query.top(top);
       if (typeof skip === "number" && skip > 0) query = query.skip(skip);
 
       const rows: any[] = await query();
