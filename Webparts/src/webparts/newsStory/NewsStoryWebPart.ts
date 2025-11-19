@@ -3,10 +3,9 @@ import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
   type IPropertyPaneConfiguration,
-  PropertyPaneTextField
+  PropertyPaneTextField,
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-
 
 import * as strings from 'NewsStoryWebPartStrings';
 import NewsStory from './components/NewsStory';
@@ -17,17 +16,16 @@ export interface INewsStoryWebPartProps {
   description: string;
 }
 
-export default class NewsStoryWebPart extends BaseClientSideWebPart<INewsStoryWebPartProps> {
-
-
+export default class NewsStoryWebPart
+  extends BaseClientSideWebPart<INewsStoryWebPartProps> {
 
   public render(): void {
     const element: React.ReactElement<INewsStoryProps> = React.createElement(
       NewsStory,
       {
         interval: 500,
-        context: this.context
-      }
+        context: this.context,
+      },
     );
 
     ReactDom.render(element, this.domElement);
@@ -35,58 +33,63 @@ export default class NewsStoryWebPart extends BaseClientSideWebPart<INewsStoryWe
 
   protected onInit(): Promise<void> {
     return this._getEnvironmentMessage().then(message => {
-      //this._environmentMessage = message;
+      // this._environmentMessage = message;
     });
   }
 
-
-
   private _getEnvironmentMessage(): Promise<string> {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
-          let environmentMessage: string = '';
-          switch (context.app.host.name) {
-            case 'Office': // running in Office
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
-              break;
-            case 'Outlook': // running in Outlook
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
-              break;
-            case 'Teams': // running in Teams
-            case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
-              break;
-            default:
-              environmentMessage = strings.UnknownEnvironment;
-          }
+    if (!!this.context.sdks.microsoftTeams) {
+      return this.context.sdks.microsoftTeams.teamsJs.app.getContext().then(context => {
+        let environmentMessage: string = '';
+        switch (context.app.host.name) {
+          case 'Office':
+            environmentMessage = this.context.isServedFromLocalhost
+              ? strings.AppLocalEnvironmentOffice
+              : strings.AppOfficeEnvironment;
+            break;
+          case 'Outlook':
+            environmentMessage = this.context.isServedFromLocalhost
+              ? strings.AppLocalEnvironmentOutlook
+              : strings.AppOutlookEnvironment;
+            break;
+          case 'Teams':
+          case 'TeamsModern':
+            environmentMessage = this.context.isServedFromLocalhost
+              ? strings.AppLocalEnvironmentTeams
+              : strings.AppTeamsTabEnvironment;
+            break;
+          default:
+            environmentMessage = strings.UnknownEnvironment;
+        }
 
-          return environmentMessage;
-        });
+        return environmentMessage;
+      });
     }
 
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
+    return Promise.resolve(
+      this.context.isServedFromLocalhost
+        ? strings.AppLocalEnvironmentSharePoint
+        : strings.AppSharePointEnvironment,
+    );
   }
 
-
   protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
-      if (!currentTheme) {
-        return;
-      }
-  
-     // this._isDarkTheme = !!currentTheme.isInverted;
-      const {
-        semanticColors
-      } = currentTheme;
-  
-      if (semanticColors) {
-        this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
-        this.domElement.style.setProperty('--link', semanticColors.link || null);
-        this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
-          this.domElement.style.setProperty('--primaryButtonBackground', semanticColors.primaryButtonBackground || null);
-      }
-  
+    if (!currentTheme) {
+      return;
     }
+
+    const { semanticColors } = currentTheme;
+
+    if (semanticColors) {
+      this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
+      this.domElement.style.setProperty('--link', semanticColors.link || null);
+      this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
+      this.domElement.style.setProperty(
+        '--primaryButtonBackground',
+        semanticColors.primaryButtonBackground || null,
+      );
+    }
+  }
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
@@ -101,20 +104,21 @@ export default class NewsStoryWebPart extends BaseClientSideWebPart<INewsStoryWe
       pages: [
         {
           header: {
-            description: strings.PropertyPaneDescription
+            description: strings.PropertyPaneDescription,
           },
           groups: [
             {
               groupName: strings.BasicGroupName,
               groupFields: [
                 PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
-                })
-              ]
-            }
-          ]
-        }
-      ]
+                  label: strings.DescriptionFieldLabel,
+                }),
+              ],
+            },
+          ],
+        },
+      ],
     };
   }
 }
+    
