@@ -33,6 +33,12 @@ moment.updateLocale('en', {
   }
 });
 
+export enum ContentTypeId {
+  NEWS_STORY = "0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E",
+  TRAINING = "0x0101009D1CB255DA76424F860D91F20E6C411800B721B228147AA74E9D35C742E0E4560C",
+  EVENT = "0x0101009D1CB255DA76424F860D91F20E6C41180091B43BD03BCDD947979C2884C4C8FF39"
+}
+
 export type OurValueCard = { id: number; title: string; desc: string; icon?: string; sort: number; };
 export type OrgMember = { id: number; name: string; role: string; level: number; sort: number; photoUrl?: string; user: string; };
 export type OrgDepartment = { name: string; url?: string; };
@@ -115,7 +121,7 @@ export class listServices {
   // eslint-disable-line @typescript-eslint/no-explicit-any
   public async getNewsStory(rowCount?: number): Promise<any[]> {
     let results;
-    const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E0070F67800B7FC224AB6F421620C7A7297*)`;
+    const constraints = `AND ContentTypeId:(${ContentTypeId.NEWS_STORY}*)`;
     try {
       results = await this.sp.search({
         Querytext: "*",
@@ -172,7 +178,7 @@ export class listServices {
   // eslint-disable-line @typescript-eslint/no-explicit-any
   public async getNewsStorybyID(ID?: number): Promise<any[]> {
     let results;
-    const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E0070F67800B7FC224AB6F421620C7A7297*)`;
+    const constraints = `AND ContentTypeId:(${ContentTypeId.NEWS_STORY}*)`;
     try {
       results = await this.sp.search({
         Querytext: "*",
@@ -223,7 +229,7 @@ export class listServices {
   // eslint-disable-line @typescript-eslint/no-explicit-any
   public async getTrainingByID(ID?: number): Promise<any[]> {
     let results;
-    const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B721B228147AA74E9D35C742E0E4560C00B86D6AF04B11174DB95E36FF7ADB455C*)`;
+    const constraints = `AND ContentTypeId:(${ContentTypeId.TRAINING}*)`;
     try {
       results = await this.sp.search({
         Querytext: "*",
@@ -401,7 +407,7 @@ export class listServices {
   // Function to get all trainings
   public async getAllTraining(): Promise<any[]> {
     let results;
-    const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C411800B721B228147AA74E9D35C742E0E4560C00B86D6AF04B11174DB95E36FF7ADB455C*)`;
+    const constraints = `AND ContentTypeId:(${ContentTypeId.TRAINING}*)`;
     try {
       const searchOptions: ISearchQuery = {
         Querytext: "*",
@@ -459,7 +465,7 @@ export class listServices {
   // Function to get all events
   public async getAllEvents(): Promise<any[]> {
     let results;
-    const constraints = `AND ContentTypeId:(0x0101009D1CB255DA76424F860D91F20E6C41180091B43BD03BCDD947979C2884C4C8FF39*)`;
+    const constraints = `AND ContentTypeId:(${ContentTypeId.EVENT}*)`;
     try {
       const searchOptions: ISearchQuery = {
         Querytext: "*",
@@ -549,10 +555,10 @@ export class listServices {
 
       const filters: string[] = [];
       if (typeof categoryId === "number") filters.push(`TIRCategoryIDId eq ${categoryId}`);
-      if (typeof excludeId === "number")   filters.push(`Id ne ${excludeId}`);
+      if (typeof excludeId === "number") filters.push(`Id ne ${excludeId}`);
       if (filters.length) query = query.filter(filters.join(" and "));
 
-      if (typeof top  === "number" && top  > 0) query = query.top(top);
+      if (typeof top === "number" && top > 0) query = query.top(top);
       if (typeof skip === "number" && skip > 0) query = query.skip(skip);
 
       const rows: any[] = await query();
@@ -648,8 +654,8 @@ export class listServices {
       RowLimit: rowLimit,
       TrimDuplicates: true,
       SelectProperties: [
-        'WorkId','Title','Path','FileType','Filename',
-        'LastModifiedTime','DepartmentOWSTEXT','Department','ContentType'
+        'WorkId', 'Title', 'Path', 'FileType', 'Filename',
+        'LastModifiedTime', 'DepartmentOWSTEXT', 'Department', 'ContentType'
       ],
       SortList: [{ Property: 'LastModifiedTime', Direction: 1 /* desc */ }],
     };
@@ -671,8 +677,8 @@ export class listServices {
       RowLimit: rowLimit,
       TrimDuplicates: true,
       SelectProperties: [
-        'WorkId','Title','Path','FileType','Filename',
-        'ViewsLifeTime','DepartmentOWSTEXT','Department','ContentType'
+        'WorkId', 'Title', 'Path', 'FileType', 'Filename',
+        'ViewsLifeTime', 'DepartmentOWSTEXT', 'Department', 'ContentType'
       ],
       SortList: [{ Property: 'ViewsLifeTime', Direction: 1 /* desc */ }],
     };

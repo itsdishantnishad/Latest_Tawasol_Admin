@@ -32,7 +32,7 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context }) => {
           events={calendarEvents}
           startAccessor="start"
           endAccessor="end"
-          onSelectEvent={(event) => setSelectedEvent(events.find((ev: any) => ev.ID === event.ID))}
+          onSelectEvent={(event:any) => setSelectedEvent(events.find((ev: any) => ev.ID === event.ID))}
         />
       </div>
       <Modal
