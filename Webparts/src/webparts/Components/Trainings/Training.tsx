@@ -3,6 +3,7 @@ import styles from "./Training.module.scss";
 import { AllTrainingCard } from "./Card";
 import { LearningLinks } from "./Learningcard";
 import Trainingcard from "./TrainingCard";
+import CalendarViewComponent from "../Events/Calendarview/CalendarView";
 
 interface IAccordionState {
   [key: string]: boolean;
@@ -10,6 +11,8 @@ interface IAccordionState {
 
 export interface ITrainingmoduleProps {
   AllTrainingdata: any[]|undefined;
+  viewtype?: string;
+  context?: any;
 }
 
 
@@ -93,12 +96,13 @@ function mapSharePointTrainingsForAll(data: any[]) {
       isMyTraining: !!item.joiningURL,
       location: item.location?.split("\n\n")[0] || "TBD",
       joinUrl: item.joiningURL || "#",
-
+      Eventtype: "Trainings",
       // TrainingCard props
       startDate: startDateStr,
       endDate: endDateStr,
       subtitle: "",
       time: timeRange,
+      ...item,
     };
   });
 }
@@ -160,12 +164,13 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
       </div>
 
       {/* Courses */}
-      <div className={styles.courseListing}>
-        {activeTab !== "my" ? (
-          // All Trainings - Accordion by month
-          Object.entries(groupedCourses).map(([month, courses]) => (
-            <div key={month} className={styles.monthSection}>
-              <button
+      {props.viewtype === "list" ? (
+        <div className={styles.courseListing}>
+          {activeTab !== "my" ? (
+            // All Trainings - Accordion by month
+            Object.entries(groupedCourses).map(([month, courses]) => (
+              <div key={month} className={styles.monthSection}>
+                <button
                 className={styles.accordionHeader}
                 onClick={() => toggleMonth(month)}
                 aria-expanded={expandedMonths[month]}
@@ -238,6 +243,9 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
           </div>
         </div>
       </div>
+      ) : (
+      <CalendarViewComponent events={mappedTrainings} context={props.context} />
+      )}
     </>
   );
 };
