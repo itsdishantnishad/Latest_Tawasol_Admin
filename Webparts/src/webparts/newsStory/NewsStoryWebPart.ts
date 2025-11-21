@@ -14,6 +14,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 export interface INewsStoryWebPartProps {
   description: string;
+  detailsPageUrl?: string;
 }
 
 export default class NewsStoryWebPart
@@ -23,8 +24,9 @@ export default class NewsStoryWebPart
     const element: React.ReactElement<INewsStoryProps> = React.createElement(
       NewsStory,
       {
-        interval: 500,
+        interval: 500, // existing behavior
         context: this.context,
+        detailsPageUrl: this.properties.detailsPageUrl,
       },
     );
 
@@ -113,6 +115,12 @@ export default class NewsStoryWebPart
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel,
                 }),
+                PropertyPaneTextField('detailsPageUrl', {
+                  label: 'News details page URL',
+                  description:
+                    'Example: SitePages/NewsView.aspx or SitePages/NewsLanding.aspx or full absolute URL',
+                  placeholder: 'SitePages/NewsView.aspx',
+                }),
               ],
             },
           ],
@@ -121,4 +129,3 @@ export default class NewsStoryWebPart
     };
   }
 }
-    

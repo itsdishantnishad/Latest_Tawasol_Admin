@@ -637,50 +637,47 @@ export class listServices {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getDepartmentsByMember(
-    listTitle: string,
-    memberDisplayName: string
-  ): Promise<any[]> {
-    let results: any[] = [];
-    try {
-      results = await this.sp.web.lists.getByTitle(listTitle).items
-        .select(
-          "Id",
-          "Title",
-          "URL",
-          "TIRDepartment",
-          "TaxCatchAll/Term",
-          "TIRDepartmentMember/Title"
-        )
-        .expand("TaxCatchAll,TIRDepartmentMember")();
+    public async getDepartmentsByMember(
+      listTitle: string,
+      memberDisplayName: string
+    ): Promise<OrgDepartment[]> {        // <— note return type: OrgDepartment[]
+      let results: any[] = [];
+      try {
+        results = await this.sp.web.lists.getByTitle(listTitle).items
+          .select(
+            "Id",
+            "Title",
+            "URL",
+            "TIRDepartment",
+            "TaxCatchAll/Term",
+            "TIRDepartmentMember/Title"
+          )
+          .expand("TaxCatchAll,TIRDepartmentMember")();
 
-      const matches = results.filter((item) => {
-        const people: any[] = Array.isArray(item?.TIRDepartmentMember)
-          ? item.TIRDepartmentMember
-          : [];
-        return people.some(
-          (p) =>
-            (p?.Title || "").trim().toLowerCase() ===
-            memberDisplayName.trim().toLowerCase()
-        );
-      });
+        const matches = results.filter((item) => {
+          const people: any[] = Array.isArray(item?.TIRDepartmentMember)
+            ? item.TIRDepartmentMember
+            : [];
+          return people.some(
+            (p) =>
+              (p?.Title || "").trim().toLowerCase() ===
+              memberDisplayName.trim().toLowerCase()
+          );
+        });
 
-      return matches.map((item: any) => {
-        return {
-          id: item.Id,
-          title: item.Title,
-          url: item.URL ? item.URL.Url : "#",
-          department:
-            item.TaxCatchAll && item.TaxCatchAll[0]
-              ? item.TaxCatchAll[0].Term
-              : "#",
-          TIRDepartmentMember: item.TIRDepartmentMember,
-        } as any;
-      });
-    } catch (error) {
-      return Promise.reject(error);
+        // Map into OrgDepartment shape: { name, url? }
+        const mapped: OrgDepartment[] = matches.map((item: any) => ({
+          name: item.Title || "",                       // <- text inside orange box
+          url: item.URL ? item.URL.Url : undefined,    // <- click opens this (if present)
+        }));
+
+        console.log("[TeamOrg] mapped departments", mapped);
+        return mapped;
+      } catch (error) {
+        console.error("[TeamOrg] getDepartmentsByMember error", error);
+        return Promise.reject(error);
+      }
     }
-  }
 
   /** ===== Policies & Procedures: Document Functions (for Landing.tsx) ===== */
 
@@ -907,7 +904,6 @@ export class listServices {
   }
 
   /** ===== Announcement Banner (time-window & timezone aware) ===== */
-
   public async getActiveAnnouncementBannersByListTitle(
     listTitle: string,
     currentDateTime: Date = new Date()
@@ -922,45 +918,49 @@ export class listServices {
 
       const currentLocalMs = currentDateTime.getTime();
 
-      const mappedItems: AnnouncementBannerListItem[] = (sharePointItems ||
-        []).map((rawItem: any) => {
-        const rawIconField = rawItem?.TIRIconURL;
-        const resolvedIconUrl =
-          typeof rawIconField === "string"
-            ? rawIconField
-            : rawIconField?.Url || undefined;
+      const mappedItems: AnnouncementBannerListItem[] = (sharePointItems || [])
+        .map((rawItem: any) => {
+          const rawIconField = rawItem?.TIRIconURL;
+          const resolvedIconUrl =
+            typeof rawIconField === "string"
+              ? rawIconField
+              : rawIconField?.Url || undefined;
 
-        const startIsoRaw = rawItem?.TIREventStartDate
-          ? String(rawItem.TIREventStartDate)
-          : undefined;
-        const endIsoRaw = rawItem?.TIREventEndDate
-          ? String(rawItem.TIREventEndDate)
-          : undefined;
+          const startIsoRaw = rawItem?.TIREventStartDate
+            ? String(rawItem.TIREventStartDate)
+            : undefined;
+          const endIsoRaw = rawItem?.TIREventEndDate
+            ? String(rawItem.TIREventEndDate)
+            : undefined;
 
-        const startIsoLocal = this.toLocalIso(startIsoRaw);
-        const endIsoLocal = this.toLocalIso(endIsoRaw);
+          const startIsoLocal = this.toLocalIso(startIsoRaw);
+          const endIsoLocal = this.toLocalIso(endIsoRaw);
 
-        return {
-          id: Number(rawItem?.Id) || 0,
-          title: rawItem?.Title || "",
-          description: rawItem?.TIRDescription || "",
-          iconUrl: resolvedIconUrl,
-          startIso: startIsoLocal,
-          endIso: endIsoLocal,
-          isActive: Boolean(rawItem?.TIRIsActive),
-        };
-      });
+          return {
+            id: Number(rawItem?.Id) || 0,
+            title: rawItem?.Title || "",
+            description: listServices.toPlainText(rawItem?.TIRDescription || ""),
+            iconUrl: resolvedIconUrl,
+            startIso: startIsoLocal,
+            endIso: endIsoLocal,
+            isActive: Boolean(rawItem?.TIRIsActive),
+          } as AnnouncementBannerListItem;
+        });
 
       const filteredActiveItems = mappedItems.filter((item) => {
         if (!item.isActive) return false;
+
         const startTimestampMs = item.startIso
           ? new Date(item.startIso).getTime()
           : Number.NEGATIVE_INFINITY;
+
         const endTimestampMs = item.endIso
           ? new Date(item.endIso).getTime()
           : Number.POSITIVE_INFINITY;
+
         return (
-          startTimestampMs <= currentLocalMs && currentLocalMs <= endTimestampMs
+          startTimestampMs <= currentLocalMs &&
+          currentLocalMs <= endTimestampMs
         );
       });
 
@@ -971,6 +971,7 @@ export class listServices {
         const rightEndMs = right.endIso
           ? new Date(right.endIso).getTime()
           : Number.POSITIVE_INFINITY;
+
         if (leftEndMs !== rightEndMs) return leftEndMs - rightEndMs;
 
         const leftStartMs = left.startIso
@@ -979,6 +980,7 @@ export class listServices {
         const rightStartMs = right.startIso
           ? new Date(right.startIso).getTime()
           : 0;
+
         return rightStartMs - leftStartMs;
       });
 

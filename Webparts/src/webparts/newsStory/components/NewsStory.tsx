@@ -133,7 +133,14 @@ export default class NewsStory extends React.Component<INewsStoryProps, INewsSto
 
   public render(): React.ReactElement<INewsStoryProps> {
     const webUrl = this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, '');
-    const newsViewUrl = `${webUrl}/SitePages/NewsView.aspx`;
+
+    // Get configured URL from web part property (if any)
+    const configuredUrl = (this.props.detailsPageUrl || '').trim();
+    const newsViewUrl = configuredUrl
+      ? (configuredUrl.startsWith('http')
+          ? configuredUrl
+          : `${webUrl}/${configuredUrl.replace(/^\//, '')}`)
+      : `${webUrl}/SitePages/NewsView.aspx`; // default fallback
 
     return (
       <div className={styles.promotionalBanner}>

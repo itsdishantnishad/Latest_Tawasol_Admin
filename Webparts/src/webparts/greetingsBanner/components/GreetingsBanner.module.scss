@@ -7,7 +7,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px; /* space between text and emoji */
+  gap: 10px;
   padding: 8px 0;
 }
 
@@ -16,27 +16,32 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px; /* comma spacing looks nice */
+  gap: 6px; 
   text-align: center;
-  line-height: 100%;
-  font-size: 36px; /* Figma */
-  font-family: "Figtree", Inter, Arial, sans-serif; /* Fallbacks */
+  line-height: 1.2;  
+
+  font-size: 36px; 
+  font-family: "Figtree", Inter, Arial, sans-serif; 
 }
 
 /* “Good Morning,” part */
 .greetingText {
-  font-weight: 500; /* Medium */
+  font-weight: 500; 
   color: #101820;
 }
 
-/* Name with gradient (DA221C -> E6574C) */
+/* Name with gradient */
 .nameText {
-  font-weight: 600; /* SemiBold */
+  font-weight: 600; 
   background: linear-gradient(180deg, #DA221C 0%, #E6574C 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+
+  /* helps avoid bottom clipping in some browsers */
+  display: inline-block;
+  padding-bottom: 2px;
 }
 
 /* Inline emoji/SVG at the end */
@@ -60,4 +65,101 @@
   line-height: 1.4;
   color: #3A3B43;
   text-align: center;
+}
+/* --------------------------------- Responsive --------------------------------- */
+@media (max-width: 1600px) {
+  .greetingsBannerTitle {
+    font-size: 34px;
+  }
+  .greetingsBannerEmoji {
+    width: 32px;
+    height: 32px;
+
+    > svg {
+      width: 32px;
+      height: 32px;
+    }
+  }
+}
+
+@media (max-width: 1360px) {
+  .greetingsBannerTitle {
+    font-size: 32px;
+  }
+  .greetingsBannerEmoji {
+    width: 30px;
+    height: 30px;
+
+    > svg {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
+
+@media (max-width: 1100px) {
+  .greetingsBannerTitle {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+  .greetingsBannerEmoji {
+    width: 28px;
+    height: 28px;
+
+    > svg {
+      width: 28px;
+      height: 28px;
+    }
+  }
+}
+
+@media (max-width: 991px) {
+  .greetingsBannerTitle {
+    font-size: 26px;
+  }
+  .greetingsBannerEmoji {
+    width: 26px;
+    height: 26px;
+
+    > svg {
+      width: 26px;
+      height: 26px;
+    }
+  }
+}
+
+@media (max-width: 800px) {
+  .greetingsBannerCard {
+    padding: 6px 0;
+  }
+  .greetingsBannerTitle {
+    font-size: 24px;
+  }
+  .greetingsBannerEmoji {
+    width: 24px;
+    height: 24px;
+
+    > svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .greetingsBannerCard {
+    padding: 4px 0;
+  }
+  .greetingsBannerTitle {
+    font-size: 20px;
+  }
+  .greetingsBannerEmoji {
+    width: 22px;
+    height: 22px;
+
+    > svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
 }
