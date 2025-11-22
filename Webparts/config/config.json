@@ -177,6 +177,22 @@
           "manifest": "./src/webparts/profile/ProfileWebPart.manifest.json"
         }
       ]
+    },
+    "announcement-banner-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/announcementBanner/AnnouncementBannerWebPart.js",
+          "manifest": "./src/webparts/announcementBanner/AnnouncementBannerWebPart.manifest.json"
+        }
+      ]
+    },
+    "greetings-banner-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/greetingsBanner/GreetingsBannerWebPart.js",
+          "manifest": "./src/webparts/greetingsBanner/GreetingsBannerWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -202,6 +218,8 @@
     "PoliciesAndProceduresViewsWebPartStrings": "lib/webparts/policiesAndProceduresViews/loc/{locale}.js",
     "EventGalleryWebPartStrings": "lib/webparts/eventGallery/loc/{locale}.js",
     "GlobalBannerWebPartStrings": "lib/webparts/globalBanner/loc/{locale}.js",
-    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js"
+    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js",
+    "AnnouncementBannerWebPartStrings": "lib/webparts/announcementBanner/loc/{locale}.js",
+    "GreetingsBannerWebPartStrings": "lib/webparts/greetingsBanner/loc/{locale}.js"
   }
 }
