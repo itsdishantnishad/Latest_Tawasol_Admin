@@ -67,22 +67,22 @@ export default class TeamOrganisationStructure
     }
   }
 
-private onCardClick = (member: OrgMember): void => {
-      this.setState(current =>
-        current.selectedId === member.id
-          ? { departments: depts, loadingDepts: false }
-          : current
-      );
-    } catch (e) {
-      console.error("[TeamOrg] error loading departments", e);
-      this.setState(current =>
-        current.selectedId === member.id
-          ? { departments: [], loadingDepts: false }
-          : current
-      );
-    }
-  });
-};
+  private onCardClick = (member: OrgMember): void => {
+    //     this.setState(current =>
+    //       current.selectedId === member.id
+    //         ? { departments: depts, loadingDepts: false }
+    //         : current
+    //     );
+    //   } catch (e) {
+    //     console.error("[TeamOrg] error loading departments", e);
+    //     this.setState(current =>
+    //       current.selectedId === member.id
+    //         ? { departments: [], loadingDepts: false }
+    //         : current
+    //     );
+    //   }
+    // });
+  };
 
 
   public render(): React.ReactElement<ITeamOrganisationStructureProps> {
