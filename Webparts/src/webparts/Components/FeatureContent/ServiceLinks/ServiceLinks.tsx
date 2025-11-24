@@ -2,7 +2,7 @@ import * as React from 'react';
 import styles from './ServiceLinks.module.scss';
 
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
-import { AppsAndLinks } from '../../AppsAndLinks/AppsAndLinks';
+import AppsAndLinks  from '../../AppsAndLinks/AppsAndLinks';
 import { listServices } from '../../../services/listServices';
 
 const jiraIcon: string = require("../../../featureWheel/images/jira.png");
@@ -231,7 +231,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
     return (
         <div className={styles.serviceLinksContainer}>
             {/* Circular Services Layout with Navigation */}
-            <AppsAndLinks savedApps={data} hideAppsAndLinks={hideAppsAndLinks} isHidden={isHidden} />
+            <AppsAndLinks savedApps={data} hideAppsAndLinks={hideAppsAndLinks} isHidden={isHidden} context={props.context} />
 
             <div className={styles.wheelWrapper}>
                 <button className={styles.navButton} onClick={handlePrev}>

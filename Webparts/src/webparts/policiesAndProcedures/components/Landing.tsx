@@ -11,7 +11,8 @@ import { ListName } from '../../services/Constants';
 
 export interface ILandingProps { title: string; context: WebPartContext; }
 
-export interface CategoryItem {
+/** Core function tile model */
+export interface FunctionCategory {
   key: string;
   title: string;
   imageSrc?: string;
@@ -19,59 +20,96 @@ export interface CategoryItem {
   svgMarkup?: string;
   href?: string;
 }
-export interface DepartmentItem {
+
+/** Support function tile model */
+export interface SupportDepartment {
   key: string;
   title: string;
   iconSrc: string;
   href?: string;
 }
 
-interface LandingState {
-  searchQuery: string;
-  coreFunctionTiles: CategoryItem[];
-  supportFunctionTiles: DepartmentItem[];
-  activeFunctionDisplayName?: string;
+interface LandingViewState {
+  searchText: string;
+  coreFunctionCards: FunctionCategory[];
+  supportFunctionCards: SupportDepartment[];
+  activeFunctionName?: string;
+  // FUTURE: keep href for deep-linking
+  // activeFunctionHref?: string;
 }
 
-export default class Landing extends React.Component<ILandingProps, LandingState> {
-  public state: LandingState = { searchQuery: '', coreFunctionTiles: [], supportFunctionTiles: [] };
+export default class Landing extends React.Component<ILandingProps, LandingViewState> {
+  public state: LandingViewState = {
+    searchText: '',
+    coreFunctionCards: [],
+    supportFunctionCards: []
+  };
 
-  private handleSearchChange = (_?: any, newValue?: string): void =>
-    this.setState({ searchQuery: newValue || '' });
+  /** On-type search handler */
+  private handleSearchInputChange = (_?: any, newValue?: string): void =>
+    this.setState({ searchText: newValue || '' });
 
+  /** Load Core/Support function directories for tiles */
   public async componentDidMount(): Promise<void> {
-    const service = new listServices(this.props.context);
-    const functionRows: DocumentFunctionRow[] = await service.getDocumentFunctions(ListName.DOCUMENT_FUNCTION);
+    const svc = new listServices(this.props.context);
+    const functionDirectory: DocumentFunctionRow[] =
+      await svc.getDocumentFunctions(ListName.DOCUMENT_FUNCTION);
 
-    const coreTiles = functionRows
+    const coreFunctionCards: FunctionCategory[] = functionDirectory
       .filter(row => (row.functionType || '').toLowerCase() === 'core function')
-      .map(row => ({ key: String(row.id), title: row.title, imageSrc: row.iconUrl, href: row.targetUrl } as CategoryItem));
+      .map(row => ({
+        key: String(row.id),
+        title: row.title,
+        imageSrc: row.iconUrl,
+        href: row.targetUrl
+      }));
 
-    const supportTiles = functionRows
+    const supportFunctionCards: SupportDepartment[] = functionDirectory
       .filter(row => (row.functionType || '').toLowerCase() === 'support function')
-      .map(row => ({ key: String(row.id), title: row.title, iconSrc: row.iconUrl || '', href: row.targetUrl } as DepartmentItem));
+      .map(row => ({
+        key: String(row.id),
+        title: row.title,
+        iconSrc: row.iconUrl || '',
+        href: row.targetUrl
+      }));
 
-    this.setState({ coreFunctionTiles: coreTiles, supportFunctionTiles: supportTiles });
+    this.setState({ coreFunctionCards, supportFunctionCards });
   }
 
-  private openFunctionView = (functionDisplayName: string): void =>
-    this.setState({ activeFunctionDisplayName: functionDisplayName });
+  /** CURRENT: open the internal ViewPage (by display name) */
+  private showFunctionDetailView = (functionDisplayName: string /*, href?: string*/): void => {
+    // FUTURE — navigate to target URL instead:
+    // if (href) { window.location.assign(href); return; }
 
-  private exitFunctionView = (): void =>
-    this.setState({ activeFunctionDisplayName: undefined });
+    this.setState({
+      activeFunctionName: functionDisplayName
+      // , activeFunctionHref: href
+    });
+  };
+
+  /** Close detail view and return to tiles landing */
+  private closeFunctionDetailView = (): void =>
+    this.setState({ activeFunctionName: undefined /*, activeFunctionHref: undefined */ });
 
   public render(): React.ReactElement<ILandingProps> {
-    const { searchQuery, coreFunctionTiles, supportFunctionTiles, activeFunctionDisplayName } = this.state;
+    const {
+      searchText,
+      coreFunctionCards,
+      supportFunctionCards,
+      activeFunctionName
+    } = this.state;
 
-    if (activeFunctionDisplayName) {
+    if (activeFunctionName) {
       return (
         <PoliciesandProceduresView
           context={this.props.context}
-          functionDisplayName={activeFunctionDisplayName}
-          onBackToLanding={this.exitFunctionView}
-          // Turn these on in client env:
-          // useSharePointProvider
-          // dmsLibraryRoot="/sites/Intranet/DMS"
+          functionDisplayName={activeFunctionName}
+          onBackToLanding={this.closeFunctionDetailView}
+          /*
+            FUTURE — enable real DMS provider in client env:
+            useSharePointProvider={true}
+            dmsLibraryRoot="/sites/Intranet/DMS"
+          */
         />
       );
     }
@@ -81,33 +119,35 @@ export default class Landing extends React.Component<ILandingProps, LandingState
         <div className={styles.homeTopRow}>
           <div className={styles.sectionHeading}>Core Function</div>
           <div className={styles.searchHome}>
-            <SearchBox placeholder="Search Documents" onChange={this.handleSearchChange} />
+            <SearchBox placeholder="Search Documents" onChange={this.handleSearchInputChange} />
           </div>
         </div>
 
         <Tiles
           variant="core"
-          categories={coreFunctionTiles}
+          categories={coreFunctionCards}
           departments={[]}
-          searchText={searchQuery}
-          onOpen={this.openFunctionView}
+          searchText={searchText}
+          onOpenFunctionView={this.showFunctionDetailView /* FUTURE: extend to (title, href) */}
         />
 
         <div className={styles.sectionHeading} style={{ marginTop: 12 }}>Support Function</div>
         <Tiles
           variant="support"
           categories={[]}
-          departments={supportFunctionTiles}
-          searchText={searchQuery}
-          onOpen={this.openFunctionView}
+          departments={supportFunctionCards}
+          searchText={searchText}
+          onOpenFunctionView={this.showFunctionDetailView /* FUTURE: extend to (title, href) */}
         />
 
         <div style={{ marginTop: 18 }} />
         <Boards
-          // Flip these ON in client env when DMS/search must be live:
-          // useSharePointProvider={true}
-          // dmsLibraryRoot="/sites/Intranet/DMS"
           context={this.props.context}
+          /*
+            FUTURE — switch Boards to live data:
+            useSharePointProvider={true}
+            dmsLibraryRoot="/sites/Intranet/DMS"
+          */
         />
       </div>
     );

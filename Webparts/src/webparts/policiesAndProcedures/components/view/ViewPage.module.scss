@@ -1,7 +1,7 @@
 /* ================= Layout ================= */
 .wrap {
   display: grid;
-  grid-template-columns: 1fr 420px;
+  grid-template-columns: 1fr 620px;
   gap: 14px;
   align-items: stretch; /* keep */
 }
@@ -174,7 +174,7 @@
   background: var(--pp-card-accent-2);
   border: 1px solid var(--pp-border);
   border-radius: 12px;
-  padding: 16px;
+  padding: 5px;
   /* min-height: 260px;  REMOVE */
   height: 100%;                   /* NEW: fill column height */
   display: grid;
