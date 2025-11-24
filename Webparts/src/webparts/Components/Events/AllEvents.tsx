@@ -7,12 +7,12 @@ import CalendarViewComponent from "./Calendarview/CalendarView";
 export interface IAlleventsProps {
   AllEventItems:any;
   context?: any;
+  viewtype?: string;
 }
 
 const AllEvents: React.FC<IAlleventsProps> = (props) => {
   const now = new Date();
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
-  const [viewType, setViewType] = React.useState<"list" | "calendar">("list");
 
   const parsedEvents = React.useMemo(() => {
     const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -41,6 +41,7 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
         eventDateTime: eventStart,
         isregistered: !!item.isRegistered,
         ID: item.ID,
+        Eventtype: "Events",
         context: props.context,
         ...item
       };
@@ -65,20 +66,8 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
         </div>
       </div>
 
-      {activeTab === "all" && (
-        <div className={styles.viewSwitchContainer} style={{margin:"20px 0"}}>
-          <button className={`${styles.tabButton} ${viewType === "list" ? styles.activeTab : ""}`} onClick={() => setViewType("list")}>
-            List View
-          </button>
-
-          <button className={`${styles.tabButton} ${viewType === "calendar" ? styles.activeTab : ""}`} onClick={() => setViewType("calendar")}>
-            Calendar
-          </button>
-        </div>
-      )}
-
       {activeTab === "all" ? (
-        viewType === "list" ? (
+        props.viewtype === "list" ? (
           <div className={styles.eventsContainer}>
             <div className={styles.eventsWrapper}>
               {upcomingEvents.length > 0 ? (
