@@ -69,6 +69,12 @@ const features: Feature[] = [
         subtitle: "Grow skills, unlock new doors",
         icon: "",
     },
+    {
+        id: "about_dhre",
+        title: "About DHRE",
+        subtitle: "Journey through DHRE",
+        icon: "",
+    },
 ];
 
 interface FeatureWheelProps {
@@ -120,6 +126,7 @@ const Wheel: React.FC<FeatureWheelProps> = ({ onFeatureSelect, selectedFeature }
         dashboard: styles.dashboardCard,
         offers: styles.offersCard,
         training: styles.trainingCard,
+        about_dhre: styles.aboutDhreCard
     };
 
     return (
