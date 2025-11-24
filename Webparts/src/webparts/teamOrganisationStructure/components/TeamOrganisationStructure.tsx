@@ -55,9 +55,11 @@ export default class TeamOrganisationStructure
         departments: []
       });
 
-      const sourceList = this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
+      const sourceList =
+        this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
       const members = await this.spService.getOrganisationMembers(sourceList);
 
+      console.log("[TeamOrg] members", members);
       this.setState({ items: members, loading: false });
     } catch (err: any) {
       this.setState({
@@ -67,32 +69,83 @@ export default class TeamOrganisationStructure
     }
   }
 
-private onCardClick = (member: OrgMember): void => {
-      this.setState(current =>
-        current.selectedId === member.id
-          ? { departments: depts, loadingDepts: false }
-          : current
-      );
-    } catch (e) {
-      console.error("[TeamOrg] error loading departments", e);
-      this.setState(current =>
-        current.selectedId === member.id
-          ? { departments: [], loadingDepts: false }
-          : current
-      );
-    }
-  });
-};
+  private onCardClick = (member: OrgMember): void => {
+      // Step 1 – update selection and show "Loading departments…"
+      this.setState(
+        (prev) => {
+          const isSamePerson = prev.selectedId === member.id;
 
+          // If clicking again on the same person, unselect them
+          if (isSamePerson) {
+            return {
+              selectedId: null,
+              selectedLevel: null,
+              departments: [],
+              loadingDepts: false,
+            };
+          }
+
+          // New selected person
+          return {
+            selectedId: member.id,
+            selectedLevel: member.level,
+            departments: [],      // clear previous departments
+            loadingDepts: true,   // show loading for this click
+          };
+        },
+        async () => {
+          // Step 2 – after state is updated, actually load departments
+          const { selectedId } = this.state;
+
+          // if user just un-selected, do nothing
+          if (!selectedId) {
+            return;
+          }
+
+          // we use the People column *display name* as the join key
+          const key = (member.user || "").trim();
+          if (!key) {
+            console.warn("[TeamOrg] selected member has no user title", member);
+            this.setState({ departments: [], loadingDepts: false });
+            return;
+          }
+
+          try {
+            const deptList =
+              (this.props.deptListTitle || ListName.TEAM_ORG_DEPARTMENTS).trim();
+
+            console.log("[TeamOrg] loading departments for:", key, "from list:", deptList);
+
+            const depts = await this.spService.getDepartmentsByMember(
+              deptList,
+              key
+            );
+
+            console.log("[TeamOrg] departments loaded:", depts);
+
+            this.setState({
+              departments: depts,
+              loadingDepts: false,
+            });
+          } catch (error) {
+            console.error("[TeamOrg] failed to load departments", error);
+            this.setState({
+              departments: [],
+              loadingDepts: false,
+            });
+          }
+        }
+      );
+  };
 
   public render(): React.ReactElement<ITeamOrganisationStructureProps> {
     const { items, loading, error, selectedLevel } = this.state;
 
-    const rootMember = items.find(m => m.level === 0);
-    const nonRoot = items.filter(m => m.level !== 0);
+    const rootMember = items.find((m) => m.level === 0);
+    const nonRoot = items.filter((m) => m.level !== 0);
 
     const membersByLevel: Record<number, OrgMember[]> = {};
-    nonRoot.forEach(m => (membersByLevel[m.level] ||= []).push(m));
+    nonRoot.forEach((m) => (membersByLevel[m.level] ||= []).push(m));
     const orderedLevels = Object.keys(membersByLevel)
       .map(Number)
       .sort((l, r) => l - r);
@@ -115,10 +168,10 @@ private onCardClick = (member: OrgMember): void => {
               </div>
             )}
 
-            {orderedLevels.map(level => (
+            {orderedLevels.map((level) => (
               <React.Fragment key={level}>
                 <div className={styles.row}>
-                  {membersByLevel[level].map(person => (
+                  {membersByLevel[level].map((person) => (
                     <React.Fragment key={person.id}>
                       {this.renderCard(person, false)}
                     </React.Fragment>
@@ -151,18 +204,26 @@ private onCardClick = (member: OrgMember): void => {
           styles.card,
           isRoot ? styles.cardLg : "",
           isSelected ? styles.cardSelected : ""
-        ].join(" ")}
+        ]
+          .filter(Boolean)
+          .join(" ")}
       >
         <div className={styles.photoWrap}>
           {member.photoUrl ? (
-            <img className={styles.photo} src={member.photoUrl} alt={member.name} />
+            <img
+              className={styles.photo}
+              src={member.photoUrl}
+              alt={member.name}
+            />
           ) : (
             <div className={styles.photoFallback} aria-label="No image" />
           )}
         </div>
 
         <div
-          className={`${styles.accent} ${isRoot ? styles.accentCenter : ""}`}
+          className={`${styles.accent} ${
+            isRoot ? styles.accentCenter : ""
+          }`}
           aria-hidden
         />
         <div className={styles.name}>{member.name}</div>
@@ -170,7 +231,6 @@ private onCardClick = (member: OrgMember): void => {
       </div>
     );
   }
-
 
   private renderDepartmentsBand(): JSX.Element {
     const { departments, loadingDepts } = this.state;
