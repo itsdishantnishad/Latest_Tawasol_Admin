@@ -69,7 +69,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0px
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  @media (max-width: 991px){
+    display: block;
+  }
 }
 .sectionHeading {
   color: #000;
@@ -84,6 +88,9 @@
     border-radius: 50px;
     border: 1px solid #E8E8E8;
     height: 48px;
+    @media (max-width: 991px){
+      width: 100%;
+    }
     &:focus{
       outline: 0;
     }
@@ -93,11 +100,19 @@
 
 /* ------------------------------- Core grid tiles ------------------------------- */
 .coreGrid {
-  display: flex;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
   gap: 24px;
   margin-bottom: 60px;
-  flex-wrap: wrap;
+  @media (max-width: 991px){
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 640px){
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 480px){
+    grid-template-columns: 1fr;
+  }
 }
 .coreTile  {
   position: relative;
@@ -130,11 +145,19 @@
 }
 /* ----------------------------- Support grid tiles ----------------------------- */
 .supportGrid{
-  align-items: center;
   display: grid;
-  gap: 24px;
   grid-template-columns: repeat(6, 1fr);
-  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 60px;
+  @media (max-width: 991px){
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 640px){
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 480px){
+    grid-template-columns: 1fr;
+  }
 }
 .supportTile{
   background: var(--pp-card-accent);
@@ -166,8 +189,21 @@
 }
 
 /* ----------------------------------- Boards ----------------------------------- */
-.boards { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-top:18px; }
-.board  { @extend %tileCard; padding:12px; }
+.boards {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  @media (max-width: 991px){
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+.board  {
+  padding: 12px;
+  flex: 1 1 33.33%;
+  @media (max-width: 991px){
+
+  }
+}
 .boardTitle { font-weight:600; margin-bottom:6px; font-size:13px; }
 .boardList { list-style:none; padding:0; margin:0; }
 .boardList li { display:grid; grid-template-columns: 12px 1fr auto; gap:8px; padding:8px 0; border-top:1px dashed var(--pp-border-dash); }
