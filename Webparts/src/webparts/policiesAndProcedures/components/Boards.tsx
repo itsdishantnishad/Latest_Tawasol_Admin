@@ -6,9 +6,20 @@ import { listServices, DocumentSummary } from '../../services/listServices';
 type BoardItem = DocumentSummary;
 
 interface IBoardsProps {
+  /** Pass context to enable live SharePoint data. If omitted, component shows placeholders. */
   context?: WebPartContext;
-  useSharePointProvider?: boolean;   // default false
-  dmsLibraryRoot?: string;           // e.g. "/sites/Intranet/DMS"
+
+  /** Force using SharePoint provider (default: auto = true when context exists) */
+  useSharePointProvider?: boolean;
+
+  /** DMS library root (server-relative path). Example: "/sites/Intranet/DMS" */
+  dmsLibraryRoot?: string;
+
+  /** How many items to show in "Recently Updated" (default 6) */
+  recentlyCount?: number;
+
+  /** How many items to show in "Most Used in DHRE" (default 6) */
+  mostUsedCount?: number;
 }
 
 interface IBoardsState {
@@ -26,10 +37,14 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
     favourites: []
   };
 
+  private _mounted = false;
+
   public async componentDidMount(): Promise<void> {
+    this._mounted = true;
+
     // Dummy favourites (until Like feature is wired)
     const dummyFavs: BoardItem[] = [
-      { id: 'f1', name: 'Performance Management', ext: 'docx', tag: 'Documents', dept: 'GRC' },
+      { id: 'f1', name: 'Performance Management',                   ext: 'docx', tag: 'Documents',          dept: 'GRC' },
       { id: 'f2', name: 'Addendum to HC Policy Manual Reference….', ext: 'pptx', tag: 'Awareness Sessions', dept: 'GRC' },
       { id: 'f3', name: 'Addendum to HC Policy Manual Reference….', ext: 'pdf',  tag: 'Forms',              dept: 'GRC' },
     ];
@@ -38,21 +53,48 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
       id: `p${i}`, name: `Sample document ${i + 1}.pdf`, dept: 'GRC'
     }));
 
-    if (!this.props.useSharePointProvider || !this.props.context) {
-      this.setState({ loading: false, recently: placeholders, mostUsed: placeholders.slice(0, 4), favourites: dummyFavs });
+    const recentlyCount = this.props.recentlyCount ?? 6;
+    const mostUsedCount = this.props.mostUsedCount ?? 6;
+
+    // Auto enable SP provider when context exists unless explicitly disabled
+    const useSP = (this.props.useSharePointProvider ?? !!this.props.context) && !!this.props.context;
+
+    if (!useSP) {
+      if (this._mounted) {
+        this.setState({
+          loading: false,
+          recently: placeholders,
+          mostUsed: placeholders.slice(0, Math.min(4, mostUsedCount)),
+          favourites: dummyFavs
+        });
+      }
       return;
     }
 
     try {
-      const svc = new listServices(this.props.context);
+      const svc = new listServices(this.props.context!);
       const [recently, mostUsed] = await Promise.all([
-        svc.getRecentlyUpdatedDocuments(this.props.dmsLibraryRoot || '/sites/Intranet/DMS', 6),
-        svc.getMostUsedDocumentsOnSite(6)
+        svc.getRecentlyUpdatedDocuments(this.props.dmsLibraryRoot || '/sites/Intranet/DMS', recentlyCount),
+        svc.getMostUsedDocumentsOnSite(mostUsedCount)
       ]);
-      this.setState({ loading: false, recently, mostUsed, favourites: dummyFavs });
+
+      if (this._mounted) {
+        this.setState({ loading: false, recently, mostUsed, favourites: dummyFavs });
+      }
     } catch {
-      this.setState({ loading: false, recently: placeholders, mostUsed: placeholders.slice(0, 4), favourites: dummyFavs });
+      if (this._mounted) {
+        this.setState({
+          loading: false,
+          recently: placeholders,
+          mostUsed: placeholders.slice(0, Math.min(4, mostUsedCount)),
+          favourites: dummyFavs
+        });
+      }
     }
+  }
+
+  public componentWillUnmount(): void {
+    this._mounted = false;
   }
 
   private renderSimpleList = (title: string, items: BoardItem[]) => (

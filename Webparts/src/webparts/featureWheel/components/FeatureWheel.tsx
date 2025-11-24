@@ -13,6 +13,7 @@ import Dashboard from '../../Components/FeatureContent/Dashboard/Dashboard';
 import Offers from '../../Components/FeatureContent/Offers/Offers';
 import Training from '../../Components/FeatureContent/Training/Training';
 import styles from './FeatureWheel.module.scss';
+import AboutDHRE from '../../Components/FeatureContent/AboutDHRE/AboutDHRE';
 
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
@@ -78,6 +79,10 @@ const featureTitleContent: Record<string, { header: string, subHeader: string }>
   training: {
     header: "Enroll Yourself in Upcoming Trainings",
     subHeader: "Grow your skills with tailored learning sessions"
+  },
+  about_dhre: {
+    header: "About DHRE",
+    subHeader: "Dive deep into DHRE: Our departments, culture, and core values."
   }
 }
 
@@ -102,7 +107,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
       case 'meetings':
         return <Meeting seeAllURL={props.meeting} onViewAll={handleViewAll} />;
       case 'service_links':
-        return <ServiceLinks onViewAll={handleViewAll} />;
+        return <ServiceLinks context={props.context} />;
       case 'forms':
         return <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />;
       case 'dashboard':
@@ -111,6 +116,8 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
         return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
       case 'training':
         return <Training seeAllURL={props.trainingAndDevelopment} onViewAll={handleViewAll} />;
+      case 'about_dhre':
+        return <AboutDHRE />;
     }
   };
 

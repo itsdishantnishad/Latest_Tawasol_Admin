@@ -4,10 +4,41 @@ import type { IMoreForYouProps } from './IMoreForYouProps';
 import { listServices } from '../../services/listServices';
 import moment from 'moment';
 
+// SVGs from shared constants
+import {
+  AnnouncementIconSVG,
+  ArroundTheWorldIconSVG,
+  DHREIconSVG,
+  HumanCapitalSVG,
+  GovernanceRiskandComplianceSVG,
+  HealthSafetyEnvironmentSVG,
+  ProcurementSVG,
+} from '../../assets/constants';
+
 export interface IMoreForYouState {
   relatedNews: any[];
   animate: boolean;
 }
+
+// Helper: convert SVG string → data URI so we can use as background-image
+const svgToDataUri = (svg: string): string =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
+// Category icons mapped by normalized key
+const categoryIconSrcByKey: Record<string, string> = {
+  announcement: svgToDataUri(AnnouncementIconSVG),
+  around_the_world: svgToDataUri(ArroundTheWorldIconSVG),
+  dhre_stories: svgToDataUri(DHREIconSVG),
+};
+
+// Department icons mapped by normalized key
+const departmentIconSrcByKey: Record<string, string> = {
+  human_capital: svgToDataUri(HumanCapitalSVG),
+  governance_risk_and_compliance: svgToDataUri(GovernanceRiskandComplianceSVG),
+  health_safety_environment: svgToDataUri(HealthSafetyEnvironmentSVG),
+  procurement_and_admin: svgToDataUri(ProcurementSVG),
+  procurement_admin: svgToDataUri(ProcurementSVG), // alias
+};
 
 export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreForYouState> {
   private spService: listServices;
@@ -22,7 +53,11 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
   public async componentDidMount(): Promise<void> {
     const listItems = await this.spService.getNewsStory();
     this.setState({ relatedNews: listItems, animate: true });
-    this.animationTimeout = window.setTimeout(() => this.setState({ animate: false }), 900) as unknown as number;
+
+    this.animationTimeout = window.setTimeout(
+      () => this.setState({ animate: false }),
+      900
+    ) as unknown as number;
   }
 
   public componentWillUnmount(): void {
@@ -38,28 +73,34 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
 
         <div className={`${styles.grid} ${animate ? styles.animateIn : ''}`}>
           {relatedNews?.map((news: any) => {
-            const categoryKey = String(news.newsType || '').toLowerCase().trim().replace(/\s+/g, '_');
-            const categoryClassByKey: Record<string, string | undefined> = {
-              announcement: styles.cat_announcement,
-              around_the_world: styles.cat_around_the_world,
-              dhre_stories: styles.cat_dhre_stories,
-            };
-            const showDepartment = categoryKey === 'announcement' || categoryKey === 'dhre_stories';
+            // ----- category key normalisation -----
+            const categoryKey = String(news.newsType || '')
+              .toLowerCase()
+              .trim()
+              .replace(/\s+/g, '_');
 
+            const showDepartment =
+              categoryKey === 'announcement' || categoryKey === 'dhre_stories';
+
+            // ----- department key normalisation -----
             const departmentKey = String(news.department || '')
-              .toLowerCase().trim().replace(/[&＆]/g, 'and')
-              .replace(/[^a-z0-9\s_]/g, '').replace(/\s+/g, '_');
+              .toLowerCase()
+              .trim()
+              .replace(/[&＆]/g, 'and')
+              .replace(/[^a-z0-9\s_]/g, '')
+              .replace(/\s+/g, '_');
 
-            const departmentClassByKey: Record<string, string | undefined> = {
-              human_capital: styles.dept_hc,
-              governance_risk_and_compliance: styles.dept_grc,
-              health_safety_environment: styles.dept_hse,
-              procurement_and_admin: styles.dept_proc,
-              procurement_admin: styles.dept_proc,
+            const handleOpen = () => {
+              if (news?.path) window.location.href = String(news.path);
             };
 
-            const handleOpen = () => { if (news?.path) window.location.href = String(news.path); };
-            const publishedHuman = news.publishedISO ? moment(news.publishedISO).fromNow() : undefined;
+            const publishedHuman = news.publishedISO
+              ? moment(news.publishedISO).fromNow()
+              : undefined;
+
+            // Resolve icon sources from maps
+            const categoryIconSrc = categoryIconSrcByKey[categoryKey];
+            const departmentIconSrc = departmentIconSrcByKey[departmentKey];
 
             return (
               <article
@@ -79,10 +120,16 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
                 </div>
 
                 <div className={styles.contentOverlay}>
+                  {/* Category icon – now using inline backgroundImage from constants.ts */}
                   <span
-                    className={`${styles.badge} ${styles.categoryIcon} ${categoryClassByKey[categoryKey] || ''}`}
+                    className={`${styles.badge} ${styles.categoryIcon}`}
                     aria-label={news.newsType}
                     title={news.newsType}
+                    style={
+                      categoryIconSrc
+                        ? { backgroundImage: `url("${categoryIconSrc}")` }
+                        : undefined
+                    }
                   />
 
                   <div className={styles.bottom}>
@@ -91,19 +138,33 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
                     <div className={styles.metaRow}>
                       {showDepartment && news.department && (
                         <span className={`${styles.metaItem} ${styles.dept}`}>
-                          <span className={`${styles.deptIcon} ${departmentClassByKey[departmentKey] || ''}`} aria-hidden="true" />
+                          <span
+                            className={styles.deptIcon}
+                            aria-hidden="true"
+                            style={
+                              departmentIconSrc
+                                ? { backgroundImage: `url("${departmentIconSrc}")` }
+                                : undefined
+                            }
+                          />
                           {news.department}
                         </span>
                       )}
 
-                      {publishedHuman && <span className={styles.metaItem}>{publishedHuman}</span>}
+                      {publishedHuman && (
+                        <span className={styles.metaItem}>{publishedHuman}</span>
+                      )}
 
                       {typeof news.readTime === 'number' && news.readTime > 0 && (
-                        <span className={styles.metaItem}>{news.readTime} min read</span>
+                        <span className={styles.metaItem}>
+                          {news.readTime} min read
+                        </span>
                       )}
 
                       {typeof news.pageView === 'number' && (
-                        <span className={styles.metaItem}>{news.pageView} Views</span>
+                        <span className={styles.metaItem}>
+                          {news.pageView} Views
+                        </span>
                       )}
                     </div>
                   </div>

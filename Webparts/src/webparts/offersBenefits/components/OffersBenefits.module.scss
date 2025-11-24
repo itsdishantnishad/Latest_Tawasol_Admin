@@ -1,0 +1,224 @@
+:root{
+  --bg:#FFF4EA;
+  --card:#FEEAD1;              
+  --ink:#2f2f2f;
+  --muted:#666;
+  --accent:#DA291C;
+
+  /* rail + pill (Figma) */
+  --rail-bg:#fff7f0;
+  --rail-border:#efb77c;
+  --rail-shadow:0 18px 28px rgba(239,183,124,.18);
+
+  --pill-a:#f6c894;
+  --pill-b:#e4a668;
+  --pill-inner:#d99658;
+  --pill-shadow:0 8px 18px rgba(217,153,90,.28);
+
+  /* explicit heights so 4 privilege cards look different */
+  --priv-top-h:360px;
+  --priv-bot-h:260px;
+
+  /* CTA */
+  --cta-bg:#0d1115;
+
+  /* checks (banner bullets) */
+  --check-bg:#138a3b;
+  --check-tick:#fff;
+}
+
+/* wrapper */
+.wrapper{
+  background:var(--bg);
+  padding:12px 16px 24px;
+  border-radius:12px;
+}
+
+/* ───────── Breadcrumb (Figma) ───────── */
+.breadcrumb{
+  display:flex;align-items:center;gap:12px;
+  margin:0 0 12px;
+}
+.backBtn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:transparent;border:0;cursor:pointer;
+  color:#111;font-weight:600;padding:4px 6px;border-radius:8px;
+}
+.backBtn:hover{ background:rgba(0,0,0,.04); }
+.breadDivider{
+  width:1px;height:18px;background:#d9d3cc;border-radius:1px;
+}
+.linksContainer{
+  display:inline-flex;align-items:center;gap:8px;color:#71767c;font-weight:600;
+}
+.crumbLink{ color:#111; text-decoration:none; }
+.crumbLink:hover{ text-decoration:underline; }
+.crumbCurrent{ color:#5c636a; }
+
+/* ========== Segmented tabs (Figma match) ========== */
+.segWrap{display:flex;justify-content:center;margin:18px 0 24px;}
+.seg{
+  display:inline-flex;align-items:center;gap:22px;
+  padding:10px;height:64px;
+  background:var(--rail-bg);
+  border:2px solid var(--rail-border);
+  border-radius:999px;
+  box-shadow:var(--rail-shadow);
+}
+.segBtn{
+  position:relative;
+  height:44px;min-width:260px;padding:0 28px;
+  border:0;background:transparent;border-radius:999px;
+  color:#4b4b4b;
+  font:700 22px/44px "Inter",system-ui,-apple-system,Segoe UI,Arial;
+  cursor:pointer;transition:color .2s ease,transform .08s ease;
+}
+.segBtnActive{
+  color:var(--ink);
+  background:linear-gradient(180deg,var(--pill-a) 0%,var(--pill-b) 100%);
+  box-shadow:var(--pill-shadow);
+}
+.segBtnActive::after{
+  content:"";position:absolute;left:10px;right:10px;bottom:6px;height:8px;
+  border-radius:999px;background:var(--pill-inner);opacity:.55;filter:blur(.2px);
+}
+.segBtn:active{transform:translateY(1px);}
+
+/* ========== Grid ========== */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px;}
+.col4{grid-column:span 4;}
+.col12{grid-column:span 12;}
+
+/* fixed areas for privileges (2×2) */
+.item0{grid-column:1 / span 6;}
+.item1{grid-column:7 / span 6;}
+.item2{grid-column:1 / span 6;}
+.item3{grid-column:7 / span 6;}
+
+/* ========== Cards ========== */
+.card{
+  background:var(--card);
+  border-radius:14px;
+  box-shadow:0 8px 24px rgba(254,234,209,.9);
+  overflow:hidden;
+}
+.cardSoft{background:#F9EDE3;}
+.cardPad{padding:18px 18px 20px;}
+
+.cardImage{
+  width:100%;
+  height:220px;
+  object-fit:cover;display:block;
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+.cardBody{padding:14px 16px 18px;}
+.cardTitle{font-size:18px;font-weight:700;color:var(--ink);line-height:1.25;}
+.cardTitleRed{color:var(--accent);} /* force red title when needed */
+.cardSubtitle{margin-top:8px;color:var(--muted);font-size:13.5px;}
+
+/* privilege image heights to make cards different */
+.imgTop{width:100%;height:var(--priv-top-h);object-fit:cover;display:block;}
+.imgBot{width:100%;height:var(--priv-bot-h);object-fit:cover;display:block;}
+
+/* bullets (default: one column with red marker + black text) */
+.bullets{margin:10px 0 0;padding-left:22px;color:#1f1f1f;}
+.bullets li::marker{ color: var(--accent); }
+
+/* two-column bullets (Figma 2 left + 2 right) */
+.bulletsTwoCol{
+  margin-top:10px;
+  padding-left:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  column-gap:28px;
+  row-gap:8px;
+}
+.bulletsTwoCol li{
+  list-style:none;
+  position:relative;
+  padding-left:14px;
+  color:#1f1f1f;
+}
+.bulletsTwoCol li::before{
+  content:"";
+  position:absolute;
+  left:0; top:9px;
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--accent);
+}
+
+/* small heading above the bullets (Figma) */
+.bulletHeading{ margin-top:12px; font-weight:700; color:var(--ink); }
+
+/* simple website link (globe + text) — BLACK */
+.siteRow{ margin-top:12px; }
+.siteLink{
+  display:inline-flex;align-items:center;gap:8px;
+  color:#111;                   /* black text */
+  text-decoration:none;
+  font-weight:700;
+}
+.siteLink:hover{text-decoration:underline;}
+.globe{
+  width:16px;height:16px; display:inline-block; border-radius:50%;
+  border:2px solid #111;      /* black ring */
+  position:relative;
+}
+.globe::before,.globe::after{
+  content:""; position:absolute; inset:3px 6px;
+  border:1px solid #111; border-radius:50%;   /* black latitude */
+}
+.globe::after{
+  inset:7px 2px; border-radius:0; border:none;
+  border-top:1px solid #111;                  /* black longitude */
+}
+
+/* CTA (if needed elsewhere) */
+.ctaRow{margin-top:16px;}
+.ctaPrimary{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:260px;height:44px;border-radius:999px;
+  background:linear-gradient(180deg,#2b2f33 0%,var(--cta-bg) 100%);
+  color:#fff;text-decoration:none;font:600 14px/44px "Inter",system-ui,-apple-system,Segoe UI,Arial;
+  box-shadow:inset 0 -3px 0 rgba(255,255,255,.06),0 8px 18px rgba(20,24,28,.28);
+}
+
+/* ========== Promo banner (Medical) ========== */
+.promo{
+  display:grid;grid-template-columns:1fr 420px;gap:12px;
+  background:#FFF7F0;border-radius:16px;padding:24px;
+}
+.promoLeft{padding-right:8px;}
+.promoTitle{font-size:24px;font-weight:800;color:var(--ink);} /* default black */
+.promoTitle em{ color:var(--accent); font-style:normal; }      /* only <em> red */
+.promoSub{margin-top:10px;color:#555;}
+.promoBullets{margin-top:14px;padding-left:0;list-style:none;}
+.promoBullets li{
+  display:flex;align-items:flex-start;gap:10px;margin:10px 0;color:#222;
+}
+.promoCheck{
+  flex:0 0 22px;height:22px;border-radius:6px;background:var(--check-bg);
+  display:inline-grid;place-items:center;
+}
+.promoCheck:after{
+  content:"✓"; font-weight:900; font-size:14px; color:var(--check-tick); line-height:1;
+}
+.promoBadges{display:flex;gap:10px;margin-top:12px;}
+.promoBadge{height:34px;width:auto;display:block;}
+.promoSite{margin-top:10px;}
+.promoImgWrap{display:flex;align-items:center;justify-content:center;}
+.promoImg{max-width:100%;height:auto;display:block;}
+
+/* ========== Contact card (Figma layout) ========== */
+.infoHead{ font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px; }
+.infoRow{ display:flex;align-items:center;justify-content:space-between; gap:16px;padding:6px 0;font-size:14px;color:#3b3b3b; }
+.infoVal{ color:#0d5fd7;font-weight:600;text-decoration:none; }
+.infoVal:hover{ text-decoration:underline; }
+.divider{ height:1px;background:#e7e1da;margin:10px 0 14px; }
+.infoBlockTitle{ font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px; }
+.infoBlockText{ font-size:13.5px;color:#454545;margin-bottom:4px; }
+.infoBlockMuted{ font-size:12.5px;color:#7a7a7a; }
+
+.skel{background:#eee;border-radius:12px;animation:pulse 1.4s ease-in-out infinite;}
+@keyframes pulse{0%{opacity:.6}50%{opacity:.3}100%{opacity:.6}}

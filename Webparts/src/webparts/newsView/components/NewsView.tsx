@@ -59,7 +59,7 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
 
     this.newsDataService = new listServices(this.props.context);
 
-    // Bind handlers (class-based, explicit)
+    // Bind handlers
     this.handleTabChange = this.handleTabChange.bind(this);
     this.handleDepartmentChange = this.handleDepartmentChange.bind(this);
     this.handleSearchChange = this.handleSearchChange.bind(this);
@@ -70,10 +70,8 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
     try {
       const allNewsArticles: NewsRow[] = await this.newsDataService.getNewsStory(30);
 
-      // Compute announcements once; reuse in filter pipeline
       const announcementItems: NewsRow[] = allNewsArticles.filter(this.isAnnouncement);
 
-      // Build department dropdown options (unique, non-empty)
       const uniqueDepartments = Array.from(
         new Set(
           allNewsArticles
@@ -98,7 +96,7 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
     }
   }
 
-  // ======== Reusable predicates / helpers (enterprise-friendly, testable) ========
+  // ======== Helpers ========
 
   private normalize(value?: string): string {
     return (value || "").trim().toLowerCase();
@@ -106,12 +104,11 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
 
   private isAnnouncement = (item: NewsRow): boolean => {
     const t = this.normalize(item.newsType);
-    return t.includes("announce"); // covers "Announcement", "Announcements"
+    return t.includes("announce");
   };
 
   private matchesTab = (item: NewsRow, tab: TabKey): boolean => {
     if (tab === "All") return true;
-    // Only announcements for the Announcements tab
     return this.isAnnouncement(item);
   };
 
@@ -127,7 +124,6 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
     const inDept = this.normalize(item.department).includes(normalizedQuery);
     const inAuthor = this.normalize(item.author).includes(normalizedQuery);
 
-    // tags can be string or string[]
     let inTags = false;
     if (Array.isArray(item.tags)) {
       inTags = item.tags.some(tag => this.normalize(tag).includes(normalizedQuery));
@@ -142,7 +138,6 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
     const { allNewsItems, activeTab, selectedDepartment, searchQuery } = this.state;
     const normalizedQuery = this.normalize(searchQuery);
 
-    // Start from All items; we use predicates so this is linear and easy to extend
     return allNewsItems
       .filter(item => this.matchesTab(item, activeTab))
       .filter(item => this.matchesDepartment(item, selectedDepartment))
@@ -150,10 +145,21 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
   }
 
   // ======== Event handlers ========
-  private handleTabChange(tab: TabKey) { this.setState({ activeTab: tab }); }
-  private handleDepartmentChange(dept: string) { this.setState({ selectedDepartment: dept }); }
-  private handleSearchChange(queryText: string) { this.setState({ searchQuery: queryText }); }
-  private handleViewModeChange(view: ViewMode) { this.setState({ viewMode: view }); }
+  private handleTabChange(tab: TabKey) {
+    this.setState({ activeTab: tab });
+  }
+
+  private handleDepartmentChange(dept: string) {
+    this.setState({ selectedDepartment: dept });
+  }
+
+  private handleSearchChange(queryText: string) {
+    this.setState({ searchQuery: queryText });
+  }
+
+  private handleViewModeChange(view: ViewMode) {
+    this.setState({ viewMode: view });
+  }
 
   // ======== Render ========
   public render(): React.ReactElement<INewsViewProps> {
@@ -180,7 +186,11 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
           onSearch={this.handleSearchChange}
           onView={this.handleViewModeChange}
         />
-        <NewsResults items={filteredRows} view={viewMode} />
+
+        <NewsResults
+          items={filteredRows}
+          view={viewMode}
+        />
       </div>
     );
   }

@@ -2,6 +2,8 @@ import * as React from 'react';
 import styles from './ServiceLinks.module.scss';
 
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
+import AppsAndLinks  from '../../AppsAndLinks/AppsAndLinks';
+import { listServices } from '../../../services/listServices';
 
 const jiraIcon: string = require("../../../featureWheel/images/jira.png");
 const slackIcon: string = require("../../../featureWheel/images/slack.png");
@@ -17,9 +19,13 @@ export interface IServiceLink {
     relativeTo?: 'outer' | 'inner';
 }
 
+export interface IServiceLinksState {
+    isHidden: boolean;
+}
+
 export interface IServiceLinksProps {
     services?: IServiceLink[];
-    onViewAll?: () => void;
+    context: any;
 }
 
 const defaultServices: IServiceLink[] = [
@@ -118,6 +124,8 @@ const defaultServices: IServiceLink[] = [
 export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
     const services = props.services || defaultServices;
     const [currentPage, setCurrentPage] = React.useState(0);
+    const [data, setData] = React.useState([]);
+    const [isHidden, setIsHidden] = React.useState(true);
     const itemsPerPage = 9; // 6 outer circle + 3 inner circle cards
     const totalPages = Math.ceil(services.length / itemsPerPage);
     const currentServices = services.slice(
@@ -194,9 +202,37 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
         return positionMap[position] || { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
     };
 
+    React.useEffect(() => {
+        const fetchData = async () => {
+            try {
+                let spService: listServices;
+                spService = new listServices(props.context);
+
+                const result:any = await spService.getApps("Apps");                       
+                setData(result);
+            } catch (err) {
+               // setError(err);
+            } finally {
+               // setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []); // Empty dependency array ensures this runs once on mount
+
+    const showAppsLinksDialog = (): void => {
+        setIsHidden(false);
+    }
+
+    const hideAppsAndLinks = (): void => {
+        setIsHidden(true);
+    }
+
     return (
         <div className={styles.serviceLinksContainer}>
             {/* Circular Services Layout with Navigation */}
+            <AppsAndLinks savedApps={data} hideAppsAndLinks={hideAppsAndLinks} isHidden={isHidden} context={props.context} />
+
             <div className={styles.wheelWrapper}>
                 <button className={styles.navButton} onClick={handlePrev}>
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
@@ -268,8 +304,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
                         </div>
                     )
                 }
-
-                <PrimaryButton label="View All" onClick={props.onViewAll} />
+                <PrimaryButton label="View All" onClick={showAppsLinksDialog} />
             </div>
         </div>
     );

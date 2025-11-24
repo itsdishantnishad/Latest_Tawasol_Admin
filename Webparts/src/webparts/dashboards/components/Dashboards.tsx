@@ -1,14 +1,18 @@
 import * as React from 'react';
-import { Stack, Text, Separator, Breadcrumb, IBreadcrumbItem } from '@fluentui/react';
+import { Stack, Text, Separator } from '@fluentui/react';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
 import { listServices, DashboardCategory, DashboardItem } from '../../services/listServices';
 import { ListName } from '../../services/Constants';
 import { breadcrumbBeforeBackArrowSVG } from '../../assets/constants';
 
+// ⬇️ NEW: global breadcrumbs (single .ts utility component)
+import GlobalBreadcrumbs from '../../assets/GlobalBreadcrumbs';
+
+
 import CategoryRail from './CategoryRail';
 import DashboardGrid from './DashboardGrid';
 import DashboardDetail from './DashboardDetail';
-import DashboardBanner from './banner/DashboardBanner';
+// import DashboardBanner from './banner/DashboardBanner';
 
 import styles from './Dashboards.module.scss';
 
@@ -104,27 +108,27 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
     this.setState({ active: undefined, related: [], relatedTop: 4, relatedExpanded: false, hasMoreRelated: false });
   };
 
-  /** Back | Home > Dashboards (Back only in detail view) */
+  /** Back | Home › Dashboards (Back only in detail view) */
   private renderTopBar(): React.ReactNode {
     const { active } = this.state;
     if (!active) return null;
 
-    const breadcrumbItems: IBreadcrumbItem[] = [
-      { key: 'home', text: 'Home', onClick: () => this.setState({ active: undefined }) },
-      { key: 'dash', text: 'Dashboards', isCurrentItem: true }
-    ];
-
     return (
       <div className={styles.topBar}>
-        <button className={styles.backBtn} onClick={this.onBackToMaster} aria-label="Back" title="Back">
-          <span
-            aria-hidden="true"
-            dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }}
-          />
+        {/* ⬅️ EXISTING BACK BUTTON WITH ICON — kept exactly as-is */}
+        {/* <button className={styles.backBtn} onClick={this.onBackToMaster} aria-label="Back" title="Back">
+          <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }} />
           <span>Back</span>
         </button>
-        <span className={styles.divider}>|</span>
-        <Breadcrumb items={breadcrumbItems} />
+
+        <span className={styles.divider}>|</span> */}
+
+        {/* ⬇️ REPLACED Fluent UI Breadcrumb with GlobalBreadcrumbs */}
+        <GlobalBreadcrumbs
+          sectionLabel="Home"
+          currentLabel="Dashboards"
+          onBack={this.onBackToMaster} // (left label also does one-step back)
+        />
       </div>
     );
   }
@@ -137,14 +141,15 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
 
     return (
       <section>
-        {!active && <DashboardBanner />}
+        {/* {!active && <DashboardBanner />} */}
 
         {this.renderTopBar()}
 
-        <Separator />
+        {/* <Separator /> */}
 
         <div className={styles.layout}>
           {!active && (
+            <>
             <div className={styles.rail}>
               <CategoryRail
                 items={categories}
@@ -152,7 +157,10 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
                 onSelect={this.onSelectCategory}
               />
             </div>
+            <div className={styles.verticleDivider}></div>
+            </>
           )}
+
 
           <Stack grow>
             {loading && <Text>Loading…</Text>}
@@ -164,7 +172,7 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
                 title={selectedCategory?.name || 'Dashboards'}
                 items={dashboards}
                 onOpen={this.onOpenDashboard}
-                showTitle={false}   // HIDE the duplicate heading
+                showTitle={false}
               />
             )}
 

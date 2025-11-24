@@ -1,10 +1,27 @@
 import * as React from "react";
-import { Pivot, PivotItem, Dropdown, SearchBox, IDropdownOption } from "@fluentui/react";
+import {
+  Pivot,
+  PivotItem,
+  Dropdown,
+  SearchBox,
+  IDropdownOption
+} from "@fluentui/react";
 import styles from "./NewsView.module.scss";
 import type { TabKey, ViewMode } from "./NewsView";
 
-const gridViewIconSrc = require("../assets/GridViewToggle.svg");
-const listViewIconSrc = require("../assets/ListViewToggle.svg");
+// SVG strings from constants.ts
+import {
+  GRIDViewToggleSVG,
+  ListvViewToggleSVG
+} from "../../assets/constants";
+
+// Helper: convert raw SVG string to a data URI so we can use it in <img src="">
+const svgToDataUri = (svg: string): string =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
+// Reuse the same variable names used earlier, but now fed from constants
+const gridViewIconSrc = svgToDataUri(GRIDViewToggleSVG);
+const listViewIconSrc = svgToDataUri(ListvViewToggleSVG);
 
 export interface IFiltersBarProps {
   tab: TabKey;
@@ -24,11 +41,17 @@ export default class FiltersBar extends React.Component<IFiltersBarProps> {
     this.props.onTab(nextTab);
   };
 
-  private handleDepartmentChange = (_event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
+  private handleDepartmentChange = (
+    _event: React.FormEvent<HTMLDivElement>,
+    option?: IDropdownOption
+  ) => {
     if (option) this.props.onDept(String(option.key));
   };
 
-  private handleSearchChange = (_event?: React.ChangeEvent<HTMLInputElement>, newValue?: string) => {
+  private handleSearchChange = (
+    _event?: React.ChangeEvent<HTMLInputElement>,
+    newValue?: string
+  ) => {
     this.props.onSearch(newValue || "");
   };
 
@@ -69,7 +92,9 @@ export default class FiltersBar extends React.Component<IFiltersBarProps> {
         <div className={styles.zoneToggle}>
           <div className={styles.viewToggle} role="group" aria-label="Toggle view">
             <button
-              className={`${styles.toggleBtn} ${currentViewMode === "grid" ? styles.active : ""}`}
+              className={`${styles.toggleBtn} ${
+                currentViewMode === "grid" ? styles.active : ""
+              }`}
               onClick={() => setViewMode("grid")}
               aria-pressed={currentViewMode === "grid"}
               type="button"
@@ -77,7 +102,9 @@ export default class FiltersBar extends React.Component<IFiltersBarProps> {
               <img src={gridViewIconSrc} alt="Grid view" />
             </button>
             <button
-              className={`${styles.toggleBtn} ${currentViewMode === "list" ? styles.active : ""}`}
+              className={`${styles.toggleBtn} ${
+                currentViewMode === "list" ? styles.active : ""
+              }`}
               onClick={() => setViewMode("list")}
               aria-pressed={currentViewMode === "list"}
               type="button"

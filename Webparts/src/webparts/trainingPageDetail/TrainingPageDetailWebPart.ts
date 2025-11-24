@@ -16,8 +16,11 @@ export interface ITrainingPageDetailWebPartProps {
   description: string;
 }
 
-export default class TrainingPageDetailWebPart extends BaseClientSideWebPart<ITrainingPageDetailWebPartProps> {
-  private trainingItem: any;
+export default class TrainingPageDetailWebPart
+  extends BaseClientSideWebPart<ITrainingPageDetailWebPartProps> {
+
+  // ✅ make it an array by default
+  private trainingItem: any[] = [];
   private spService: listServices;
 
   public render(): void {
@@ -31,13 +34,28 @@ export default class TrainingPageDetailWebPart extends BaseClientSideWebPart<ITr
     ReactDom.render(element, this.domElement);
   }
 
-  async onInit(): Promise<void> {
-    this.spService = new listServices(this.context);
-    const pageId = this.context.pageContext.listItem?.id
-    pageId ?
-      this.trainingItem = await this.spService.getTrainingByID(pageId) : "";
-  }
+  public async onInit(): Promise<void> {
+    await super.onInit();
 
+    this.spService = new listServices(this.context);
+
+    const pageId = this.context.pageContext.listItem?.id;
+
+    if (pageId) {
+      try {
+        this.trainingItem = await this.spService.getTrainingByID(pageId);
+      } catch (err) {
+        console.error('Error loading training item by ID', err);
+        this.trainingItem = [];
+      }
+    } else {
+      // no list item bound to this page
+      this.trainingItem = [];
+    }
+
+    // ✅ ensure we render with the loaded data
+    this.render();
+  }
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
