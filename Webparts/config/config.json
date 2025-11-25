@@ -209,6 +209,14 @@
           "manifest": "./src/webparts/greetingsBanner/GreetingsBannerWebPart.manifest.json"
         }
       ]
+    },
+    "beverages-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/beverages/BeveragesWebPart.js",
+          "manifest": "./src/webparts/beverages/BeveragesWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -238,6 +246,7 @@
     "OnboardingWebPartStrings": "lib/webparts/onboarding/loc/{locale}.js",
     "OffersBenefitsWebPartStrings": "lib/webparts/offersBenefits/loc/{locale}.js",
     "AnnouncementBannerWebPartStrings": "lib/webparts/announcementBanner/loc/{locale}.js",
-    "GreetingsBannerWebPartStrings": "lib/webparts/greetingsBanner/loc/{locale}.js"
+    "GreetingsBannerWebPartStrings": "lib/webparts/greetingsBanner/loc/{locale}.js",
+    "BeveragesWebPartStrings": "lib/webparts/beverages/loc/{locale}.js"
   }
 }
