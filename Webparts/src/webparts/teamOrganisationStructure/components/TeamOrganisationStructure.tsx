@@ -1,7 +1,11 @@
 import * as React from "react";
 import styles from "./TeamOrganisationStructure.module.scss";
 import { ITeamOrganisationStructureProps } from "./ITeamOrganisationStructureProps";
-import { listServices, OrgMember, OrgDepartment } from "../../services/listServices";
+import {
+  listServices,
+  OrgMember,
+  OrgDepartment,
+} from "../../services/listServices";
 import { ListName } from "../../services/Constants";
 
 export interface ITeamOrganisationStructureState {
@@ -14,9 +18,10 @@ export interface ITeamOrganisationStructureState {
   loadingDepts: boolean;
 }
 
-export default class TeamOrganisationStructure
-  extends React.Component<ITeamOrganisationStructureProps, ITeamOrganisationStructureState> {
-
+export default class TeamOrganisationStructure extends React.Component<
+  ITeamOrganisationStructureProps,
+  ITeamOrganisationStructureState
+> {
   private spService: listServices;
 
   constructor(props: ITeamOrganisationStructureProps) {
@@ -28,7 +33,7 @@ export default class TeamOrganisationStructure
       selectedId: null,
       selectedLevel: null,
       departments: [],
-      loadingDepts: false
+      loadingDepts: false,
     };
     this.spService = new listServices(this.props.context);
   }
@@ -37,7 +42,9 @@ export default class TeamOrganisationStructure
     await this.loadMembers();
   }
 
-  public async componentDidUpdate(prevProps: ITeamOrganisationStructureProps): Promise<void> {
+  public async componentDidUpdate(
+    prevProps: ITeamOrganisationStructureProps
+  ): Promise<void> {
     const prevTitle = (prevProps.listTitle || "").trim();
     const nextTitle = (this.props.listTitle || "").trim();
     if (prevTitle !== nextTitle) {
@@ -52,7 +59,7 @@ export default class TeamOrganisationStructure
         error: null,
         selectedId: null,
         selectedLevel: null,
-        departments: []
+        departments: [],
       });
 
       const sourceList =
@@ -64,79 +71,95 @@ export default class TeamOrganisationStructure
     } catch (err: any) {
       this.setState({
         error: err?.message || "Failed to load.",
-        loading: false
+        loading: false,
       });
     }
   }
 
+  // ========= card click handling (select + load departments) =========
   private onCardClick = (member: OrgMember): void => {
-      // Step 1 – update selection and show "Loading departments…"
-      this.setState(
-        (prev) => {
-          const isSamePerson = prev.selectedId === member.id;
+    this.setState(
+      (prev) => {
+        const isSamePerson = prev.selectedId === member.id;
 
-          // If clicking again on the same person, unselect them
-          if (isSamePerson) {
-            return {
-              selectedId: null,
-              selectedLevel: null,
-              departments: [],
-              loadingDepts: false,
-            };
-          }
-
-          // New selected person
+        // If clicking again on the same person -> unselect
+        if (isSamePerson) {
           return {
-            selectedId: member.id,
-            selectedLevel: member.level,
-            departments: [],      // clear previous departments
-            loadingDepts: true,   // show loading for this click
+            ...prev,
+            selectedId: null,
+            selectedLevel: null,
+            departments: [],
+            loadingDepts: false,
           };
-        },
-        async () => {
-          // Step 2 – after state is updated, actually load departments
-          const { selectedId } = this.state;
-
-          // if user just un-selected, do nothing
-          if (!selectedId) {
-            return;
-          }
-
-          // we use the People column *display name* as the join key
-          const key = (member.user || "").trim();
-          if (!key) {
-            console.warn("[TeamOrg] selected member has no user title", member);
-            this.setState({ departments: [], loadingDepts: false });
-            return;
-          }
-
-          try {
-            const deptList =
-              (this.props.deptListTitle || ListName.TEAM_ORG_DEPARTMENTS).trim();
-
-            console.log("[TeamOrg] loading departments for:", key, "from list:", deptList);
-
-            const depts = await this.spService.getDepartmentsByMember(
-              deptList,
-              key
-            );
-
-            console.log("[TeamOrg] departments loaded:", depts);
-
-            this.setState({
-              departments: depts,
-              loadingDepts: false,
-            });
-          } catch (error) {
-            console.error("[TeamOrg] failed to load departments", error);
-            this.setState({
-              departments: [],
-              loadingDepts: false,
-            });
-          }
         }
-      );
+
+        // New selected person
+        return {
+          ...prev,
+          selectedId: member.id,
+          selectedLevel: member.level,
+          departments: [],
+          loadingDepts: true,
+        };
+      },
+      async () => {
+        const { selectedId } = this.state;
+
+        // If user un-selected or clicked someone else meanwhile, abort
+        if (!selectedId || selectedId !== member.id) {
+          return;
+        }
+
+        const key = (member.user || "").trim();
+        if (!key) {
+          console.warn(
+            "[TeamOrg] selected member has no user title",
+            member
+          );
+          this.setState((current) =>
+            current.selectedId === member.id
+              ? { ...current, departments: [], loadingDepts: false }
+              : current
+          );
+          return;
+        }
+
+        try {
+          const deptList =
+            (this.props.deptListTitle || ListName.TEAM_ORG_DEPARTMENTS).trim();
+
+          console.log(
+            "[TeamOrg] loading departments for:",
+            key,
+            "from list:",
+            deptList
+          );
+
+          const depts = await this.spService.getDepartmentsByMember(
+            deptList,
+            key
+          );
+
+          console.log("[TeamOrg] departments loaded:", depts);
+
+          this.setState((current) =>
+            current.selectedId === member.id
+              ? { ...current, departments: depts, loadingDepts: false }
+              : current
+          );
+        } catch (e) {
+          console.error("[TeamOrg] error loading departments", e);
+          this.setState((current) =>
+            current.selectedId === member.id
+              ? { ...current, departments: [], loadingDepts: false }
+              : current
+          );
+        }
+      }
+    );
   };
+
+  // ====================== render ======================
 
   public render(): React.ReactElement<ITeamOrganisationStructureProps> {
     const { items, loading, error, selectedLevel } = this.state;
@@ -203,7 +226,7 @@ export default class TeamOrganisationStructure
         className={[
           styles.card,
           isRoot ? styles.cardLg : "",
-          isSelected ? styles.cardSelected : ""
+          isSelected ? styles.cardSelected : "",
         ]
           .filter(Boolean)
           .join(" ")}
