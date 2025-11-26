@@ -1,8 +1,4 @@
 .wrapper {
-  // width: 100%;
-  // margin: 0 auto;
-  // padding: 24px 45px;
-  // background: #FFF4EA;
   background: #FFF4EA;
   padding: 60px;
 }
@@ -33,23 +29,23 @@
   color: #000;
 }
 
-/* ==== Main row (brands) ==== */
+/* ==== Main row (brands) – desktop / tablet ==== */
 .brandsColumns {
   display: flex;
-  flex-wrap: nowrap;        /* keep all four on one row at desktop */
-  gap: 16px;                /* tighter than 24px */
+  flex-wrap: nowrap;
+  gap: 16px;
   justify-content: center;
   align-items: flex-start;
 }
 .brandColumn {
   display: flex;
   flex-direction: column;
-  gap: 16px;                /* tighter vertical gap */
+  gap: 16px;
 }
 
-/* ==== Main brand cards (dynamic width × 85) ==== */
+/* ==== Main brand cards ==== */
 .brandCard {
-  width: 100%;              /* stretches to supplied width from TSX */
+  width: 100%;
   height: 85px;
   background: #FEEAD6;
   border-radius: 8px;
@@ -72,46 +68,121 @@
   color: #222;
 }
 
-/* ==== Sub-grids: DP/Meraas/Meydan=2 cols, Nakheel=3 cols ==== */
-.subGridCols2 {
+/* ==== Sub-grid (dynamic columns via inline style) ==== */
+.subGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px 40px;           /* row | col (reduced from 36|56) */
-  justify-items: center;
-  align-items: center;
-}
-.subGridCols3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px 32px;           /* reduced from 36|40 */
+  gap: 28px 32px;               /* row | col */
   justify-items: center;
   align-items: center;
 }
 
-/* shared cells/logo */
 .subCell {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 84px; line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 84px;
+  line-height: 0;
 }
 .subLogo {
   display: block;
-  max-width: 240px;         /* slightly tighter than 260px */
+  max-width: 240px;
   max-height: 64px;
   height: auto;
   object-fit: contain;
 }
-.subFallback { font-size: 14px; color: #333; }
+.subFallback {
+  font-size: 14px;
+  color: #333;
+}
+
+/* ----------------- Mobile carousel (one category per slide) ----------------- */
+
+.carousel {
+  display: none;               /* only show below 640px */
+  margin-top: 32px;
+}
+
+.carouselViewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE / old Edge */
+}
+.carouselViewport::-webkit-scrollbar {
+  display: none;               /* Chrome / Safari */
+}
+
+.carouselTrack {
+  display: flex;
+}
+
+.carouselSlide {
+  flex: 0 0 100%;              /* exactly one slide per viewport width */
+  scroll-snap-align: center;
+  padding: 0 24px 24px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Dots */
+.dots {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: none;
+  padding: 0;
+  background: #D3D3D3;
+  cursor: pointer;
+}
+.dotActive {
+  width: 20px;
+  background: #DA291C;
+}
 
 /* ==== Responsive ==== */
 @media (max-width: 1200px) {
-  .brandsColumns { flex-wrap: wrap; }          /* allow wrap on smaller screens */
-  .subGridCols3 { grid-template-columns: repeat(2, 1fr); }
+  .brandsColumns { flex-wrap: wrap; }
 }
 @media (max-width: 992px) {
-  .subGridCols2 { grid-template-columns: repeat(2, 1fr); }
-  .subGridCols3 { grid-template-columns: repeat(2, 1fr); }
+  /* same dynamic grid; just slightly tighter gaps if you want */
+  .subGrid { gap: 24px 24px; }
 }
 @media (max-width: 640px) {
-  .brandCard { width: 100%; }
-  .subGridCols2, .subGridCols3 { grid-template-columns: repeat(2,1fr); gap: 24px; }
+  .wrapper {
+    padding: 40px 16px;
+  }
+
+  .heading {
+    text-align: left;
+  }
+
+  .our,
+  .portfolio {
+    font-size: 32px;
+  }
+
+  /* hide desktop layout, show mobile carousel */
+  .brandsColumns {
+    display: none;
+  }
+
+  .carousel {
+    display: block;
+  }
+
+  .subGrid {
+    gap: 20px 16px;            /* tighter on mobile */
+  }
 }
