@@ -34,9 +34,20 @@ export class SearchService {
     return (text || '').replace(/["']/g, '');
   }
 
-  // -------------------------
-  // PEOPLE SUGGESTIONS 
-  // -------------------------
+  // ------------------------------------------------------------------
+  // PEOPLE SUGGESTIONS  (Graph directory search: /users?$search=)
+  // ------------------------------------------------------------------
+  /**
+   * Uses Microsoft Graph directory search:
+   *   GET /users?$search="text"&$top=n&$count=true
+   * Requires: User.ReadBasic.All or User.Read.All (you already have).
+   *
+   * Returns:
+   *  - title:     displayName
+   *  - subtitle:  "jobTitle - department"
+   *  - imageUrl:  userphoto.aspx (built from UPN/mail)
+   *  - url:       mailto:...
+   */
   public async queryPeople(text: string, top: number): Promise<ISuggestItem[]> {
     const q = text.trim();
     if (!q) return [];
@@ -44,11 +55,18 @@ export class SearchService {
     try {
       const client = await this.getGraph();
 
+      // Strip quotes just in case
+      const term = q.replace(/["']/g, '');
+
+      // Graph directory search requires property:value format
+      // Allowed props: displayName, mail, givenName, surname, userPrincipalName
+      const searchExpr = `"displayName:${term}"`;
+
       const res = await client
         .api('/users')
-        .header('ConsistencyLevel', 'eventual')  // required for $search
+        .header('ConsistencyLevel', 'eventual') // required for $search + $count
         .query({
-          $search: `"${q}"`,
+          $search: searchExpr,
           $top: top,
           $count: 'true'
         })
@@ -63,8 +81,7 @@ export class SearchService {
         const upn: string = u.userPrincipalName || u.mail || '';
 
         const subtitleParts = [jobTitle, dept].filter(Boolean);
-        const subtitle: string =
-          subtitleParts.join(' - ') || upn || '';
+        const subtitle: string = subtitleParts.join(' - ') || upn || '';
 
         const photoKey: string = upn || u.id || '';
         const photoUrl: string = photoKey
@@ -84,12 +101,14 @@ export class SearchService {
 
       return items;
     } catch (e) {
+      // Optional: log if you want to see failures during dev
+      // console.error('[SearchService.queryPeople] Graph error', e);
       return [];
     }
   }
 
   // ------------------------------------------------------------------
-  // PAGE SUGGESTIONS
+  // PAGE SUGGESTIONS  (modern Site Pages only)
   // ------------------------------------------------------------------
   public async queryContent(text: string, take: number): Promise<ISuggestItem[]> {
     const q = text.trim();
