@@ -178,6 +178,14 @@
         }
       ]
     },
+    "meeting-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/meeting/MeetingWebPart.js",
+          "manifest": "./src/webparts/meeting/MeetingWebPart.manifest.json"
+        }
+      ]
+    },
     "onboarding-web-part": {
       "components": [
         {
@@ -235,6 +243,7 @@
     "EventGalleryWebPartStrings": "lib/webparts/eventGallery/loc/{locale}.js",
     "GlobalBannerWebPartStrings": "lib/webparts/globalBanner/loc/{locale}.js",
     "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js",
+    "MeetingWebPartStrings": "lib/webparts/meeting/loc/{locale}.js",
     "OnboardingWebPartStrings": "lib/webparts/onboarding/loc/{locale}.js",
     "OffersBenefitsWebPartStrings": "lib/webparts/offersBenefits/loc/{locale}.js",
     "AnnouncementBannerWebPartStrings": "lib/webparts/announcementBanner/loc/{locale}.js",
