@@ -94,7 +94,7 @@ export default class Tiles extends React.Component<ITilesProps> {
               // FUTURE: remove preventDefault and rely on dep.href to navigate directly.
             >
               <div className={styles.supportIcon}>
-                <Image src={dep.iconSrc} alt="" imageFit={ImageFit.contain} width={46} height={46} />
+                <Image src={dep.iconSrc} alt="" imageFit={ImageFit.contain} />
               </div>
               <div className={styles.supportTitle}>{dep.title}</div>
             </Link>

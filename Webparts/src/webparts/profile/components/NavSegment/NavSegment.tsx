@@ -29,7 +29,7 @@ const NavSegment: React.FC<NavSegmentProps> = ({
   const selected = value ?? internal;
 
   const handleClick = (opt: Option) => {
-    if (value === undefined) setInternal(opt);  // uncontrolled usage
+    if (value === undefined) setInternal(opt);  
     onChange?.(opt);
   };
 
