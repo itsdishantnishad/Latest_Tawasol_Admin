@@ -1,6 +1,11 @@
-import { MSGraphClientV3, SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
+import {
+  MSGraphClientV3,
+  SPHttpClient,
+  SPHttpClientResponse
+} from '@microsoft/sp-http';
 
 export type SuggestKind = 'person' | 'page' | 'doc';
+
 export interface ISuggestItem {
   title: string;
   subtitle?: string;
@@ -19,46 +24,84 @@ export class SearchService {
   ) {}
 
   private async getGraph(): Promise<MSGraphClientV3> {
-    if (!this.graph) this.graph = await this.msGraphClientFactory.getClient('3');
+    if (!this.graph) {
+      this.graph = await this.msGraphClientFactory.getClient('3');
+    }
     return this.graph;
   }
 
-  async queryPeople(text: string, top: number): Promise<ISuggestItem[]> {
-    const client = await this.getGraph();
-    const res = await client.api('/me/people')
-      .header('ConsistencyLevel', 'eventual')
-      .query({ $search: `"${text}"`, $top: top })
-      .get();
-
-    const people = (res?.value || []) as Array<any>;
-    return people.map(p => ({
-      title: p.displayName || '',
-      // Figma-style: Job Title – Department
-      subtitle: [p.jobTitle, p.department].filter(Boolean).join(' - ') || p.userPrincipalName || '',
-      url: `mailto:${p.userPrincipalName || ''}`,
-      imageUrl: '', // avatar added by caller if desired
-      kind: 'person'
-    }));
+  private escapeKql(text: string): string {
+    return (text || '').replace(/["']/g, '');
   }
 
-  /**
-   * Search ONLY modern site pages (Site Pages library):
-   *  - ContentClass: STS_ListItem_WebPageLibrary
-   *  - FileExtension: aspx
-   *  - Path: current site only
-   * Then map CT name -> News / Events / Training / Page.
-   */
-  async queryContent(text: string, take: number): Promise<ISuggestItem[]> {
+  // -------------------------
+  // PEOPLE SUGGESTIONS 
+  // -------------------------
+  public async queryPeople(text: string, top: number): Promise<ISuggestItem[]> {
     const q = text.trim();
     if (!q) return [];
 
-    // KQL restricted to modern Site Pages only
+    try {
+      const client = await this.getGraph();
+
+      const res = await client
+        .api('/users')
+        .header('ConsistencyLevel', 'eventual')  // required for $search
+        .query({
+          $search: `"${q}"`,
+          $top: top,
+          $count: 'true'
+        })
+        .get();
+
+      const users: any[] = res?.value || [];
+
+      const items: ISuggestItem[] = users.map(u => {
+        const displayName: string = u.displayName || '';
+        const jobTitle: string = u.jobTitle || '';
+        const dept: string = u.department || '';
+        const upn: string = u.userPrincipalName || u.mail || '';
+
+        const subtitleParts = [jobTitle, dept].filter(Boolean);
+        const subtitle: string =
+          subtitleParts.join(' - ') || upn || '';
+
+        const photoKey: string = upn || u.id || '';
+        const photoUrl: string = photoKey
+          ? `${this.webUrl}/_layouts/15/userphoto.aspx?size=M&username=${encodeURIComponent(
+              photoKey
+            )}`
+          : '';
+
+        return {
+          title: displayName || upn || '(no name)',
+          subtitle,
+          url: upn ? `mailto:${upn}` : '#',
+          imageUrl: photoUrl || undefined,
+          kind: 'person' as const
+        };
+      });
+
+      return items;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // PAGE SUGGESTIONS
+  // ------------------------------------------------------------------
+  public async queryContent(text: string, take: number): Promise<ISuggestItem[]> {
+    const q = text.trim();
+    if (!q) return [];
+
+    const safe = this.escapeKql(q);
+
     const kqlParts: string[] = [
-      `${q}*`,
+      `(Title:${safe}* OR FileName:${safe}*)`,
       `Path:"${this.webUrl}"`,
       'ContentClass:STS_ListItem_WebPageLibrary',
       'FileExtension:aspx',
-      // hard filters to avoid system/internal stuff
       `-Path:"${this.webUrl}/_layouts/"`,
       `-Path:"${this.webUrl}/_catalogs/"`,
       `-Path:"${this.webUrl}/Lists/"`,
@@ -80,18 +123,26 @@ export class SearchService {
     ].join(',');
 
     const url =
-      `${this.webUrl}/_api/search/query?querytext='${encodeURIComponent(kql)}'` +
-      `&rowlimit=${take}&selectproperties='${select}'`;
+      `${this.webUrl}/_api/search/query?` +
+      `querytext='${encodeURIComponent(kql)}'` +
+      `&rowlimit=${take}` +
+      `&selectproperties='${select}'`;
 
-    const r: SPHttpClientResponse = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
+    const r: SPHttpClientResponse = await this.spHttpClient.get(
+      url,
+      SPHttpClient.configurations.v1
+    );
     const json: any = await r.json();
-    const rows: any[] = json?.PrimaryQueryResult?.RelevantResults?.Table?.Rows || [];
+    const rows: any[] =
+      json?.PrimaryQueryResult?.RelevantResults?.Table?.Rows || [];
 
     const items: ISuggestItem[] = [];
 
     for (const row of rows) {
       const cells: Record<string, string> = {};
-      (row?.Cells || []).forEach((c: any) => { cells[c.Key] = c.Value; });
+      (row?.Cells || []).forEach((c: any) => {
+        cells[c.Key] = c.Value;
+      });
 
       const path = cells['Path'] || '';
       const pathLower = path.toLowerCase();
@@ -99,16 +150,13 @@ export class SearchService {
       const thumb = cells['PictureThumbnailURL'] || '';
       const contentType = cells['ContentType'] || '';
 
-      // Only *real* modern pages in Site Pages
       const isPage =
         contentClass === 'sts_listitem_webpagelibrary' &&
         pathLower.includes('/sitepages/') &&
         pathLower.endsWith('.aspx');
 
-      // Strict: skip anything that is not a modern Site Page
       if (!isPage) continue;
 
-      // ---- label to show in subtitle (page category) --------------------
       let scopeLabel = 'Page';
       const ct = contentType.toLowerCase();
 
@@ -119,7 +167,6 @@ export class SearchService {
       } else if (ct.includes('training')) {
         scopeLabel = 'Training';
       }
-      // else keep "Page"
 
       const title =
         cells['Title'] ||
@@ -128,10 +175,10 @@ export class SearchService {
 
       items.push({
         title,
-        subtitle: scopeLabel,         // ONLY "News" / "Events" / "Training" / "Page"
+        subtitle: scopeLabel,
         url: path || '#',
-        imageUrl: thumb || undefined, // page preview if available
-        kind: 'page'                  // no docs, images, etc.
+        imageUrl: thumb || undefined,
+        kind: 'page'
       });
     }
 

@@ -221,8 +221,17 @@ export default class ExtensionsApplicationCustomizer
     this.injectFont();
     document.body.style.background = '#FFF4EA';
 
-    this.search = new SearchService(this.webUrl, this.context.msGraphClientFactory, this.context.spHttpClient as SPHttpClient);
-    this.nav = new NavigationService(this.context.spHttpClient as SPHttpClient, this.webUrl);
+    // ---- SEARCH SERVICE: now only uses SPHttpClient (no Graph) ----
+    this.search = new SearchService(
+      this.webUrl,
+      this.context.msGraphClientFactory,
+      this.context.spHttpClient as SPHttpClient
+    );
+
+    this.nav = new NavigationService(
+      this.context.spHttpClient as SPHttpClient,
+      this.webUrl
+    );
     this.notifications = new Notifications(HARD_NOTIFS);
 
     const urls = resolveUrls(this.webUrl);
@@ -240,8 +249,13 @@ export default class ExtensionsApplicationCustomizer
 
     const headerWrap = document.querySelector(`.${styles.TIRHdrWrap}`) as HTMLElement;
     if (headerWrap) {
-      this.suggest = new SuggestBox(headerWrap, () => this.webUrl, (upn?) =>
-        `${this.webUrl}/_layouts/15/userphoto.aspx?size=M&username=${encodeURIComponent(upn || '')}`
+      this.suggest = new SuggestBox(
+        headerWrap,
+        () => this.webUrl,
+        (upn?) =>
+          `${this.webUrl}/_layouts/15/userphoto.aspx?size=M&username=${encodeURIComponent(
+            upn || ''
+          )}`
       );
     }
 
@@ -279,6 +293,7 @@ export default class ExtensionsApplicationCustomizer
     this.suggest?.updatePosition();
   };
 
+  /** Wire up search box with suggestions (people + content) */
   private wireSearch(input: HTMLInputElement): void {
     input.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.key === 'Enter' && !this.suggest.moveActive('enter')) {
@@ -298,18 +313,24 @@ export default class ExtensionsApplicationCustomizer
 
     input.addEventListener('input', () => {
       const val = input.value.trim();
-      if (this.debounceId) clearTimeout(this.debounceId);
-      if (val.length < 2) { this.suggest.close(); return; }
+      if (this.debounceId) {
+        clearTimeout(this.debounceId);
+      }
+      if (val.length < 2) {
+        this.suggest.close();
+        return;
+      }
 
       this.debounceId = window.setTimeout(async () => {
         try {
-          const [people, content] = await Promise.all([
-            this.search.queryPeople(val, 3),
-            this.search.queryContent(val, 5)
-          ]);
+          // Both calls are safe: queryPeople already returns [] on failure.
+          const people = await this.search.queryPeople(val, 3);
+          const content = await this.search.queryContent(val, 5);
+
           const results = [...people, ...content].slice(0, 8);
           this.suggest.open(val, results);
-        } catch {
+        } catch (err) {
+          // Worst case: don’t break the page, just show no suggestions
           this.suggest.open(val, []);
         }
       }, 250);
