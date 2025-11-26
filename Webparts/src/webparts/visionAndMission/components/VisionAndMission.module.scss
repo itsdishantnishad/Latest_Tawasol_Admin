@@ -13,6 +13,10 @@
   gap: 60px;
   align-items: center;
   margin-bottom: 60px;
+  @media (max-width: 991px){
+    display: flex;
+    flex-wrap: wrap;
+  }
 }
 
 .leftPic img {

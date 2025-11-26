@@ -113,5 +113,5 @@
 }
 @media (max-width: 640px) {
   .brandCard { width: 100%; }
-  .subGridCols2, .subGridCols3 { grid-template-columns: 1fr; gap: 24px; }
+  .subGridCols2, .subGridCols3 { grid-template-columns: repeat(2,1fr); gap: 24px; }
 }
