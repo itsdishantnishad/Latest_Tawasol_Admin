@@ -73,6 +73,7 @@ function detectLabels(): S {
     { match:/leave/,           sect:'Home',                 current:'Leave Details' },
     { match:/hr-letters?/,     sect:'Home',                 current:'HR Letters' },
     { match: /back/,            sect:'Home',                  current:'Offer & Benefits'},
+    {match:/back/,              sect:'Home',                  current:'Beverage Menu'},
   ];
   for(const r of map){
     if(r.match.test(path)){
