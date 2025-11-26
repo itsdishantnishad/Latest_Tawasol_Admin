@@ -67,22 +67,31 @@ export default class TeamOrganisationStructure
     }
   }
 
-private onCardClick = (member: OrgMember): void => {
-      this.setState(current =>
-        current.selectedId === member.id
-          ? { departments: depts, loadingDepts: false }
-          : current
-      );
-    } catch (e) {
-      console.error("[TeamOrg] error loading departments", e);
-      this.setState(current =>
-        current.selectedId === member.id
-          ? { departments: [], loadingDepts: false }
-          : current
-      );
-    }
-  });
+private onCardClick = async (member: OrgMember): Promise<void> => {
+  try {
+    this.setState({
+      selectedId: member.id,
+      selectedLevel: member.level,
+      loadingDepts: true
+    });
+
+    const sourceList = this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
+    const depts = await this.spService.getDepartmentsByMember(sourceList, member.name);
+
+    this.setState({
+      departments: depts,
+      loadingDepts: false
+    });
+
+  } catch (e) {
+    console.error("[TeamOrg] error loading departments", e);
+    this.setState({
+      departments: [],
+      loadingDepts: false
+    });
+  }
 };
+
 
 
   public render(): React.ReactElement<ITeamOrganisationStructureProps> {
