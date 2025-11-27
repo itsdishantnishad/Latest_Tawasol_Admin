@@ -9,10 +9,10 @@
   background-color: #fef7f0;
   border-radius: 16px;
   color: #1a1a1a;
-  padding: 32px 60px;
+  padding: 0;
 
   @media (max-width: 768px) {
-    padding: 20px;
+    padding: 0;
   }
 }
 
@@ -118,9 +118,8 @@
 
 /* Tabs */
 .tabContainer {
-  margin-bottom: 0;
-  padding: 0 60px;
-  background-color: #fef7f0;
+  margin-block: 20px;
+  padding: 0;
 }
 
 .tabContainerInner{
