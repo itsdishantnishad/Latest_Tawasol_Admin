@@ -217,7 +217,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
           {activeTab === "quick" && (
             <div className={styles.linksGrid}>
               {props.savedApps.filter(app => app.AppType === "Quick Links").map((link, index) => (
-                <a key={index} href={link.URL} className={styles.linkItem}>
+                <a key={index}target="_blank" rel="noopener noreferrer" href={link.URL} className={styles.linkItem}>
                   <div className={styles.iconCircle}> {link.IconURL ? (
                       <img src={link.IconURL} className={styles.appIcon} />
                     ) : (
@@ -233,7 +233,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
           {activeTab === "app" && (
             <div className={styles.linksGrid}>
               {props.savedApps.filter(app => app.AppType === "App Links").map((app, index) => (
-                <a key={index} href={app.URL} className={styles.linkItem}>
+                <a key={index} target="_blank" rel="noopener noreferrer" href={app.URL} className={styles.linkItem}>
                   <div className={styles.iconCircle}>
                     {app.IconURL ? (
                       <img src={app.IconURL} className={styles.appIcon} />
@@ -260,7 +260,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                 {/* Custom link items */}
                 {customLinks.map((link, index) => (
                   <div key={index} className={styles.customLinkItem}>
-                    <a href={link.URL} className={styles.linkItem}>
+                    <a href={link.URL} target="_blank" rel="noopener noreferrer" className={styles.linkItem}>
                       <div className={styles.iconCircle}>🔗</div>
                       <div className={styles.linkTitle}>{link.Title}</div>
                     </a>
