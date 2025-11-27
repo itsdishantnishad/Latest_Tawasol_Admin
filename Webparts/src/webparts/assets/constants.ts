@@ -153,6 +153,25 @@ export const ProcurementSVG = `<svg width="21" height="20" viewBox="0 0 21 20" f
 </svg>
 `;
 
+// GRID & List View Toggle
+
+export const GRIDViewToggleSVG = `
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.3333 7.0974V3.31406C18.3333 2.13906 17.8 1.66406 16.475 1.66406H13.1083C11.7833 1.66406 11.25 2.13906 11.25 3.31406V7.08906C11.25 8.2724 11.7833 8.73906 13.1083 8.73906H16.475C17.8 8.7474 18.3333 8.2724 18.3333 7.0974Z" stroke="#101820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M18.3333 16.475V13.1083C18.3333 11.7833 17.8 11.25 16.475 11.25H13.1083C11.7833 11.25 11.25 11.7833 11.25 13.1083V16.475C11.25 17.8 11.7833 18.3333 13.1083 18.3333H16.475C17.8 18.3333 18.3333 17.8 18.3333 16.475Z" stroke="#101820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M8.7513 7.0974V3.31406C8.7513 2.13906 8.21797 1.66406 6.89297 1.66406H3.5263C2.2013 1.66406 1.66797 2.13906 1.66797 3.31406V7.08906C1.66797 8.2724 2.2013 8.73906 3.5263 8.73906H6.89297C8.21797 8.7474 8.7513 8.2724 8.7513 7.0974Z" stroke="#101820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M8.7513 16.475V13.1083C8.7513 11.7833 8.21797 11.25 6.89297 11.25H3.5263C2.2013 11.25 1.66797 11.7833 1.66797 13.1083V16.475C1.66797 17.8 2.2013 18.3333 3.5263 18.3333H6.89297C8.21797 18.3333 8.7513 17.8 8.7513 16.475Z" stroke="#101820" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+export const ListvViewToggleSVG = `
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2.5 16.6641H17.5" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M2.5 5H17.5" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+
 // Red Color Long Arrow Which is Used in Every Heading
 
 export const LeftSideRedArrowSVG = `<svg width="286" height="20" viewBox="0 0 286 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -166,5 +185,64 @@ export const RightSideRedArrowSVG = `<svg width="286" height="20" viewBox="0 0 2
 <path d="M268.944 18.8574C272.534 16.2933 278.353 10.9272 278.266 10.1489C278.184 9.42629 272.235 3.14366 268.944 0.581841" stroke="#FF0000"/>
 <path d="M275.686 18.8574C279.276 16.2933 285.095 10.9272 285.008 10.1489C284.927 9.42629 278.977 3.14366 275.686 0.581841" stroke="#FF0000"/>
 <path d="M246.616 9.78172C253.298 12.5541 255.896 14.5601 258.232 18.6029C258.382 18.8638 258.729 18.9365 258.967 18.7518L270.041 10.1644C270.292 9.96955 270.294 9.59084 270.046 9.39284L259.007 0.606701C258.757 0.407699 258.386 0.498075 258.248 0.786348C255.903 5.68927 253.125 7.86444 246.616 9.78172ZM246.616 9.78172L0.00244141 9.78174" stroke="#FF0000"/>
+</svg>
+`;
+
+
+// Greeting Banner SVGs
+
+export const MorningSVG = `<svg width="61" height="61" viewBox="0 0 61 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="30.1016" cy="30.1016" r="30.1016" fill="url(#paint0_linear_24156_21229)"/>
+<circle cx="24.9237" cy="15.0604" r="1.99402" fill="black"/>
+<circle cx="34.8964" cy="15.0604" r="1.99402" fill="black"/>
+<path d="M21.9389 22.5938C21.6785 25.2512 24.4053 28.8577 30.2709 28.8577C37.0405 28.8577 38.8588 24.3021 38.6025 22.5938" stroke="black" stroke-width="0.997008" stroke-linecap="round"/>
+<path d="M33.9609 6.58594L38.5919 6.97185" stroke="#E59B24" stroke-width="1.15775" stroke-linecap="round"/>
+<path d="M26.2422 6.58594L21.6112 6.97185" stroke="#E59B24" stroke-width="1.15775" stroke-linecap="round"/>
+<defs>
+<linearGradient id="paint0_linear_24156_21229" x1="30.1016" y1="0" x2="30.1016" y2="60.2031" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FFD46E"/>
+<stop offset="1" stop-color="#FD7654"/>
+</linearGradient>
+</defs>
+</svg>
+`;
+
+export const AfternoonSVG = `<svg width="61" height="61" viewBox="0 0 61 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="30.1016" cy="30.1016" r="30.1016" fill="url(#paint0_linear_24156_21238)"/>
+<circle cx="24.9237" cy="15.0604" r="1.99402" fill="black"/>
+<circle cx="34.8964" cy="15.0604" r="1.99402" fill="black"/>
+<path d="M21.9389 22.5938C21.6785 25.2512 24.4053 28.8577 30.2709 28.8577C37.0405 28.8577 38.8588 24.3021 38.6025 22.5938" stroke="black" stroke-width="0.997008" stroke-linecap="round"/>
+<path d="M33.9609 6.58594L38.5919 6.97185" stroke="url(#paint1_linear_24156_21238)" stroke-width="1.15775" stroke-linecap="round"/>
+<path d="M26.2422 6.58594L21.6112 6.97185" stroke="url(#paint2_linear_24156_21238)" stroke-width="1.15775" stroke-linecap="round"/>
+<defs>
+<linearGradient id="paint0_linear_24156_21238" x1="30.1016" y1="0" x2="30.1016" y2="60.2031" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FFD673"/>
+<stop offset="1" stop-color="#FB2F2F"/>
+</linearGradient>
+<linearGradient id="paint1_linear_24156_21238" x1="36.2764" y1="6.58594" x2="36.2764" y2="6.97185" gradientUnits="userSpaceOnUse">
+<stop stop-color="#E59B24"/>
+<stop offset="1" stop-color="#F72727"/>
+</linearGradient>
+<linearGradient id="paint2_linear_24156_21238" x1="23.9267" y1="6.58594" x2="23.9267" y2="6.97185" gradientUnits="userSpaceOnUse">
+<stop stop-color="#E59B24"/>
+<stop offset="1" stop-color="#F72727"/>
+</linearGradient>
+</defs>
+</svg>
+`;
+
+export const EveningSVG = `<svg width="61" height="61" viewBox="0 0 61 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="30.1016" cy="30.1016" r="30.1016" fill="url(#paint0_linear_24156_21247)"/>
+<circle cx="24.9237" cy="15.0604" r="1.99402" fill="black"/>
+<circle cx="34.8964" cy="15.0604" r="1.99402" fill="black"/>
+<path d="M21.9389 22.5938C21.6785 25.2512 24.4053 28.8577 30.2709 28.8577C37.0405 28.8577 38.8588 24.3021 38.6025 22.5938" stroke="black" stroke-width="0.997008" stroke-linecap="round"/>
+<path d="M33.9609 6.58594L38.5919 6.97185" stroke="#E59B24" stroke-width="1.15775" stroke-linecap="round"/>
+<path d="M26.2422 6.58594L21.6112 6.97185" stroke="#E59B24" stroke-width="1.15775" stroke-linecap="round"/>
+<defs>
+<linearGradient id="paint0_linear_24156_21247" x1="30.1016" y1="0" x2="30.1016" y2="60.2031" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FFD673"/>
+<stop offset="1" stop-color="#FD987E"/>
+</linearGradient>
+</defs>
 </svg>
 `;

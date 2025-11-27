@@ -1,3 +1,8 @@
+
+
+// +++++++++++++++++++++++ CODE TO FETCH DYNAMICALLY MEETING ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
 // import * as React from 'react';
 // import * as ReactDom from 'react-dom';
 // import {
@@ -136,7 +141,7 @@
 
 
 
-
+//+++++++++++++++++++++++++++++++++++++++ DUMMY CODE FOR TESTING THE UI++++++++++++++++++++++++++++++++++++++++++
 
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
@@ -155,19 +160,12 @@ import { GraphMeetingsProvider } from '../services/meetingServices/GraphMeetings
 import { pickFeatured } from '../services/meetingServices/pickFeatured';
 
 export interface IMeetingProps {
-  // Graph only
   source: 'my' | 'team';
   teamId?: string;
-
-  // query options
-  daysAhead: number; // default 7
-  take: number; // default 10
-
-  // freshness
-  refreshMins: number; // default 5
-
-  // show UI with sample data if empty/error
-  demoMode?: boolean; // default true
+  daysAhead: number; 
+  take: number; 
+  refreshMins: number; 
+  demoMode?: boolean; 
 }
 
 export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps> {
@@ -186,7 +184,6 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
     const cacheKey = `mtg2:${this.properties.source}:${this.properties.teamId || 'me'}:${this.properties.daysAhead}:${this.properties.take}`;
 
     try {
-      // If demoMode is forced, skip Graph entirely and render samples
       if (this.properties.demoMode === true && this._isDesignOrDemoForced()) {
         const demo = this._makeDemoRows();
         this._renderRows(demo, ttl, cacheKey);
@@ -220,18 +217,13 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
         rows = await provider.getUpcoming(this.properties.daysAhead, this.properties.take);
         sessionStorage.setItem(cacheKey, JSON.stringify({ t: Date.now(), v: rows }));
       }
-
-      // If no rows but demoMode is enabled, show samples
       if ((!rows || rows.length === 0) && this.properties.demoMode) {
         const demo = this._makeDemoRows();
         this._renderRows(demo, ttl, cacheKey);
         return;
       }
-
-      // Normal render
       this._renderRows(rows || [], ttl, cacheKey);
     } catch (err) {
-      // Graph not approved / 401 / 403 / network — show demo if allowed
       if (this.properties.demoMode) {
         const demo = this._makeDemoRows();
         this._renderRows(demo, ttl, cacheKey);
@@ -246,22 +238,19 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
   private _showingAll: boolean = false;
 
   private _renderRows(rows: any[], ttl: number, cacheKey: string) {
-    const { latest5 } = pickFeatured(rows);
+    const { latest4} = pickFeatured(rows);
 
     const element = React.createElement(MeetingWheelPanel, {
-      latest: latest5,
+      latest: latest4,
       allMeetings: rows,
-      showingAll: this._showingAll, // ✅ tell the panel our current mode
+      showingAll: this._showingAll, 
       onViewAll: () => {
-        // ✅ toggle inline on the same page
         this._showingAll = !this._showingAll;
         this._renderRows(rows, ttl, cacheKey);
       }
     });
 
     ReactDom.render(element, this.domElement);
-
-    // Only auto-refresh if not showing all
     if (!this._showingAll) {
       setTimeout(() => {
         sessionStorage.removeItem(cacheKey);
@@ -285,13 +274,9 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
         </div>
       </div>`;
   }
-
-  // Keep simple; rely on property pane toggle
   private _isDesignOrDemoForced(): boolean {
     return false;
   }
-
-  // Sample data: realistic, future-dated, with joinUrl present
   private _makeDemoRows() {
     const now = new Date();
     const add = (mins: number) => new Date(now.getTime() + mins * 60 * 1000).toISOString();
@@ -396,7 +381,7 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
                 }),
                 PropertyPaneSlider('take', {
                   label: 'Fetch count',
-                  min: 5,
+                  min: 4,
                   max: 25
                 }),
                 PropertyPaneSlider('refreshMins', {

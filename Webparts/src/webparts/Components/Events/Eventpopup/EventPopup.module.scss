@@ -1,0 +1,185 @@
+.eventCardNew {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-width: 320px;
+  width: 100%;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  &.pastEvent {
+    opacity: 0.6;
+    filter: grayscale(40%);
+  }
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.eventImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.statusBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+
+  &.upcoming {
+    background: #ff4757;
+    color: #ffffff;
+  }
+
+  &.registered {
+    background: #2ecc71;
+    color: #ffffff;
+  }
+}
+
+.cardContent {
+  padding: 20px;
+}
+
+.categoryTag {
+  display: inline-block;
+  color: #ff4757;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: capitalize;
+}
+
+.eventTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+
+  &:last-of-type {
+    margin-bottom: 20px;
+  }
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  color: #ff4757;
+  flex-shrink: 0;
+}
+
+.infoText {
+  font-size: 14px;
+  color: #5a5a5a;
+  flex: 1;
+}
+
+.dateBadge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-left: auto;
+}
+
+.actionSection {
+  width: 100%;
+}
+
+.viewDetailsButton {
+  width: 100%;
+  padding: 14px 24px;
+  background: #2c3e50;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+
+  &:hover {
+    background: #1a252f;
+    transform: scale(1.02);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.countdownSection {
+  text-align: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.countdownText {
+  font-size: 14px;
+  color: #5a5a5a;
+  font-weight: 500;
+}
+
+.countdownHighlight {
+  color: #ff4757;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.pastEventLabel {
+  text-align: center;
+  padding: 14px;
+  background: #e0e0e0;
+  color: #757575;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .eventCardNew {
+    max-width: 100%;
+  }
+
+  .imageContainer {
+    height: 160px;
+  }
+
+  .eventTitle {
+    font-size: 16px;
+  }
+
+  .cardContent {
+    padding: 16px;
+  }
+}

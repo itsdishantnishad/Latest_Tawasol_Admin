@@ -1,27 +1,3 @@
-// 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ===================== HEADER ===================== */
 .TIRHdr {
   position: fixed;
@@ -151,14 +127,17 @@
 .TIRAvatar img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ===================== FLOATING NAV ===================== */
-.TIRFloatingNav {
+.TIRFloatingNav{
+  /* tune here */
+  --float-base-bottom: 12px;   /* default distance from viewport bottom */
+  --float-raise: 0px;          /* JS sets this when footer overlaps */
+
   position: fixed !important;
   left: 50% !important;
-  transform: translateX(-50%);
-  bottom: 80px;
+  bottom: var(--float-base-bottom);
   width: 480px;
   height: 64px;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255,255,255,.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: 16px;
@@ -168,13 +147,14 @@
   align-items: center;
   justify-content: center;
   font-family: 'Inter', sans-serif;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
   z-index: 10000;
   pointer-events: auto;
-  opacity: 1;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  transform: translateX(-50%) translateY(0);
-  will-change: opacity, transform;
+
+  /* smooth, GPU-friendly lift */
+  transform: translate(-50%, calc(-1 * var(--float-raise)));
+  transition: transform .24s ease;
+  will-change: transform;
 }
 
 .TIRButtonGroup {
@@ -235,9 +215,21 @@
   justify-content: center;
   gap: 18px;
   margin-bottom: 16px;
+  @media (max-width: 900){
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
 }
 
-.TIRFooterLink { color: #fff; text-decoration: none; font-size: 15px; font-weight: 400; }
+.TIRFooterLink {
+  color: #C4C5C7;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  text-decoration: none;
+}
 .TIRFooterLink:hover { text-decoration: underline; }
 
 .TIRFooterLine { width: 100%; border: none; border-top: 1px solid #444; margin: 16px 0; }
@@ -265,29 +257,50 @@
   left: 50%;
   transform: translateX(-50%);
   width: 560px;
-  background: #fff;
-  border: 1px solid #E6E6E6;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
+
+  /* glass / translucent look */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(255, 255, 255, 0.76) 100%
+  );
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+
   z-index: 1000001;
   overflow: hidden;
 }
 
-.TIRSuggestList { display: flex; flex-direction: column; }
+.TIRSuggestList {
+  display: flex;
+  flex-direction: column;
+}
 
+/* items sit on top of translucent host */
 .TIRSuggestItem {
   display: grid;
   grid-template-columns: 48px 1fr;
   gap: 12px;
   align-items: center;
-  padding: 12px 16px;
+  padding: 12px 18px;
   cursor: pointer;
-  background: #fff;
+  background: transparent; /* <-- no solid white */
 }
 
-.TIRSuggestItem + .TIRSuggestItem { border-top: 1px solid #F0F0F0; }
+.TIRSuggestItem + .TIRSuggestItem {
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+}
+
 .TIRSuggestItem:hover,
-.TIRSuggestItem[aria-selected="true"] { background: #F7F7F7; }
+.TIRSuggestItem[aria-selected='true'] {
+  background: rgba(255, 255, 255, 0.38);
+}
 
 .TIRSuggestThumb {
   width: 44px;
@@ -297,11 +310,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #E6E6E6;
-  background: #FAFAFA;
+  border: 1px solid rgba(230, 230, 230, 0.9);
+  background: rgba(250, 250, 250, 0.9);
 }
 
-.TIRSuggestThumb img { width: 100%; height: 100%; object-fit: cover; }
+.TIRSuggestThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .TIRSuggestTitle {
   font-weight: 700;
@@ -314,7 +331,7 @@
 .TIRSuggestSub {
   font-weight: 400;
   font-size: 14px;
-  color: #666;
+  color: #555;
   line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
@@ -325,16 +342,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 12px;
-  border-top: 1px solid #EDEDED;
-  background: #fff;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.72);
   font-size: 14px;
   font-weight: 600;
   color: #1a73e8;
   cursor: pointer;
 }
 
-.TIRSuggestFooter:hover { background: #F7F7F7; }
+.TIRSuggestFooter:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
 
 /* ===================== NOTIFICATIONS ===================== */
 .TIRNotifOverlay {
@@ -439,37 +458,13 @@
 }
 
 /* ===================== RESPONSIVE ===================== */
-@media (max-width: 420px) {
-  .TIRHdr { height: 48px; }
-  .TIRBrandLogo { width: 28px; height: 28px; }
-  .TIRSearch { width: 220px; height: 40px; }
-  .TIRRight { gap: 10px; }
-  .TIRIconBtn { width: 28px; height: 28px; }
-  .TIRAvatar { width: 34px; height: 34px; }
-  .TIRFloatingNav { width: 300px; height: 56px; bottom: 110px; }
-  .TIRButtonGroup { height: 48px; }
-  .TIRNavLabel { display: none; }
-  .TIRFooter { padding: 20px; }
-  .TIRFooterBottom { grid-template-columns: 1fr; text-align: center; }
-  .TIRFooterBottom span:first-child, .TIRFooterBottomCenter, .TIRSocials { justify-self: center; }
-  .TIRSuggestHost { width: 280px; }
-  .TIRNotifModal { width: 92vw; }
-}
 
-@media (max-width: 576px) {
-  .TIRSearch { width: 260px; height: 40px; }
-  .TIRIconBtn { width: 30px; height: 30px; }
-  .TIRFloatingNav { width: 320px; height: 56px; bottom: 110px; }
-  .TIRSuggestHost { width: 320px; }
-}
-
-@media (max-width: 768px) {
-  .TIRHdr { height: 52px; }
-  .TIRBrandLogo { width: 30px; height: 30px; }
-  .TIRAvatar { width: 36px; height: 36px; }
-  .TIRSearch { width: 300px; }
-  .TIRFloatingNav { width: 360px; bottom: 120px; }
-  .TIRSuggestHost { width: 420px; }
+@media (max-width: 1200px) {
+  .TIRSearch { width: 380px; }
+  .TIRBrandLogo { width: 34px; height: 34px; }
+  .TIRAvatar { width: 38px; height: 38px; }
+  .TIRIconBtn { width: 32px; height: 32px; }
+  .TIRSuggestHost { width: 540px; }
 }
 
 @media (max-width: 992px) {
@@ -481,18 +476,53 @@
   .TIRSuggestHost { width: 500px; }
 }
 
-@media (max-width: 1200px) {
-  .TIRSearch { width: 380px; }
-  .TIRBrandLogo { width: 34px; height: 34px; }
-  .TIRAvatar { width: 38px; height: 38px; }
-  .TIRIconBtn { width: 32px; height: 32px; }
-  .TIRSuggestHost { width: 540px; }
+@media (max-width: 900px){
+  .TIRFooterNav{
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .TIRHdr { height: 52px; }
+  .TIRBrandLogo { width: 30px; height: 30px; }
+  .TIRAvatar { width: 36px; height: 36px; }
+  .TIRSearch { width: 300px; }
+  .TIRFloatingNav { width: 360px; bottom: 120px; }
+  .TIRSuggestHost { width: 420px; }
+}
+
+@media (max-width: 576px) {
+  .TIRSearch { width: 260px; height: 40px; }
+  .TIRIconBtn { width: 30px; height: 30px; }
+  .TIRFloatingNav { width: 320px; height: 56px; bottom: 110px; }
+  .TIRSuggestHost { width: 320px; }
+}
+
+@media (max-width: 420px) {
+  .TIRHdr { height: 48px; }
+  .TIRBrandLogo { width: 28px; height: 28px; }
+  .TIRSearch { width: 220px; height: 40px; }
+  .TIRRight { gap: 10px; }
+  .TIRIconBtn { width: 28px; height: 28px; }
+  .TIRAvatar { width: 34px; height: 34px; }
+  .TIRFloatingNav { width: 300px; height: 56px; --float-base-bottom: 10px; }
+  .TIRButtonGroup { height: 48px; }
+  .TIRNavLabel { display: none; }
+  .TIRFooter { padding: 20px; }
+  .TIRFooterBottom { grid-template-columns: 1fr; text-align: center; }
+  .TIRFooterBottom span:first-child, .TIRFooterBottomCenter, .TIRSocials { justify-self: center; }
+  .TIRSuggestHost { width: 280px; }
+  .TIRNotifModal { width: 92vw; }
 }
 
 @media (min-width: 1440px) {
   .TIRHdrWrap { width: 94vw; }
   .TIRSearch { width: 500px; }
-  .TIRFloatingNav { width: 520px; bottom: 150px; }
+  .TIRFloatingNav { width: 520px; --float-base-bottom: 14px; }
   .TIRFooter { padding: 28px 56px; }
   .TIRFooterLogo { font-size: 30px; }
   .TIRFooterNav { gap: 20px; }
@@ -502,7 +532,7 @@
 @media (min-width: 1920px) {
   .TIRHdrWrap { width: 92vw; }
   .TIRSearch { width: 560px; height: 46px; }
-  .TIRFloatingNav { width: 560px; bottom: 160px; }
+  .TIRFloatingNav { width: 560px; --float-base-bottom: 16px; }
   .TIRFooter { padding: 32px 72px; }
   .TIRFooterLogo { font-size: 32px; }
   .TIRFooterNav { gap: 22px; }
@@ -512,12 +542,13 @@
 @media (min-width: 2560px) {
   .TIRHdrWrap { width: 90vw; }
   .TIRSearch { width: 640px; height: 48px; }
-  .TIRFloatingNav { width: 620px; bottom: 180px; }
+  .TIRFloatingNav { width: 620px; --float-base-bottom: 18px; }
   .TIRFooter { padding: 40px 96px; }
   .TIRFooterLogo { font-size: 36px; }
   .TIRFooterNav { gap: 26px; }
   .TIRSuggestHost { width: 760px; }
 }
+
 /* === Hide SharePoint native modern footer === */
 .simpleFooterContainer,
 [data-automationid="SimpleFooter"],

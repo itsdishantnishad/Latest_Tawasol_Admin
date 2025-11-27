@@ -7,6 +7,6 @@ export function pickFeatured(rows: Meeting[]) {
     if (new Date(rows[i].start).getTime() >= now) { idx = i; break; }
   }
   const featured3 = rows.slice(idx, idx + 3);
-  const latest5 = rows.slice(0, 5);
-  return { featured3, latest5 };
+  const latest4 = rows.slice(0, 4);
+  return { featured3, latest4 };
 }

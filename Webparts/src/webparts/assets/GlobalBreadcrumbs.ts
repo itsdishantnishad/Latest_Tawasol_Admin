@@ -15,8 +15,7 @@ const CSS = `
 .__gbc_back{
   display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;
   font-family:Inter, Segoe UI, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-  font-size:14px;line-height:22px;letter-spacing:0;color:#2B2B2B;font-weight:500;
-}
+    font-size: 16px; line-height: 24px; letter-spacing: 0; color: #000000; font-weight: 400; }
 .__gbc_back svg{width:18px;height:18px;display:block}
 .__gbc_divider{width:1px;height:16px;background:rgba(58,59,67,.35)}
 .__gbc_wrap{
@@ -25,10 +24,10 @@ const CSS = `
   font-size:14px;line-height:22px;letter-spacing:0;color:#3A3B43;
   -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
 }
-.__gbc_link{color:#B9BCC3;font-weight:400;text-decoration:none;cursor:pointer}
+.__gbc_link{color: #A7A7A7;font-weight: 400;text-decoration: none;cursor: pointer;font-size: 14px;line-height: 22px;}
 .__gbc_link:hover{text-decoration:underline}
 .__gbc_sep{color:#B9BCC3;opacity:1;margin:0 2px;user-select:none}
-.__gbc_current{color:#3A3B43;font-weight:600}
+.__gbc_current{color: #3A3B43;font-weight: 500;font-size: 14px;line-height: 22px;font-family: Inter, sans-serif;}
 `;
 
 let __gbc_styles = false;
@@ -73,6 +72,8 @@ function detectLabels(): S {
       current:()=> tidy((q && q.get('cat')) || fromTitle() || 'Details') },
     { match:/leave/,           sect:'Home',                 current:'Leave Details' },
     { match:/hr-letters?/,     sect:'Home',                 current:'HR Letters' },
+    { match: /back/,            sect:'Home',                  current:'Offer & Benefits'},
+    {match:/back/,              sect:'Home',                  current:'Beverage Menu'},
   ];
   for(const r of map){
     if(r.match.test(path)){
