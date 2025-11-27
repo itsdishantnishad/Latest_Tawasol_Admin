@@ -20,6 +20,8 @@ const AllComponents: React.FC<Props> = ({
   context,
   viewMode,
 }) => {
+
+  const sitepageurl = `${context?.pageContext?.web?.absoluteUrl}/SitePages/`;
   const now = new Date();
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
   const parsedEvents = React.useMemo(() => {
@@ -201,6 +203,7 @@ const AllComponents: React.FC<Props> = ({
                       date={`${event.day}, ${event.date} ${event.month}`}
                       imageUrl={event.imageUrl}
                       imageCount={0}
+                      sitepageurl={sitepageurl}
                     />
                   ))
                 ) : (
