@@ -221,38 +221,38 @@
 .fileIcon[data-ext="xlsx"] { background:#cfeedd; }
 .fileIcon[data-ext="pptx"] { background:#ffe6bf; }
 
-/* --------------------------------- Responsive --------------------------------- */
-@media (max-width: 1600px) {
-  .supportGrid { grid-template-columns: repeat(6, 1fr); }
-}
-@media (max-width: 1360px) {
-  .supportGrid { grid-template-columns: repeat(5, 1fr); }
-  .coreTile{
-    flex: 1 1 auto;
-  }
-}
-@media (max-width: 1100px) {
-  .supportGrid { grid-template-columns: repeat(4, 1fr); }
-  .libWrap     { grid-template-columns: 1fr; } 
-}
+// /* --------------------------------- Responsive --------------------------------- */
+// @media (max-width: 1600px) {
+//   .supportGrid { grid-template-columns: repeat(6, 1fr); }
+// }
+// @media (max-width: 1360px) {
+//   .supportGrid { grid-template-columns: repeat(5, 1fr); }
+//   .coreTile{
+//     flex: 1 1 auto;
+//   }
+// }
+// @media (max-width: 1100px) {
+//   .supportGrid { grid-template-columns: repeat(4, 1fr); }
+//   .libWrap     { grid-template-columns: 1fr; } 
+// }
 
-@media (max-width: 991px) {
-  .supportGrid { grid-template-columns: repeat(3, 1fr); }
-}
+// @media (max-width: 991px) {
+//   .supportGrid { grid-template-columns: repeat(3, 1fr); }
+// }
 
-@media (max-width: 800px) {
-  .topBar { grid-template-columns: 1fr; }
-  .supportGrid { grid-template-columns: repeat(3, 1fr); }
-  .docGrid { grid-template-columns: repeat(3, minmax(180px, 1fr)); }
-  .boards { grid-template-columns: 1fr; }
-}
+// @media (max-width: 800px) {
+//   .topBar { grid-template-columns: 1fr; }
+//   .supportGrid { grid-template-columns: repeat(3, 1fr); }
+//   .docGrid { grid-template-columns: repeat(3, minmax(180px, 1fr)); }
+//   .boards { grid-template-columns: 1fr; }
+// }
 
-@media (max-width: 640px) {
-  .homeTopRow{flex-wrap: wrap-reverse;}
-  .searchHome{
-    & > div{
-      width: 100%;
-    }
-  }
-  .supportGrid { grid-template-columns: repeat(2, 1fr); }
-}
+// @media (max-width: 640px) {
+//   .homeTopRow{flex-wrap: wrap-reverse;}
+//   .searchHome{
+//     & > div{
+//       width: 100%;
+//     }
+//   }
+//   .supportGrid { grid-template-columns: repeat(2, 1fr); }
+// }

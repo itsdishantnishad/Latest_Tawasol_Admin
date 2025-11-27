@@ -12,6 +12,7 @@ export interface IAlleventsProps {
 
 const AllEvents: React.FC<IAlleventsProps> = (props) => {
   const now = new Date();
+  const sitepageurl = `${props?.context?.pageContext?.web?.absoluteUrl}/SitePages/`;
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
 
   const parsedEvents = React.useMemo(() => {
@@ -84,7 +85,7 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
               <div className={styles.gridLayout}>
                 {previousEvents.length > 0 ? (
                   previousEvents.map((event:any, index:any) => (
-                    <PreviousEventCard key={index} title={event.title} date={`${event.day}, ${event.date} ${event.month}`} imageUrl={event.imageUrl} imageCount={0}/>
+                    <PreviousEventCard key={index} title={event.title} date={`${event.day}, ${event.date} ${event.month}`} imageUrl={event.imageUrl} imageCount={0} sitepageurl={sitepageurl}/>
                   ))
                 ) : (
                   <p>No previous events found.</p>
