@@ -1,10 +1,8 @@
 @import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
 
 .eventDetail {
-  padding: 40px 60px;
-  max-width: 1400px;
-  margin: 0 auto;
-  background: #F5F3EF;
+  background-color: #fef7f0;
+  padding: 20px 60px;
   min-height: 100vh;
 }
 
@@ -98,7 +96,7 @@
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   padding: 24px;
-  min-width: 500px;
+  width: 500px;
   z-index: 100;
   animation: slideDown 0.3s ease;
 }
@@ -433,9 +431,10 @@
   }
 
   .findPhotoDropdown {
-    min-width: 90vw;
-    left: 5vw;
-    transform: none;
+    left: 0;
+    right: 0;
+    width: 90%;
+    transform: translateX(2%);
   }
 
   .tabButtons {

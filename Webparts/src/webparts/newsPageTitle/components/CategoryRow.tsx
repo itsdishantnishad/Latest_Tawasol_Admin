@@ -2,12 +2,25 @@ import * as React from 'react';
 import styles from './NewsPageTitle.module.scss';
 import NewsType from '../../Components/News/NewsType';
 
+// SVGs from shared constants
+import {
+  GovernanceRiskandComplianceSVG,
+  HealthSafetyEnvironmentSVG,
+  HumanCapitalSVG,
+  ProcurementSVG,
+} from '../../assets/constants';
+
+// Helper: convert SVG string → data URI so we can use it in <img src="">
+const svgToDataUri = (svg: string): string =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+
 // ─── Department icons ─────────────────────────────────────────────────────────
+// Keys are just your internal short codes (grc/hse/hc/pa)
 const ICONS: Record<string, string> = {
-  grc: require('../../assets/GovernanceRiskandCompliance.svg'),
-  hse: require('../../assets/HealthSafetyEnvironment.svg'),
-  hc:  require('../../assets/HumanCapital.svg'),
-  pa:  require('../../assets/Procurement.svg'),
+  grc: svgToDataUri(GovernanceRiskandComplianceSVG),
+  hse: svgToDataUri(HealthSafetyEnvironmentSVG),
+  hc:  svgToDataUri(HumanCapitalSVG),
+  pa:  svgToDataUri(ProcurementSVG),
 };
 
 export interface IHeaderChipsProps {
@@ -67,6 +80,7 @@ export default class CategoryRow extends React.Component<IHeaderChipsProps> {
     const categoryText = this.getCategoryText();
     const departmentText = this.getDepartmentText();
     const deptIcon = this.pickDepartmentIcon(departmentText);
+
     const c = (categoryText || '').toLowerCase();
     const showDepartment = c.includes('announce') || c.includes('dhre'); // hide for Around the world
     const tags = this.asArray(this.props.hashtags);
@@ -79,7 +93,14 @@ export default class CategoryRow extends React.Component<IHeaderChipsProps> {
 
         {showDepartment && departmentText && (
           <div className={styles.departmentChip}>
-            {deptIcon && <img className={styles.deptIcon} src={deptIcon} alt="" loading="lazy" />}
+            {deptIcon && (
+              <img
+                className={styles.deptIcon}
+                src={deptIcon}
+                alt=""
+                loading="lazy"
+              />
+            )}
             <span className={styles.departmentText}>{departmentText}</span>
           </div>
         )}
@@ -95,8 +116,8 @@ export default class CategoryRow extends React.Component<IHeaderChipsProps> {
                 key={i}
                 className={styles.hashtagLink}
                 onClick={() => this.props.onTagClick && this.props.onTagClick(tag)}
-              >#
-                {tag}
+              >
+                #{tag}
               </span>
             ))}
           </div>

@@ -11,5 +11,6 @@ export enum ListName {
   TEAM_ORG_DEPARTMENTS   = "Team Org Departments",
   DASH_CATEGORIES        = "Dashboard Category",
   DASHBOARDS             = "BI Dashboard",
-  DOCUMENT_FUNCTION      = "Document Function" 
+  DOCUMENT_FUNCTION      = "Document Function",
+  ANNOUNCEMENT_BANNER    = "Announcement Banner"
 }

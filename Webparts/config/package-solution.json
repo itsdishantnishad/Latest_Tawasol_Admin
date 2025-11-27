@@ -32,6 +32,16 @@
         "id": "91f9e40d-ef47-4d71-82db-166c26b1db18",
         "version": "1.0.0.0"
       }
+    ],
+    "webApiPermissionRequests": [
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Calendars.Read"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "User.ReadBasic.All"
+      }
     ]
   },
   "paths": {

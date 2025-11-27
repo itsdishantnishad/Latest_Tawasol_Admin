@@ -16,7 +16,10 @@
 
 /* Image */
 .imageWrap { position:absolute; inset:0; }
-.imageWrap img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; filter:saturate(1.05) contrast(1.02); }
+.imageWrap img {
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
+  filter:saturate(1.05) contrast(1.02);
+}
 .fadeTop, .fadeBottom { position:absolute; left:0; right:0; height:55%; pointer-events:none; }
 .fadeTop    { top:0;    background:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,0)); }
 .fadeBottom { bottom:0; background:linear-gradient(0deg,  rgba(0,0,0,.78), rgba(0,0,0,0)); }
@@ -52,23 +55,30 @@
 }
 .metaItem.dept{ padding:2px 8px; border-radius:999px; backdrop-filter:blur(2px); }
 
-/* Category icon sprite */
-.categoryIcon{ width:25px; height:25px; border-radius:4px; background-repeat:no-repeat; background-position:center; background-size:contain; filter:drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
-.cat_announcement{ background-image:url("../../assets/AnnouncementIconNewsTag.svg"); }
-.cat_around_the_world{ background-image:url("../../assets/ArroundTheWorldIconNewsTag.svg"); }
-.cat_dhre_stories{ background-image:url("../../assets/DHREIconNewsTag.svg"); }
+/* Category icon – image now provided inline from TS via backgroundImage */
+.categoryIcon{
+  width:25px; height:25px; border-radius:4px;
+  background-repeat:no-repeat; background-position:center; background-size:contain;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));
+}
 
-/* Department icon */
-.deptIcon{ width:16px; height:16px; margin-right:6px; display:inline-block; background-repeat:no-repeat; background-position:center; background-size:contain; filter:drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
-.dept_hc { background-image:url("../../assets/HumanCapital.svg"); }
-.dept_grc{ background-image:url("../../assets/GovernanceRiskandCompliance.svg"); }
-.dept_hse{ background-image:url("../../assets/HealthSafetyEnvironment.svg"); }
-.dept_proc{ background-image:url("../../assets/Procurement.svg"); }
+/* Department icon – image now provided inline from TS via backgroundImage */
+.deptIcon{
+  width:16px; height:16px; margin-right:6px; display:inline-block;
+  background-repeat:no-repeat; background-position:center; background-size:contain;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));
+}
 
 /* Animations */
 .animateIn{}
-@keyframes slideUpFade{ from{transform:translateY(16px); opacity:0;} to{transform:translateY(0); opacity:1;} }
-.grid.animateIn > .card{ animation:slideUpFade 720ms cubic-bezier(0.22,1,0.36,1) both; will-change:transform, opacity; }
+@keyframes slideUpFade{
+  from{transform:translateY(16px); opacity:0;}
+  to{transform:translateY(0); opacity:1;}
+}
+.grid.animateIn > .card{
+  animation:slideUpFade 720ms cubic-bezier(0.22,1,0.36,1) both;
+  will-change:transform, opacity;
+}
 .grid.animateIn > .card:nth-child(1){ animation-delay:80ms; }
 .grid.animateIn > .card:nth-child(2){ animation-delay:160ms; }
 .grid.animateIn > .card:nth-child(3){ animation-delay:240ms; }
