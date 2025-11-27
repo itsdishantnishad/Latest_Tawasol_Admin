@@ -16,7 +16,6 @@ export interface IFaqsProps {
 interface IFaqItem {
   id: number;
   category: string;
-  // store both languages
   questionEn: string;
   answerEn: string;
   questionAr?: string;
