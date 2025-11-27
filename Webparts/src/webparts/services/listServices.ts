@@ -461,45 +461,82 @@ export class listServices {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getAllEvents(): Promise<any[]> {
-    let results;
-    const constraints = `AND ContentTypeId:(${ContentTypeId.EVENT}*)`;
+      let results;
+      const constraints = `AND ContentTypeId:(${ContentTypeId.EVENT}*)`;
 
-    try {
-      const searchOptions: ISearchQuery = {
-        Querytext: "*",
-        TrimDuplicates: false,
-        SelectProperties: [
-          "Id",
-          "Title",
-          "TIREventEndDate",
-          "TIREventStartDate",
-          "TIRLocation",
-          "TIREventCategory",
-          "URL",
-        ],
-        QueryTemplate: `{searchTerms}`,
-        HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
-        EnableInterleaving: true,
-      };
+      try {
+        const searchOptions: ISearchQuery = {
+          Querytext: "*",
+          TrimDuplicates: false,
+          SelectProperties: [
+            "Id",
+            "Title",
+            "TIREventEndDate",
+            "TIREventStartDate",
+            "TIRLocation",
+            "TIREventCategory",
+            "URL",
 
-      searchOptions.RowLimit = 500;
-      results = await this.sp.search(searchOptions);
+            // 🔹 image-related managed properties
+            "PictureThumbnailURL",
+            "BannerImageUrlOWSURLH",
+            "PublishingImage",
+            "Path"
+          ],
+          QueryTemplate: `{searchTerms}`,
+          HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
+          EnableInterleaving: true
+        };
 
-      return results.PrimarySearchResults.map((item: any) => {
-        return {
-          ID: item.Id,
-          title: item.Title,
-          eventEndDate: item.TIREventEndDate,
-          eventStartDate: item.TIREventStartDate,
-          location: item.TIRLocation,
-          newsImage: listServices.getImageUrlFromPage(item.URL, 200),
-          category: item.TIREventCategory,
-        } as any;
-      });
-    } catch (error) {
-      return Promise.reject(error);
+        searchOptions.RowLimit = 500;
+        results = await this.sp.search(searchOptions);
+
+        return results.PrimarySearchResults.map((item: any) => {
+          // --- try multiple places for an image -----------------
+          let img: string = "";
+
+          // 1) direct thumbnail (usually present for modern pages)
+          if (item.PictureThumbnailURL) {
+            img = item.PictureThumbnailURL;
+          }
+
+          // 2) Banner image field (url, desc) → take just url part
+          if (!img && item.BannerImageUrlOWSURLH) {
+            // often like "https://.../image.jpg, Image description"
+            const raw = String(item.BannerImageUrlOWSURLH);
+            img = raw.split(",")[0].trim();
+          }
+
+          // 3) PublishingImage (sometimes used on classic layouts)
+          if (!img && item.PublishingImage) {
+            // usually contains <img src="..."> HTML
+            const match = String(item.PublishingImage).match(/src="([^"]+)"/i);
+            if (match && match[1]) {
+              img = match[1];
+            }
+          }
+
+          // 4) Fallback: our old getpreview logic
+          if (!img && item.URL) {
+            img = listServices.getImageUrlFromPage(item.URL, 200);
+          }
+
+          return {
+            ID: item.Id,
+            title: item.Title,
+            eventEndDate: item.TIREventEndDate,
+            eventStartDate: item.TIREventStartDate,
+            location: item.TIRLocation,
+            newsImage: img,                        // ✅ always best image we found
+            category: item.TIREventCategory,
+            pageUrl: item.URL,                     // extra info for debugging / future
+            path: item.Path
+          } as any;
+        });
+      } catch (error) {
+        return Promise.reject(error);
+      }
     }
-  }
 
   /** ===== Simple list-based loaders (Apps, Joiners, Portfolio, Values) ===== */
 
@@ -681,8 +718,6 @@ export class listServices {
       const mapped: OrgDepartment[] = matches.map((item: any) => {
         const rawDept = item.TIRDepartment;
         let deptName = "";
-
-        // 🔹 TIRDepartment comes as taxonomy object/array → get its Label like we do elsewhere
         if (rawDept) {
           if (Array.isArray(rawDept)) {
             const first = rawDept[0] || {};
@@ -722,7 +757,7 @@ export class listServices {
     }
   }
 
-  /** ===== Policies & Procedures: Document Functions (for Landing.tsx) ===== */
+  /** ===== Policies & Procedures: Document Functions ===== */
 
   public async getDocumentFunctions(
     listTitle: string

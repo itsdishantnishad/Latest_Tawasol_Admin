@@ -1,12 +1,12 @@
 /** ====== Site URL bases (edit these two only if your path changes) ====== */
 export const SITE_BASE =
-  'https://orgessence.sharepoint.com';
+  'https://dubaiholding.sharepoint.com';
 export const SITE_ASSETS_BASE =
-  `${SITE_BASE}/sites/IntranetRevampTawasol/SiteAssets`;
+  `${SITE_BASE}/sites/TawasolDev/SiteAssets`;
 
 /** Policies & Procedures – View Page Icons folder */
 export const PP_VIEW_ICONS_BASE =
-  `${SITE_ASSETS_BASE}/Policies%20%26%20Procedures/View%20Page%20Icons`;
+  `${SITE_ASSETS_BASE}/Policies%20&%20Procedures/View%20Page%20Icons`;
 
 /** Global Banner (already used elsewhere) */
 export const DEFAULT_BANNER_TITLE = 'Welcome to Tawasol';
@@ -33,7 +33,7 @@ export const ICON_ARROW_DOWN        = `${PP_VIEW_ICONS_BASE}/Folder%20Arrow%20Ic
 /** ===== Real PDF used in dummy provider for preview ===== */
 export const REAL_PDF_FILE_NAME = 'Major Project File.pdf';
 export const REAL_PDF_URL =
-  'https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SiteAssets/Policies%20%26%20Procedures/View%20Page%20Icons/Major%20Project%20File.pdf';
+  'https://dubaiholding.sharepoint.com/sites/TawasolDev/SiteAssets/Policies%20&%20Procedures/View%20Page%20Icons/Major%20Project%20File.pdf';
 
 
 /** ====== Breadcrumb / Tasks SVGs you already had (kept as-is) ====== */
