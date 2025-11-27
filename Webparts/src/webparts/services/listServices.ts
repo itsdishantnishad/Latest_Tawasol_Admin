@@ -509,7 +509,7 @@ export class listServices {
     try {
       results = await this.sp.web.lists
         .getByTitle(listName)
-        .items.select("Title", "TIRSortOrder", "TIRIconURL", "URL")
+        .items.select("Title", "TIRSortOrder", "TIRIconURL", "URL","TIRAppType")
         .orderBy("TIRSortOrder", true)();
 
       return results.map((item: any) => {
@@ -518,6 +518,7 @@ export class listServices {
           SortOrder: item.TIRSortOrder,
           IconURL: item.TIRIconURL ? item.TIRIconURL.Url : "#",
           URL: item.URL ? item.URL.Url : "#",
+          AppType: item.TIRAppType ? item.TIRAppType : "",
         } as any;
       });
     } catch (error) {
