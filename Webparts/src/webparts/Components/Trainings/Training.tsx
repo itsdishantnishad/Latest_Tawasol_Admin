@@ -63,49 +63,70 @@ const learningContentLinks = [
 // --------------------------
 // Mapping SharePoint data
 // --------------------------
-function mapSharePointTrainingsForAll(data: any[]) {
-  return data.map((item, index) => {
-    const startDateStr = item.eventStartDate?.split("\n\n")[1] || "";
-    const endDateStr = item.eventEndDate?.split("\n\n")[1] || "";
+const mapSharePointTrainingsForAll = (data: any[]) => {
+
+  const deduped = Array.from(
+    new Map(data.map(i => [i.ListItemID || i.title, i])).values()
+  );
+
+  return deduped.map((item, index) => {
+
+    const startDateStr = item.eventStartDate?.split("\n")[0]?.trim() || "";
+    const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim() || "";
 
     const startDate = new Date(startDateStr);
     const endDate = new Date(endDateStr);
 
-    // Month label for AllTrainingCard accordion
-    const monthLabel = `${startDate.toLocaleString("default", { month: "long" })} ${startDate.getFullYear()}`;
+    const monthLabel = `${startDate.toLocaleString("default", {
+      month: "long",
+    })} ${startDate.getFullYear()}`;
 
-    // Date range for AllTrainingCard
-    const dateRange = `${startDate.getDate()}-${endDate.getDate()} ${startDate.toLocaleString("default", { month: "short" })} ${startDate.getFullYear()}`;
+    const dateRange = `${startDate.getDate()}-${endDate.getDate()} ${startDate.toLocaleString(
+      "default",
+      { month: "short" }
+    )} ${startDate.getFullYear()}`;
 
-    // Time for TrainingCard
-    const timeRange = `${startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${endDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    const timeRange = `${startDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    })} - ${endDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    })}`;
+
+   // FIX location duplication
+    const location = item.location?.split("\n")[0]?.trim() || "";
 
     return {
+      ...item,
       id: index + 1,
-      // AllTrainingCard props
-      imageUrl: item.newsImage || "https://via.placeholder.com/400x200?text=No+Image",
-      category: "Online",
+      imageUrl:
+        item.newsImage || "https://via.placeholder.com/400x200?text=No+Image",
+      category: "Classroom",
       title: item.title || "Untitled Training",
       date: dateRange,
-      duration: `${Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} days`,
+      duration: `${Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      )} days`,
       instructorName: item?.instructor?.name,
       instructorTitle: item?.instructor?.role,
       instructorImageUrl: `https://i.pravatar.cc/150?img=${(index % 6) + 1}`,
       month: monthLabel,
       isRegistered: !!item.joiningURL,
       isMyTraining: !!item.joiningURL,
-      location: item.location?.split("\n\n")[0] || "TBD",
+      location: location,   // 🔥 FIXED
       joinUrl: item.joiningURL || "#",
       Eventtype: "Trainings",
-      // TrainingCard props
       startDate: startDateStr,
       endDate: endDateStr,
       subtitle: "",
       time: timeRange,
-      ...item,
     };
   });
-}
+};
+
 
 
 // --------------------------
@@ -208,6 +229,7 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
                       instructorImageUrl={course.instructorImageUrl}
                       isRegistered={course.isRegistered}
                       onJoin={() => handleRequestApproval(course.id, course.title)}
+                      pageUrl={course.pageUrl}
                     />
                   ))}
                 </div>

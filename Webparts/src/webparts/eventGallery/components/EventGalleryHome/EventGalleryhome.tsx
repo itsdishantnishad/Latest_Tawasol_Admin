@@ -86,6 +86,7 @@ let  dummyEvents = convertToDummyEvents(props.Allevent, props?.context?._pageCon
         onBack={handleBackToGallery}
         eventdata={dummyEvents}
         images={images}
+        dymaicUrl={props?.context?._pageContext?.web?.absoluteUrl?.split("/sites")[0]}
       />
     );
   }
