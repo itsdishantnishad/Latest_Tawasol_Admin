@@ -13,6 +13,7 @@ export interface TrainingCardProps {
   imageUrl: string;
   isRegistered: boolean;
   joinUrl: string;
+  pageUrl: string;
 }
 
 const TrainingCard: React.FC<TrainingCardProps> = ({
@@ -26,7 +27,8 @@ const TrainingCard: React.FC<TrainingCardProps> = ({
   location,
   imageUrl,
   isRegistered,
-  joinUrl
+  joinUrl,
+  pageUrl
 }) => {
   const startDateObj = new Date(startDate);
   const endDateObj = new Date(endDate);
@@ -40,6 +42,7 @@ const TrainingCard: React.FC<TrainingCardProps> = ({
   const endWeekday = endDateObj.toLocaleDateString('en-US', { weekday: 'long' });
 
   return (
+    <a href={pageUrl} className={styles.cardLinkWrapper}>
     <div className={styles.cardContainer}>
       <div className={styles.dateSection}>
         <div className={styles.dateBox}>
@@ -103,6 +106,7 @@ const TrainingCard: React.FC<TrainingCardProps> = ({
         </a>
       </div>
     </div>
+    </a>
   );
 };
 
