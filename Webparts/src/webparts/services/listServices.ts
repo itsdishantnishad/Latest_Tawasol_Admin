@@ -565,23 +565,19 @@ export class listServices {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getNewJoiners(listName: string): Promise<any[]> {
-    let results: any[] = [];
-    try {
-      results = await this.sp.web.lists
-        .getByTitle(listName)
-        .items.select("Title", "TIRDesignation", "TIRUserPicture", "TIRDescription")();
+    const results = await this.sp.web.lists
+      .getByTitle(listName)
+      .items
+      .select("Title", "TIRSortOrder", "TIRDesignation", "TIRUserPicture", "TIRDescription")
+      .orderBy("TIRSortOrder", false)(); // false = descending
 
-      return results.map((item: any) => {
-        return {
-          Title: item.Title,
-          Designation: item.TIRDesignation,
-          UserPicture: item.TIRUserPicture ? item.TIRUserPicture.Url : "#",
-          Description: item.TIRDescription,
-        } as any;
-      });
-    } catch (error) {
-      return Promise.reject(error);
-    }
+    return results.map((item: any) => ({
+      Title: item.Title,
+      SortOrder: Number(item.TIRSortOrder),
+      Designation: item.TIRDesignation,
+      UserPicture: item.TIRUserPicture ? item.TIRUserPicture.Url : "#",
+      Description: item.TIRDescription
+    }));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
