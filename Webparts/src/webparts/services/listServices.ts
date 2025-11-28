@@ -450,6 +450,7 @@ export class listServices {
           newsImage: listServices.getImageUrlFromPage(item.URL, 200),
           joiningURL: item.TIRJoiningURLOWSMTXT,
           instructor: instructorInfo,
+          pageUrl: item.URL,
         } as any;
       });
     } catch (error) {

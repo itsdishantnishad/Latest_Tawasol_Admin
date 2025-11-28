@@ -11,6 +11,7 @@ interface IEventDetailProps {
   onBack: () => void;
   eventdata: any[];
   images: any[];
+  dymaicUrl: string;
 }
 
 interface IPhoto {

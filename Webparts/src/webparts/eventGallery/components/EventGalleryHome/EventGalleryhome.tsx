@@ -148,6 +148,7 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
         onBack={handleBackToGallery}
         eventdata={dummyEvents}
         images={images}
+        dymaicUrl={props?.context?._pageContext?.web?.absoluteUrl?.split("/sites")[0]}
       />
     );
   }
