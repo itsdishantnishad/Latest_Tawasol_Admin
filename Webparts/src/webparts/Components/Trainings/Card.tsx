@@ -14,6 +14,7 @@ export interface IAllTrainingCardProps {
   instructorImageUrl: string;
   isRegistered?: boolean;
   onJoin: () => void;
+  pageUrl: string;
 }
 export const AllTrainingCard: React.FC<IAllTrainingCardProps> = ({
   imageUrl,
@@ -25,16 +26,18 @@ export const AllTrainingCard: React.FC<IAllTrainingCardProps> = ({
   instructorTitle,
   instructorImageUrl,
   isRegistered = false,
-  onJoin
+  onJoin,
+  pageUrl
 }) => {
   const formatDate = (rawDate: string) => rawDate; // Customize if needed, e.g., parse and reformat
 
   return (
-    <div className={styles.courseCard}>      
-      {/* Header Image */}
-      <div className={styles.imageContainer}>
-        <img src={imageUrl} alt={title} className={styles.headerImage} />
-        {/* Category Label (top-left on image) */}
+    <a href={pageUrl} className={styles.cardLinkWrapper}>
+      <div className={styles.courseCard}>
+        {/* Header Image */}
+        <div className={styles.imageContainer}>
+          <img src={imageUrl} alt={title} className={styles.headerImage} />
+          {/* Category Label (top-left on image) */}
        <div className={styles.categoryLabel}>{category}</div>
       </div>
 
@@ -93,5 +96,6 @@ export const AllTrainingCard: React.FC<IAllTrainingCardProps> = ({
         )}
       </div>
     </div>
+    </a>
   );
 };

@@ -59,17 +59,6 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const userEmail = props.context.pageContext.user.loginName;
-
-  const quickLinks = [
-    { Title: "IT Help Request", IconURL: "🖥️", URL: "#" },
-    { Title: "Learning @ Dhre", IconURL: "📖", URL: "#" },
-    { Title: "Performance Management", IconURL: "📊", URL: "#" },
-    { Title: "Leave Request", IconURL: "📋", URL: "#" },
-    { Title: "Password Reset", IconURL: "🔄", URL: "#" },
-    { Title: "Biometric Attendance", IconURL: "👤", URL: "#" },
-    { Title: "Data Protection", IconURL: "🔒", URL: "#" }
-  ];
-
   const loadUserLinks = async () => {
     try {
       const items: IUserListItem[] = await sp.web.lists
@@ -300,6 +289,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                       <TextField
                         label="Add name"
                         placeholder="Add a name"
+                        required
                         value={linkTitle}
                         onChange={(e, v: any) => setLinkTitle(v)}
                         styles={{
@@ -313,6 +303,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                         label="Enter your URL"
                         placeholder="Enter your URL here"
                         value={linkURL}
+                        required
                         onChange={(e, v: any) => setLinkURL(v)}
                         styles={{
                           fieldGroup: { borderRadius: 8 }

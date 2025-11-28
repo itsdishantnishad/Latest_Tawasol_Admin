@@ -11,6 +11,7 @@ interface IEventDetailProps {
   onBack: () => void;
   eventdata: any[];
   images: any[];
+  dymaicUrl: string;
 }
 
 interface IPhoto {
@@ -20,7 +21,7 @@ interface IPhoto {
 }
 
 const EventDetail: React.FC<IEventDetailProps> = (props) => {
-  const { eventTitle, eventDate, imageCount, onBack, eventdata, images } =
+  const { eventTitle, eventDate, imageCount, onBack, eventdata, images, dymaicUrl } =
     props;
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [showFindMyPhoto, setShowFindMyPhoto] = useState<boolean>(false);
@@ -315,7 +316,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
             onClick={() => openLightbox(photo.Id)}
           >
             <img
-              src={`https://orgessence.sharepoint.com${photo.FileRef}`}
+              src={`${dymaicUrl}${photo.FileRef}`}
               alt={photo.alt}
             />
           </div>

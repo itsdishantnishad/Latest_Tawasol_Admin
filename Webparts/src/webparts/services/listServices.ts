@@ -450,6 +450,7 @@ export class listServices {
           newsImage: listServices.getImageUrlFromPage(item.URL, 200),
           joiningURL: item.TIRJoiningURLOWSMTXT,
           instructor: instructorInfo,
+          pageUrl: item.URL,
         } as any;
       });
     } catch (error) {
@@ -494,6 +495,7 @@ export class listServices {
           location: item.TIRLocation,
           newsImage: listServices.getImageUrlFromPage(item.URL, 200),
           category: item.TIREventCategory,
+          pageUrl: item.URL,
         } as any;
       });
     } catch (error) {
