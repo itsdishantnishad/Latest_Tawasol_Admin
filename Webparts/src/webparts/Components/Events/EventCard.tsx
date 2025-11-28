@@ -18,6 +18,7 @@ interface EventCardProps {
   imageUrl: string;
   eventDateTime: Date | string | null;
   ID: number;
+  pageUrl: string;
   context?: any;
 }
 
@@ -33,6 +34,7 @@ const EventCard: React.FC<EventCardProps> = ({
   imageUrl,
   eventDateTime,
   ID,
+  pageUrl,
   context,
 }) => {
   const [countdown, setCountdown] = React.useState<string>("");
@@ -127,93 +129,94 @@ const EventCard: React.FC<EventCardProps> = ({
   const handleRegisterClick = () => {
     setnewregister(true);
   };
-
-  const CountdownUI = () => (
-    <div className={styles.countdownWrapper}>
-      <div className={styles.countdownLabel}>Event starts in</div>
-      <div className={styles.countdownTime}>{countdown}</div>
-    </div>
-  );
-
   return (
-    <div
-      className={`${styles.eventCard} ${isPastEvent ? styles.pastEvent : ""}`}
-    >
-      <div className={styles.dateSection}>
-        <div className={styles.month}>{month}</div>
-        <div className={styles.date}>{date}</div>
-        <div className={styles.day}>{day}</div>
-      </div>
+    <>
+      <a href={pageUrl} className={styles.cardLinkWrapper}>
+        <div
+          className={`${styles.eventCard} ${
+            isPastEvent ? styles.pastEvent : ""
+          }`}
+        >
+          <div className={styles.dateSection}>
+            <div className={styles.month}>{month}</div>
+            <div className={styles.date}>{date}</div>
+            <div className={styles.day}>{day}</div>
+          </div>
 
-      <div className={styles.imageSection}>
-        <img src={imageUrl} alt={title} className={styles.eventImage} />
-        {!isPastEvent && (
-          <span
-            className={`${styles.statusBadge} ${
-              isRegistered ? styles.registered : styles.upcoming
-            }`}
-          >
-            {isRegistered ? "Registered" : "Upcoming"}
-          </span>
-        )}
-      </div>
+          <div className={styles.imageSection}>
+            <img src={imageUrl} alt={title} className={styles.eventImage} />
+            {!isPastEvent && (
+              <span
+                className={`${styles.statusBadge} ${
+                  isRegistered ? styles.registered : styles.upcoming
+                }`}
+              >
+                {isRegistered ? "Registered" : "Upcoming"}
+              </span>
+            )}
+          </div>
 
-      <div className={styles.detailsSection}>
-        <div className={styles.category}>{category}</div>
-        <h3 className={styles.title}>{title}</h3>
-      </div>
+          <div className={styles.detailsSection}>
+            <div className={styles.category}>{category}</div>
+            <h3 className={styles.title}>{title}</h3>
+          </div>
 
-      <div className={styles.locationSection}>
-        <div className={styles.infoRow}>
-          <svg
-            className={styles.icon}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="12" r="10" strokeWidth="1" />
-            <path strokeWidth="1" d="M12 6v6l4 2" />
-          </svg>
-          <span className={styles.infoText}>{time}</span>
-        </div>
-
-        <div className={styles.infoRow}>
-          <svg
-            className={styles.icon}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeWidth="1"
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-            />
-            <path strokeWidth="1" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span className={styles.infoText}>{location}</span>
-        </div>
-      </div>
-
-      <div className={styles.actionSection}>
-        {isPastEvent ? (
-          <div className={styles.pastEventLabel}>Past event</div>
-        ) : isRegistered ? (
-          countdown && (
-            <div className={styles.countdownWrapper}>
-              <div className={styles.countdownLabel}>Event starts in</div>
-              <div className={styles.countdownTime}>{countdown}</div>
+          <div className={styles.locationSection}>
+            <div className={styles.infoRow}>
+              <svg
+                className={styles.icon}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" strokeWidth="1" />
+                <path strokeWidth="1" d="M12 6v6l4 2" />
+              </svg>
+              <span className={styles.infoText}>{time}</span>
             </div>
-          )
-        ) : (
-          <button
-            type="button"
-            className={styles.registerButton}
-            onClick={handleRegisterClick}
-          >
-            Register
-          </button>
-        )}
-      </div>
+
+            <div className={styles.infoRow}>
+              <svg
+                className={styles.icon}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeWidth="1"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path strokeWidth="1" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className={styles.infoText}>{location}</span>
+            </div>
+          </div>
+
+          <div className={styles.actionSection}>
+            {isPastEvent ? (
+              <div className={styles.pastEventLabel}>Past event</div>
+            ) : isRegistered ? (
+              countdown && (
+                <div className={styles.countdownWrapper}>
+                  <div className={styles.countdownLabel}>Event starts in</div>
+                  <div className={styles.countdownTime}>{countdown}</div>
+                </div>
+              )
+            ) : (
+              <button
+                type="button"
+                className={styles.registerButton}
+                onClick={(e) => {
+                  e.preventDefault(); // prevent navigating when clicking button
+                  handleRegisterClick();
+                }}
+              >
+                Register
+              </button>
+            )}
+          </div>
+        </div>
+      </a>
 
       {newregister && (
         <EventRegistration
@@ -223,7 +226,7 @@ const EventCard: React.FC<EventCardProps> = ({
           eventId={ID}
         />
       )}
-    </div>
+    </>
   );
 };
 

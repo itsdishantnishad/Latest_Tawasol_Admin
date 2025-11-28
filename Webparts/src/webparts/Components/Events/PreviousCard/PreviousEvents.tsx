@@ -6,7 +6,7 @@ interface PreviousEventCardProps {
   imageCount: number;
   date: string;
   imageUrl: string;
-  sitepageurl?: string;
+  pageUrl: string;
 }
 
 const PreviousEventCard: React.FC<PreviousEventCardProps> = ({
@@ -14,17 +14,11 @@ const PreviousEventCard: React.FC<PreviousEventCardProps> = ({
   imageCount,
   date,
   imageUrl,
-  sitepageurl
+  pageUrl
 }) => {
-
-  // Replace spaces with hyphens
-  const formattedTitle = title.replace(/\s+/g, '-');
-
-  const finalUrl = sitepageurl ? `${sitepageurl}${formattedTitle}.aspx` : "#";
-
   return (
-    <a 
-      href={finalUrl}
+    <a
+      href={pageUrl}
       target="_blank"
       rel="noopener noreferrer"
     >

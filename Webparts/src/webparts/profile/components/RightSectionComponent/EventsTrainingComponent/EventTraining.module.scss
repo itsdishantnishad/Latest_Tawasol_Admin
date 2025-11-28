@@ -6,26 +6,29 @@
 }
 
 .categoryLabel {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
   font-weight: 500;
   font-size: 12px;
   line-height: 18px;
-  color: #DA291C;
+  color: #da291c;
   text-transform: capitalize;
   margin: 0;
 }
 
 .eventTitle {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
   font-weight: 600;
   font-size: 16px;
   line-height: 24px;
   color: #000000;
-}.card {
+}
+.card {
   width: 100%;
   max-width: 424px;
   min-height: 436px;
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: 6px;
   box-sizing: border-box;
   padding: 20px 24px 24px 24px;
@@ -54,7 +57,8 @@
 }
 
 .upcomingText {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
@@ -65,7 +69,7 @@
   width: 376px;
   height: 52px;
   border-radius: 360px;
-  border: 1px solid #FBBF7F;
+  border: 1px solid #fbbf7f;
   background: rgba(255, 255, 255, 0.46);
   display: grid;
   place-items: center;
@@ -92,13 +96,13 @@
   font-size: 16px;
   line-height: 20px;
   letter-spacing: 0px;
-  color: #3A3B43;
+  color: #3a3b43;
   cursor: pointer;
 }
 
 .segActive {
-  background: radial-gradient(120% 140% at 30% 25%, #DDA160 0%, #FFDBB4 100%);
-  border: 1px solid #F0BB82;
+  background: radial-gradient(120% 140% at 30% 25%, #dda160 0%, #ffdbb4 100%);
+  border: 1px solid #f0bb82;
   color: #2b2b2b;
 }
 
@@ -127,7 +131,7 @@
   height: 100%;
   border-radius: 8px;
   object-fit: cover;
-  background: #F2F3F8;
+  background: #f2f3f8;
   display: block;
 }
 
@@ -135,13 +139,13 @@
   width: 100%;
   height: 100%;
   border-radius: 8px;
-  background: #F2F3F8;
+  background: #f2f3f8;
 }
 
 .registerPill,
 .registerPillMuted {
   position: absolute;
-  top: 12px;
+  bottom: 12px;
   left: 12px;
   height: 28px;
   min-width: 86px;
@@ -154,19 +158,20 @@
 }
 
 .registerPill {
-  background: #DA291C;
+  background: #da291c;
 }
 
 .registerPillMuted {
-  background: #B0B0B0;
+  background: #b0b0b0;
 }
 
 .registerText {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
   font-weight: 500;
   font-size: 12px;
   line-height: 16px;
-  color: #FFFFFF;
+  color: #ffffff;
   white-space: nowrap;
 }
 
@@ -178,7 +183,8 @@
 }
 
 .eventTitle {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
   font-weight: 600;
   font-size: 16px;
   line-height: 24px;
@@ -205,12 +211,13 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
   font-weight: 400;
   font-size: 14px;
   line-height: 22px;
   letter-spacing: -0.5px;
-  color: #3A3B43;
+  color: #3a3b43;
 }
 
 .locationRow {
@@ -220,12 +227,13 @@
 }
 
 .locationText {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
   font-weight: 400;
   font-size: 14px;
   line-height: 22px;
   letter-spacing: -0.5px;
-  color: #3A3B43;
+  color: #3a3b43;
 }
 
 .icon16 {

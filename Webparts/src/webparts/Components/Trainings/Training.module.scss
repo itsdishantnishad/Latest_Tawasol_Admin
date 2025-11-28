@@ -446,3 +446,15 @@
 }
   color: #605e5c;
 }
+
+.cardLinkWrapper {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover .cardContainer {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+  }
+}

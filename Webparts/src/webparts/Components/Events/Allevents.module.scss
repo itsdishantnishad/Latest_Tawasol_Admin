@@ -373,3 +373,14 @@
   cursor: pointer;
 }
 
+.cardLinkWrapper {
+  display: block;              // Makes the link behave like a block wrapper
+  text-decoration: none;       // Removes underline
+  color: inherit;              // Keep card text colors same
+  cursor: pointer;             // Makes hover feel clickable
+
+  &:hover .eventCard {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+  }
+}

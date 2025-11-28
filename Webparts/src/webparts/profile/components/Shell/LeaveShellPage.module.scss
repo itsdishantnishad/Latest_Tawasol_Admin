@@ -1,23 +1,17 @@
-:root { --w-card: 870px; }
-
-.page {
-  min-height: 100vh;
-  width: 100vw;
-  background: #F9ECE1; 
-  display: flex;
-  justify-content: center;
+:root {
+  --w-card: 870px;
 }
 
-.wrapper {
-  width: 100%;
-  max-width: calc(var(--w-card) + 56px); 
-  padding-top: 16px;
+.page {
+  background: #fff4ea;
+  padding: 60px;
 }
 
 .segmentRow {
   display: flex;
   justify-content: center;
   margin-bottom: 16px;
+  margin-top: 60px;
 }
 
 .content {

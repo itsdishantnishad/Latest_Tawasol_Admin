@@ -18,24 +18,20 @@ export default class MainPage extends React.Component<IMainPageProps> {
     const { onNavigateToLeave, onNavigateToHRLetter} = this.props;
 
     return (
-      <div className={[styles.page, this.props.className || ""].join(" ")}>
-        <div className={styles.pageInner}>
-          <div className={styles.headerSection}>
-            <ProfileHeader />
+      <div className={[styles.pageInner, this.props.className || ""].join(" ")}>
+        <ProfileHeader />
+        <div className={styles.columns}>
+          <div className={styles.leftCol} role="region" aria-label="Main feed">
+            <LeftSection />
           </div>
-          <div className={styles.columns}>
-            <div className={styles.leftCol} role="region" aria-label="Main feed">
-              <LeftSection />
-            </div>
 
-            <aside className={styles.rightCol} role="complementary" aria-label="Sidebar widgets">
-              <RightSection
-                onApplyLeave={onNavigateToLeave}
-                onRequestHRLetter={onNavigateToHRLetter}
-                // onViewHoliday={onNavigateToHoliday}
-              />
-            </aside>
-          </div>
+          <aside className={styles.rightCol} role="complementary" aria-label="Sidebar widgets">
+            <RightSection
+              onApplyLeave={onNavigateToLeave}
+              onRequestHRLetter={onNavigateToHRLetter}
+              // onViewHoliday={onNavigateToHoliday}
+            />
+          </aside>
         </div>
       </div>
     );
