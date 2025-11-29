@@ -69,13 +69,13 @@
 /* Learning Links + Content Section */
 .learningSection {
   display: grid;
+  gap: 20px;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  margin-top: 48px;
+  margin-top: 80px;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 20px;
   }
 }
 
