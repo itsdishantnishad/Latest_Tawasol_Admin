@@ -24,25 +24,23 @@
 
 /* Outer padding around the section */
 .root {
-  padding: 48px 24px;
+  padding: 80px 60px;
 }
 
 .container {
   margin: 0 auto;
-  padding: 12px 36px;
+  padding: 0;
 }
 
 /* Heading */
 .heading {
-  line-height: 100%;
-  letter-spacing: 1px;
-  text-align: center;
-  margin-bottom: 32px;
-
   display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
+  justify-content: center;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 40px;
+  text-align: center;
 }
 .headingOur {
   font-family: "Instrument Serif", serif;
