@@ -1,4 +1,4 @@
-*{
+* {
     font-family: 'Inter', sans-serif;
 }
 
@@ -41,12 +41,11 @@
     height: auto;
     width: 1px;
     background-color: #D2CBC2;
-    margin: 0 96px;
+    margin: 0 93px;
 }
 
 .layout {
     display: flex;
-    gap: 1rem;
     padding: 30px 60px;
     background-color: #fef7f0;
 }
@@ -55,6 +54,8 @@
     border: 1px solid #FBBF7F;
     border-radius: 16px;
     padding: 12px 8px;
+    align-self: flex-start;
+    background-color: #ffffff;
     @media (max-width: 900px){
         border: 0;
         border-radius: 0;
@@ -153,10 +154,12 @@
 
 /* image frame is always aligned like Figma (16:9) */
 .cardImg {
+    display: block;
     width: 100%;
+    height: 234px;
+    aspect-ratio: 1.2;
     object-fit: cover;
     object-position: center;
-    display: block
 }
 
 .placeholder {
