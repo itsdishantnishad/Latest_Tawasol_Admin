@@ -168,24 +168,28 @@ const AllComponents: React.FC<Props> = ({
         // ------------ ALL DATA ------------
         viewMode === "list" ? (
           <>
-            <h5>Events</h5>
-            {parsedEvents.map((event: any, index: any) => (
-              <EventCard key={index} {...event} context={context} />
-            ))}
+            <div className={styles.eventsContainer}>
+              <div className={styles.eventsWrapper}>
+              <h5>Events</h5>
+              {parsedEvents.map((event: any, index: any) => (
+                <EventCard key={index} {...event} context={context} />
+              ))}
 
-            <h5>Trainings</h5>
-            {mappedTrainings.map((event: any) => (
-              <Trainingcard key={event.id} {...event} />
-            ))}
+              <h5>Trainings</h5>
+              {mappedTrainings.map((event: any) => (
+                <Trainingcard key={event.id} {...event} />
+              ))}
 
-            <h5>Meetings</h5>
-            {filteredMeetings.map((event: any) => (
-              <MeetingCard
-                key={event.id}
-                event={event}
-                onJoinClick={() => alert("Joining Meeting...")}
-              />
-            ))}
+              <h5>Meetings</h5>
+              {filteredMeetings.map((event: any) => (
+                <MeetingCard
+                  key={event.id}
+                  event={event}
+                  onJoinClick={() => alert("Joining Meeting...")}
+                />
+              ))}
+            </div>
+
             <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>
@@ -205,6 +209,32 @@ const AllComponents: React.FC<Props> = ({
                 )}
               </div>
             </div>
+          </div>
+          
+          {/* <div className={styles.eventsContainer}>
+            <div className={styles.eventsWrapper}>
+              {upcomingEvents.length > 0 ? (
+                upcomingEvents.map((event:any, index:any) => (
+                  <EventCard key={index} {...event} context={props.context} />
+                ))
+              ) : (
+                <p>No upcoming events found.</p>
+              )}
+            </div>
+
+            <div className={styles.previousEventsContainer}>
+              <h2 className={styles.heading}>Previous Events</h2>
+              <div className={styles.gridLayout}>
+                {previousEvents.length > 0 ? (
+                  previousEvents.map((event:any, index:any) => (
+                    <PreviousEventCard key={index} title={event.title} date={`${event.day}, ${event.date} ${event.month}`} imageUrl={event.imageUrl} imageCount={0} sitepageurl={sitepageurl}/>
+                  ))
+                ) : (
+                  <p>No previous events found.</p>
+                )}
+              </div>
+            </div>
+          </div> */}
           </>
         ) : (
           <>

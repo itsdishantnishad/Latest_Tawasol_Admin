@@ -46,16 +46,16 @@ const TrainingCard: React.FC<TrainingCardProps> = ({
     <div className={styles.cardContainer}>
       <div className={styles.dateSection}>
         <div className={styles.dateBox}>
-          <div className={styles.month}>{startMonth}</div>
-          <div className={styles.day}>{startDay}</div>
-          <div className={styles.weekday}>{startWeekday}</div>
+          <div className={styles.month}>{startWeekday} - {endWeekday}</div>
+          <div className={styles.day}>{startDay} - {endDay} {startMonth}</div>
+          {/* <div className={styles.weekday}>{startWeekday}</div> */}
         </div>
 
-        <div className={styles.dateBox}>
+        {/* <div className={styles.dateBox}>
           <div className={styles.month}>{endMonth}</div>
           <div className={styles.day}>{endDay}</div>
           <div className={styles.weekday}>{endWeekday}</div>
-        </div>
+        </div> */}
       </div>
 
       <div className={styles.imageSection}>
