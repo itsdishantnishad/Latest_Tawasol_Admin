@@ -563,7 +563,21 @@ export class listServices {
       return Promise.reject(error);
     }
   }
-
+  
+  // get custom app links
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async getCustomAppLinks(listName: string, userEmail: string): Promise<any[]> {
+    let results: any[] = [];
+    try {
+      results = await this.sp.web.lists
+        .getByTitle(listName)
+        .items.select("Id", "TIRUserEmail", "TIRCustomLinkAttribute")
+        .filter(`TIRUserEmail eq '${userEmail}'`)();
+      return results;
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getNewJoiners(listName: string): Promise<any[]> {
     const results = await this.sp.web.lists

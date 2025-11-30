@@ -103,7 +103,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
       case 'events':
         return <Events seeAllURL={props.upcomingEvents} onViewAll={handleViewAll} />;
       case 'employee_events':
-        return <LetsCelebrate seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />;
+        return <LetsCelebrate context={props.context} seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />;
       case 'meetings':
         return <Meeting seeAllURL={props.meeting} onViewAll={handleViewAll} />;
       case 'service_links':
