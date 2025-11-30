@@ -1,4 +1,3 @@
-
 import React from "react";
 import styles from "./TableView.module.scss";
 
@@ -12,171 +11,74 @@ import {
     TableCellLayout,
 } from "@fluentui/react-components";
 
-import Tag from "../../../../Tag/Tag";
+export interface TableColumn<T = object> {
+    columnKey: string;
+    label: string;
+    renderCell?: (rowData: T, rowIndex: number) => React.ReactNode;
+    renderHeader?: () => React.ReactNode;
+}
 
-const formatIsoDateToDisplay = (isoString: string) =>
-    new Date(isoString).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+export interface TableViewProps<T = object> {
+    data: T[];
+    columns: TableColumn<T>[];
+    getRowKey: (rowData: T, rowIndex: number) => string | number;
+    onRowClick?: (rowData: T, rowIndex: number) => void;
+    ariaLabel?: string;
+    className?: string;
+}
 
-const tableBodyData = [
-    {
-        "workitemId": "04iUB000002JFj1YAG",
-        "workflowNumber": "E-35961",
-        "taskType": "Salary Certificate",
-        "taskTitle": "oracle Salary Certificate",
-        "taskDescription": "",
-        "status": "Pending",
-        "requestorName": "Ayaan Ali",
-        "requestorDepartment": "HR",
-        "priority": "High",
-        "originSystem": "Oracle",
-        "dueDate": "2025-11-03T08:00:00.000Z",
-        "createdOn": "2025-10-10T09:30:00.000Z",
-        "assignedTo": "005TX0000044AAA",
-        "action": "Pending"
-    },
-    {
-        "workitemId": "04iUB000002JFj2YAG",
-        "workflowNumber": "E-35962",
-        "taskType": "Leave Approval",
-        "taskTitle": "oracle Annual Leave Approval",
-        "taskDescription": "",
-        "status": "Approved",
-        "requestorName": "Mira Kapoor",
-        "requestorDepartment": "Finance",
-        "priority": "Medium",
-        "originSystem": "Oracle",
-        "dueDate": "2025-11-07T08:00:00.000Z",
-        "createdOn": "2025-10-11T10:15:00.000Z",
-        "assignedTo": "005TX0000044AAB",
-        "action": "Approved"
-    },
-    {
-        "workitemId": "04iUB000002JFj3YAG",
-        "workflowNumber": "E-35963",
-        "taskType": "Account Name Change",
-        "taskTitle": "oracle Account Name Change",
-        "taskDescription": "",
-        "status": "Rejected",
-        "requestorName": "Hassan Raza",
-        "requestorDepartment": "Sales",
-        "priority": "Low",
-        "originSystem": "Oracle",
-        "dueDate": "2025-11-12T08:00:00.000Z",
-        "createdOn": "2025-10-12T08:05:00.000Z",
-        "assignedTo": "005TX0000044AAC",
-        "action": "Rejected"
-    },
-    {
-        "workitemId": "04iUB000002JFj4YAG",
-        "workflowNumber": "E-35964",
-        "taskType": "Vendor Creation",
-        "taskTitle": "oracle New Vendor Onboarding",
-        "taskDescription": "",
-        "status": "Pending",
-        "requestorName": "Noor Fatima",
-        "requestorDepartment": "Procurement",
-        "priority": "High",
-        "originSystem": "Oracle",
-        "dueDate": "2025-11-18T08:00:00.000Z",
-        "createdOn": "2025-10-13T11:45:00.000Z",
-        "assignedTo": "005TX0000044AAD",
-        "action": "Pending"
-    }
-]
+const TableView = <T extends object = object>({
+    data,
+    columns,
+    getRowKey,
+    onRowClick,
+    ariaLabel = "Data Table",
+    className,
+}: TableViewProps<T>): JSX.Element => {
+    const handleRowClick = (rowData: T, rowIndex: number): void => {
+        if (onRowClick) {
+            onRowClick(rowData, rowIndex);
+        }
+    };
 
-const TableView = () => {
+    const renderCell = (column: TableColumn<T>, rowData: T, rowIndex: number): React.ReactNode => {
+        if (column.renderCell) {
+            return column.renderCell(rowData, rowIndex);
+        }
 
-    const tableColumns = [
-        { columnKey: "workflowNumber", label: "Workflow No." },
-        { columnKey: "taskTitle", label: "Task Title" },
-        { columnKey: "priority", label: "Priority" },
-        { columnKey: "dueDate", label: "Due Date" },
-        { columnKey: "action", label: "Action" },
-        { columnKey: "status", label: "Status" },
-    ];
-
-    const statusTagColor = {
-        'Approved': '#0e8732',
-        'Rejected': '#da291c',
-        'Pending': '#c3a500',
-    }
-
-    const priorityTagBgColor = {
-        'High': '#fdede8',
-        'Medium': '#feefd4',
-        'Low': '#e2edfe',
-    }
-
-    const priorityTagTextColor = {
-        'High': '#ff3a00',
-        'Medium': '#dda338',
-        'Low': '#2b77d6',
-    }
-
-    const renderTaskRow = (taskItem: any): JSX.Element => (
-        <TableRow key={taskItem.workitemId} onClick={() => { console.log("clicked") }}>
-            <TableCell>
-                <TableCellLayout>{taskItem.workflowNumber}</TableCellLayout>
-            </TableCell>
-            <TableCell>
-                <TableCellLayout>{taskItem.taskTitle}</TableCellLayout>
-            </TableCell>
-            <TableCell>
-                <TableCellLayout>
-                    <Tag
-                        label={taskItem.priority}
-                        backgroundColor={priorityTagBgColor[taskItem.priority as keyof typeof priorityTagBgColor]}
-                        textColor={priorityTagTextColor[taskItem.priority as keyof typeof priorityTagTextColor]}
-                    />
-                </TableCellLayout>
-            </TableCell>
-            <TableCell>{formatIsoDateToDisplay(taskItem.dueDate)}</TableCell>
-            <TableCell>
-                <div className={styles.actionCell}>
-                    <span className={styles.actionItem}>
-                        <span
-                            className={styles.actionIcon}
-                            dangerouslySetInnerHTML={{ __html: "❌" }}
-                        />
-                        Reject
-                    </span>
-                    <span className={styles.actionItem}>
-                        <span
-                            className={styles.actionIcon}
-                            dangerouslySetInnerHTML={{ __html: "✅" }}
-                        />
-                        Approve
-                    </span>
-                </div>
-            </TableCell>
-
-            <TableCell>
-                <TableCellLayout>
-                    <Tag
-                        label={taskItem.status}
-                        backgroundColor={statusTagColor[taskItem.status as keyof typeof statusTagColor]}
-                    />
-                </TableCellLayout>
-            </TableCell>
-        </TableRow>
-    );
-
+        // Default rendering: access the property by columnKey
+        const cellValue = (rowData as Record<string, unknown>)[column.columnKey];
+        return <TableCellLayout>{String(cellValue ?? "")}</TableCellLayout>;
+    };
 
     return (
-        <Table className={styles.table} aria-label="Task Approvals Table">
+        <Table className={`${styles.table} ${className || ""}`} aria-label={ariaLabel}>
             <TableHeader className={styles.tableHeader}>
                 <TableRow>
-                    {tableColumns.map((column) => (
-                        <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>
+                    {columns.map((column) => (
+                        <TableHeaderCell key={column.columnKey}>
+                            {column.renderHeader ? column.renderHeader() : column.label}
+                        </TableHeaderCell>
                     ))}
                 </TableRow>
             </TableHeader>
 
             <TableBody className={styles.tableBody}>
-                {tableBodyData.map((task) => renderTaskRow(task))}
+                {data.map((rowData, rowIndex) => (
+                    <TableRow
+                        key={getRowKey(rowData, rowIndex)}
+                        onClick={() => handleRowClick(rowData, rowIndex)}
+                    >
+                        {columns.map((column) => (
+                            <TableCell key={column.columnKey}>
+                                {renderCell(column, rowData, rowIndex)}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+                ))}
             </TableBody>
         </Table>
-    )
-}
+    );
+};
 
 export default TableView;

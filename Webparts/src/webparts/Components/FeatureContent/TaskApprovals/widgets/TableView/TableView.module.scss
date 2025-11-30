@@ -1,27 +1,3 @@
-@import "~@fluentui/react/dist/sass/References.scss";
-
-.main {
-  background: #fff4ea;
-}
-
-.pageContainer {
-  margin: 0 auto;
-  padding: 60px 60px 0;
-}
-
-.taskHeader {
-  width: 230px;
-  height: 55px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.tableWrapper {
-  padding: 0 60px;
-}
-
 .table {
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
@@ -46,6 +22,7 @@
     color: #000000;
     & > div {
       min-height: auto;
+      font-weight: 500;
     }
   }
 }
@@ -62,52 +39,4 @@
   tr:nth-child(even) {
     background: #ffeee0;
   }
-}
-
-.taskHeaderAbsolute {
-  justify-self: center;
-  text-align: center;
-}
-
-.taskText {
-  font-family: "Instrument Serif", serif;
-  font-weight: 400;
-  font-style: italic;
-  font-size: 42px;
-  line-height: 100%;
-  letter-spacing: 1px;
-  text-align: center;
-  color: #da291c;
-}
-
-.approvalsText {
-  font-family: "Instrument Serif", serif;
-  font-weight: 400;
-  font-style: normal;
-  font-size: 42px;
-  line-height: 100%;
-  letter-spacing: 1px;
-  text-align: center;
-  color: #000000;
-}
-
-/* action column */
-.actionCell {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.actionItem {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.actionIcon {
-  width: 24px;
-  height: 24px;
-  display: inline-block;
 }
