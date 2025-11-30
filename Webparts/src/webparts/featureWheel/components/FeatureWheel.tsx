@@ -97,7 +97,7 @@ const featureTitleContent: Record<string, { header: string, subHeader: string }>
 }
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
-  const [selectedFeature, setSelectedFeature] = useState('beverage_menu');
+  const [selectedFeature, setSelectedFeature] = useState('gallery');
 
   const handleViewAll = () => {
     // Handle view all action - can navigate to appropriate page
