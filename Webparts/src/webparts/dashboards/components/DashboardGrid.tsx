@@ -45,8 +45,8 @@ const DashboardGrid: React.FC<IDashboardGridProps> = ({ title, items, onOpen, sh
             )}
 
             <Stack tokens={{ childrenGap: 2 }}>
-              <Text className={styles.cardTitle}>{it.title}</Text>
-              {it.body && <Text className={styles.cardBody}>{it.body}</Text>}
+              <span className={styles.cardTitle}>{it.title}</span>
+              {it.body && <span className={styles.cardBody}>{it.body}</span>}
             </Stack>
           </article>
         ))}

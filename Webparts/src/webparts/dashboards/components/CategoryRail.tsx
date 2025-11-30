@@ -25,7 +25,7 @@ export default class CategoryRail extends React.Component<ICategoryRailProps, {}
               aria-pressed={active}
               title={cat.name}
             >
-              <Text>{cat.name}</Text>
+              <span>{cat.name}</span>
             </button>
           );
         })}

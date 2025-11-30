@@ -41,7 +41,7 @@ export default class DashboardDetail extends React.Component<IDashboardDetailPro
 
         {showSection && (
           <>
-            <Text variant="large" className={ui.moreTitle}>More Dashboards</Text>
+            <span className={ui.moreTitle}>More Dashboards</span>
 
             <div className={ui.relatedGrid}>
               {related.map(it => (
@@ -56,8 +56,8 @@ export default class DashboardDetail extends React.Component<IDashboardDetailPro
                   ) : (
                     <div className={ui.cardImg} />
                   )}
-                  <Text variant="medium" className={ui.cardTitle}>{it.title}</Text>
-                  {it.body && <Text variant="small" className={ui.cardBody}>{it.body}</Text>}
+                  <span className={ui.cardTitle}>{it.title}</span>
+                  {it.body && <span className={ui.cardBody}>{it.body}</span>}
                 </div>
               ))}
             </div>

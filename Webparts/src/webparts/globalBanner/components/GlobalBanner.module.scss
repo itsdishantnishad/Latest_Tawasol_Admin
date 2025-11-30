@@ -1,4 +1,5 @@
 @import '~@fluentui/react/dist/sass/References.scss';
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
 
 /* Outer: controls page spacing around the banner */
 .bannerRoot {
@@ -64,15 +65,14 @@
 /* Title + description */
 .title {
   margin: 0;
-  font-family: "Instrument Serif", serif !important;
-  font-weight: 400;
   font-size: 60px;
   line-height: 100%;
   letter-spacing: 0;
   text-align: center;
 }
-.titleFirst { color: #DA291C; font-style: italic; font-weight: 400; }
-.titleRest  { color: #000000; font-style: normal; font-weight: 400; }
+
+.titleFirst { color: #DA291C; font-style: italic; font-weight: 400; font-family: "Instrument Serif", serif !important; }
+.titleRest  { color: #000000; font-style: normal; font-weight: 400; font-family: "Instrument Serif", serif !important; }
 
 .description {
   margin-top: 12px;
@@ -82,7 +82,7 @@
   line-height: 24px;
   letter-spacing: 0;
   text-align: center;
-  color: #101820;
+  color: #5B6770;
   opacity: .9;
 }
 
