@@ -146,8 +146,8 @@ const Wheel: React.FC<FeatureWheelProps> = ({ onFeatureSelect, selectedFeature }
 
                     // Calculate arc position
                     // Distribute all features across the arc
-                    const startAngle = -100;
-                    const endAngle = 100;
+                    const startAngle = -120;
+                    const endAngle = 120;
                     const angleRange = endAngle - startAngle;
                     // Normalize position to 0-1 range, then map to angle range
                     const normalizedPosition = (position + maxPosition) / (maxPosition * 2);
