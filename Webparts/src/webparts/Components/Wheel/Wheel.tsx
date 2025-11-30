@@ -75,6 +75,12 @@ const features: Feature[] = [
         subtitle: "Journey through DHRE",
         icon: "",
     },
+    {
+        id: "tasks",
+        title: "Task",
+        subtitle: "Get things done with clarity",
+        icon: "../FeatureContent/assets/Dashboard.svg",
+    },
 ];
 
 interface FeatureWheelProps {
@@ -126,7 +132,8 @@ const Wheel: React.FC<FeatureWheelProps> = ({ onFeatureSelect, selectedFeature }
         dashboard: styles.dashboardCard,
         offers: styles.offersCard,
         training: styles.trainingCard,
-        about_dhre: styles.aboutDhreCard
+        about_dhre: styles.aboutDhreCard,
+        tasks: styles.tasksCard
     };
 
     return (

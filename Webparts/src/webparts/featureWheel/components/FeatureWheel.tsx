@@ -14,6 +14,7 @@ import Offers from '../../Components/FeatureContent/Offers/Offers';
 import Training from '../../Components/FeatureContent/Training/Training';
 import styles from './FeatureWheel.module.scss';
 import AboutDHRE from '../../Components/FeatureContent/AboutDHRE/AboutDHRE';
+import TaskApprovals from '../../Components/FeatureContent/TaskApprovals/TaskApprovals';
 
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
@@ -83,11 +84,15 @@ const featureTitleContent: Record<string, { header: string, subHeader: string }>
   about_dhre: {
     header: "About DHRE",
     subHeader: "Dive deep into DHRE: Our departments, culture, and core values."
+  },
+  tasks: {
+    header: "Task Approvals",
+    subHeader: "Streamline your work to accomplish more, faster."
   }
 }
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
-  const [selectedFeature, setSelectedFeature] = useState('gallery');
+  const [selectedFeature, setSelectedFeature] = useState('tasks');
 
   const handleViewAll = () => {
     // Handle view all action - can navigate to appropriate page
@@ -118,6 +123,8 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
         return <Training seeAllURL={props.trainingAndDevelopment} onViewAll={handleViewAll} />;
       case 'about_dhre':
         return <AboutDHRE />;
+      case 'tasks':
+        return <TaskApprovals />;
     }
   };
 
