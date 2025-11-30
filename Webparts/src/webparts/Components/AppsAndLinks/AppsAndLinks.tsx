@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import styles from "./AppsAndLinks.module.scss";
-
+import { listServices } from "../../services/listServices";
 import {
   Dialog,
   DialogContent,
@@ -51,7 +51,8 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
+  let spService: listServices;
+   spService = new listServices(props.context);
   const [linkTitle, setLinkTitle] = useState("");
   const [linkURL, setLinkURL] = useState("");
 
@@ -61,11 +62,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
   const userEmail = props.context.pageContext.user.loginName;
   const loadUserLinks = async () => {
     try {
-      const items: IUserListItem[] = await sp.web.lists
-        .getByTitle(LIST_NAME)
-        .items.select("Id", USER_EMAIL_COL, APPLINK_COL)
-        .filter(`${USER_EMAIL_COL} eq '${userEmail}'`)();
-
+      const items: IUserListItem[] = await spService.getCustomAppLinks("Custom App Links", userEmail);
       if (items.length > 0 && items[0][APPLINK_COL]) {
         setCustomLinks(JSON.parse(items[0][APPLINK_COL]));
       }
