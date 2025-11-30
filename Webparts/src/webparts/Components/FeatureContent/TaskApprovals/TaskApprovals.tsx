@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styles from "./TaskApprovals.module.scss";
 import CategoryView, { ICategoryItem } from "../CategoryView/CategoryView";
-import TableView, { TableColumn } from "./widgets/TableView/TableView";
+import TableView, { TableColumn } from "../../../widgets/TableView/TableView";
 import Tag from "../../Tag/Tag";
 import PrimaryButton from "../../PrimaryButton/PrimaryButton";
 
@@ -137,12 +137,6 @@ const TaskApprovals: React.FC = () => {
     const handleViewAll = () => {
         // View all control
     }
-
-    const statusTagColor = {
-        'Approved': '#0e8732',
-        'Rejected': '#da291c',
-        'Pending': '#c3a500',
-    };
 
     const priorityTagBgColor = {
         'High': '#fdede8',

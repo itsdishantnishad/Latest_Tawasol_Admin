@@ -15,6 +15,7 @@ import Training from '../../Components/FeatureContent/Training/Training';
 import styles from './FeatureWheel.module.scss';
 import AboutDHRE from '../../Components/FeatureContent/AboutDHRE/AboutDHRE';
 import TaskApprovals from '../../Components/FeatureContent/TaskApprovals/TaskApprovals';
+import BeverageMenu from '../../Components/FeatureContent/BeverageMenu/BeverageMenu';
 
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
@@ -88,11 +89,15 @@ const featureTitleContent: Record<string, { header: string, subHeader: string }>
   tasks: {
     header: "Task Approvals",
     subHeader: "Streamline your work to accomplish more, faster."
+  },
+  beverage_menu: {
+    header: "Beverage Menu",
+    subHeader: "Find your favourite drink to fuel your day"
   }
 }
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
-  const [selectedFeature, setSelectedFeature] = useState('tasks');
+  const [selectedFeature, setSelectedFeature] = useState('beverage_menu');
 
   const handleViewAll = () => {
     // Handle view all action - can navigate to appropriate page
@@ -125,6 +130,8 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
         return <AboutDHRE />;
       case 'tasks':
         return <TaskApprovals />;
+      case 'beverage_menu':
+        return <BeverageMenu />;
     }
   };
 
