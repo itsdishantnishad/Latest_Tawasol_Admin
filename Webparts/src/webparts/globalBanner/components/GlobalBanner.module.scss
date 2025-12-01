@@ -3,9 +3,9 @@
 
 /* Outer: controls page spacing around the banner */
 .bannerRoot {
-  background: #fef7f0;
+  // background: #fef7f0;
   box-sizing: border-box;
-  padding: 30px 60px;
+  padding: 32px 60px;
 }
 
 /* Inner: holds the media + overlay and keeps rounded mask */
@@ -75,15 +75,14 @@
 .titleRest  { color: #000000; font-style: normal; font-weight: 400; font-family: "Instrument Serif", serif !important; }
 
 .description {
-  margin-top: 12px;
   font-family: "Inter", sans-serif !important;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: 0;
-  text-align: center;
   color: #5B6770;
-  opacity: .9;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 24px;
+  text-align: center;
+  width: 476px;
 }
 
 @media (max-width: 991.98px) {
