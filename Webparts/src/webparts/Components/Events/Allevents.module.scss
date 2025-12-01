@@ -143,7 +143,7 @@
 // }
 
 .detailsSection {
-  // flex: 1;
+  flex: 1;
   // min-width: 0;
   width: 25%;
   display: flex;
@@ -186,6 +186,7 @@
   flex-direction: column;
   gap: 12px;
   margin-right: 16px;
+  flex: 1;
 
   .infoRow {
     display: flex;
@@ -410,7 +411,7 @@
   }
 }
 .previousEventsContainer {
-  margin-top: 48px;
+  margin-top: 80px;
 }
 
 .heading {
@@ -418,31 +419,33 @@
   font-size: 24px;
   line-height: 32px;
   font-weight: 500;
-  margin-bottom: 20px;
+  margin: 0;
+  margin-bottom: 24px;
 }
 
 .gridLayout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  // grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
 
 
 /* Tabs */
 .tabContainer {
-  margin-block: 20px;
+  margin-block: 32px;
 }
 
 .tabContainerInner{
-  border-bottom: 1px solid #edebe9; // Subtle border
+  border-bottom: 1px solid #CCCACA;
   display: flex;
-  gap: 30px;
+  gap: 24px;
 }
 
 .tabButton {
   background: 0 0;
   border: none;
-  color: #3A3B43;
+  color: #6C6C6C;
   cursor: pointer;
   font-size: 16px;
   font-weight: 400;
@@ -450,11 +453,6 @@
   padding: 15px 0;
   position: relative;
   transition: color .3s ease;
-
-  &:hover {
-    color: #3A3B43;
-    font-weight: 500;
-  }
 }
 
 .activeTab {
