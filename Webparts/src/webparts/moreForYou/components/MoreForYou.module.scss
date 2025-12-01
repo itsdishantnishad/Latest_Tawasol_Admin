@@ -2,7 +2,7 @@
 .wrapper { padding: 0; position: relative; max-width: 520px; }
 
 /* Heading */
-.heading { color:#000; font-size:24px; line-height:32px; font-weight:600; margin:0; }
+.heading { font-family: Inter, sans-serif; color:#000; font-size: 16px; line-height: 24px; font-weight:600; margin:0; }
 
 /* Grid */
 .grid { display:grid; gap:10px; grid-template-columns:1fr; width:100%; margin-top:20px; }
