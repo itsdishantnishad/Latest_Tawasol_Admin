@@ -477,8 +477,6 @@ export class listServices {
             "TIRLocation",
             "TIREventCategory",
             "URL",
-
-            // 🔹 image-related managed properties
             "PictureThumbnailURL",
             "BannerImageUrlOWSURLH",
             "PublishingImage",
@@ -493,31 +491,22 @@ export class listServices {
         results = await this.sp.search(searchOptions);
 
         return results.PrimarySearchResults.map((item: any) => {
-          // --- try multiple places for an image -----------------
           let img: string = "";
 
-          // 1) direct thumbnail (usually present for modern pages)
           if (item.PictureThumbnailURL) {
             img = item.PictureThumbnailURL;
           }
-
-          // 2) Banner image field (url, desc) → take just url part
           if (!img && item.BannerImageUrlOWSURLH) {
-            // often like "https://.../image.jpg, Image description"
             const raw = String(item.BannerImageUrlOWSURLH);
             img = raw.split(",")[0].trim();
           }
 
-          // 3) PublishingImage (sometimes used on classic layouts)
           if (!img && item.PublishingImage) {
-            // usually contains <img src="..."> HTML
             const match = String(item.PublishingImage).match(/src="([^"]+)"/i);
             if (match && match[1]) {
               img = match[1];
             }
           }
-
-          // 4) Fallback: our old getpreview logic
           if (!img && item.URL) {
             img = listServices.getImageUrlFromPage(item.URL, 200);
           }
@@ -528,9 +517,9 @@ export class listServices {
             eventEndDate: item.TIREventEndDate,
             eventStartDate: item.TIREventStartDate,
             location: item.TIRLocation,
-            newsImage: img,                        // ✅ always best image we found
+            newsImage: img,                      
             category: item.TIREventCategory,
-            pageUrl: item.URL,                     // extra info for debugging / future
+            pageUrl: item.URL,                    
             path: item.Path
           } as any;
         });
@@ -655,6 +644,7 @@ export class listServices {
     const rows = await this.sp.web.lists
       .getByTitle(listTitle)
       .items.select(
+        "Id",
         "Title",
         "TIRDesignation",
         "TIRLevel",
@@ -671,16 +661,15 @@ export class listServices {
       const photoUrl = typeof ph === "string" ? ph : ph?.Url || undefined;
 
       const userField = it?.TIRUser || {};
-      const userTitle = userField?.Title || "";
+      const userTitle = (userField?.Title || "").trim();
 
       return {
-        id: Number(it?.Id) || 0,
+        id: Number(it.Id),
         name: it?.Title || "",
         role: it?.TIRDesignation || "",
         level: Number(it?.TIRLevel ?? 99),
         sort: Number(it?.TIRSortOrder ?? 9999),
         photoUrl,
-        // 👇 this is what TeamOrganisationStructure.tsx expects
         user: userTitle
       };
     });
@@ -701,73 +690,90 @@ export class listServices {
     listTitle: string,
     memberDisplayName: string
   ): Promise<OrgDepartment[]> {
-    let results: any[] = [];
-    try {
-      results = await this.sp.web.lists
-        .getByTitle(listTitle)
-        .items.select(
-          "Id",
-          "Title",
-          "URL",
-          "TIRDepartment",                 // taxonomy field
-          "TIRDepartmentMember/Title"
-        )
-        .expand("TIRDepartmentMember")();
 
-      // filter rows where the People column contains our member
-      const matches = results.filter((item) => {
-        const people: any[] = Array.isArray(item?.TIRDepartmentMember)
-          ? item.TIRDepartmentMember
-          : [];
-        return people.some(
-          (p) =>
-            (p?.Title || "").trim().toLowerCase() ===
-            memberDisplayName.trim().toLowerCase()
-        );
-      });
+    const targetName = memberDisplayName.trim().toLowerCase();
 
-      const mapped: OrgDepartment[] = matches.map((item: any) => {
-        const rawDept = item.TIRDepartment;
-        let deptName = "";
-        if (rawDept) {
-          if (Array.isArray(rawDept)) {
-            const first = rawDept[0] || {};
-            deptName = first.Label || first.Term || first.Name || "";
-          } else if (typeof rawDept === "object") {
-            // your current case: { Label, TermGuid, WssId }
-            deptName = rawDept.Label || rawDept.Term || rawDept.Name || "";
-          } else {
-            deptName = String(rawDept);
-          }
-        }
+    const deptRows: any[] = await this.sp.web.lists
+      .getByTitle(listTitle)
+      .items.select(
+        "Id",
+        "URL",
+        "TIRDepartment",
+        "TIRDepartmentMember/Title"
+      )
+      .expand("TIRDepartmentMember")();
 
-        // fallback to list Title if something is odd
-        if (!deptName) {
-          deptName = item.Title || "";
-        }
+    const memberRows = deptRows.filter((item) => {
+      const people: any[] = Array.isArray(item.TIRDepartmentMember)
+        ? item.TIRDepartmentMember
+        : [];
 
-        const urlField = item.URL;
-        const url =
-          urlField && typeof urlField === "object"
-            ? urlField.Url
-            : urlField || undefined;
+      return people.some(
+        (p) => (p?.Title || "").trim().toLowerCase() === targetName
+      );
+    });
 
-        console.log("[TeamOrg] raw dept row:", item, " -> deptName:", deptName);
-
-        return {
-          name: deptName,   // ✅ plain string for UI
-          url,
-        };
-      });
-
-      console.log("[TeamOrg] mapped departments", mapped);
-      return mapped;
-    } catch (error) {
-      console.error("[TeamOrg] getDepartmentsByMember error", error);
-      return Promise.reject(error);
+    if (!memberRows.length) {
+      return [];
     }
-  }
 
+    const wssIds: number[] = [];
+
+    memberRows.forEach((item) => {
+      const raw = item.TIRDepartment;
+      const values = Array.isArray(raw) ? raw : raw ? [raw] : [];
+
+      values.forEach((v: any) => {
+        const id = Number(v?.WssId);
+        if (id && !wssIds.includes(id)) {
+          wssIds.push(id);
+        }
+      });
+    });
+
+    if (!wssIds.length) {
+      return [];
+    }
+
+    const filter = wssIds.map((id) => `Id eq ${id}`).join(" or ");
+
+    const termRows: any[] = await this.sp.web.lists
+      .getByTitle("TaxonomyHiddenList")
+      .items.select("Id", "Title")
+      .filter(filter)();
+
+    const labelById = new Map<number, string>();
+    termRows.forEach((row) => {
+      labelById.set(Number(row.Id), row.Title as string);
+    });
+
+    const result: OrgDepartment[] = memberRows.map((item) => {
+      const raw = item.TIRDepartment;
+      const values = Array.isArray(raw) ? raw : raw ? [raw] : [];
+
+      let deptName = "";
+
+      if (values.length) {
+        const first = values[0];
+        const wssId = Number(first?.WssId);
+        const label = wssId ? labelById.get(wssId) : undefined;
+        deptName = label || "";
+      }
+
+      const urlField = item.URL;
+      const url =
+        urlField && typeof urlField === "object"
+          ? urlField.Url
+          : urlField || undefined;
+
+      return {
+        name: deptName,
+        url,
+      };
+    });
+
+    return result;
+  }
   /** ===== Policies & Procedures: Document Functions ===== */
 
   public async getDocumentFunctions(

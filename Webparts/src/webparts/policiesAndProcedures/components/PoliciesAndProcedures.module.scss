@@ -149,17 +149,16 @@
 .supportGrid {
   display: grid;
   grid-template-columns: repeat(6, 200px);
-  gap: 30px;
-  justify-content: flex-start;  /* keep grid left-aligned */
-  align-items: flex-start;
+  gap: 24px;
+  justify-content: space-between; 
 }
 
 .supportTile {
   background: var(--pp-card-accent);
   border: 1px solid var(--pp-border);
   border-radius: 12px;
-  width: 162px;   
-  min-height: 223px;  
+  width: 157px;   
+  min-height: 235px;  
   color: #000;
   cursor: pointer;
 
