@@ -204,7 +204,7 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
         <div className={styles.imagePaint} style={{ backgroundImage: `url("${previewImageSrc}")` }} />
         {categoryIconSrc && (
           <div className={styles.TIRCategoryIconGrid}>
-            <Image src={categoryIconSrc} alt="" width={40} height={40} imageFit={ImageFit.contain} />
+            <Image src={categoryIconSrc} alt="" width={32} height={32} imageFit={ImageFit.contain} />
           </div>
         )}
 
@@ -242,84 +242,85 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
   private renderList(newsItems: NewsRow[]) {
     return (
       <ul className={`${styles.listWrap} ${this.state.animateList ? styles.animateIn : ""}`}>
-        {newsItems.map((newsItem) => {
+        {newsItems.map((newsItem, index) => {
           const previewImageSrc = getImageSrcOrPlaceholder(newsItem.newsImage);
           const { departmentIconSrc, categoryIconSrc } = getIconSourcePaths(newsItem.department, newsItem.newsType);
           const targetUrl = resolveTargetUrl(newsItem);
 
           return (
-            <li key={newsItem.listItemId ?? targetUrl ?? newsItem.title} className={styles.listItem}>
-              <a
-                className={styles.listItemLink}
-                href={targetUrl || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={newsItem.title}
-                data-interception="off"
-                onClick={(event) => this.handleAnchorClick(event, targetUrl)}
-              >
-                <div className={`${styles.listMedia} ${styles.thumb}`}>
-                  <Image
-                    src={previewImageSrc}
-                    alt={newsItem.title}
-                    shouldStartVisible
-                    imageFit={ImageFit.cover}
-                    width={120}
-                    height={64}
-                  />
-                  {categoryIconSrc && (
-                    <span className={styles.listCatIcon}>
-                      <Image src={categoryIconSrc} alt="" width={26} height={26} imageFit={ImageFit.contain} />
-                    </span>
-                  )}
-                </div>
-
-                <div className={styles.listBody}>
-                  <div className={styles.topRow}>
-                    {newsItem.department && (
-                      <span className={styles.listDeptGroup}>
-                        {departmentIconSrc && (
-                          <Image
-                            className={styles.listDeptIcon}
-                            src={departmentIconSrc}
-                            alt=""
-                            width={16}
-                            height={16}
-                            imageFit={ImageFit.contain}
-                          />
-                        )}
-                        <span className={styles.listDept}>{newsItem.department}</span>
-                      </span>
-                    )}
-                    {Array.isArray(newsItem.tags) && newsItem.tags.length > 0 && (
-                      <span className={styles.hashes}>
-                        {newsItem.tags.slice(0, 3).map((tag, tagIndex) => (
-                          <span key={tagIndex} className={styles.hash}>
-                            #{tag}
-                          </span>
-                        ))}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className={styles.titleRow}>
-                    <span className={styles.listTitle}>{newsItem.title}</span>
-                    <span className={styles.metaInline}>{this.renderMetaRow(newsItem, "list")}</span>
-                  </div>
-
-                  <div className={styles.authorRow}>
+            <>
+              <li key={newsItem.listItemId ?? targetUrl ?? newsItem.title} className={styles.listItem}>
+                <a
+                  className={styles.listItemLink}
+                  href={targetUrl || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={newsItem.title}
+                  data-interception="off"
+                  onClick={(event) => this.handleAnchorClick(event, targetUrl)}
+                >
+                  <div className={styles.listMedia}>
                     <Image
-                      src={buildUserPhotoUrl(newsItem.authorEmail, "S")}
-                      alt={newsItem.author || "Author"}
-                      width={20}
-                      height={20}
+                      src={previewImageSrc}
+                      alt={newsItem.title}
+                      shouldStartVisible
                       imageFit={ImageFit.cover}
                     />
-                    <span className={styles.authorName}>{newsItem.author}</span>
+                    {categoryIconSrc && (
+                      <span className={styles.listCatIcon}>
+                        <Image src={categoryIconSrc} alt="" width={28} height={28} imageFit={ImageFit.contain} />
+                      </span>
+                    )}
                   </div>
-                </div>
-              </a>
-            </li>
+
+                  <div className={styles.listBody}>
+                    <div className={styles.leftRow}>
+                      {(newsItem.department || newsItem.tags?.length) && <div>
+                        {newsItem.department && (
+                          <span className={styles.listDeptGroup}>
+                            {departmentIconSrc && (
+                              <Image
+                                className={styles.listDeptIcon}
+                                src={departmentIconSrc}
+                                alt=""
+                                width={16}
+                                height={16}
+                                imageFit={ImageFit.contain}
+                              />
+                            )}
+                            <span className={styles.listDept}>{newsItem.department}</span>
+                          </span>
+                        )}
+                        {Array.isArray(newsItem.tags) && newsItem.tags.length > 0 && (
+                          <span className={styles.hashes}>
+                            {newsItem.tags.slice(0, 3).map((tag, tagIndex) => (
+                              <span key={tagIndex} className={styles.hash}>
+                                #{tag}
+                              </span>
+                            ))}
+                          </span>
+                        )}
+                      </div>}
+                      <span className={styles.listTitle}>{newsItem.title}</span>
+                    </div>
+                    <div className={styles.rightRow}>
+                      <span className={styles.metaInline}>{this.renderMetaRow(newsItem, "list")}</span>
+                      <div className={styles.authorRow}>
+                        <Image
+                          src={buildUserPhotoUrl(newsItem.authorEmail, "S")}
+                          alt={newsItem.author || "Author"}
+                          width={20}
+                          height={20}
+                          imageFit={ImageFit.cover}
+                        />
+                        <span className={styles.authorName}>{newsItem.author}</span>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </li>
+              {newsItems.length - 1 !== index && <div className={styles.separator} />}
+            </>
           );
         })}
       </ul>

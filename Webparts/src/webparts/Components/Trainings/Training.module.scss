@@ -9,10 +9,10 @@
   background-color: #fef7f0;
   border-radius: 16px;
   color: #1a1a1a;
-  padding: 32px 60px;
+  padding: 0;
 
   @media (max-width: 768px) {
-    padding: 20px;
+    padding: 0;
   }
 }
 
@@ -69,13 +69,13 @@
 /* Learning Links + Content Section */
 .learningSection {
   display: grid;
+  gap: 20px;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  margin-top: 48px;
+  margin-top: 80px;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 20px;
   }
 }
 
@@ -118,21 +118,19 @@
 
 /* Tabs */
 .tabContainer {
-  margin-bottom: 0;
-  padding: 0 60px;
-  background-color: #fef7f0;
+  margin-block: 32px;
 }
 
 .tabContainerInner{
-  border-bottom: 1px solid #edebe9; // Subtle border
+  border-bottom: 1px solid #CCCACA;
   display: flex;
-  gap: 30px;
+  gap: 24px;
 }
 
 .tabButton {
   background: 0 0;
   border: none;
-  color: #6c6c6c;
+  color: #6C6C6C;
   cursor: pointer;
   font-size: 16px;
   font-weight: 400;
@@ -140,15 +138,10 @@
   padding: 15px 0;
   position: relative;
   transition: color .3s ease;
-
-  &:hover {
-    color: #3A3B43;
-    font-weight: 500;
-  }
 }
 
 .activeTab {
-  color: #000;
+  color: #000000;
   font-weight: 500;
 }
 

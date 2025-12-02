@@ -1,0 +1,54 @@
+.taskApprovalsContainer {
+  width: 100%;
+  padding: 40px 60px;
+}
+
+.tableWrapper {
+  margin-top: 40px;
+  padding: 0 60px;
+}
+
+/* action column */
+.actionCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.actionItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.actionIcon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+.requestorWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  img {
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+}
+
+.requestorName {
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  color: #3a3b43;
+}
+
+.ctaWrapper {
+  margin-top: 40px;
+}

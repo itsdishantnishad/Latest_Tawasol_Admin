@@ -50,6 +50,7 @@
 
 .departmentText {
   color: #6C6C6C;
+  font-family: Inter, sans-serif;
   font-weight: 500;
   font-size: 12px;
   line-height: 16px;
@@ -89,6 +90,7 @@
 
 .hashtagLink {
   color: #D3675B;
+  font-family: Inter, sans-serif;
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
@@ -106,6 +108,7 @@
    ============================= */
 .title {
   color: #000000;
+  font-family: Inter, sans-serif;
   font-size: 36px;
   font-weight: 600;
   line-height: 44px;
@@ -119,8 +122,8 @@
   display: flex;
   justify-content: space-between; /* Meta to the right */
   align-items: center;
-  margin-bottom: 16px;
   color: #555;
+  font-family: Inter, sans-serif;
   font-size: 14px;
   gap: 12px; /* helps when wrapping on small screens */
   flex-wrap: wrap; /* ensure no cramping on narrow widths */
@@ -142,8 +145,8 @@
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   flex: 0 0 auto;
@@ -153,6 +156,7 @@
   color: #000000;
   font-weight: 600;
   white-space: nowrap;
+  font-family: Inter, sans-serif;
   font-size: 14px;
   line-height: 22px;
 }

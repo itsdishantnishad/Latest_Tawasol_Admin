@@ -1,176 +1,303 @@
 @import "~@fluentui/react/dist/sass/References.scss";
 
 .celebrateContainer {
-  // width: 100%;
-  // max-width: 1440px;
-  // margin: 0 auto;
-  // padding: 60px 20px;
-  // background-color: #e5e7eb;
-  padding: 50px 0;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.headerContent {
+  padding: 50px 20px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 40px;
-  margin-bottom: 12px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.decorativeLineLeft,
-.decorativeLineRight {
-  flex-shrink: 0;
-
-  svg {
-    display: block;
-  }
-}
-
-.title {
-  font-family: "Instrument Serif", serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: 42px;
-  line-height: normal;
-  color: #000000;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.subtitle {
-  font-family: "Inter", sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
-  color: #5b6770;
-  margin: 0;
-}
-
+// Tabs
 .tabs {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 60px;
-  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: 50px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 50px;
+  padding: 4px;
+  width: fit-content;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .tab {
-  background: white;
-  border: 2px solid transparent;
-  border-radius: 24px;
-  padding: 8px 20px;
-  font-family: "Inter", sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 20px;
-  color: #1a202c;
+  padding: 12px 28px;
+  background: transparent;
+  border: none;
+  border-radius: 50px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
   transition: all 0.3s ease;
+  white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 8px;
 
   &:hover {
-    background: #fff7ed;
-    border-color: #fdba74;
+    color: #333;
   }
 }
 
 .activeTab {
-  background: #fed7aa;
-  border-color: #fb923c;
-  color: #9a3412;
+  background: #ffecd1;
+  color: #333;
+  font-weight: 600;
 }
 
 .count {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  padding: 2px 8px;
+  background: #ff6b35;
+  color: white;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
 }
 
+// Content Area
 .content {
-  min-height: 300px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 550px;
+}
+
+// Wheel Layout
+.wheelWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 120px;
+  max-width: 1320px;
+  margin: 0 auto;
+  min-height: 500px;
+}
+
+.navButton {
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  color: #000000;
+  z-index: 10;
+
+  &:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.05);
+    transform: scale(1.05);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+  }
+}
+
+.circleContainer {
+  position: relative;
+  width: 50vw;
+  height: 50vw;
+  max-width: 700px;
+  max-height: 700px;
+}
+
+// Outer Circle (larger circle)
+.outerCircle {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid rgba(224, 152, 144, 0.15);
+  background: transparent;
+}
+
+// Inner Circle (smaller circle inside)
+.innerCircle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  border: 1px solid rgba(224, 152, 144, 0.15);
+  background: transparent;
+}
+
+// Profile Card
+.profileCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  /* This matches the Figma 'gap: 10px' -> space between image and name */
+  gap: 10px; 
+}
+
+.profileImageWrapper {
+  /* Exact Figma Dimensions */
+  width: 67px;
+  height: 67px;
+  
+  /* border-radius: 33.5px is exactly 50% of 67px */
+  border-radius: 50%; 
+  
+  /* Figma: border-width: 1px */
+  border: 1px solid #1a4d2e; /* Change hex color to your specific green */
+  
+  /* Figma: padding: 7px. This creates the white space between border and image */
+  padding: 7px;
+  
+  background-color: #ffffff;
+  box-sizing: border-box; /* Ensures padding stays inside the 67px width */
+  
+  /* Centering the image inside */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.profileImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover; /* Ensures the photo stays round without stretching */
+  display: block;
+}
+
+.profileName {
+  font-family: 'Segoe UI', sans-serif; /* Or your specific font */
+  font-size: 14px; /* Adjust based on your Figma design */
+  color: #333;
+  text-align: center;
+  white-space: nowrap;
+}
+
+// Center Illustration (in the very center)
+.centerIllustration {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 45%;
+  height: 45%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.illustrationImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+// Empty State
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  
+  p {
+    font-size: 16px;
+    color: #666;
+  }
+}
+
+// Bottom Section
+.bottomSection {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
   margin-bottom: 40px;
 }
 
-.celebrationIcon {
-  text-align: center;
-}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cccaca;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
 
-.emoji {
-  display: block;
-  animation: bounce 5s ease-in-out infinite;
-  img {
-    width: 150px;
+  &:hover {
+    background: #9ca3af;
+    transform: scale(1.2);
   }
 }
 
-@keyframes bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
+.activeDot {
+  background: #da291c;
+  width: 18px;
+  border-radius: 40px;
 }
 
-.emptyState {
-  text-align: center;
-
-  p {
-    font-family: "Inter", sans-serif;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 24px;
-    color: #9ca3af;
-    margin: 0;
-  }
-}
-
+// Button Container
 .buttonContainer {
-  text-align: center;
-  
-  a {
-    text-decoration: none;
-  }
+  display: flex;
+  justify-content: center;
 }
 
 .viewAllButton {
-  background: radial-gradient(
-    circle at top left,
-    rgba(32, 45, 57, 1) 0%,
-    rgba(16, 24, 32, 1) 100%
-  );
+  background: #2c3e50;
   color: white;
   border: none;
-  border-radius: 167px;
-  padding: 8px 12px;
-  min-width: 143px;
-  height: 36px;
-  font-family: "Inter", sans-serif;
-  font-weight: 600;
+  border-radius: 25px;
+  padding: 12px 32px;
   font-size: 14px;
-  line-height: 20px;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: -4px -6px 4px 0px rgba(0, 0, 0, 0.51) inset,
-    0px 4px 4px 0px rgba(118, 139, 158, 1) inset;
   transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
 
   &:hover {
+    background: #34495e;
     transform: translateY(-2px);
-    box-shadow: -4px -6px 6px 0px rgba(0, 0, 0, 0.51) inset,
-      0px 6px 6px 0px rgba(118, 139, 158, 1) inset;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   &:active {
@@ -178,41 +305,133 @@
   }
 }
 
-// Responsive design
-@media (max-width: 1200px) {
-  .headerContent {
-    gap: 20px;
+// Responsive Design
+@media (max-width: 1024px) {
+  .wheelWrapper {
+    gap: 40px;
+    min-height: 450px;
   }
 
-  .title {
-    font-size: 36px;
+  .circleContainer {
+    width: 60vw;
+    height: 60vw;
+    max-width: 600px;
+    max-height: 600px;
+  }
+
+  .profileImageWrapper {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profileName {
+    font-size: 12px;
+    max-width: 100px;
+  }
+
+  .content {
+    min-height: 450px;
   }
 }
 
 @media (max-width: 768px) {
   .celebrateContainer {
-    padding: 40px 16px;
+    padding: 30px 16px;
   }
 
-  .headerContent {
-    flex-direction: column;
+  .tabs {
+    flex-wrap: wrap;
+    padding: 3px;
+    margin-bottom: 30px;
+  }
+
+  .tab {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .count {
+    font-size: 11px;
+    padding: 1px 6px;
+  }
+
+  .wheelWrapper {
     gap: 16px;
+    min-height: 350px;
   }
 
-  .decorativeLineLeft,
-  .decorativeLineRight {
-    display: none;
+  .circleContainer {
+    width: 70vw;
+    height: 70vw;
+    max-width: 400px;
+    max-height: 400px;
   }
 
-  .title {
-    font-size: 28px;
+  .navButton {
+    width: 48px;
+    height: 48px;
+
+    svg {
+      width: 30px;
+      height: 30px;
+    }
   }
 
-  .subtitle {
-    font-size: 14px;
+  .profileImageWrapper {
+    width: 70px;
+    height: 70px;
+    border-width: 2px;
   }
 
-  .emoji {
-    font-size: 80px;
+  .profileName {
+    font-size: 11px;
+    max-width: 80px;
+    padding: 3px 8px;
+  }
+
+  .content {
+    min-height: 350px;
+  }
+
+  .bottomSection {
+    margin-top: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wheelWrapper {
+    flex-direction: column;
+    gap: 20px;
+    min-height: auto;
+  }
+
+  .navButton {
+    transform: rotate(90deg);
+    
+    &:first-child {
+      order: -1;
+    }
+    
+    &:last-child {
+      order: 1;
+    }
+  }
+
+  .circleContainer {
+    width: 80vw;
+    height: 80vw;
+    max-width: 300px;
+    max-height: 300px;
+    order: 0;
+  }
+
+  .profileImageWrapper {
+    width: 60px;
+    height: 60px;
+  }
+
+  .profileName {
+    font-size: 10px;
+    max-width: 70px;
   }
 }

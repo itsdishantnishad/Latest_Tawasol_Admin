@@ -5,36 +5,50 @@
 .eventCard {
   display: flex;
   align-items: center;
-  gap: 30px;
   background-color: #ffffff;
   border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
+  gap: 16px;
+  padding: 16px 24px;
+  transition: box-shadow .3s ease;
+  border-left: 5px solid #0E6187;
   &.pastEvent {
-    .dateSection {
-      background-color: #F0EDEB;
+    // .dateSection {
+    //   background-color: #F0EDEB;
+    //   .month,
+    //   .day {
+    //     color: #9ca3af;
+    //   }
       
-      .month,
-      .day {
-        color: #9ca3af;
-      }
+    //   .date {
+    //     color: #9ca3af;
+    //   }
+    // }
+    
+    // .detailsSection{
+    //   .category {
+    //     color: #f3a6a6;
+    //   }
       
-      .date {
-        color: #9ca3af;
+    //   .title {
+    //     color: #6b7280;
+    //   }
+    // }
+
+    // .locationSection{
+    //   .infoRow {
+    //     color: #9ca3af;
+    //   }
+    // }
+
+    .actionSection{
+      .pastEventLabel {
+        font-size: 14px;
+        color: #3A3B43;
+        line-height: 20px;
+        font-weight: 400;
       }
-    }
-    
-    .category {
-      color: #f3a6a6;
-    }
-    
-    .title {
-      color: #6b7280;
-    }
-    
-    .infoRow {
-      color: #9ca3af;
     }
   }
 
@@ -45,34 +59,43 @@
 
 // Date Section
 .dateSection {
-  flex-shrink: 0;
-  background-color: #f3f4f6;
-  border-radius: 8px;
-  min-width: 80px;
-  height: 100px;
-  padding: 15px;
+  // flex-shrink: 0;
+  // background-color: #f3f4f6;
+  // border-radius: 8px;
+  // min-width: 80px;
+  // height: 100px;
+  // padding: 15px;
+  // display: flex;
+  // flex-direction: column;
+  // justify-content: center;
+  // align-items: center;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  height: 100px;
+  background: #FFE8DD;
+  border-radius: 8px;
+  padding: 12px;
 }
 
-.month {
-  color: #101820;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
-}
+// .month {
+//   color: #101820;
+//   font-size: 16px;
+//   font-weight: 400;
+//   line-height: 24px;
+// }
 
 .date {
   color: #101820;
-  font-size: 36px;
+  font-size: 20px;
   font-weight: 700;
-  line-height: 44px;
+  line-height: 28px;
 }
 
 .day {
-  color: #6C6C6C;
+  color: #3A3B43;
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
@@ -113,50 +136,125 @@
 }
 
 // Details Section
+// .detailsSection {
+//   // flex-grow: 1;
+//   // min-width: 0;
+//   width: 30%;
+// }
+
 .detailsSection {
-  // flex-grow: 1;
+  flex: 1;
   // min-width: 0;
-  width: 30%;
-}
-
-.locationSection{
-  font-size: 14px;
-}
-
-.category {
-  color: #D3675B;
-  font-size: 14px;
-  line-height: 22px;
-  font-weight: 500;
-  margin-bottom: 5px;
-  letter-spacing: -0.5px;
-}
-
-.title {
-  color: #101820;
-  font-size: 20px;
-  line-height: 28px;
-  font-weight: 600;
-  margin: 0;
-}
-
-.infoRow {
+  width: 25%;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
-  color: #3A3B43;
-  margin-bottom: 5px;
-  
-  &:last-child {
-    margin-bottom: 0;
+
+  .category {
+    color: #D3675B;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: capitalize;
+    line-height: 24px;
+    margin: 0;
+  }
+
+  .title {
+    color: #101820;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 28px;
+    margin: 0;
   }
 }
 
-.icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
+// .locationSection{
+//   font-size: 14px;
+// }
+
+.contentWrapper {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
+
+.locationSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-right: 16px;
+  flex: 1;
+
+  .infoRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .icon {
+      flex-shrink: 0;
+      color: #DA291C;
+      width: 20px;
+      height: 20px;
+    }
+
+    .infoText {
+      color: #3A3B43;
+      font-size: 14px;
+      font-weight: 400;
+      white-space: nowrap;
+      line-height: 22px;
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .instructorImage {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+}
+
+// .category {
+//   color: #D3675B;
+//   font-size: 14px;
+//   line-height: 22px;
+//   font-weight: 500;
+//   margin-bottom: 5px;
+//   letter-spacing: -0.5px;
+// }
+
+// .title {
+//   color: #101820;
+//   font-size: 20px;
+//   line-height: 28px;
+//   font-weight: 600;
+//   margin: 0;
+// }
+
+// .infoRow {
+//   display: flex;
+//   align-items: center;
+//   gap: 8px;
+//   color: #3A3B43;
+//   margin-bottom: 5px;
+  
+//   &:last-child {
+//     margin-bottom: 0;
+//   }
+// }
+
+// .icon {
+//   width: 20px;
+//   height: 20px;
+//   flex-shrink: 0;
+// }
 
 .infoText {
   font-size: 14px;
@@ -166,31 +264,47 @@
 
 // Action Section
 .actionSection {
-  flex-shrink: 0;
-  text-align: right;
-  margin-left: auto;
+  // flex-shrink: 0;
+  // text-align: right;
+  // margin-left: auto;
+  .registerButton {
+    // background-color: #111827;
+    // color: #ffffff;
+    // padding: 8px 24px;
+    // border-radius: 24px;
+    // font-weight: 500;
+    // border: none;
+    // cursor: pointer;
+    // transition: background-color 0.3s ease;
+    // font-size: 14px;
+
+      background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
+      border: none;
+      border-radius: 167px;
+      box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
+      color: #fff;
+      cursor: pointer;
+      font-family: Inter, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      height: 40px;
+      line-height: 20px;
+      min-width: 143px;
+      padding: 8px 12px;
+      transition: all .3s ease;
+    
+    &:hover {
+      background-color: #1f2937;
+    }
+    
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.2);
+    }
+  }
 }
 
-.registerButton {
-  background-color: #111827;
-  color: #ffffff;
-  padding: 8px 24px;
-  border-radius: 24px;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-size: 14px;
-  
-  &:hover {
-    background-color: #1f2937;
-  }
-  
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.2);
-  }
-}
+
 
 .countdownWrapper {
   text-align: right;
@@ -211,17 +325,11 @@
   font-weight: 600;
 }
 
-.pastEventLabel {
-  font-size: 14px;
-  color: #d1d5db;
-  font-weight: 400;
-}
-
 // Container styles for demo
 .eventsContainer {
   min-height: 100vh;
-  background-color: #fef7f0;
-  padding: 40px 60px;
+  // background-color: #fef7f0;
+  padding: 0;
   
 }
 
@@ -230,6 +338,14 @@
   display: flex;
   flex-direction: column;
   gap: 1em;
+}
+
+.eventsWrapper h5{
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #000000;
+  margin-block: 10px;
 }
 
 .infoBox {
@@ -295,7 +411,7 @@
   }
 }
 .previousEventsContainer {
-  margin-top: 48px;
+  margin-top: 80px;
 }
 
 .heading {
@@ -303,33 +419,33 @@
   font-size: 24px;
   line-height: 32px;
   font-weight: 500;
-  margin-bottom: 20px;
+  margin: 0;
+  margin-bottom: 24px;
 }
 
 .gridLayout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  // grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
 
 
 /* Tabs */
 .tabContainer {
-  margin-bottom: 0;
-  padding: 0 60px;
-  background-color: #fef7f0;
+  margin-block: 32px;
 }
 
 .tabContainerInner{
-  border-bottom: 1px solid #edebe9; // Subtle border
+  border-bottom: 1px solid #CCCACA;
   display: flex;
-  gap: 30px;
+  gap: 24px;
 }
 
 .tabButton {
   background: 0 0;
   border: none;
-  color: #3A3B43;
+  color: #6C6C6C;
   cursor: pointer;
   font-size: 16px;
   font-weight: 400;
@@ -337,11 +453,6 @@
   padding: 15px 0;
   position: relative;
   transition: color .3s ease;
-
-  &:hover {
-    color: #3A3B43;
-    font-weight: 500;
-  }
 }
 
 .activeTab {
