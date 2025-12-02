@@ -11,6 +11,10 @@ import { SuggestBox } from './components/SuggestBox';
 import { SearchService } from './services/searchService';
 import { NavigationService } from './services/navigationService';
 import { IDS, HARD_NOTIFS, resolveUrls } from './shared/constants';
+import { IOnboConfig } from './components/Onbo';
+
+// ⬇️ Onboarding import (Onbo.ts)
+import Onbo from './components/Onbo';
 
 export interface IExtensionsApplicationCustomizerProperties {
   testMessage: string;
@@ -46,6 +50,9 @@ export default class ExtensionsApplicationCustomizer
   private notifications!: Notifications;
   private observer?: MutationObserver;
   private debounceId?: number;
+
+  // Onboarding instance reference (optional, for cleanup)
+  private onboarding?: Onbo;
 
   private get webUrl(): string { return this.context.pageContext.web.absoluteUrl; }
   private get userEmail(): string { return this.context.pageContext.user.email || ''; }
@@ -221,6 +228,21 @@ export default class ExtensionsApplicationCustomizer
     this.injectFont();
     document.body.style.background = '#FFF4EA';
 
+    // Resolve all environment-specific URLs once
+    const urls = resolveUrls(this.webUrl);
+
+    // ⬇️ Onboarding – show only for first-time users
+    if (!Onbo.hasSeen(this.context)) {
+      const onboConfig: IOnboConfig = {
+        homeUrl: urls.home, // Tawasol home
+        // TODO: is URL ko apne actual onboarding video se replace karo
+        videoUrl: `${urls.home}/SiteAssets/onboarding.mp4`
+      };
+
+      this.onboarding = new Onbo(this.context, onboConfig);
+      this.onboarding.render();
+    }
+
     // ---- SEARCH SERVICE: now only uses SPHttpClient (no Graph) ----
     this.search = new SearchService(
       this.webUrl,
@@ -234,7 +256,6 @@ export default class ExtensionsApplicationCustomizer
     );
     this.notifications = new Notifications(HARD_NOTIFS);
 
-    const urls = resolveUrls(this.webUrl);
     this.header = new Header(
       this.webUrl,
       this.userEmail,
@@ -270,7 +291,8 @@ export default class ExtensionsApplicationCustomizer
   }
 
   private async refreshNavAndFooter(): Promise<void> {
-    const links = await this.nav.getNavLinks().catch(() => []);
+    // ⬇️ FIX: add explicit return type to avoid TS7011
+    const links = await this.nav.getNavLinks().catch((): any[] => []);
     if (links.length) {
       this.floatingNav = new FloatingNav();
       this.floatingNav.render(IDS.hosts.nav, links);
@@ -353,5 +375,8 @@ export default class ExtensionsApplicationCustomizer
     this.observer?.disconnect();
     window.removeEventListener('scroll', this.updateSuggest, true);
     window.removeEventListener('resize', this.updateSuggest);
+
+    // If onboarding overlay abhi bhi laga ho to clean up
+    this.onboarding?.dispose();
   }
 }
