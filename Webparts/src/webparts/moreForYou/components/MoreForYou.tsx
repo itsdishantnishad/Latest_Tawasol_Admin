@@ -133,24 +133,24 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
                   />
 
                   <div className={styles.bottom}>
+                    {showDepartment && news.department && (
+                      <span className={styles.dept}>
+                        <span
+                          className={styles.deptIcon}
+                          aria-hidden="true"
+                          style={
+                            departmentIconSrc
+                              ? { backgroundImage: `url("${departmentIconSrc}")` }
+                              : undefined
+                          }
+                        />
+                        {news.department}
+                      </span>
+                    )}
+
                     <div className={styles.title}>{news.title}</div>
 
                     <div className={styles.metaRow}>
-                      {showDepartment && news.department && (
-                        <span className={`${styles.metaItem} ${styles.dept}`}>
-                          <span
-                            className={styles.deptIcon}
-                            aria-hidden="true"
-                            style={
-                              departmentIconSrc
-                                ? { backgroundImage: `url("${departmentIconSrc}")` }
-                                : undefined
-                            }
-                          />
-                          {news.department}
-                        </span>
-                      )}
-
                       {publishedHuman && (
                         <span className={styles.metaItem}>{publishedHuman}</span>
                       )}

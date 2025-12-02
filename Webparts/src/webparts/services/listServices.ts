@@ -60,6 +60,7 @@ export type OrgMember = {
   sort: number;
   photoUrl?: string;
   user: string;
+  userEmail?: string;
 };
 
 export type OrgDepartment = { name: string; url?: string };
@@ -449,6 +450,7 @@ export class listServices {
           newsImage: listServices.getImageUrlFromPage(item.URL, 200),
           joiningURL: item.TIRJoiningURLOWSMTXT,
           instructor: instructorInfo,
+          pageUrl: item.URL,
         } as any;
       });
     } catch (error) {
@@ -493,6 +495,7 @@ export class listServices {
           location: item.TIRLocation,
           newsImage: listServices.getImageUrlFromPage(item.URL, 200),
           category: item.TIREventCategory,
+          pageUrl: item.URL,
         } as any;
       });
     } catch (error) {
@@ -508,7 +511,7 @@ export class listServices {
     try {
       results = await this.sp.web.lists
         .getByTitle(listName)
-        .items.select("Title", "TIRSortOrder", "TIRIconURL", "URL")
+        .items.select("Title", "TIRSortOrder", "TIRIconURL", "URL","TIRAppType")
         .orderBy("TIRSortOrder", true)();
 
       return results.map((item: any) => {
@@ -517,13 +520,28 @@ export class listServices {
           SortOrder: item.TIRSortOrder,
           IconURL: item.TIRIconURL ? item.TIRIconURL.Url : "#",
           URL: item.URL ? item.URL.Url : "#",
+          AppType: item.TIRAppType ? item.TIRAppType : "",
         } as any;
       });
     } catch (error) {
       return Promise.reject(error);
     }
   }
-
+  
+  // get custom app links
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async getCustomAppLinks(listName: string, userEmail: string): Promise<any[]> {
+    let results: any[] = [];
+    try {
+      results = await this.sp.web.lists
+        .getByTitle(listName)
+        .items.select("Id", "TIRUserEmail", "TIRCustomLinkAttribute")
+        .filter(`TIRUserEmail eq '${userEmail}'`)();
+      return results;
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getNewJoiners(listName: string): Promise<any[]> {
     let results: any[] = [];
@@ -605,7 +623,12 @@ export class listServices {
     const rows = await this.sp.web.lists
       .getByTitle(listTitle)
       .items.select(
-        "Title,TIRDesignation,TIRLevel,TIRSortOrder,TIRUserPicture,TIRUser/Title"
+        "Title",
+        "TIRDesignation",
+        "TIRLevel",
+        "TIRSortOrder",
+        "TIRUserPicture",
+        "TIRUser/Title"
       )
       .orderBy("TIRLevel", true)
       .orderBy("TIRSortOrder", true)
@@ -614,6 +637,10 @@ export class listServices {
     const mapped: OrgMember[] = rows.map((it: any) => {
       const ph = it?.TIRUserPicture;
       const photoUrl = typeof ph === "string" ? ph : ph?.Url || undefined;
+
+      const userField = it?.TIRUser || {};
+      const userTitle = userField?.Title || "";
+
       return {
         id: Number(it?.Id) || 0,
         name: it?.Title || "",
@@ -621,7 +648,8 @@ export class listServices {
         level: Number(it?.TIRLevel ?? 99),
         sort: Number(it?.TIRSortOrder ?? 9999),
         photoUrl,
-        user: it?.TIRUser?.Title || "",
+        // 👇 this is what TeamOrganisationStructure.tsx expects
+        user: userTitle
       };
     });
 
@@ -637,47 +665,78 @@ export class listServices {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public async getDepartmentsByMember(
-      listTitle: string,
-      memberDisplayName: string
-    ): Promise<OrgDepartment[]> {        // <— note return type: OrgDepartment[]
-      let results: any[] = [];
-      try {
-        results = await this.sp.web.lists.getByTitle(listTitle).items
-          .select(
-            "Id",
-            "Title",
-            "URL",
-            "TIRDepartment",
-            "TaxCatchAll/Term",
-            "TIRDepartmentMember/Title"
-          )
-          .expand("TaxCatchAll,TIRDepartmentMember")();
+  public async getDepartmentsByMember(
+    listTitle: string,
+    memberDisplayName: string
+  ): Promise<OrgDepartment[]> {
+    let results: any[] = [];
+    try {
+      results = await this.sp.web.lists
+        .getByTitle(listTitle)
+        .items.select(
+          "Id",
+          "Title",
+          "URL",
+          "TIRDepartment",                 // taxonomy field
+          "TIRDepartmentMember/Title"
+        )
+        .expand("TIRDepartmentMember")();
 
-        const matches = results.filter((item) => {
-          const people: any[] = Array.isArray(item?.TIRDepartmentMember)
-            ? item.TIRDepartmentMember
-            : [];
-          return people.some(
-            (p) =>
-              (p?.Title || "").trim().toLowerCase() ===
-              memberDisplayName.trim().toLowerCase()
-          );
-        });
+      // filter rows where the People column contains our member
+      const matches = results.filter((item) => {
+        const people: any[] = Array.isArray(item?.TIRDepartmentMember)
+          ? item.TIRDepartmentMember
+          : [];
+        return people.some(
+          (p) =>
+            (p?.Title || "").trim().toLowerCase() ===
+            memberDisplayName.trim().toLowerCase()
+        );
+      });
 
-        // Map into OrgDepartment shape: { name, url? }
-        const mapped: OrgDepartment[] = matches.map((item: any) => ({
-          name: item.Title || "",                       // <- text inside orange box
-          url: item.URL ? item.URL.Url : undefined,    // <- click opens this (if present)
-        }));
+      const mapped: OrgDepartment[] = matches.map((item: any) => {
+        const rawDept = item.TIRDepartment;
+        let deptName = "";
 
-        console.log("[TeamOrg] mapped departments", mapped);
-        return mapped;
-      } catch (error) {
-        console.error("[TeamOrg] getDepartmentsByMember error", error);
-        return Promise.reject(error);
-      }
+        // 🔹 TIRDepartment comes as taxonomy object/array → get its Label like we do elsewhere
+        if (rawDept) {
+          if (Array.isArray(rawDept)) {
+            const first = rawDept[0] || {};
+            deptName = first.Label || first.Term || first.Name || "";
+          } else if (typeof rawDept === "object") {
+            // your current case: { Label, TermGuid, WssId }
+            deptName = rawDept.Label || rawDept.Term || rawDept.Name || "";
+          } else {
+            deptName = String(rawDept);
+          }
+        }
+
+        // fallback to list Title if something is odd
+        if (!deptName) {
+          deptName = item.Title || "";
+        }
+
+        const urlField = item.URL;
+        const url =
+          urlField && typeof urlField === "object"
+            ? urlField.Url
+            : urlField || undefined;
+
+        console.log("[TeamOrg] raw dept row:", item, " -> deptName:", deptName);
+
+        return {
+          name: deptName,   // ✅ plain string for UI
+          url,
+        };
+      });
+
+      console.log("[TeamOrg] mapped departments", mapped);
+      return mapped;
+    } catch (error) {
+      console.error("[TeamOrg] getDepartmentsByMember error", error);
+      return Promise.reject(error);
     }
+  }
 
   /** ===== Policies & Procedures: Document Functions (for Landing.tsx) ===== */
 

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import styles from "./AppsAndLinks.module.scss";
-
+import { listServices } from "../../services/listServices";
 import {
   Dialog,
   DialogContent,
@@ -37,49 +37,32 @@ interface IUserListItem {
   Id: number;
   UserEmail: string;
   AppLink: string;
+  [key: string]: any;
 }
 
-const LIST_NAME = "test"; // your list name
-const USER_EMAIL_COL = "UserEmail";
-const APPLINK_COL = "AppLink";
+const LIST_NAME = "Custom App Links";
+const USER_EMAIL_COL = "TIRUserEmail";
+const APPLINK_COL = "TIRCustomLinkAttribute";
 
 const AppsAndLinks = (props: IAppsAndLinksProps) => {
-    const sp: SPFI = React.useMemo(() => spfi().using(SPFx(props.context)), [props.context]);
+  const sp: SPFI = React.useMemo(() => spfi().using(SPFx(props.context)), [props.context]);
   const [activeTab, setActiveTab] = useState("quick");
   const [customLinks, setCustomLinks] = useState<ICustomLink[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
+  let spService: listServices;
+   spService = new listServices(props.context);
   const [linkTitle, setLinkTitle] = useState("");
   const [linkURL, setLinkURL] = useState("");
 
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const userEmail = props.context.pageContext.user.email;
-
-  // Quick links sample
-  const quickLinks = [
-    { Title: "IT Help Request", IconURL: "🖥️", URL: "#" },
-    { Title: "Learning @ Dhre", IconURL: "📖", URL: "#" },
-    { Title: "Performance Management", IconURL: "📊", URL: "#" },
-    { Title: "Leave Request", IconURL: "📋", URL: "#" },
-    { Title: "Password Reset", IconURL: "🔄", URL: "#" },
-    { Title: "Biometric Attendance", IconURL: "👤", URL: "#" },
-    { Title: "Data Protection", IconURL: "🔒", URL: "#" }
-  ];
-
-  /** -------------------------
-   * Load user's existing custom links
-   ------------------------- */
+  const userEmail = props.context.pageContext.user.loginName;
   const loadUserLinks = async () => {
     try {
-      const items: IUserListItem[] = await sp.web.lists
-        .getByTitle(LIST_NAME)
-        .items.select("Id", USER_EMAIL_COL, APPLINK_COL)
-        .filter(`${USER_EMAIL_COL} eq '${userEmail}'`)();
-
+      const items: IUserListItem[] = await spService.getCustomAppLinks("Custom App Links", userEmail);
       if (items.length > 0 && items[0][APPLINK_COL]) {
         setCustomLinks(JSON.parse(items[0][APPLINK_COL]));
       }
@@ -92,9 +75,6 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     loadUserLinks();
   }, []);
 
-  /** -------------------------
-   * Save to SharePoint List (Add or Update)
-   ------------------------- */
   const persistToSharePoint = async (updatedLinks: ICustomLink[]) => {
     try {
       const existingItems: IUserListItem[] = await sp.web.lists
@@ -108,13 +88,11 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
       };
 
       if (existingItems.length > 0) {
-        // update
         await sp.web.lists
           .getByTitle(LIST_NAME)
           .items.getById(existingItems[0].Id)
           .update(payload);
       } else {
-        // create new
         await sp.web.lists.getByTitle(LIST_NAME).items.add(payload);
       }
     } catch (err) {
@@ -122,14 +100,12 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     }
   };
 
-  /** -------------------------
-   * Open Add Form
-   ------------------------- */
   const openAddForm = () => {
     setIsEditMode(false);
     setLinkTitle("");
     setLinkURL("");
     setIsFormOpen(true);
+    setMenuOpenIndex(null);
   };
 
   const openEditForm = (index: number) => {
@@ -138,11 +114,9 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     setLinkTitle(customLinks[index].Title);
     setLinkURL(customLinks[index].URL);
     setIsFormOpen(true);
+    setMenuOpenIndex(null);
   };
 
-  /** -------------------------
-   * Save/Add/Update link
-   ------------------------- */
   const saveForm = async () => {
     if (!linkTitle || !linkURL) return;
 
@@ -160,9 +134,12 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     setIsFormOpen(false);
   };
 
-  /** -------------------------
-   * Delete Link
-   ------------------------- */
+  const cancelForm = () => {
+    setIsFormOpen(false);
+    setLinkTitle("");
+    setLinkURL("");
+  };
+
   const deleteLink = async (index: number) => {
     if (!confirm("Are you sure you want to delete this link?")) return;
 
@@ -173,9 +150,6 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     setMenuOpenIndex(null);
   };
 
-  /** -------------------------
-   * Detect click outside menu
-   ------------------------- */
   useEffect(() => {
     const handleClick = (e: any) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -228,9 +202,13 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
           {/* ---------------- Quick Links ---------------- */}
           {activeTab === "quick" && (
             <div className={styles.linksGrid}>
-              {quickLinks.map((link, index) => (
-                <a key={index} href={link.URL} className={styles.linkItem}>
-                  <div className={styles.iconCircle}>{link.IconURL}</div>
+              {props.savedApps.filter(app => app.AppType === "Quick Links").map((link, index) => (
+                <a key={index}target="_blank" rel="noopener noreferrer" href={link.URL} className={styles.linkItem}>
+                  <div className={styles.iconCircle}> {link.IconURL ? (
+                      <img src={link.IconURL} className={styles.appIcon} />
+                    ) : (
+                      "🔗"
+                    )}</div>
                   <div className={styles.linkTitle}>{link.Title}</div>
                 </a>
               ))}
@@ -240,8 +218,8 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
           {/* ---------------- Apps Links ---------------- */}
           {activeTab === "app" && (
             <div className={styles.linksGrid}>
-              {props.savedApps?.map((app, index) => (
-                <a key={index} href={app.URL} className={styles.linkItem}>
+              {props.savedApps.filter(app => app.AppType === "App Links").map((app, index) => (
+                <a key={index} target="_blank" rel="noopener noreferrer" href={app.URL} className={styles.linkItem}>
                   <div className={styles.iconCircle}>
                     {app.IconURL ? (
                       <img src={app.IconURL} className={styles.appIcon} />
@@ -257,80 +235,112 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
 
           {/* ---------------- Custom Links ---------------- */}
           {activeTab === "custom" && (
-            <div className={styles.linksGrid}>
-              {/* Add button */}
-              <button className={styles.addLinkButton} onClick={openAddForm}>
-                <div className={styles.iconCircle}>+</div>
-                <div className={styles.linkTitle}>Add Link</div>
-              </button>
+            <>
+              <div className={styles.linksGrid}>
+                {/* Add button */}
+                <button className={styles.addLinkButton} onClick={openAddForm}>
+                  <div className={styles.iconCircle}>+</div>
+                  <div className={styles.linkTitle}>Add Link</div>
+                </button>
 
-              {/* Custom link items */}
-              {customLinks.map((link, index) => (
-                <div key={index} className={styles.customLinkItem}>
-                  <a href={link.URL} className={styles.linkItem}>
-                    <div className={styles.iconCircle}>🔗</div>
-                    <div className={styles.linkTitle}>{link.Title}</div>
-                  </a>
+                {/* Custom link items */}
+                {customLinks.map((link, index) => (
+                  <div key={index} className={styles.customLinkItem}>
+                    <a href={link.URL} target="_blank" rel="noopener noreferrer" className={styles.linkItem}>
+                      <div className={styles.iconCircle}>🔗</div>
+                      <div className={styles.linkTitle}>{link.Title}</div>
+                    </a>
 
-                  {/* Icon (3-dot or gear icon) */}
-                  <div className={styles.menuWrapper}>
-                    <IconButton
-                      iconProps={{ iconName: "MoreVertical" }}
-                      onClick={() =>
-                        setMenuOpenIndex(menuOpenIndex === index ? null : index)
-                      }
+                    <div className={styles.menuWrapper}>
+                      <IconButton
+                        iconProps={{ iconName: "MoreVertical" }}
+                        onClick={() =>
+                          setMenuOpenIndex(menuOpenIndex === index ? null : index)
+                        }
+                      />
+
+                      {menuOpenIndex === index && (
+                        <div ref={menuRef} className={styles.menu}>
+                          <button onClick={() => openEditForm(index)}>
+                            Edit
+                          </button>
+                          <button onClick={() => deleteLink(index)}>
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ---------------- Inline Add/Edit Form ---------------- */}
+              {isFormOpen && (
+                <div className={styles.inlineForm}>
+                  <h3 className={styles.formTitle}>
+                    {isEditMode ? "Edit Link" : "Add Custom Links"}
+                  </h3>
+                  
+                  <div className={styles.formFields}>
+                    <div className={styles.formField}>
+                      <TextField
+                        label="Add name"
+                        placeholder="Add a name"
+                        required
+                        value={linkTitle}
+                        onChange={(e, v: any) => setLinkTitle(v)}
+                        styles={{
+                          fieldGroup: { borderRadius: 8 }
+                        }}
+                      />
+                    </div>
+
+                    <div className={styles.formField}>
+                      <TextField
+                        label="Enter your URL"
+                        placeholder="Enter your URL here"
+                        value={linkURL}
+                        required
+                        onChange={(e, v: any) => setLinkURL(v)}
+                        styles={{
+                          fieldGroup: { borderRadius: 8 }
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.formActions}>
+                    <DefaultButton
+                      text="Cancel"
+                      onClick={cancelForm}
+                      styles={{
+                        root: {
+                          borderRadius: 24,
+                          border: '2px solid #000',
+                          minWidth: 200,
+                          height: 48
+                        }
+                      }}
                     />
-
-                    {menuOpenIndex === index && (
-                      <div ref={menuRef} className={styles.menu}>
-                        <button onClick={() => openEditForm(index)}>
-                          Edit
-                        </button>
-                        <button onClick={() => deleteLink(index)}>
-                          Delete
-                        </button>
-                      </div>
-                    )}
+                    <PrimaryButton
+                      text="Save"
+                      onClick={saveForm}
+                      styles={{
+                        root: {
+                          borderRadius: 24,
+                          minWidth: 200,
+                          height: 48,
+                          backgroundColor: '#b8b8b8'
+                        }
+                      }}
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </DialogContent>
-
-      {/* ---------------- Add/Edit Form Dialog ---------------- */}
-      <Dialog
-        hidden={!isFormOpen}
-        onDismiss={() => setIsFormOpen(false)}
-        dialogContentProps={{
-          type: DialogType.normal,
-          title: isEditMode ? "Edit Link" : "Add Link",
-          showCloseButton: true
-        }}
-      >
-        <DialogContent>
-          <TextField
-            label="Link Title"
-            value={linkTitle}
-            onChange={(e, v:any) => setLinkTitle(v)}
-          />
-          <TextField
-            label="URL"
-            value={linkURL}
-            onChange={(e, v:any) => setLinkURL(v)}
-          />
-
-          <div style={{ marginTop: 20, textAlign: "right" }}>
-            <DefaultButton
-              text="Cancel"
-              onClick={() => setIsFormOpen(false)}
-              style={{ marginRight: 10 }}
-            />
-            <PrimaryButton text="Save" onClick={saveForm} />
-          </div>
-        </DialogContent>
-      </Dialog>
     </Dialog>
   );
 }

@@ -14,6 +14,8 @@ import Offers from '../../Components/FeatureContent/Offers/Offers';
 import Training from '../../Components/FeatureContent/Training/Training';
 import styles from './FeatureWheel.module.scss';
 import AboutDHRE from '../../Components/FeatureContent/AboutDHRE/AboutDHRE';
+import TaskApprovals from '../../Components/FeatureContent/TaskApprovals/TaskApprovals';
+import BeverageMenu from '../../Components/FeatureContent/BeverageMenu/BeverageMenu';
 
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
@@ -83,6 +85,14 @@ const featureTitleContent: Record<string, { header: string, subHeader: string }>
   about_dhre: {
     header: "About DHRE",
     subHeader: "Dive deep into DHRE: Our departments, culture, and core values."
+  },
+  tasks: {
+    header: "Task Approvals",
+    subHeader: "Streamline your work to accomplish more, faster."
+  },
+  beverage_menu: {
+    header: "Beverage Menu",
+    subHeader: "Find your favourite drink to fuel your day"
   }
 }
 
@@ -103,7 +113,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
       case 'events':
         return <Events seeAllURL={props.upcomingEvents} onViewAll={handleViewAll} />;
       case 'employee_events':
-        return <LetsCelebrate seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />;
+        return <LetsCelebrate context={props.context} seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />;
       case 'meetings':
         return <Meeting seeAllURL={props.meeting} onViewAll={handleViewAll} />;
       case 'service_links':
@@ -118,6 +128,10 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
         return <Training seeAllURL={props.trainingAndDevelopment} onViewAll={handleViewAll} />;
       case 'about_dhre':
         return <AboutDHRE />;
+      case 'tasks':
+        return <TaskApprovals />;
+      case 'beverage_menu':
+        return <BeverageMenu />;
     }
   };
 

@@ -3,14 +3,11 @@ import * as React from "react";
 import css from "./LeaveShellPage.module.scss";
 
 import NavSegment from "../NavSegment/NavSegment";
-import Breadcrumb from "./Breadcrumb";
+import Breadcrumb from "../../../Components/Breadcrumb/Breadcrumb";
 
 import LeaveFormComponent from "../Forms/LeaveForm/LeaveForm";
 import HRLetterComponent from "../Forms/HrLetterForm/HrLetterComp";
 //import HolidayListComponent from "../Forms/HolidayListForm/HolidayListComp";
-
-const LeftArrow = require("../../assets/ArrowLeft.svg");
-const RightArrow = require("../../assets/ArrowRight.svg");
 
 export type Option = "Apply Leave" | "HR Letters";
 
@@ -39,7 +36,7 @@ export default class LeaveShellPage extends React.Component<ILeaveShellPageProps
 
   private renderPane(): React.ReactNode {
     const { tab } = this.state;
-    
+
     switch (tab) {
       case "HR Letters":
         return <HRLetterComponent />;
@@ -53,19 +50,18 @@ export default class LeaveShellPage extends React.Component<ILeaveShellPageProps
 
   public render(): React.ReactElement<ILeaveShellPageProps> {
     const { tab } = this.state;
-    const { onBack } = this.props;
+    const { onBack = () => { } } = this.props;
 
     return (
       <div className={css.page}>
-        <div className={css.wrapper}>
-         
+        <div>
+
           <Breadcrumb
-            leftIconSrc={LeftArrow}
-            rightIconSrc={RightArrow}
             onBack={onBack}
-            leftText="Back"
-            trailStart="Home"
-            selectedOption={tab}  
+            links={[
+              { text: "Home" },
+              { text: "Apply Leave" },
+            ]}
           />
 
           <div className={css.segmentRow}>

@@ -126,7 +126,11 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  min-width: 176px;            
+  min-width: 176px;     
+  transition: background-color 0.1s ease-in-out;       
+}
+.cta:hover{
+  background-color:#FEEAD6;
 }
 .ctaText {
   width: 83px;

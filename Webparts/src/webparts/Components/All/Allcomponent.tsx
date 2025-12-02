@@ -22,121 +22,117 @@ const AllComponents: React.FC<Props> = ({
 }) => {
   const now = new Date();
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
-  const parsedEvents = React.useMemo(() => {
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    const days = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
+   const parsedEvents = React.useMemo(() => {
+  
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
     return (filteredEvents || []).map((item: any) => {
-      const startDateStr = item.eventStartDate?.split("\n\n")[1]?.trim();
-      const endDateStr = item.eventEndDate?.split("\n\n")[1]?.trim();
 
+      // Always use FIRST LINE → accurate, same as UI
+      const startDateStr = item.eventStartDate?.split("\n")[0]?.trim();
+      const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim();
+  
+      // Parse EXACTLY as SharePoint stored it
       const eventStart = startDateStr ? new Date(startDateStr) : null;
-      const eventEnd = endDateStr ? new Date(endDateStr) : null;
-
+      const eventEnd   = endDateStr ? new Date(endDateStr) : null;
+  
+      // FIX location duplication
+      const location = item.location?.split("\n")[0]?.trim() || "";
+  
       let time = "Not specified";
+  
       if (eventStart && eventEnd) {
         const formatTime = (date: Date) =>
           date.toLocaleTimeString("en-US", {
             hour: "numeric",
             minute: "2-digit",
+            hour12: true
           });
+  
         time = `${formatTime(eventStart)} - ${formatTime(eventEnd)}`;
       }
-
+  
       return {
+        ...item,
         date: eventStart ? String(eventStart.getDate()).padStart(2, "0") : "",
         month: eventStart ? months[eventStart.getMonth()] : "",
         day: eventStart ? days[eventStart.getDay()] : "",
         title: item.title || "Untitled Event",
         time,
-        imageUrl: item.newsImage || "",
+        location,
         eventDateTime: eventStart,
+        category:item.category,
+        imageUrl: item.newsImage || "",
         isregistered: !!item.isRegistered,
-        ID: item.ID,
-        context: context,
-        Eventtype: "Events",
-        ...item,
       };
     });
   }, [filteredEvents]);
-  const mapSharePointTrainingsForAll = (data: any[]) => {
-    return data.map((item, index) => {
-      const startDateStr = item.eventStartDate?.split("\n\n")[1] || "";
-      const endDateStr = item.eventEndDate?.split("\n\n")[1] || "";
+ const mapSharePointTrainingsForAll = (data: any[]) => {
 
-      const startDate = new Date(startDateStr);
-      const endDate = new Date(endDateStr);
+  const deduped = Array.from(
+    new Map(data.map(i => [i.ListItemID || i.title, i])).values()
+  );
 
-      // Month label for AllTrainingCard accordion
-      const monthLabel = `${startDate.toLocaleString("default", {
-        month: "long",
-      })} ${startDate.getFullYear()}`;
+  return deduped.map((item, index) => {
 
-      // Date range for AllTrainingCard
-      const dateRange = `${startDate.getDate()}-${endDate.getDate()} ${startDate.toLocaleString(
-        "default",
-        { month: "short" }
-      )} ${startDate.getFullYear()}`;
+    const startDateStr = item.eventStartDate?.split("\n")[0]?.trim() || "";
+    const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim() || "";
 
-      // Time for TrainingCard
-      const timeRange = `${startDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })} - ${endDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}`;
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
 
-      return {
-        id: index + 1,
-        // AllTrainingCard props
-        imageUrl:
-          item.newsImage || "https://via.placeholder.com/400x200?text=No+Image",
-        category: "Online",
-        title: item.title || "Untitled Training",
-        date: dateRange,
-        duration: `${Math.ceil(
-          (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-        )} days`,
-        instructorName: item?.instructor?.name,
-        instructorTitle: item?.instructor?.role,
-        instructorImageUrl: `https://i.pravatar.cc/150?img=${(index % 6) + 1}`,
-        month: monthLabel,
-        isRegistered: !!item.joiningURL,
-        isMyTraining: !!item.joiningURL,
-        location: item.location?.split("\n\n")[0] || "TBD",
-        joinUrl: item.joiningURL || "#",
-        Eventtype: "Trainings",
-        // TrainingCard props
-        startDate: startDateStr,
-        endDate: endDateStr,
-        subtitle: "",
-        time: timeRange,
-        ...item,
-      };
-    });
-  };
+    const monthLabel = `${startDate.toLocaleString("default", {
+      month: "long",
+    })} ${startDate.getFullYear()}`;
+
+    const dateRange = `${startDate.getDate()}-${endDate.getDate()} ${startDate.toLocaleString(
+      "default",
+      { month: "short" }
+    )} ${startDate.getFullYear()}`;
+
+    const timeRange = `${startDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    })} - ${endDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    })}`;
+
+   // FIX location duplication
+    const location = item.location?.split("\n")[0]?.trim() || "";
+
+    return {
+      ...item,
+      id: index + 1,
+      imageUrl:
+        item.newsImage || "https://via.placeholder.com/400x200?text=No+Image",
+      category: "Classroom",
+      title: item.title || "Untitled Training",
+      date: dateRange,
+      duration: `${Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      )} days`,
+      instructorName: item?.instructor?.name,
+      instructorTitle: item?.instructor?.role,
+      instructorImageUrl: `https://i.pravatar.cc/150?img=${(index % 6) + 1}`,
+      month: monthLabel,
+      isRegistered: !!item.joiningURL,
+      isMyTraining: !!item.joiningURL,
+      location: location,   // 🔥 FIXED
+      joinUrl: item.joiningURL || "#",
+      Eventtype: "Trainings",
+      startDate: startDateStr,
+      endDate: endDateStr,
+      subtitle: "",
+      time: timeRange,
+    };
+  });
+};
+
+
   const mappedTrainings = mapSharePointTrainingsForAll(filteredTrainings);
   const Alldata = [...parsedEvents, ...mappedTrainings, ...filteredMeetings];
   const myEvents = parsedEvents.filter((e: any) => e.isregistered);
@@ -172,24 +168,28 @@ const AllComponents: React.FC<Props> = ({
         // ------------ ALL DATA ------------
         viewMode === "list" ? (
           <>
-            <h5>Events</h5>
-            {parsedEvents.map((event: any, index: any) => (
-              <EventCard key={index} {...event} context={context} />
-            ))}
+            <div className={styles.eventsContainer}>
+              <div className={styles.eventsWrapper}>
+              <h5>Events</h5>
+              {parsedEvents.map((event: any, index: any) => (
+                <EventCard key={index} {...event} context={context} />
+              ))}
 
-            <h5>Trainings</h5>
-            {mappedTrainings.map((event: any) => (
-              <Trainingcard key={event.id} {...event} />
-            ))}
+              <h5>Trainings</h5>
+              {mappedTrainings.map((event: any) => (
+                <Trainingcard key={event.id} {...event} />
+              ))}
 
-            <h5>Meetings</h5>
-            {filteredMeetings.map((event: any) => (
-              <MeetingCard
-                key={event.id}
-                event={event}
-                onJoinClick={() => alert("Joining Meeting...")}
-              />
-            ))}
+              <h5>Meetings</h5>
+              {filteredMeetings.map((event: any) => (
+                <MeetingCard
+                  key={event.id}
+                  event={event}
+                  onJoinClick={() => alert("Joining Meeting...")}
+                />
+              ))}
+            </div>
+
             <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>
@@ -201,6 +201,7 @@ const AllComponents: React.FC<Props> = ({
                       date={`${event.day}, ${event.date} ${event.month}`}
                       imageUrl={event.imageUrl}
                       imageCount={0}
+                      pageUrl={event?.pageUrl}
                     />
                   ))
                 ) : (
@@ -208,6 +209,32 @@ const AllComponents: React.FC<Props> = ({
                 )}
               </div>
             </div>
+          </div>
+          
+          {/* <div className={styles.eventsContainer}>
+            <div className={styles.eventsWrapper}>
+              {upcomingEvents.length > 0 ? (
+                upcomingEvents.map((event:any, index:any) => (
+                  <EventCard key={index} {...event} context={props.context} />
+                ))
+              ) : (
+                <p>No upcoming events found.</p>
+              )}
+            </div>
+
+            <div className={styles.previousEventsContainer}>
+              <h2 className={styles.heading}>Previous Events</h2>
+              <div className={styles.gridLayout}>
+                {previousEvents.length > 0 ? (
+                  previousEvents.map((event:any, index:any) => (
+                    <PreviousEventCard key={index} title={event.title} date={`${event.day}, ${event.date} ${event.month}`} imageUrl={event.imageUrl} imageCount={0} sitepageurl={sitepageurl}/>
+                  ))
+                ) : (
+                  <p>No previous events found.</p>
+                )}
+              </div>
+            </div>
+          </div> */}
           </>
         ) : (
           <>
@@ -223,6 +250,7 @@ const AllComponents: React.FC<Props> = ({
                       date={`${event.day}, ${event.date} ${event.month}`}
                       imageUrl={event.imageUrl}
                       imageCount={0}
+                      pageUrl={event?.pageUrl}
                     />
                   ))
                 ) : (
@@ -261,6 +289,7 @@ const AllComponents: React.FC<Props> = ({
                       date={`${event.day}, ${event.date} ${event.month}`}
                       imageUrl={event.imageUrl}
                       imageCount={0}
+                      pageUrl={event?.pageUrl}
                     />
                   ))
                 ) : (
@@ -283,6 +312,7 @@ const AllComponents: React.FC<Props> = ({
                       date={`${event.day}, ${event.date} ${event.month}`}
                       imageUrl={event.imageUrl}
                       imageCount={0}
+                      pageUrl={event?.pageUrl}
                     />
                   ))
                 ) : (

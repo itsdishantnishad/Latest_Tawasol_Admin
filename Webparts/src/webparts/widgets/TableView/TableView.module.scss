@@ -1,0 +1,42 @@
+.table {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  overflow: hidden;
+
+  tr {
+    border: none;
+    color: #3a3b43;
+
+    td {
+      height: auto;
+      padding: 12px;
+    }
+  }
+}
+
+.tableHeader {
+  background: #ffebda;
+
+  th {
+    padding: 12px;
+    color: #000000;
+    & > div {
+      min-height: auto;
+      font-weight: 500;
+    }
+  }
+}
+
+.tableBody {
+  tr {
+    cursor: pointer;
+  }
+
+  tr:nth-child(odd) {
+    background: #fff4ea;
+  }
+
+  tr:nth-child(even) {
+    background: #ffeee0;
+  }
+}

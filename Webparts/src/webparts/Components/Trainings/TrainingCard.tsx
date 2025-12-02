@@ -13,6 +13,7 @@ export interface TrainingCardProps {
   imageUrl: string;
   isRegistered: boolean;
   joinUrl: string;
+  pageUrl: string;
 }
 
 const TrainingCard: React.FC<TrainingCardProps> = ({
@@ -26,7 +27,8 @@ const TrainingCard: React.FC<TrainingCardProps> = ({
   location,
   imageUrl,
   isRegistered,
-  joinUrl
+  joinUrl,
+  pageUrl
 }) => {
   const startDateObj = new Date(startDate);
   const endDateObj = new Date(endDate);
@@ -40,19 +42,20 @@ const TrainingCard: React.FC<TrainingCardProps> = ({
   const endWeekday = endDateObj.toLocaleDateString('en-US', { weekday: 'long' });
 
   return (
+    <a href={pageUrl} className={styles.cardLinkWrapper}>
     <div className={styles.cardContainer}>
       <div className={styles.dateSection}>
         <div className={styles.dateBox}>
-          <div className={styles.month}>{startMonth}</div>
-          <div className={styles.day}>{startDay}</div>
-          <div className={styles.weekday}>{startWeekday}</div>
+          <div className={styles.month}>{startWeekday} - {endWeekday}</div>
+          <div className={styles.day}>{startDay} - {endDay} {startMonth}</div>
+          {/* <div className={styles.weekday}>{startWeekday}</div> */}
         </div>
 
-        <div className={styles.dateBox}>
+        {/* <div className={styles.dateBox}>
           <div className={styles.month}>{endMonth}</div>
           <div className={styles.day}>{endDay}</div>
           <div className={styles.weekday}>{endWeekday}</div>
-        </div>
+        </div> */}
       </div>
 
       <div className={styles.imageSection}>
@@ -103,6 +106,7 @@ const TrainingCard: React.FC<TrainingCardProps> = ({
         </a>
       </div>
     </div>
+    </a>
   );
 };
 

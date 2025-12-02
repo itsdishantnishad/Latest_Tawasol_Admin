@@ -1,0 +1,131 @@
+
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 515px);
+  gap: 24px 32px;
+  justify-content: center;
+  margin-top: 116px;
+}
+
+/* Card container */
+.card {
+  width: 515px;
+  min-height: 282px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(61, 51, 51, 0.04);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Header */
+.cardHeader {
+  width: 100%;
+  height: 55px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
+  background-color: #feead6;
+}
+
+.cardTitle {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0;
+  color: #000000;
+}
+
+/* Body / rows */
+.cardBody {
+  padding: 4px 0 8px 0;
+}
+
+/* Single row */
+.row {
+  width: 514px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  gap: 12px;
+  border-bottom: 1px solid #f3e0d0;
+  box-sizing: border-box;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.rowLeft {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.rowLabel {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0;
+  color: #000000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right side: icons + phone */
+.rowRight {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+/* SVG icon wrapper */
+.iconLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* SVG itself */
+.iconImage {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* Phone link: icon + number */
+.phoneLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.phoneText {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0;
+  color: #1b5cb8;
+  white-space: nowrap;
+}
+
+.phoneLink:hover .phoneText {
+  text-decoration: underline;
+}

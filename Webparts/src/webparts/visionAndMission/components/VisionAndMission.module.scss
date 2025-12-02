@@ -11,14 +11,20 @@
   display: grid;
   grid-template-columns: 350px 1fr;
   gap: 60px;
-  align-items: center;
-  margin-bottom: 60px;
+  align-items: flex-start;
+  margin-bottom: 80px;
+  @media (max-width: 991px){
+    display: flex;
+    flex-wrap: wrap;
+  }
 }
 
-.leftPic img {
-  width: 100%;
-  height: auto;
-  display: block;
+.leftPic{
+  img {
+    // width: 100%;
+    // height: auto;
+    display: block;
+  }
 }
 
 /* ✅ this was missing earlier */
@@ -29,8 +35,8 @@
 
 /* Headings */
 .sectionTitle {
-  margin: 0 0 40px 0;
-  line-height: 100%;
+  margin: 0 0 24px 0;
+  line-height: 1;
   letter-spacing: 1px;
   display: flex;
   align-items: baseline;
@@ -69,7 +75,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 28px;
-  margin-top: 0;
+  margin-top: 60px;
 }
 
 .point {
@@ -77,15 +83,17 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;  /* left align like Figma */
-  gap: 40px;
+  gap: 11px;
+  max-width: 75%;
 }
 
 
 .numImg {
-  width: 64px;    
-  height: auto;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 11px;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
 }
 
 /* fallback text number ke liye bhi same placement/size */
