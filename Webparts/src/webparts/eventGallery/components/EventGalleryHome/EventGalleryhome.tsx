@@ -21,7 +21,7 @@ interface IEventGalleryProps {
   Allevent: any;
 }
 
-// 🔸 change this to your own static placeholder if you want
+// Placeholder Image from Assets Folder
 const FALLBACK_IMAGE: string = require("../../../assets/PlaceHolderImage.png");
 
 const EventGallery: React.FC<IEventGalleryProps> = (props) => {
@@ -41,13 +41,12 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
     props?.context?.pageContext?.web?.serverRelativeUrl || ""; // e.g. "/sites/Arnav-Site-Test"
   const lowerSiteRoot = currentSiteRoot.toLowerCase();
 
-  // 👉 Build image URL from newsImage (from search result)
   const buildImageUrlFromNewsImage = (newsImage: string | undefined): string => {
     if (!newsImage) return "";
 
     const raw = newsImage.trim();
 
-    // absolute URL, just return it
+    // absolute URL making it dynamic
     if (raw.startsWith("http://") || raw.startsWith("https://")) {
       return raw;
     }
@@ -63,7 +62,7 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
 
   const rawEvents = props.Allevent || [];
 
-  // Filter: only keep events that clearly belong to *this* site
+  // Filter: only keep events that clearly belong to the current site where WebPart is uploaded
   const eventsFromCurrentSite = React.useMemo(
     () =>
       rawEvents.filter((ev: any) => {
@@ -83,17 +82,13 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
     [rawEvents, lowerSiteRoot]
   );
 
-  // Shape events for UI – our computed preview URL always wins
   const convertToDummyEvents = (allEvents: any[]): IEventItem[] => {
     return allEvents.map((ev, index) => {
       const newsImageUrl = buildImageUrlFromNewsImage(ev.newsImage);
       const rawDate = ev.eventStartDate || ev.date || "";
 
       return {
-        // bring original fields first
         ...ev,
-
-        // then override / normalize what we need
         id: ev.id ?? ev.ID ?? index + 1,
         title: ev.title || ev.Title,
         imageUrl: newsImageUrl || ev.imageUrl || "",
@@ -106,7 +101,6 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
 
   const dummyEvents = convertToDummyEvents(eventsFromCurrentSite);
   console.log("[EventGalleryHome] events", dummyEvents);
-  // Load "Image Gallery" images for detail view
   React.useEffect(() => {
     const loadImages = async () => {
       const result = await sp.web.lists

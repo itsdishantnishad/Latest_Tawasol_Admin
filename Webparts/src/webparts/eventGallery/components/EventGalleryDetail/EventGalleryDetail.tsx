@@ -33,12 +33,12 @@ const resolveImageUrl = (img: any): string => {
 
   if (!raw) return "";
 
-  // If already absolute, just return
+  // absolute URL
   if (typeof raw === "string" && (raw.startsWith("http://") || raw.startsWith("https://"))) {
     return raw;
   }
 
-  // Otherwise assume server-relative and prepend current origin (tenant/site where webpart is running)
+  // Tenant Origin
   const origin =
     typeof window !== "undefined" && window.location && window.location.origin
       ? window.location.origin
@@ -155,7 +155,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       if (!file) return;
       if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) return;
       if (file.size > 5 * 1024 * 1024) return;
-      onUpload(file); // will call handleUploadChange(file)
+      onUpload(file); 
     };
 
     return (
