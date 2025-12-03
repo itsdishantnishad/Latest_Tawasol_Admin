@@ -1,5 +1,6 @@
 .greetingsBannerRoot {
   background: transparent;
+  padding: 20px 0;
 }
 
 /* One centered line with emoji at the end */
@@ -8,7 +9,7 @@
   justify-content: center;
   align-items: center;
   gap: 10px;
-  padding: 8px 0;
+  padding: 0;
 }
 
 /* Wrap to control typography on both parts */
