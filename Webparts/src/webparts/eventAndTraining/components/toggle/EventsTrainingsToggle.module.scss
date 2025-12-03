@@ -99,7 +99,7 @@
 }
 
 .paddingSection{
-  padding: 20px 60px;
+  padding: 0px 60px;
 }
 
 .topWrapper {
@@ -113,7 +113,7 @@
 /* Tabs */
 .tabContainer {
   display: flex;
-  padding: 4px;
+  padding: 8px;
   border-radius: 40px;
   border: 1px solid #f3d3b0;
   background: #fff8f0;
@@ -124,12 +124,13 @@
   border-radius: 30px;
   border: none;
   background: transparent;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
+  line-height: 20px;
   color: #3A3B43;
   cursor: pointer;
   width: 25%;
-  padding: 8px 40px;
+  padding: 0 40px;
   transition: 0.2s;
   height: 40px;
 }

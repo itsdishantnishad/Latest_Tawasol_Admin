@@ -5,75 +5,73 @@ interface Feature {
     id: string;
     title: string;
     subtitle: string;
-    icon: string;
 }
 
 const features: Feature[] = [
     {
         id: "gallery",
         title: "Image Gallery",
-        subtitle: "Past events images and memories",
-        icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/jira.svg",
+        subtitle: "Past events images and memories"
     },
     {
         id: "documents",
         title: "Documents",
-        subtitle: "All files in one place",
-        icon: "",
+        subtitle: "All files in one place"
     },
     {
         id: "events",
         title: "Events",
-        subtitle: "Discover whats happening next",
-        icon: "",
+        subtitle: "Discover whats happening next"
     },
     {
         id: "employee_events",
         title: "Let’s Celebrate",
-        subtitle: "Birthday, anniversary & new joiners",
-        icon: "",
+        subtitle: "Birthday, anniversary & new joiners"
     },
     {
         id: "meetings",
         title: "Meeting",
-        subtitle: "Connect, discuss, move forward",
-        icon: "",
+        subtitle: "Connect, discuss, move forward"
     },
     {
         id: "service_links",
         title: "Service Links",
-        subtitle: "Quick access, zero hassle",
-        icon: "",
+        subtitle: "Quick access, zero hassle"
     },
     {
         id: "forms",
         title: "Interactive Forms",
-        subtitle: "All interactive forms In one place",
-        icon: "",
+        subtitle: "All interactive forms In one place"
     },
     {
         id: "dashboard",
         title: "Dashboard",
-        subtitle: "Track, analyze, optimize",
-        icon: "",
+        subtitle: "Track, analyze, optimize"
     },
     {
         id: "offers",
         title: "Offers",
-        subtitle: "Exclusive deals just for you",
-        icon: "",
+        subtitle: "Exclusive deals just for you"
     },
     {
         id: "training",
         title: "Training",
-        subtitle: "Grow skills, unlock new doors",
-        icon: "",
+        subtitle: "Grow skills, unlock new doors"
     },
     {
         id: "about_dhre",
         title: "About DHRE",
-        subtitle: "Journey through DHRE",
-        icon: "",
+        subtitle: "Journey through DHRE"
+    },
+    {
+        id: "tasks",
+        title: "Task",
+        subtitle: "Get things done with clarity"
+    },
+    {
+        id: "beverage_menu",
+        title: "Services",
+        subtitle: "Simplify your journey ahead"
     },
 ];
 
@@ -126,7 +124,9 @@ const Wheel: React.FC<FeatureWheelProps> = ({ onFeatureSelect, selectedFeature }
         dashboard: styles.dashboardCard,
         offers: styles.offersCard,
         training: styles.trainingCard,
-        about_dhre: styles.aboutDhreCard
+        about_dhre: styles.aboutDhreCard,
+        tasks: styles.tasksCard,
+        beverage_menu: styles.beverageCard
     };
 
     return (
@@ -146,8 +146,8 @@ const Wheel: React.FC<FeatureWheelProps> = ({ onFeatureSelect, selectedFeature }
 
                     // Calculate arc position
                     // Distribute all features across the arc
-                    const startAngle = -100;
-                    const endAngle = 100;
+                    const startAngle = -120;
+                    const endAngle = 120;
                     const angleRange = endAngle - startAngle;
                     // Normalize position to 0-1 range, then map to angle range
                     const normalizedPosition = (position + maxPosition) / (maxPosition * 2);
