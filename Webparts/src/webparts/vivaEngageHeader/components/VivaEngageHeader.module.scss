@@ -5,8 +5,6 @@
   background-position: center bottom;
   background-size: 59% auto;
 
-  /* ↓ tighten bottom spacing */
-  padding: 64px 12px 8px;   /* was: 56px 12px (or 24px earlier) */
   margin-bottom: -35px;     /* gentle overlap to remove visible gap */
 
   min-height: 200px;

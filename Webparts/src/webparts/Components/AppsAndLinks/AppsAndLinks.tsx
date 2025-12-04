@@ -44,22 +44,34 @@ const LIST_NAME = "Custom App Links";
 const USER_EMAIL_COL = "TIRUserEmail";
 const APPLINK_COL = "TIRCustomLinkAttribute";
 
+// Helper regex for URL validation (Requires http:// or https://)
+const URL_REGEX = /^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+
 const AppsAndLinks = (props: IAppsAndLinksProps) => {
   const sp: SPFI = React.useMemo(() => spfi().using(SPFx(props.context)), [props.context]);
   const [activeTab, setActiveTab] = useState("quick");
   const [customLinks, setCustomLinks] = useState<ICustomLink[]>([]);
+  
+  // Form State
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  let spService: listServices;
-   spService = new listServices(props.context);
+  
+  // Input State
   const [linkTitle, setLinkTitle] = useState("");
   const [linkURL, setLinkURL] = useState("");
+  
+  // Error State
+  const [titleError, setTitleError] = useState("");
+  const [urlError, setUrlError] = useState("");
+
+  const spService = new listServices(props.context);
 
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const userEmail = props.context.pageContext.user.loginName;
+
   const loadUserLinks = async () => {
     try {
       const items: IUserListItem[] = await spService.getCustomAppLinks("Custom App Links", userEmail);
@@ -77,6 +89,8 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
 
   const persistToSharePoint = async (updatedLinks: ICustomLink[]) => {
     try {
+      // In a real scenario, consider Debouncing this or handling race conditions
+      // For this snippet, we follow existing logic
       const existingItems: IUserListItem[] = await sp.web.lists
         .getByTitle(LIST_NAME)
         .items.select("Id", USER_EMAIL_COL, APPLINK_COL)
@@ -100,10 +114,16 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     }
   };
 
-  const openAddForm = () => {
-    setIsEditMode(false);
+  const resetFormState = () => {
     setLinkTitle("");
     setLinkURL("");
+    setTitleError("");
+    setUrlError("");
+  };
+
+  const openAddForm = () => {
+    setIsEditMode(false);
+    resetFormState();
     setIsFormOpen(true);
     setMenuOpenIndex(null);
   };
@@ -113,12 +133,55 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     setEditingIndex(index);
     setLinkTitle(customLinks[index].Title);
     setLinkURL(customLinks[index].URL);
+    setTitleError("");
+    setUrlError("");
     setIsFormOpen(true);
     setMenuOpenIndex(null);
   };
 
+  const validateForm = (): boolean => {
+    let isValid = true;
+    
+    // 1. Validate Title Empty
+    if (!linkTitle.trim()) {
+      setTitleError("Name is required");
+      isValid = false;
+    } else {
+      // 4. Validate Duplicate Name
+      // We filter out the current item if we are in edit mode so we don't compare it against itself
+      const duplicateExists = customLinks.some((link, index) => {
+         if (isEditMode && index === editingIndex) return false;
+         return link.Title.toLowerCase() === linkTitle.trim().toLowerCase();
+      });
+
+      if (duplicateExists) {
+        setTitleError("This name already exists");
+        isValid = false;
+      }
+    }
+
+    // 2. Validate URL Empty
+    if (!linkURL.trim()) {
+      setUrlError("URL is required");
+      isValid = false;
+    } else if (!URL_REGEX.test(linkURL)) {
+      // 3. Validate URL Format
+      setUrlError("Invalid URL format (must start with http:// or https://)");
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
   const saveForm = async () => {
-    if (!linkTitle || !linkURL) return;
+    // Clear previous errors first? 
+    // Usually better to just set errors based on validation.
+    setTitleError("");
+    setUrlError("");
+
+    if (!validateForm()) {
+      return; 
+    }
 
     let updatedLinks = [...customLinks];
 
@@ -136,8 +199,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
 
   const cancelForm = () => {
     setIsFormOpen(false);
-    setLinkTitle("");
-    setLinkURL("");
+    resetFormState();
   };
 
   const deleteLink = async (index: number) => {
@@ -203,7 +265,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
           {activeTab === "quick" && (
             <div className={styles.linksGrid}>
               {props.savedApps.filter(app => app.AppType === "Quick Links").map((link, index) => (
-                <a key={index}target="_blank" rel="noopener noreferrer" href={link.URL} className={styles.linkItem}>
+                <a key={index} target="_blank" rel="noopener noreferrer" href={link.URL} className={styles.linkItem}>
                   <div className={styles.iconCircle}> {link.IconURL ? (
                       <img src={link.IconURL} className={styles.appIcon} />
                     ) : (
@@ -288,7 +350,11 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                         placeholder="Add a name"
                         required
                         value={linkTitle}
-                        onChange={(e, v: any) => setLinkTitle(v)}
+                        onChange={(e, v: any) => {
+                          setLinkTitle(v);
+                          if (titleError) setTitleError(""); // Clear error on type
+                        }}
+                        errorMessage={titleError} // Bind error state
                         styles={{
                           fieldGroup: { borderRadius: 8 }
                         }}
@@ -301,7 +367,11 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                         placeholder="Enter your URL here"
                         value={linkURL}
                         required
-                        onChange={(e, v: any) => setLinkURL(v)}
+                        onChange={(e, v: any) => {
+                          setLinkURL(v);
+                          if (urlError) setUrlError(""); // Clear error on type
+                        }}
+                        errorMessage={urlError} // Bind error state
                         styles={{
                           fieldGroup: { borderRadius: 8 }
                         }}
