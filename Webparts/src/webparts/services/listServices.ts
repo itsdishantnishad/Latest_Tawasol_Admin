@@ -414,6 +414,46 @@ export class listServices {
     }
   }
 
+  /** ===== Events ===== */
+  public async getEventsByID(ID?: number): Promise<any[]> {
+    let results;
+    const constraints = `AND ContentTypeId:(${ContentTypeId.EVENT}*)`;
+
+    try {
+      results = await this.sp.search({
+        Querytext: "*",
+        RowLimit: 1,
+        TrimDuplicates: false,
+        SelectProperties: [
+          "Id",
+          "Title",
+          "TIREventEndDate",
+          "TIREventStartDate",
+          "TIRLocation",
+          "TIREventCategory",
+          "URL",
+        ],
+        QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
+        HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
+        EnableInterleaving: true,
+      } as ISearchQuery);
+
+      return results.PrimarySearchResults.map((item: any) => {
+        return {
+         ID: item.Id,
+          title: item.Title,
+          eventEndDate: item.TIREventEndDate,
+          eventStartDate: item.TIREventStartDate,
+          location: item.TIRLocation,
+          newsImage: listServices.getImageUrlFromPage(item.URL, 200),
+          category: item.TIREventCategory,
+          pageUrl: item.URL,
+        } as any;
+      });
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getAllTraining(): Promise<any[]> {
     let results;
