@@ -3,7 +3,7 @@ import styles from "./LetsCelebrate.module.scss";
 
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
-const cakeImage: string = require("../images/Cake.svg");
+const cakeImage: string = require("../images/Cake-1.svg");
 const newJoinerCenter: string = require("../images/Newjoiner.svg");
 const aniversaryImage: string = require("../images/aniversary.svg");
 import { listServices } from "../../../services/listServices";
@@ -138,9 +138,8 @@ const defaultCelebrations = {
 // Position assignments for outer circle (2 positions - left and right)
 const outerPositions: Array<'left' | 'right'> = ['left', 'right'];
 
-// Position assignments for inner circle (3 positions)
-const innerPositions: Array<'top' | 'bottom-left' | 'bottom-right'> = [
-    'top',
+// Position assignments for inner circle (2 positions)
+const innerPositions: Array<'bottom-left' | 'bottom-right' | 'bottom-right'> = [
     'bottom-left',
     'bottom-right'
 ];
@@ -244,12 +243,12 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     const positionMap: Record<string, React.CSSProperties> = {
       'left': {
         top: '50%',
-        left: '10%',
+        left: '0%',
         transform: 'translate(-50%, -50%)'
       },
       'right': {
         top: '50%',
-        right: '10%',
+        right: '0%',
         transform: 'translate(50%, -50%)'
       }
     };
@@ -257,22 +256,17 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   };
 
   const getInnerCirclePosition = (index: number): React.CSSProperties => {
-    const position = innerPositions[index % 3];
+    const position = innerPositions[index % 2];
     const positionMap: Record<string, React.CSSProperties> = {
-      'top': {
-        top: '10%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)'
-      },
       'bottom-left': {
-        bottom: '10%',
-        left: '30%',
-        transform: 'translate(-50%, 50%)'
+        top: '75%',
+        left: '0%',
+        transform: 'translate(0%, 0%)'
       },
       'bottom-right': {
-        bottom: '10%',
-        right: '30%',
-        transform: 'translate(50%, 50%)'
+        top: '75%',
+        right: '0%',
+        transform: 'translate(0%, 0%)'
       }
     };
     return positionMap[position] || {};
@@ -339,7 +333,6 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                     <div className={styles.profileName}>{item.name}</div>
                   </div>
                 ))}
-
                 {/* Inner circle with people around it */}
                 <div className={styles.innerCircle}>
                   {/* Render inner circle profile cards (max 3) */}
@@ -381,6 +374,29 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                   </div>
                 </div>
               </div>
+              {/* Pagination & View All Button */}
+              <div className={styles.bottomSection}>
+                {totalPages > 1 && (
+                  <div className={styles.pagination}>
+                    {Array.from({ length: totalPages }).map((_, index) => (
+                      <button
+                        key={index}
+                        className={`${styles.dot} ${
+                          index === currentPage ? styles.activeDot : ""
+                        }`}
+                        onClick={() => setCurrentPage(index)}
+                        aria-label={`Go to page ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                <div className={styles.buttonContainer}>
+                  <a href={props.seeAllURL} className={styles.viewAllButton}>
+                    View All
+                  </a>
+                </div>
+              </div>
             </div>
 
             <button
@@ -408,30 +424,6 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
             </p>
           </div>
         )}
-      </div>
-
-      {/* Pagination & View All Button */}
-      <div className={styles.bottomSection}>
-        {totalPages > 1 && (
-          <div className={styles.pagination}>
-            {Array.from({ length: totalPages }).map((_, index) => (
-              <button
-                key={index}
-                className={`${styles.dot} ${
-                  index === currentPage ? styles.activeDot : ""
-                }`}
-                onClick={() => setCurrentPage(index)}
-                aria-label={`Go to page ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
-
-        <div className={styles.buttonContainer}>
-          <a href={props.seeAllURL} className={styles.viewAllButton}>
-            View All
-          </a>
-        </div>
       </div>
     </div>
   );
