@@ -1,12 +1,14 @@
 import * as React from 'react';
 import type { IProfileProps } from './IProfileProps';
-
+import { WebPartContext } from '@microsoft/sp-webpart-base';
 import App from './App/App';
 export default class Profile extends React.Component<IProfileProps> {
   public render(): React.ReactElement<IProfileProps> {
     return (
       <>
-      <App/>
+      <App 
+      context={this.props.context}
+      />
       </>
     );
   }

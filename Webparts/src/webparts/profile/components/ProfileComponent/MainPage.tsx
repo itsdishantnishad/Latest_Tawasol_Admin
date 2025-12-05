@@ -1,8 +1,8 @@
 
 import * as React from "react";
 import styles from "./MainPage.module.scss";
-
-import ProfileHeader from "../LeftSectionComponent/ProflleHeaderComp/ProfileHeaderComp";
+import { WebPartContext } from "@microsoft/sp-webpart-base";
+import ProfileHeader from "../ProflleHeaderComp/ProfileHeaderComp";
 import LeftSection from "../LeftSectionComponent/LeftSection/LeftSection";
 import RightSection from "../RightSectionComponent/RightSection/RightSection";
 
@@ -11,6 +11,7 @@ export interface IMainPageProps {
   onNavigateToLeave?: () => void;
   onNavigateToHRLetter?: () => void;
   // onNavigateToHoliday?: () => void;
+  context:WebPartContext
 }
 
 export default class MainPage extends React.Component<IMainPageProps> {
@@ -30,6 +31,7 @@ export default class MainPage extends React.Component<IMainPageProps> {
               onApplyLeave={onNavigateToLeave}
               onRequestHRLetter={onNavigateToHRLetter}
               // onViewHoliday={onNavigateToHoliday}
+              context={this.props.context}
             />
           </aside>
         </div>

@@ -12,6 +12,9 @@ import * as strings from 'ProfileWebPartStrings';
 import Profile from './components/Profile';
 import { IProfileProps } from './components/IProfileProps';
 
+// 🔴 NEW: import your PnP setup helper
+import { setupSP } from './components/services/spSetup';
+
 export interface IProfileWebPartProps {
   description: string;
 }
@@ -29,20 +32,21 @@ export default class ProfileWebPart extends BaseClientSideWebPart<IProfileWebPar
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+        userDisplayName: this.context.pageContext.user.displayName,
+        context: this.context
       }
     );
 
     ReactDom.render(element, this.domElement);
   }
 
-  protected onInit(): Promise<void> {
-    return this._getEnvironmentMessage().then(message => {
-      this._environmentMessage = message;
-    });
+  // 🔴 UPDATED: initialise PnP here
+  protected async onInit(): Promise<void> {
+    await super.onInit();
+    setupSP(this.context);
+
+    this._environmentMessage = await this._getEnvironmentMessage();
   }
-
-
 
   private _getEnvironmentMessage(): Promise<string> {
     if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
@@ -68,7 +72,11 @@ export default class ProfileWebPart extends BaseClientSideWebPart<IProfileWebPar
         });
     }
 
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
+    return Promise.resolve(
+      this.context.isServedFromLocalhost
+        ? strings.AppLocalEnvironmentSharePoint
+        : strings.AppSharePointEnvironment
+    );
   }
 
   protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
@@ -77,16 +85,13 @@ export default class ProfileWebPart extends BaseClientSideWebPart<IProfileWebPar
     }
 
     this._isDarkTheme = !!currentTheme.isInverted;
-    const {
-      semanticColors
-    } = currentTheme;
+    const { semanticColors } = currentTheme;
 
     if (semanticColors) {
       this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
       this.domElement.style.setProperty('--link', semanticColors.link || null);
       this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
     }
-
   }
 
   protected onDispose(): void {
