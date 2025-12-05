@@ -1,0 +1,46 @@
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.searchContainer {
+  width: 398px;
+  height: 48px;
+  background: #FFFFFF;
+  border: 1px solid #E8E8E8;
+  border-radius: 96px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.searchIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: #323130;
+  font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  
+  &::placeholder {
+    color: #6C6C6C;
+    opacity: 1;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
