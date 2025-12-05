@@ -1,7 +1,7 @@
 
 import * as React from "react";
 import styles from "./RightSection.module.scss";
-
+import { WebPartContext } from "@microsoft/sp-webpart-base";
 import ApplyLeaveCard from "../LeaveComponent/ApplyLeave";
 import HrLettersCard from "../HRLetterComponent/HRLetter";
 import HolidayListCard from "../HolidayListComponent/HolidayList";
@@ -15,6 +15,8 @@ export interface IRightSectionProps {
   onViewHoliday?: () => void;
   sticky?: boolean;
   stickyTop?: number;
+  eventsTrainingTab?: "events" | "training";
+  context:WebPartContext
 }
 
 export default class RightSection extends React.Component<IRightSectionProps> {
@@ -44,12 +46,12 @@ export default class RightSection extends React.Component<IRightSectionProps> {
         aria-label="Sidebar"
       >
        
-
         {/* Events / Training */}
-        <div className={styles.block}>
-          <UpcomingEventsCard />
-        </div>
-
+       <div className={styles.block}>
+          <UpcomingEventsCard currentTab={this.props.eventsTrainingTab}
+          context={this.props.context}
+           />
+       </div>
 
 
         {/* Apply for Leave */}

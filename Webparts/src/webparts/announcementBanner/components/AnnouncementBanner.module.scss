@@ -50,10 +50,11 @@
   color: rgba(255,255,255,.85);
   font-size: 12.5px;
   line-height: 1.45;
-  max-width: 720px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  max-width: none;
+  word-break: break-word;
 }
 
 .actionCol {

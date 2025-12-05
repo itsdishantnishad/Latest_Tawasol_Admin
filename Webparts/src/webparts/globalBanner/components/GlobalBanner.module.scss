@@ -5,7 +5,10 @@
 .bannerRoot {
   // background: #fef7f0;
   box-sizing: border-box;
-  padding: 32px 60px;
+  padding: 30px 60px;
+  @media (max-width: 900px){
+    padding: 16px;
+  }
 }
 
 /* Inner: holds the media + overlay and keeps rounded mask */
@@ -13,12 +16,12 @@
   position: relative;
   width: 100%;
   // border-radius: 8px;
-  overflow: hidden;   
+  // overflow: hidden;   
   @media (max-width: 900px){
     overflow: hidden;
     position: relative;
     width: 100%;
-    height: 350px;
+    height: 250px;
     border-radius: 30px;
   }
 }
@@ -44,23 +47,17 @@
 
 /* Overlay respects the inner frame, not the outer padding */
 .textOverlay {
-  position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  padding: 0 16px;
+  padding: 15px;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   @media (max-width: 900px){
-    display: grid;
-    inset: 0;
-    padding: 0px 25px;
-    place-items: center;
-    pointer-events: none;
-    position: absolute;
   }
 }
 
-.textWrap { text-align: center; max-width: 920px; }
+.textWrap { text-align: center;}
 
 /* Title + description */
 .title {
@@ -82,7 +79,7 @@
   letter-spacing: 0;
   line-height: 24px;
   text-align: center;
-  width: 476px;
+  width: 100%;
 }
 
 @media (max-width: 991.98px) {
