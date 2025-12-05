@@ -3,11 +3,12 @@ import * as React from "react";
 import MainPage from "../ProfileComponent/MainPage";
 import LeaveShellPage from "../Shell/LeaveShellPage";
 import { Option } from "../NavSegment/NavSegment";
-
+import { WebPartContext } from "@microsoft/sp-webpart-base";
 export type AppView = "main" | "forms";
 
 export interface IAppProps {
   className?: string;
+  context:WebPartContext
 }
 
 export interface IAppState {
@@ -46,6 +47,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
           onNavigateToLeave={this.handleNavigateToLeave}
           onNavigateToHRLetter={this.handleNavigateToHRLetter}
           // onNavigateToHoliday={this.handleNavigateToHoliday}
+          context = {this.props.context}
         />
       );
     }

@@ -1,4 +1,3 @@
-
 import { SPFI, spfi, SPFx } from "@pnp/sp";
 let _sp: SPFI | null = null;
 
