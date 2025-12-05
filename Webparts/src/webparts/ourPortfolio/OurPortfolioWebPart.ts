@@ -51,7 +51,7 @@ export default class OurPortfolioWebPart
               groupFields: [
                 PropertyPaneTextField("listTitle", {
                   label: "Please enter list name",
-                  placeholder: "Our Portfolio", // ⬅️ updated placeholder
+                  placeholder: "Our Portfolio",
                 }),
               ],
             },

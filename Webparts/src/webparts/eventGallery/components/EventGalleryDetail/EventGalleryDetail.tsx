@@ -20,9 +20,36 @@ interface IPhoto {
   alt: string;
 }
 
+const resolveImageUrl = (img: any): string => {
+  if (!img) return "";
+
+  const raw =
+    img.Url ||
+    img.url ||
+    img.FileRef ||
+    img.fileRef ||
+    img.ServerRelativeUrl ||
+    img.serverRelativeUrl;
+
+  if (!raw) return "";
+
+  // absolute URL
+  if (typeof raw === "string" && (raw.startsWith("http://") || raw.startsWith("https://"))) {
+    return raw;
+  }
+
+  // Tenant Origin
+  const origin =
+    typeof window !== "undefined" && window.location && window.location.origin
+      ? window.location.origin
+      : "";
+
+  return `${origin}${raw}`;
+};
+
 const EventDetail: React.FC<IEventDetailProps> = (props) => {
-  const { eventTitle, eventDate, imageCount, onBack, eventdata, images, dymaicUrl } =
-    props;
+  const { eventTitle, eventDate, imageCount, onBack, eventdata, images } = props;
+
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [showFindMyPhoto, setShowFindMyPhoto] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("profile");
@@ -32,10 +59,12 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
   const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+
   const openLightbox = (photoId: number): void => {
     setSelectedPhoto(photoId);
   };
-  const [selectedEvent, setSelectedEvent] = useState(null);
+
   const closeLightbox = (): void => {
     setSelectedPhoto(null);
   };
@@ -54,9 +83,10 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
     }
   };
 
-  const currentPhotoIndex = selectedPhoto
-    ? images.findIndex((p) => p.Id === selectedPhoto)
-    : 0;
+  const currentPhotoIndex =
+    selectedPhoto != null
+      ? images.findIndex((p) => p.Id === selectedPhoto)
+      : 0;
 
   const goToPrevious = (): void => {
     if (currentPhotoIndex > 0) {
@@ -69,9 +99,9 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       setSelectedPhoto(images[currentPhotoIndex + 1].Id);
     }
   };
-  const handleUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+
+  // FIX: this now expects a File, used by UploadPhotoPanel
+  const handleUploadChange = (file: File) => {
     const url = URL.createObjectURL(file);
     setUploadedPreview(url);
   };
@@ -88,6 +118,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
     const img = canvas.toDataURL("image/png");
     setCapturedPreview(img);
   };
+
   const onContinueWithPhoto = () => {
     // this is final confirm after capture photo
     // here you can send preview image to API OR set in state
@@ -96,6 +127,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
     // same logic what I do in profile / upload continue flow
     //  handleFinalSubmit(capturedPreview);
   };
+
   const useProfilePicture = () => {
     setFaceRecognized(true);
   };
@@ -123,8 +155,9 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       if (!file) return;
       if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) return;
       if (file.size > 5 * 1024 * 1024) return;
-      onUpload(file);
+      onUpload(file); 
     };
+
     return (
       <div className={styles.uploadWrapper}>
         <h2 className={styles.panelTitle}>Face Recognition</h2>
@@ -214,9 +247,11 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       </div>
     );
   };
+
   const handleEventClick = (event: any): void => {
     setSelectedEvent(event);
   };
+
   return (
     <div className={styles.eventDetail}>
       {/* Header */}
@@ -316,21 +351,22 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
             onClick={() => openLightbox(photo.Id)}
           >
             <img
-              src={`${dymaicUrl}${photo.FileRef}`}
-              alt={photo.alt}
+              src={resolveImageUrl(photo)} // dynamic URL here
+              alt={photo.alt || eventTitle}
             />
           </div>
         ))}
       </div>
 
       {/* More Event Gallery Section */}
-      {/* More Event Gallery Section */}
       <div className={styles.moreEventsSection}>
         <div className={styles.moreEventsHeader}>
           <h2 className={styles.moreEventsTitle}>
             More Event <span className={styles.galleryHighlight}>Gallery</span>
           </h2>
-          <button className={styles.viewAllButton} onClick={onBack}>View All</button>
+          <button className={styles.viewAllButton} onClick={onBack}>
+            View All
+          </button>
         </div>
 
         <div className={styles.moreEventsCardsRow}>
@@ -346,47 +382,55 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       </div>
 
       {/* Lightbox */}
-    {selectedPhoto !== null && (
-  <div className={styles.lightboxOverlay}>
-    <div className={styles.lightboxContainer} onClick={closeLightbox}>
+      {selectedPhoto !== null && currentPhotoIndex > -1 && (
+        <div className={styles.lightboxOverlay}>
+          <div
+            className={styles.lightboxContainer}
+            onClick={closeLightbox}
+          >
+            <div className={styles.counter}>
+              {currentPhotoIndex + 1} / {images.length}
+            </div>
 
-      <div className={styles.counter}>
-        {currentPhotoIndex + 1} / {images.length}
-      </div>
+            <button className={styles.closeBtn} onClick={closeLightbox}>
+              ×
+            </button>
 
-      <button className={styles.closeBtn} onClick={closeLightbox}>×</button>
+            {/* previous preview */}
+            {currentPhotoIndex > 0 && (
+              <div
+                className={styles.sideThumbsLeft}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToPrevious();
+                }}
+              >
+                <img src={resolveImageUrl(images[currentPhotoIndex - 1])} />
+              </div>
+            )}
 
-      {/* previous preview */}
-      {currentPhotoIndex > 0 && (
-        <div
-          className={styles.sideThumbsLeft}
-          onClick={(e)=>{e.stopPropagation(); goToPrevious();}}
-        >
-          <img src={images[currentPhotoIndex-1].Url} />
+            <img
+              className={styles.mainImage}
+              src={resolveImageUrl(images[currentPhotoIndex])}
+              alt=""
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {/* next preview */}
+            {currentPhotoIndex < images.length - 1 && (
+              <div
+                className={styles.sideThumbsRight}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToNext();
+                }}
+              >
+                <img src={resolveImageUrl(images[currentPhotoIndex + 1])} />
+              </div>
+            )}
+          </div>
         </div>
       )}
-
-      <img
-        className={styles.mainImage}
-        src={images[currentPhotoIndex].Url}
-        alt=""
-        onClick={(e)=>e.stopPropagation()}
-      />
-
-      {/* next preview */}
-      {currentPhotoIndex < images.length-1 && (
-        <div
-          className={styles.sideThumbsRight}
-          onClick={(e)=>{e.stopPropagation(); goToNext();}}
-        >
-          <img src={images[currentPhotoIndex+1].Url} />
-        </div>
-      )}
-
-    </div>
-  </div>
-)}
-
     </div>
   );
 };
