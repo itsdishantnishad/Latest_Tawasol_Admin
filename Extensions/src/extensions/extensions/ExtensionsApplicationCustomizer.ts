@@ -1,3 +1,5 @@
+// src/extensions/extensions/ExtensionsApplicationCustomizer.ts
+
 import { BaseApplicationCustomizer } from '@microsoft/sp-application-base';
 require('../../styles/hideNav.css');
 
@@ -11,10 +13,10 @@ import { SuggestBox } from './components/SuggestBox';
 import { SearchService } from './services/searchService';
 import { NavigationService } from './services/navigationService';
 import { IDS, HARD_NOTIFS, resolveUrls } from './shared/constants';
-import { IOnboConfig } from './components/Onbo';
 
-// ⬇️ Onboarding import (Onbo.ts)
+// 🔹 Onboarding import
 import Onbo from './components/Onbo';
+import { IOnboConfig } from './components/Onbo';
 
 export interface IExtensionsApplicationCustomizerProperties {
   testMessage: string;
@@ -51,7 +53,7 @@ export default class ExtensionsApplicationCustomizer
   private observer?: MutationObserver;
   private debounceId?: number;
 
-  // Onboarding instance reference (optional, for cleanup)
+  // 🔹 Onboarding instance
   private onboarding?: Onbo;
 
   private get webUrl(): string { return this.context.pageContext.web.absoluteUrl; }
@@ -219,8 +221,9 @@ export default class ExtensionsApplicationCustomizer
     });
   }
 
-  public onInit(): Promise<void> {
-    if (!this.shouldRender()) return Promise.resolve();
+  // 🔹 ONINIT UPDATED FOR ONBOARDING + REST SAME
+  public async onInit(): Promise<void> {
+    if (!this.shouldRender()) return;
 
     // Amplitude tracking for every modern Site Page
     this.initAmplitude();
@@ -228,22 +231,28 @@ export default class ExtensionsApplicationCustomizer
     this.injectFont();
     document.body.style.background = '#FFF4EA';
 
-    // Resolve all environment-specific URLs once
     const urls = resolveUrls(this.webUrl);
 
-    // ⬇️ Onboarding – show only for first-time users
-    if (!Onbo.hasSeen(this.context)) {
-      const onboConfig: IOnboConfig = {
-        homeUrl: urls.home, // Tawasol home
-        // TODO: is URL ko apne actual onboarding video se replace karo
-        videoUrl: `${urls.home}/SiteAssets/onboarding.mp4`
-      };
+    // ---------- ONBOARDING FROM LIST ----------
+    try {
+      const state = await Onbo.loadStateFromList(this.context);
 
-      this.onboarding = new Onbo(this.context, onboConfig);
-      this.onboarding.render();
+      if (!state.hasSeen && state.videoUrl) {
+        const cfg: IOnboConfig = {
+          homeUrl: urls.home,
+          videoUrl: state.videoUrl
+        };
+        this.onboarding = new Onbo(this.context, cfg);
+        this.onboarding.render();
+      }
+    } catch (err) {
+      // Onboarding fail should NOT break rest of extension
+      console.error('Onboarding load failed', err);
     }
 
-    // ---- SEARCH SERVICE: now only uses SPHttpClient (no Graph) ----
+        // ---------- TEMP: FORCE ONBOARDING FOR TEST ----------
+   
+    // ---- SEARCH SERVICE ----
     this.search = new SearchService(
       this.webUrl,
       this.context.msGraphClientFactory,
@@ -280,19 +289,21 @@ export default class ExtensionsApplicationCustomizer
       );
     }
 
-    this.refreshNavAndFooter();
-    this.observer = new MutationObserver(() => this.refreshNavAndFooter());
+    await this.refreshNavAndFooter();
+    this.observer = new MutationObserver(() => {
+      void this.refreshNavAndFooter();
+    });
     this.observer.observe(document.body, { childList: true, subtree: true });
 
     window.addEventListener('scroll', this.updateSuggest, true);
     window.addEventListener('resize', this.updateSuggest);
-
-    return Promise.resolve();
   }
 
   private async refreshNavAndFooter(): Promise<void> {
-    // ⬇️ FIX: add explicit return type to avoid TS7011
-    const links = await this.nav.getNavLinks().catch((): any[] => []);
+    const links = await this.nav.getNavLinks().catch((/*err*/): any[] => {
+      return [];
+    });
+
     if (links.length) {
       this.floatingNav = new FloatingNav();
       this.floatingNav.render(IDS.hosts.nav, links);
@@ -345,14 +356,12 @@ export default class ExtensionsApplicationCustomizer
 
       this.debounceId = window.setTimeout(async () => {
         try {
-          // Both calls are safe: queryPeople already returns [] on failure.
           const people = await this.search.queryPeople(val, 3);
           const content = await this.search.queryContent(val, 5);
 
           const results = [...people, ...content].slice(0, 8);
           this.suggest.open(val, results);
         } catch (err) {
-          // Worst case: don’t break the page, just show no suggestions
           this.suggest.open(val, []);
         }
       }, 250);
@@ -376,7 +385,7 @@ export default class ExtensionsApplicationCustomizer
     window.removeEventListener('scroll', this.updateSuggest, true);
     window.removeEventListener('resize', this.updateSuggest);
 
-    // If onboarding overlay abhi bhi laga ho to clean up
+    // 🔹 clean onboarding overlay if still present
     this.onboarding?.dispose();
   }
 }
