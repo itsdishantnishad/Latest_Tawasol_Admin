@@ -125,7 +125,16 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
       case 'offers':
         return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
       case 'training':
-        return <Training seeAllURL={props.trainingAndDevelopment} onViewAll={handleViewAll} />;
+        return (
+               <Training
+                context={props.context}                 
+                seeAllURL={props.trainingAndDevelopment} 
+                topCount={4}                             
+                listTitle="Site Pages"                
+                siteUrl="https://orgessence.sharepoint.com/sites/IntranetRevampTawasol" 
+                />
+                );
+
       case 'about_dhre':
         return <AboutDHRE />;
       case 'tasks':
