@@ -14,12 +14,12 @@ const VisionAndMission: React.FC<IVisionAndMissionProps> = ({
   visionTitle = "Our Vision",
   missionTitle = "Our Mission",
 }) => {
-  // load fonts once (safe to call multiple times—cached)
-  useEffect(() => {
-    SPComponentLoader.loadCss(
-      "https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Instrument+Serif:ital@0;1&display=swap"
-    );
-  }, []);
+  // // load fonts once (safe to call multiple times—cached)
+  // useEffect(() => {
+  //   SPComponentLoader.loadCss(
+  //     "https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Instrument+Serif:ital@0;1&display=swap"
+  //   );
+  // }, []);
 
   // assets (same names as your repo)
   const arrowsImg = require("../assets/freepik--Arrows--inject-217.png") as string;

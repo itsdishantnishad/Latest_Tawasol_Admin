@@ -137,8 +137,11 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
 
   return (
     <div className={styles.featureWheelContainer}>
-
-      <img src={featureWheelBanner} className={styles.featureWheelBanner} alt="Feature Wheel" />
+      {/* <img src={featureWheelBanner} className={styles.featureWheelBanner} alt="Feature Wheel" /> */}
+      <div className={styles.headingSection}>
+        <h1><span>Tawasol</span>, The smarter way to stay connected</h1>
+        <h6>Scroll to see all the menus under Tawasol</h6>
+      </div>
       <section className={styles.wheelSection}>
         <Wheel
           selectedFeature={selectedFeature}
