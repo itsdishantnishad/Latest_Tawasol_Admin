@@ -414,6 +414,46 @@ export class listServices {
     }
   }
 
+  /** ===== Events ===== */
+  public async getEventsByID(ID?: number): Promise<any[]> {
+    let results;
+    const constraints = `AND ContentTypeId:(${ContentTypeId.EVENT}*)`;
+
+    try {
+      results = await this.sp.search({
+        Querytext: "*",
+        RowLimit: 1,
+        TrimDuplicates: false,
+        SelectProperties: [
+          "Id",
+          "Title",
+          "TIREventEndDate",
+          "TIREventStartDate",
+          "TIRLocation",
+          "TIREventCategory",
+          "URL",
+        ],
+        QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
+        HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
+        EnableInterleaving: true,
+      } as ISearchQuery);
+
+      return results.PrimarySearchResults.map((item: any) => {
+        return {
+         ID: item.Id,
+          title: item.Title,
+          eventEndDate: item.TIREventEndDate,
+          eventStartDate: item.TIREventStartDate,
+          location: item.TIRLocation,
+          newsImage: listServices.getImageUrlFromPage(item.URL, 200),
+          category: item.TIREventCategory,
+          pageUrl: item.URL,
+        } as any;
+      });
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getAllTraining(): Promise<any[]> {
     let results;
@@ -462,46 +502,71 @@ export class listServices {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getAllEvents(): Promise<any[]> {
-    let results;
-    const constraints = `AND ContentTypeId:(${ContentTypeId.EVENT}*)`;
+      let results;
+      const constraints = `AND ContentTypeId:(${ContentTypeId.EVENT}*)`;
 
-    try {
-      const searchOptions: ISearchQuery = {
-        Querytext: "*",
-        TrimDuplicates: false,
-        SelectProperties: [
-          "Id",
-          "Title",
-          "TIREventEndDate",
-          "TIREventStartDate",
-          "TIRLocation",
-          "TIREventCategory",
-          "URL",
-        ],
-        QueryTemplate: `{searchTerms}`,
-        HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
-        EnableInterleaving: true,
-      };
+      try {
+        const searchOptions: ISearchQuery = {
+          Querytext: "*",
+          TrimDuplicates: false,
+          SelectProperties: [
+            "Id",
+            "Title",
+            "TIREventEndDate",
+            "TIREventStartDate",
+            "TIRLocation",
+            "TIREventCategory",
+            "URL",
+            "PictureThumbnailURL",
+            "BannerImageUrlOWSURLH",
+            "PublishingImage",
+            "Path"
+          ],
+          QueryTemplate: `{searchTerms}`,
+          HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
+          EnableInterleaving: true
+        };
 
-      searchOptions.RowLimit = 500;
-      results = await this.sp.search(searchOptions);
+        searchOptions.RowLimit = 500;
+        results = await this.sp.search(searchOptions);
 
-      return results.PrimarySearchResults.map((item: any) => {
-        return {
-          ID: item.Id,
-          title: item.Title,
-          eventEndDate: item.TIREventEndDate,
-          eventStartDate: item.TIREventStartDate,
-          location: item.TIRLocation,
-          newsImage: listServices.getImageUrlFromPage(item.URL, 200),
-          category: item.TIREventCategory,
-          pageUrl: item.URL,
-        } as any;
-      });
-    } catch (error) {
-      return Promise.reject(error);
+        return results.PrimarySearchResults.map((item: any) => {
+          let img: string = "";
+
+          if (item.PictureThumbnailURL) {
+            img = item.PictureThumbnailURL;
+          }
+          if (!img && item.BannerImageUrlOWSURLH) {
+            const raw = String(item.BannerImageUrlOWSURLH);
+            img = raw.split(",")[0].trim();
+          }
+
+          if (!img && item.PublishingImage) {
+            const match = String(item.PublishingImage).match(/src="([^"]+)"/i);
+            if (match && match[1]) {
+              img = match[1];
+            }
+          }
+          if (!img && item.URL) {
+            img = listServices.getImageUrlFromPage(item.URL, 200);
+          }
+
+          return {
+            ID: item.Id,
+            title: item.Title,
+            eventEndDate: item.TIREventEndDate,
+            eventStartDate: item.TIREventStartDate,
+            location: item.TIRLocation,
+            newsImage: img,                      
+            category: item.TIREventCategory,
+            pageUrl: item.URL,                    
+            path: item.Path
+          } as any;
+        });
+      } catch (error) {
+        return Promise.reject(error);
+      }
     }
-  }
 
   /** ===== Simple list-based loaders (Apps, Joiners, Portfolio, Values) ===== */
 
@@ -544,23 +609,19 @@ export class listServices {
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getNewJoiners(listName: string): Promise<any[]> {
-    let results: any[] = [];
-    try {
-      results = await this.sp.web.lists
-        .getByTitle(listName)
-        .items.select("Title", "TIRDesignation", "TIRUserPicture", "TIRDescription")();
+    const results = await this.sp.web.lists
+      .getByTitle(listName)
+      .items
+      .select("Title", "TIRSortOrder", "TIRDesignation", "TIRUserPicture", "TIRDescription")
+      .orderBy("TIRSortOrder", false)(); // false = descending
 
-      return results.map((item: any) => {
-        return {
-          Title: item.Title,
-          Designation: item.TIRDesignation,
-          UserPicture: item.TIRUserPicture ? item.TIRUserPicture.Url : "#",
-          Description: item.TIRDescription,
-        } as any;
-      });
-    } catch (error) {
-      return Promise.reject(error);
-    }
+    return results.map((item: any) => ({
+      Title: item.Title,
+      SortOrder: Number(item.TIRSortOrder),
+      Designation: item.TIRDesignation,
+      UserPicture: item.TIRUserPicture ? item.TIRUserPicture.Url : "#",
+      Description: item.TIRDescription
+    }));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -623,6 +684,7 @@ export class listServices {
     const rows = await this.sp.web.lists
       .getByTitle(listTitle)
       .items.select(
+        "Id",
         "Title",
         "TIRDesignation",
         "TIRLevel",
@@ -639,16 +701,15 @@ export class listServices {
       const photoUrl = typeof ph === "string" ? ph : ph?.Url || undefined;
 
       const userField = it?.TIRUser || {};
-      const userTitle = userField?.Title || "";
+      const userTitle = (userField?.Title || "").trim();
 
       return {
-        id: Number(it?.Id) || 0,
+        id: Number(it.Id),
         name: it?.Title || "",
         role: it?.TIRDesignation || "",
         level: Number(it?.TIRLevel ?? 99),
         sort: Number(it?.TIRSortOrder ?? 9999),
         photoUrl,
-        // 👇 this is what TeamOrganisationStructure.tsx expects
         user: userTitle
       };
     });
@@ -669,76 +730,91 @@ export class listServices {
     listTitle: string,
     memberDisplayName: string
   ): Promise<OrgDepartment[]> {
-    let results: any[] = [];
-    try {
-      results = await this.sp.web.lists
-        .getByTitle(listTitle)
-        .items.select(
-          "Id",
-          "Title",
-          "URL",
-          "TIRDepartment",                 // taxonomy field
-          "TIRDepartmentMember/Title"
-        )
-        .expand("TIRDepartmentMember")();
 
-      // filter rows where the People column contains our member
-      const matches = results.filter((item) => {
-        const people: any[] = Array.isArray(item?.TIRDepartmentMember)
-          ? item.TIRDepartmentMember
-          : [];
-        return people.some(
-          (p) =>
-            (p?.Title || "").trim().toLowerCase() ===
-            memberDisplayName.trim().toLowerCase()
-        );
-      });
+    const targetName = memberDisplayName.trim().toLowerCase();
 
-      const mapped: OrgDepartment[] = matches.map((item: any) => {
-        const rawDept = item.TIRDepartment;
-        let deptName = "";
+    const deptRows: any[] = await this.sp.web.lists
+      .getByTitle(listTitle)
+      .items.select(
+        "Id",
+        "URL",
+        "TIRDepartment",
+        "TIRDepartmentMember/Title"
+      )
+      .expand("TIRDepartmentMember")();
 
-        // 🔹 TIRDepartment comes as taxonomy object/array → get its Label like we do elsewhere
-        if (rawDept) {
-          if (Array.isArray(rawDept)) {
-            const first = rawDept[0] || {};
-            deptName = first.Label || first.Term || first.Name || "";
-          } else if (typeof rawDept === "object") {
-            // your current case: { Label, TermGuid, WssId }
-            deptName = rawDept.Label || rawDept.Term || rawDept.Name || "";
-          } else {
-            deptName = String(rawDept);
-          }
-        }
+    const memberRows = deptRows.filter((item) => {
+      const people: any[] = Array.isArray(item.TIRDepartmentMember)
+        ? item.TIRDepartmentMember
+        : [];
 
-        // fallback to list Title if something is odd
-        if (!deptName) {
-          deptName = item.Title || "";
-        }
+      return people.some(
+        (p) => (p?.Title || "").trim().toLowerCase() === targetName
+      );
+    });
 
-        const urlField = item.URL;
-        const url =
-          urlField && typeof urlField === "object"
-            ? urlField.Url
-            : urlField || undefined;
-
-        console.log("[TeamOrg] raw dept row:", item, " -> deptName:", deptName);
-
-        return {
-          name: deptName,   // ✅ plain string for UI
-          url,
-        };
-      });
-
-      console.log("[TeamOrg] mapped departments", mapped);
-      return mapped;
-    } catch (error) {
-      console.error("[TeamOrg] getDepartmentsByMember error", error);
-      return Promise.reject(error);
+    if (!memberRows.length) {
+      return [];
     }
-  }
 
-  /** ===== Policies & Procedures: Document Functions (for Landing.tsx) ===== */
+    const wssIds: number[] = [];
+
+    memberRows.forEach((item) => {
+      const raw = item.TIRDepartment;
+      const values = Array.isArray(raw) ? raw : raw ? [raw] : [];
+
+      values.forEach((v: any) => {
+        const id = Number(v?.WssId);
+        if (id && !wssIds.includes(id)) {
+          wssIds.push(id);
+        }
+      });
+    });
+
+    if (!wssIds.length) {
+      return [];
+    }
+
+    const filter = wssIds.map((id) => `Id eq ${id}`).join(" or ");
+
+    const termRows: any[] = await this.sp.web.lists
+      .getByTitle("TaxonomyHiddenList")
+      .items.select("Id", "Title")
+      .filter(filter)();
+
+    const labelById = new Map<number, string>();
+    termRows.forEach((row) => {
+      labelById.set(Number(row.Id), row.Title as string);
+    });
+
+    const result: OrgDepartment[] = memberRows.map((item) => {
+      const raw = item.TIRDepartment;
+      const values = Array.isArray(raw) ? raw : raw ? [raw] : [];
+
+      let deptName = "";
+
+      if (values.length) {
+        const first = values[0];
+        const wssId = Number(first?.WssId);
+        const label = wssId ? labelById.get(wssId) : undefined;
+        deptName = label || "";
+      }
+
+      const urlField = item.URL;
+      const url =
+        urlField && typeof urlField === "object"
+          ? urlField.Url
+          : urlField || undefined;
+
+      return {
+        name: deptName,
+        url,
+      };
+    });
+
+    return result;
+  }
+  /** ===== Policies & Procedures: Document Functions ===== */
 
   public async getDocumentFunctions(
     listTitle: string

@@ -48,13 +48,13 @@ export default class EventGalleryWebPart extends BaseClientSideWebPart<IEventGal
         .then(context => {
           let environmentMessage: string = '';
           switch (context.app.host.name) {
-            case 'Office': // running in Office
+            case 'Office':
               environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
               break;
-            case 'Outlook': // running in Outlook
+            case 'Outlook':
               environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
               break;
-            case 'Teams': // running in Teams
+            case 'Teams':
             case 'TeamsModern':
               environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
               break;
