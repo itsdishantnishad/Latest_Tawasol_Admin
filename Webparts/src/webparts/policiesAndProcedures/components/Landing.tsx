@@ -140,7 +140,6 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
           onOpenFunctionView={this.showFunctionDetailView /* FUTURE: extend to (title, href) */}
         />
 
-        <div style={{ marginTop: 18 }} />
         <Boards
           context={this.props.context}
           /*

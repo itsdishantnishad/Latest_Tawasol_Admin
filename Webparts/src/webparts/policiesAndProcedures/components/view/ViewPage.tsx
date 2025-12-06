@@ -92,11 +92,16 @@ export default class PoliciesAndProceduresView extends React.Component<
   private renderTopBar(): React.ReactNode {
     return (
       <div className={view.topBar}>
-        <button className={view.backBtn} onClick={this.props.onBackToLanding} aria-label="Back" title="Back">
+        {/* <button className={view.backBtn} onClick={this.props.onBackToLanding} aria-label="Back" title="Back">
           <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }} />
           <span>Back</span>
-        </button>
-        <Breadcrumb items={this.state.breadcrumbs} />
+        </button> */}
+        <p onClick={this.props.onBackToLanding}>
+          <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }} style={{verticalAlign: 'sub'}} />
+          <span>Back</span>
+        </p>
+        <p>|</p>
+        <Breadcrumb items={this.state.breadcrumbs} className={view.breadStyle} />
         <div className={view.searchSlot} />
       </div>
     );
