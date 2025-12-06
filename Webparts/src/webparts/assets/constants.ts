@@ -1,40 +1,69 @@
-/** ====== Site URL bases (edit these two only if your path changes) ====== */
-export const SITE_BASE =
-  'https://orgessence.sharepoint.com';
-export const SITE_ASSETS_BASE =
-  `${SITE_BASE}/sites/IntranetRevampTawasol/SiteAssets`;
+import { WebPartContext } from '@microsoft/sp-webpart-base';
 
-/** Policies & Procedures – View Page Icons folder */
-export const PP_VIEW_ICONS_BASE =
-  `${SITE_ASSETS_BASE}/Policies%20%26%20Procedures/View%20Page%20Icons`;
-
-/** Global Banner (already used elsewhere) */
-export const DEFAULT_BANNER_TITLE = 'Welcome to Tawasol';
-export const DEFAULT_BANNER_DESCRIPTION = 'Your daily hub for news, documents and collaboration.';
-export const DEFAULT_BANNER_URL =
-  `${SITE_ASSETS_BASE}/Global%20Banner/DefaultBanner.svg`;
-
-/** ====== Individual icon URLs (update filenames only if you rename files) ====== */
-export const ICON_DOC_FOLDER_GRID   = `${PP_VIEW_ICONS_BASE}/Document%20Folder%20GRID%20Icon.svg`;
-export const ICON_DOC_FOLDER_LIST   = `${PP_VIEW_ICONS_BASE}/Document%20Folder%20List%20Icon.svg`;
-export const ICON_EXPORT_TO_CSV     = `${PP_VIEW_ICONS_BASE}/Export%20To%20CSV%20Icon.svg`;
-export const ICON_FOLDER            = `${PP_VIEW_ICONS_BASE}/Folder%20Icon.svg`;
-export const ICON_JPG               = `${PP_VIEW_ICONS_BASE}/JPG%20Icon.svg`;
-export const ICON_PDF               = `${PP_VIEW_ICONS_BASE}/PDF%20Icon.svg`;
-export const ICON_POWERPOINT        = `${PP_VIEW_ICONS_BASE}/PowerPoint%20Icon.svg`;
-export const ICON_PREVIEW_PLACEHOLDER = `${PP_VIEW_ICONS_BASE}//Preview%20File%20Placeholder%20Icon.svg`;
-export const ICON_TAG               = `${PP_VIEW_ICONS_BASE}/Tag%20Icon.svg`;
-export const ICON_TEXT              = `${PP_VIEW_ICONS_BASE}/Text%20Icon.svg`;
-export const ICON_WORD              = `${PP_VIEW_ICONS_BASE}/Word%20Icon.svg`;
-export const ICON_ZIP               = `${PP_VIEW_ICONS_BASE}/Zip%20Icon.svg`;
-export const ICON_ARROW_UP          = `${PP_VIEW_ICONS_BASE}/Folder%20Arrow%20Icon%20Up.svg`;
-export const ICON_ARROW_DOWN        = `${PP_VIEW_ICONS_BASE}/Folder%20Arrow%20Icon%20Down.svg`;
-
-/** ===== Real PDF used in dummy provider for preview ===== */
+/** ===== Static text  ===== */
 export const REAL_PDF_FILE_NAME = 'Major Project File.pdf';
-export const REAL_PDF_URL =
-  'https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SiteAssets/Policies%20%26%20Procedures/View%20Page%20Icons/Major%20Project%20File.pdf';
+export const DEFAULT_BANNER_TITLE = 'Welcome to Tawasol';
+export const DEFAULT_BANNER_DESCRIPTION =
+  'Your daily hub for news, documents and collaboration.';
 
+
+/** ===== Dynamic URL constants  ===== */
+export let SITE_BASE: string;
+export let SITE_ASSETS_BASE: string;
+export let PP_VIEW_ICONS_BASE: string;
+
+export let DEFAULT_BANNER_URL: string;
+
+export let ICON_DOC_FOLDER_GRID: string;
+export let ICON_DOC_FOLDER_LIST: string;
+export let ICON_EXPORT_TO_CSV: string;
+export let ICON_FOLDER: string;
+export let ICON_JPG: string;
+export let ICON_PDF: string;
+export let ICON_POWERPOINT: string;
+export let ICON_PREVIEW_PLACEHOLDER: string;
+export let ICON_TAG: string;
+export let ICON_TEXT: string;
+export let ICON_WORD: string;
+export let ICON_ZIP: string;
+export let ICON_ARROW_UP: string;
+export let ICON_ARROW_DOWN: string;
+
+export let REAL_PDF_URL: string;
+
+/**
+ * Call this once (e.g. in WebPart onInit) to populate all URL constants
+ */
+export function initUrlConstants(context: WebPartContext): void {
+  const siteUrl = context.pageContext.site.absoluteUrl.replace(/\/$/, '');
+  const webUrl = context.pageContext.web.absoluteUrl.replace(/\/$/, '');
+
+  SITE_BASE = siteUrl;
+  SITE_ASSETS_BASE = `${webUrl}/SiteAssets`;
+  PP_VIEW_ICONS_BASE =
+    `${SITE_ASSETS_BASE}/Policies%20&%20Procedures/View%20Page%20Icons`;
+
+  DEFAULT_BANNER_URL =
+    `${SITE_ASSETS_BASE}/Global%20Banner/DefaultBanner.svg`;
+
+  ICON_DOC_FOLDER_GRID   = `${PP_VIEW_ICONS_BASE}/Document%20Folder%20GRID%20Icon.svg`;
+  ICON_DOC_FOLDER_LIST   = `${PP_VIEW_ICONS_BASE}/Document%20Folder%20List%20Icon.svg`;
+  ICON_EXPORT_TO_CSV     = `${PP_VIEW_ICONS_BASE}/Export%20To%20CSV%20Icon.svg`;
+  ICON_FOLDER            = `${PP_VIEW_ICONS_BASE}/Folder%20Icon.svg`;
+  ICON_JPG               = `${PP_VIEW_ICONS_BASE}/JPG%20Icon.svg`;
+  ICON_PDF               = `${PP_VIEW_ICONS_BASE}/PDF%20Icon.svg`;
+  ICON_POWERPOINT        = `${PP_VIEW_ICONS_BASE}/PowerPoint%20Icon.svg`;
+  ICON_PREVIEW_PLACEHOLDER =
+    `${PP_VIEW_ICONS_BASE}/Preview%20File%20Placeholder%20Icon.svg`;
+  ICON_TAG               = `${PP_VIEW_ICONS_BASE}/Tag%20Icon.svg`;
+  ICON_TEXT              = `${PP_VIEW_ICONS_BASE}/Text%20Icon.svg`;
+  ICON_WORD              = `${PP_VIEW_ICONS_BASE}/Word%20Icon.svg`;
+  ICON_ZIP               = `${PP_VIEW_ICONS_BASE}/Zip%20Icon.svg`;
+  ICON_ARROW_UP          = `${PP_VIEW_ICONS_BASE}/Folder%20Arrow%20Icon%20Up.svg`;
+  ICON_ARROW_DOWN        = `${PP_VIEW_ICONS_BASE}/Folder%20Arrow%20Icon%20Down.svg`;
+
+  REAL_PDF_URL = `${PP_VIEW_ICONS_BASE}/Major%20Project%20File.pdf`;
+}
 
 /** ====== Breadcrumb / Tasks SVGs you already had (kept as-is) ====== */
 export const breadcrumbBeforeBackArrowSVG = `
