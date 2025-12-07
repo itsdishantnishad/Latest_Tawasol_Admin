@@ -1,5 +1,16 @@
 @import '~@fluentui/react/dist/sass/References.scss';
-// @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: local('Instrument Serif Regular'), url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: local('Instrument Serif Italic'), url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
 
 /* Outer: controls page spacing around the banner */
 .bannerRoot {
@@ -66,13 +77,14 @@
   line-height: 100%;
   letter-spacing: 0;
   text-align: center;
+  font-weight: 400;
 }
 
-.titleFirst { color: #DA291C; font-style: italic; font-weight: 400; font-family: "Instrument Serif", serif !important; }
-.titleRest  { color: #000000; font-style: normal; font-weight: 400; font-family: "Instrument Serif", serif !important; }
+.titleFirst { color: #DA291C; font-family: 'Instrument Serif Italic'; }
+.titleRest  { color: #000000; font-family: 'Instrument Serif Regular'; }
 
 .description {
-  font-family: "Inter", sans-serif !important;
+  font-family: 'Inter', sans-serif;
   color: #5B6770;
   font-size: 16px;
   font-weight: 400;

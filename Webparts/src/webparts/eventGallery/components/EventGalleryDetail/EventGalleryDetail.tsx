@@ -362,7 +362,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       <div className={styles.moreEventsSection}>
         <div className={styles.moreEventsHeader}>
           <h2 className={styles.moreEventsTitle}>
-            More Event <span className={styles.galleryHighlight}>Gallery</span>
+            More Event Gallery
           </h2>
           <button className={styles.viewAllButton} onClick={onBack}>
             View All
