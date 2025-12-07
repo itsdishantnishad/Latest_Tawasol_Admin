@@ -21,13 +21,13 @@ export interface IVisionAndMissionWebPartProps {
 export default class VisionAndMissionWebPart
   extends BaseClientSideWebPart<IVisionAndMissionWebPartProps> {
 
-  public onInit(): Promise<void> {
-    // fonts once per page
-    SPComponentLoader.loadCss(
-      "https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Instrument+Serif:ital@0;1&display=swap"
-    );
-    return super.onInit();
-  }
+  // public onInit(): Promise<void> {
+  //   // fonts once per page
+  //   SPComponentLoader.loadCss(
+  //     "https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Instrument+Serif:ital@0;1&display=swap"
+  //   );
+  //   return super.onInit();
+  // }
 
   public render(): void {
     const props: IVisionAndMissionProps = {
