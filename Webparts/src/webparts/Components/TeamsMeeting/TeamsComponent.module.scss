@@ -52,50 +52,58 @@
   border-radius: 8px;
   padding: 0;
 
-  .month {
-    font-size: 13px;
-    font-weight: 500;
-    color: #424242;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-    order: 1;
-  }
+  // .month {
+  //   font-size: 13px;
+  //   font-weight: 500;
+  //   color: #424242;
+  //   text-transform: uppercase;
+  //   margin-bottom: 4px;
+  //   order: 1;
+  // }
 
   .date {
-    font-size: 36px;
+    color: #101820;
+    font-size: 20px;
     font-weight: 700;
-    color: #1A1A1A;
-    line-height: 1;
-    margin-bottom: 2px;
-    order: 2;
+    line-height: 28px;
   }
 
   .day {
-    font-size: 13px;
-    font-weight: 600;
-    color: #424242;
-    text-transform: uppercase;
-    order: 3;
+    color: #3A3B43;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
   }
 }
 
 .imageSection {
   flex-shrink: 0;
+  position: relative;
 
   svg {
-    display: block;
-    width: 190px;
-    height: 108px;
-    border-radius: 8px;
+    border-radius: 10px;
+    height: 125px;
+    object-fit: cover;
+    width: 250px;
+    object-position: center top;
   }
 }
 
-.detailsSection {
-  flex: 1;
-  min-width: 0;
+.contentWrapper {
   display: flex;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.detailsSection {
+  display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+  max-width: 30%;
 
   .category {
     font-size: 13px;
@@ -118,14 +126,22 @@
   flex-direction: column;
   gap: 12px;
   margin-right: 16px;
+  flex: 1;
 
   .infoRow {
     display: flex;
     align-items: center;
     gap: 8px;
 
-    svg {
+    // svg {
+    //   flex-shrink: 0;
+    // }
+
+    .icon {
       flex-shrink: 0;
+      color: #DA291C;
+      width: 20px;
+      height: 20px;
     }
 
     .infoText {
@@ -149,32 +165,42 @@
   flex-shrink: 0;
 
   .registerButton {
+    background: radial-gradient(883.19% 262.8% at 112.5% -164.06%, #101820 0%, #202D39 100%);
+    box-shadow: -4px -6px 4px 0 rgba(0, 0, 0, 0.51) inset, 0 4px 4px 0 #768B9E inset;
+    border: none;
+    border-radius: 167px;
+    color: #fff;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    height: 48px;
+    line-height: 20px;
+    min-width: 143px;
+    padding: 0px 12px;
+    transition: all .3s ease;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 28px;
-    background: #1F3464;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    justify-content: center;
+    gap: 4px;
+    text-decoration: none;
 
     &:hover {
-      background: #162749;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(31, 52, 100, 0.3);
+      background-color: #1f2937;
     }
 
     &:active {
       transform: translateY(0);
     }
 
+    &:focus{
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.2);
+    }
+
     img {
-      width: 20px;
-      height: 20px;
+      width: 1rem;
+      height: 1rem;
     }
   }
 }
