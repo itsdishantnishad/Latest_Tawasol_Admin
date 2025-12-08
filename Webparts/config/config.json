@@ -234,7 +234,7 @@
         }
       ]
     },
-    "event-detail-web-part": {
+      "event-detail-web-part": {
       "components": [
         {
           "entrypoint": "./lib/webparts/eventDetail/EventDetailWebPart.js",
@@ -242,6 +242,7 @@
         }
       ]
     }
+
   },
   "externals": {},
   "localizedResources": {
@@ -274,6 +275,7 @@
     "GreetingsBannerWebPartStrings": "lib/webparts/greetingsBanner/loc/{locale}.js",
     "BeveragesWebPartStrings": "lib/webparts/beverages/loc/{locale}.js",
     "HelpWebPartStrings": "lib/webparts/help/loc/{locale}.js",
-    "EventDetailWebPartStrings": "lib/webparts/eventDetail/loc/{locale}.js"
+    "EventDetailWebPartStrings": "lib/webparts/eventDetail/loc/{locale}.js",
+    "FormsLibraryWebPartStrings": "lib/webparts/formsLibrary/loc/{locale}.js"
   }
 }

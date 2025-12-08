@@ -26,7 +26,7 @@ const EventCard: React.FC<IEventCardProps> = ({ event, onClick }) => {
           {/* <div className={styles.cardContent}></div> */}
           <h3 className={styles.eventTitle}>
             {event.title}
-            <span className={styles.arrow}>›</span>
+            <svg className={styles.arrow} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </h3>
           <div className={styles.cardFooter}>
             <span className={styles.imageCount}>{event.imageCount} images</span>

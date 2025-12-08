@@ -98,13 +98,17 @@
 
 .cardTitle {
   font-size: 18px;
-  font-weight: 700;
+  line-height: 24px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
 }
 
 .cardSubtitle {
-  font-size: 12px;
-  line-height: 1.2;
-  margin-top: 6px;
+  font-size: 14px;
+  line-height: 22px;
+  margin-top: 0;
+  font-weight: 400;
+  color: #fff;
 }
 
 @media (max-width: 768px) {

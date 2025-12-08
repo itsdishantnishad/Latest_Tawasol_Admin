@@ -125,7 +125,16 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
       case 'offers':
         return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
       case 'training':
-        return <Training seeAllURL={props.trainingAndDevelopment} onViewAll={handleViewAll} />;
+        return (
+               <Training
+                context={props.context}                 
+                seeAllURL={props.trainingAndDevelopment} 
+                topCount={4}                             
+                listTitle="Site Pages"                
+                siteUrl="https://orgessence.sharepoint.com/sites/IntranetRevampTawasol" 
+                />
+                );
+
       case 'about_dhre':
         return <AboutDHRE />;
       case 'tasks':
@@ -137,8 +146,11 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
 
   return (
     <div className={styles.featureWheelContainer}>
-
-      <img src={featureWheelBanner} className={styles.featureWheelBanner} alt="Feature Wheel" />
+      {/* <img src={featureWheelBanner} className={styles.featureWheelBanner} alt="Feature Wheel" /> */}
+      <div className={styles.headingSection}>
+        <h1><span>Tawasol</span>, The smarter way to stay connected</h1>
+        <h6>Scroll to see all the menus under Tawasol</h6>
+      </div>
       <section className={styles.wheelSection}>
         <Wheel
           selectedFeature={selectedFeature}

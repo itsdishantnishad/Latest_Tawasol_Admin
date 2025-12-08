@@ -1,3 +1,14 @@
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
+
 .vivaHeader {
   /* existing background + layout */
   background-color: #FFF4EA;
@@ -42,9 +53,8 @@
 .title {
   margin: 0;
   text-align: center;
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Italic' !important;
   font-weight: 400;
-  font-style: italic;
   font-size: 42px;
   line-height: 100%;
   letter-spacing: 1px;
