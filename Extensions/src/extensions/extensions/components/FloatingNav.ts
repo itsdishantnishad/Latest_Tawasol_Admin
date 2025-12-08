@@ -33,16 +33,11 @@ export class FloatingNav {
 
       const target = new URL(targetUrl, current.origin);
       const targetPath = target.pathname.replace(/\/$/, '').toLowerCase();
-
-      // Primary: match clean paths (ignoring trailing slash)
       if (targetPath === currentPath) return true;
-
-      // Fallback: compare absolute URL without query/hash
       const currentAbs = (current.origin + current.pathname).toLowerCase();
       const targetAbs = (target.origin + target.pathname).toLowerCase();
       return currentAbs === targetAbs;
     } catch {
-      // Very defensive fallback – simple substring compare
       const normCurrent = window.location.href.split('#')[0].toLowerCase();
       const normTarget = targetUrl.split('#')[0].toLowerCase();
       return normCurrent.indexOf(normTarget) >= 0;
