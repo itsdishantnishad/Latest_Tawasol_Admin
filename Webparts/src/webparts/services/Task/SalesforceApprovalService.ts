@@ -1,11 +1,12 @@
-// src/webparts/task/services/sfApprovalService.ts
+// src/webparts/task/services/SalesforceApprovalService.ts
 // Service for Task Listing + Approve/Reject actions.
-// Uses SPFx HttpClient. In MOCK mode, throws from list and returns a fake success for action.
+// Uses SPFx HttpClient for real Salesforce calls.
+// Set USE_MOCK_DATA = true only if you want to run with local dummy data.
 
 import { HttpClient, IHttpClientOptions, HttpClientResponse } from "@microsoft/sp-http";
 
-// ====== TOGGLE THIS AT CUTOVER ======
-const USE_MOCK_DATA = true;
+// ====== TOGGLE THIS ======
+const USE_MOCK_DATA = false;   // ⬅️ now using REAL Salesforce, not mock
 
 export type TaskActionType = "Approve" | "Reject";
 
@@ -47,7 +48,7 @@ export interface TaskListApiResponse {
 export interface SfApprovalServiceInit {
   httpClient?: HttpClient;          // Pass this at cutover (from WebPart context)
   salesforceBaseUrl: string;        // e.g., https://dubaiproperties--dev.sandbox.my.salesforce.com
-  accessToken?: string;             // Optional if calling SF directly; not needed if you call a proxy
+  accessToken?: string;             // Bearer token if calling SF directly
 }
 
 export class SfApprovalService {
@@ -72,13 +73,18 @@ export class SfApprovalService {
       throw new Error("HttpClient not provided. Pass SPFx HttpClient at cutover.");
     }
 
-    const requestUrl = `${this.salesforceBaseUrl}/services/apexrest/approvalhistory?emailID=${encodeURIComponent(userEmail)}`;
-    const requestHeaders: HeadersInit = { Accept: "application/json" };
-    if (this.accessToken) requestHeaders["Authorization"] = `Bearer ${this.accessToken}`;
+    const requestUrl =
+      `${this.salesforceBaseUrl}/services/apexrest/approvalhistory?emailID=${encodeURIComponent(userEmail)}`;
 
-    const httpResponse: HttpClientResponse = await this.httpClient.get(requestUrl, HttpClient.configurations.v1, {
-      headers: requestHeaders
-    });
+    const requestHeaders: HeadersInit = { Accept: "application/json" };
+    if (this.accessToken) {
+      requestHeaders["Authorization"] = `Bearer ${this.accessToken}`;
+    }
+
+    const httpResponse: HttpClientResponse =
+      await this.httpClient.get(requestUrl, HttpClient.configurations.v1, {
+        headers: requestHeaders
+      });
 
     if (!httpResponse.ok) {
       throw new Error(`List API failed: ${httpResponse.status} ${httpResponse.statusText}`);
@@ -109,7 +115,9 @@ export class SfApprovalService {
           contextId: request.contextId,
           comments:
             request.comments ??
-            (request.actionType === "Approve" ? "Approved via REST API" : "Rejected via REST API"),
+            (request.actionType === "Approve"
+              ? "Approved via REST API"
+              : "Rejected via REST API"),
         },
       ],
     };
@@ -118,16 +126,23 @@ export class SfApprovalService {
       "Content-Type": "application/json",
       Accept: "application/json",
     };
-    if (this.accessToken) requestHeaders["Authorization"] = `Bearer ${this.accessToken}`;
+    if (this.accessToken) {
+      requestHeaders["Authorization"] = `Bearer ${this.accessToken}`;
+    }
 
-    const httpOptions: IHttpClientOptions = { headers: requestHeaders, body: JSON.stringify(requestBody) };
-    const httpResponse: HttpClientResponse = await this.httpClient.post(requestUrl, HttpClient.configurations.v1, httpOptions);
+    const httpOptions: IHttpClientOptions = {
+      headers: requestHeaders,
+      body: JSON.stringify(requestBody)
+    };
+
+    const httpResponse: HttpClientResponse =
+      await this.httpClient.post(requestUrl, HttpClient.configurations.v1, httpOptions);
 
     if (!httpResponse.ok) {
       throw new Error(`Action API failed: ${httpResponse.status} ${httpResponse.statusText}`);
     }
 
-    const jsonResponse = await httpResponse.json();
+    const jsonResponse: any = await httpResponse.json();
     const wasSuccessful = Array.isArray(jsonResponse) && jsonResponse[0]?.success === true;
 
     return {

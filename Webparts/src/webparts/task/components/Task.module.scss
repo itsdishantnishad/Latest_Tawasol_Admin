@@ -44,6 +44,7 @@
   th {
     padding: 12px;
     color: #000000;
+
     & > div {
       min-height: auto;
     }
@@ -52,7 +53,7 @@
 
 .tableBody {
   tr {
-    cursor: pointer;
+    cursor: default; // no row click, only "View Details"
   }
 
   tr:nth-child(odd) {
@@ -91,7 +92,7 @@
   color: #000000;
 }
 
-/* action column */
+/* (old action styles – safe to keep if needed elsewhere)
 .actionCell {
   display: inline-flex;
   align-items: center;
@@ -110,4 +111,25 @@
   width: 24px;
   height: 24px;
   display: inline-block;
+}
+*/
+
+/* --- View Details column --- */
+.viewDetailsLink {
+  font-weight: 500;
+  font-size: 14px;
+  color: #da291c; /* Tawasol red */
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.viewDetailsLink:hover {
+  text-decoration: underline;
+}
+
+.viewDetailsDisabled {
+  font-weight: 500;
+  font-size: 14px;
+  color: #8d8e92; /* muted grey */
+  cursor: default;
 }
