@@ -12,7 +12,8 @@ import { Notifications } from './shared/notifications';
 import { SuggestBox } from './components/SuggestBox';
 import { SearchService } from './services/searchService';
 import { NavigationService } from './services/navigationService';
-import { IDS, HARD_NOTIFS, resolveUrls } from './shared/constants';
+import { IDS, resolveUrls } from './shared/constants';
+import { NotificationService } from './services/notificationService';
 
 // 🔹 Onboarding import
 import Onbo from './components/Onbo';
@@ -25,7 +26,9 @@ export interface IExtensionsApplicationCustomizerProperties {
 /** Amplitude API key (project key) */
 const AMPLITUDE_API_KEY: string = 'c8c6db5639af77ddc99ca0e6a6b32f53';
 
-/** Types for window.amplitude so we don't use `any` */
+/** Max notifications to load into the popup (10 at first, then See more…) */
+const MAX_NOTIFS: number = 100;
+
 type AmplitudeProps = Record<string, unknown>;
 
 interface AmplitudeInstance {
@@ -49,12 +52,17 @@ export default class ExtensionsApplicationCustomizer
   private suggest!: SuggestBox;
   private search!: SearchService;
   private nav!: NavigationService;
-  private notifications!: Notifications;
-  private observer?: MutationObserver;
-  private debounceId?: number;
+
+  // 🔔 Notifications
+  private notifService!: NotificationService;
+  private notifications?: Notifications;
+  private isLoadingNotifications: boolean = false;
 
   // 🔹 Onboarding instance
   private onboarding?: Onbo;
+
+  private observer?: MutationObserver;
+  private debounceId?: number;
 
   private get webUrl(): string { return this.context.pageContext.web.absoluteUrl; }
   private get userEmail(): string { return this.context.pageContext.user.email || ''; }
@@ -221,7 +229,7 @@ export default class ExtensionsApplicationCustomizer
     });
   }
 
-  // 🔹 ONINIT UPDATED FOR ONBOARDING + REST SAME
+  // 🔹 ONINIT MERGED (Onboarding + NotificationService + existing UI)
   public async onInit(): Promise<void> {
     if (!this.shouldRender()) return;
 
@@ -250,8 +258,6 @@ export default class ExtensionsApplicationCustomizer
       console.error('Onboarding load failed', err);
     }
 
-        // ---------- TEMP: FORCE ONBOARDING FOR TEST ----------
-   
     // ---- SEARCH SERVICE ----
     this.search = new SearchService(
       this.webUrl,
@@ -263,16 +269,22 @@ export default class ExtensionsApplicationCustomizer
       this.context.spHttpClient as SPHttpClient,
       this.webUrl
     );
-    this.notifications = new Notifications(HARD_NOTIFS);
 
+    // ---- NOTIFICATION SERVICE (dynamic) ----
+    this.notifService = new NotificationService(
+      this.context.spHttpClient as SPHttpClient,
+      this.webUrl,
+      this.context.pageContext.user.loginName,
+      this.context.pageContext.user.email || '',
+      this.context.pageContext.user.displayName
+    );
+
+    // ---- HEADER (with bell wired to NotificationService) ----
     this.header = new Header(
       this.webUrl,
       this.userEmail,
       () => (window.location.href = urls.home),
-      () => {
-        const open = document.querySelector(`.${styles.TIRNotifOverlay}`);
-        open ? this.notifications.close() : this.notifications.open();
-      },
+      () => { void this.handleBellClick(); },
       (input) => this.wireSearch(input)
     );
     this.header.render(IDS.hosts.header);
@@ -297,13 +309,74 @@ export default class ExtensionsApplicationCustomizer
 
     window.addEventListener('scroll', this.updateSuggest, true);
     window.addEventListener('resize', this.updateSuggest);
+
+    // Load initial unread count + cache notifications (no UI yet)
+    void this.bootstrapNotifications();
+  }
+
+  /** First-time load: read status + top notifications + set badge. */
+  private async bootstrapNotifications(): Promise<void> {
+    try {
+      const status = await this.notifService.getUserStatus();
+      const items = await this.notifService.getLatest(MAX_NOTIFS);
+      const unread = items.filter(n => n.created > status.lastSeenAt).length;
+      this.updateNotifBadge(unread);
+
+      // (Re)create notifications instance with all callbacks
+      this.notifications = new Notifications(
+        items,
+        status.lastSeenAt,
+        {
+          onUnreadChange: (count: number) => this.updateNotifBadge(count),
+          onMarkAllRead: async () => {
+            await this.notifService.markAllRead();
+            this.updateNotifBadge(0);
+          },
+          onItemOpen: async (item) => {
+            // Persist "seen up to" this notification
+            if (item.created) {
+              await this.notifService.markSeenUpTo(item.created);
+            }
+          }
+        }
+      );
+    } catch (e) {
+      // ignore – badge just stays 0
+      // optional: console.error('bootstrapNotifications failed', e);
+    }
+  }
+
+  /** Bell click: toggle popup, lazy-load if not ready. */
+  private async handleBellClick(): Promise<void> {
+    const overlay = document.querySelector(`.${styles.TIRNotifOverlay}`);
+    if (overlay) {
+      this.notifications?.close();
+      return;
+    }
+
+    if (!this.notifications) {
+      if (this.isLoadingNotifications) return;
+      this.isLoadingNotifications = true;
+      try {
+        await this.bootstrapNotifications();
+      } finally {
+        this.isLoadingNotifications = false;
+      }
+    }
+
+    this.notifications?.open();
+  }
+
+  /** Update bell badge without touching Header.ts */
+  private updateNotifBadge(count: number): void {
+    const bell = document.getElementById(IDS.elems.bell);
+    if (bell) {
+      bell.setAttribute('data-count', count > 0 ? String(count) : '0');
+    }
   }
 
   private async refreshNavAndFooter(): Promise<void> {
-    const links = await this.nav.getNavLinks().catch((/*err*/): any[] => {
-      return [];
-    });
-
+    const links = await this.nav.getNavLinks().catch(() => []);
     if (links.length) {
       this.floatingNav = new FloatingNav();
       this.floatingNav.render(IDS.hosts.nav, links);
@@ -379,6 +452,7 @@ export default class ExtensionsApplicationCustomizer
   public onDispose(): void {
     this.suggest?.close();
     this.header?.dispose();
+    this.notifications?.dispose();
     this.floatingNav?.dispose();
     this.footer?.dispose();
     this.observer?.disconnect();

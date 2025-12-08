@@ -49,7 +49,10 @@
 .page {
   background-color: #fef7f0;
   font-family: Inter, sans-serif;
-  padding: 30px 60px;
+  padding: 22px 60px;
+  @media (max-width: 990px){
+    padding: 16px;
+  }
 }
 
 /* ----------------------------------- Banner ----------------------------------- */
@@ -70,7 +73,7 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
   @media (max-width: 991px){
     display: block;
   }
@@ -139,7 +142,7 @@
   font-weight: 500;
   left: 0;
   line-height: 24px;
-  padding: 10px 15px;
+  padding: 24px;
   position: absolute;
   right: 0;
 }
@@ -148,8 +151,8 @@
 /* Desktop / base – exact Figma grid: 6 tiles per row, each 200px wide */
 .supportGrid {
   display: grid;
-  grid-template-columns: repeat(6, 200px);
-  gap: 30px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 24px;
   justify-content: flex-start;  /* keep grid left-aligned */
   align-items: flex-start;
 }
@@ -158,17 +161,15 @@
   background: var(--pp-card-accent);
   border: 1px solid var(--pp-border);
   border-radius: 12px;
-  width: 162px;   
-  min-height: 223px;  
+  width: auto;   
+  min-height: 213px;  
   color: #000;
   cursor: pointer;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-
-  padding: 24px 24px 20px;
+  padding: 24px;
   @extend %hoverLift;
 }
 .supportTile:hover { background: var(--pp-card-soft); color:#000; text-decoration:none; }
@@ -210,16 +211,26 @@
 /* ----------------------------------- Boards ----------------------------------- */
 .boards {
   display: grid;
-  gap: 20px;
+  gap: 24px;
   grid-template-columns: repeat(3, 1fr);
+  padding-top: 60px;
   @media (max-width: 991px){
     grid-template-columns: repeat(1, 1fr);
   }
 }
 .board  {
-  padding: 12px;
+  padding: 24px;
+  border-radius: 8px;
+  background: #fff;
 }
-.boardTitle { font-weight:600; margin-bottom:6px; font-size:13px; }
+
+.boardTitle {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  line-height: 24px;
+  color: #000000;
+}
 .boardList { list-style:none; padding:0; margin:0; }
 .boardList li { display:grid; grid-template-columns: 12px 1fr auto; gap:8px; padding:8px 0; border-top:1px dashed var(--pp-border-dash); }
 .boardList li:first-child { border-top:none; }
@@ -275,26 +286,26 @@
 /* --------------------------------- Responsive --------------------------------- */
 
 @media (max-width: 1600px) {
-  .supportGrid { grid-template-columns: repeat(6, 200px); }
+  .supportGrid {grid-template-columns: repeat(6, 1fr); }
 }
 
 @media (max-width: 1360px) {
-  .supportGrid { grid-template-columns: repeat(5, 200px); }
+  .supportGrid {   grid-template-columns: repeat(5, 1fr); }
   .coreTile { flex: 1 1 auto; }
 }
 
 @media (max-width: 1100px) {
-  .supportGrid { grid-template-columns: repeat(4, 200px); }
+  .supportGrid {   grid-template-columns: repeat(4, 1fr); }
   .libWrap     { grid-template-columns: 1fr; } 
 }
 
 @media (max-width: 991px) {
-  .supportGrid { grid-template-columns: repeat(3, 200px); }
+  .supportGrid {   grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 800px) {
   .topBar { grid-template-columns: 1fr; }
-  .supportGrid { grid-template-columns: repeat(3, 200px); }
+  .supportGrid {   grid-template-columns: repeat(2, 1fr); }
   .docGrid { grid-template-columns: repeat(3, minmax(180px, 1fr)); }
   .boards { grid-template-columns: 1fr; }
 }
@@ -306,5 +317,10 @@
       width: 100%;
     }
   }
-  .supportGrid { grid-template-columns: repeat(2, 200px); }
+  .supportGrid {   grid-template-columns: repeat(2, 1fr); }
+}
+
+
+@media (max-width: 480px) {
+  .supportGrid {   grid-template-columns: repeat(1, 1fr); }
 }

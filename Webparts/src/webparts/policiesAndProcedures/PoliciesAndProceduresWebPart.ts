@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import Landing from './components/Landing';
 import GlobalBreadcrumbs from '../assets/GlobalBreadcrumbs';
+import { initUrlConstants } from '../assets/constants';
 
 export interface IPoliciesAndProceduresWebPartProps {
   title: string;
@@ -11,6 +12,11 @@ export interface IPoliciesAndProceduresWebPartProps {
 
 export default class PoliciesAndProceduresWebPart
   extends BaseClientSideWebPart<IPoliciesAndProceduresWebPartProps> {
+
+  protected async onInit(): Promise<void> {
+    initUrlConstants(this.context);
+    return super.onInit();
+  }
 
   public render(): void {
     const element = React.createElement(Landing, {
