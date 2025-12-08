@@ -1,11 +1,9 @@
+
+
+
 @import "~@fluentui/react/dist/sass/References.scss";
 
 .trainingContainer {
-  // width: 100%;
-  // max-width: 1440px;
-  // margin: 0 auto;
-  // padding: 60px 20px;
-  // background-color: #e5e7eb;
   padding: 50px 0;
 }
 
@@ -60,7 +58,7 @@
 }
 
 .trainingCard {
-  background: white;
+  background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -76,10 +74,6 @@
 
     .imageOverlay {
       opacity: 0.5;
-    }
-
-    .arrowIcon {
-      transform: translate(2px, -2px);
     }
   }
 }
@@ -104,29 +98,69 @@
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(0, 0, 0, 0.3) 100%
+    rgba(0, 0, 0, 0.35) 100%
   );
   opacity: 0.3;
   transition: opacity 0.3s ease;
 }
 
-.levelBadge {
+/* top-left pill: Classroom */
+
+.modeBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 12px;
+  border-radius: 8px; /* was 999px – now square-ish like design */
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(4px);
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 16px;
+  color: #111827;
+}
+
+
+/* top-right date card: 6-7 / OCT */
+.dateBadge {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(4px);
-  color: #1a202c;
-  border-radius: 20px;
-  padding: 6px 14px;
+  border-radius: 10px;
+  overflow: hidden; /* so top/bottom colors stay inside card */
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+  background: transparent; /* gradient handled by children */
+  padding: 0; /* padding moved to inner rows */
+}
+
+.dateDay {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 18px;
+  color: #ffffff; /* white text on black */
+  background: #000000;
+  padding: 4px 10px 2px;
+}
+
+.dateMonth {
   font-family: "Inter", sans-serif;
   font-weight: 600;
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 11px;
+  line-height: 14px;
+  color: #111827; /* black text on white */
+  text-transform: uppercase;
+  background: #ffffff;
+  padding: 2px 10px 4px;
 }
 
 .trainingInfo {
-  padding: 24px;
+  padding: 20px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .trainingTitle {
@@ -135,45 +169,114 @@
   font-size: 18px;
   line-height: 24px;
   color: #1a202c;
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
+}
+
+/* meta: time + location */
+.metaRow {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.arrowIcon {
-  color: #dc2626;
-  flex-shrink: 0;
-  transition: transform 0.3s ease;
-}
-
-.trainingDescription {
-  font-family: "Inter", sans-serif;
-  font-weight: 400;
-  font-size: 13px;
-  line-height: 20px;
-  color: #718096;
-  margin: 0 0 12px 0;
-}
-
-.duration {
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 6px;
+  margin-bottom: 16px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 13px;
+  line-height: 18px;
   color: #4b5563;
+}
 
-  svg {
-    color: #9ca3af;
+.metaIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.metaText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* instructor row */
+.instructorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.instructorAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: #111827;
+}
+
+.instructorInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.instructorName {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 18px;
+  color: #111827;
+}
+
+.instructorTitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 16px;
+  color: #6b7280;
+}
+
+/* “Request for Approval” button */
+.requestButton {
+  margin-top: auto;
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #111827 0%, #020617 100%);
+  color: #ffffff;
+  padding: 10px 16px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 26px rgba(15, 23, 42, 0.45);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.35);
   }
 }
 
 .buttonContainer {
   text-align: center;
-  
+
   a {
     text-decoration: none;
   }

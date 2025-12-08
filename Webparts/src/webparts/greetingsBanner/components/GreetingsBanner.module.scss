@@ -19,22 +19,21 @@
   justify-content: center;
   gap: 6px; 
   text-align: center;
-  line-height: 1.2;  
-
+  line-height: 100%;  
+  font-weight: 500; 
   font-size: 36px; 
   font-family: "Figtree", Inter, Arial, sans-serif; 
 }
 
 /* “Good Morning,” part */
 .greetingText {
-  font-weight: 500; 
-  color: #101820;
+  color: #000000;
 }
 
 /* Name with gradient */
 .nameText {
   font-weight: 600; 
-  background: linear-gradient(180deg, #DA221C 0%, #E6574C 100%);
+  background: linear-gradient(90deg, #DA221C 0%, #E6574C 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

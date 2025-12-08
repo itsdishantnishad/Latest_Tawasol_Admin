@@ -5,7 +5,6 @@ export interface INewJoinersFeedProps {
   items: any[];
   formatDate?: (isoOrText?: string) => string;
   webAbsoluteUrl?: string;
-  // optional: allow passing a custom celebrations map if needed later
   celebrations?: {
     birthdays?: any[];
     anniversaries?: any[];
@@ -13,34 +12,63 @@ export interface INewJoinersFeedProps {
   };
 }
 
+const NewJoiner: React.FC<INewJoinersFeedProps> = ({
+  items = [],
+  celebrations,
+  formatDate,
+  webAbsoluteUrl
+}) => {
 
-const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items = [], celebrations, formatDate, webAbsoluteUrl }) => {
-  // Note: parent (LetsCelebrate) now controls which items are passed in.
-  // This component simply renders the feed. If you also want the local
-  // tab UI inside this component, we can add it — currently parent tabs are preferred.
+  // -------------------------
+  // 🟦 FIX 1: SORT BY JOINING DATE
+  // -------------------------
+  const sortedItems = React.useMemo(() => {
+    if (!items || items.length === 0) return [];
+
+    return [...items].sort((a, b) => {
+      const dateA = new Date(a.JoiningDate || a.joiningDate || a.date || "").getTime();
+      const dateB = new Date(b.JoiningDate || b.joiningDate || b.date || "").getTime();
+      return dateA - dateB;          // earliest first
+      // return dateB - dateA;        // latest first (if needed)
+    });
+  }, [items]);
+
 
   return (
     <>
       <div className={styles.content}>
-        {items && items.length > 0 ? (
+        {sortedItems.length > 0 ? (
           <div className={styles.feed}>
-            {items.map((item: any) => {
+            {sortedItems.map((item: any) => {
               return (
                 <article key={item.ID || item.id || item.Title}>
                   <div className={styles.cardTop}>
                     <header className={styles.header}>
                       <h2 className={styles.name}>
-                        <span className={styles.nameDecor}>{item.Title || item.name}</span>
+                        <span className={styles.nameDecor}>
+                          {item.Title || item.name}
+                        </span>
                       </h2>
-                      <div className={styles.role}>{item.Designation || item.department}</div>
+                      <div className={styles.role}>
+                        {item.Designation || item.department}
+                      </div>
                     </header>
 
                     <div className={styles.ctaCol}>
-                      <a className={styles.sayHello}
+                      <a
+                        className={styles.sayHello}
                         target="_blank"
                         data-interception="off"
-                        href={`${"https://teams.microsoft.com/l/chat/0/0?users=" + (item.UserEmail || '') + "&message=Hello"}`} rel="noreferrer">
-                        <span className={styles.helloIcon} aria-hidden="true">🤝</span>
+                        href={
+                          "https://teams.microsoft.com/l/chat/0/0?users=" +
+                          (item.UserEmail || "") +
+                          "&message=Hello"
+                        }
+                        rel="noreferrer"
+                      >
+                        <span className={styles.helloIcon} aria-hidden="true">
+                          🤝
+                        </span>
                         <span>Say Hello</span>
                       </a>
                     </div>
@@ -48,12 +76,21 @@ const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items = [], celebrations, f
 
                   <div className={styles.card}>
                     <div className={styles.left}>
-                      <img className={styles.photo} src={item.UserPicture || item.image} alt={item.Title || item.name || "Profile photo"} />
+                      <img
+                        className={styles.photo}
+                        src={item.UserPicture || item.image}
+                        alt={item.Title || item.name || "Profile photo"}
+                      />
                     </div>
 
                     <div className={styles.right}>
                       <section className={styles.body}>
-                        <p dangerouslySetInnerHTML={{ __html: item.Description || '' }} className={styles.para} />
+                        <p
+                          dangerouslySetInnerHTML={{
+                            __html: item.Description || ""
+                          }}
+                          className={styles.para}
+                        />
                       </section>
                     </div>
                   </div>
@@ -62,8 +99,11 @@ const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items = [], celebrations, f
             })}
           </div>
         ) : (
-          <div>
-            <p>No data</p>
+          // -------------------------
+          // 🟦 FIX 2: CLEAR EMPTY MESSAGE
+          // -------------------------
+          <div className={styles.emptyState}>
+            <p>No New Joiners</p>
           </div>
         )}
       </div>
