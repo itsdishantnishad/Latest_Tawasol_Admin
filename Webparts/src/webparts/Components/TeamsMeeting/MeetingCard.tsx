@@ -7,11 +7,16 @@ const TeamsIcon: string = require("../../assets/TeamsIcon.png");
 const MeetingCard = ({ event, onJoinClick }:any) => {
   return (
     <div className={styles.meetingCard}>
-      <div className={styles.dateSection}>
+      {/* <div className={styles.dateSection}>
         <div className={styles.month}>{event.date?.month}</div>
         <div className={styles.date}>{event.date?.date}</div>
         <div className={styles.day}>{event.date?.day}</div>
-      </div>
+      </div> */}
+      <div className={styles.dateSection}>
+            <div className={styles.day}>{event.day}</div>
+            <div className={styles.date}>{event.date} {event.month}</div>
+            {/* <div className={styles.month}></div> */}
+          </div>
 
       <div className={styles.imageSection}>
         <svg
