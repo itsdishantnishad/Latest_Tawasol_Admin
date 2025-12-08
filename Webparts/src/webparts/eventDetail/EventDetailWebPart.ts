@@ -38,7 +38,8 @@ export default class EventDetailWebPart extends BaseClientSideWebPart<IEventDeta
 
     this.spService = new listServices(this.context);
 
-    const pageId = this.context.pageContext.listItem?.id;
+    // const pageId = this.context.pageContext.listItem?.id;
+    const pageId = 60; // temp hardcoded for testing
 
     if (pageId) {
       try {
