@@ -199,6 +199,18 @@
 .TIRNavIcon { width: 20px; height: 20px; }
 .TIRNavLabel { display: inline; }
 
+/* ACTIVE STATE FOR CURRENT TAB */
+.TIRNavItemActive,
+.TIRNavItemActive:hover {
+  color: #fff;
+  background: #000;
+}
+
+.TIRNavItemActive .TIRNavIcon,
+.TIRNavItemActive:hover .TIRNavIcon {
+  filter: brightness(0) invert(1);
+}
+
 /* ===================== FOOTER ===================== */
 .TIRFooter {
   position: relative;
