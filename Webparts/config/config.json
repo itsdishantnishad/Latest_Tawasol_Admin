@@ -233,7 +233,16 @@
           "manifest": "./src/webparts/help/HelpWebPart.manifest.json"
         }
       ]
+    },
+      "event-detail-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/eventDetail/EventDetailWebPart.js",
+          "manifest": "./src/webparts/eventDetail/EventDetailWebPart.manifest.json"
+        }
+      ]
     }
+
   },
   "externals": {},
   "localizedResources": {
