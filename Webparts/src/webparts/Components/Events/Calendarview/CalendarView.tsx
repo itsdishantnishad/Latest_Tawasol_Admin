@@ -14,19 +14,41 @@ const localizer = momentLocalizer(moment);
 interface Props {
   events: any[];
   context?: any;
+  from?: string;
 }
 
-const CalendarViewComponent: React.FC<Props> = ({ events, context }) => {
+const CalendarViewComponent: React.FC<Props> = ({ events, context , from }) => {
   const [selectedEvent, setSelectedEvent] = React.useState<any>(null);
-
-  const calendarEvents = events.map((e: any) => {
+const calendarEvents = events.map((e: any) => {
     const startDateStr = e.eventStartDate?.split("\n\n")[1]?.trim();
     const endDateStr = e.eventEndDate?.split("\n\n")[1]?.trim();
+    
+    // Parse as UTC but convert to local date without timezone shift
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+    
+    // Create dates in local timezone with the same values
+    const localStart = new Date(
+      startDate.getUTCFullYear(),
+      startDate.getUTCMonth(),
+      startDate.getUTCDate(),
+      startDate.getUTCHours(),
+      startDate.getUTCMinutes()
+    );
+    
+    const localEnd = new Date(
+      endDate.getUTCFullYear(),
+      endDate.getUTCMonth(),
+      endDate.getUTCDate(),
+      endDate.getUTCHours(),
+      endDate.getUTCMinutes()
+    );
+    
     return {
       ...e,
       title: e.title,
-      start: new Date(startDateStr),
-      end: new Date(endDateStr),
+      start: localStart,
+      end: localEnd,
     };
   });
 
@@ -56,21 +78,64 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context }) => {
 
   return (
     <>
-      <div style={{ height: "600px", padding: "20px" }}>
-        <Calendar
-          localizer={localizer}
-          events={calendarEvents}
-          startAccessor="start"
-          endAccessor="end"
-          onSelectEvent={(event: any) => 
-            setSelectedEvent(events.find((ev: any) => 
-              ev.ID === event.ID && ev.Eventtype === event.Eventtype
-            ))
-          }
-          eventPropGetter={eventStyleGetter}
-          views={['month', 'week', 'day', 'agenda']}
-          defaultView="month"
-        />
+      <div style={{ padding: "20px" }}>
+        {/* Legend */}
+        {from === "All" && <div style={{ 
+          display: 'flex', 
+          gap: '24px', 
+          marginBottom: '16px',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          justifyContent: 'flex-end'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ 
+              width: '16px', 
+              height: '16px', 
+              backgroundColor: '#0E6187', 
+              borderRadius: '3px' 
+            }} />
+            <span style={{ fontSize: '14px', color: '#333' }}>Events</span>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ 
+              width: '16px', 
+              height: '16px', 
+              backgroundColor: '#4BB86C', 
+              borderRadius: '3px' 
+            }} />
+            <span style={{ fontSize: '14px', color: '#333' }}>Trainings</span>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ 
+              width: '16px', 
+              height: '16px', 
+              backgroundColor: '#4C8AE0', 
+              borderRadius: '3px' 
+            }} />
+            <span style={{ fontSize: '14px', color: '#333' }}>Teams Meeting</span>
+          </div>
+        </div>}
+
+        {/* Calendar */}
+        <div style={{ height: "600px" }}>
+          <Calendar
+            localizer={localizer}
+            events={calendarEvents}
+            startAccessor="start"
+            endAccessor="end"
+            onSelectEvent={(event: any) => 
+              setSelectedEvent(events.find((ev: any) => 
+                ev.ID === event.ID && ev.Eventtype === event.Eventtype
+              ))
+            }
+            eventPropGetter={eventStyleGetter}
+            views={['month', 'week', 'day', 'agenda']}
+            defaultView="month"
+          />
+        </div>
       </div>
       
       <Modal
