@@ -10,6 +10,8 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import * as strings from 'GlobalBannerWebPartStrings';
 import Banner from './components/GlobalBanner';
 import { IBannerProps } from './components/IGlobalBannerProps';
+import { initUrlConstants } from '../assets/constants';
+
 
 export interface IBannerWebPartProps {
   titleFirst: string;
@@ -19,6 +21,12 @@ export interface IBannerWebPartProps {
 }
 
 export default class BannerWebPart extends BaseClientSideWebPart<IBannerWebPartProps> {
+
+    protected async onInit(): Promise<void> {
+      initUrlConstants(this.context);
+      return super.onInit();
+    }
+
   public render(): void {
     const element: React.ReactElement<IBannerProps> = React.createElement(Banner, {
       ...this.properties

@@ -20,6 +20,30 @@ export class FloatingNav {
 
   private handleScrollOrResize = () => this.scheduleRecompute();
 
+  /**
+   * Decide whether a given nav item's URL should be considered "active"
+   * for the current page.
+   */
+  private isActiveUrl(targetUrl: string): boolean {
+    if (!targetUrl) return false;
+
+    try {
+      const current = new URL(window.location.href);
+      const currentPath = current.pathname.replace(/\/$/, '').toLowerCase();
+
+      const target = new URL(targetUrl, current.origin);
+      const targetPath = target.pathname.replace(/\/$/, '').toLowerCase();
+      if (targetPath === currentPath) return true;
+      const currentAbs = (current.origin + current.pathname).toLowerCase();
+      const targetAbs = (target.origin + target.pathname).toLowerCase();
+      return currentAbs === targetAbs;
+    } catch {
+      const normCurrent = window.location.href.split('#')[0].toLowerCase();
+      const normTarget = targetUrl.split('#')[0].toLowerCase();
+      return normCurrent.indexOf(normTarget) >= 0;
+    }
+  }
+
   public render(hostId: string, navigationItems: INavItem[]): void {
     if (document.getElementById(hostId)) return;
     if (!navigationItems?.length) return;
@@ -27,12 +51,18 @@ export class FloatingNav {
     const navigationHtml = `
       <nav class="${styles.TIRFloatingNav}" role="navigation" aria-label="Primary">
         <div class="${styles.TIRButtonGroup}">
-          ${navigationItems.map(item => `
-            <a class="${styles.TIRNavItem}" href="${item.url}">
+          ${navigationItems
+            .map(item => {
+              const isActive = this.isActiveUrl(item.url);
+              const activeClass = isActive ? ` ${styles.TIRNavItemActive}` : '';
+
+              return `
+            <a class="${styles.TIRNavItem}${activeClass}" href="${item.url}">
               ${item.icon ? `<img src="${item.icon}" class="${styles.TIRNavIcon}" alt="" aria-hidden="true" />` : ''}
               <span class="${styles.TIRNavLabel}">${item.label}</span>
-            </a>
-          `).join('')}
+            </a>`;
+            })
+            .join('')}
         </div>
       </nav>`;
 

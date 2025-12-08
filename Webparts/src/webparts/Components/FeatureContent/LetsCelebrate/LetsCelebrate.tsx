@@ -7,6 +7,7 @@ const cakeImage: string = require("../images/Cake-1.svg");
 const newJoinerCenter: string = require("../images/Newjoiner.svg");
 const aniversaryImage: string = require("../images/aniversary.svg");
 import { listServices } from "../../../services/listServices";
+
 export interface ICelebration {
   id: string;
   name: string;
@@ -136,58 +137,53 @@ const defaultCelebrations = {
 };
 
 // Position assignments for outer circle (2 positions - left and right)
-const outerPositions: Array<'left' | 'right'> = ['left', 'right'];
+const outerPositions: Array<"left" | "right"> = ["left", "right"];
 
 // Position assignments for inner circle (2 positions)
-const innerPositions: Array<'bottom-left' | 'bottom-right' | 'bottom-right'> = [
-    'bottom-left',
-    'bottom-right'
-];
+const innerPositions: Array<
+  "bottom-left" | "bottom-right" | "bottom-right"
+> = ["bottom-left", "bottom-right"];
 
 export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const [activeTab, setActiveTab] = React.useState<
     "birthdays" | "anniversaries" | "newJoiners" | "Achievements"
   >("newJoiners");
   const [currentPage, setCurrentPage] = React.useState(0);
-   // 1. Create State to hold SharePoint Data
   const [spNewJoiners, setSpNewJoiners] = React.useState<any[]>([]);
 
-  // 2. Use useEffect to fetch data on mount
   React.useEffect(() => {
     const fetchNewJoiners = async () => {
       try {
         const spService = new listServices(props.context);
-        // Ensure your service returns data matching ICelebration interface, or map it here
         const data = await spService.getNewJoiners("New Joiner");
-        
-        // Example mapping if necessary (if 'data' is raw SharePoint items):
-        const mappedData = data.map(item => ({
-           id: item.Id,
-           name: item.Title,
-           department: item.Department,
-           type: 'newJoiner',
-           image: item.UserPicture
+
+        const mappedData = data.map((item) => ({
+          id: item.Id,
+          name: item.Title,
+          department: item.Department,
+          type: "newJoiner" as const,
+          image: item.UserPicture,
         }));
         setSpNewJoiners(mappedData);
-
       } catch (error) {
         console.error("Error fetching new joiners:", error);
       }
     };
 
     fetchNewJoiners();
-  }, [props.context]); // Re-run if context changes
+  }, [props.context]);
 
-  // 3. Merge Props/Defaults with Fetched Data
-  // Priority: Props -> Fetched Data -> Default Data
   const celebrations = {
     birthdays: props.celebrations?.birthdays ?? defaultCelebrations.birthdays,
-    anniversaries: props.celebrations?.anniversaries ?? defaultCelebrations.anniversaries,
-    
-    // Updated logic: Use fetched data if available
-    newJoiners: props.celebrations?.newJoiners ?? (spNewJoiners.length > 0 ? spNewJoiners : defaultCelebrations.newJoiners),
-    
-    Achievements: props.celebrations?.Achievements ?? defaultCelebrations.Achievements ?? [],
+    anniversaries:
+      props.celebrations?.anniversaries ?? defaultCelebrations.anniversaries,
+    newJoiners:
+      props.celebrations?.newJoiners ??
+      (spNewJoiners.length > 0 ? spNewJoiners : defaultCelebrations.newJoiners),
+    Achievements:
+      props.celebrations?.Achievements ??
+      defaultCelebrations.Achievements ??
+      [],
   };
 
   const tabs = [
@@ -215,8 +211,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
 
   const currentCelebrations: ICelebration[] = celebrations[activeTab] ?? [];
 
-  // Pagination logic - 2 outer + 3 inner = 5 people per page
-  const itemsPerPage = 5; // 2 outer + 3 inner
+  const itemsPerPage = 5;
   const totalPages = Math.ceil(currentCelebrations.length / itemsPerPage);
   const currentItems = currentCelebrations.slice(
     currentPage * itemsPerPage,
@@ -235,22 +230,22 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     key: "birthdays" | "anniversaries" | "newJoiners" | "Achievements"
   ): void => {
     setActiveTab(key);
-    setCurrentPage(0); // Reset page when switching tabs
+    setCurrentPage(0);
   };
 
   const getOuterCirclePosition = (index: number): React.CSSProperties => {
     const position = outerPositions[index % 2];
     const positionMap: Record<string, React.CSSProperties> = {
-      'left': {
-        top: '50%',
-        left: '0%',
-        transform: 'translate(-50%, -50%)'
+      left: {
+        top: "50%",
+        left: "0%",
+        transform: "translate(-50%, -50%)",
       },
-      'right': {
-        top: '50%',
-        right: '0%',
-        transform: 'translate(50%, -50%)'
-      }
+      right: {
+        top: "50%",
+        right: "0%",
+        transform: "translate(50%, -50%)",
+      },
     };
     return positionMap[position] || {};
   };
@@ -258,19 +253,54 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const getInnerCirclePosition = (index: number): React.CSSProperties => {
     const position = innerPositions[index % 2];
     const positionMap: Record<string, React.CSSProperties> = {
-      'bottom-left': {
-        top: '75%',
-        left: '0%',
-        transform: 'translate(0%, 0%)'
+      "bottom-left": {
+        top: "75%",
+        left: "0%",
+        transform: "translate(0%, 0%)",
       },
-      'bottom-right': {
-        top: '75%',
-        right: '0%',
-        transform: 'translate(0%, 0%)'
-      }
+      "bottom-right": {
+        top: "75%",
+        right: "0%",
+        transform: "translate(0%, 0%)",
+      },
     };
     return positionMap[position] || {};
   };
+
+  // --- DYNAMIC VIEW-ALL URL WITH DEFAULT ---
+  const webUrl: string = props.context.pageContext.web.absoluteUrl.replace(
+    /\/$/,
+    ""
+  );
+  const origin: string = new URL(webUrl).origin;
+
+  const viewAllHref = React.useMemo(() => {
+    const configured = (props.seeAllURL || "").trim();
+
+    // If nothing configured, default to a page in the current site:
+    //   /sites/ThisSite/SitePages/Lets-Celebrate.aspx
+    const raw = configured || "SitePages/Lets-Celebrate.aspx";
+
+    // Absolute URL from anywhere -> keep its path but move to current tenant
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const parsed = new URL(raw);
+        return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      } catch {
+        return raw;
+      }
+    }
+
+    // Root-relative (/sites/YourSite/SitePages/Page.aspx)
+    if (raw.startsWith("/")) {
+      return `${origin}${raw}`;
+    }
+
+    // Web-relative (SitePages/Page.aspx)
+    return `${webUrl}/${raw}`;
+  }, [props.seeAllURL, webUrl, origin]);
+  // --- END ---
+
   return (
     <div className={styles.celebrateContainer}>
       {/* Tabs */}
@@ -311,7 +341,6 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
 
             <div className={styles.circleContainer}>
               <div className={styles.outerCircle}>
-                {/* Render outer circle profile cards (max 2 - left and right) */}
                 {currentItems.slice(0, 2).map((item, index) => (
                   <div
                     key={item.id}
@@ -333,9 +362,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                     <div className={styles.profileName}>{item.name}</div>
                   </div>
                 ))}
-                {/* Inner circle with people around it */}
+
                 <div className={styles.innerCircle}>
-                  {/* Render inner circle profile cards (max 3) */}
                   {currentItems.slice(2, 5).map((item, index) => (
                     <div
                       key={item.id}
@@ -358,7 +386,6 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                     </div>
                   ))}
 
-                  {/* Center illustration - always visible */}
                   <div className={styles.centerIllustration}>
                     <img
                       src={
@@ -374,7 +401,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                   </div>
                 </div>
               </div>
-              {/* Pagination & View All Button */}
+
               <div className={styles.bottomSection}>
                 {totalPages > 1 && (
                   <div className={styles.pagination}>
@@ -392,7 +419,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                 )}
 
                 <div className={styles.buttonContainer}>
-                  <a href={props.seeAllURL} className={styles.viewAllButton}>
+                  <a href={viewAllHref} className={styles.viewAllButton}>
                     View All
                   </a>
                 </div>
