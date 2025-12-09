@@ -156,7 +156,8 @@ export default class NewsStory extends React.Component<INewsStoryProps, INewsSto
   public async componentDidMount(): Promise<void> {
     try {
       // get top 3 news stories for current site
-      const listItems = await this.spService.getNewsStory(3);
+      const maxItems = this.props.maxItems && this.props.maxItems > 0 ? this.props.maxItems : 3;
+      const listItems = await this.spService.getNewsStory(maxItems);
       this.setState({ promos: listItems });
     } catch (error) {
       console.error('Error loading news story', error);

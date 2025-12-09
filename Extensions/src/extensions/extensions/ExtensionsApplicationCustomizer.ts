@@ -15,6 +15,10 @@ import { NavigationService } from './services/navigationService';
 import { IDS, resolveUrls } from './shared/constants';
 import { NotificationService } from './services/notificationService';
 
+// 🔹 Onboarding import
+import Onbo from './components/Onbo';
+import { IOnboConfig } from './components/Onbo';
+
 export interface IExtensionsApplicationCustomizerProperties {
   testMessage: string;
 }
@@ -49,10 +53,13 @@ export default class ExtensionsApplicationCustomizer
   private search!: SearchService;
   private nav!: NavigationService;
 
-  // notifications
+  // 🔔 Notifications
   private notifService!: NotificationService;
   private notifications?: Notifications;
   private isLoadingNotifications: boolean = false;
+
+  // 🔹 Onboarding instance
+  private onboarding?: Onbo;
 
   private observer?: MutationObserver;
   private debounceId?: number;
@@ -86,6 +93,14 @@ export default class ExtensionsApplicationCustomizer
     return !!document.getElementById('spPageChromeAppDiv');
   }
 
+  /**
+   * Read current Site Page Content Type and map to a friendly pageType.
+   * Any CT whose name contains:
+   *  - "news"    -> "News"
+   *  - "event"   -> "Event"
+   *  - "training"-> "Training"
+   *  else        -> "Page"
+   */
   private async getPageTypeFromContentType():
     Promise<{ pageType: string; contentTypeName?: string }> {
 
@@ -138,11 +153,13 @@ export default class ExtensionsApplicationCustomizer
 
     const win = window as unknown as AmplitudeWindow;
 
+    // If Amplitude is already available, configure directly
     if (win.amplitude && win.amplitude.getInstance) {
       void this.configureAmplitude();
       return;
     }
 
+    // Inject script only once
     if (!document.getElementById('amplitude-js')) {
       const script = document.createElement('script');
       script.id = 'amplitude-js';
@@ -154,16 +171,19 @@ export default class ExtensionsApplicationCustomizer
         void this.configureAmplitude();
       };
 
+      // Optional: silent error handler; no console noise
       script.onerror = () => { /* ignore */ };
 
       document.head.appendChild(script);
     } else {
+      // Script tag exists; give it a moment then configure
       window.setTimeout(() => {
         void this.configureAmplitude();
       }, 1000);
     }
   }
 
+  /** Configure Amplitude user + log "SharePoint Page Viewed" with pageType from CT */
   private async configureAmplitude(): Promise<void> {
     const win = window as unknown as AmplitudeWindow;
     if (!win.amplitude || !win.amplitude.getInstance) return;
@@ -204,18 +224,41 @@ export default class ExtensionsApplicationCustomizer
       title: document.title,
       siteTitle,
       siteUrl: web.absoluteUrl,
-      pageType,
-      contentTypeName
+      pageType,          // "News" / "Event" / "Training" / "Page"
+      contentTypeName    // e.g. "TIR News Story"
     });
   }
 
-  public onInit(): Promise<void> {
-    if (!this.shouldRender()) return Promise.resolve();
+  // 🔹 ONINIT MERGED (Onboarding + NotificationService + existing UI)
+  public async onInit(): Promise<void> {
+    if (!this.shouldRender()) return;
 
+    // Amplitude tracking for every modern Site Page
     this.initAmplitude();
+
     this.injectFont();
     document.body.style.background = '#FFF4EA';
 
+    const urls = resolveUrls(this.webUrl);
+
+    // ---------- ONBOARDING FROM LIST ----------
+    try {
+      const state = await Onbo.loadStateFromList(this.context);
+
+      if (!state.hasSeen && state.videoUrl) {
+        const cfg: IOnboConfig = {
+          homeUrl: urls.home,
+          videoUrl: state.videoUrl
+        };
+        this.onboarding = new Onbo(this.context, cfg);
+        this.onboarding.render();
+      }
+    } catch (err) {
+      // Onboarding fail should NOT break rest of extension
+      console.error('Onboarding load failed', err);
+    }
+
+    // ---- SEARCH SERVICE ----
     this.search = new SearchService(
       this.webUrl,
       this.context.msGraphClientFactory,
@@ -227,7 +270,7 @@ export default class ExtensionsApplicationCustomizer
       this.webUrl
     );
 
-    // notification service
+    // ---- NOTIFICATION SERVICE (dynamic) ----
     this.notifService = new NotificationService(
       this.context.spHttpClient as SPHttpClient,
       this.webUrl,
@@ -236,7 +279,7 @@ export default class ExtensionsApplicationCustomizer
       this.context.pageContext.user.displayName
     );
 
-    const urls = resolveUrls(this.webUrl);
+    // ---- HEADER (with bell wired to NotificationService) ----
     this.header = new Header(
       this.webUrl,
       this.userEmail,
@@ -258,8 +301,10 @@ export default class ExtensionsApplicationCustomizer
       );
     }
 
-    this.refreshNavAndFooter();
-    this.observer = new MutationObserver(() => this.refreshNavAndFooter());
+    await this.refreshNavAndFooter();
+    this.observer = new MutationObserver(() => {
+      void this.refreshNavAndFooter();
+    });
     this.observer.observe(document.body, { childList: true, subtree: true });
 
     window.addEventListener('scroll', this.updateSuggest, true);
@@ -267,8 +312,6 @@ export default class ExtensionsApplicationCustomizer
 
     // Load initial unread count + cache notifications (no UI yet)
     void this.bootstrapNotifications();
-
-    return Promise.resolve();
   }
 
   /** First-time load: read status + top notifications + set badge. */
@@ -388,9 +431,10 @@ export default class ExtensionsApplicationCustomizer
         try {
           const people = await this.search.queryPeople(val, 3);
           const content = await this.search.queryContent(val, 5);
+
           const results = [...people, ...content].slice(0, 8);
           this.suggest.open(val, results);
-        } catch {
+        } catch (err) {
           this.suggest.open(val, []);
         }
       }, 250);
@@ -414,5 +458,8 @@ export default class ExtensionsApplicationCustomizer
     this.observer?.disconnect();
     window.removeEventListener('scroll', this.updateSuggest, true);
     window.removeEventListener('resize', this.updateSuggest);
+
+    // 🔹 clean onboarding overlay if still present
+    this.onboarding?.dispose();
   }
 }
