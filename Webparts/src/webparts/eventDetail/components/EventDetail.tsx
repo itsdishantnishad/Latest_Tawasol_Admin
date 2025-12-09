@@ -19,15 +19,33 @@ export default class EventDetail extends React.Component<IEventDetailProps, IEve
     };
   }
 
+  // Extract first line from multiline string (SharePoint format)
+  private extractFirstLine(value: string): string {
+    if (!value) return "";
+    return value.split("\n")[0]?.trim() || "";
+  }
+
   private formatTime(dateStr: string): string {
     if (!dateStr) return "";
-    const d = new Date(dateStr);
+    // Extract first line before parsing
+    const cleanDateStr = this.extractFirstLine(dateStr);
+    if (!cleanDateStr) return "";
+    
+    const d = new Date(cleanDateStr);
+    if (isNaN(d.getTime())) return ""; // Check for invalid date
+    
     return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
   }
 
   private formatDate(dateStr: string): string {
     if (!dateStr) return "";
-    const d = new Date(dateStr);
+    // Extract first line before parsing
+    const cleanDateStr = this.extractFirstLine(dateStr);
+    if (!cleanDateStr) return "";
+    
+    const d = new Date(cleanDateStr);
+    if (isNaN(d.getTime())) return ""; // Check for invalid date
+    
     const day = d.getDate();
     const month = d.toLocaleString("en-US", { month: "short" }).toUpperCase();
     return `${day} ${month}`;
@@ -35,7 +53,13 @@ export default class EventDetail extends React.Component<IEventDetailProps, IEve
 
   private isPastEvent(dateStr: string): boolean {
     if (!dateStr) return true; // default to past
-    const eventDate = new Date(dateStr);
+    // Extract first line before parsing
+    const cleanDateStr = this.extractFirstLine(dateStr);
+    if (!cleanDateStr) return true;
+    
+    const eventDate = new Date(cleanDateStr);
+    if (isNaN(eventDate.getTime())) return true; // Treat invalid dates as past
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return eventDate < today;
@@ -63,6 +87,9 @@ export default class EventDetail extends React.Component<IEventDetailProps, IEve
     const endTime = this.formatTime(item.eventEndDate);
     const dateLabel = this.formatDate(item.eventStartDate);
     const isPast = this.isPastEvent(item.eventEndDate);
+    
+    // Fix location duplication - extract first line only
+    const location = this.extractFirstLine(item.location) || "N/A";
 
     return (
       <div className={styles.card}>
@@ -102,7 +129,7 @@ export default class EventDetail extends React.Component<IEventDetailProps, IEve
               <circle cx="12" cy="10" r="3"></circle>
             </svg>
           </span>
-          <span className={styles.text}>{item.location}</span>
+          <span className={styles.text}>{location}</span>
         </div>
 
         {/* BUTTON */}

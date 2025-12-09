@@ -238,7 +238,7 @@ const AllComponents: React.FC<Props> = ({
           </>
         ) : (
           <>
-            <CalendarViewComponent events={Alldata} context={context} />
+            <CalendarViewComponent events={Alldata} context={context} from="All" />
             <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>
