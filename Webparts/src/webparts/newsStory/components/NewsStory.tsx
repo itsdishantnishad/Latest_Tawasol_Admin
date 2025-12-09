@@ -69,50 +69,28 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
             style={{ cursor: 'pointer' }}
           >
             <div className={styles.bannerCard__PromoDetailsContent}>
-              <div style={{ height: '100%', flex: '1 1 50%' }}>
-                <div style={{ width: 'max-content' }}>
+              <div className={styles.leftSection}>
+                <div className={styles.newsTypeWrapper}>
                   <NewsType newsType={news.newsType} />
                 </div>
+
                 <div className={styles.bannerCard__PromoDetailsContent__title}>
                   {news.title}
                 </div>
-                <div style={{ marginTop: '20px' }}>
+
+                <div className={styles.valuesWrapper}>
                   <div className={styles.bannerCard__PromoDetailsContent__values}>
                     <span>{news.lastModified}</span>
-                    <span
-                      style={{
-                        backgroundColor: '#6c6c6c',
-                        width: '5px',
-                        height: '5px',
-                        borderRadius: '50%',
-                      }}
-                    />
+                    <span className={styles.dot}></span>
                     <span>{news.readTime} min read</span>
-                    <span
-                      style={{
-                        backgroundColor: '#6c6c6c',
-                        width: '5px',
-                        height: '5px',
-                        borderRadius: '50%',
-                      }}
-                    />
+                    <span className={styles.dot}></span>
                     <span>{news.pageView} Views</span>
                   </div>
                 </div>
               </div>
-              <div
-                style={{
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  flex: '1 1 50%',
-                  overflow: 'hidden',
-                }}
-              >
-                <img
-                  style={{ height: '100%', borderRadius: '10px', width: '100%' }}
-                  src={news.newsImage}
-                />
+
+              <div className={styles.rightSection}>
+                <img className={styles.newsImage} src={news.newsImage} />
               </div>
             </div>
           </div>
