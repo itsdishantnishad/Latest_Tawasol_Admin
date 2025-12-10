@@ -8,7 +8,13 @@
   position: relative;
   width: 100%;
   height: 470px;
-  overflow: hidden;
+  // overflow: hidden;
+
+  @media (max-width: 580px){
+    height: 400px;
+    padding: 0;
+    overflow: unset;
+  }
 
   &::after {
     content: "";
@@ -49,6 +55,7 @@
   cursor: pointer;
   background-repeat: no-repeat;
   transition: all ease 0.5s;
+
   &:hover {
     transform: translateY(-10px);
   }
@@ -64,17 +71,44 @@
   position: absolute;
   left: 50%;
   top: 0;
-  cursor: pointer;
-  transform-origin: center center;
-  transition: transform 1s ease-out;
   background: none;
   border: none;
   padding: 0;
+  cursor: pointer;
+  transform-origin: center center;
+  transition: transform 1s ease-out;
   -webkit-tap-highlight-color: transparent;
   outline: none;
+  /* Use CSS variables coming from TSX */
+  transform: translate(
+      calc(-50% + var(--x, 0px)),
+      var(--y, 0px)
+    )
+  rotate(var(--rotation, 0deg))
+  scale(var(--scale, 1));
+  @media (max-width: 580px){
+    padding: 0;
+    transform: translate(
+      calc(-50% + var(--x, 0px)),
+      var(--y, 0px)
+    )
+    rotate(var(--rotation, 0deg)) 
+    scale(calc(var(--scale, 1) * 1.2));
+  }
+
+/* Clickable / disabled states mapped from TSX className */
+.cardClickable {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.cardDisabled {
+  pointer-events: none;
+  cursor: default;
 }
 
 .cardInner {
+  position: relative;
   width: 180px;
   height: 220px;
   border-radius: 15px;
@@ -82,6 +116,16 @@
   justify-content: center;
   background-repeat: no-repeat;
   background-size: cover;
+  @media (max-width: 767px){
+    height: 220px;
+    width: 180px;
+    padding: 16px;
+  }
+  @media (max-width: 580px){
+    padding: 0;
+    height: 180px;
+    width: 140px;
+  }
 }
 
 .cardSelected {
@@ -89,11 +133,14 @@
 }
 
 .cardTextContainer {
+  bottom: 0;
   color: #fff;
-  text-align: center;
+  padding: 15px;
   position: absolute;
-  bottom: 15px;
-  padding: 12px;
+  text-align: center;
+  @media (max-width: 580px){
+    padding: 5px;
+  }
 }
 
 .cardTitle {
@@ -101,6 +148,10 @@
   line-height: 24px;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
+  @media (max-width: 580px){
+    font-size: 14px;
+    line-height: 22px;
+  }
 }
 
 .cardSubtitle {
@@ -108,30 +159,16 @@
   line-height: 22px;
   margin-top: 0;
   font-weight: 400;
+  letter-spacing: -0.5px;
   color: #fff;
-}
-
-@media (max-width: 768px) {
-  .wheelContainer {
-    height: 350px;
-    padding: 0 8px;
-  }
-
-  .cardInner {
-    width: 140px;
-    height: 180px;
-    padding: 16px;
-  }
-
-  .cardTitle {
-    font-size: 16px;
-  }
-
-  .cardSubtitle {
-    font-size: 11px;
+  font-family: 'Inter', sans-serif;
+  @media (max-width: 580px){
+    font-size: 12px;
+    line-height: 18px;
   }
 }
 
+/* Background variants */
 .dashboardCard {
   background-image: url("../FeatureContent/assets/Dashboard.svg");
 }
@@ -182,4 +219,6 @@
 
 .beverageCard {
   background-image: url("../FeatureContent/assets/Services.svg");
+}
+
 }
