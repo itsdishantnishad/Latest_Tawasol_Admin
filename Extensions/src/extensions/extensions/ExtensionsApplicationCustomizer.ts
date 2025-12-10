@@ -183,6 +183,15 @@ export default class ExtensionsApplicationCustomizer
     }
   }
 
+  /** Hide the sharepoint left sitebar */
+  private hideAppBar(): void {
+    // document.getElementById('sp-appBar').style.display = 'none';
+    const appBar = document.getElementById('sp-appBar');
+    if (appBar) {
+      appBar.style.display = 'none';
+    }
+  }
+
   /** Configure Amplitude user + log "SharePoint Page Viewed" with pageType from CT */
   private async configureAmplitude(): Promise<void> {
     const win = window as unknown as AmplitudeWindow;
@@ -233,12 +242,15 @@ export default class ExtensionsApplicationCustomizer
   public async onInit(): Promise<void> {
     if (!this.shouldRender()) return;
 
+    // 👉 Hide SharePoint app bar
+    this.hideAppBar();
+
     // Amplitude tracking for every modern Site Page
     this.initAmplitude();
 
     this.injectFont();
     document.body.style.background = '#FFF4EA';
-    this.hideVivaEngageViewAll();
+
     const urls = resolveUrls(this.webUrl);
 
     // ---------- ONBOARDING FROM LIST ----------
@@ -376,7 +388,8 @@ export default class ExtensionsApplicationCustomizer
   }
 
   private async refreshNavAndFooter(): Promise<void> {
-    const links = await this.nav.getNavLinks().catch(() => []);
+    const links = await this.nav.getNavLinks().catch(() => [])
+    
     if (links.length) {
       this.floatingNav = new FloatingNav();
       this.floatingNav.render(IDS.hosts.nav, links);
@@ -462,37 +475,4 @@ export default class ExtensionsApplicationCustomizer
     // 🔹 clean onboarding overlay if still present
     this.onboarding?.dispose();
   }
-/*  hiding view all buttin */
-
-  private hideVivaEngageViewAll(): void {
-    const hideViewAll = () => {
-      const allLinks = document.querySelectorAll('a');
-
-      allLinks.forEach((link) => {
-        const text = link.textContent?.trim().toLowerCase();
-        if (text === 'view all' && !link.classList.contains('hideViewAll')) {
-          (link as HTMLElement).style.display = 'none';
-          (link as HTMLElement).style.visibility = 'hidden';
-          link.classList.add('hideViewAll');
-        }
-      });
-      const observer = new MutationObserver(() => {
-        const links = document.querySelectorAll('a:not(.hideViewAll)');
-        links.forEach((link) => {
-          const text = link.textContent?.trim().toLowerCase();
-          if (text === 'view all') {
-            (link as HTMLElement).style.display = 'none';
-            (link as HTMLElement).style.visibility = 'hidden';
-            link.classList.add('hideViewAll');
-          }
-        });
-      });
-
-      observer.observe(document.body, { childList: true, subtree: true });
-    };
-    hideViewAll();
-    setInterval(hideViewAll, 3000);
-  }
-
 }
-
