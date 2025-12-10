@@ -121,7 +121,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
       case 'forms':
         return <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />;
       case 'dashboard':
-        return <Dashboard seeAllURL={props.dashboard} onViewAll={handleViewAll} />;
+        return <Dashboard context={props.context} seeAllURL={props.dashboard} onViewAll={handleViewAll} />;
       case 'offers':
         return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
       case 'training':
