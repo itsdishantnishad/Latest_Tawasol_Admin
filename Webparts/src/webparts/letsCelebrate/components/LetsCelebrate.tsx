@@ -7,9 +7,10 @@ import { BirthdayData } from './Birthday/BirthdayData';
 import Birthday from './Birthday/Birthday';
 import { listServices } from '../../services/listServices';
 import NavTabs, { NavTabsOption } from '../../Components/NavTabs/NavTabs'; // adjust path if needed
+import Achievements from './Achievements/Achievement';
 
 export interface ILetsCelebrateState {
-  selectedTab: 'birthdays' | 'anniversaries' | 'newJoiners';
+  selectedTab: 'birthdays' | 'anniversaries' | 'newJoiners' | 'achievements';
   newJoinersData: any[];
 }
 
@@ -41,6 +42,7 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
       { key: 'birthdays', label: 'Birthdays' },
       { key: 'anniversaries', label: 'Anniversaries' },
       { key: 'newJoiners', label: 'New Joiners' },
+      { key: 'achievements', label: 'Achievements' }
     ];
 
     return (
@@ -60,6 +62,9 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
 
           {selectedTab === 'newJoiners' && (
             <NewJoiner items={newJoinersData} />
+          )}
+          {selectedTab === 'achievements' && (
+            <Achievements  context={this.props.context}/>
           )}
         </div>
       </div>

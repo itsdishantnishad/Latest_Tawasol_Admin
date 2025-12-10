@@ -4,4 +4,5 @@ export interface INewsStoryProps {
   interval: number;
   context: WebPartContext;
   detailsPageUrl?: string;
+  maxItems: number;
 }

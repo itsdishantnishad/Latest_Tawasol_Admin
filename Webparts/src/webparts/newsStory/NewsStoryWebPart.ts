@@ -4,6 +4,7 @@ import { Version } from '@microsoft/sp-core-library';
 import {
   type IPropertyPaneConfiguration,
   PropertyPaneTextField,
+  PropertyPaneSlider,
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
@@ -15,6 +16,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 export interface INewsStoryWebPartProps {
   description: string;
   detailsPageUrl?: string;
+  maxItems?: number;
 }
 
 export default class NewsStoryWebPart
@@ -27,6 +29,7 @@ export default class NewsStoryWebPart
         interval: 500, // existing behavior
         context: this.context,
         detailsPageUrl: this.properties.detailsPageUrl,
+        maxItems: this.properties.maxItems || 3,
       },
     );
 
@@ -120,6 +123,13 @@ export default class NewsStoryWebPart
                   description:
                     'Example: SitePages/NewsView.aspx or SitePages/NewsLanding.aspx or full absolute URL',
                   placeholder: 'SitePages/NewsView.aspx',
+                }),
+                PropertyPaneSlider('maxItems', {
+                  label: 'Number of news items to show',
+                  min: 1,
+                  max: 50,
+                  step: 1,
+                  showValue: true,
                 }),
               ],
             },

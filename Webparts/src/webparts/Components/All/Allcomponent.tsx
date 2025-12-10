@@ -238,7 +238,7 @@ const AllComponents: React.FC<Props> = ({
           </>
         ) : (
           <>
-            <CalendarViewComponent events={Alldata} context={context} />
+            <CalendarViewComponent events={Alldata} context={context} from="All" />
             <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>
@@ -264,20 +264,27 @@ const AllComponents: React.FC<Props> = ({
         // ------------ MY DATA ------------
         viewMode === "list" ? (
           <>
-            <h5>My Events</h5>
-            {myEvents.map((event: any) => (
-              <EventCard key={event.id} {...event} context={context} />
-            ))}
+            <div className={styles.eventsWrapper}>
+              <h5>My Events</h5>
+              {myEvents.map((event: any) => (
+                <EventCard key={event.id} {...event} context={context} />
+              ))}
+            </div>
 
-            <h5>My Trainings</h5>
-            {myTrainings.map((training: any) => (
-              <Trainingcard key={training.id} {...training} />
-            ))}
+            <div className={styles.eventsWrapper}>
+              <h5>My Trainings</h5>
+              {myTrainings.map((training: any) => (
+                <Trainingcard key={training.id} {...training} />
+              ))}
+            </div>
 
-            <h5>My Meetings</h5>
-            {filteredMeetings.map((meeting: any) => (
-              <MeetingCard key={meeting.id} event={meeting} />
-            ))}
+            <div className={styles.eventsWrapper}>
+              <h5>My Meetings</h5>
+              {filteredMeetings.map((meeting: any) => (
+                <MeetingCard key={meeting.id} event={meeting} />
+              ))}
+            </div>
+            
             <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>

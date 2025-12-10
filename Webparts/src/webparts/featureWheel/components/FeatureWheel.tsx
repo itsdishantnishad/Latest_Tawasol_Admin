@@ -111,7 +111,15 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
       case 'documents':
         return <Documents seeAllURL={props.documents} onViewAll={handleViewAll} />;
       case 'events':
-        return <Events seeAllURL={props.upcomingEvents} onViewAll={handleViewAll} />;
+        return <Events 
+
+         context={props.context}
+         seeAllURL={props.upcomingEvents}
+         onViewAll={handleViewAll}
+         listTitle="Site Pages"
+         topCount={4}
+
+           />;
       case 'employee_events':
         return <LetsCelebrate context={props.context} seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />;
       case 'meetings':
@@ -121,7 +129,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
       case 'forms':
         return <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />;
       case 'dashboard':
-        return <Dashboard seeAllURL={props.dashboard} onViewAll={handleViewAll} />;
+        return <Dashboard context={props.context} seeAllURL={props.dashboard} onViewAll={handleViewAll} />;
       case 'offers':
         return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
       case 'training':

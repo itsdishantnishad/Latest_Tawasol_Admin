@@ -1,44 +1,19 @@
 // EventCard.module.scss
+*{
+  font-family: 'Inter', sans-serif;
+}
+
 .eventCard {
   display: flex;
   align-items: center;
   background-color: #ffffff;
   border-radius: 8px;
-  // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
   gap: 16px;
   padding: 16px 24px;
   transition: box-shadow .3s ease;
   border-left: 5px solid #0E6187;
   &.pastEvent {
-    // .dateSection {
-    //   background-color: #F0EDEB;
-    //   .month,
-    //   .day {
-    //     color: #9ca3af;
-    //   }
-      
-    //   .date {
-    //     color: #9ca3af;
-    //   }
-    // }
-    
-    // .detailsSection{
-    //   .category {
-    //     color: #f3a6a6;
-    //   }
-      
-    //   .title {
-    //     color: #6b7280;
-    //   }
-    // }
-
-    // .locationSection{
-    //   .infoRow {
-    //     color: #9ca3af;
-    //   }
-    // }
-
     .actionSection{
       .pastEventLabel {
         font-size: 14px;
@@ -56,33 +31,16 @@
 
 // Date Section
 .dateSection {
-  // flex-shrink: 0;
-  // background-color: #f3f4f6;
-  // border-radius: 8px;
-  // min-width: 80px;
-  // height: 100px;
-  // padding: 15px;
-  // display: flex;
-  // flex-direction: column;
-  // justify-content: center;
-  // align-items: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 120px;
-  height: 100px;
-  background: #FFE8DD;
+  width: 181px;
+  height: 104px;
+  background: #FFF4EA;
   border-radius: 8px;
-  padding: 12px;
+  padding: 0;
 }
-
-// .month {
-//   color: #101820;
-//   font-size: 16px;
-//   font-weight: 400;
-//   line-height: 24px;
-// }
 
 .date {
   color: #101820;
@@ -132,27 +90,20 @@
   }
 }
 
-// Details Section
-// .detailsSection {
-//   // flex-grow: 1;
-//   // min-width: 0;
-//   width: 30%;
-// }
-
 .detailsSection {
-  flex: 1;
-  // min-width: 0;
-  width: 25%;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+  max-width: 30%;
 
   .category {
     color: #D3675B;
     font-size: 14px;
     font-weight: 500;
     text-transform: capitalize;
-    line-height: 24px;
+    line-height: 22px;
+    letter-spacing: -0.5px;
     margin: 0;
   }
 
@@ -164,10 +115,6 @@
     margin: 0;
   }
 }
-
-// .locationSection{
-//   font-size: 14px;
-// }
 
 .contentWrapper {
   display: flex;
@@ -218,41 +165,6 @@
   }
 }
 
-// .category {
-//   color: #D3675B;
-//   font-size: 14px;
-//   line-height: 22px;
-//   font-weight: 500;
-//   margin-bottom: 5px;
-//   letter-spacing: -0.5px;
-// }
-
-// .title {
-//   color: #101820;
-//   font-size: 20px;
-//   line-height: 28px;
-//   font-weight: 600;
-//   margin: 0;
-// }
-
-// .infoRow {
-//   display: flex;
-//   align-items: center;
-//   gap: 8px;
-//   color: #3A3B43;
-//   margin-bottom: 5px;
-  
-//   &:last-child {
-//     margin-bottom: 0;
-//   }
-// }
-
-// .icon {
-//   width: 20px;
-//   height: 20px;
-//   flex-shrink: 0;
-// }
-
 .infoText {
   font-size: 14px;
   line-height: 22px;
@@ -261,34 +173,21 @@
 
 // Action Section
 .actionSection {
-  // flex-shrink: 0;
-  // text-align: right;
-  // margin-left: auto;
   .registerButton {
-    // background-color: #111827;
-    // color: #ffffff;
-    // padding: 8px 24px;
-    // border-radius: 24px;
-    // font-weight: 500;
-    // border: none;
-    // cursor: pointer;
-    // transition: background-color 0.3s ease;
-    // font-size: 14px;
-
-      background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
-      border: none;
-      border-radius: 167px;
-      box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
-      color: #fff;
-      cursor: pointer;
-      font-family: Inter, sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      height: 40px;
-      line-height: 20px;
-      min-width: 143px;
-      padding: 8px 12px;
-      transition: all .3s ease;
+    background: radial-gradient(883.19% 262.8% at 112.5% -164.06%, #101820 0%, #202D39 100%);
+    box-shadow: -4px -6px 4px 0 rgba(0, 0, 0, 0.51) inset, 0 4px 4px 0 #768B9E inset;
+    border: none;
+    border-radius: 167px;
+    color: #fff;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    height: 48px;
+    line-height: 20px;
+    min-width: 143px;
+    padding: 0 12px;
+    transition: all .3s ease;
     
     &:hover {
       background-color: #1f2937;
@@ -338,11 +237,12 @@
 }
 
 .eventsWrapper h5{
+  color: #000;
   font-size: 18px;
   font-weight: 500;
   line-height: 24px;
-  color: #000000;
-  margin-block: 10px;
+  margin-bottom: 24px;
+  margin-top: 32px;
 }
 
 .infoBox {
@@ -422,15 +322,13 @@
 
 .gridLayout {
   display: grid;
-  // grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
 
-
 /* Tabs */
 .tabContainer {
-  margin-block: 32px;
+  margin-top: 32px;
 }
 
 .tabContainerInner{
@@ -484,10 +382,10 @@
 }
 
 .cardLinkWrapper {
-  display: block;              // Makes the link behave like a block wrapper
-  text-decoration: none;       // Removes underline
-  color: inherit;              // Keep card text colors same
-  cursor: pointer;             // Makes hover feel clickable
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 
   &:hover .eventCard {
     transform: translateY(-2px);

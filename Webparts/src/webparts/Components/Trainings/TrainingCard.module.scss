@@ -1,43 +1,29 @@
+*{
+  font-family: 'Inter', sans-serif;
+}
+
 .cardContainer {
-  // display: flex;
-  // flex-direction: row;
-  // align-items: flex-start;
-  // background-color: #fff9f4;
-  // border-radius: 12px;
-  // padding: 12px 16px;
-  // box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  // gap: 12px;
-  // align-items: center;
-    display: flex;
-    align-items: center;
-    background-color: #ffffff;
-    border-radius: 8px;
-    // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
-    gap: 16px;
-    padding: 16px 24px;
-    transition: box-shadow .3s ease;
-    border-left: 5px solid #4BB86C;
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  transition: box-shadow 0.3s ease;
+  gap: 16px;
+  padding: 16px 24px;
+  transition: box-shadow .3s ease;
+  border-left: 5px solid #4BB86C;
 }
 
 .dateSection {
-  // display: flex;
-  // align-items: center;
-  // gap: 8px;
-  // background: #F0EDEB;
-  // border-radius: 8px;
-  // padding: 8px 12px;
-  // text-align: center;
-  // flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 120px;
-    height: 100px;
-    background: #FFE8DD;
-    border-radius: 8px;
-    padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 181px;
+  height: 104px;
+  background: #FFF4EA;
+  border-radius: 8px;
+  padding: 0;
 
   .dateBox {
     display: flex;
@@ -46,32 +32,17 @@
     min-width: 48px;
 
     .month {
-      // color: #101820;
-      // font-size: 16px;
-      // font-weight: 400;
-      // line-height: 24px;
       font-size: 12px;
       line-height: 16px;
       font-weight: 400;
       color: #3A3B43;
     }
-    .day {
-      // color: #101820;
-      // font-size: 36px;
-      // font-weight: 700;
-      // line-height: 44px;
-      
+    .day {      
       color: #101820;
       font-size: 20px;
       line-height: 28px;
       font-weight: 700;
     }
-    // .weekday {
-    //   color: #6c6c6c;
-    //   font-size: 12px;
-    //   font-weight: 400;
-    //   line-height: 16px;
-    // }
   }
 }
 
@@ -109,12 +80,11 @@
 }
 
 .detailsSection {
-  // flex: 1;
-  // min-width: 0;
-  width: 25%;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+  max-width: 30%;
 
   .category {
     color: #D3675B;
@@ -139,8 +109,9 @@
 .metaSection {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  align-self: center;
+  gap: 12px;
+  margin-right: 16px;
+  flex: 1;
 
   .metaItem {
     font-size: 0.8rem;
@@ -150,9 +121,10 @@
     gap: 6px;
 
     .icon {
-      width: 1rem;
-      height: 1rem;
-      stroke: currentColor;
+      flex-shrink: 0;
+      color: #DA291C;
+      width: 20px;
+      height: 20px;
     }
 
     span{
@@ -164,23 +136,25 @@
 }
 
 .joinButton {
-  background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
+  background: radial-gradient(883.19% 262.8% at 112.5% -164.06%, #101820 0%, #202D39 100%);
+  box-shadow: -4px -6px 4px 0 rgba(0, 0, 0, 0.51) inset, 0 4px 4px 0 #768B9E inset;
   border: none;
   border-radius: 167px;
-  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
   color: #fff;
   cursor: pointer;
   font-family: Inter, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  height: 40px;
+  height: 48px;
   line-height: 20px;
   min-width: 143px;
-  padding: 8px 12px;
+  padding: 0 12px;
   transition: all .3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  text-decoration: none;
   
   &:hover {
     background-color: #1f2937;
