@@ -239,6 +239,7 @@ export default class ExtensionsApplicationCustomizer
     this.injectFont();
     document.body.style.background = '#FFF4EA';
     this.hideVivaEngageViewAll();
+    this.hideVivaEngageConversationsText();
     const urls = resolveUrls(this.webUrl);
 
     // ---------- ONBOARDING FROM LIST ----------
@@ -462,7 +463,7 @@ export default class ExtensionsApplicationCustomizer
     // 🔹 clean onboarding overlay if still present
     this.onboarding?.dispose();
   }
-/*  hiding view all buttin */
+  /*  hiding view all buttin */
 
   private hideVivaEngageViewAll(): void {
     const hideViewAll = () => {
@@ -492,6 +493,40 @@ export default class ExtensionsApplicationCustomizer
     };
     hideViewAll();
     setInterval(hideViewAll, 3000);
+  }
+
+  /* find conversation id */
+  private hideVivaEngageConversationsText(): void {
+    const hideConversations = () => {
+      const allElements = document.querySelectorAll('*');
+
+      allElements.forEach((element) => {
+        const text = element.textContent?.trim();
+
+        if (text === 'Conversations' && !element.classList.contains('hideConversations')) {
+          (element as HTMLElement).style.display = 'none';
+          (element as HTMLElement).style.visibility = 'hidden';
+          element.classList.add('hideConversations');
+        }
+      });
+
+      const observer = new MutationObserver(() => {
+        const elements = document.querySelectorAll('*:not(.hideConversations)');
+        elements.forEach((element) => {
+          const text = element.textContent?.trim();
+          if (text === 'Conversations') {
+            (element as HTMLElement).style.display = 'none';
+            (element as HTMLElement).style.visibility = 'hidden';
+            element.classList.add('hideConversations');
+          }
+        });
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+    };
+
+    hideConversations();
+    setInterval(hideConversations, 3000);
   }
 
 }
