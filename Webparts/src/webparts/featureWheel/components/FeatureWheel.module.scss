@@ -74,6 +74,9 @@
 .titleContainer {
   text-align: center;
   margin-top: 40px;
+  @media (max-width: 767px){
+    margin-top: 0;
+  }
 }
 
 .headerContent {
@@ -81,8 +84,29 @@
   align-items: center;
   justify-content: center;
   gap: 40px;
-  @media (max-width: 580px){
+  .desktopImage{
+    display: block;
+    @media (max-width: 767px){
+      display: none;
+    }
+  }
+  .mobImage{
+    display: none;
+    @media (max-width: 767px){
+      display: block;
+    }
+    @media (max-width: 580px){
+      gap: 5px;
+    }
+    @media (max-width: 380px){
+      width: 45px;
+    }
+  }
+  @media (max-width: 767px){
     gap: 10px;
+  }
+  @media (max-width: 580px){
+    gap: 5px;
   }
 }
 
@@ -98,6 +122,9 @@
   @media (max-width: 580px){
     font-size: 28px;
   }
+  @media (max-width: 380px){
+    font-size: 20px;
+  }
 }
 
 .subtitle {
@@ -112,6 +139,9 @@
     line-height: 22px;
     letter-spacing: -0.5px;
     color: #6C6C6C;
+  }
+  @media (max-width: 380px){
+    font-size: 12px;
   }
 }
 

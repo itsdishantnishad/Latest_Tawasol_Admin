@@ -355,7 +355,8 @@
 
   .wheelWrapper {
     gap: 16px;
-    min-height: 350px;
+    min-height: 800px;
+    width: 100%;
   }
 
   .circleContainer {
@@ -400,7 +401,7 @@
   .wheelWrapper {
     flex-direction: column;
     gap: 20px;
-    min-height: auto;
+    // min-height: auto;
   }
 
   .navButton {

@@ -19,6 +19,10 @@ import BeverageMenu from '../../Components/FeatureContent/BeverageMenu/BeverageM
 
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
+
+const leftHeadingLineMobile: string = require("../images/leftArrowMobile.svg");
+const rightHeadingLineMobile: string = require("../images/rightArrowMobile.svg");
+
 const featureWheelBanner: string = require("../images/featureWheelBanner.png");
 
 interface FeatureTitleProps {
@@ -30,9 +34,11 @@ const FeatureTitle: React.FC<FeatureTitleProps> = ({ header, subHeader }) => {
   return (
     <div className={styles.titleContainer}>
       <div className={styles.headerContent}>
-        <img src={rightHeadingLine} alt="" />
+        <img src={rightHeadingLine} alt="" className={styles.desktopImage}/>
+        <img src={rightHeadingLineMobile} alt="" className={styles.mobImage}/>
         <h2 className={styles.title}>{header}</h2>
-        <img src={leftHeadingLine} alt="" />
+        <img src={leftHeadingLine} alt="" className={styles.desktopImage}/>
+        <img src={leftHeadingLineMobile} alt="" className={styles.mobImage}/>
       </div>
       <p className={styles.subtitle}>
         {subHeader}
