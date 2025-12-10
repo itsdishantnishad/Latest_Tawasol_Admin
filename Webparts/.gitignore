@@ -35,3 +35,8 @@ obj
 
 #yomen file
 .yo-rc.json
+
+
+salesforceConfig.json
+
+serviceNowConfig.json

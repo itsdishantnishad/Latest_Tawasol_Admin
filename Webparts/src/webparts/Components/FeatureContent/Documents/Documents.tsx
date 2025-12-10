@@ -131,7 +131,7 @@ export const Documents: React.FC<IDocumentsProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <a href={props.seeAllURL} className={styles.viewAllButton}>
+                <a href="https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SitePages/PoliciesAndProcedures.aspx" className={styles.viewAllButton}>
                     View All
                 </a>
                 {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
