@@ -238,7 +238,7 @@ export default class ExtensionsApplicationCustomizer
 
     this.injectFont();
     document.body.style.background = '#FFF4EA';
-
+    this.hideVivaEngageViewAll();
     const urls = resolveUrls(this.webUrl);
 
     // ---------- ONBOARDING FROM LIST ----------
@@ -462,4 +462,37 @@ export default class ExtensionsApplicationCustomizer
     // 🔹 clean onboarding overlay if still present
     this.onboarding?.dispose();
   }
+/*  hiding view all buttin */
+
+  private hideVivaEngageViewAll(): void {
+    const hideViewAll = () => {
+      const allLinks = document.querySelectorAll('a');
+
+      allLinks.forEach((link) => {
+        const text = link.textContent?.trim().toLowerCase();
+        if (text === 'view all' && !link.classList.contains('hideViewAll')) {
+          (link as HTMLElement).style.display = 'none';
+          (link as HTMLElement).style.visibility = 'hidden';
+          link.classList.add('hideViewAll');
+        }
+      });
+      const observer = new MutationObserver(() => {
+        const links = document.querySelectorAll('a:not(.hideViewAll)');
+        links.forEach((link) => {
+          const text = link.textContent?.trim().toLowerCase();
+          if (text === 'view all') {
+            (link as HTMLElement).style.display = 'none';
+            (link as HTMLElement).style.visibility = 'hidden';
+            link.classList.add('hideViewAll');
+          }
+        });
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+    };
+    hideViewAll();
+    setInterval(hideViewAll, 3000);
+  }
+
 }
+
