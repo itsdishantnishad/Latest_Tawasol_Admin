@@ -177,11 +177,11 @@ const Wheel: React.FC<FeatureWheelProps> = ({ onFeatureSelect, selectedFeature }
                     const radius = 650;
                     const radians = (angle * Math.PI) / 180;
                     const x = Math.sin(radians) * radius;
-                    const y = -Math.cos(radians) * radius + radius + 10;
+                    const y = -Math.cos(radians) * radius + radius + 0;
 
                     // Card rotation to follow arc
                     const cardRotation = angle;
-                    const scale = isSelected ? 1.05 : 1;
+                    const scale = isSelected ? 1.05 : 0.9;
 
                     return (
                         <button
