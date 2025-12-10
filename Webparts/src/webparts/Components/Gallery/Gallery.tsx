@@ -69,7 +69,7 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
                 {/* <button className={styles.viewAllButton} onClick={handleViewAll}>
                     View All
                 </button> */}
-                <a href={props.seeAllURL} className={styles.viewAllButton}>
+                <a href="https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SitePages/Event-Gallery.aspx" className={styles.viewAllButton}>
                     View All
                 </a>
             </div>

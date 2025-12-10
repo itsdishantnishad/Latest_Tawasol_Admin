@@ -37,7 +37,7 @@ export const AboutDHRE: React.FC = (props) => {
             </div>
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <a href="#" className={styles.viewAllButton}>Know More</a>
+                <a href="https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SitePages/About-DHRE.aspx" className={styles.viewAllButton}>Know More</a>
             </div>
         </div>
     );

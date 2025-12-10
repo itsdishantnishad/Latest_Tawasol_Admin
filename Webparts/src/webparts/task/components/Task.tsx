@@ -11,230 +11,157 @@ import {
   TableCellLayout,
 } from "@fluentui/react-components";
 import Tag from '../../Components/Tag/Tag';
-
-import sfListingMock from './dummyData';
-import TaskDetails, { TaskDetailsData } from './TaskDetails';
 import NavSegment from './taskNavBtnComp';
-import { ACTION_RED_CROSS_REJECT_SVG, ACTION_GREEN_CHECK_APPROVE_SVG } from '../../assets/constants';
 
-import { SfApprovalService, TaskListApiResponse } from '../../services/Task/SalesforceApprovalService';
+import {
+  SfApprovalService,
+  TaskListApiResponse as SalesforceTaskListApiResponse,
+  SFApproval
+} from '../../services/Task/SalesforceApprovalService';
 
-
+import {
+  ServiceNowApprovalService,
+  ServiceNowTaskListItem
+} from '../../services/Task/ServiceNowApprovalService';
 
 export interface ITaskState {
   selectedTabValue: string;
-  selectedTaskDetails: TaskDetailsData | null;
   isLoading: boolean;
   errorMessage?: string;
-  oracleItems: any[];
-  salesforceItems: any[];
+  oracleItems: ServiceNowTaskListItem[];
+  salesforceItems: SFApproval[];
 }
 
-const formatIsoDateToDisplay = (isoString: string) =>
-  new Date(isoString).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+const formatIsoDateToDisplay = (isoString: string) => {
+  if (!isoString) return '—';
+  const date = new Date(isoString);
+  return date.toLocaleDateString('en-GB', {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+};
 
 export default class Task extends React.Component<ITaskProps, ITaskState> {
+  private readonly salesforceBaseUrl: string =
+    "https://infaservicesuat.dubaiholding.com";
+
   private readonly salesforceService: SfApprovalService;
+  private readonly serviceNowService: ServiceNowApprovalService;
 
   constructor(props: ITaskProps) {
     super(props);
     this.state = {
       selectedTabValue: "All",
-      selectedTaskDetails: null,
       isLoading: true,
       oracleItems: [],
       salesforceItems: [],
     };
 
-    // Not passing HttpClient in dev; service is in MOCK mode until cutover.
     this.salesforceService = new SfApprovalService({
-      // httpClient: this.props.httpClient, // provide at cutover for direct calls
-      salesforceBaseUrl: "https://dubaiproperties--dev.sandbox.my.salesforce.com",
-      // accessToken: "<Bearer token if calling SF directly>",
+      httpClient: this.props.httpClient,
+      salesforceBaseUrl: this.salesforceBaseUrl,
+    });
+
+    this.serviceNowService = new ServiceNowApprovalService({
+      httpClient: this.props.httpClient,
+      baseUrl: this.salesforceBaseUrl,
     });
   }
 
   public async componentDidMount(): Promise<void> {
     try {
-      // In mock mode the service throws "MOCK_MODE"
-      const currentUserEmail = this.props.userDisplayName || "someone@example.com";
-      const listResponse: TaskListApiResponse = await this.salesforceService.fetchApprovalsByEmail(currentUserEmail);
+      const currentUserEmail = this.props.userEmail || "aisha.amiri@dhre.ae";
 
-      const salesforceList = (listResponse.approvals || []).filter(
-        (task) => (task.originSystem || "").toLowerCase() === "salesforce"
-      );
-      const oracleList = (listResponse.approvals || []).filter(
-        (task) => (task.originSystem || "").toLowerCase() === "oracle"
-      );
+      const [sfResponse, oracleItems] = await Promise.all([
+        this.salesforceService.fetchApprovalsByEmail(currentUserEmail),
+        this.serviceNowService.fetchApprovalsByEmail(currentUserEmail)
+      ]);
 
       this.setState({
-        oracleItems: oracleList,
-        salesforceItems: salesforceList,
+        oracleItems: oracleItems,
+        salesforceItems: sfResponse.approvals,
         isLoading: false,
       });
     } catch (error: any) {
-      // Fallback to mocks
+      console.error('Error loading approvals:', error);
       this.setState({
-        oracleItems: sfListingMock.oracle,
-        salesforceItems: sfListingMock.salesForce,
+        oracleItems: [],
+        salesforceItems: [],
         isLoading: false,
-        errorMessage: (error?.message && error.message !== "MOCK_MODE") ? error.message : undefined,
+        errorMessage: error.message,
       });
     }
   }
 
-  private normalizeOriginSystem(originSystem?: string): string {
-    const lower = (originSystem || "").toLowerCase();
-    if (lower === "oracle") return "Oracle";
-    if (lower === "salesforce") return "Salesforce";
-    return originSystem || "—";
-  }
-
-  private buildTaskDetailsPayload(taskRowData: any): TaskDetailsData {
-    return {
-      workitemId: taskRowData.workitemId,
-      workflowNumber: taskRowData.workflowNumber,
-      taskTitle: taskRowData.taskTitle,
-      taskType: taskRowData.taskType,
-      priority: taskRowData.priority,
-      originSystem: this.normalizeOriginSystem(taskRowData.originSystem),
-      status: taskRowData.status,
-      createdOn: taskRowData.createdOn,
-      dueDate: taskRowData.dueDate,
-      assignedTo: taskRowData.assignedTo,
-      requestorName: taskRowData.requestorName,
-      requestorDepartment: taskRowData.requestorDepartment,
-    };
-  }
-
-  private handleRowClick = (taskRowData: any) => {
-    const taskDetails: TaskDetailsData = this.buildTaskDetailsPayload(taskRowData);
-    this.setState({ selectedTaskDetails: taskDetails });
-  };
-
-  private handleBackFromDetails = () => {
-    this.setState({ selectedTaskDetails: null });
-  };
-
-  private handleTabChange = (newTabValue: string) => {
-    this.setState({ selectedTabValue: newTabValue, selectedTaskDetails: null });
-  };
-
-  private handleApproveAction = async (taskDetails: TaskDetailsData) => {
-    try {
-      const actionResponse = await this.salesforceService.submitTaskAction({
-        actionType: "Approve",
-        contextId: taskDetails.workitemId,
-      });
-
-      if (actionResponse.success) {
-        alert(`Approved! Status: ${actionResponse.instanceStatus || "Approved"}`);
-        this.setState({ selectedTaskDetails: { ...taskDetails, status: "Approved" } });
-      } else {
-        alert("Approve failed");
-      }
-    } catch {
-      alert("Approve failed");
-    }
+  private handleTabChange = (value: string): void => {
+    this.setState({ selectedTabValue: value });
   };
 
   public render(): React.ReactElement<ITaskProps> {
     const {
-      selectedTaskDetails,
       selectedTabValue,
       isLoading,
       oracleItems,
       salesforceItems
     } = this.state;
 
-    if (selectedTaskDetails) {
-      return (
-        <div className={styles.main}>
-          <div className={styles.pageContainer}>
-            <TaskDetails
-              data={selectedTaskDetails}
-              onBack={this.handleBackFromDetails}
-              onApprove={() => this.handleApproveAction(selectedTaskDetails)}
-            />
-          </div>
-        </div>
-      );
-    }
-
     const tableColumns = [
       { columnKey: "workflowNumber", label: "Workflow No." },
       { columnKey: "taskTitle", label: "Task Title" },
       { columnKey: "priority", label: "Priority" },
       { columnKey: "dueDate", label: "Due Date" },
+      { columnKey: "requestedBy", label: "Requested By" },
       { columnKey: "action", label: "Action" },
-      { columnKey: "status", label: "Status" },
     ];
 
-    const statusTagColor = {
-      'Approved': '#0e8732',
-      'Rejected': '#da291c',
-      'Pending': '#c3a500',
-    }
+    const priorityTagBgColor: Record<string, string> = {
+      High: '#fdede8',
+      Medium: '#feefd4',
+      Low: '#e2edfe',
+    };
 
-    const priorityTagBgColor = {
-      'High': '#fdede8',
-      'Medium': '#feefd4',
-      'Low': '#e2edfe',
-    }
+    const priorityTagTextColor: Record<string, string> = {
+      High: '#ff3a00',
+      Medium: '#dda338',
+      Low: '#2b77d6',
+    };
 
-    const priorityTagTextColor = {
-      'High': '#ff3a00',
-      'Medium': '#dda338',
-      'Low': '#2b77d6',
-    }
-
-    const renderTaskRow = (taskItem: any): JSX.Element => (
-      <TableRow key={taskItem.workitemId} onClick={() => this.handleRowClick(taskItem)}>
-        <TableCell>
-          <TableCellLayout>{taskItem.workflowNumber}</TableCellLayout>
-        </TableCell>
-        <TableCell>
-          <TableCellLayout>{taskItem.taskTitle}</TableCellLayout>
-        </TableCell>
-        <TableCell>
-          <TableCellLayout>
-            <Tag
-              label={taskItem.priority}
-              backgroundColor={priorityTagBgColor[taskItem.priority as keyof typeof priorityTagBgColor]}
-              textColor={priorityTagTextColor[taskItem.priority as keyof typeof priorityTagTextColor]}
-            />
-          </TableCellLayout>
-        </TableCell>
-        <TableCell>{formatIsoDateToDisplay(taskItem.dueDate)}</TableCell>
-        <TableCell>
-          <div className={styles.actionCell}>
-            <span className={styles.actionItem}>
-              <span
-                className={styles.actionIcon}
-                dangerouslySetInnerHTML={{ __html: ACTION_RED_CROSS_REJECT_SVG }}
+    const renderTaskRow = (taskItem: ServiceNowTaskListItem | SFApproval): JSX.Element => {
+      return (
+        <TableRow key={taskItem.workitemId || taskItem.workflowNumber}>
+          <TableCell>
+            <TableCellLayout>{taskItem.workflowNumber}</TableCellLayout>
+          </TableCell>
+          <TableCell>
+            <TableCellLayout>{taskItem.taskTitle}</TableCellLayout>
+          </TableCell>
+          <TableCell>
+            <TableCellLayout>
+              <Tag
+                label={taskItem.priority || '—'}
+                backgroundColor={priorityTagBgColor[taskItem.priority as keyof typeof priorityTagBgColor]}
+                textColor={priorityTagTextColor[taskItem.priority as keyof typeof priorityTagTextColor]}
               />
-              Reject
-            </span>
-            <span className={styles.actionItem}>
-              <span
-                className={styles.actionIcon}
-                dangerouslySetInnerHTML={{ __html: ACTION_GREEN_CHECK_APPROVE_SVG }}
-              />
-              Approve
-            </span>
-          </div>
-        </TableCell>
+            </TableCellLayout>
+          </TableCell>
+          <TableCell>
+            {formatIsoDateToDisplay(taskItem.dueDate)}
+          </TableCell>
+          <TableCell>
+            <TableCellLayout>{taskItem.requestorName || '—'}</TableCellLayout>
+          </TableCell>
+          <TableCell>
+            <span className={styles.viewDetailsLink}>View Details</span>
+          </TableCell>
+        </TableRow>
+      );
+    };
 
-        <TableCell>
-          <TableCellLayout>
-            <Tag
-              label={taskItem.status}
-              backgroundColor={statusTagColor[taskItem.status as keyof typeof statusTagColor]}
-            />
-          </TableCellLayout>
-        </TableCell>
-      </TableRow>
-    );
+    const rowsToRender: (ServiceNowTaskListItem | SFApproval)[] = [
+      ...(selectedTabValue === "Oracle" || selectedTabValue === "All" ? oracleItems : []),
+      ...(selectedTabValue === "Salesforce" || selectedTabValue === "All" ? salesforceItems : []),
+    ];
 
     return (
       <div className={styles.main}>
@@ -256,19 +183,28 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
               <TableHeader className={styles.tableHeader}>
                 <TableRow>
                   {tableColumns.map((column) => (
-                    <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>
+                    <TableHeaderCell key={column.columnKey}>
+                      {column.label}
+                    </TableHeaderCell>
                   ))}
                 </TableRow>
               </TableHeader>
 
               <TableBody className={styles.tableBody}>
-                {isLoading ? null : (
-                  <>
-                    {(selectedTabValue === "Oracle" || selectedTabValue === "All") &&
-                      oracleItems.map((task) => renderTaskRow(task))}
-                    {(selectedTabValue === "Salesforce" || selectedTabValue === "All") &&
-                      salesforceItems.map((task) => renderTaskRow(task))}
-                  </>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6}>
+                      <TableCellLayout>Loading approvals...</TableCellLayout>
+                    </TableCell>
+                  </TableRow>
+                ) : rowsToRender.length > 0 ? (
+                  rowsToRender.map(task => renderTaskRow(task))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6}>
+                      <TableCellLayout>No approvals found</TableCellLayout>
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </Table>

@@ -1,3 +1,5 @@
+// src/webparts/task/TaskWebPart.ts
+
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
@@ -29,7 +31,11 @@ export default class TaskWebPart extends BaseClientSideWebPart<ITaskWebPartProps
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        userDisplayName: this.context.pageContext.user.displayName
+        userDisplayName: this.context.pageContext.user.displayName,
+
+        // NEW: needed for Salesforce service
+        userEmail: this.context.pageContext.user.email,
+        httpClient: this.context.httpClient
       }
     );
 
@@ -41,8 +47,6 @@ export default class TaskWebPart extends BaseClientSideWebPart<ITaskWebPartProps
       this._environmentMessage = message;
     });
   }
-
-
 
   private _getEnvironmentMessage(): Promise<string> {
     if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
@@ -68,7 +72,11 @@ export default class TaskWebPart extends BaseClientSideWebPart<ITaskWebPartProps
         });
     }
 
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
+    return Promise.resolve(
+      this.context.isServedFromLocalhost
+        ? strings.AppLocalEnvironmentSharePoint
+        : strings.AppSharePointEnvironment
+    );
   }
 
   protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
@@ -86,7 +94,6 @@ export default class TaskWebPart extends BaseClientSideWebPart<ITaskWebPartProps
       this.domElement.style.setProperty('--link', semanticColors.link || null);
       this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
     }
-
   }
 
   protected onDispose(): void {

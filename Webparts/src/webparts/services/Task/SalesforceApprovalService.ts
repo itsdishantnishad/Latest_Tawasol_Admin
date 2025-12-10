@@ -1,139 +1,70 @@
-// src/webparts/task/services/sfApprovalService.ts
-// Service for Task Listing + Approve/Reject actions.
-// Uses SPFx HttpClient. In MOCK mode, throws from list and returns a fake success for action.
+import { HttpClient } from '@microsoft/sp-http';
 
-import { HttpClient, IHttpClientOptions, HttpClientResponse } from "@microsoft/sp-http";
-
-// ====== TOGGLE THIS AT CUTOVER ======
-const USE_MOCK_DATA = true;
-
-export type TaskActionType = "Approve" | "Reject";
-
-export interface TaskActionRequest {
-  actionType: TaskActionType;
-  contextId: string;
-  comments?: string;
-}
-
-export interface TaskActionResponse {
-  success: boolean;
-  instanceStatus?: string;
-  errors?: any;
-}
-
-export interface TaskListItem {
-  workitemId: string;
-  workflowNumber: string;
-  taskType: string;
-  taskTitle: string;
-  taskDescription: string | null | "";
-  status: "Pending" | "Approved" | "Rejected" | string;
-  requestorName: string;
-  requestorDepartment: string | null;
-  priority: "" | "High" | "Medium" | "Low";
-  originSystem: "Salesforce" | "Oracle" | string;
-  dueDate: string;   // ISO
-  createdOn: string; // ISO
-  assignedTo: string;
-  action: string;
+export interface SFApproval {
+  workflowNumber: string;      // Maps to "number" from API
+  taskTitle: string;            // Maps to "taskTitle" from API
+  priority: string;             // Maps to "priority" from API
+  dueDate: string;              // Maps to "dueDate" from API
+  requestorName: string;        // Maps to "requestorName" from API
+  workitemId: string;           // Maps to "workitemId" from API
+  originSystem: string;         // Maps to "originSystem" from API
 }
 
 export interface TaskListApiResponse {
-  success: boolean;
-  message: string;
-  approvals: TaskListItem[];
+  approvals: SFApproval[];
 }
 
-export interface SfApprovalServiceInit {
-  httpClient?: HttpClient;          // Pass this at cutover (from WebPart context)
-  salesforceBaseUrl: string;        // e.g., https://dubaiproperties--dev.sandbox.my.salesforce.com
-  accessToken?: string;             // Optional if calling SF directly; not needed if you call a proxy
+export interface SalesforceServiceConfig {
+  httpClient: HttpClient;
+  salesforceBaseUrl: string;
 }
 
 export class SfApprovalService {
-  private readonly httpClient?: HttpClient;
-  private readonly salesforceBaseUrl: string;
-  private readonly accessToken?: string;
+  private httpClient: HttpClient;
+  private salesforceBaseUrl: string;
 
-  constructor(initialization: SfApprovalServiceInit) {
-    this.httpClient = initialization.httpClient;
-    this.salesforceBaseUrl = initialization.salesforceBaseUrl.replace(/\/$/, "");
-    this.accessToken = initialization.accessToken;
+  constructor(config: SalesforceServiceConfig) {
+    this.httpClient = config.httpClient;
+    this.salesforceBaseUrl = config.salesforceBaseUrl;
   }
 
-  /** GET /services/apexrest/approvalhistory?emailID=... */
-  public async fetchApprovalsByEmail(userEmail: string): Promise<TaskListApiResponse> {
-    if (USE_MOCK_DATA) {
-      // Signal upstream to use local dummy data
-      return Promise.reject(new Error("MOCK_MODE"));
-    }
-
-    if (!this.httpClient) {
-      throw new Error("HttpClient not provided. Pass SPFx HttpClient at cutover.");
-    }
-
-    const requestUrl = `${this.salesforceBaseUrl}/services/apexrest/approvalhistory?emailID=${encodeURIComponent(userEmail)}`;
-    const requestHeaders: HeadersInit = { Accept: "application/json" };
-    if (this.accessToken) requestHeaders["Authorization"] = `Bearer ${this.accessToken}`;
-
-    const httpResponse: HttpClientResponse = await this.httpClient.get(requestUrl, HttpClient.configurations.v1, {
-      headers: requestHeaders
-    });
-
-    if (!httpResponse.ok) {
-      throw new Error(`List API failed: ${httpResponse.status} ${httpResponse.statusText}`);
-    }
-
-    return httpResponse.json();
-  }
-
-  /** POST /services/data/v62.0/process/approvals */
-  public async submitTaskAction(request: TaskActionRequest): Promise<TaskActionResponse> {
-    if (USE_MOCK_DATA) {
-      // Simulate success path
-      return Promise.resolve({
-        success: true,
-        instanceStatus: request.actionType === "Approve" ? "Approved" : "Rejected",
-      });
-    }
-
-    if (!this.httpClient) {
-      throw new Error("HttpClient not provided. Pass SPFx HttpClient at cutover.");
-    }
-
-    const requestUrl = `${this.salesforceBaseUrl}/services/data/v62.0/process/approvals`;
-    const requestBody = {
-      requests: [
+  public async fetchApprovalsByEmail(email: string): Promise<TaskListApiResponse> {
+    try {
+      // This will use the configuration from salesforceConfig.json
+      const endpoint = `${this.salesforceBaseUrl}/api/DHRESFTWApprovalHistory100/v1/DHRESFTWApprovalHistory`;
+      
+      const response = await this.httpClient.get(
+        endpoint,
+        HttpClient.configurations.v1,
         {
-          actionType: request.actionType,
-          contextId: request.contextId,
-          comments:
-            request.comments ??
-            (request.actionType === "Approve" ? "Approved via REST API" : "Rejected via REST API"),
-        },
-      ],
-    };
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-    const requestHeaders: HeadersInit = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    };
-    if (this.accessToken) requestHeaders["Authorization"] = `Bearer ${this.accessToken}`;
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Salesforce approvals: ${response.statusText}`);
+      }
 
-    const httpOptions: IHttpClientOptions = { headers: requestHeaders, body: JSON.stringify(requestBody) };
-    const httpResponse: HttpClientResponse = await this.httpClient.post(requestUrl, HttpClient.configurations.v1, httpOptions);
+      const data = await response.json();
+      
+      // Map API response to our interface
+      const approvals: SFApproval[] = (data.result || []).map((item: any) => ({
+        workflowNumber: item.workflowNumber || item.number || '',
+        taskTitle: item.taskTitle || '',
+        priority: item.priority || '',
+        dueDate: item.dueDate || '',
+        requestorName: item.requestorName || item.requestedBy || '',
+        workitemId: item.workitemId || '',
+        originSystem: item.originSystem || 'salesforce'
+      }));
 
-    if (!httpResponse.ok) {
-      throw new Error(`Action API failed: ${httpResponse.status} ${httpResponse.statusText}`);
+      return { approvals };
+    } catch (error) {
+      console.error('Error fetching Salesforce approvals:', error);
+      throw error;
     }
-
-    const jsonResponse = await httpResponse.json();
-    const wasSuccessful = Array.isArray(jsonResponse) && jsonResponse[0]?.success === true;
-
-    return {
-      success: !!wasSuccessful,
-      instanceStatus: jsonResponse?.[0]?.instanceStatus,
-      errors: wasSuccessful ? undefined : jsonResponse?.[0]?.errors,
-    };
   }
 }
