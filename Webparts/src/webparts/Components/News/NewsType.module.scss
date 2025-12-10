@@ -10,8 +10,12 @@
   font-weight: 600;
   gap: 5px;
   padding: 0 10px 0 0;
-  font-size: 10.67px;
-  line-height: 14.22px;
+  font-size: 14px;
+  line-height: 22px;
+  @media (max-width: 580px){
+    font-size: 12px;
+    line-height: 16px;
+  }
   img{
     width: 31px;
     height: 30px;

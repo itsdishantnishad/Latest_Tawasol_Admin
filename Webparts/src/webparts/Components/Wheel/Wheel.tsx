@@ -1,5 +1,25 @@
 import * as React from 'react';
 import styles from './Wheel.module.scss';
+import type { CSSProperties } from "react";
+
+type WheelCardStyle = CSSProperties & {
+  "--x": string;
+  "--y": string;
+  "--rotation": string;
+  "--scale": number;
+};
+
+const getCardStyle = (
+  x: number,
+  y: number,
+  cardRotation: number,
+  scale: number
+): WheelCardStyle => ({
+  "--x": `${x}px`,
+  "--y": `${y}px`,
+  "--rotation": `${cardRotation}deg`,
+  "--scale": scale
+});
 
 interface Feature {
     id: string;
@@ -168,12 +188,8 @@ const Wheel: React.FC<FeatureWheelProps> = ({ onFeatureSelect, selectedFeature }
                             key={card.id}
                             onClick={() => isClickable && handleCardClick(card.id)}
                             disabled={!isClickable}
-                            className={styles.card}
-                            style={{
-                                transform: `translate(calc(-50% + ${x}px), ${y}px) rotate(${cardRotation}deg) scale(${scale})`,
-                                pointerEvents: isClickable ? 'auto' : 'none',
-                                cursor: isClickable ? 'pointer' : 'default',
-                            }}
+                            className={`${styles.card} ${isClickable ? styles.cardClickable : styles.cardDisabled}`}
+                            style={getCardStyle(x, y, cardRotation, scale)}
                         >
                             <div
                                 className={`${styles.cardInner} ${bgClassById[card.id] || ""} ${isSelected ? styles.cardSelected : ""}`}
