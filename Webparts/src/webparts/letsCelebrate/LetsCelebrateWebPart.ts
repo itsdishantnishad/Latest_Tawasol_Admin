@@ -8,7 +8,7 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import * as strings from 'LetsCelebrateWebPartStrings';
 import LetsCelebrate from './components/LetsCelebrate';
 import { ILetsCelebrateProps } from './components/ILetsCelebrateProps';
-
+import { setupSP } from '../profile/components/services/spSetup';
 export interface ILetsCelebrateWebPartProps {
 
 }
@@ -27,6 +27,8 @@ export default class LetsCelebrateWebPart extends BaseClientSideWebPart<ILetsCel
   }
 
   protected onInit(): Promise<void> {
+     setupSP(this.context);
+     console.log("✅ PnP JS initialized in onInit");
     return this._getEnvironmentMessage().then(message => {
      
     });

@@ -99,7 +99,19 @@
   font-size: 12px;
   line-height: 16px;
 }
-
+.upcomingBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #dc2626;      /* light gray */
+  color:   #f3f4f6;           /* dark text */
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+}
 .dateBadge {
   position: absolute;
   top: 12px;
