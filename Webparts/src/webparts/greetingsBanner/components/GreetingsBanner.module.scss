@@ -1,6 +1,9 @@
 .greetingsBannerRoot {
   background: transparent;
   padding: 20px 0;
+  @media (max-width: 580px){
+    padding-bottom: 0;
+  }
 }
 
 /* One centered line with emoji at the end */
