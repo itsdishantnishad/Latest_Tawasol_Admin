@@ -285,35 +285,28 @@
   display: inline-flex;
   gap: 20px;
   justify-self: end;
-  align-items: center;
 }
 
 .TIRSocialLink {
-  display: inline-flex;
   width: 44px;
   height: 44px;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.25s ease;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s;
 }
 
 .TIRSocialLink:hover {
-  background: #ffffff;   /* white circle on hover */
+  background: white;
 }
 
 .TIRSocialLink img {
-  width: auto;
-  height: auto;
-  max-width: 26px;
-  max-height: 26px;
-  min-width: 20px;
-  min-height: 20px;
-  filter: brightness(0) invert(1);   /* white by default */
-  transition: filter 0.25s ease;
+  width: 26px;
+  height: 26px;
+  filter: brightness(0) invert(1); /* white */
 }
 
 .TIRSocialLink:hover img {
-  filter: brightness(1) invert(0);   /* black icon on white circle */
+  filter: none; /* back to original (black) */
 }
 
 /* ===================== SUGGESTIONS ===================== */
