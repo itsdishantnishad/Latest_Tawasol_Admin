@@ -35,7 +35,7 @@ const features: Feature[] = [
     },
     {
         id: "documents",
-        title: "Documents",
+        title: "Policies & Procedures",
         subtitle: "All files in one place"
     },
     {
