@@ -52,3 +52,27 @@
 .ctaWrapper {
   margin-top: 40px;
 }
+// Button Container
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+}
+.viewAllButton {
+  background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
+  border: none;
+  border-radius: 167px;
+  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
+  color: #fff;
+  cursor: pointer;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  min-width: 105px;
+  height: 36px;
+  padding: 0;
+  text-align: center;
+  text-decoration: none;
+  transition: all .3s ease;
+  place-content: center;
+}

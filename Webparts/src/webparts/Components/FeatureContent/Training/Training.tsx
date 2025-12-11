@@ -1,11 +1,10 @@
+// src/webparts/featureWheel/Components/FeatureContent/Training/Training.tsx
 
-import * as React from 'react';
-import styles from './Training.module.scss';
-import { WebPartContext } from '@microsoft/sp-webpart-base';
-import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
+import * as React from "react";
+import styles from "./Training.module.scss";
+import { WebPartContext } from "@microsoft/sp-webpart-base";
+import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
-const rightHeadingLine: string = require("../images/rightArrow.svg");
-const leftHeadingLine: string = require("../images/leftArrow.svg");
 const Location_Icon_URL = require("../assets/LocationIcon.png");
 const Time_Icon_URL = require("../assets/clockIcon.png");
 
@@ -14,8 +13,8 @@ export interface ITraining {
   title: string;
   description: string;
   image: string;
-  duration?: string; 
-  level?: string;    
+  duration?: string;
+  level?: string;
   url: string;
   dateDay: string;
   dateMonth: string;
@@ -29,17 +28,17 @@ export interface ITrainingProps {
   onViewAll?: () => void;
   seeAllURL?: string;
   context?: WebPartContext;
-  listTitle?: string;   
-  siteUrl?: string;     
-  topCount?: number;    
+  listTitle?: string;
+  siteUrl?: string;
+  topCount?: number;
 }
 
 const formatTime = (date: Date | null): string => {
-  if (!date) return '';
+  if (!date) return "";
   return date.toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
   });
 };
 
@@ -48,18 +47,17 @@ const formatDateRange = (
   end: Date | null
 ): { day: string; month: string } => {
   if (!start) {
-    return { day: '', month: '' };
+    return { day: "", month: "" };
   }
 
   const month = start
-    .toLocaleString(undefined, { month: 'short' })
+    .toLocaleString(undefined, { month: "short" })
     .toUpperCase();
 
   if (!end || start.toDateString() === end.toDateString()) {
-    // single day
     return {
-      day: start.getDate().toString().padStart(2, '0'),
-      month
+      day: start.getDate().toString().padStart(2, "0"),
+      month,
     };
   }
 
@@ -71,28 +69,30 @@ const formatDateRange = (
     const endDay = end.getDate();
     return {
       day: `${startDay}-${endDay}`,
-      month
+      month,
     };
   }
 
   return {
     day: start.getDate().toString(),
-    month
+    month,
   };
 };
 
 const getInitials = (fullName?: string): string => {
-  if (!fullName) return '';
+  if (!fullName) return "";
   const parts = fullName
-    .split(' ')
+    .split(" ")
     .filter((p) => !!p && p.trim().length > 0);
-  if (parts.length === 0) return '';
+  if (parts.length === 0) return "";
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
   return (parts[0][0] + parts[1][0]).toUpperCase();
 };
 
 const mapItemToTraining = (item: any): ITraining => {
-  const start = item.TIREventStartDate ? new Date(item.TIREventStartDate) : null;
+  const start = item.TIREventStartDate
+    ? new Date(item.TIREventStartDate)
+    : null;
   const end = item.TIREventEndDate ? new Date(item.TIREventEndDate) : null;
 
   const duration =
@@ -100,18 +100,18 @@ const mapItemToTraining = (item: any): ITraining => {
       ? `${formatTime(start)} - ${formatTime(end)}`
       : start
       ? formatTime(start)
-      : '';
+      : "";
 
   const { day: dateDay, month: dateMonth } = formatDateRange(start, end);
 
-  const description = item.TIRLocation || 'Click to view training details';
+  const description = item.TIRLocation || "Click to view training details";
 
-  let imageUrl = 'https://via.placeholder.com/400x250?text=Training';
+  let imageUrl = "https://via.placeholder.com/400x250?text=Training";
   const banner = item.BannerImageUrl;
 
   if (banner) {
-    if (typeof banner === 'string') {
-      const firstPart = banner.split(',')[0].trim();
+    if (typeof banner === "string") {
+      const firstPart = banner.split(",")[0].trim();
       if (firstPart) {
         imageUrl = firstPart;
       }
@@ -120,8 +120,8 @@ const mapItemToTraining = (item: any): ITraining => {
     }
   }
 
-  const joiningUrl: string = (item.TIRJoiningURL || '').trim();
-  const fileUrl: string = item.FileRef || '#';
+  const joiningUrl: string = (item.TIRJoiningURL || "").trim();
+  const fileUrl: string = item.FileRef || "#";
   const url = joiningUrl || fileUrl;
 
   const instructor = item.TIRInstructor;
@@ -132,17 +132,17 @@ const mapItemToTraining = (item: any): ITraining => {
 
   return {
     id: item.Id.toString(),
-    title: item.Title || 'Untitled Training',
+    title: item.Title || "Untitled Training",
     description,
     image: imageUrl,
     duration,
-    level: 'Classroom', 
+    level: "Classroom",
     url,
     dateDay,
     dateMonth,
     location: item.TIRLocation,
     instructorName,
-    instructorTitle
+    instructorTitle,
   };
 };
 
@@ -171,7 +171,7 @@ export const Training: React.FC<ITrainingProps> = (props) => {
 
         const webUrl =
           props.siteUrl || props.context!.pageContext.web.absoluteUrl;
-        const listTitle = props.listTitle || 'Site Pages';
+        const listTitle = props.listTitle || "Site Pages";
         const top = props.topCount || 4;
 
         const fetchTop = Math.max(top * 3, 20);
@@ -203,7 +203,7 @@ export const Training: React.FC<ITrainingProps> = (props) => {
 
         const trainingItems = (json.value || []).filter(
           (item: any) =>
-            item.ContentType && item.ContentType.Name === 'TIR Training'
+            item.ContentType && item.ContentType.Name === "TIR Training"
         );
 
         const mapped: ITraining[] = trainingItems
@@ -212,7 +212,7 @@ export const Training: React.FC<ITrainingProps> = (props) => {
 
         setTrainings(mapped);
       } catch (e: any) {
-        setError(e?.message || 'Unknown error');
+        setError(e?.message || "Unknown error");
         setTrainings([]);
       } finally {
         setLoading(false);
@@ -220,16 +220,49 @@ export const Training: React.FC<ITrainingProps> = (props) => {
     };
 
     loadTrainings();
-  }, [props.trainings, props.context, props.listTitle, props.siteUrl, props.topCount]);
+  }, [
+    props.trainings,
+    props.context,
+    props.listTitle,
+    props.siteUrl,
+    props.topCount,
+  ]);
+
+  // ---------- VIEW ALL URL LOGIC ----------
+  const web = props.context?.pageContext.web;
+
+  const configured = props.seeAllURL;
+  // Default page if property is empty – change this name as you wish
+  const raw = configured || "SitePages/Events-And-Trainings.aspx";
+
+  let viewAllUrl: string | undefined;
+
+  if (raw) {
+    if (raw.startsWith("http")) {
+      viewAllUrl = raw; // absolute
+    } else if (raw.startsWith("/")) {
+      viewAllUrl = raw; // server-relative
+    } else if (web) {
+      // site-relative -> prefix current site
+      const serverRel = web.serverRelativeUrl.replace(/\/$/, "");
+      const rel = raw.replace(/^\//, "");
+      viewAllUrl = `${serverRel}/${rel}`;
+    } else {
+      viewAllUrl = raw;
+    }
+  }
+  // ----------------------------------------
 
   if (loading) {
-    return <div className={styles.trainingContainer}>Loading trainings...</div>;
+    return (
+      <div className={styles.trainingContainer}>Loading trainings...</div>
+    );
   }
 
   if (error) {
     return (
       <div className={styles.trainingContainer}>
-        <p style={{ color: 'red' }}>Error loading trainings: {error}</p>
+        <p style={{ color: "red" }}>Error loading trainings: {error}</p>
       </div>
     );
   }
@@ -262,7 +295,7 @@ export const Training: React.FC<ITrainingProps> = (props) => {
 
               {/* mode pill – Classroom */}
               <div className={styles.modeBadge}>
-                {training.level || 'Classroom'}
+                {training.level || "Classroom"}
               </div>
 
               {/* date card – 6-7 / OCT */}
@@ -283,10 +316,12 @@ export const Training: React.FC<ITrainingProps> = (props) => {
                   <div className={styles.metaItem}>
                     <img
                       src={Time_Icon_URL}
-                      className={`${styles.metaIcon}`}
+                      className={styles.metaIcon}
                       alt=""
                     />
-                    <span className={styles.metaText}>{training.duration}</span>
+                    <span className={styles.metaText}>
+                      {training.duration}
+                    </span>
                   </div>
                 )}
 
@@ -328,10 +363,10 @@ export const Training: React.FC<ITrainingProps> = (props) => {
                 className={styles.requestButton}
                 type="button"
                 onClick={(e) => {
-                  e.preventDefault(); // don't navigate the <a> card
+                  e.preventDefault();
                   alert(
                     `Your request for "${training.title}" has been captured.\n\n` +
-                    "In the next phase, this button will open the actual approval workflow."
+                      "In the next phase, this button will open the actual approval workflow."
                   );
                 }}
               >
@@ -342,12 +377,24 @@ export const Training: React.FC<ITrainingProps> = (props) => {
         ))}
       </div>
 
-      {/* View All Button */}
-      <div className={styles.buttonContainer}>
-        <a href={props.seeAllURL} className={styles.viewAllButton}>
-          View All
-        </a>
-      </div>
+      {/* View All Button – like other components */}
+      {(props.onViewAll || viewAllUrl) && (
+        <div className={styles.buttonContainer}>
+          {props.onViewAll ? (
+            <button
+              type="button"
+              className={styles.viewAllButton}
+              onClick={props.onViewAll}
+            >
+              View All
+            </button>
+          ) : viewAllUrl ? (
+            <a href={viewAllUrl} className={styles.viewAllButton}>
+              View All
+            </a>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 };
