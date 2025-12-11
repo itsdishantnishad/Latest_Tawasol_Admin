@@ -158,54 +158,46 @@ const Wheel: React.FC<FeatureWheelProps> = ({ onFeatureSelect, selectedFeature }
 
             {/* Carousel container - cards arranged in an arc */}
             <div className={styles.carouselContainer}>
-                {visibleCards.map((card) => {
-                    const isSelected = card.position === 0;
-                    const position = card.position;
-                    // Only allow clicks on selected card and immediate neighbors (left: -1, right: +1)
-                    const isClickable = Math.abs(position) <= 1;
+            {visibleCards.map((card) => {
+            const isSelected = card.position === 0;
+            const position = card.position;
 
-                    // Calculate arc position
-                    // Distribute all features across the arc
-                    const startAngle = -120;
-                    const endAngle = 120;
-                    const angleRange = endAngle - startAngle;
-                    // Normalize position to 0-1 range, then map to angle range
-                    const normalizedPosition = (position + maxPosition) / (maxPosition * 2);
-                    const angle = startAngle + angleRange * normalizedPosition;
+            // Calculate arc position
+            const startAngle = -120;
+            const endAngle = 120;
+            const angleRange = endAngle - startAngle;
 
-                    // Arc radius
-                    const radius = 650;
-                    const radians = (angle * Math.PI) / 180;
-                    const x = Math.sin(radians) * radius;
-                    const y = -Math.cos(radians) * radius + radius + 0;
+            const normalizedPosition = (position + maxPosition) / (maxPosition * 2);
+            const angle = startAngle + angleRange * normalizedPosition;
 
-                    // Card rotation to follow arc
-                    const cardRotation = angle;
-                    const scale = isSelected ? 1.05 : 0.9;
+            const radius = 650;
+            const radians = (angle * Math.PI) / 180;
+            const x = Math.sin(radians) * radius;
+            const y = -Math.cos(radians) * radius + radius;
 
-                    return (
-                        <button
-                            key={card.id}
-                            onClick={() => isClickable && handleCardClick(card.id)}
-                            disabled={!isClickable}
-                            className={`${styles.card} ${isClickable ? styles.cardClickable : styles.cardDisabled}`}
-                            style={getCardStyle(x, y, cardRotation, scale)}
-                        >
-                            <div
-                                className={`${styles.cardInner} ${bgClassById[card.id] || ""} ${isSelected ? styles.cardSelected : ""}`}
-                            >
-                                <div className={styles.cardTextContainer}>
-                                    <div className={`${styles.cardTitle}`}>
-                                        {card.title}
-                                    </div>
-                                    <div className={`${styles.cardSubtitle}`}>
-                                        {card.subtitle}
-                                    </div>
-                                </div>
-                            </div>
-                        </button>
-                    );
-                })}
+            const cardRotation = angle;
+            const scale = isSelected ? 1.05 : 0.9;
+
+            return (
+                <button
+                key={card.id}
+                onClick={() => handleCardClick(card.id)}   // 👈 always clickable
+                className={`${styles.card} ${styles.cardClickable}`}  // 👈 or just styles.card
+                style={getCardStyle(x, y, cardRotation, scale)}
+                >
+                <div
+                    className={`${styles.cardInner} ${
+                    bgClassById[card.id] || ""
+                    } ${isSelected ? styles.cardSelected : ""}`}
+                >
+                    <div className={styles.cardTextContainer}>
+                    <div className={styles.cardTitle}>{card.title}</div>
+                    <div className={styles.cardSubtitle}>{card.subtitle}</div>
+                    </div>
+                </div>
+                </button>
+            );
+            })}
             </div>
         </div>
     )

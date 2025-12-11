@@ -96,7 +96,7 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
 
         // If nothing configured, default to a page in the current site:
         //   /sites/ThisSite/SitePages/Lets-Celebrate.aspx
-        const raw = configured || "SitePages/Lets-Celebrate.aspx";
+        const raw = configured || "SitePages/Dashboards.aspx";
 
         // Absolute URL from anywhere -> keep its path but move to current tenant
         if (/^https?:\/\//i.test(raw)) {

@@ -34,11 +34,11 @@ const FeatureTitle: React.FC<FeatureTitleProps> = ({ header, subHeader }) => {
   return (
     <div className={styles.titleContainer}>
       <div className={styles.headerContent}>
-        <img src={rightHeadingLine} alt="" className={styles.desktopImage}/>
-        <img src={rightHeadingLineMobile} alt="" className={styles.mobImage}/>
+        <img src={rightHeadingLine} alt="" className={styles.desktopImage} />
+        <img src={rightHeadingLineMobile} alt="" className={styles.mobImage} />
         <h2 className={styles.title}>{header}</h2>
-        <img src={leftHeadingLine} alt="" className={styles.desktopImage}/>
-        <img src={leftHeadingLineMobile} alt="" className={styles.mobImage}/>
+        <img src={leftHeadingLine} alt="" className={styles.desktopImage} />
+        <img src={leftHeadingLineMobile} alt="" className={styles.mobImage} />
       </div>
       <p className={styles.subtitle}>
         {subHeader}
@@ -100,7 +100,7 @@ const featureTitleContent: Record<string, { header: string, subHeader: string }>
     header: "Beverage Menu",
     subHeader: "Find your favourite drink to fuel your day"
   }
-}
+};
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
   const [selectedFeature, setSelectedFeature] = useState('gallery');
@@ -113,48 +113,102 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props: any) => {
   const renderFeatureContent = () => {
     switch (selectedFeature) {
       case 'gallery':
-        return <Gallery seeAllURL={props.imageGallery} onViewAll={handleViewAll} />
+        return (
+          <Gallery
+            context={props.context}
+            seeAllURL={props.imageGallery}   // web part property pointing to Image Gallery page
+            onViewAll={handleViewAll}
+          />
+        );
+
       case 'documents':
-        return <Documents seeAllURL={props.documents} onViewAll={handleViewAll} />;
+        return (
+          <Documents
+            context={props.context}
+            seeAllURL={props.documents}     // web part property for Policies & Procedures page
+            onViewAll={handleViewAll}
+          />
+        );
+
       case 'events':
-        return <Events 
+        return (
+          <Events
+            context={props.context}
+            seeAllURL={props.upcomingEvents}
+            onViewAll={handleViewAll}
+            listTitle="Site Pages"
+            topCount={4}
+          />
+        );
 
-         context={props.context}
-         seeAllURL={props.upcomingEvents}
-         onViewAll={handleViewAll}
-         listTitle="Site Pages"
-         topCount={4}
-
-           />;
       case 'employee_events':
-        return <LetsCelebrate context={props.context} seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />;
+        return (
+          <LetsCelebrate
+            context={props.context}
+            seeAllURL={props.letsCelebrate}
+            onViewAll={handleViewAll}
+          />
+        );
+
       case 'meetings':
-        return <Meeting seeAllURL={props.meeting} onViewAll={handleViewAll} />;
+        return (
+          <Meeting
+            context={props.context}
+            seeAllURL={props.meeting}      // web part property for Meetings page
+            onViewAll={handleViewAll}
+          />
+        );
+
       case 'service_links':
         return <ServiceLinks context={props.context} />;
+
       case 'forms':
         return <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />;
+
       case 'dashboard':
-        return <Dashboard context={props.context} seeAllURL={props.dashboard} onViewAll={handleViewAll} />;
+        return (
+          <Dashboard
+            context={props.context}
+            seeAllURL={props.dashboard}
+            onViewAll={handleViewAll}
+          />
+        );
+
       case 'offers':
         return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
+
       case 'training':
         return (
-               <Training
-                context={props.context}                 
-                seeAllURL={props.trainingAndDevelopment} 
-                topCount={4}                             
-                listTitle="Site Pages"                
-                siteUrl="https://orgessence.sharepoint.com/sites/IntranetRevampTawasol" 
-                />
-                );
+          <Training
+            context={props.context}
+            seeAllURL={props.trainingAndDevelopment}
+            topCount={4}
+            listTitle="Site Pages"
+            siteUrl="https://orgessence.sharepoint.com/sites/IntranetRevampTawasol"
+          />
+        );
 
       case 'about_dhre':
-        return <AboutDHRE />;
+        // 🔹 IMPORTANT: pass context here (fix for TS2741)
+        return (
+          <AboutDHRE
+            context={props.context}
+            // Optionally later: seeAllURL={props.aboutDHRE}
+          />
+        );
+
       case 'tasks':
-        return <TaskApprovals />;
+        return (
+          <TaskApprovals
+            context={props.context}
+          />
+        );
+
       case 'beverage_menu':
         return <BeverageMenu />;
+
+      default:
+        return null;
     }
   };
 
