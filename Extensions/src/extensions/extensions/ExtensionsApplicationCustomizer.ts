@@ -199,7 +199,7 @@ export default class ExtensionsApplicationCustomizer
     // this.hideVivaEngageViewAll();
     this.hideVivaEngageConversationsText();
     // Amplitude tracking for every modern Site Page
-    this.hideVivaEngageViewAll();
+    // this.hideVivaEngageViewAll();
     const urls = resolveUrls(this.webUrl);
 
     // Onboarding
