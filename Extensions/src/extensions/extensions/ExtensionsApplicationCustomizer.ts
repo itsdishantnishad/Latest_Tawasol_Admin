@@ -198,6 +198,7 @@ export default class ExtensionsApplicationCustomizer
     document.body.style.background = '#FFF4EA';
     // Amplitude tracking for every modern Site Page
     this.hideVivaEngageViewAll();
+    this.hideVivaEngageConversationsText();
     const urls = resolveUrls(this.webUrl);
 
     // Onboarding
@@ -386,37 +387,63 @@ export default class ExtensionsApplicationCustomizer
     window.removeEventListener('resize', this.updateSuggest);
     this.onboarding?.dispose();
   }
-  /*  hiding view all buttin */
+  
 
-  private hideVivaEngageViewAll(): void {
-    const hideViewAll = () => {
-      const allLinks = document.querySelectorAll('a');
+  /* Hide Viva Engage "View all" button only */
+private hideVivaEngageViewAll(): void {
 
-      allLinks.forEach((link) => {
-        const text = link.textContent?.trim().toLowerCase();
-        if (text === 'view all' && !link.classList.contains('hideViewAll')) {
-          (link as HTMLElement).style.display = 'none';
-          (link as HTMLElement).style.visibility = 'hidden';
-          link.classList.add('hideViewAll');
-        }
-      });
-      const observer = new MutationObserver(() => {
-        const links = document.querySelectorAll('a:not(.hideViewAll)');
-        links.forEach((link) => {
-          const text = link.textContent?.trim().toLowerCase();
-          if (text === 'view all') {
-            (link as HTMLElement).style.display = 'none';
-            (link as HTMLElement).style.visibility = 'hidden';
-            link.classList.add('hideViewAll');
-          }
-        });
-      });
+  const hide = () => {
+    const links = document.querySelectorAll('a:not(.hideViewAll)');
 
-      observer.observe(document.body, { childList: true, subtree: true });
-    };
-    hideViewAll();
-    setInterval(hideViewAll, 3000);
+    links.forEach(link => {
+      const text = link.textContent?.trim().toLowerCase();
+      if (text !== 'view all') return;
+
+      // Check if this element is part of Viva Engage
+      if (!this.isVivaEngageElement(link)) return;
+
+      // Hide the element
+      (link as HTMLElement).style.setProperty('display', 'none', 'important');
+      (link as HTMLElement).style.setProperty('visibility', 'hidden', 'important');
+      link.classList.add('hideViewAll');
+    });
+  };
+
+  hide();
+
+  new MutationObserver(() => hide()).observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  setInterval(hide, 2000);
+}
+
+
+/* Only checks Viva Engage context */
+private isVivaEngageElement(element: Element): boolean {
+  let node: Element | null = element;
+
+  while (node && node !== document.body) {
+    const cls = (node.className || '').toString().toLowerCase();
+    const id = (node.id || '').toLowerCase();
+
+    // Strong, clean indicators of Viva Engage
+    if (
+      cls.includes('viva') ||
+      cls.includes('engage') ||
+      cls.includes('yammer') ||
+      id.includes('viva') ||
+      id.includes('engage') ||
+      id.includes('yammer')
+    ) {
+      return true;
+    }
+    node = node.parentElement;
   }
+
+  return false;
+}
 
   /* find conversation id */
   private hideVivaEngageConversationsText(): void {
