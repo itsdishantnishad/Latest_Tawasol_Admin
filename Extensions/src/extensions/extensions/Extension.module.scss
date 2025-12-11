@@ -274,6 +274,47 @@
 
 .TIRSocials { display: inline-flex; gap: 16px; justify-self: end; }
 .TIRSocials img { width: 20px; height: 20px; }
+.TIRFooterIcon {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+/* ===================== SOCIAL ICONS ===================== */
+.TIRSocials {
+  display: inline-flex;
+  gap: 20px;
+  justify-self: end;
+  align-items: center;
+}
+
+.TIRSocialLink {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s ease;
+}
+
+.TIRSocialLink:hover {
+  background: #ffffff;   /* white circle on hover */
+}
+
+.TIRSocialLink img {
+  width: auto;
+  height: auto;
+  max-width: 26px;
+  max-height: 26px;
+  min-width: 20px;
+  min-height: 20px;
+  filter: brightness(0) invert(1);   /* white by default */
+  transition: filter 0.25s ease;
+}
+
+.TIRSocialLink:hover img {
+  filter: brightness(1) invert(0);   /* black icon on white circle */
+}
 
 /* ===================== SUGGESTIONS ===================== */
 .TIRSuggestHost {
