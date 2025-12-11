@@ -148,7 +148,15 @@ export default class ExtensionsApplicationCustomizer
       setTimeout(() => void this.configureAmplitude(), 1000);
     }
   }
-
+  /** Hide the sharepoint left sitebar */
+  private hideAppBar(): void {
+    // document.getElementById('sp-appBar').style.display = 'none';
+    const appBar = document.getElementById('sp-appBar');
+    if (appBar) {
+      appBar.style.display = 'none';
+    }
+  }
+  /** Configure Amplitude user + log "SharePoint Page Viewed" with pageType from CT */
   private async configureAmplitude(): Promise<void> {
     const win = window as unknown as AmplitudeWindow;
     if (!win.amplitude?.getInstance) return;
@@ -180,15 +188,18 @@ export default class ExtensionsApplicationCustomizer
       contentTypeName
     });
   }
-
+ 
   public async onInit(): Promise<void> {
     if (!this.shouldRender()) return;
-
+  // 👉 Hide SharePoint app bar
+    this.hideAppBar();
     this.initAmplitude();
     this.injectFont();
     document.body.style.background = '#FFF4EA';
     // this.hideVivaEngageViewAll();
     this.hideVivaEngageConversationsText();
+    // Amplitude tracking for every modern Site Page
+    this.hideVivaEngageViewAll();
     const urls = resolveUrls(this.webUrl);
 
     // Onboarding
