@@ -211,8 +211,13 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
       case "tasks":
         return <TaskApprovals context={props.context} />;
 
-      case "beverage_menu":
-        return <BeverageMenu />;
+      case 'beverage_menu':
+        return (
+          <BeverageMenu
+            context={props.context}
+            seeAllURL={props.beverageMenu} // add this prop to webpart if needed
+          />
+        );
 
       default:
         return null;

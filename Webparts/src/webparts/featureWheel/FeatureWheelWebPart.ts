@@ -23,6 +23,9 @@ export interface IFeatureWheelWebPartProps {
   meeting: string;
   interactiveForms: string;
   dashboard: string;
+
+  // 🔹 NEW – Beverage Menu URL
+  beverageMenu: string;
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
@@ -39,7 +42,8 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
         meeting: this.properties.meeting,
         interactiveForms: this.properties.interactiveForms,
         dashboard: this.properties.dashboard,
-        context: this.context
+        beverageMenu: this.properties.beverageMenu,
+        context: this.context,
       }
     );
 
@@ -47,7 +51,9 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
   }
 
   protected onInit(): Promise<void> {
-    return this._getEnvironmentMessage().then(() => { return; });
+    return this._getEnvironmentMessage().then(() => {
+      return;
+    });
   }
 
   private _getEnvironmentMessage(): Promise<string> {
@@ -111,7 +117,8 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
                   label: "Please enter URL for 'Let's Celebrate' see all",
                 }),
                 PropertyPaneTextField("trainingAndDevelopment", {
-                  label: "Please enter URL for 'Training & Development' see all",
+                  label:
+                    "Please enter URL for 'Training & Development' see all",
                 }),
                 PropertyPaneTextField("upcomingEvents", {
                   label: "Please enter URL for 'Upcoming events' see all",
@@ -134,6 +141,9 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
                 }),
                 PropertyPaneTextField("dashboard", {
                   label: "Please enter URL for 'Dashboard' view all",
+                }),
+                PropertyPaneTextField("beverageMenu", {
+                  label: "Please enter URL for 'Beverage Menu' view all",
                 }),
               ],
             },
