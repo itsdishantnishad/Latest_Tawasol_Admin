@@ -187,7 +187,7 @@ export default class ExtensionsApplicationCustomizer
     this.initAmplitude();
     this.injectFont();
     document.body.style.background = '#FFF4EA';
-    this.hideVivaEngageViewAll();
+    // this.hideVivaEngageViewAll();
     this.hideVivaEngageConversationsText();
     const urls = resolveUrls(this.webUrl);
 
@@ -379,35 +379,35 @@ export default class ExtensionsApplicationCustomizer
   }
   /*  hiding view all buttin */
 
-  private hideVivaEngageViewAll(): void {
-    const hideViewAll = () => {
-      const allLinks = document.querySelectorAll('a');
+  // private hideVivaEngageViewAll(): void {
+  //   const hideViewAll = () => {
+  //     const allLinks = document.querySelectorAll('a');
 
-      allLinks.forEach((link) => {
-        const text = link.textContent?.trim().toLowerCase();
-        if (text === 'view all' && !link.classList.contains('hideViewAll')) {
-          (link as HTMLElement).style.display = 'none';
-          (link as HTMLElement).style.visibility = 'hidden';
-          link.classList.add('hideViewAll');
-        }
-      });
-      const observer = new MutationObserver(() => {
-        const links = document.querySelectorAll('a:not(.hideViewAll)');
-        links.forEach((link) => {
-          const text = link.textContent?.trim().toLowerCase();
-          if (text === 'view all') {
-            (link as HTMLElement).style.display = 'none';
-            (link as HTMLElement).style.visibility = 'hidden';
-            link.classList.add('hideViewAll');
-          }
-        });
-      });
+  //     allLinks.forEach((link) => {
+  //       const text = link.textContent?.trim().toLowerCase();
+  //       if (text === 'view all' && !link.classList.contains('hideViewAll')) {
+  //         (link as HTMLElement).style.display = 'none';
+  //         (link as HTMLElement).style.visibility = 'hidden';
+  //         link.classList.add('hideViewAll');
+  //       }
+  //     });
+  //     const observer = new MutationObserver(() => {
+  //       const links = document.querySelectorAll('a:not(.hideViewAll)');
+  //       links.forEach((link) => {
+  //         const text = link.textContent?.trim().toLowerCase();
+  //         if (text === 'view all') {
+  //           (link as HTMLElement).style.display = 'none';
+  //           (link as HTMLElement).style.visibility = 'hidden';
+  //           link.classList.add('hideViewAll');
+  //         }
+  //       });
+  //     });
 
-      observer.observe(document.body, { childList: true, subtree: true });
-    };
-    hideViewAll();
-    setInterval(hideViewAll, 3000);
-  }
+  //     observer.observe(document.body, { childList: true, subtree: true });
+  //   };
+  //   hideViewAll();
+  //   setInterval(hideViewAll, 3000);
+  // }
 
   /* find conversation id */
   private hideVivaEngageConversationsText(): void {
