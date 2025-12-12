@@ -51,6 +51,31 @@
   margin: 0;
 }
 
+/* ====== NEW: 4 SVG images layout ====== */
+.imageGrid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 40px; // thoda space images ke neeche
+}
+
+.imageWrapper {
+  max-width: 280px;
+  flex: 0 1 280px;
+}
+
+.meetingImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ====== OLD carousel styles (ab use nahi ho rahe, but safe to keep) ====== */
+
 .carouselContainer {
   position: relative;
   width: 100%;
@@ -171,7 +196,7 @@
 
 .buttonContainer {
   text-align: center;
-  
+
   a {
     text-decoration: none;
   }
@@ -249,5 +274,15 @@
 
   .meetingCard {
     width: 240px;
+  }
+
+  /* Mobile tweak for images */
+  .imageGrid {
+    gap: 16px;
+  }
+
+  .imageWrapper {
+    max-width: 160px;
+    flex: 0 1 160px;
   }
 }
