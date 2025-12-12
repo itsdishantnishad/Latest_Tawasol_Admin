@@ -2,7 +2,9 @@ import * as React from 'react';
 import styles from './Offers.module.scss';
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
-
+const EmployeePrivilegesIcon = require("../assets/EP.png");
+const MedicalnsuranceIcon = require("../assets/MedicalInsurance.svg");
+const EmployeeOffersIcon = require("../assets/EmployeeOffers.svg")
 export interface IOffer {
     id: string;
     title: string;
@@ -23,30 +25,30 @@ export interface IOffersProps {
 const defaultOffers: IOffer[] = [
     {
         id: '1',
-        title: 'Al Mandhar',
+        title: 'Employee Offers',
         location: 'Jumeirah Al Qasar',
         discount: 'Upto 50% Discount',
-        image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400',
+        image: EmployeeOffersIcon,
         category: 'Food',
         isFavorite: false,
         url: '#'
     },
     {
         id: '2',
-        title: 'Al Mandhar',
+        title: 'Medical Insurance',
         location: 'Jumeirah Al Qasar',
         discount: 'Upto 50% Discount',
-        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400',
+        image: MedicalnsuranceIcon,
         category: 'Restaurant',
         isFavorite: false,
         url: '#'
     },
     {
         id: '3',
-        title: 'Al Mandhar',
+        title: 'Employee Privileges',
         location: 'Jumeirah Al Qasar',
         discount: 'Upto 50% Discount',
-        image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400',
+        image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400',
         category: 'Travel',
         isFavorite: true,
         url: '#'
@@ -63,10 +65,10 @@ const defaultOffers: IOffer[] = [
     },
     {
         id: '5',
-        title: 'Al Mandhar',
+        title: 'Employee Privileges',
         location: 'Jumeirah Al Qasar',
         discount: 'Upto 50% Discount',
-        image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400',
+        image: EmployeePrivilegesIcon,
         category: 'Food',
         isFavorite: false,
         url: '#'
