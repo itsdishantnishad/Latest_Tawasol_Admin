@@ -28,8 +28,20 @@ export interface ITrainingProps {
   onViewAll?: () => void;
   seeAllURL?: string;
   context?: WebPartContext;
+
+  /**
+   * Usually "Site Pages". Keep this if you want,
+   * but note list titles can differ in localized tenants.
+   */
   listTitle?: string;
+
+  /**
+   * OPTIONAL: if you pass a siteUrl, it will only be honored
+   * if it's the SAME tenant/origin as the current page.
+   * (prevents accidental cross-tenant 403)
+   */
   siteUrl?: string;
+
   topCount?: number;
 }
 
@@ -46,9 +58,7 @@ const formatDateRange = (
   start: Date | null,
   end: Date | null
 ): { day: string; month: string } => {
-  if (!start) {
-    return { day: "", month: "" };
-  }
+  if (!start) return { day: "", month: "" };
 
   const month = start
     .toLocaleString(undefined, { month: "short" })
@@ -65,10 +75,8 @@ const formatDateRange = (
     start.getMonth() === end.getMonth() &&
     start.getFullYear() === end.getFullYear()
   ) {
-    const startDay = start.getDate();
-    const endDay = end.getDate();
     return {
-      day: `${startDay}-${endDay}`,
+      day: `${start.getDate()}-${end.getDate()}`,
       month,
     };
   }
@@ -84,15 +92,15 @@ const getInitials = (fullName?: string): string => {
   const parts = fullName
     .split(" ")
     .filter((p) => !!p && p.trim().length > 0);
+
   if (parts.length === 0) return "";
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+
   return (parts[0][0] + parts[1][0]).toUpperCase();
 };
 
 const mapItemToTraining = (item: any): ITraining => {
-  const start = item.TIREventStartDate
-    ? new Date(item.TIREventStartDate)
-    : null;
+  const start = item.TIREventStartDate ? new Date(item.TIREventStartDate) : null;
   const end = item.TIREventEndDate ? new Date(item.TIREventEndDate) : null;
 
   const duration =
@@ -111,10 +119,8 @@ const mapItemToTraining = (item: any): ITraining => {
 
   if (banner) {
     if (typeof banner === "string") {
-      const firstPart = banner.split(",")[0].trim();
-      if (firstPart) {
-        imageUrl = firstPart;
-      }
+      const firstPart = banner.split(",")[0]?.trim();
+      if (firstPart) imageUrl = firstPart;
     } else if (banner.Url) {
       imageUrl = banner.Url;
     }
@@ -127,11 +133,10 @@ const mapItemToTraining = (item: any): ITraining => {
   const instructor = item.TIRInstructor;
   const instructorName: string | undefined =
     instructor && (instructor.Title || instructor.Name);
-  const instructorTitle: string | undefined =
-    instructor && instructor.JobTitle;
+  const instructorTitle: string | undefined = instructor && instructor.JobTitle;
 
   return {
-    id: item.Id.toString(),
+    id: item.Id?.toString() || "",
     title: item.Title || "Untitled Training",
     description,
     image: imageUrl,
@@ -169,8 +174,32 @@ export const Training: React.FC<ITrainingProps> = (props) => {
         setLoading(true);
         setError(null);
 
-        const webUrl =
-          props.siteUrl || props.context!.pageContext.web.absoluteUrl;
+        // ✅ Always prefer current site
+        const ctxWebUrl = props.context!.pageContext.web.absoluteUrl;
+        let webUrl = ctxWebUrl;
+
+        // ✅ Only honor props.siteUrl when it's SAME tenant/origin
+        if (props.siteUrl) {
+          try {
+            const ctxOrigin = new URL(ctxWebUrl).origin;
+            const cfg = new URL(props.siteUrl);
+
+            if (cfg.origin === ctxOrigin) {
+              webUrl = cfg.href.replace(/\/$/, "");
+            } else {
+              // Prevent cross-tenant calls -> 403
+              console.warn(
+                "[Training] Ignoring siteUrl because it is cross-tenant:",
+                cfg.origin,
+                "!=",
+                ctxOrigin
+              );
+            }
+          } catch {
+            // ignore invalid URL
+          }
+        }
+
         const listTitle = props.listTitle || "Site Pages";
         const top = props.topCount || 4;
 
@@ -191,7 +220,10 @@ export const Training: React.FC<ITrainingProps> = (props) => {
           );
 
         if (!response.ok) {
-          throw new Error(`SharePoint request failed: ${response.statusText}`);
+          const body = await response.text();
+          throw new Error(
+            `SharePoint request failed (${response.status}): ${body || response.statusText}`
+          );
         }
 
         const json = await response.json();
@@ -201,6 +233,7 @@ export const Training: React.FC<ITrainingProps> = (props) => {
           return;
         }
 
+        // Keep your CT filter
         const trainingItems = (json.value || []).filter(
           (item: any) =>
             item.ContentType && item.ContentType.Name === "TIR Training"
@@ -232,7 +265,6 @@ export const Training: React.FC<ITrainingProps> = (props) => {
   const web = props.context?.pageContext.web;
 
   const configured = props.seeAllURL;
-  // Default page if property is empty – change this name as you wish
   const raw = configured || "SitePages/Events-And-Trainings.aspx";
 
   let viewAllUrl: string | undefined;
@@ -254,9 +286,7 @@ export const Training: React.FC<ITrainingProps> = (props) => {
   // ----------------------------------------
 
   if (loading) {
-    return (
-      <div className={styles.trainingContainer}>Loading trainings...</div>
-    );
+    return <div className={styles.trainingContainer}>Loading trainings...</div>;
   }
 
   if (error) {
@@ -277,7 +307,6 @@ export const Training: React.FC<ITrainingProps> = (props) => {
 
   return (
     <div className={styles.trainingContainer}>
-      {/* Training Grid */}
       <div className={styles.trainingGrid}>
         {trainings.map((training) => (
           <a
@@ -293,12 +322,10 @@ export const Training: React.FC<ITrainingProps> = (props) => {
               />
               <div className={styles.imageOverlay} />
 
-              {/* mode pill – Classroom */}
               <div className={styles.modeBadge}>
                 {training.level || "Classroom"}
               </div>
 
-              {/* date card – 6-7 / OCT */}
               {training.dateDay && training.dateMonth && (
                 <div className={styles.dateBadge}>
                   <div className={styles.dateDay}>{training.dateDay}</div>
@@ -310,18 +337,11 @@ export const Training: React.FC<ITrainingProps> = (props) => {
             <div className={styles.trainingInfo}>
               <h3 className={styles.trainingTitle}>{training.title}</h3>
 
-              {/* time + location rows */}
               <div className={styles.metaRow}>
                 {training.duration && (
                   <div className={styles.metaItem}>
-                    <img
-                      src={Time_Icon_URL}
-                      className={styles.metaIcon}
-                      alt=""
-                    />
-                    <span className={styles.metaText}>
-                      {training.duration}
-                    </span>
+                    <img src={Time_Icon_URL} className={styles.metaIcon} alt="" />
+                    <span className={styles.metaText}>{training.duration}</span>
                   </div>
                 )}
 
@@ -332,14 +352,11 @@ export const Training: React.FC<ITrainingProps> = (props) => {
                       className={styles.metaIcon}
                       alt=""
                     />
-                    <span className={styles.metaText}>
-                      {training.location}
-                    </span>
+                    <span className={styles.metaText}>{training.location}</span>
                   </div>
                 )}
               </div>
 
-              {/* instructor row */}
               {training.instructorName && (
                 <div className={styles.instructorRow}>
                   <div className={styles.instructorAvatar}>
@@ -358,7 +375,6 @@ export const Training: React.FC<ITrainingProps> = (props) => {
                 </div>
               )}
 
-              {/* bottom CTA button */}
               <button
                 className={styles.requestButton}
                 type="button"
@@ -377,7 +393,6 @@ export const Training: React.FC<ITrainingProps> = (props) => {
         ))}
       </div>
 
-      {/* View All Button – like other components */}
       {(props.onViewAll || viewAllUrl) && (
         <div className={styles.buttonContainer}>
           {props.onViewAll ? (
