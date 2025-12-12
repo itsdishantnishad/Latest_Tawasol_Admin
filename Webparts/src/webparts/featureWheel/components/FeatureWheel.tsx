@@ -130,7 +130,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
       case "documents":
         return (
           <Documents
-          //  context={props.context}
+            // context={props.context}
             seeAllURL={props.documents}
             onViewAll={handleViewAll}
           />
@@ -200,8 +200,6 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
             seeAllURL={props.trainingAndDevelopment}
             topCount={4}
             listTitle="Site Pages"
-            // data source site – keep as you had it
-            siteUrl="https://orgessence.sharepoint.com/sites/IntranetRevampTawasol"
           />
         );
 
