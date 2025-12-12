@@ -14,6 +14,28 @@ export interface ISuggestItem {
   kind: SuggestKind;
 }
 
+/**
+ * ================================================
+ * PROFILE PAGE CONFIG
+ * ================================================
+ *
+ * Only change PROFILE_PAGE_NAME (and optionally PROFILE_PAGE_FOLDER).
+ *
+ * Example 1 – custom modern page in current site:
+ *   PROFILE_PAGE_FOLDER = 'SitePages';
+ *   PROFILE_PAGE_NAME   = 'profile-page.aspx';
+ *   => https://<current-site>/SitePages/profile-page.aspx?accountname=<upn>
+ *
+ * Example 2 – classic user profile page:
+ *   USE_CLASSIC_PROFILE = true;
+ *   => https://<current-site>/_layouts/15/userprofile.aspx?accountname=<upn>
+ */
+const PROFILE_PAGE_FOLDER: string = 'SitePages';        // 'SitePages' or 'Pages' etc.
+const PROFILE_PAGE_NAME: string   = 'profile.aspx'; // only file name to change
+
+// Set this true if you want classic userprofile.aspx instead of custom page.
+const USE_CLASSIC_PROFILE: boolean = false;
+
 export class SearchService {
   private graph?: MSGraphClientV3;
 
@@ -34,19 +56,46 @@ export class SearchService {
     return (text || '').replace(/["']/g, '');
   }
 
+  /**
+   * Build the profile URL for a given user UPN/email.
+   * - Tenant + site come from this.webUrl (dynamic)
+   * - Only PROFILE_PAGE_NAME is edited manually
+   */
+  private buildPersonProfileUrl(upn: string): string {
+    if (!upn) return '#';
+
+    // Current web URL without trailing slash
+    const baseWeb = this.webUrl.replace(/\/$/, '');
+
+    if (USE_CLASSIC_PROFILE) {
+      // Classic profile page under _layouts
+      const classicUrl = `${baseWeb}/_layouts/15/userprofile.aspx`;
+      const sep = classicUrl.indexOf('?') >= 0 ? '&' : '?';
+      return `${classicUrl}${sep}accountname=${encodeURIComponent(upn)}`;
+    }
+
+    // Custom modern page: <current-site>/<folder>/<page>.aspx
+    const folder = PROFILE_PAGE_FOLDER.replace(/^\/|\/$/g, ''); // no leading/trailing slash
+    const page   = PROFILE_PAGE_NAME.replace(/^\//, '');        // no leading slash
+
+    const pagePath = `${baseWeb}/${folder}/${page}`;
+    const sep = pagePath.indexOf('?') >= 0 ? '&' : '?';
+
+    return `${pagePath}${sep}accountname=${encodeURIComponent(upn)}`;
+  }
+
   // ------------------------------------------------------------------
   // PEOPLE SUGGESTIONS  (Graph directory search: /users?$search=)
   // ------------------------------------------------------------------
   /**
    * Uses Microsoft Graph directory search:
    *   GET /users?$search="text"&$top=n&$count=true
-   * Requires: User.ReadBasic.All or User.Read.All (you already have).
    *
    * Returns:
    *  - title:     displayName
    *  - subtitle:  "jobTitle - department"
    *  - imageUrl:  userphoto.aspx (built from UPN/mail)
-   *  - url:       mailto:...
+   *  - url:       profile page (custom or classic) via buildPersonProfileUrl
    */
   public async queryPeople(text: string, top: number): Promise<ISuggestItem[]> {
     const q = text.trim();
@@ -90,18 +139,19 @@ export class SearchService {
             )}`
           : '';
 
+        const personUrl = this.buildPersonProfileUrl(upn);
+
         return {
           title: displayName || upn || '(no name)',
           subtitle,
-          url: upn ? `mailto:${upn}` : '#',
+          url: personUrl,
           imageUrl: photoUrl || undefined,
           kind: 'person' as const
         };
       });
 
       return items;
-    } catch (e) {
-      // Optional: log if you want to see failures during dev
+    } catch {
       // console.error('[SearchService.queryPeople] Graph error', e);
       return [];
     }
