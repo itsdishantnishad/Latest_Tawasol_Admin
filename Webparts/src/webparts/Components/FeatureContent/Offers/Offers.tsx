@@ -141,7 +141,7 @@ export const Offers: React.FC<IOffersProps> = (props) => {
 
             {/* View All Button */}
             <div className={styles.buttonContainer}>
-                <a href={props.seeAllURL} className={styles.viewAllButton}>
+                <a href="https://dubaiholding.sharepoint.com/sites/TawasolUAT/SitePages/Offers-&-Benefits.aspx" className={styles.viewAllButton}>
                     View All
                 </a>
                 {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>

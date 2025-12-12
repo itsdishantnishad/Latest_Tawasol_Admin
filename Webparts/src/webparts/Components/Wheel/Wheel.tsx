@@ -1,6 +1,8 @@
-import * as React from 'react';
-import styles from './Wheel.module.scss';
+// src/webparts/featureWheel/Components/Wheel/Wheel.tsx
+
+import * as React from "react";
 import type { CSSProperties } from "react";
+import styles from "./Wheel.module.scss";
 
 type WheelCardStyle = CSSProperties & {
   "--x": string;
@@ -18,13 +20,13 @@ const getCardStyle = (
   "--x": `${x}px`,
   "--y": `${y}px`,
   "--rotation": `${cardRotation}deg`,
-  "--scale": scale
+  "--scale": scale,
 });
 
 interface Feature {
-    id: string;
-    title: string;
-    subtitle: string;
+  id: string;
+  title: string;
+  subtitle: string;
 }
 
 const features: Feature[] = [
@@ -96,119 +98,116 @@ const features: Feature[] = [
 ];
 
 interface FeatureWheelProps {
-    onFeatureSelect: (featureId: string) => void;
-    selectedFeature: string;
+  onFeatureSelect: (featureId: string) => void;
+  selectedFeature: string;
 }
 
-const Wheel: React.FC<FeatureWheelProps> = ({ onFeatureSelect, selectedFeature }) => {
-    const selectedIndex = features.findIndex((f) => f.id === selectedFeature);
-    const totalFeatures = features.length;
-    // Create an array of cards showing all features
-    const getVisibleCards = () => {
-        const visibleCards = [];
-        // Show all features positioned around the wheel
-        for (let i = 0; i < totalFeatures; i++) {
-            // Calculate position relative to selected feature
-            let relativePosition = i - selectedIndex;
-            // Normalize to -totalFeatures/2 to totalFeatures/2 range
-            if (relativePosition > totalFeatures / 2) {
-                relativePosition -= totalFeatures;
-            } else if (relativePosition < -totalFeatures / 2) {
-                relativePosition += totalFeatures;
-            }
-            visibleCards.push({
-                ...features[i],
-                position: relativePosition,
-                actualIndex: i,
-            });
-        }
-        return visibleCards;
-    };
+const Wheel: React.FC<FeatureWheelProps> = ({
+  onFeatureSelect,
+  selectedFeature,
+}) => {
+  const selectedIndex = features.findIndex((f) => f.id === selectedFeature);
+  const totalFeatures = features.length;
 
-    const handleCardClick = (featureId: string) => {
-        onFeatureSelect(featureId);
-    };
+  // Build list of cards with relative positions
+  const getVisibleCards = () => {
+    const visibleCards: Array<
+      Feature & { position: number; actualIndex: number }
+    > = [];
 
-    const visibleCards = getVisibleCards();
-    // Calculate max position once for angle normalization
-    const maxPosition = Math.max(...visibleCards.map(c => Math.abs(c.position)));
+    for (let i = 0; i < totalFeatures; i++) {
+      let relativePosition = i - selectedIndex;
 
-    const bgClassById: Record<string, string> = {
-        gallery: styles.galleryCard,
-        documents: styles.documentsCard,
-        events: styles.eventsCard,
-        employee_events: styles.celebrateCard,
-        meetings: styles.meetingCard,
-        service_links: styles.serviceLinksCard,
-        forms: styles.interactiveFormsCard,
-        dashboard: styles.dashboardCard,
-        offers: styles.offersCard,
-        training: styles.trainingCard,
-        about_dhre: styles.aboutDhreCard,
-        tasks: styles.tasksCard,
-        beverage_menu: styles.beverageCard
-    };
+      if (relativePosition > totalFeatures / 2) {
+        relativePosition -= totalFeatures;
+      } else if (relativePosition < -totalFeatures / 2) {
+        relativePosition += totalFeatures;
+      }
 
-    return (
-        <div className={styles.wheelContainer}>
-            {/* Central arrow pointer */}
-            <div className={styles.centralArrow}>
-                <div className={styles.arrow} />
-            </div>
+      visibleCards.push({
+        ...features[i],
+        position: relativePosition,
+        actualIndex: i,
+      });
+    }
+    return visibleCards;
+  };
 
-            {/* Carousel container - cards arranged in an arc */}
-            <div className={styles.carouselContainer}>
-                {visibleCards.map((card) => {
-                    const isSelected = card.position === 0;
-                    const position = card.position;
-                    // Only allow clicks on selected card and immediate neighbors (left: -1, right: +1)
-                    const isClickable = Math.abs(position) <= 1;
+  const handleCardClick = (featureId: string) => {
+    onFeatureSelect(featureId);
+  };
 
-                    // Calculate arc position
-                    // Distribute all features across the arc
-                    const startAngle = -120;
-                    const endAngle = 120;
-                    const angleRange = endAngle - startAngle;
-                    // Normalize position to 0-1 range, then map to angle range
-                    const normalizedPosition = (position + maxPosition) / (maxPosition * 2);
-                    const angle = startAngle + angleRange * normalizedPosition;
+  const visibleCards = getVisibleCards();
+  const maxPosition = Math.max(...visibleCards.map((c) => Math.abs(c.position)));
 
-                    // Arc radius
-                    const radius = 650;
-                    const radians = (angle * Math.PI) / 180;
-                    const x = Math.sin(radians) * radius;
-                    const y = -Math.cos(radians) * radius + radius + 0;
+  const bgClassById: Record<string, string> = {
+    gallery: styles.galleryCard,
+    documents: styles.documentsCard,
+    events: styles.eventsCard,
+    employee_events: styles.celebrateCard,
+    meetings: styles.meetingCard,
+    service_links: styles.serviceLinksCard,
+    forms: styles.interactiveFormsCard,
+    dashboard: styles.dashboardCard,
+    offers: styles.offersCard,
+    training: styles.trainingCard,
+    about_dhre: styles.aboutDhreCard,
+    tasks: styles.tasksCard,
+    beverage_menu: styles.beverageCard,
+  };
 
-                    // Card rotation to follow arc
-                    const cardRotation = angle;
-                    const scale = isSelected ? 1.05 : 0.9;
+  return (
+    <div className={styles.wheelContainer}>
+      {/* Central arrow pointer */}
+      <div className={styles.centralArrow}>
+        <div className={styles.arrow} />
+      </div>
 
-                    return (
-                        <button
-                            key={card.id}
-                            onClick={() => isClickable && handleCardClick(card.id)}
-                            disabled={!isClickable}
-                            className={`${styles.card} ${isClickable ? styles.cardClickable : styles.cardDisabled}`}
-                            style={getCardStyle(x, y, cardRotation, scale)}
-                        >
-                            <div
-                                className={`${styles.cardInner} ${bgClassById[card.id] || ""} ${isSelected ? styles.cardSelected : ""}`}
-                            >
-                                <div className={styles.cardTextContainer}>
-                                    <div className={`${styles.cardTitle}`}>
-                                        {card.title}
-                                    </div>
-                                    <div className={`${styles.cardSubtitle}`}>
-                                        {card.subtitle}
-                                    </div>
-                                </div>
-                            </div>
-                        </button>
-                    );
-                })}
-            </div>
-        </div>
-    )
+      {/* Carousel container - cards arranged in an arc */}
+      <div className={styles.carouselContainer}>
+        {visibleCards.map((card) => {
+          const isSelected = card.position === 0;
+          const position = card.position;
+
+          const startAngle = -120;
+          const endAngle = 120;
+          const angleRange = endAngle - startAngle;
+
+          const normalizedPosition =
+            (position + maxPosition) / (maxPosition * 2);
+          const angle = startAngle + angleRange * normalizedPosition;
+
+          const radius = 650;
+          const radians = (angle * Math.PI) / 180;
+          const x = Math.sin(radians) * radius;
+          const y = -Math.cos(radians) * radius + radius;
+
+          const cardRotation = angle;
+          const scale = isSelected ? 1.05 : 0.9;
+
+          return (
+            <button
+              key={card.id}
+              onClick={() => handleCardClick(card.id)}
+              className={`${styles.card} ${styles.cardClickable}`}
+              style={getCardStyle(x, y, cardRotation, scale)}
+            >
+              <div
+                className={`${styles.cardInner} ${
+                  bgClassById[card.id] || ""
+                } ${isSelected ? styles.cardSelected : ""}`}
+              >
+                <div className={styles.cardTextContainer}>
+                  <div className={styles.cardTitle}>{card.title}</div>
+                  <div className={styles.cardSubtitle}>{card.subtitle}</div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 };
 
 export default Wheel;

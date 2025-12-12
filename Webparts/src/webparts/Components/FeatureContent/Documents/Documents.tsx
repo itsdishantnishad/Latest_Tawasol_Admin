@@ -1,9 +1,9 @@
 import * as React from 'react';
 import styles from './Documents.module.scss';
+
 // import leftHeadingLine from "../images/leftArrow.svg";
 // import rightHeadingLine from "../images/rightArrow.svg";
-// import docIcon from '../images/doc-icon.svg';
-// import pdfIcon from '../images/pdf-icon.svg';
+
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
 // const docIcon: string = require("../images/doc-icon.svg");

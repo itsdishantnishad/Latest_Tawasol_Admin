@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import styles from './Events.module.scss';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
@@ -26,9 +25,9 @@ export interface IEventsProps {
   onViewAll?: () => void;
   seeAllURL?: string;
   context?: WebPartContext;
-  listTitle?: string;   
-  siteUrl?: string;     
-  topCount?: number;  
+  listTitle?: string;
+  siteUrl?: string;
+  topCount?: number;
 }
 
 const formatTime = (date: Date | null): string => {
@@ -85,7 +84,7 @@ const mapItemToEvent = (item: any): IEvent => {
     categoryLabel = item.TIREventCategory_0;
   }
 
-  // Banner image 
+  // Banner image
   let imageUrl = 'https://via.placeholder.com/400x250?text=Event';
   const banner = item.BannerImageUrl;
 
@@ -111,7 +110,7 @@ const mapItemToEvent = (item: any): IEvent => {
       month: formatMonth(start)
     },
     status,
-    eventStartTime: undefined 
+    eventStartTime: undefined
   };
 };
 
@@ -207,6 +206,42 @@ export const Events: React.FC<IEventsProps> = (props) => {
     loadEvents();
   }, [props.events, props.context, props.listTitle, props.siteUrl, props.topCount]);
 
+  // --- DYNAMIC VIEW-ALL URL WITH DEFAULT ---
+  const viewAllHref = React.useMemo(() => {
+    const configured = (props.seeAllURL || '').trim();
+
+    // If no context (e.g., used in a pure mocked scenario), just return what we got
+    if (!props.context) {
+      return configured || '#';
+    }
+
+    const webUrl = props.context.pageContext.web.absoluteUrl.replace(/\/$/, '');
+    const origin = new URL(webUrl).origin;
+
+    // If nothing configured, default to a page in the current site:
+    //   /sites/ThisSite/SitePages/Events.aspx  (change if you have a different name)
+    const raw = configured || 'SitePages/Events-And-Trainings.aspx';
+
+    // Absolute URL from anywhere -> keep its path but move to current tenant
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const parsed = new URL(raw);
+        return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      } catch {
+        return raw;
+      }
+    }
+
+    // Root-relative (/sites/YourSite/SitePages/Page.aspx)
+    if (raw.startsWith('/')) {
+      return `${origin}${raw}`;
+    }
+
+    // Web-relative (SitePages/Page.aspx)
+    return `${webUrl}/${raw}`;
+  }, [props.seeAllURL, props.context]);
+  // --- END ---
+
   if (loading) {
     return <div className={styles.eventsContainer}>Loading events...</div>;
   }
@@ -243,7 +278,11 @@ export const Events: React.FC<IEventsProps> = (props) => {
                   <span className={styles.registeredBadge}>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <circle cx="8" cy="8" r="8" fill="#10B981" />
-                      <path  d="M5 8L7 10L11 6"  stroke="white" strokeWidth="2" strokeLinecap="round"
+                      <path
+                        d="M5 8L7 10L11 6"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
                         strokeLinejoin="round"
                       />
                     </svg>
@@ -291,7 +330,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
 
       {/* View All Button */}
       <div className={styles.buttonContainer}>
-        <a href={props.seeAllURL} className={styles.viewAllButton}>
+        <a href={viewAllHref} className={styles.viewAllButton}>
           View All
         </a>
       </div>
