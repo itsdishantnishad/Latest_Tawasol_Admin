@@ -12,12 +12,11 @@ import {
 } from "@fluentui/react-components";
 import Tag from '../../Components/Tag/Tag';
 import NavSegment from './taskNavBtnComp';
-
 import {
   SfApprovalService,
-  TaskListApiResponse as SalesforceTaskListApiResponse,
-  SFApproval
-} from '../../services/Task/SalesforceApprovalService';
+  SFApproval,
+} from '../../services/Integration/SalesForce';
+
 
 import {
   ServiceNowApprovalService,
@@ -30,6 +29,7 @@ export interface ITaskState {
   errorMessage?: string;
   oracleItems: ServiceNowTaskListItem[];
   salesforceItems: SFApproval[];
+  rawResponse?: any;
 }
 
 const formatIsoDateToDisplay = (isoString: string) => {
@@ -43,55 +43,92 @@ const formatIsoDateToDisplay = (isoString: string) => {
 };
 
 export default class Task extends React.Component<ITaskProps, ITaskState> {
-  private readonly salesforceBaseUrl: string =
-    "https://infaservicesuat.dubaiholding.com";
-
-  private readonly salesforceService: SfApprovalService;
-  private readonly serviceNowService: ServiceNowApprovalService;
+  private salesforceService: SfApprovalService;
 
   constructor(props: ITaskProps) {
     super(props);
     this.state = {
       selectedTabValue: "All",
-      isLoading: true,
-      oracleItems: [],
+      isLoading: false,
       salesforceItems: [],
+      rawResponse: undefined,
+      errorMessage: undefined,
+      oracleItems: [],
     };
 
     this.salesforceService = new SfApprovalService({
       httpClient: this.props.httpClient,
-      salesforceBaseUrl: this.salesforceBaseUrl,
-    });
-
-    this.serviceNowService = new ServiceNowApprovalService({
-      httpClient: this.props.httpClient,
-      baseUrl: this.salesforceBaseUrl,
     });
   }
 
+  // private readonly salesforceBaseUrl: string =
+  //   "https://infaservicesuat.dubaiholding.com";
+
+
+  private readonly serviceNowService: ServiceNowApprovalService;
+
+  // constructor(props: ITaskProps) {
+  //   super(props);
+  //   this.state = {
+  //     selectedTabValue: "All",
+  //     isLoading: true,
+  //     oracleItems: [],
+  //     salesforceItems: [],
+  //   };
+
+  //   this.salesforceService = new SfApprovalService({
+  //     httpClient: this.props.httpClient,
+  //     salesforceBaseUrl: this.salesforceBaseUrl,
+  //   });
+
+  //   this.serviceNowService = new ServiceNowApprovalService({
+  //     httpClient: this.props.httpClient,
+  //     baseUrl: this.salesforceBaseUrl,
+  //   });
+  // }
+
   public async componentDidMount(): Promise<void> {
     try {
-      const currentUserEmail = this.props.userEmail || "aisha.amiri@dhre.ae";
-
-      const [sfResponse, oracleItems] = await Promise.all([
-        this.salesforceService.fetchApprovalsByEmail(currentUserEmail),
-        this.serviceNowService.fetchApprovalsByEmail(currentUserEmail)
-      ]);
+      const email = this.props.userEmail || "";
+      const res = await this.salesforceService.fetchApprovalsByEmail(email);
 
       this.setState({
-        oracleItems: oracleItems,
-        salesforceItems: sfResponse.approvals,
         isLoading: false,
+        salesforceItems: res.approvals || [],
+        rawResponse: res,
       });
-    } catch (error: any) {
-      console.error('Error loading approvals:', error);
+    } catch (e: any) {
+      console.error("Salesforce API error:", e);
       this.setState({
-        oracleItems: [],
-        salesforceItems: [],
         isLoading: false,
-        errorMessage: error.message,
+        salesforceItems: [],
+        rawResponse: undefined,
+        errorMessage: e?.message || "Failed to load Salesforce approvals",
       });
     }
+
+    // try {
+    //   const currentUserEmail = this.props.userEmail || "aisha.amiri@dhre.ae";
+
+    //   const [sfResponse, oracleItems] = await Promise.all([
+    //     this.salesforceService.fetchApprovalsByEmail(currentUserEmail),
+    // //     this.serviceNowService.fetchApprovalsByEmail(currentUserEmail)
+    //   ]);
+
+    //   this.setState({
+    //     oracleItems: oracleItems,
+    //     salesforceItems: sfResponse.approvals,
+    //     isLoading: false,
+    //   });
+    // } catch (error: any) {
+    //   console.error('Error loading approvals:', error);
+    //   this.setState({
+    //     oracleItems: [],
+    //     salesforceItems: [],
+    //     isLoading: false,
+    //     errorMessage: error.message,
+    //   });
+    // }
   }
 
   private handleTabChange = (value: string): void => {
@@ -152,6 +189,12 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
             <TableCellLayout>{taskItem.requestorName || '—'}</TableCellLayout>
           </TableCell>
           <TableCell>
+            <a
+              href={taskItem.redirectURL || "#"}
+              target="_blank"
+            >
+              View Details
+            </a>
             <span className={styles.viewDetailsLink}>View Details</span>
           </TableCell>
         </TableRow>

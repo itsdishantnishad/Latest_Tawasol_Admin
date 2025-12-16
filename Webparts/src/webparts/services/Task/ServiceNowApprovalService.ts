@@ -8,6 +8,7 @@ export interface ServiceNowTaskListItem {
   requestorName: string;        // Maps to "openedBy" from API
   workitemId: string;           // For unique key
   originSystem: string;         // Always 'servicenow' for ServiceNow items
+  redirectURL?: string;        // URL to view details in ServiceNow
 }
 
 export interface ServiceNowServiceConfig {
