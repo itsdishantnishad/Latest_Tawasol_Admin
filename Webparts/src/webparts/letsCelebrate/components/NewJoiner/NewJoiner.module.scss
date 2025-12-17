@@ -1,3 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: local('Instrument Serif Regular'), url('/../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: local('Instrument Serif Italic'), url('/../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
+
 .content {
   min-height: 300px;
   display: flex;
@@ -19,20 +32,20 @@
   justify-content: space-between;
 }
 .card {
-  display: grid;
-  grid-template-columns: 220px 1fr; /* left image | right content | CTA */
+  display: flex;
+  // flex-wrap: wrap;
   gap: 20px;
   align-items: start;
-  padding: 15px 0 26px 0;
+  padding: 0;
   border-bottom: 1px solid #eee;
 
   @media (max-width: 900px) {
-    grid-template-columns: 140px 1fr;
+    // grid-template-columns: 140px 1fr;
     .ctaCol { grid-column: 1 / -1; justify-content: flex-start; }
   }
 
   @media (max-width: 640px) {
-    grid-template-columns: 1fr;
+    // grid-template-columns: 1fr;
     .left { order: -1; }
     .ctaCol { grid-column: 1 / -1; }
   }
@@ -55,10 +68,10 @@
 
 /* ==== image ==== */
 .photo {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
+  height: 286px;
   object-fit: cover;
+  width: 260px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
@@ -91,7 +104,7 @@
 .body {
   display: grid;
   gap: 10px;          /* vertical spacing between paragraphs */
-  margin-top: 6px;    /* small breathing room after meta */
+  margin-top: 0px;    /* small breathing room after meta */
 }
 
 .para {
