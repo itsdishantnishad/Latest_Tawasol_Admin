@@ -1,17 +1,307 @@
+// @import "~@fluentui/react/dist/sass/References.scss";
+
+// .eventsContainer {
+//   // width: 100%;
+//   // max-width: 1440px;
+//   // margin: 0 auto;
+//   // padding: 60px 20px;
+//   // background-color: #e5e7eb;
+//   padding: 50px 0;
+// }
+
+// .header {
+//   text-align: center;
+//   margin-bottom: 60px;
+// }
+
+// .headerContent {
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   gap: 40px;
+//   margin-bottom: 12px;
+// }
+
+// .decorativeLineLeft,
+// .decorativeLineRight {
+//   flex-shrink: 0;
+
+//   svg {
+//     display: block;
+//   }
+// }
+
+// .title {
+//   font-family: "Instrument Serif", serif;
+//   font-style: italic;
+//   font-weight: 400;
+//   font-size: 42px;
+//   line-height: normal;
+//   color: #000000;
+//   margin: 0;
+//   white-space: nowrap;
+// }
+
+// .subtitle {
+//   font-family: "Inter", sans-serif;
+//   font-weight: 400;
+//   font-size: 16px;
+//   line-height: 24px;
+//   color: #5b6770;
+//   margin: 0;
+// }
+
+// .eventsGrid {
+//   display: grid;
+//   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+//   gap: 24px;
+//   max-width: 1200px;
+//   margin: 0 auto 0;
+// }
+
+// .eventCard {
+//   background: white;
+//   border-radius: 12px;
+//   overflow: hidden;
+//   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+//   transition: all 0.3s ease;
+
+//   &:hover {
+//     transform: translateY(-4px);
+//     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+//   }
+// }
+
+// .eventImage {
+//   position: relative;
+//   width: 100%;
+//   height: 200px;
+//   background-size: cover;
+//   background-position: center;
+// }
+
+// .statusBadge {
+//   position: absolute;
+//   top: 12px;
+//   left: 12px;
+// }
+
+// .registeredBadge {
+//   display: inline-flex;
+//   align-items: center;
+//   gap: 6px;
+//   background: #10b981;
+//   color: white;
+//   border-radius: 6px;
+//   padding: 4px 12px;
+//   font-family: "Inter", sans-serif;
+//   font-weight: 600;
+//   font-size: 12px;
+//   line-height: 16px;
+// }
+// .upcomingBadge {
+//   display: inline-flex;
+//   align-items: center;
+//   gap: 6px;
+//   background: #dc2626;      /* light gray */
+//   color:   #f3f4f6;           /* dark text */
+//   border-radius: 6px;
+//   padding: 4px 12px;
+//   font-family: "Inter", sans-serif;
+//   font-weight: 600;
+//   font-size: 12px;
+//   line-height: 16px;
+// }
+// .dateBadge {
+//   position: absolute;
+//   top: 12px;
+//   right: 12px;
+//   background: white;
+//   border-radius: 8px;
+//   padding: 8px 12px;
+//   text-align: center;
+//   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+// }
+
+// .day {
+//   font-family: "Inter", sans-serif;
+//   font-weight: 700;
+//   font-size: 20px;
+//   line-height: 24px;
+//   color: #1a202c;
+// }
+
+// .month {
+//   font-family: "Inter", sans-serif;
+//   font-weight: 600;
+//   font-size: 12px;
+//   line-height: 16px;
+//   color: #718096;
+// }
+
+// .categoryBadge {
+//   position: absolute;
+//   bottom: 12px;
+//   left: 12px;
+//   background: rgba(0, 0, 0, 0.7);
+//   backdrop-filter: blur(4px);
+//   color: white;
+//   border-radius: 6px;
+//   padding: 4px 12px;
+//   font-family: "Inter", sans-serif;
+//   font-weight: 500;
+//   font-size: 12px;
+//   line-height: 16px;
+// }
+
+// .eventContent {
+//   padding: 20px;
+// }
+
+// .eventTitle {
+//   font-family: "Inter", sans-serif;
+//   font-weight: 700;
+//   font-size: 18px;
+//   line-height: 24px;
+//   color: #1a202c;
+//   margin: 0 0 8px 0;
+// }
+
+// .eventTime {
+//   font-family: "Inter", sans-serif;
+//   font-weight: 400;
+//   font-size: 14px;
+//   line-height: 20px;
+//   color: #718096;
+//   margin: 0 0 12px 0;
+// }
+
+// .pastEvent {
+//   font-family: "Inter", sans-serif;
+//   font-weight: 500;
+//   font-size: 14px;
+//   line-height: 20px;
+//   color: #9ca3af;
+//   margin: 0;
+// }
+
+// .startingTime {
+//   font-family: "Inter", sans-serif;
+//   font-weight: 600;
+//   font-size: 14px;
+//   line-height: 20px;
+//   color: #dc2626;
+//   margin: 0;
+// }
+
+// .registerButton {
+//   background: #1a202c;
+//   color: white;
+//   border: none;
+//   border-radius: 6px;
+//   padding: 8px 16px;
+//   font-family: "Inter", sans-serif;
+//   font-weight: 600;
+//   font-size: 14px;
+//   line-height: 20px;
+//   cursor: pointer;
+//   transition: all 0.3s ease;
+//   width: 100%;
+//   &:hover {
+//     background: #2d3748;
+//   }
+// }
+
+// .buttonContainer {
+//   text-align: center;
+//   margin-top: 40px;
+  
+//   a {
+//     text-decoration: none;
+//   }
+// }
+
+// .viewAllButton {
+//   background: radial-gradient(
+//     circle at top left,
+//     rgba(32, 45, 57, 1) 0%,
+//     rgba(16, 24, 32, 1) 100%
+//   );
+//   color: white;
+//   border: none;
+//   border-radius: 167px;
+//   padding: 8px 12px;
+//   min-width: 143px;
+//   height: 36px;
+//   font-family: "Inter", sans-serif;
+//   font-weight: 600;
+//   font-size: 14px;
+//   line-height: 20px;
+//   cursor: pointer;
+//   box-shadow: -4px -6px 4px 0px rgba(0, 0, 0, 0.51) inset,
+//     0px 4px 4px 0px rgba(118, 139, 158, 1) inset;
+//   transition: all 0.3s ease;
+
+//   &:hover {
+//     transform: translateY(-2px);
+//     box-shadow: -4px -6px 6px 0px rgba(0, 0, 0, 0.51) inset,
+//       0px 6px 6px 0px rgba(118, 139, 158, 1) inset;
+//   }
+
+//   &:active {
+//     transform: translateY(0);
+//   }
+// }
+
+// // Responsive design
+// @media (max-width: 1200px) {
+//   .headerContent {
+//     gap: 20px;
+//   }
+
+//   .title {
+//     font-size: 36px;
+//   }
+// }
+
+// @media (max-width: 768px) {
+//   .eventsContainer {
+//     padding: 40px 16px;
+//   }
+
+//   .headerContent {
+//     flex-direction: column;
+//     gap: 16px;
+//   }
+
+//   .decorativeLineLeft,
+//   .decorativeLineRight {
+//     display: none;
+//   }
+
+//   .title {
+//     font-size: 28px;
+//   }
+
+//   .subtitle {
+//     font-size: 14px;
+//   }
+
+//   .eventsGrid {
+//     grid-template-columns: 1fr;
+//   }
+// }
+
+
 @import "~@fluentui/react/dist/sass/References.scss";
 
 .eventsContainer {
-  // width: 100%;
-  // max-width: 1440px;
-  // margin: 0 auto;
-  // padding: 60px 20px;
-  // background-color: #e5e7eb;
   padding: 50px 0;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 30px;
 }
 
 .headerContent {
@@ -49,6 +339,20 @@
   line-height: 24px;
   color: #5b6770;
   margin: 0;
+}
+
+.toast {
+  max-width: 1200px;
+  margin: 0 auto 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #10b981;
+  background: #ecfdf5;
+  color: #065f46;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .eventsGrid {
@@ -99,12 +403,13 @@
   font-size: 12px;
   line-height: 16px;
 }
+
 .upcomingBadge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #dc2626;      /* light gray */
-  color:   #f3f4f6;           /* dark text */
+  background: #dc2626;
+  color: #f3f4f6;
   border-radius: 6px;
   padding: 4px 12px;
   font-family: "Inter", sans-serif;
@@ -112,31 +417,45 @@
   font-size: 12px;
   line-height: 16px;
 }
+
+/* ✅ Date badge split: top black + bottom white */
 .dateBadge {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: white;
   border-radius: 8px;
-  padding: 8px 12px;
-  text-align: center;
+  overflow: hidden;
+  padding: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-width: 52px;
 }
 
 .day {
+  background: #000000;
+  color: #ffffff;
   font-family: "Inter", sans-serif;
   font-weight: 700;
   font-size: 20px;
   line-height: 24px;
-  color: #1a202c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
 }
 
 .month {
+  background: #ffffff;
+  color: #000000;
   font-family: "Inter", sans-serif;
   font-weight: 600;
   font-size: 12px;
   line-height: 16px;
-  color: #718096;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
 }
 
 .categoryBadge {
@@ -156,6 +475,8 @@
 
 .eventContent {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .eventTitle {
@@ -176,6 +497,28 @@
   margin: 0 0 12px 0;
 }
 
+/* ✅ Time/Location rows */
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px 0;
+}
+
+.metaIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.metaText {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: #718096;
+}
+
 .pastEvent {
   font-family: "Inter", sans-serif;
   font-weight: 500;
@@ -185,37 +528,65 @@
   margin: 0;
 }
 
-.startingTime {
-  font-family: "Inter", sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 20px;
-  color: #dc2626;
-  margin: 0;
+/* ✅ Countdown block */
+.countdownBar {
+  margin-top: 10px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
+.countdownLabel {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  color: #6b7280;
+}
+
+.countdownValue {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 24px;
+  color: #dc2626;
+}
+
+/* ✅ Register button style (your requestButton design) */
 .registerButton {
-  background: #1a202c;
-  color: white;
+  margin-top: auto;
+  width: 100%;
   border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #111827 0%, #020617 100%);
+  color: #ffffff;
+  padding: 10px 16px;
   font-family: "Inter", sans-serif;
   font-weight: 600;
   font-size: 14px;
   line-height: 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
   &:hover {
-    background: #2d3748;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 26px rgba(15, 23, 42, 0.45);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.35);
   }
 }
 
 .buttonContainer {
   text-align: center;
   margin-top: 40px;
-  
+
   a {
     text-decoration: none;
   }
@@ -253,7 +624,7 @@
   }
 }
 
-// Responsive design
+/* Responsive design */
 @media (max-width: 1200px) {
   .headerContent {
     gap: 20px;
