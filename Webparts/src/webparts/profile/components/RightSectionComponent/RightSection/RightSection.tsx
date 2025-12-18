@@ -56,7 +56,7 @@ export default class RightSection extends React.Component<IRightSectionProps> {
 
         {/* Apply for Leave */}
         <div className={styles.block}>
-          <ApplyLeaveCard onApply={onApplyLeave} />
+          <ApplyLeaveCard context={this.props.context} onApply={onApplyLeave} />
         </div>
 
         {/* HR Letters */}
