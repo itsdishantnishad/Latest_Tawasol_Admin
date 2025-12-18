@@ -2,7 +2,7 @@ import * as React from "react";
 import PeopleSimpleFeed, { IPersonBase } from "./PeopleSimpleFeed";
 import { IBirthdayPerson } from "./BirthdayData";
 import styles from "./Birthday.module.scss";
-const upChevronIcon = require("../../assets/upArrow.svg") as string;
+// const upChevronIcon = require("../../assets/upArrow.svg") as string;
 
 export interface BirthdaysFeedProps {
   items: IBirthdayPerson[];
@@ -32,7 +32,7 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({ items, webAbsoluteUrl }) => {
       <div className={styles.section}>
         <div className={styles.sectionHead}>
           <p>Today's Celebration</p>
-          <img src={upChevronIcon} alt="" />
+          {/* <img src={upChevronIcon} alt="" /> */}
         </div>
         <PeopleSimpleFeed
           items={todayBirthdays}
