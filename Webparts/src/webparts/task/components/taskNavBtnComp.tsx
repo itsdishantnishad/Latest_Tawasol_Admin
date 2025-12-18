@@ -91,33 +91,15 @@ export interface TabDefinition {
 }
 
 export interface NavSegmentProps {
-  value?: SystemFilterOption;
-  defaultValue?: SystemFilterOption;
-  onChange?: (newValue: SystemFilterOption) => void;
+  value: SystemFilterOption;
+  onChange: (newValue: SystemFilterOption) => void;
   className?: string;
   tabs: readonly TabDefinition[];
 }
 
-const NavSegment: React.FC<NavSegmentProps> = ({
-  value,
-  defaultValue,
-  onChange,
-  className,
-  tabs,
-}) => {
-  const initialValue: SystemFilterOption =
-    defaultValue ?? (tabs[0]?.key ?? "Salesforce");
+const formatCount = (n: number): string => String(n ?? 0).padStart(2, "0");
 
-  const [internalSelectedValue, setInternalSelectedValue] =
-    React.useState<SystemFilterOption>(initialValue);
-
-  const selectedValue: SystemFilterOption = value ?? internalSelectedValue;
-
-  const handleTabClick = (newValue: SystemFilterOption) => {
-    if (value === undefined) setInternalSelectedValue(newValue);
-    onChange?.(newValue);
-  };
-
+const NavSegment: React.FC<NavSegmentProps> = ({ value, onChange, className, tabs }) => {
   return (
     <div
       className={[styles.segmentWrap, className ?? ""].join(" ")}
@@ -125,7 +107,7 @@ const NavSegment: React.FC<NavSegmentProps> = ({
       aria-label="Task system filter"
     >
       {tabs.map((tab) => {
-        const isActive = selectedValue === tab.key;
+        const isActive = value === tab.key;
 
         return (
           <button
@@ -137,7 +119,7 @@ const NavSegment: React.FC<NavSegmentProps> = ({
               styles.segmentBtn,
               isActive ? styles.segmentBtnActive : styles.segmentBtnIdle,
             ].join(" ")}
-            onClick={() => handleTabClick(tab.key)}
+            onClick={() => onChange(tab.key)}
           >
             <span className={styles.tabInner}>
               <span className={styles.iconWrap}>
@@ -148,7 +130,7 @@ const NavSegment: React.FC<NavSegmentProps> = ({
               </span>
 
               <span className={styles.segmentText}>{tab.label}</span>
-              <span className={styles.countText}>{tab.count}</span>
+              <span className={styles.countText}>{formatCount(tab.count)}</span>
             </span>
           </button>
         );

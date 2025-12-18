@@ -1,34 +1,34 @@
-
 // src/webparts/<yourWebPart>/components/LeaveComponent/ApplyLeave.tsx
 import * as React from "react";
 import styles from "./ApplyLeave.module.scss";
-import { TahweelService, TahweelReportResponse, TahweelReportRequest } from "../../../../services/Integration/TahweelService";
+import { TahweelService } from "../../../../services/Integration/TahweelService";
 
 export interface IApplyLeaveCardProps {
-  periodText?: string;
-  leaveBalance?: number;
-  totalBalance?: number;
-  accruals?: number;
-  onApply?: () => void;
   context: any;
+  onApply?: () => void;
+
+  // UI text (optional)
+  periodText?: string;
 }
 
 export interface IApplyLeaveCardState {
   loading: boolean;
-  result: string;
+  leaveBalanceText: string; // "20" or "No balance found"
+  periodText: string;       // "as of 20th November"
   error: string;
-  personNumber: string;
 }
 
-export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps> {
-  private tahweelService: TahweelService;
+export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps, IApplyLeaveCardState> {
+  private readonly tahweelService: TahweelService;
+
   constructor(props: IApplyLeaveCardProps) {
     super(props);
+
     this.state = {
       loading: true,
-      result: "",
+      leaveBalanceText: "—",
+      periodText: props.periodText || this.formatAsOfText(new Date()),
       error: "",
-      personNumber: ""
     };
 
     this.tahweelService = new TahweelService({
@@ -36,124 +36,83 @@ export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps
     });
   }
 
-  public static defaultProps: Partial<IApplyLeaveCardProps> = {
-    periodText: "01 Jan 2024 to 31 Dec 2024",
-    leaveBalance: 20,
-    totalBalance: 32.567,
-    accruals: 20.867,
-  };
-
   public async componentDidMount(): Promise<void> {
-
+    await this.loadLeaveBalance();
   }
 
-  private decodeBase64(base64String: string): any {
-    try {
-      // Decode base64 to string
-      const decoded = atob(base64String);
-      return decoded;
-    } catch (e) {
-      throw new Error("Failed to decode person number from base64.");
-    }
+  private formatAsOfText(d: Date): string {
+    const day = d.getDate();
+    const month = d.toLocaleString("en-GB", { month: "long" });
+
+    const suffix =
+      day % 100 >= 11 && day % 100 <= 13
+        ? "th"
+        : day % 10 === 1
+        ? "st"
+        : day % 10 === 2
+        ? "nd"
+        : day % 10 === 3
+        ? "rd"
+        : "th";
+
+    return `as of ${day}${suffix} ${month}`;
   }
 
+  private async loadLeaveBalance(): Promise<void> {
+    const userEmail: string = (this.props.context?.pageContext?.user?.email || "").trim();
 
-  private async handleGetLeaveBalance() {
-    this.setState({ loading: true, result: "", error: "", personNumber: "" });
-    const userEmail = this.props.context?.pageContext?.user?.email;
-    try {
-      // 1. Get person number by email
-      const personResp = await this.tahweelService.fetchPersonNumberByEmail(
-        userEmail
-      );
-
-      // Extract base64 string and decode
-      const base64String =
-        personResp.response?.Body?.runReportResponse?.runReportReturn
-          ?.reportBytes;
-      let personNumber = "";
-      if (base64String) {
-        const decoded = this.decodeBase64(base64String);
-        const match = decoded.match(/<USERNAME>(.*?)<\/USERNAME>/i);
-        if (match && match[1]) {
-          personNumber = match[1].trim();
-        }
-      }
-      if (!personNumber)
-        throw new Error("Person number not found for this email.");
-      this.setState({ personNumber });
-      console.log("personNumber:", personNumber);
-
-      // 2. Use person number to get leave balance
-      const leaveReq: TahweelReportRequest = {
-        email: userEmail,
-        person_number: "",
-        reportPath:
-          "/Custom/DH Integrations/HCM/OneApp/DHH/DH Get Leave Balance Report.xdo",
-        parameters: {
-          params: [
-            {
-              name: "person_number",
-              value: "150286", //150286 is test data
-            },
-          ],
-        },
-      };
-      const leaveResp: TahweelReportResponse =
-        await this.tahweelService.fetchLeaveBalance(leaveReq);
-
-      const leaveBase64String =
-        personResp.response?.Body?.runReportResponse?.runReportReturn
-          ?.reportBytes;
-      let leaveBalance = null;
-      if (leaveBase64String) {
-        const decoded = this.decodeBase64(leaveBase64String);
-        const match = decoded.match(/<USERNAME>(.*?)<\/USERNAME>/i);
-        if (match && match[1]) {
-          leaveBalance = match[1].trim();
-        }
-      }
+    if (!userEmail) {
       this.setState({
-        result: JSON.stringify(leaveResp, null, 2),
         loading: false,
+        leaveBalanceText: "No Balance Found",
+        error: "User email not available.",
       });
-    } catch (err: any) {
+      return;
+    }
+
+    this.setState({ loading: true, error: "" });
+
+    try {
+      // 1) Email -> person number
+      const personRes = await this.tahweelService.fetchPersonNumberByEmail(userEmail);
+
+      // 2) person number -> leave balance
+      const leaveRes = await this.tahweelService.fetchLeaveBalanceByPersonNumber(personRes.personNumber);
+
       this.setState({
-        error: err.message || "API call failed",
         loading: false,
+        leaveBalanceText: leaveRes.hasBalance ? leaveRes.balance : "No Balance Found",
+        periodText: this.props.periodText || this.formatAsOfText(new Date()),
+        error: leaveRes.hasBalance ? "" : "No Balance Found", // you can hide this if you don’t want text
+      });
+    } catch (e: any) {
+      this.setState({
+        loading: false,
+        leaveBalanceText: "No Balance Found",
+        error: e?.message || "Failed to fetch leave balance.",
       });
     }
   }
 
   public render(): React.ReactElement<IApplyLeaveCardProps> {
-    const { periodText, leaveBalance, totalBalance, accruals, onApply } = this.props;
+    const { onApply } = this.props;
+    const { loading, leaveBalanceText, periodText } = this.state;
 
     return (
       <section className={styles.card} aria-label="Apply for Leave">
         <div className={styles.headTitle}>Apply for Leave</div>
+
         <p className={styles.subText}>
           Apply for leave in just a few clicks and track your leave balance with ease
         </p>
 
         <div className={styles.balanceBox}>
-          <div className={styles.balanceNumber}>{leaveBalance}</div>
+          <div className={styles.balanceNumber}>{loading ? "—" : leaveBalanceText}</div>
           <div className={styles.balanceLabel}>Leave Balance</div>
           <div className={styles.balancePeriod}>{periodText}</div>
         </div>
 
-        <div className={styles.kpisRow}>
-          <div className={styles.kpi}>
-            <div className={styles.kpiNumber}>{this.handleGetLeaveBalance()}</div>
-            <div className={styles.kpiLabel}>Total Balance</div>
-          </div>
-          <div className={styles.verticalDivider} aria-hidden="true" />
-          <div className={styles.kpi}>
-            <div className={styles.kpiNumber}>{accruals}</div>
-            <div className={styles.kpiLabel}>Accruals</div>
-          </div>
-        </div>
-
-        <button type="button" className={styles.cta} onClick={onApply}>
+        <button type="button" className={styles.cta} onClick={onApply} disabled={loading}>
           <span className={styles.ctaText}>Apply Leave</span>
         </button>
       </section>
