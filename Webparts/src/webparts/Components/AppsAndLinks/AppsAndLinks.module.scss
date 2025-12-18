@@ -1,33 +1,47 @@
-.container {
-  padding: 20px 10px;
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+.serviceLinkModal{
+  [role="heading"] {
+    font-size: 20px;
+    line-height: 28px !important;
+    font-weight: 500 !important;
+    color: #000000 !important;
+    font-family: 'Inter', sans-serif !important;
+  }
+  .container {
+    padding: 0;
+  }
 }
 
 .tabContainer {
   display: flex;
   gap: 8px;
   margin-bottom: 30px;
-  background-color: #f5f5f5;
+  background-color: #ffffff66;
   padding: 6px;
   border-radius: 25px;
   width: fit-content;
-  margin: 0 auto 30px;
+  margin: 0 auto 24px;
+  border: 1px solid #FBBF7F;
 }
 
 .tab {
-  padding: 10px 30px;
-  border: none;
   background-color: transparent;
+  border: none;
   border-radius: 20px;
+  color: #3A3B43;
   cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
-  color: #666;
-  transition: all 0.3s ease;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  padding: 10px 30px;
+  transition: all .3s ease;
+  font-family: 'Inter', sans-serif !important;
 }
 
 .activeTab {
-  background-color: #ffe4d6;
-  color: #333;
+  background: radial-gradient(245.31% 848.44% at 112.5% -164.06%,#dda160 0,#ffdbb4 100%);
+  color: #3A3B43;
 }
 
 .content {
@@ -36,9 +50,9 @@
 
 .linksGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 30px;
-  padding: 20px;
+  gap: 20px;
+  grid-template-columns: repeat(6, 1fr);
+  padding: 0;
 }
 
 .linkItem {
@@ -49,17 +63,16 @@
   color: #333;
   transition: transform 0.2s ease;
   cursor: pointer;
-
-  &:hover {
-    transform: translateY(-3px);
-  }
+  // &:hover {
+  //   transform: translateY(-3px);
+  // }
 }
 
 .iconCircle {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background-color: #f5f5f5;
+  background-color: #ffffff66;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,9 +92,12 @@
 
 .linkTitle {
   font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
   text-align: center;
-  font-weight: 500;
-  line-height: 1.3;
+  color: #000000;
+  letter-spacing: -0.5px;
+  font-family: 'Inter', sans-serif;
 }
 
 .addLinkButton {
@@ -292,18 +308,20 @@
   }
 }
 .inlineForm {
-  margin-top: 30px;
-  padding: 24px;
-  border: 1px solid #f4a261;
-  border-radius: 12px;
-  background-color: #fff;
+  background-color: transparent;
+  border: 1px solid #F8CCA3;
+  border-radius: 4px;
+  margin-top: 24px;
+  padding: 16px;
+  font-family: 'Inter', sans-serif;
 }
 
 .formTitle {
-  margin: 0 0 24px 0;
-  font-size: 20px;
-  font-weight: 400;
-  color: #666;
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  color: #6C6C6C;
 }
 
 .formFields {
@@ -317,6 +335,21 @@
   width: 100%;
 }
 
+.inputLine{
+  font-family: 'Inter', sans-serif;
+  label{
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 500;
+    color: #3A3B43;
+  }
+  input{
+    border: 1px solid #F8CCA3;
+    padding: 12px 20px;
+  }
+}
+
 .formActions {
   display: flex;
   gap: 16px;
@@ -327,8 +360,8 @@
 .divider {
   width: 100%;
   height: 1px;
-  background-color: #e0e0e0;
-  margin: 16px 0;
+  background-color: #F8CCA3;
+  margin: 0;
 }
 
 .successMessage {
@@ -388,24 +421,29 @@
 .menuedit {
   display: flex;
   flex-direction: column;
-  padding: 8px 0;
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   min-width: 140px;
+  padding: 0;
+  border: 1px solid #F8CCA3;
+  overflow: hidden;
 }
 
 .menuedit button {
-  display: flex;
   align-items: center;
-  gap: 10px;          // spacing between icon & text
-  width: 100%;
-  padding: 10px 14px;
-  background: none;
+  background: 0 0;
   border: none;
-  text-align: left;
-  font-size: 15px;
   cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  line-height: 22px;
+  gap: 10px;
+  padding: 10px 14px;
+  text-align: left;
+  width: 100%;
+  color: #3A3B43;
+  font-family: 'Inter', sans-serif;
 }
 
 .menuedit button:hover {

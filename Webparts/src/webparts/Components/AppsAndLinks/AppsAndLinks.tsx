@@ -4,6 +4,10 @@ import styles from "./AppsAndLinks.module.scss";
 import { listServices } from "../../services/listServices";
 import { Dialog, DialogContent, DialogType } from "@fluentui/react/lib/Dialog";
 
+const addLinkIcon: string = require("../../../webparts/assets/add-square.svg");
+const editIcon: string = require("../../../webparts/assets/editIcon.svg");
+const trashIcon: string = require("../../../webparts/assets/trashIcon.svg");
+
 import {
   IconButton,
   DefaultButton,
@@ -273,6 +277,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
       dialogContentProps={{
         type: DialogType.normal,
         title: "Service Links",
+        className: styles.serviceLinkModal,
         showCloseButton: true,
       }}
       minWidth={"800px"}
@@ -370,7 +375,9 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
               <div className={styles.linksGrid}>
                 {/* Add button */}
                 <button className={styles.addLinkButton} onClick={openAddForm}>
-                  <div className={styles.iconCircle}>+</div>
+                  <div className={styles.iconCircle}>
+                    <img src={addLinkIcon} alt="" />
+                  </div>
                   <div className={styles.linkTitle}>Add Links</div>
                 </button>
 
@@ -400,7 +407,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                       {menuOpenIndex === index && (
                         <div ref={menuRef} className={styles.menuedit}>
                           <button onClick={() => openEditForm(index)}>
-                            <svg
+                            {/* <svg
                               xmlns="http://www.w3.org/2000/svg"
                               width="24"
                               height="24"
@@ -421,11 +428,12 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                               />
-                            </svg>
+                            </svg> */}
+                            <img src={editIcon} alt="" />
                             Edit
                           </button>
                           <button onClick={() => deleteLink(index)}>
-                            <svg
+                            {/* <svg
                               xmlns="http://www.w3.org/2000/svg"
                               width="24"
                               height="24"
@@ -480,7 +488,8 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                                 fill="#BC3D1D"
                                 mask="url(#path-6-inside-2_24956_130529)"
                               />
-                            </svg>
+                            </svg> */}
+                            <img src={trashIcon} alt="" />
                             Delete
                           </button>
                         </div>
@@ -503,6 +512,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                         label="Add name"
                         placeholder="Add a name"
                         required
+                        className={styles.inputLine}
                         value={linkTitle}
                         onChange={(e, v: any) => {
                           setLinkTitle(v);
