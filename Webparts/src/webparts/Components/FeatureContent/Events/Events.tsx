@@ -4,8 +4,6 @@ import styles from './Events.module.scss';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 
-const leftHeadingLine: string = require("../images/leftArrow.svg");
-const rightHeadingLine: string = require("../images/rightArrow.svg");
 const Location_Icon_URL = require("../assets/LocationIcon.png");
 const Time_Icon_URL = require("../assets/clockIcon.png");
 
@@ -346,17 +344,9 @@ export const Events: React.FC<IEventsProps> = (props) => {
 
   return (
     <div className={styles.eventsContainer}>
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <img className={styles.decorativeLineLeft} src={leftHeadingLine} alt="" />
-          <h2 className={styles.title}>Events</h2>
-          <img className={styles.decorativeLineRight} src={rightHeadingLine} alt="" />
-        </div>
-        <p className={styles.subtitle}>Discover celebrations and entertainment happening around you.</p>
-      </div>
 
       <div className={styles.eventsGrid}>
-        {events.map((event) => (
+        {events.filter((event) => event.status !== 'past').map((event) => (
           <div key={event.id} className={styles.eventCard}>
             <div
               className={styles.eventImage}
