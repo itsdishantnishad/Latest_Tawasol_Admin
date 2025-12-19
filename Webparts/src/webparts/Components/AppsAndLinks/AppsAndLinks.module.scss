@@ -121,6 +121,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  &:hover .menuWrapper{
+    display: block;
+  }
 }
 
 .deleteButton {
@@ -273,11 +276,14 @@
   position: absolute;
   top: 8px;
   right: 8px;
-
+  display: none;
   button {
     background: transparent;
-    border: none;
-    cursor: pointer;
+    &:hover{
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
   }
 }
 
