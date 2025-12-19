@@ -531,6 +531,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                         placeholder="https://example.com"
                         value={linkURL}
                         required
+                        className={styles.inputLine}
                         onChange={(e, v: any) => {
                           setLinkURL(v);
                           if (urlError) setUrlError("");
@@ -547,26 +548,10 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                     <DefaultButton
                       text="Cancel"
                       onClick={cancelForm}
-                      styles={{
-                        root: {
-                          borderRadius: 24,
-                          border: "2px solid #000",
-                          minWidth: 200,
-                          height: 48,
-                        },
-                      }}
                     />
                     <PrimaryButton
                       text="Save"
                       onClick={saveForm}
-                      styles={{
-                        root: {
-                          borderRadius: 24,
-                          minWidth: 200,
-                          height: 48,
-                          backgroundColor: "#b8b8b8",
-                        },
-                      }}
                     />
                   </div>
                 </div>
