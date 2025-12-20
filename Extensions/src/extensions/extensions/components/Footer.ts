@@ -41,9 +41,7 @@ export class Footer {
 
         <hr class="${styles.TIRFooterLine}" />
 
-        <div class="${styles.TIRFooterBottom}">
-          <span>Made with ❤️ by DHRE Technology Team</span>
-          
+        <div class="${styles.TIRFooterBottom}"> 
           <div class="${styles.TIRFooterBottomCenter}"></div>
 
           ${social.length > 0
