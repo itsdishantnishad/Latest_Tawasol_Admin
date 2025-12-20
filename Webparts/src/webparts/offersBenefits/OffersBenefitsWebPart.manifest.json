@@ -3,6 +3,7 @@
   "id": "4964fafb-0851-43cc-8446-34132ebfe405",
   "alias": "OffersBenefitsWebPart",
   "componentType": "WebPart",
+  "supportsFullBleed": true,
 
  
   "version": "*",

@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Text, Spinner, SpinnerSize } from "@fluentui/react";
 import {
@@ -11,22 +10,31 @@ import {
 } from "../services/profileHeaderServices";
 import styles from "./ProfileHeader.module.scss";
 
-const ProfileIcon_URL = require("../../assets/profileCircleImg.svg")
+import { TahweelService, TahweelAdDetails } from "../../../services/Integration/TahweelService";
+
+const ProfileIcon_URL = require("../../assets/profileCircleImg.svg");
 
 type StatItem = { label: string; value: number };
 
 export interface IProfileHeaderProps {
+  context: any;
+
   photoUrl?: string;
   fullName?: string;
   department?: string;
+
   stats: StatItem[];
   actionNavigateUrl?: string;
 }
 
 interface IProfileHeaderState {
   currentPhoto: string;
+
   fullName: string;
+  designation: string;
   department: string;
+  personNumber: string;
+
   showMenu: boolean;
   copyFeedback: boolean;
   isLoading: boolean;
@@ -37,6 +45,8 @@ interface IProfileHeaderState {
 export default class ProfileHeader extends React.Component<IProfileHeaderProps, IProfileHeaderState> {
   private menuRef: React.RefObject<HTMLDivElement>;
   private feedbackTimeout: NodeJS.Timeout | null = null;
+
+  private tahweelService: TahweelService;
 
   public static defaultProps: Partial<IProfileHeaderProps> = {
     stats: [
@@ -53,8 +63,12 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
     this.state = {
       currentPhoto: "",
+
       fullName: props.fullName || "",
+      designation: "",
       department: props.department || "",
+      personNumber: "",
+
       showMenu: false,
       copyFeedback: false,
       isLoading: true,
@@ -63,18 +77,22 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     };
 
     this.menuRef = React.createRef();
+    this.tahweelService = new TahweelService({ httpClient: this.props.context.httpClient });
   }
 
-  componentDidMount(): void {
+  public componentDidMount(): void {
     document.addEventListener("click", this.handleOutsideClick);
     this.initializeProfile();
   }
 
-  componentWillUnmount(): void {
+  public componentWillUnmount(): void {
     document.removeEventListener("click", this.handleOutsideClick);
-    if (this.feedbackTimeout) {
-      clearTimeout(this.feedbackTimeout);
-    }
+    if (this.feedbackTimeout) clearTimeout(this.feedbackTimeout);
+  }
+
+  private getUserEmailFromContext(): string {
+    const email = (this.props.context?.pageContext?.user?.email || "").trim();
+    return email;
   }
 
   private initializeProfile = async (): Promise<void> => {
@@ -82,18 +100,73 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       const siteUrl = await getSiteUrl();
       this.setState({ siteUrl });
 
-      const photoUrl = await fetchUserProfilePicture();
-      if (photoUrl) {
-        this.setState({ currentPhoto: photoUrl });
+      const userEmail = this.getUserEmailFromContext();
+
+      // 1) Tahweel AD Details (preferred)
+      let adDetails: TahweelAdDetails | null = null;
+      try {
+        if (userEmail) {
+          adDetails = await this.tahweelService.fetchAdDetailsByEmail(userEmail);
+        }
+      } catch (e) {
+        // DEBUG_REMOVE_LATER: Tahweel AD Details error log
+        console.log("[ProfileHeader] Tahweel AD Details error:", e);
       }
 
-      const userInfo = await fetchCurrentUserInfo();
-      if (userInfo) {
-        this.setState({
-          fullName: userInfo.fullName,
-          department: userInfo.department || "SharePoint Developer",
-        });
+      // 2) SharePoint photo fallback if Tahweel image not present
+      let spPhotoUrl = "";
+      try {
+        const photoUrl = await fetchUserProfilePicture();
+        if (photoUrl) spPhotoUrl = photoUrl;
+      } catch {
+        // ignore
       }
+
+      // 3) SharePoint info fallback if Tahweel name/department missing
+      let spInfo: { fullName: string; department: string } | null = null;
+      try {
+        spInfo = await fetchCurrentUserInfo();
+      } catch {
+        // ignore
+      }
+
+      const finalFullName =
+        ((adDetails?.fullName || "").trim()) ||
+        ((spInfo?.fullName || "").trim()) ||
+        ((this.state.fullName || "").trim());
+
+      const finalDesignation = ((adDetails?.designation || "").trim());
+
+      const finalDepartment =
+        ((adDetails?.department || "").trim()) ||
+        ((spInfo?.department || "").trim()) ||
+        ((this.state.department || "").trim());
+
+      const finalPhoto =
+        ((adDetails?.imageDataUrl || "").trim()) ||
+        (spPhotoUrl || "");
+
+      this.setState({
+        currentPhoto: finalPhoto,
+        fullName: finalFullName,
+        designation: finalDesignation,
+        department: finalDepartment,
+        personNumber: (adDetails?.personNumber || "").trim(),
+        error: null,
+      });
+
+      // Debug
+      // DEBUG_REMOVE_LATER: ProfileHeader loaded summary log
+      console.log("[ProfileHeader] Loaded:", {
+        email: userEmail,
+        personNumber: (adDetails?.personNumber || "").trim(),
+        employeeNumber: (adDetails?.employeeNumber || "").trim(),
+        name: finalFullName,
+        designation: finalDesignation,
+        department: finalDepartment,
+        hasTahweelImage: !!(adDetails?.imageDataUrl),
+        hasSpPhoto: !!spPhotoUrl,
+      });
     } catch (error) {
       this.setState({ error: "Failed to load profile" });
     } finally {
@@ -143,8 +216,10 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
   private handleCopyProfile = async (): Promise<void> => {
     try {
-      const { fullName, department } = this.state;
-      await copyProfileToClipboard(fullName, department);
+      const { fullName, designation, department } = this.state;
+      const subtitle = (designation || "").trim() || (department || "").trim();
+      await copyProfileToClipboard(fullName, subtitle);
+
       this.setState({ copyFeedback: true });
 
       if (this.feedbackTimeout) clearTimeout(this.feedbackTimeout);
@@ -156,9 +231,24 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     }
   };
 
+  private getInitials(fullName: string): string {
+    const cleaned = (fullName || "").replace(/,/g, " ").trim().replace(/\s+/g, " ");
+    if (!cleaned) return "";
+
+    const parts = cleaned.split(" ").filter(Boolean);
+    if (!parts.length) return "";
+
+    const first = (parts[0] || "").charAt(0);
+    const last = (parts.length > 1 ? parts[parts.length - 1] : parts[0]).charAt(0);
+
+    return (first + last).toUpperCase();
+  }
+
   private renderName = (): React.ReactElement => {
-    const name = (this.state.fullName || "").trim();
-    const [first, ...rest] = name.split(" ");
+    const name = (this.state.fullName || "").trim().replace(/,/g, " ").replace(/\s+/g, " ");
+    const parts = name.split(" ").filter(Boolean);
+    const first = parts[0] || "";
+    const rest = parts.slice(1);
 
     return (
       <div className={styles.nameRow}>
@@ -177,24 +267,59 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     </div>
   );
 
+  private renderAvatar(): React.ReactElement {
+    const { isLoading, currentPhoto, fullName } = this.state;
+
+    if (isLoading) {
+      return (
+        <div
+          className={styles.avatar}
+          style={{ background: "#e0e0e0", display: "flex", alignItems: "center", justifyContent: "center" }}
+        >
+          <Spinner size={SpinnerSize.large} />
+        </div>
+      );
+    }
+
+    if (currentPhoto) {
+      return <img className={styles.avatar} src={currentPhoto} alt="Profile" />;
+    }
+
+    const initials = this.getInitials(fullName) || "—";
+    return (
+      <div
+        className={styles.avatar}
+        title={fullName}
+        aria-label="Profile initials"
+        style={{
+          background: "#d9d9d9",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: 700,
+          fontSize: 22,
+          color: "#333",
+        }}
+      >
+        {initials}
+      </div>
+    );
+  }
+
   public render(): React.ReactElement {
     const { stats } = this.props;
-    const { currentPhoto, department, showMenu, copyFeedback, isLoading, error } = this.state;
+    const { designation, department, showMenu, copyFeedback, error, isLoading } = this.state;
+
+    const subtitle = (designation || "").trim() || (department || "").trim() || "—";
 
     return (
       <div className={styles.headerWrap}>
         <div className={styles.identityCard}>
-          {isLoading ? (
-            <div className={styles.avatar} style={{ background: "#e0e0e0", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Spinner size={SpinnerSize.large} />
-            </div>
-          ) : (
-            <img className={styles.avatar} src={currentPhoto} alt="Profile" />
-          )}
+          {this.renderAvatar()}
 
           <div className={styles.metaCol}>
             {this.renderName()}
-            <Text className={styles.department} block>{department}</Text>
+            <Text className={styles.department} block>{subtitle}</Text>
           </div>
         </div>
 
@@ -239,14 +364,8 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
                     onClick={this.openFileDialog}
                     role="menuitem"
                   >
-                    <img
-                      src={ProfileIcon_URL}
-                      className={styles.changePhotoIcon}
-                      alt=""
-                    />
-                    <span className={styles.changePhotoLabel}>
-                      Change Profile Photo
-                    </span>
+                    <img src={ProfileIcon_URL} className={styles.changePhotoIcon} alt="" />
+                    <span className={styles.changePhotoLabel}>Change Profile Photo</span>
                   </button>
                 </div>
               )}
@@ -276,7 +395,3 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     );
   }
 }
-
-
-
-

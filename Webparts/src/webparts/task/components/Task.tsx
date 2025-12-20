@@ -71,6 +71,15 @@ const SERVICENOW_TABLE_COLUMNS = [
   { columnKey: "action", label: "Link" },
 ];
 
+const TAHWEEL_TABLE_COLUMNS = [
+  { columnKey: "workflowNumber", label: "Number" },        
+  { columnKey: "taskTitle", label: "Title" },             
+  { columnKey: "priority", label: "Priority" },           
+  { columnKey: "dueDate", label: "Assigned Date" },        
+  { columnKey: "requestedBy", label: "Created By" },      
+  { columnKey: "action", label: "Action" },               
+];
+
 const PRIORITY_BADGE_BG_BY_LABEL: Record<string, string> = {
   High: "#fdede8",
   Medium: "#feefd4",
@@ -237,13 +246,12 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     }));
 
     const activeTableColumns =
-      selectedTabValue === "ServiceNow" ? SERVICENOW_TABLE_COLUMNS : SALESFORCE_TABLE_COLUMNS;
+      selectedTabValue === "ServiceNow" ? SERVICENOW_TABLE_COLUMNS : selectedTabValue === "Tahweel" ? TAHWEEL_TABLE_COLUMNS : SALESFORCE_TABLE_COLUMNS;
 
     const actionLinkLabel =
       selectedTabValue === "ServiceNow" || selectedTabValue === "Tahweel" ? "Open" : "View Details";
 
-    const renderTaskRow = (task: TaskRowItem): JSX.Element => {
-      const priorityLabel = task.priority || EMPTY_CELL_TEXT;
+    const renderTaskRow = (task: TaskRowItem): JSX.Element => {      const priorityLabel = task.priority || EMPTY_CELL_TEXT;
 
       return (
         <TableRow key={(task.workitemId || task.workflowNumber) + ""}>

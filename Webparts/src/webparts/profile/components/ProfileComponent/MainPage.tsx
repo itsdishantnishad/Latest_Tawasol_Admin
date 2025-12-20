@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import styles from "./MainPage.module.scss";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
@@ -11,16 +10,17 @@ export interface IMainPageProps {
   onNavigateToLeave?: () => void;
   onNavigateToHRLetter?: () => void;
   // onNavigateToHoliday?: () => void;
-  context:WebPartContext
+  context: WebPartContext;
 }
 
 export default class MainPage extends React.Component<IMainPageProps> {
   public render(): React.ReactElement<IMainPageProps> {
-    const { onNavigateToLeave, onNavigateToHRLetter} = this.props;
+    const { onNavigateToLeave, onNavigateToHRLetter } = this.props;
 
     return (
       <div className={[styles.pageInner, this.props.className || ""].join(" ")}>
-        <ProfileHeader />
+        <ProfileHeader context={this.props.context} />
+
         <div className={styles.columns}>
           <div className={styles.leftCol} role="region" aria-label="Main feed">
             <LeftSection />

@@ -10,7 +10,7 @@ const SERVICE_NOW_API_CONFIG = {
 
   // API Key auth (Postman header: x-api-key)
   apiKeyHeaderName: "x-api-key",
-  apiKey: "qnwCDLTzcXO50lteD3S5By408lqputhj89ihYtiHW6o",
+  apiKey: "qnwCDLTzcXO50lteD3S5By408lqputhj89ihYtiHW6o=",
 };
 
 export interface ServiceNowApproval {
