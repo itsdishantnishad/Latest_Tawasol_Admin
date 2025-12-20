@@ -214,6 +214,7 @@
 
 :global(.ms-Dialog-main) {
   background-color: #FDECDC !important;
+  border-radius: 8px;
 }
 
 .optionsButton {
@@ -274,11 +275,12 @@
 
 .menuWrapper {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 0px;
+  right: 40%;
   display: none;
   button {
     background: transparent;
+    left: 100%;
     &:hover{
       background: transparent;
       border: none;
