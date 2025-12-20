@@ -1,0 +1,392 @@
+/* src/webparts/letsMeetDetail/components/LetsMeetDetail.module.scss */
+
+.letsMeetDetail {
+  width: 100%;
+}
+
+.error {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 0, 0, 0.08);
+}
+
+/* MAIN VIDEO sizes: 1320 x 699, radius 16 */
+.mainVideoWrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.mainVideo {
+  position: relative;
+  width: 100%;
+  max-width: 1320px;
+  height: 699px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.mainVideoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Overlay */
+.mainOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 24px;
+}
+
+.mainKicker {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.35);
+}
+
+.mainTitle {
+  font-size: 52px;
+  font-weight: 800;
+  color: #f2b61a; /* yellow-ish like your screenshot */
+  text-shadow: 0 2px 14px rgba(0,0,0,0.35);
+}
+
+/* Play button (center) */
+.playBtn {
+  margin-top: 14px;
+  width: 80px;
+  height: 80px;
+  border-radius: 999px;
+  border: none;
+  background: #e4002b; /* red */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.playBtn:focus {
+  outline: 2px solid rgba(255,255,255,0.9);
+  outline-offset: 4px;
+}
+
+.playTriangle {
+  width: 0;
+  height: 0;
+  border-left: 20px solid #fff;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  margin-left: 4px;
+}
+
+/* MISSED EPISODE SECTION */
+.missedWrap {
+  width: 100%;
+  max-width: 1320px;
+  margin: 18px auto 0;
+}
+
+.missedHeading {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 10px;
+}
+
+/* Horizontal row */
+.episodesRow {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+/* Each video: 372 x 210 */
+.episodeCard {
+  position: relative;
+  flex: 0 0 auto;
+  width: 372px;
+  height: 210px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.episodeImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.episodeOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 16px;
+  gap: 6px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+
+.episodeKicker {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.episodeTitle {
+  color: #f2b61a;
+  font-size: 18px;
+  font-weight: 800;
+  max-width: 90%;
+  line-height: 1.1;
+}
+
+/* Small play button */
+.playBtnSmall {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #e4002b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playTriangleSmall {
+  width: 0;
+  height: 0;
+  border-left: 12px solid #fff;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  margin-left: 2px;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .mainVideo {
+    height: auto;
+    aspect-ratio: 1320 / 699;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainKicker { font-size: 22px; }
+  .mainTitle { font-size: 34px; }
+  .playBtn { width: 64px; height: 64px; }
+}
+/* src/webparts/letsMeetDetail/components/LetsMeetDetail.module.scss */
+
+.letsMeetDetail {
+  width: 100%;
+}
+
+.error {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 0, 0, 0.08);
+}
+
+/* MAIN VIDEO sizes: 1320 x 699, radius 16 */
+.mainVideoWrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.mainVideo {
+  position: relative;
+  width: 100%;
+  max-width: 1320px;
+  height: 699px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.mainVideoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Overlay */
+.mainOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 24px;
+}
+
+.mainKicker {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.35);
+}
+
+.mainTitle {
+  font-size: 52px;
+  font-weight: 800;
+  color: #f2b61a; /* yellow-ish like your screenshot */
+  text-shadow: 0 2px 14px rgba(0,0,0,0.35);
+}
+
+/* Play button (center) */
+.playBtn {
+  margin-top: 14px;
+  width: 80px;
+  height: 80px;
+  border-radius: 999px;
+  border: none;
+  background: #e4002b; /* red */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.playBtn:focus {
+  outline: 2px solid rgba(255,255,255,0.9);
+  outline-offset: 4px;
+}
+
+.playTriangle {
+  width: 0;
+  height: 0;
+  border-left: 20px solid #fff;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  margin-left: 4px;
+}
+
+/* MISSED EPISODE SECTION */
+.missedWrap {
+  width: 100%;
+  max-width: 1320px;
+  margin: 18px auto 0;
+}
+
+.missedHeading {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 10px;
+}
+
+/* Horizontal row */
+.episodesRow {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+/* Each video: 372 x 210 */
+.episodeCard {
+  position: relative;
+  flex: 0 0 auto;
+  width: 372px;
+  height: 210px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.episodeImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.episodeOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 16px;
+  gap: 6px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+
+.episodeKicker {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.episodeTitle {
+  color: #f2b61a;
+  font-size: 18px;
+  font-weight: 800;
+  max-width: 90%;
+  line-height: 1.1;
+}
+
+/* Small play button */
+.playBtnSmall {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #e4002b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playTriangleSmall {
+  width: 0;
+  height: 0;
+  border-left: 12px solid #fff;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  margin-left: 2px;
+}
+
+.mainVideoIframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .mainVideo {
+    height: auto;
+    aspect-ratio: 1320 / 699;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainKicker { font-size: 22px; }
+  .mainTitle { font-size: 34px; }
+  .playBtn { width: 64px; height: 64px; }
+}
