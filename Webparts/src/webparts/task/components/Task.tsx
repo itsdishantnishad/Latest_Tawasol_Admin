@@ -19,6 +19,7 @@ import { TahweelSVG, SalesforceSVG, ServiceNowSVG } from "../../assets/constants
 
 import { SfApprovalService, SFApproval } from "../../services/Integration/SalesForce";
 import { ServiceNowApprovalService, ServiceNowApproval } from "../../services/Integration/ServiceNow";
+import { TahweelService, TahweelApproval } from "../../services/Integration/TahweelService";
 
 type TaskRowItem = {
   workflowNumber: string;
@@ -84,7 +85,6 @@ const PRIORITY_BADGE_TEXT_BY_LABEL: Record<string, string> = {
 
 const normalizeApiDateString = (value: string): string => {
   if (!value) return "";
-  // "2025-11-04 11:16:25" => "2025-11-04T11:16:25" (SPFx-safe: no includes)
   const hasSpace = value.indexOf(" ") !== -1;
   const hasT = value.indexOf("T") !== -1;
   return hasSpace && !hasT ? value.replace(" ", "T") : value;
@@ -101,6 +101,7 @@ const formatDateForDisplay = (value: string): string => {
 export default class Task extends React.Component<ITaskProps, ITaskState> {
   private readonly salesforceService: SfApprovalService;
   private readonly serviceNowService: ServiceNowApprovalService;
+  private readonly tahweelService: TahweelService;
 
   private _loadSequence = 0;
 
@@ -126,6 +127,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
 
     this.salesforceService = new SfApprovalService({ httpClient: this.props.httpClient });
     this.serviceNowService = new ServiceNowApprovalService({ httpClient: this.props.httpClient });
+    this.tahweelService = new TahweelService({ httpClient: this.props.httpClient });
   }
 
   public async componentDidMount(): Promise<void> {
@@ -164,6 +166,19 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     };
   }
 
+  private mapTahweelApprovalToRow(item: TahweelApproval): TaskRowItem {
+    return {
+      workflowNumber: item.workflowNumber || EMPTY_CELL_TEXT,
+      taskTitle: item.taskTitle || EMPTY_CELL_TEXT,
+      priority: item.priority || EMPTY_CELL_TEXT,
+      dueDate: item.dueDate || "",
+      requestorName: item.requestorName || EMPTY_CELL_TEXT,
+      workitemId: item.workitemId || item.workflowNumber || "",
+      redirectURL: item.redirectURL,
+      originSystem: item.originSystem || "Tahweel",
+    };
+  }
+
   private async loadTabData(tab: SystemFilterOption): Promise<void> {
     if (this.state.loaded[tab]) return;
 
@@ -180,6 +195,10 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
       } else if (tab === "ServiceNow") {
         const res = await this.serviceNowService.fetchApprovalsByEmail(userEmail);
         rows = (res?.approvals || []).map((x) => this.mapServiceNowApprovalToRow(x));
+      } else if (tab === "Tahweel") {
+        const { personNumber } = await this.tahweelService.fetchPersonNumberByEmail(userEmail);
+        const res = await this.tahweelService.fetchTahweelApprovalsByEmployeeNumber(personNumber);
+        rows = (res?.approvals || []).map((x) => this.mapTahweelApprovalToRow(x));
       } else {
         rows = [];
       }
@@ -212,7 +231,6 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     const { selectedTabValue, isLoading, errorMessage, data } = this.state;
 
     const activeRows: TaskRowItem[] = data[selectedTabValue];
-
     const systemTabs = SYSTEM_TAB_DEFINITIONS.map((t) => ({
       ...t,
       count: data[t.key].length,
@@ -221,7 +239,8 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     const activeTableColumns =
       selectedTabValue === "ServiceNow" ? SERVICENOW_TABLE_COLUMNS : SALESFORCE_TABLE_COLUMNS;
 
-    const actionLinkLabel = selectedTabValue === "ServiceNow" ? "Open" : "View Details";
+    const actionLinkLabel =
+      selectedTabValue === "ServiceNow" || selectedTabValue === "Tahweel" ? "Open" : "View Details";
 
     const renderTaskRow = (task: TaskRowItem): JSX.Element => {
       const priorityLabel = task.priority || EMPTY_CELL_TEXT;

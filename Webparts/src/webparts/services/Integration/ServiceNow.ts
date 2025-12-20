@@ -7,10 +7,10 @@ const SERVICE_NOW_API_CONFIG = {
   approvalListEndpoint: "/api/Tawasol/GetServiceNowApprovalList",
 
   userIdField: "userID",
-  defaultUserId: "Taha.Abizar@dhre.ae",
 
-  // 🔜 FUTURE (when you get authorization)
-  // basicAuthBase64: "PASTE_BASE64_HERE",
+  // API Key auth (Postman header: x-api-key)
+  apiKeyHeaderName: "x-api-key",
+  apiKey: "qnwCDLTzcXO50lteD3S5By408lqputhj89ihYtiHW6o",
 };
 
 export interface ServiceNowApproval {
@@ -59,8 +59,10 @@ export class ServiceNowApprovalService {
   }
 
   public async fetchApprovalsByEmail(email: string): Promise<ServiceNowTaskListApiResponse> {
-    const userIdToSend =
-      email && email.trim() ? email.trim() : SERVICE_NOW_API_CONFIG.defaultUserId;
+    const userIdToSend = (email || "").trim();
+    if (!userIdToSend) {
+      throw new Error("ServiceNow approvals failed: email (userID) is required.");
+    }
 
     const requestUrl =
       `${SERVICE_NOW_API_CONFIG.apiBaseUrl.replace(/\/$/, "")}${SERVICE_NOW_API_CONFIG.approvalListEndpoint}`;
@@ -74,11 +76,12 @@ export class ServiceNowApprovalService {
     requestHeaders.append("Accept", "application/json");
     requestHeaders.append("Cache-Control", "no-cache");
 
-    //  FUTURE
-    // requestHeaders.append(
-    //   "Authorization",
-    //   `Basic ${SERVICE_NOW_API_CONFIG.basicAuthBase64}`
-    // );
+    // API Key Header
+    const apiKey = (SERVICE_NOW_API_CONFIG.apiKey || "").trim();
+    if (!apiKey) {
+      throw new Error("ServiceNow approvals failed: API key is missing in SERVICE_NOW_API_CONFIG.apiKey");
+    }
+    requestHeaders.append(SERVICE_NOW_API_CONFIG.apiKeyHeaderName, apiKey);
 
     const httpClientOptions: IHttpClientOptions = {
       body: requestBody,
