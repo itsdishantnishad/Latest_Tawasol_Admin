@@ -179,7 +179,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
               const position = outerPositions[idx]; // 0..3
               return (
                 <a key={service.id} href={service.url} className={styles.serviceCard} style={getOuterCirclePosition(position)}>
-                  {service.icon && service.icon !== "#" && <img src={service.icon} alt={service.name} width={80} height={80} />}
+                  {service.icon && service.icon !== "#" && <img src={service.icon} alt={service.name} width={64} height={64} />}
                   <span className={styles.serviceName}>{service.name}</span>
                 </a>
               );
@@ -191,30 +191,30 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
                 const position = innerPositions[idx]; // 0..2
                 return (
                   <a key={service.id} href={service.url} className={styles.serviceCard} style={getInnerCirclePosition(position)}>
-                    {service.icon && service.icon !== "#" && <img src={service.icon} alt={service.name} width={80} height={80} />}
+                    {service.icon && service.icon !== "#" && <img src={service.icon} alt={service.name} width={64} height={64} />}
                     <span className={styles.serviceName}>{service.name}</span>
                   </a>
                 );
               })}
             </div>
           </div>
+        </div>
 
-          <div className={styles.commonButtonArea}>
-            {/* Pagination Dots */}
-            {totalPages > 1 && (
-              <div className={styles.pagination}>
-                {Array.from({ length: totalPages }).map((_, index) => (
-                  <button
-                    key={index}
-                    className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""}`}
-                    onClick={() => setCurrentPage(index)}
-                    aria-label={`Go to page ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-            <PrimaryButton label="View All" onClick={showAppsLinksDialog} />
-          </div>
+        <div className={styles.commonButtonArea}>
+          {/* Pagination Dots */}
+          {totalPages > 1 && (
+            <div className={styles.pagination}>
+              {Array.from({ length: totalPages }).map((_, index) => (
+                <button
+                  key={index}
+                  className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""}`}
+                  onClick={() => setCurrentPage(index)}
+                  aria-label={`Go to page ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+          <PrimaryButton label="View All" onClick={showAppsLinksDialog} />
         </div>
 
         <button className={styles.navButton} onClick={handleNext} disabled={totalPages <= 1}>
