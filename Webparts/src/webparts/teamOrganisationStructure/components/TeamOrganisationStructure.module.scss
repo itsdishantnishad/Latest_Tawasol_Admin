@@ -36,7 +36,7 @@
 /* ===== People grid ===== */
 .row {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: clamp(14px, 1.5vw, 18px);
   // margin-bottom: clamp(18px, 2vw, 22px);
   margin-bottom: 52px;

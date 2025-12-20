@@ -4,7 +4,7 @@
   justify-content: center;
   gap: 8px;
   flex-wrap: wrap;
-  margin: 0 auto 30px;
+  margin: 0 auto;
   border: 1px solid #FBBF7F;
   width: max-content;
   border-radius: 50px;
@@ -34,8 +34,9 @@
 }
 
 .tab:hover{
-  background: #fff7ed;
-  border-color: #fdba74;
+  border: 1.5px solid #F0BB82;
+  color: #3a3a3a;
+  background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #DDA160 0%, #FFDBB4 100%)
 }
 
 
