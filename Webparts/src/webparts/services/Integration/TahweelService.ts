@@ -7,7 +7,10 @@ import { HttpClient, IHttpClientOptions, HttpClientResponse } from "@microsoft/s
  */
 const TAHWEEL_CONFIG = {
   baseUrl: "https://infaservicesuat.dubaiholding.com",
-  endpoint: "/api/DHRETahweelFusionBireportGeneric100/v1/DHRETahweelFusionBireportGeneric",
+  endpoint: "/api/DHRETahweelFusionBireportGeneric100/v1/DHRETahweelFusionBireportGeneric100/v1/DHRETahweelFusionBireportGeneric".replace(
+    "/v1/DHRETahweelFusionBireportGeneric100/v1/DHRETahweelFusionBireportGeneric",
+    "/api/DHRETahweelFusionBireportGeneric100/v1/DHRETahweelFusionBireportGeneric"
+  ),
 
   authorization: {
     type: "Basic" as const,
@@ -16,8 +19,10 @@ const TAHWEEL_CONFIG = {
   },
 
   // Reports
-  personNumberReportPath: "/Custom/DH Integrations/AYA/DH_EXT1012_AYA/DH_GET_USER_NAME_REP.xdo",
-  leaveBalanceReportPath: "/Custom/DH Integrations/HCM/OneApp/DHH/DH Get Leave Balance Report.xdo",
+  personNumberReportPath:
+    "/Custom/DH Integrations/AYA/DH_EXT1012_AYA/DH_GET_USER_NAME_REP.xdo",
+  leaveBalanceReportPath:
+    "/Custom/DH Integrations/HCM/OneApp/DHH/DH Get Leave Balance Report.xdo",
 
   // Param name as per payload
   personEmailParamName: "P_USER_EAMIL",
@@ -31,7 +36,6 @@ const TAHWEEL_TASKS_API_CONFIG = {
 
   taskListEndpoint: "/api/Tahweel/GetTahweelApprovalList",
   taskApprovalUrlEndpoint: "/api/Tahweel/GetTahweelTaskApprovalUrl",
-
 
   apiKeyHeaderName: "x-api-key",
   apiKey: "qnwCDLTzcXO50lteD3S5By408lqputhj89ihYtiHW6o=",
@@ -52,9 +56,6 @@ const TAHWEEL_PROFILE_API_CONFIG = {
   apiKey: TAHWEEL_TASKS_API_CONFIG.apiKey,
 
   employeeNumberField: TAHWEEL_TASKS_API_CONFIG.employeeNumberField,
-
-  // if later backend requires Basic auth, keep ready like Salesforce.ts
-  // basicAuthBase64: "PASTE_BASE64_HERE",
 };
 
 export interface TahweelReportRequest {
@@ -96,13 +97,12 @@ export interface TahweelTaskListApiResponse {
  */
 export interface TahweelAdDetails {
   employeeNumber: string; // same value we send to API
-  personNumber: string;   // PERSON_NUMBER from XML (verification)
+  personNumber: string;   // person_number from API
   fullName: string;
   designation: string;
   department: string;
-  imageBase64?: string;   // IMAGE from XML (raw base64)
+  imageBase64?: string;   // image from API (raw base64)
   imageDataUrl?: string;  // data:image/...;base64,...
-  decodedXml?: string;    // helpful for debugging
 }
 
 type TahweelRawTaskItem = {
@@ -129,11 +129,29 @@ type TahweelTaskUrlApiRawResponse = {
   [key: string]: any;
 };
 
+// ✅ NEW GetADDetails response shape
+type TahweelAdDetailsApiItem = {
+  person_number?: string;
+  full_name?: string;
+  designation?: string;
+  department?: string;
+  image?: string;
+  [key: string]: any;
+};
+
+type TahweelAdDetailsApiResponse = {
+  status_code?: number;
+  data?: TahweelAdDetailsApiItem[];
+  [key: string]: any;
+};
+
 export class TahweelService {
   private readonly httpClient: HttpClient;
 
-  // ✅ shared cache across instances (Profile + Leave Balance both can reuse)
-  private static _personNumberPromiseByEmail: { [email: string]: Promise<{ personNumber: string; decodedXml: string }> } = {};
+  // shared cache across instances (Profile + Leave Balance both can reuse)
+  private static _personNumberPromiseByEmail: {
+    [email: string]: Promise<{ personNumber: string; decodedXml: string }>;
+  } = {};
 
   constructor(config: TahweelServiceConfig) {
     this.httpClient = config.httpClient;
@@ -225,7 +243,6 @@ export class TahweelService {
     const effectiveEmail = (email || "").trim();
     if (!effectiveEmail) throw new Error("Email is required to fetch person number.");
 
-    // ✅ cache to avoid duplicate calls (Profile + LeaveBalance)
     if (!TahweelService._personNumberPromiseByEmail[effectiveEmail]) {
       TahweelService._personNumberPromiseByEmail[effectiveEmail] = (async () => {
         const request: TahweelReportRequest = {
@@ -346,9 +363,7 @@ export class TahweelService {
 
     if (!response.ok) {
       const t = await response.text().catch(() => "");
-      throw new Error(
-        `Tahweel task approval URL failed: ${response.status} ${response.statusText}. ${t}`
-      );
+      throw new Error(`Tahweel task approval URL failed: ${response.status} ${response.statusText}. ${t}`);
     }
 
     const txt = await response.text().catch(() => "");
@@ -423,13 +438,10 @@ export class TahweelService {
   }
 
   // ---------------------------
-  // ✅ Tahweel Profile: AD Details
+  // Tahweel Profile: AD Details
   // ---------------------------
 
-  /**
-   * Email -> EmployeeNumber -> GetADDetails -> parse XML
-   * Most efficient because Email->USERNAME is already used for leave balance too (and cached).
-   */
+  /** Email -> employeeNumber -> GetADDetails */
   public async fetchAdDetailsByEmail(email: string): Promise<TahweelAdDetails | null> {
     const effectiveEmail = (email || "").trim();
     if (!effectiveEmail) throw new Error("Email is required to fetch AD details.");
@@ -442,7 +454,8 @@ export class TahweelService {
   }
 
   /**
-   * EmployeeNumber -> GetADDetails API -> reportBytes(base64) -> XML -> values
+   * ✅ UPDATED: New API returns JSON directly (no reportBytes/XML).
+   * Only image is base64.
    */
   public async fetchAdDetailsByEmployeeNumber(employeeNumber: string): Promise<TahweelAdDetails | null> {
     const emp = (employeeNumber || "").trim();
@@ -452,9 +465,6 @@ export class TahweelService {
       `${TAHWEEL_PROFILE_API_CONFIG.apiBaseUrl.replace(/\/$/, "")}${TAHWEEL_PROFILE_API_CONFIG.adDetailsEndpoint}`;
 
     const headers = this.buildTahweelAzureHeaders();
-
-    // 🔜 FUTURE: if Basic auth required, uncomment like Salesforce.ts
-    // headers.append("Authorization", `Basic ${TAHWEEL_PROFILE_API_CONFIG.basicAuthBase64}`);
 
     const options: IHttpClientOptions = {
       headers,
@@ -475,56 +485,35 @@ export class TahweelService {
     }
 
     const responseText = await response.text().catch(() => "");
-    const parsed = this.safeParsePossiblyDoubleEncodedJson(responseText);
+    const parsed = this.safeParsePossiblyDoubleEncodedJson(responseText) as TahweelAdDetailsApiResponse;
 
-    // Try different shapes (backend may vary)
-    const reportBytes =
-      parsed?.result?.reportBytes ||
-      parsed?.result?.ReportBytes ||
-      parsed?.reportBytes ||
-      parsed?.ReportBytes ||
-      "";
+    const first: TahweelAdDetailsApiItem | undefined =
+      Array.isArray(parsed?.data) && parsed.data.length > 0 ? parsed.data[0] : undefined;
 
-    if (!reportBytes || typeof reportBytes !== "string") {
-      // DEBUG_REMOVE_LATER: reportBytes missing log (GetADDetails)
-      console.log("[Tahweel GetADDetails] reportBytes missing:", parsed);
+    if (!first) {
+      // DEBUG_REMOVE_LATER: GetADDetails missing data array
+      console.log("[Tahweel GetADDetails] data missing:", parsed);
       return null;
     }
 
-    const decodedXml = this.decodeBase64ToUtf8(reportBytes);
-    const doc = this.parseXml(decodedXml);
+    const fullName = (first.full_name || "").toString().trim();
+    const designation = (first.designation || "").toString().trim();
+    const department = (first.department || "").toString().trim();
+    const personNumberFromApi = (first.person_number || "").toString().trim();
 
-    const fullName = this.getFirstText(doc, "FULL_NAME");
-    const designation = this.getFirstText(doc, "DESIGNATION");
-    const department = this.getFirstText(doc, "DEPARTMENT");
-    const personNumberFromXml = this.getFirstText(doc, "PERSON_NUMBER");
-
-    let imageBase64 = this.getFirstText(doc, "IMAGE");
-    if (imageBase64) {
-      imageBase64 = imageBase64.replace(/\s+/g, "");
-    }
+    let imageBase64 = (first.image || "").toString();
+    if (imageBase64) imageBase64 = imageBase64.replace(/\s+/g, "");
 
     const imageDataUrl = this.buildImageDataUrl(imageBase64);
 
-    // DEBUG_REMOVE_LATER: Parsed AD details log (GetADDetails)
-    console.log("[Tahweel GetADDetails] Parsed:", {
+    return {
       employeeNumber: emp,
-      personNumberFromXml,
+      personNumber: personNumberFromApi || emp,
       fullName,
       designation,
       department,
-      hasImage: !!imageDataUrl,
-    });
-
-    return {
-      employeeNumber: emp,
-      personNumber: personNumberFromXml || emp,
-      fullName: fullName || "",
-      designation: designation || "",
-      department: department || "",
       imageBase64: imageBase64 || undefined,
       imageDataUrl: imageDataUrl || undefined,
-      decodedXml,
     };
   }
 
@@ -532,7 +521,6 @@ export class TahweelService {
     const b64 = (imageBase64 || "").replace(/\s+/g, "");
     if (!b64) return "";
 
-    // avoid startsWith/includes for older targets
     const isPng = b64.indexOf("iVBOR") === 0;
     const isJpg = b64.indexOf("/9j/") === 0;
     const mime = isPng ? "image/png" : isJpg ? "image/jpeg" : "image/png";
