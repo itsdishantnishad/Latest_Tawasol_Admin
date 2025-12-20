@@ -6,4 +6,5 @@ export interface IProfileProps {
   hasTeamsContext: boolean;
   userDisplayName: string;
   context:WebPartContext
+  badges?: Array<{ name: string; imageUrl: string }>;
 }

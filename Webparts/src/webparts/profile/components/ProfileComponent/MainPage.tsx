@@ -10,29 +10,32 @@ export interface IMainPageProps {
   className?: string;
   onNavigateToLeave?: () => void;
   onNavigateToHRLetter?: () => void;
-  // onNavigateToHoliday?: () => void;
-  context:WebPartContext
+  context: WebPartContext;
+  badges?: Array<{ name: string; imageUrl: string }>;  
 }
 
 export default class MainPage extends React.Component<IMainPageProps> {
   public render(): React.ReactElement<IMainPageProps> {
-    const { onNavigateToLeave, onNavigateToHRLetter} = this.props;
+    const { onNavigateToLeave, onNavigateToHRLetter } = this.props;
+    
+    console.log("[MainPage] Badges:", this.props.badges);
 
     return (
       <div className={[styles.pageInner, this.props.className || ""].join(" ")}>
-        <ProfileHeader />
+        <ProfileHeader 
+          badges={this.props.badges}  
+        />
         <div className={styles.columns}>
           <div className={styles.leftCol} role="region" aria-label="Main feed">
             <LeftSection />
           </div>
 
           <aside className={styles.rightCol} role="complementary" aria-label="Sidebar widgets">
-            <RightSection
+            {/* <RightSection
               onApplyLeave={onNavigateToLeave}
               onRequestHRLetter={onNavigateToHRLetter}
-              // onViewHoliday={onNavigateToHoliday}
               context={this.props.context}
-            />
+            /> */}
           </aside>
         </div>
       </div>

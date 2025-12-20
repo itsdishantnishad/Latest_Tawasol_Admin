@@ -301,14 +301,14 @@
   transition: background 0.2s;
 }
 
-.TIRSocialLink:hover {
-  background: white;
-}
+// .TIRSocialLink:hover {
+//   background: white;
+// }
 
 .TIRSocialLink img {
   width: 26px;
   height: 26px;
-  filter: brightness(0) invert(1); /* white */
+  // filter: brightness(0) invert(1); /* white */
 }
 
 .TIRSocialLink:hover img {
