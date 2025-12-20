@@ -1,3 +1,5 @@
+// ProfileHeaderComp.tsx
+
 import * as React from "react";
 import { Text, Spinner, SpinnerSize } from "@fluentui/react";
 import {
@@ -7,6 +9,8 @@ import {
   updateUserProfilePicture,
   copyProfileToClipboard,
   fetchCurrentUserInfo,
+  saveSelectedBadge,
+  loadSelectedBadge,
 } from "../services/profileHeaderServices";
 import styles from "./ProfileHeader.module.scss";
 
@@ -15,6 +19,7 @@ import { TahweelService, TahweelAdDetails } from "../../../services/Integration/
 const ProfileIcon_URL = require("../../assets/profileCircleImg.svg");
 
 type StatItem = { label: string; value: number };
+type BadgeItem = { name: string; imageUrl: string };
 
 export interface IProfileHeaderProps {
   context: any;
@@ -25,6 +30,9 @@ export interface IProfileHeaderProps {
 
   stats: StatItem[];
   actionNavigateUrl?: string;
+
+  badges?: BadgeItem[];
+  selectedBadge?: BadgeItem | null;
 }
 
 interface IProfileHeaderState {
@@ -40,11 +48,14 @@ interface IProfileHeaderState {
   isLoading: boolean;
   siteUrl: string;
   error: string | null;
+
+  badgeImageErrors: { [key: string]: boolean };
+  selectedBadge: BadgeItem | null;
 }
 
 export default class ProfileHeader extends React.Component<IProfileHeaderProps, IProfileHeaderState> {
   private menuRef: React.RefObject<HTMLDivElement>;
-  private feedbackTimeout: NodeJS.Timeout | null = null;
+  private feedbackTimeout: number | undefined;
 
   private tahweelService: TahweelService;
 
@@ -74,6 +85,9 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       isLoading: true,
       siteUrl: "",
       error: null,
+
+      badgeImageErrors: {},
+      selectedBadge: props.selectedBadge ?? null,
     };
 
     this.menuRef = React.createRef();
@@ -87,7 +101,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
   public componentWillUnmount(): void {
     document.removeEventListener("click", this.handleOutsideClick);
-    if (this.feedbackTimeout) clearTimeout(this.feedbackTimeout);
+    if (this.feedbackTimeout) window.clearTimeout(this.feedbackTimeout);
   }
 
   private getUserEmailFromContext(): string {
@@ -100,9 +114,13 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       const siteUrl = await getSiteUrl();
       this.setState({ siteUrl });
 
+      const savedBadge = loadSelectedBadge();
+      if (savedBadge) {
+        this.setState({ selectedBadge: savedBadge });
+      }
+
       const userEmail = this.getUserEmailFromContext();
 
-      // 1) Tahweel AD Details (preferred)
       let adDetails: TahweelAdDetails | null = null;
       try {
         if (userEmail) {
@@ -113,7 +131,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
         console.log("[ProfileHeader] Tahweel AD Details error:", e);
       }
 
-      // 2) SharePoint photo fallback if Tahweel image not present
       let spPhotoUrl = "";
       try {
         const photoUrl = await fetchUserProfilePicture();
@@ -122,7 +139,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
         // ignore
       }
 
-      // 3) SharePoint info fallback if Tahweel name/department missing
       let spInfo: { fullName: string; department: string } | null = null;
       try {
         spInfo = await fetchCurrentUserInfo();
@@ -155,7 +171,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
         error: null,
       });
 
-      // Debug
       // DEBUG_REMOVE_LATER: ProfileHeader loaded summary log
       console.log("[ProfileHeader] Loaded:", {
         email: userEmail,
@@ -222,13 +237,33 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
       this.setState({ copyFeedback: true });
 
-      if (this.feedbackTimeout) clearTimeout(this.feedbackTimeout);
-      this.feedbackTimeout = setTimeout(() => {
+      if (this.feedbackTimeout) window.clearTimeout(this.feedbackTimeout);
+      this.feedbackTimeout = window.setTimeout(() => {
         this.setState({ copyFeedback: false });
       }, 2000);
     } catch (error) {
       this.setState({ error: "Failed to copy profile" });
     }
+  };
+
+  private handleBadgeImageError = (badgeName: string): void => {
+    // DEBUG_REMOVE_LATER: badge image error log
+    console.warn(`[ProfileHeader] Badge image failed: ${badgeName}`);
+    this.setState((prev) => ({
+      badgeImageErrors: {
+        ...prev.badgeImageErrors,
+        [badgeName]: true,
+      },
+    }));
+  };
+
+  private handleSelectBadge = (badge: BadgeItem): void => {
+    this.setState((prev) => {
+      const isSame = prev.selectedBadge?.name === badge.name;
+      const next = isSame ? null : badge;
+      saveSelectedBadge(next);
+      return { selectedBadge: next };
+    });
   };
 
   private getInitials(fullName: string): string {
@@ -267,7 +302,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     </div>
   );
 
-  private renderAvatar(): React.ReactElement {
+  private renderAvatarCore(): React.ReactElement {
     const { isLoading, currentPhoto, fullName } = this.state;
 
     if (isLoading) {
@@ -307,15 +342,36 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
   }
 
   public render(): React.ReactElement {
-    const { stats } = this.props;
-    const { designation, department, showMenu, copyFeedback, error, isLoading } = this.state;
+    const { stats, badges } = this.props;
+    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors } = this.state;
 
     const subtitle = (designation || "").trim() || (department || "").trim() || "—";
 
     return (
       <div className={styles.headerWrap}>
         <div className={styles.identityCard}>
-          {this.renderAvatar()}
+          <div className={styles.avatarWrap}>
+            {this.renderAvatarCore()}
+
+            {selectedBadge ? (
+              <div
+                className={styles.avatarBadge}
+                title={selectedBadge.name}
+                aria-label={`Selected badge: ${selectedBadge.name}`}
+              >
+                {badgeImageErrors[selectedBadge.name] ? (
+                  <div className={styles.avatarBadgeFallback}>?</div>
+                ) : (
+                  <img
+                    className={styles.avatarBadgeIcon}
+                    src={selectedBadge.imageUrl}
+                    alt={selectedBadge.name}
+                    onError={() => this.handleBadgeImageError(selectedBadge.name)}
+                  />
+                )}
+              </div>
+            ) : null}
+          </div>
 
           <div className={styles.metaCol}>
             {this.renderName()}
@@ -339,6 +395,21 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
                 <path d="M8.00391 12H16.0039" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
+
+            {copyFeedback && (
+              <div className={styles.copyPill} role="status" aria-live="polite">
+                <span className={styles.copyDot} aria-hidden="true">!</span>
+                <span className={styles.copyText}>Profile Copied</span>
+                <button
+                  type="button"
+                  className={styles.copyClose}
+                  aria-label="Close"
+                  onClick={() => this.setState({ copyFeedback: false })}
+                >
+                  ×
+                </button>
+              </div>
+            )}
 
             <div className={styles.kebabWrapper} ref={this.menuRef}>
               <button
@@ -386,6 +457,40 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
               {error}
             </div>
           )}
+
+          {badges && badges.length > 0 ? (
+            <div className={styles.badgesRow} aria-label="Badges">
+              {badges.map((b, i) => (
+                <div
+                  className={styles.badgeItem}
+                  key={`${b.name}-${i}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => this.handleSelectBadge(b)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      this.handleSelectBadge(b);
+                    }
+                  }}
+                  aria-label={`Select badge ${b.name}`}
+                >
+                  {badgeImageErrors[b.name] ? (
+                    <div className={styles.badgePlaceholder} title={`Failed to load: ${b.name}`}>
+                      ?
+                    </div>
+                  ) : (
+                    <img
+                      className={styles.badgeImg}
+                      src={b.imageUrl}
+                      alt={b.name}
+                      onError={() => this.handleBadgeImageError(b.name)}
+                    />
+                  )}
+                  <div className={styles.badgeName}>{b.name}</div>
+                </div>
+              ))}
+            </div>
+          ) : null}
 
           <div className={styles.statsRow} role="region" aria-label="Profile stats">
             {stats.slice(0, 4).map(this.renderStat)}

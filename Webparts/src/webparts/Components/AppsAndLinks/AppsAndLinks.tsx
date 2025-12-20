@@ -197,7 +197,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     } else if (!isValidURL(linkURL.trim())) {
       // 4. Validate URL Format using improved validation
       setUrlError(
-        "Invalid URL format. Must be a valid URL starting with http:// or https://"
+        "Not a valid URL. Please check the spelling entered correctly"
       );
       isValid = false;
     }
@@ -534,7 +534,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                         className={styles.inputLine}
                         onChange={(e, v: any) => {
                           setLinkURL(v);
-                          if (urlError) setUrlError("");
+                          if (urlError) setUrlError(urlError);
                         }}
                         errorMessage={urlError}
                         styles={{

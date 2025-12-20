@@ -234,15 +234,22 @@
         }
       ]
     },
-      "event-detail-web-part": {
+    "event-detail-web-part": {
       "components": [
         {
           "entrypoint": "./lib/webparts/eventDetail/EventDetailWebPart.js",
           "manifest": "./src/webparts/eventDetail/EventDetailWebPart.manifest.json"
         }
       ]
+    },
+    "lets-meet-detail-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/letsMeetDetail/LetsMeetDetailWebPart.js",
+          "manifest": "./src/webparts/letsMeetDetail/LetsMeetDetailWebPart.manifest.json"
+        }
+      ]
     }
-
   },
   "externals": {},
   "localizedResources": {
@@ -276,6 +283,7 @@
     "BeveragesWebPartStrings": "lib/webparts/beverages/loc/{locale}.js",
     "HelpWebPartStrings": "lib/webparts/help/loc/{locale}.js",
     "EventDetailWebPartStrings": "lib/webparts/eventDetail/loc/{locale}.js",
-    "FormsLibraryWebPartStrings": "lib/webparts/formsLibrary/loc/{locale}.js"
+    "FormsLibraryWebPartStrings": "lib/webparts/formsLibrary/loc/{locale}.js",
+    "LetsMeetDetailWebPartStrings": "lib/webparts/letsMeetDetail/loc/{locale}.js"
   }
 }
