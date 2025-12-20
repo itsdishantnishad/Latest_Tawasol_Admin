@@ -158,6 +158,37 @@ export const getFileMetadata = async (fileUrl: string): Promise<any> => {
   }
 };
 
+export type SelectedBadge = { name: string; imageUrl: string };
+
+const SELECTED_BADGE_STORAGE_KEY = "tawasol_selected_badge";
+
+export const saveSelectedBadge = (badge: SelectedBadge | null): void => {
+  try {
+    if (!badge) {
+      window.localStorage.removeItem(SELECTED_BADGE_STORAGE_KEY);
+      return;
+    }
+    window.localStorage.setItem(SELECTED_BADGE_STORAGE_KEY, JSON.stringify(badge));
+  } catch (e) {
+    console.warn("[profileHeaderServices] saveSelectedBadge failed:", e);
+  }
+};
+
+export const loadSelectedBadge = (): SelectedBadge | null => {
+  try {
+    const raw = window.localStorage.getItem(SELECTED_BADGE_STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as SelectedBadge;
+    if (!parsed?.name || !parsed?.imageUrl) return null;
+
+    return parsed;
+  } catch (e) {
+    console.warn("[profileHeaderServices] loadSelectedBadge failed:", e);
+    return null;
+  }
+};
+
 
 
 
