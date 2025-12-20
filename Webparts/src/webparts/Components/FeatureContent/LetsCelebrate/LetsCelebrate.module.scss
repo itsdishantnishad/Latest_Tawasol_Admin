@@ -124,8 +124,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 1px solid #e0989042;
-
+  border: 1px solid #e0989026;
   /* Soft halo behind the border */
   background: radial-gradient(
     circle,
@@ -145,7 +144,7 @@
   width: 60%;
   height: 60%;
   border-radius: 50%;
-  border: 1px solid #e0989042;
+  border: 1px solid #e0989026;
   background: transparent;
 }
 
@@ -166,10 +165,10 @@
   border: 2px solid #DA291C;
   border-radius: 50%;
   box-sizing: border-box;
-  height: 74px;
+  height: 64px;
   overflow: hidden;
   padding: 5px;
-  width: 74px;
+  width: 64px;
   /* Centering the image inside */
   display: flex;
   align-items: center;
@@ -245,14 +244,15 @@
   margin-top: 0;
   width: 100%;
   position: absolute;
-  top: 85%;
+  bottom: 13%;
+  gap: 35px;
 }
 
 .pagination {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 40px;
+  margin-bottom: 0px;
 }
 
 .dot {

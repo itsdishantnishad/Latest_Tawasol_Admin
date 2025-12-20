@@ -364,7 +364,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                 ))}
 
                 <div className={styles.innerCircle}>
-                  {currentItems.slice(2, 5).map((item, index) => (
+                  {currentItems.slice(2, 4).map((item, index) => (
                     <div
                       key={item.id}
                       className={styles.profileCard}

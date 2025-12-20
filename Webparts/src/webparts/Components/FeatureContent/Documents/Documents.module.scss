@@ -82,8 +82,12 @@
 }
 
 .iconContainer {
-  margin-bottom: 20px;
+  margin-bottom: 0;
 
+  img{
+    width: 300px;
+    height: 400px;
+  }
   svg {
     display: block;
   }
