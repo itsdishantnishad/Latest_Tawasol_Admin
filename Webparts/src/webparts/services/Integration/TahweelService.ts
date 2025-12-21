@@ -37,6 +37,9 @@ const TAHWEEL_TASKS_API_CONFIG = {
   taskListEndpoint: "/api/Tahweel/GetTahweelApprovalList",
   taskApprovalUrlEndpoint: "/api/Tahweel/GetTahweelTaskApprovalUrl",
 
+  // ✅ NEW
+  activeEmployeesEndpoint: "/api/Tahweel/GetActiveEmployees",
+
   apiKeyHeaderName: "x-api-key",
   apiKey: "qnwCDLTzcXO50lteD3S5By408lqputhj89ihYtiHW6o=",
 
@@ -143,6 +146,43 @@ type TahweelAdDetailsApiResponse = {
   status_code?: number;
   data?: TahweelAdDetailsApiItem[];
   [key: string]: any;
+};
+
+// ✅ NEW GetActiveEmployees response shape
+type TahweelActiveEmployeeApiItem = {
+  person_number?: string;
+  full_name?: string;
+  doj?: string;
+  date_of_birth?: string;
+
+  // future (as per your note)
+  role?: string;
+  designation?: string;
+  department?: string;
+  email?: string;
+  image?: string;
+
+  [key: string]: any;
+};
+
+type TahweelActiveEmployeeApiResponse = {
+  response?: TahweelActiveEmployeeApiItem[];
+  [key: string]: any;
+};
+
+export type TahweelActiveEmployee = {
+  personNumber: string;
+  fullName: string;
+  doj: string;
+  dateOfBirth: string;
+
+  role: string;
+  designation: string;
+  department: string;
+  email: string;
+
+  // imageBase64?: string;
+  // imageDataUrl?: string;
 };
 
 export class TahweelService {
@@ -454,7 +494,7 @@ export class TahweelService {
   }
 
   /**
-   * ✅ UPDATED: New API returns JSON directly (no reportBytes/XML).
+   * UPDATED: New API returns JSON directly (no reportBytes/XML).
    * Only image is base64.
    */
   public async fetchAdDetailsByEmployeeNumber(employeeNumber: string): Promise<TahweelAdDetails | null> {
@@ -491,7 +531,6 @@ export class TahweelService {
       Array.isArray(parsed?.data) && parsed.data.length > 0 ? parsed.data[0] : undefined;
 
     if (!first) {
-      // DEBUG_REMOVE_LATER: GetADDetails missing data array
       console.log("[Tahweel GetADDetails] data missing:", parsed);
       return null;
     }
@@ -515,6 +554,66 @@ export class TahweelService {
       imageBase64: imageBase64 || undefined,
       imageDataUrl: imageDataUrl || undefined,
     };
+  }
+
+  // ---------------------------
+  // ✅ GetActiveEmployees (Birthdays / Anniversaries)
+  // ---------------------------
+
+  // ✅ FIXED: GET cannot have body -> send DOB/DOJ in query string
+  public async fetchActiveEmployees(flags: { DOB: "0" | "1"; DOJ: "0" | "1" }): Promise<TahweelActiveEmployee[]> {
+    const baseUrl =
+      `${TAHWEEL_TASKS_API_CONFIG.apiBaseUrl.replace(/\/$/, "")}${TAHWEEL_TASKS_API_CONFIG.activeEmployeesEndpoint}`;
+
+    const requestUrl =
+      `${baseUrl}?DOB=${encodeURIComponent(flags.DOB)}&DOJ=${encodeURIComponent(flags.DOJ)}`;
+
+    const headers = this.buildTahweelAzureHeaders();
+
+    const response: HttpClientResponse = await this.httpClient.get(
+      requestUrl,
+      HttpClient.configurations.v1,
+      { headers }
+    );
+
+    if (!response.ok) {
+      const t = await response.text().catch(() => "");
+      throw new Error(`Tahweel GetActiveEmployees failed: ${response.status} ${response.statusText}. ${t}`);
+    }
+
+    const txt = await response.text().catch(() => "");
+    const parsed = this.safeParsePossiblyDoubleEncodedJson(txt) as TahweelActiveEmployeeApiResponse;
+
+    const arr: TahweelActiveEmployeeApiItem[] = Array.isArray(parsed?.response) ? parsed.response : [];
+
+    return arr.map((x) => {
+      const personNumber = (x?.person_number || "").toString().trim();
+      const fullName = (x?.full_name || "").toString().trim();
+      const doj = (x?.doj || "").toString().trim();
+      const dateOfBirth = (x?.date_of_birth || "").toString().trim();
+
+      const role = (x?.role || "").toString().trim();
+      const designation = (x?.designation || "").toString().trim();
+      const department = (x?.department || "").toString().trim();
+      const email = (x?.email || "").toString().trim();
+
+      // Image (future): keep ready
+      // let imageBase64 = (x?.image || "").toString().replace(/\s+/g, "");
+      // const imageDataUrl = this.buildImageDataUrl(imageBase64);
+
+      return {
+        personNumber,
+        fullName,
+        doj,
+        dateOfBirth,
+        role,
+        designation,
+        department,
+        email,
+        // imageBase64: imageBase64 || undefined,
+        // imageDataUrl: imageDataUrl || undefined,
+      };
+    });
   }
 
   private buildImageDataUrl(imageBase64?: string): string {

@@ -1,92 +1,115 @@
 import * as React from "react";
 import PeopleSimpleFeed, { IPersonBase } from "./PeopleSimpleFeed";
-import { IBirthdayPerson } from "./BirthdayData";
 import styles from "./Birthday.module.scss";
-// const upChevronIcon = require("../../assets/upArrow.svg") as string;
 
 export interface BirthdaysFeedProps {
-  items: IBirthdayPerson[];
+  items: IPersonBase[];
   webAbsoluteUrl?: string;
+
+  todayTitle: string;
+  upcomingTitle: string;
+
+  emptyTodayText: string;
+  emptyUpcomingText: string;
 }
 
-const Birthday: React.FC<BirthdaysFeedProps> = ({ items, webAbsoluteUrl }) => {
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-  // reminder state for upcoming list
-  const [reminders, setReminders] = React.useState<{ [id: string]: boolean }>({});
+const monthMap: { [k: string]: number } = {
+  JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
+  JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11,
+};
 
-  const toggleReminder = (id: string) => {
-    setReminders(prev => {
-      const next = { ...prev, [id]: !prev[id] };
-      // TODO: hook notification/flow here
-      // console.log("Reminder toggled", id, next[id]);
-      return next;
-    });
-  };
+const parseMonthDay = (raw?: string): { m: number; d: number } | null => {
+  const v = (raw || "").trim();
+  if (!v) return null;
 
-  const todayBirthdays = items.filter(item => item.date === new Date().toISOString().slice(0, 10));
-  const notTodayBirthdays = items.filter(item => item.date !== new Date().toISOString().slice(0, 10));
+  // supports "DD-MMM-YYYY" or "YYYY-MM-DD"
+  const parts = v.split("-");
+  if (parts.length < 2) return null;
+
+  // "YYYY-MM-DD"
+  if (parts[0].length === 4) {
+    const m = parseInt(parts[1], 10);
+    const d = parseInt(parts[2], 10);
+    if (!m || !d) return null;
+    return { m: m - 1, d };
+  }
+
+  // "DD-MMM-YYYY"
+  const d = parseInt(parts[0], 10);
+  const mon = (parts[1] || "").toUpperCase();
+  const m = monthMap[mon];
+  if (m === undefined || !d) return null;
+  return { m, d };
+};
+
+const dayDiffFromToday = (m: number, d: number): number => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  let candidate = new Date(today.getFullYear(), m, d);
+  if (candidate.getTime() < today.getTime()) {
+    candidate = new Date(today.getFullYear() + 1, m, d);
+  }
+
+  const diff = Math.floor((candidate.getTime() - today.getTime()) / MS_PER_DAY);
+  return diff;
+};
+
+const Birthday: React.FC<BirthdaysFeedProps> = ({
+  items,
+  webAbsoluteUrl,
+  todayTitle,
+  upcomingTitle,
+  emptyTodayText,
+  emptyUpcomingText,
+}) => {
+  const withinWindow = React.useMemo(() => {
+    const rows = (items || [])
+      .map((x) => {
+        const md = parseMonthDay(x.date);
+        if (!md) return null;
+        const diff = dayDiffFromToday(md.m, md.d);
+        return { item: x, diff };
+      })
+      .filter((x): x is { item: IPersonBase; diff: number } => !!x)
+      .filter((x) => x.diff >= 0 && x.diff <= 7)
+      .sort((a, b) => a.diff - b.diff);
+
+    const today = rows.filter((x) => x.diff === 0).map((x) => x.item);
+    const upcoming = rows.filter((x) => x.diff > 0).map((x) => x.item);
+
+    return { today, upcoming };
+  }, [items]);
 
   return (
     <div className={styles.wrap}>
-      {/* Today's Celebrations */}
       <div className={styles.section}>
         <div className={styles.sectionHead}>
-          <p>Today's Celebration</p>
-          {/* <img src={upChevronIcon} alt="" /> */}
+          <p>{todayTitle}</p>
         </div>
+
         <PeopleSimpleFeed
-          items={todayBirthdays}
+          items={withinWindow.today}
           webAbsoluteUrl={webAbsoluteUrl}
-          emptyText="No birthdays today."
-        // default CTA = Wish Now (from item.wishLink)
+          emptyText={emptyTodayText}
         />
       </div>
 
-      {/* Upcoming Birthdays (collapsible) */}
-      <UpcomingSection
-        title="Upcoming Birthdays"
-        items={notTodayBirthdays}
-        webAbsoluteUrl={webAbsoluteUrl}
-        isReminded={(id) => !!reminders[id]}
-        onToggleReminder={toggleReminder}
-      />
+      <div className={styles.section}>
+        <button className={styles.sectionHead + " " + styles.collapsible}>
+          <span>{upcomingTitle}</span>
+        </button>
+
+        <PeopleSimpleFeed
+          items={withinWindow.upcoming}
+          webAbsoluteUrl={webAbsoluteUrl}
+          emptyText={emptyUpcomingText}
+        />
+      </div>
     </div>
   );
 };
 
 export default Birthday;
-
-/** Internal collapsible section for upcoming birthdays */
-const UpcomingSection: React.FC<{
-  title: string;
-  items: IPersonBase[];
-  webAbsoluteUrl?: string;
-  isReminded: (id: string) => boolean;
-  onToggleReminder: (id: string) => void;
-}> = ({ title, items, webAbsoluteUrl, isReminded, onToggleReminder }) => {
-
-
-  return (
-    <div className={styles.section}>
-      <button className={styles.sectionHead + " " + styles.collapsible} >
-        <span>{title}</span>
-        {/* <span className={styles.chevron} aria-hidden="true">{open ? "▾" : "▸"}</span> */}
-      </button>
-      <PeopleSimpleFeed
-        items={items}
-        webAbsoluteUrl={webAbsoluteUrl}
-        emptyText="No upcoming birthdays."
-        renderCta={(p: any) => (
-          <button
-            type="button"
-            className={isReminded(p.id) ? styles.remindBtnActive : styles.remindBtn}
-            onClick={() => onToggleReminder(p.id)}
-            aria-pressed={isReminded(p.id)}
-          >
-            {isReminded(p.id) ? "✓ Reminding" : "🔔 Remind me"}
-          </button>
-        )}
-      />
-    </div>
-  );
-};
