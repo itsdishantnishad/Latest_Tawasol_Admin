@@ -1,13 +1,12 @@
+
+
 import * as React from 'react';
 import type { INewsStoryProps } from './INewsStoryProps';
 import Slider, { Settings } from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { useRef } from 'react';
-import { FontIcon } from '@fluentui/react/lib/Icon';
 import styles from './NewsStory.module.scss';
 import { listServices } from '../../services/listServices';
-import NewsType from '../../Components/News/NewsType';
 
 export interface INewsStoryState {
   promos: any[];
@@ -17,80 +16,132 @@ export interface ICarouselProps {
   promos: any[];
   interval: number;
   newsViewUrl: string;
+  webUrl: string; // ✅ added (for resolving relative urls)
 }
 
+// ✅ Placeholder URL
+const PLACEHOLDER_URL = 'https://placehold.net/400x400.png';
+
+// ✅ Figma arrows (shared assets folder)
+const LeftArrowImg: string = require('../../assets/LeftArrow.png');
+const RightArrowImg: string = require('../../assets/RightArrow.png');
+
 const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let sliderRef: any = useRef(null);
+  const sliderRef = React.useRef<any>(null);
 
   const next = (): void => {
-    sliderRef.slickNext();
+    sliderRef.current?.slickNext?.();
   };
+
   const prev = (): void => {
-    sliderRef.slickPrev();
+    sliderRef.current?.slickPrev?.();
+  };
+
+  const onNewsImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>): void => {
+    const img = e.currentTarget;
+    if (img.dataset.fallbackApplied === 'true') return;
+    img.dataset.fallbackApplied = 'true';
+    img.src = PLACEHOLDER_URL;
+  };
+
+  // ✅ Resolve item url to absolute
+  const resolveUrl = (rawUrl: string): string => {
+    const u = (rawUrl || '').trim();
+    if (!u) return props.newsViewUrl;
+
+    // absolute
+    if (/^https?:\/\//i.test(u)) return u;
+
+    // server-relative (/sites/... or /SitePages/...)
+    if (u.startsWith('/')) return `${window.location.origin}${u}`;
+
+    // site-relative (SitePages/xxx.aspx)
+    const base = props.webUrl.replace(/\/$/, '');
+    return `${base}/${u.replace(/^\//, '')}`;
+  };
+
+  // ✅ Choose per-item page url (prefer path/url/link; fallback to newsViewUrl)
+  const getItemUrl = (news: any): string => {
+    const candidate =
+      news?.path ||
+      news?.url ||
+      news?.link ||
+      news?.pageUrl ||
+      ''; // add more keys if needed
+    return resolveUrl(candidate || props.newsViewUrl);
   };
 
   const settings: Settings = {
     dots: true,
+    arrows: false,
     infinite: props.promos && props.promos.length <= 1 ? false : true,
     slidesToShow: 1,
     slidesToScroll: 1,
     // autoplay: props.interval > 0,
-    autoplaySpeed: props.interval,
-    className: 'promotionalBanner',
-    appendDots: (dots: React.ReactNode) => (
-      <div>
-        <div className={styles.buttons}>
-          <ul style={{ margin: '0px', display: 'contents' }}>{dots}</ul>
-          <div style={{ display: 'flex', paddingLeft: '0px', paddingTop: '25px' }}>
-            <div onClick={prev}>
-              <FontIcon aria-label="Previous" iconName="ChevronLeftMed" />
-            </div>
-            <div onClick={next} className={styles.RightArrow}>
-              <FontIcon aria-label="Next" iconName="ChevronRightMed" />
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
+    autoplaySpeed: props.interval
   };
 
   return (
-    <Slider ref={slider => (sliderRef = slider)} {...settings}>
+    <Slider ref={(s: any) => (sliderRef.current = s)} {...settings}>
       {props.promos.map((news: any) => {
+        const imgSrc =
+          news?.newsImage && String(news.newsImage).trim()
+            ? String(news.newsImage).trim()
+            : PLACEHOLDER_URL;
+
+        const detailUrl = getItemUrl(news);
+
         return (
           <div
             className={styles.bannerCard}
             key={news.path || news.title}
             role="button"
             tabIndex={0}
-            onClick={() => window.open(props.newsViewUrl, '_self')}
-            onKeyDown={e => e.key === 'Enter' && window.open(props.newsViewUrl, '_self')}
+            onClick={() => window.open(detailUrl, '_self')}
+            onKeyDown={(e) => e.key === 'Enter' && window.open(detailUrl, '_self')}
             style={{ cursor: 'pointer' }}
           >
-            <div className={styles.bannerCard__PromoDetailsContent}>
-              <div className={styles.leftSection}>
-                <div className={styles.newsTypeWrapper}>
-                  <NewsType newsType={news.newsType} />
-                </div>
+            <div className={styles.heroMedia}>
+              <img
+                className={styles.heroImage}
+                src={imgSrc}
+                onError={onNewsImgError}
+                alt={news?.title ? String(news.title) : 'News banner'}
+              />
 
-                <div className={styles.bannerCard__PromoDetailsContent__title}>
-                  {news.title}
-                </div>
+              <div className={styles.topGradient} />
+              <div className={styles.bottomGradient} />
 
-                <div className={styles.valuesWrapper}>
-                  <div className={styles.bannerCard__PromoDetailsContent__values}>
-                    <span>{news.lastModified}</span>
-                    <span className={styles.dot}></span>
-                    <span>{news.readTime} min read</span>
-                    <span className={styles.dot}></span>
-                    <span>{news.pageView} Views</span>
-                  </div>
-                </div>
-              </div>
+              <div className={styles.captionBar}>
+                {/* LEFT side shows RightArrow image (chevrons towards title) */}
+                <button
+                  type="button"
+                  className={styles.captionDecor}
+                  aria-label="Previous slide"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation(); // ✅ do not open detail page
+                    prev();
+                  }}
+                >
+                  <img src={RightArrowImg} alt="" />
+                </button>
 
-              <div className={styles.rightSection}>
-                <img className={styles.newsImage} src={news.newsImage} />
+                <div className={styles.captionTitle}>{news?.title || ''}</div>
+
+                {/* RIGHT side shows LeftArrow image (chevrons towards title) */}
+                <button
+                  type="button"
+                  className={styles.captionDecor}
+                  aria-label="Next slide"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation(); // ✅ do not open detail page
+                    next();
+                  }}
+                >
+                  <img src={LeftArrowImg} alt="" />
+                </button>
               </div>
             </div>
           </div>
@@ -112,13 +163,13 @@ export default class NewsStory extends React.Component<INewsStoryProps, INewsSto
   public render(): React.ReactElement<INewsStoryProps> {
     const webUrl = this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, '');
 
-    // Get configured URL from web part property (if any)
+    // configured list view page (still kept as fallback)
     const configuredUrl = (this.props.detailsPageUrl || '').trim();
     const newsViewUrl = configuredUrl
       ? (configuredUrl.startsWith('http')
           ? configuredUrl
           : `${webUrl}/${configuredUrl.replace(/^\//, '')}`)
-      : `${webUrl}/SitePages/NewsView.aspx`; // default fallback
+      : `${webUrl}/SitePages/NewsView.aspx`;
 
     return (
       <div className={styles.promotionalBanner}>
@@ -126,6 +177,7 @@ export default class NewsStory extends React.Component<INewsStoryProps, INewsSto
           promos={this.state.promos}
           interval={this.props.interval}
           newsViewUrl={newsViewUrl}
+          webUrl={webUrl}
         />
       </div>
     );
@@ -133,7 +185,6 @@ export default class NewsStory extends React.Component<INewsStoryProps, INewsSto
 
   public async componentDidMount(): Promise<void> {
     try {
-      // get top 3 news stories for current site
       const maxItems = this.props.maxItems && this.props.maxItems > 0 ? this.props.maxItems : 3;
       const listItems = await this.spService.getNewsStory(maxItems);
       this.setState({ promos: listItems });
