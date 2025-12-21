@@ -1,6 +1,7 @@
-import * as React from 'react';
-import styles from './Task.module.scss';
-import type { ITaskProps } from './ITaskProps';
+import * as React from "react";
+import styles from "./Task.module.scss";
+import type { ITaskProps } from "./ITaskProps";
+
 import {
   TableBody,
   TableCell,
@@ -10,201 +11,286 @@ import {
   TableHeaderCell,
   TableCellLayout,
 } from "@fluentui/react-components";
-import Tag from '../../Components/Tag/Tag';
-import NavSegment from './taskNavBtnComp';
-import {
-  SfApprovalService,
-  SFApproval,
-} from '../../services/Integration/SalesForce';
 
+import Tag from "../../Components/Tag/Tag";
+import NavSegment, { SystemFilterOption } from "./taskNavBtnComp";
 
-import {
-  ServiceNowApprovalService,
-  ServiceNowTaskListItem
-} from '../../services/Task/ServiceNowApprovalService';
+import { TahweelSVG, SalesforceSVG, ServiceNowSVG } from "../../assets/constants";
+
+import { SfApprovalService, SFApproval } from "../../services/Integration/SalesForce";
+import { ServiceNowApprovalService, ServiceNowApproval } from "../../services/Integration/ServiceNow";
+import { TahweelService, TahweelApproval } from "../../services/Integration/TahweelService";
+
+type TaskRowItem = {
+  workflowNumber: string;
+  taskTitle: string;
+  priority: string;
+  dueDate: string;
+  requestorName: string;
+  workitemId: string;
+  redirectURL?: string;
+  originSystem: string;
+};
 
 export interface ITaskState {
-  selectedTabValue: string;
+  selectedTabValue: SystemFilterOption;
   isLoading: boolean;
   errorMessage?: string;
-  oracleItems: ServiceNowTaskListItem[];
-  salesforceItems: SFApproval[];
-  rawResponse?: any;
+
+  data: Record<SystemFilterOption, TaskRowItem[]>;
+  loaded: Record<SystemFilterOption, boolean>;
 }
 
-const formatIsoDateToDisplay = (isoString: string) => {
-  if (!isoString) return '—';
-  const date = new Date(isoString);
-  return date.toLocaleDateString('en-GB', {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
-  });
+/** Display constants */
+const EMPTY_CELL_TEXT = "—";
+const TABLE_COLUMN_COUNT = 6;
+const DATE_LOCALE = "en-GB";
+const DATE_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short", year: "numeric" };
+
+const SYSTEM_TAB_DEFINITIONS = [
+  { key: "Tahweel" as const, label: "Tahweel", iconSvg: TahweelSVG },
+  { key: "Salesforce" as const, label: "Salesforce", iconSvg: SalesforceSVG },
+  { key: "ServiceNow" as const, label: "ServiceNow", iconSvg: ServiceNowSVG },
+];
+
+const SALESFORCE_TABLE_COLUMNS = [
+  { columnKey: "workflowNumber", label: "Workflow No." },
+  { columnKey: "taskTitle", label: "Task Title" },
+  { columnKey: "priority", label: "Priority" },
+  { columnKey: "dueDate", label: "Due Date" },
+  { columnKey: "requestedBy", label: "Requested By" },
+  { columnKey: "action", label: "Action" },
+];
+
+const SERVICENOW_TABLE_COLUMNS = [
+  { columnKey: "workflowNumber", label: "Number" },
+  { columnKey: "taskTitle", label: "Short Description" },
+  { columnKey: "priority", label: "Priority" },
+  { columnKey: "dueDate", label: "Due Date" },
+  { columnKey: "requestedBy", label: "Opened By" },
+  { columnKey: "action", label: "Link" },
+];
+
+const TAHWEEL_TABLE_COLUMNS = [
+  { columnKey: "workflowNumber", label: "Number" },        
+  { columnKey: "taskTitle", label: "Title" },             
+  { columnKey: "priority", label: "Priority" },           
+  { columnKey: "dueDate", label: "Assigned Date" },        
+  { columnKey: "requestedBy", label: "Created By" },      
+  { columnKey: "action", label: "Action" },               
+];
+
+const PRIORITY_BADGE_BG_BY_LABEL: Record<string, string> = {
+  High: "#fdede8",
+  Medium: "#feefd4",
+  Low: "#e2edfe",
+};
+
+const PRIORITY_BADGE_TEXT_BY_LABEL: Record<string, string> = {
+  High: "#ff3a00",
+  Medium: "#dda338",
+  Low: "#2b77d6",
+};
+
+const normalizeApiDateString = (value: string): string => {
+  if (!value) return "";
+  const hasSpace = value.indexOf(" ") !== -1;
+  const hasT = value.indexOf("T") !== -1;
+  return hasSpace && !hasT ? value.replace(" ", "T") : value;
+};
+
+const formatDateForDisplay = (value: string): string => {
+  if (!value) return EMPTY_CELL_TEXT;
+  const cleaned = normalizeApiDateString(value);
+  const d = new Date(cleaned);
+  if (isNaN(d.getTime())) return EMPTY_CELL_TEXT;
+  return d.toLocaleDateString(DATE_LOCALE, DATE_DISPLAY_FORMAT);
 };
 
 export default class Task extends React.Component<ITaskProps, ITaskState> {
-  private salesforceService: SfApprovalService;
+  private readonly salesforceService: SfApprovalService;
+  private readonly serviceNowService: ServiceNowApprovalService;
+  private readonly tahweelService: TahweelService;
+
+  private _loadSequence = 0;
 
   constructor(props: ITaskProps) {
     super(props);
+
     this.state = {
-      selectedTabValue: "All",
+      selectedTabValue: "Salesforce",
       isLoading: false,
-      salesforceItems: [],
-      rawResponse: undefined,
       errorMessage: undefined,
-      oracleItems: [],
+
+      data: {
+        Tahweel: [],
+        Salesforce: [],
+        ServiceNow: [],
+      },
+      loaded: {
+        Tahweel: false,
+        Salesforce: false,
+        ServiceNow: false,
+      },
     };
 
-    this.salesforceService = new SfApprovalService({
-      httpClient: this.props.httpClient,
-    });
+    this.salesforceService = new SfApprovalService({ httpClient: this.props.httpClient });
+    this.serviceNowService = new ServiceNowApprovalService({ httpClient: this.props.httpClient });
+    this.tahweelService = new TahweelService({ httpClient: this.props.httpClient });
   }
-
-  // private readonly salesforceBaseUrl: string =
-  //   "https://infaservicesuat.dubaiholding.com";
-
-
-  private readonly serviceNowService: ServiceNowApprovalService;
-
-  // constructor(props: ITaskProps) {
-  //   super(props);
-  //   this.state = {
-  //     selectedTabValue: "All",
-  //     isLoading: true,
-  //     oracleItems: [],
-  //     salesforceItems: [],
-  //   };
-
-  //   this.salesforceService = new SfApprovalService({
-  //     httpClient: this.props.httpClient,
-  //     salesforceBaseUrl: this.salesforceBaseUrl,
-  //   });
-
-  //   this.serviceNowService = new ServiceNowApprovalService({
-  //     httpClient: this.props.httpClient,
-  //     baseUrl: this.salesforceBaseUrl,
-  //   });
-  // }
 
   public async componentDidMount(): Promise<void> {
-    try {
-      const email = this.props.userEmail || "";
-      const res = await this.salesforceService.fetchApprovalsByEmail(email);
-
-      this.setState({
-        isLoading: false,
-        salesforceItems: res.approvals || [],
-        rawResponse: res,
-      });
-    } catch (e: any) {
-      console.error("Salesforce API error:", e);
-      this.setState({
-        isLoading: false,
-        salesforceItems: [],
-        rawResponse: undefined,
-        errorMessage: e?.message || "Failed to load Salesforce approvals",
-      });
-    }
-
-    // try {
-    //   const currentUserEmail = this.props.userEmail || "aisha.amiri@dhre.ae";
-
-    //   const [sfResponse, oracleItems] = await Promise.all([
-    //     this.salesforceService.fetchApprovalsByEmail(currentUserEmail),
-    // //     this.serviceNowService.fetchApprovalsByEmail(currentUserEmail)
-    //   ]);
-
-    //   this.setState({
-    //     oracleItems: oracleItems,
-    //     salesforceItems: sfResponse.approvals,
-    //     isLoading: false,
-    //   });
-    // } catch (error: any) {
-    //   console.error('Error loading approvals:', error);
-    //   this.setState({
-    //     oracleItems: [],
-    //     salesforceItems: [],
-    //     isLoading: false,
-    //     errorMessage: error.message,
-    //   });
-    // }
+    await this.loadTabData(this.state.selectedTabValue);
   }
 
-  private handleTabChange = (value: string): void => {
-    this.setState({ selectedTabValue: value });
+  private getUserEmailOrThrow(): string {
+    const userEmail = (this.props.userEmail || "").trim();
+    if (!userEmail) throw new Error("User email is required.");
+    return userEmail;
+  }
+
+  private mapSalesforceApprovalToRow(item: SFApproval): TaskRowItem {
+    return {
+      workflowNumber: item.workflowNumber || EMPTY_CELL_TEXT,
+      taskTitle: item.taskTitle || EMPTY_CELL_TEXT,
+      priority: item.priority || EMPTY_CELL_TEXT,
+      dueDate: item.dueDate || "",
+      requestorName: item.requestorName || EMPTY_CELL_TEXT,
+      workitemId: item.workitemId || item.workflowNumber || "",
+      redirectURL: item.redirectURL,
+      originSystem: item.originSystem || "Salesforce",
+    };
+  }
+
+  private mapServiceNowApprovalToRow(item: ServiceNowApproval): TaskRowItem {
+    return {
+      workflowNumber: item.workflowNumber || EMPTY_CELL_TEXT,
+      taskTitle: item.taskTitle || EMPTY_CELL_TEXT,
+      priority: item.priority || EMPTY_CELL_TEXT,
+      dueDate: item.dueDate || "",
+      requestorName: item.requestorName || EMPTY_CELL_TEXT,
+      workitemId: item.workitemId || item.workflowNumber || "",
+      redirectURL: item.redirectURL,
+      originSystem: item.originSystem || "ServiceNow",
+    };
+  }
+
+  private mapTahweelApprovalToRow(item: TahweelApproval): TaskRowItem {
+    return {
+      workflowNumber: item.workflowNumber || EMPTY_CELL_TEXT,
+      taskTitle: item.taskTitle || EMPTY_CELL_TEXT,
+      priority: item.priority || EMPTY_CELL_TEXT,
+      dueDate: item.dueDate || "",
+      requestorName: item.requestorName || EMPTY_CELL_TEXT,
+      workitemId: item.workitemId || item.workflowNumber || "",
+      redirectURL: item.redirectURL,
+      originSystem: item.originSystem || "Tahweel",
+    };
+  }
+
+  private async loadTabData(tab: SystemFilterOption): Promise<void> {
+    if (this.state.loaded[tab]) return;
+
+    const seq = ++this._loadSequence;
+    this.setState({ isLoading: true, errorMessage: undefined });
+
+    try {
+      const userEmail = this.getUserEmailOrThrow();
+      let rows: TaskRowItem[] = [];
+
+      if (tab === "Salesforce") {
+        const res = await this.salesforceService.fetchApprovalsByEmail(userEmail);
+        rows = (res?.approvals || []).map((x) => this.mapSalesforceApprovalToRow(x));
+      } else if (tab === "ServiceNow") {
+        const res = await this.serviceNowService.fetchApprovalsByEmail(userEmail);
+        rows = (res?.approvals || []).map((x) => this.mapServiceNowApprovalToRow(x));
+      } else if (tab === "Tahweel") {
+        const { personNumber } = await this.tahweelService.fetchPersonNumberByEmail(userEmail);
+        const res = await this.tahweelService.fetchTahweelApprovalsByEmployeeNumber(personNumber);
+        rows = (res?.approvals || []).map((x) => this.mapTahweelApprovalToRow(x));
+      } else {
+        rows = [];
+      }
+
+      if (seq !== this._loadSequence) return;
+
+      this.setState((prev) => ({
+        isLoading: false,
+        data: { ...prev.data, [tab]: rows },
+        loaded: { ...prev.loaded, [tab]: true },
+      }));
+    } catch (e: any) {
+      if (seq !== this._loadSequence) return;
+
+      this.setState({
+        isLoading: false,
+        errorMessage: e?.message || "Failed to load approvals",
+      });
+    }
+  }
+
+  private handleTabChange = async (value: SystemFilterOption): Promise<void> => {
+    if (value === this.state.selectedTabValue) return;
+
+    this.setState({ selectedTabValue: value, errorMessage: undefined });
+    await this.loadTabData(value);
   };
 
   public render(): React.ReactElement<ITaskProps> {
-    const {
-      selectedTabValue,
-      isLoading,
-      oracleItems,
-      salesforceItems
-    } = this.state;
+    const { selectedTabValue, isLoading, errorMessage, data } = this.state;
 
-    const tableColumns = [
-      { columnKey: "workflowNumber", label: "Workflow No." },
-      { columnKey: "taskTitle", label: "Task Title" },
-      { columnKey: "priority", label: "Priority" },
-      { columnKey: "dueDate", label: "Due Date" },
-      { columnKey: "requestedBy", label: "Requested By" },
-      { columnKey: "action", label: "Action" },
-    ];
+    const activeRows: TaskRowItem[] = data[selectedTabValue];
+    const systemTabs = SYSTEM_TAB_DEFINITIONS.map((t) => ({
+      ...t,
+      count: data[t.key].length,
+    }));
 
-    const priorityTagBgColor: Record<string, string> = {
-      High: '#fdede8',
-      Medium: '#feefd4',
-      Low: '#e2edfe',
-    };
+    const activeTableColumns =
+      selectedTabValue === "ServiceNow" ? SERVICENOW_TABLE_COLUMNS : selectedTabValue === "Tahweel" ? TAHWEEL_TABLE_COLUMNS : SALESFORCE_TABLE_COLUMNS;
 
-    const priorityTagTextColor: Record<string, string> = {
-      High: '#ff3a00',
-      Medium: '#dda338',
-      Low: '#2b77d6',
-    };
+    const actionLinkLabel =
+      selectedTabValue === "ServiceNow" || selectedTabValue === "Tahweel" ? "Open" : "View Details";
 
-    const renderTaskRow = (taskItem: ServiceNowTaskListItem | SFApproval): JSX.Element => {
+    const renderTaskRow = (task: TaskRowItem): JSX.Element => {      const priorityLabel = task.priority || EMPTY_CELL_TEXT;
+
       return (
-        <TableRow key={taskItem.workitemId || taskItem.workflowNumber}>
+        <TableRow key={(task.workitemId || task.workflowNumber) + ""}>
           <TableCell>
-            <TableCellLayout>{taskItem.workflowNumber}</TableCellLayout>
+            <TableCellLayout>{task.workflowNumber || EMPTY_CELL_TEXT}</TableCellLayout>
           </TableCell>
+
           <TableCell>
-            <TableCellLayout>{taskItem.taskTitle}</TableCellLayout>
+            <TableCellLayout>{task.taskTitle || EMPTY_CELL_TEXT}</TableCellLayout>
           </TableCell>
+
           <TableCell>
             <TableCellLayout>
               <Tag
-                label={taskItem.priority || '—'}
-                backgroundColor={priorityTagBgColor[taskItem.priority as keyof typeof priorityTagBgColor]}
-                textColor={priorityTagTextColor[taskItem.priority as keyof typeof priorityTagTextColor]}
+                label={priorityLabel}
+                backgroundColor={PRIORITY_BADGE_BG_BY_LABEL[priorityLabel] || "#f3f3f3"}
+                textColor={PRIORITY_BADGE_TEXT_BY_LABEL[priorityLabel] || "#333"}
               />
             </TableCellLayout>
           </TableCell>
+
+          <TableCell>{formatDateForDisplay(task.dueDate)}</TableCell>
+
           <TableCell>
-            {formatIsoDateToDisplay(taskItem.dueDate)}
+            <TableCellLayout>{task.requestorName || EMPTY_CELL_TEXT}</TableCellLayout>
           </TableCell>
+
           <TableCell>
-            <TableCellLayout>{taskItem.requestorName || '—'}</TableCellLayout>
-          </TableCell>
-          <TableCell>
-            <a
-              href={taskItem.redirectURL || "#"}
-              target="_blank"
-            >
-              View Details
-            </a>
-            <span className={styles.viewDetailsLink}>View Details</span>
+            {task.redirectURL ? (
+              <a href={task.redirectURL} target="_blank" rel="noreferrer" className={styles.viewDetailsLink}>
+                {actionLinkLabel}
+              </a>
+            ) : (
+              EMPTY_CELL_TEXT
+            )}
           </TableCell>
         </TableRow>
       );
     };
-
-    const rowsToRender: (ServiceNowTaskListItem | SFApproval)[] = [
-      ...(selectedTabValue === "Oracle" || selectedTabValue === "All" ? oracleItems : []),
-      ...(selectedTabValue === "Salesforce" || selectedTabValue === "All" ? salesforceItems : []),
-    ];
 
     return (
       <div className={styles.main}>
@@ -214,21 +300,14 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
             <span className={styles.approvalsText}> Approvals</span>
           </div>
 
-          <NavSegment
-            absolute={false}
-            defaultValue={selectedTabValue as any}
-            onChange={this.handleTabChange}
-            labels={["All", "Oracle", "Salesforce"]}
-          />
+          <NavSegment value={selectedTabValue} onChange={this.handleTabChange} tabs={systemTabs} />
 
           <div className={styles.tableWrapper}>
             <Table className={styles.table} aria-label="Task Approvals Table">
               <TableHeader className={styles.tableHeader}>
                 <TableRow>
-                  {tableColumns.map((column) => (
-                    <TableHeaderCell key={column.columnKey}>
-                      {column.label}
-                    </TableHeaderCell>
+                  {activeTableColumns.map((column) => (
+                    <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>
                   ))}
                 </TableRow>
               </TableHeader>
@@ -236,21 +315,23 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
               <TableBody className={styles.tableBody}>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={TABLE_COLUMN_COUNT}>
                       <TableCellLayout>Loading approvals...</TableCellLayout>
                     </TableCell>
                   </TableRow>
-                ) : rowsToRender.length > 0 ? (
-                  rowsToRender.map(task => renderTaskRow(task))
+                ) : activeRows.length > 0 ? (
+                  activeRows.map(renderTaskRow)
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={TABLE_COLUMN_COUNT}>
                       <TableCellLayout>No approvals found</TableCellLayout>
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
+
+            {errorMessage && <div className={styles.errormessage}>Error : {errorMessage}</div>}
           </div>
         </div>
       </div>

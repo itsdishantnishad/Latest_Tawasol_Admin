@@ -1,3 +1,4 @@
+// ProfileHeaderComp.tsx
 
 import * as React from "react";
 import { Text, Spinner, SpinnerSize } from "@fluentui/react";
@@ -13,44 +14,50 @@ import {
 } from "../services/profileHeaderServices";
 import styles from "./ProfileHeader.module.scss";
 
+import { TahweelService, TahweelAdDetails } from "../../../services/Integration/TahweelService";
+
 const ProfileIcon_URL = require("../../assets/profileCircleImg.svg");
 
 type StatItem = { label: string; value: number };
 type BadgeItem = { name: string; imageUrl: string };
 
 export interface IProfileHeaderProps {
+  context: any;
+
   photoUrl?: string;
   fullName?: string;
   department?: string;
+
   stats: StatItem[];
   actionNavigateUrl?: string;
-  badges?: BadgeItem[];
 
-  // ✅ make optional (so parent doesn't have to pass)
+  badges?: BadgeItem[];
   selectedBadge?: BadgeItem | null;
 }
 
 interface IProfileHeaderState {
   currentPhoto: string;
+
   fullName: string;
+  designation: string;
   department: string;
+  personNumber: string;
+
   showMenu: boolean;
   copyFeedback: boolean;
   isLoading: boolean;
   siteUrl: string;
   error: string | null;
-  badgeImageErrors: { [key: string]: boolean };
 
-  // ✅ NEW
+  badgeImageErrors: { [key: string]: boolean };
   selectedBadge: BadgeItem | null;
 }
 
-export default class ProfileHeader extends React.Component<
-  IProfileHeaderProps,
-  IProfileHeaderState
-> {
+export default class ProfileHeader extends React.Component<IProfileHeaderProps, IProfileHeaderState> {
   private menuRef: React.RefObject<HTMLDivElement>;
   private feedbackTimeout: number | undefined;
+
+  private tahweelService: TahweelService;
 
   public static defaultProps: Partial<IProfileHeaderProps> = {
     stats: [
@@ -67,32 +74,39 @@ export default class ProfileHeader extends React.Component<
 
     this.state = {
       currentPhoto: "",
+
       fullName: props.fullName || "",
+      designation: "",
       department: props.department || "",
+      personNumber: "",
+
       showMenu: false,
       copyFeedback: false,
       isLoading: true,
       siteUrl: "",
       error: null,
-      badgeImageErrors: {},
 
-      // ✅ NEW
+      badgeImageErrors: {},
       selectedBadge: props.selectedBadge ?? null,
     };
 
     this.menuRef = React.createRef();
+    this.tahweelService = new TahweelService({ httpClient: this.props.context.httpClient });
   }
 
-  componentDidMount(): void {
+  public componentDidMount(): void {
     document.addEventListener("click", this.handleOutsideClick);
     this.initializeProfile();
   }
 
-  componentWillUnmount(): void {
+  public componentWillUnmount(): void {
     document.removeEventListener("click", this.handleOutsideClick);
-    if (this.feedbackTimeout) {
-      window.clearTimeout(this.feedbackTimeout);
-    }
+    if (this.feedbackTimeout) window.clearTimeout(this.feedbackTimeout);
+  }
+
+  private getUserEmailFromContext(): string {
+    const email = (this.props.context?.pageContext?.user?.email || "").trim();
+    return email;
   }
 
   private initializeProfile = async (): Promise<void> => {
@@ -100,24 +114,74 @@ export default class ProfileHeader extends React.Component<
       const siteUrl = await getSiteUrl();
       this.setState({ siteUrl });
 
-      const photoUrl = await fetchUserProfilePicture();
-      if (photoUrl) {
-        this.setState({ currentPhoto: photoUrl });
+      const savedBadge = loadSelectedBadge();
+      if (savedBadge) {
+        this.setState({ selectedBadge: savedBadge });
       }
 
-      const userInfo = await fetchCurrentUserInfo();
-      if (userInfo) {
-        this.setState({
-          fullName: userInfo.fullName,
-          department: userInfo.department || "SharePoint Developer",
-        });
+      const userEmail = this.getUserEmailFromContext();
+
+      let adDetails: TahweelAdDetails | null = null;
+      try {
+        if (userEmail) {
+          adDetails = await this.tahweelService.fetchAdDetailsByEmail(userEmail);
+        }
+      } catch (e) {
+        // DEBUG_REMOVE_LATER: Tahweel AD Details error log
+        console.log("[ProfileHeader] Tahweel AD Details error:", e);
       }
 
-      // ✅ NEW: load saved selected badge (if any)
-      const saved = loadSelectedBadge();
-      if (saved) {
-        this.setState({ selectedBadge: saved });
+      let spPhotoUrl = "";
+      try {
+        const photoUrl = await fetchUserProfilePicture();
+        if (photoUrl) spPhotoUrl = photoUrl;
+      } catch {
+        // ignore
       }
+
+      let spInfo: { fullName: string; department: string } | null = null;
+      try {
+        spInfo = await fetchCurrentUserInfo();
+      } catch {
+        // ignore
+      }
+
+      const finalFullName =
+        ((adDetails?.fullName || "").trim()) ||
+        ((spInfo?.fullName || "").trim()) ||
+        ((this.state.fullName || "").trim());
+
+      const finalDesignation = ((adDetails?.designation || "").trim());
+
+      const finalDepartment =
+        ((adDetails?.department || "").trim()) ||
+        ((spInfo?.department || "").trim()) ||
+        ((this.state.department || "").trim());
+
+      const finalPhoto =
+        ((adDetails?.imageDataUrl || "").trim()) ||
+        (spPhotoUrl || "");
+
+      this.setState({
+        currentPhoto: finalPhoto,
+        fullName: finalFullName,
+        designation: finalDesignation,
+        department: finalDepartment,
+        personNumber: (adDetails?.personNumber || "").trim(),
+        error: null,
+      });
+
+      // DEBUG_REMOVE_LATER: ProfileHeader loaded summary log
+      console.log("[ProfileHeader] Loaded:", {
+        email: userEmail,
+        personNumber: (adDetails?.personNumber || "").trim(),
+        employeeNumber: (adDetails?.employeeNumber || "").trim(),
+        name: finalFullName,
+        designation: finalDesignation,
+        department: finalDepartment,
+        hasTahweelImage: !!(adDetails?.imageDataUrl),
+        hasSpPhoto: !!spPhotoUrl,
+      });
     } catch (error) {
       this.setState({ error: "Failed to load profile" });
     } finally {
@@ -126,10 +190,7 @@ export default class ProfileHeader extends React.Component<
   };
 
   private handleOutsideClick = (e: MouseEvent): void => {
-    if (
-      this.menuRef.current &&
-      !this.menuRef.current.contains(e.target as Node)
-    ) {
+    if (this.menuRef.current && !this.menuRef.current.contains(e.target as Node)) {
       this.setState({ showMenu: false });
     }
   };
@@ -143,9 +204,7 @@ export default class ProfileHeader extends React.Component<
     document.getElementById("profile-upload-input")?.click();
   };
 
-  private handleProfileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): Promise<void> => {
+  private handleProfileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -165,20 +224,18 @@ export default class ProfileHeader extends React.Component<
         this.setState({ error: null });
       }
     } catch (error: any) {
-      this.setState({
-        error: error.message || "Failed to upload profile picture",
-      });
+      this.setState({ error: error.message || "Failed to upload profile picture" });
     }
     e.target.value = "";
   };
 
   private handleCopyProfile = async (): Promise<void> => {
     try {
-      const { fullName, department } = this.state;
+      const { fullName, designation, department } = this.state;
+      const subtitle = (designation || "").trim() || (department || "").trim();
+      await copyProfileToClipboard(fullName, subtitle);
 
-      await copyProfileToClipboard(fullName, department);
-
-      this.setState({ copyFeedback: true, error: null });
+      this.setState({ copyFeedback: true });
 
       if (this.feedbackTimeout) window.clearTimeout(this.feedbackTimeout);
       this.feedbackTimeout = window.setTimeout(() => {
@@ -189,8 +246,8 @@ export default class ProfileHeader extends React.Component<
     }
   };
 
-  // ✅ Handle badge image load errors
   private handleBadgeImageError = (badgeName: string): void => {
+    // DEBUG_REMOVE_LATER: badge image error log
     console.warn(`[ProfileHeader] Badge image failed: ${badgeName}`);
     this.setState((prev) => ({
       badgeImageErrors: {
@@ -200,31 +257,39 @@ export default class ProfileHeader extends React.Component<
     }));
   };
 
-  // ✅ NEW: click badge -> select/unselect + persist
   private handleSelectBadge = (badge: BadgeItem): void => {
     this.setState((prev) => {
       const isSame = prev.selectedBadge?.name === badge.name;
       const next = isSame ? null : badge;
-
       saveSelectedBadge(next);
       return { selectedBadge: next };
     });
   };
 
+  private getInitials(fullName: string): string {
+    const cleaned = (fullName || "").replace(/,/g, " ").trim().replace(/\s+/g, " ");
+    if (!cleaned) return "";
+
+    const parts = cleaned.split(" ").filter(Boolean);
+    if (!parts.length) return "";
+
+    const first = (parts[0] || "").charAt(0);
+    const last = (parts.length > 1 ? parts[parts.length - 1] : parts[0]).charAt(0);
+
+    return (first + last).toUpperCase();
+  }
+
   private renderName = (): React.ReactElement => {
-    const name = (this.state.fullName || "").trim();
-    const [first, ...rest] = name.split(" ");
+    const name = (this.state.fullName || "").trim().replace(/,/g, " ").replace(/\s+/g, " ");
+    const parts = name.split(" ").filter(Boolean);
+    const first = parts[0] || "";
+    const rest = parts.slice(1);
 
     return (
       <div className={styles.nameRow}>
-        <Text className={styles.firstName} block>
-          {first}
-        </Text>
+        <Text className={styles.firstName} block>{first}</Text>
         {rest.length > 0 && (
-          <Text className={styles.lastName} block>
-            {" "}
-            {rest.join(" ")}
-          </Text>
+          <Text className={styles.lastName} block>{" "}{rest.join(" ")}</Text>
         )}
       </div>
     );
@@ -237,42 +302,57 @@ export default class ProfileHeader extends React.Component<
     </div>
   );
 
+  private renderAvatarCore(): React.ReactElement {
+    const { isLoading, currentPhoto, fullName } = this.state;
+
+    if (isLoading) {
+      return (
+        <div
+          className={styles.avatar}
+          style={{ background: "#e0e0e0", display: "flex", alignItems: "center", justifyContent: "center" }}
+        >
+          <Spinner size={SpinnerSize.large} />
+        </div>
+      );
+    }
+
+    if (currentPhoto) {
+      return <img className={styles.avatar} src={currentPhoto} alt="Profile" />;
+    }
+
+    const initials = this.getInitials(fullName) || "—";
+    return (
+      <div
+        className={styles.avatar}
+        title={fullName}
+        aria-label="Profile initials"
+        style={{
+          background: "#d9d9d9",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: 700,
+          fontSize: 22,
+          color: "#333",
+        }}
+      >
+        {initials}
+      </div>
+    );
+  }
+
   public render(): React.ReactElement {
     const { stats, badges } = this.props;
+    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors } = this.state;
 
-    const {
-      currentPhoto,
-      department,
-      showMenu,
-      copyFeedback,
-      isLoading,
-      error,
-      badgeImageErrors,
-      selectedBadge,
-    } = this.state;
+    const subtitle = (designation || "").trim() || (department || "").trim() || "—";
 
     return (
       <div className={styles.headerWrap}>
         <div className={styles.identityCard}>
-          {/* ✅ Wrap avatar to support badge overlay */}
           <div className={styles.avatarWrap}>
-            {isLoading ? (
-              <div
-                className={styles.avatar}
-                style={{
-                  background: "#e0e0e0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Spinner size={SpinnerSize.large} />
-              </div>
-            ) : (
-              <img className={styles.avatar} src={currentPhoto} alt="Profile" />
-            )}
+            {this.renderAvatarCore()}
 
-            {/* ✅ Selected badge overlay (like your screenshot) */}
             {selectedBadge ? (
               <div
                 className={styles.avatarBadge}
@@ -286,9 +366,7 @@ export default class ProfileHeader extends React.Component<
                     className={styles.avatarBadgeIcon}
                     src={selectedBadge.imageUrl}
                     alt={selectedBadge.name}
-                    onError={() =>
-                      this.handleBadgeImageError(selectedBadge.name)
-                    }
+                    onError={() => this.handleBadgeImageError(selectedBadge.name)}
                   />
                 )}
               </div>
@@ -297,62 +375,30 @@ export default class ProfileHeader extends React.Component<
 
           <div className={styles.metaCol}>
             {this.renderName()}
-            <Text className={styles.department} block>
-              {department}
-            </Text>
+            <Text className={styles.department} block>{subtitle}</Text>
           </div>
         </div>
 
         <div className={styles.flexCol}>
-          <div
-            className={styles.actions}
-            role="group"
-            aria-label="Header actions"
-          >
-            {/* COPY ICON (unchanged) */}
+          <div className={styles.actions} role="group" aria-label="Header actions">
             <button
               className={styles.iconBtn}
-              aria-label="Copy Profile"
+              title={copyFeedback ? "Profile Copied!" : "Copy Profile"}
+              aria-label={copyFeedback ? "Profile Copied!" : "Copy Profile"}
               onClick={this.handleCopyProfile}
               type="button"
               disabled={isLoading}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-              >
-                <path
-                  d="M14.9922 17.5H16.5022C19.5222 17.5 22.0022 15.03 22.0022 12C22.0022 8.98 19.5322 6.5 16.5022 6.5H14.9922"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M9.00391 6.5H7.50391C4.47391 6.5 2.00391 8.97 2.00391 12C2.00391 15.02 4.47391 17.5 7.50391 17.5H9.00391"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M8.00391 12H16.0039"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                <path d="M14.9922 17.5H16.5022C19.5222 17.5 22.0022 15.03 22.0022 12C22.0022 8.98 19.5322 6.5 16.5022 6.5H14.9922" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9.00391 6.5H7.50391C4.47391 6.5 2.00391 8.97 2.00391 12C2.00391 15.02 4.47391 17.5 7.50391 17.5H9.00391" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M8.00391 12H16.0039" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
-            {/* FLOATING PILL (unchanged) */}
             {copyFeedback && (
               <div className={styles.copyPill} role="status" aria-live="polite">
-                <span className={styles.copyDot} aria-hidden="true">
-                  !
-                </span>
+                <span className={styles.copyDot} aria-hidden="true">!</span>
                 <span className={styles.copyText}>Profile Copied</span>
                 <button
                   type="button"
@@ -365,10 +411,10 @@ export default class ProfileHeader extends React.Component<
               </div>
             )}
 
-            {/* KEBAB (unchanged) */}
             <div className={styles.kebabWrapper} ref={this.menuRef}>
               <button
                 className={`${styles.iconBtn} ${styles.kebabBtn}`}
+                title="More options"
                 aria-label="More options"
                 onClick={this.toggleMenu}
                 type="button"
@@ -389,14 +435,8 @@ export default class ProfileHeader extends React.Component<
                     onClick={this.openFileDialog}
                     role="menuitem"
                   >
-                    <img
-                      src={ProfileIcon_URL}
-                      className={styles.changePhotoIcon}
-                      alt=""
-                    />
-                    <span className={styles.changePhotoLabel}>
-                      Change Profile Photo
-                    </span>
+                    <img src={ProfileIcon_URL} className={styles.changePhotoIcon} alt="" />
+                    <span className={styles.changePhotoLabel}>Change Profile Photo</span>
                   </button>
                 </div>
               )}
@@ -418,7 +458,6 @@ export default class ProfileHeader extends React.Component<
             </div>
           )}
 
-          {/* BADGES (now clickable) */}
           {badges && badges.length > 0 ? (
             <div className={styles.badgesRow} aria-label="Badges">
               {badges.map((b, i) => (
@@ -436,10 +475,7 @@ export default class ProfileHeader extends React.Component<
                   aria-label={`Select badge ${b.name}`}
                 >
                   {badgeImageErrors[b.name] ? (
-                    <div
-                      className={styles.badgePlaceholder}
-                      title={`Failed to load: ${b.name}`}
-                    >
+                    <div className={styles.badgePlaceholder} title={`Failed to load: ${b.name}`}>
                       ?
                     </div>
                   ) : (
@@ -455,6 +491,10 @@ export default class ProfileHeader extends React.Component<
               ))}
             </div>
           ) : null}
+
+          <div className={styles.statsRow} role="region" aria-label="Profile stats">
+            {stats.slice(0, 4).map(this.renderStat)}
+          </div>
         </div>
       </div>
     );
