@@ -249,7 +249,6 @@
           "manifest": "./src/webparts/letsMeetDetail/LetsMeetDetailWebPart.manifest.json"
         }
       ]
-    }
     },
     "lets-meet-gallery-web-part": {
       "components": [
