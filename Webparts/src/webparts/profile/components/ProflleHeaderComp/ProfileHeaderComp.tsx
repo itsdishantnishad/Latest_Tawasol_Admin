@@ -309,7 +309,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       return (
         <div
           className={styles.avatar}
-          style={{ background: "#e0e0e0", display: "flex", alignItems: "center", justifyContent: "center" }}
+          style={{ background: "#f99999ff", display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           <Spinner size={SpinnerSize.large} />
         </div>
