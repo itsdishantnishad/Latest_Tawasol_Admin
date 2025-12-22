@@ -53,8 +53,7 @@ const dayDiffFromToday = (m: number, d: number): number => {
     candidate = new Date(today.getFullYear() + 1, m, d);
   }
 
-  const diff = Math.floor((candidate.getTime() - today.getTime()) / MS_PER_DAY);
-  return diff;
+  return Math.floor((candidate.getTime() - today.getTime()) / MS_PER_DAY);
 };
 
 const Birthday: React.FC<BirthdaysFeedProps> = ({
@@ -65,7 +64,7 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
   emptyTodayText,
   emptyUpcomingText,
 }) => {
-  const withinWindow = React.useMemo(() => {
+  const buckets = React.useMemo(() => {
     const rows = (items || [])
       .map((x) => {
         const md = parseMonthDay(x.date);
@@ -74,7 +73,7 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
         return { item: x, diff };
       })
       .filter((x): x is { item: IPersonBase; diff: number } => !!x)
-      .filter((x) => x.diff >= 0 && x.diff <= 7)
+      .filter((x) => x.diff >= 0)
       .sort((a, b) => a.diff - b.diff);
 
     const today = rows.filter((x) => x.diff === 0).map((x) => x.item);
@@ -91,7 +90,7 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
         </div>
 
         <PeopleSimpleFeed
-          items={withinWindow.today}
+          items={buckets.today}
           webAbsoluteUrl={webAbsoluteUrl}
           emptyText={emptyTodayText}
         />
@@ -103,7 +102,7 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
         </button>
 
         <PeopleSimpleFeed
-          items={withinWindow.upcoming}
+          items={buckets.upcoming}
           webAbsoluteUrl={webAbsoluteUrl}
           emptyText={emptyUpcomingText}
         />

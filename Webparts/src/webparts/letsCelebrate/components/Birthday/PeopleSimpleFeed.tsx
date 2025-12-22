@@ -18,16 +18,19 @@ export interface PeopleSimpleFeedProps {
   webAbsoluteUrl?: string;
   emptyText?: string;
 
-  /** Optional: fully control the CTA cell */
+  /* fully control the CTA cell */
   renderCta?: (item: IPersonBase) => React.ReactNode;
 }
 
-/** ES5-safe resolver (no startsWith) */
+/* ES5-safe resolver (no startsWith) */
 const resolveImg = (raw?: string, web?: string) => {
   if (!raw) return "";
   const u: string = (raw + "").trim();
 
-  // absolute
+  // data url (base64)
+  if (/^data:image\//i.test(u)) return u;
+
+  // absolute http(s)
   if (/^https?:\/\//i.test(u)) return u;
 
   // server-relative (/sites/...)
@@ -61,7 +64,7 @@ const PeopleSimpleFeed: React.FC<PeopleSimpleFeedProps> = ({ items, webAbsoluteU
               <div className={s.sub}>
                 {(p.designation ? p.designation : "") + (p.department ? " • " + p.department : "")}
               </div>
-              {/* {p.date ? <div className={s.meta}>Date: {p.date}</div> : null} */}
+
               {p.extraRightText ? <div className={s.meta}>{p.extraRightText}</div> : null}
             </div>
 
@@ -72,7 +75,11 @@ const PeopleSimpleFeed: React.FC<PeopleSimpleFeedProps> = ({ items, webAbsoluteU
                   ? <a className={s.wishBtn}
                     target="_blank"
                     data-interception="off"
-                    href={p.wishLink}><span aria-hidden="true">🎉</span>&nbsp; Wish Now</a>
+                    href={p.wishLink}
+                    rel="noreferrer"
+                  >
+                    <span aria-hidden="true">🎉</span>&nbsp; Wish Now
+                  </a>
                   : null)}
             </div>
           </article>

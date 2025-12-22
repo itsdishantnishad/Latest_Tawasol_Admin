@@ -1,114 +1,129 @@
 import * as React from "react";
 import styles from "./ApplyLeave.module.scss";
-import { TahweelService } from "../../../../services/Integration/TahweelService";
+import { TahweelService, TahweelEmployeeLeaveBalance } from "../../../../services/Integration/TahweelService";
 
 export interface IApplyLeaveCardProps {
-  context: any;
-  onApply?: () => void;
   periodText?: string;
+  onApply?: () => void;
+  context: any;
 }
 
 export interface IApplyLeaveCardState {
   loading: boolean;
-  leaveBalanceText: string; // number or message
-  periodText: string;       // as of ...
+
+  // what we show in the big value area
+  displayValue: string;
+  isMessage: boolean;
+
+  // what we show below "Leave Balance"
+  periodText: string;
+
+  // for debugging / optional display later
   error: string;
 }
 
+const EMPTY_TEXT = "—";
+
+const monthMap: { [k: string]: number } = {
+  JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
+  JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11,
+};
+
 export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps, IApplyLeaveCardState> {
-  private readonly tahweelService: TahweelService;
+  private tahweelService: TahweelService;
 
   constructor(props: IApplyLeaveCardProps) {
     super(props);
 
     this.state = {
       loading: true,
-      leaveBalanceText: "—",
-      periodText: "—",
+      displayValue: EMPTY_TEXT,
+      isMessage: false,
+      periodText: EMPTY_TEXT,
       error: "",
     };
 
-    this.tahweelService = new TahweelService({
-      httpClient: this.props.context.httpClient,
-    });
+    this.tahweelService = new TahweelService({ httpClient: this.props.context.httpClient });
   }
 
   public async componentDidMount(): Promise<void> {
     await this.loadLeaveBalance();
   }
 
-  private isNumericText(val: string): boolean {
-    return /^-?\d+(\.\d+)?$/.test((val || "").trim());
+  private getUserEmailFromContext(): string {
+    return ((this.props.context?.pageContext?.user?.email || "") + "").trim();
   }
 
-  private formatAsOfFromTillDate(tillDate: string): string {
-    // Expected: "31-DEC-2025"
-    const raw = (tillDate || "").trim();
-    if (!raw) return "—";
+  private ordinal(n: number): string {
+    const v = n % 100;
+    if (v >= 11 && v <= 13) return n + "th";
+    const r = n % 10;
+    if (r === 1) return n + "st";
+    if (r === 2) return n + "nd";
+    if (r === 3) return n + "rd";
+    return n + "th";
+  }
 
-    const parts = raw.split("-");
-    if (parts.length < 2) return "—";
+  private parseTillDate(raw?: string): Date | null {
+    const v = (raw || "").trim();
+    if (!v) return null;
 
-    const dayNum = parseInt(parts[0], 10);
-    const monAbbr = (parts[1] || "").toUpperCase();
+    // supports "DD-MMM-YYYY" (example: 31-DEC-2025)
+    const parts = v.split("-");
+    if (parts.length === 3 && parts[1] && parts[1].length === 3) {
+      const d = parseInt(parts[0], 10);
+      const mon = (parts[1] || "").toUpperCase();
+      const y = parseInt(parts[2], 10);
+      const m = monthMap[mon];
 
-    const monthMap: Record<string, string> = {
-      JAN: "January",
-      FEB: "February",
-      MAR: "March",
-      APR: "April",
-      MAY: "May",
-      JUN: "June",
-      JUL: "July",
-      AUG: "August",
-      SEP: "September",
-      OCT: "October",
-      NOV: "November",
-      DEC: "December",
-    };
+      if (!isNaN(d) && !isNaN(y) && m !== undefined) {
+        return new Date(y, m, d);
+      }
+    }
 
-    const month = monthMap[monAbbr] || monAbbr;
+    // fallback: Date parser
+    const dt = new Date(v);
+    return isNaN(dt.getTime()) ? null : dt;
+  }
 
-    if (!dayNum || dayNum < 1) return `as of ${month}`;
+  private formatAsOf(tillDateRaw?: string): string {
+    const dt = this.parseTillDate(tillDateRaw);
+    if (!dt) return EMPTY_TEXT;
 
-    const suffix =
-      dayNum % 100 >= 11 && dayNum % 100 <= 13
-        ? "th"
-        : dayNum % 10 === 1
-        ? "st"
-        : dayNum % 10 === 2
-        ? "nd"
-        : dayNum % 10 === 3
-        ? "rd"
-        : "th";
+    const day = dt.getDate();
+    const month = dt.toLocaleString("en-GB", { month: "short" });
+    const year = dt.getFullYear();
 
-    return `as of ${dayNum}${suffix} ${month}`;
+    return `as of ${this.ordinal(day)} ${month} ${year}`;
   }
 
   private async loadLeaveBalance(): Promise<void> {
-    const userEmail: string = (this.props.context?.pageContext?.user?.email || "").trim();
-
-    if (!userEmail) {
-      this.setState({
-        loading: false,
-        leaveBalanceText: "Employee Number Not Present",
-        periodText: "—",
-        error: "User email not available.",
-      });
-      return;
-    }
-
     this.setState({ loading: true, error: "" });
 
     try {
-      const res = await this.tahweelService.fetchEmployeeLeaveBalanceByEmail(userEmail);
+      const email = this.getUserEmailFromContext();
+      if (!email) {
+        this.setState({
+          loading: false,
+          displayValue: "Employee Number Not Present",
+          isMessage: true,
+          periodText: EMPTY_TEXT,
+          error: "User email not found in context.",
+        });
+        return;
+      }
 
+      const res: TahweelEmployeeLeaveBalance = await this.tahweelService.fetchEmployeeLeaveBalanceByEmail(email);
+
+      // - if no PERSON_NUMBER -> "Employee Number Not Present"
+      // - else if no balance -> "No Balance Found"
       if (!res.hasPersonNumber) {
         this.setState({
           loading: false,
-          leaveBalanceText: "Employee Number Not Present",
-          periodText: "—",
-          error: "",
+          displayValue: "Employee Number Not Present",
+          isMessage: true,
+          periodText: EMPTY_TEXT,
+          error: "PERSON_NUMBER missing from API response",
         });
         return;
       }
@@ -116,60 +131,65 @@ export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps
       if (!res.hasBalance) {
         this.setState({
           loading: false,
-          leaveBalanceText: "No Balance Found",
-          periodText: res.tillDate ? this.formatAsOfFromTillDate(res.tillDate) : "—",
-          error: "",
+          displayValue: "No Balance Found",
+          isMessage: true,
+          periodText: this.props.periodText || this.formatAsOf(res.tillDate),
+          error: "LEAVE_BALANCE missing from API response",
         });
         return;
       }
 
       this.setState({
         loading: false,
-        leaveBalanceText: res.leaveBalance,
-        periodText: res.tillDate ? this.formatAsOfFromTillDate(res.tillDate) : "—",
+        displayValue: (res.leaveBalance || "").trim() || EMPTY_TEXT,
+        isMessage: false,
+        periodText: this.props.periodText || this.formatAsOf(res.tillDate),
         error: "",
       });
     } catch (e: any) {
       this.setState({
         loading: false,
-        leaveBalanceText: "No Balance Found",
-        periodText: "—",
-        error: e?.message || "Failed to fetch leave balance.",
+        displayValue: "No Balance Found",
+        isMessage: true,
+        periodText: EMPTY_TEXT,
+        error: e?.message || "Failed to load leave balance",
       });
     }
   }
 
   public render(): React.ReactElement<IApplyLeaveCardProps> {
     const { onApply } = this.props;
-    const { loading, leaveBalanceText, periodText } = this.state;
-
-    const displayText = loading ? "—" : leaveBalanceText;
-    const isNumeric = this.isNumericText(displayText);
+    const { loading, displayValue, isMessage, periodText } = this.state;
 
     return (
-      <section className={styles.card} aria-label="Apply for Leave">
+      <div className={styles.card}>
         <div className={styles.headTitle}>Apply for Leave</div>
 
         <p className={styles.subText}>
           Apply for leave in just a few clicks and track your leave balance with ease
         </p>
 
-        <div className={styles.balanceBox}>
-          <div className={[styles.balanceNumber, !isNumeric ? styles.balanceNumberText : ""].join(" ")}>
-            {displayText}
+        <div className={styles.balanceBox} aria-busy={loading}>
+          <div className={`${styles.balanceNumber} ${isMessage ? styles.balanceNumberMessage : ""}`}>
+            {loading ? EMPTY_TEXT : (displayValue || EMPTY_TEXT)}
           </div>
 
           <div className={styles.balanceLabel}>Leave Balance</div>
 
           <div className={styles.balancePeriod}>
-            {loading ? "—" : (periodText || "—")}
+            {loading ? EMPTY_TEXT : (periodText || EMPTY_TEXT)}
           </div>
         </div>
 
-        <button type="button" className={styles.cta} onClick={onApply} disabled={loading}>
+        <button
+          type="button"
+          className={styles.cta}
+          onClick={onApply}
+          disabled={loading}
+        >
           <span className={styles.ctaText}>Apply Leave</span>
         </button>
-      </section>
+      </div>
     );
   }
 }

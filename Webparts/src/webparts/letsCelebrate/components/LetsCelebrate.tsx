@@ -129,10 +129,13 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
       ? ('https://teams.microsoft.com/l/chat/0/0?users=' + encodeURIComponent(email) + '&message=' + encodeURIComponent(msg))
       : '';
 
-    const designation = (emp.designation || '').trim() || (emp.role || '').trim();
+    const designation = (emp.designation || '').trim() || (emp.division || '').trim();
     const department = (emp.department || '').trim();
 
     const extraRightText = mode === 'DOJ' ? this.getAnniversaryText(emp.doj, isoDate) : '';
+
+    // use API image (supports http / server-relative / data:image)
+    const imageUrl = (emp.imageDataUrl || emp.imageUrl || DefaultAvatar).toString().trim() || DefaultAvatar;
 
     return {
       id: (emp.personNumber || emp.fullName || '').trim(),
@@ -140,7 +143,7 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
       lastName,
       designation,
       department,
-      imageUrl: DefaultAvatar,
+      imageUrl,
       date: isoDate,
       wishLink: wishLink,
       extraRightText
