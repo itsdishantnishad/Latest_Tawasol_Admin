@@ -8,14 +8,14 @@
 //   grid-template-columns: repeat(4, minmax(0, 1fr));
 //   gap: 24px;
 // }
- 
+
 // @media (max-width: 1100px) {
 //   .grid { grid-template-columns: repeat(2, 1fr); }
 // }
 // @media (max-width: 640px) {
 //   .grid { grid-template-columns: 1fr; }
 // }
- 
+
 // /* Card */
 // .card {
 //   display: flex;
@@ -27,7 +27,7 @@
 //   height: auto;
 //   padding: 30px;
 // }
- 
+
 // /* Icon */
 // .icon {
 //   max-width: 60px;
@@ -37,7 +37,7 @@
 //   margin-bottom: 1rem;
 //   height: auto;
 // }
- 
+
 // /* Title text */
 // .title {
 //   color: #3A3B43;
@@ -48,7 +48,7 @@
 // }
 
 // /* Description container */
- 
+
 // /* Description text for each card */
 // .description {
 //   color: #3A3B43;
@@ -57,8 +57,7 @@
 //   font-weight: 400;
 //   line-height: 24px;
 // }
- 
- 
+
 // .description :global(*) {
 //   font-family: "Inter", sans-serif !important;
 //   background: transparent !important;
@@ -97,44 +96,24 @@
 //   text-decoration: none;
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .aboutDhreSection {
-  padding: 20px 60px;
+  padding: 60px 20px;
 }
 
 /* ==== Grid layout ==== */
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(240px, 1fr));
   gap: 24px;
 }
 
-@media (max-width: 1100px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 768px) {
+  .aboutDhreSection {
+    padding: 24px 16px;
   }
-}
 
-@media (max-width: 640px) {
   .grid {
-    grid-template-columns: 1fr;
+    overflow-x: scroll;
   }
 }
 
@@ -153,8 +132,8 @@
 /* ==== Icon (SVG image) ==== */
 .icon {
   display: block;
-  width: 100%;        /* grid column ko fill kare */
-  max-width: 260px;   /* bohot zyada na phail jaye */
+  width: 100%; /* grid column ko fill kare */
+  max-width: 260px; /* bohot zyada na phail jaye */
   height: auto;
   object-fit: contain;
 }
@@ -170,8 +149,7 @@
   background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
   border: none;
   border-radius: 167px;
-  box-shadow:
-    inset -4px -6px 4px 0 rgba(0, 0, 0, .51),
+  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, 0.51),
     inset 0 4px 4px 0 #768b9e;
   color: #fff;
   cursor: pointer;
@@ -182,7 +160,7 @@
   line-height: 20px;
   min-width: 150px;
   padding: 8px 20px;
-  transition: all .3s ease;
+  transition: all 0.3s ease;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -191,8 +169,7 @@
 
 .viewAllButton:hover {
   transform: translateY(-2px);
-  box-shadow:
-    inset -4px -6px 6px 0 rgba(0, 0, 0, .51),
+  box-shadow: inset -4px -6px 6px 0 rgba(0, 0, 0, 0.51),
     inset 0 6px 6px 0 #768b9e;
 }
 

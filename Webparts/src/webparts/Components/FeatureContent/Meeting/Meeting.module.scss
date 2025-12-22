@@ -51,19 +51,12 @@
   margin: 0;
 }
 
-/* ====== NEW: 4 SVG images layout ====== */
 .imageGrid {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(300px, 1fr));
   gap: 24px;
-  flex-wrap: wrap;
-  margin-bottom: 40px; // thoda space images ke neeche
-}
-
-.imageWrapper {
-  max-width: 280px;
-  flex: 0 1 280px;
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
 .meetingImage {
@@ -195,11 +188,7 @@
 }
 
 .buttonContainer {
-  text-align: center;
-
-  a {
-    text-decoration: none;
-  }
+  margin-top: 40px;
 }
 
 .viewAllButton {
@@ -276,13 +265,12 @@
     width: 240px;
   }
 
-  /* Mobile tweak for images */
   .imageGrid {
     gap: 16px;
+    overflow-x: auto;
   }
 
-  .imageWrapper {
-    max-width: 160px;
-    flex: 0 1 160px;
+  .buttonContainer {
+    margin-top: 24px;
   }
 }

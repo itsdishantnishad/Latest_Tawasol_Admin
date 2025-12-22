@@ -1,12 +1,10 @@
 import * as React from "react";
 import styles from "./LetsCelebrate.module.scss";
+import { listServices } from "../../../services/listServices";
 
-const leftHeadingLine: string = require("../images/leftArrow.svg");
-const rightHeadingLine: string = require("../images/rightArrow.svg");
 const cakeImage: string = require("../images/Cake-1.svg");
 const newJoinerCenter: string = require("../images/Newjoiner.svg");
 const aniversaryImage: string = require("../images/aniversary.svg");
-import { listServices } from "../../../services/listServices";
 
 export interface ICelebration {
   id: string;
@@ -308,9 +306,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            className={`${styles.tab} ${
-              activeTab === tab.key ? styles.activeTab : ""
-            }`}
+            className={`${styles.tab} ${activeTab === tab.key ? styles.activeTab : ""
+              }`}
             onClick={() => handleTabChange(tab.key)}
           >
             {tab.label} <span className={styles.count}>{tab.count}</span>
@@ -392,8 +389,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                         activeTab === "newJoiners"
                           ? newJoinerCenter
                           : activeTab === "anniversaries"
-                          ? aniversaryImage
-                          : cakeImage
+                            ? aniversaryImage
+                            : cakeImage
                       }
                       alt="Celebration"
                       className={styles.illustrationImage}
@@ -408,9 +405,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                     {Array.from({ length: totalPages }).map((_, index) => (
                       <button
                         key={index}
-                        className={`${styles.dot} ${
-                          index === currentPage ? styles.activeDot : ""
-                        }`}
+                        className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""
+                          }`}
                         onClick={() => setCurrentPage(index)}
                         aria-label={`Go to page ${index + 1}`}
                       />

@@ -200,32 +200,30 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
           </div>
         </div>
 
-        <div className={styles.commonButtonArea}>
-          {/* Pagination Dots */}
-          {totalPages > 1 && (
-            <div className={styles.pagination}>
-              {Array.from({ length: totalPages }).map((_, index) => (
-                <button
-                  key={index}
-                  className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""}`}
-                  onClick={() => setCurrentPage(index)}
-                  aria-label={`Go to page ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
-          <PrimaryButton label="View All" onClick={showAppsLinksDialog} />
-        </div>
-
         <button className={styles.navButton} onClick={handleNext} disabled={totalPages <= 1}>
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
             <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        
+
+      </div>
+      <div className={styles.commonButtonArea}>
+        {/* Pagination Dots */}
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            {Array.from({ length: totalPages }).map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""}`}
+                onClick={() => setCurrentPage(index)}
+                aria-label={`Go to page ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
+        <PrimaryButton label="View All" onClick={showAppsLinksDialog} />
       </div>
 
-      
     </div>
   );
 };

@@ -3,6 +3,8 @@ import * as React from 'react';
 import styles from './Events.module.scss';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
+import PrimaryButton from '../../PrimaryButton/PrimaryButton';
+import ConditionalLink from '../../ConditionalLink/ConditionalLink';
 
 const Location_Icon_URL = require("../assets/LocationIcon.png");
 const Time_Icon_URL = require("../assets/clockIcon.png");
@@ -244,7 +246,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
           return;
         }
 
-      
+
         const itemsWithLabels = await Promise.all(
           (json.value || []).map(async (item: any) => {
             try {
@@ -260,7 +262,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
                 const textData = textJson.d || textJson.value || textJson;
                 return { ...item, ...textData };
               }
-            } catch(error) {
+            } catch (error) {
               console.log(error)
             }
             return item;
@@ -272,7 +274,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
           .filter((event: IEvent) => event.date.day && event.date.month)
           .slice(0, top);
 
-      
+
         setEvents(applyRegistrationState(mapped));
       } catch (e: any) {
         setError(e?.message || 'Unknown error');
@@ -292,7 +294,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
     applyRegistrationState
   ]);
 
- 
+
   const viewAllHref = React.useMemo(() => {
     const configured = (props.seeAllURL || '').trim();
 
@@ -381,8 +383,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
                 <div className={styles.day}>{event.date.day}</div>
                 <div className={styles.month}>{event.date.month}</div>
               </div>
-
-              <div className={styles.categoryBadge}>{event.category}</div>
+              {event.category && <div className={styles.categoryBadge}>{event.category}</div>}
             </div>
 
             <div className={styles.eventContent}>
@@ -429,9 +430,9 @@ export const Events: React.FC<IEventsProps> = (props) => {
       </div>
 
       <div className={styles.buttonContainer}>
-        <a href={viewAllHref} className={styles.viewAllButton}>
-          View All
-        </a>
+        <ConditionalLink to={viewAllHref}>
+          <PrimaryButton label='View All' />
+        </ConditionalLink>
       </div>
     </div>
   );
