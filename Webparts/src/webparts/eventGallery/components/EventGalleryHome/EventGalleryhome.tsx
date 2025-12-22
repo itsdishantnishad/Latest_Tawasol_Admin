@@ -24,6 +24,45 @@ interface IEventGalleryProps {
 // Placeholder Image from Assets Folder
 const FALLBACK_IMAGE: string = require("../../../assets/PlaceHolderImage.png");
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+// ✅ UPDATED: safer date parser (minimal but prevents crashes)
+const parseDateSafe = (value: any): Date | null => {
+  if (!value) return null;
+
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+
+  if (typeof value === "number") {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  if (typeof value !== "string") return null;
+
+  const d = new Date(value);
+  if (!isNaN(d.getTime())) return d;
+
+  // fallback: DD/MM/YYYY or DD-MM-YYYY
+  const m = value.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) {
+    const dd = parseInt(m[1], 10);
+    const mm = parseInt(m[2], 10) - 1;
+    const yyyy = parseInt(m[3], 10);
+    const d2 = new Date(yyyy, mm, dd);
+    return isNaN(d2.getTime()) ? null : d2;
+  }
+
+  return null;
+};
+
+const getMonthKey = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+
+const getMonthLabel = (d: Date) => `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+
 const EventGallery: React.FC<IEventGalleryProps> = (props) => {
   const [visibleCount, setVisibleCount] = useState<number>(9);
   const [selectedEvent, setSelectedEvent] = useState<IEventItem | null>(null);
@@ -37,8 +76,10 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
   const tenantOrigin: string =
     props?.context?.pageContext?.web?.absoluteUrl?.split("/sites")[0] ||
     (typeof window !== "undefined" ? window.location.origin : "");
+
   const currentSiteRoot: string =
-    props?.context?.pageContext?.web?.serverRelativeUrl || ""; // e.g. "/sites/Arnav-Site-Test"
+    props?.context?.pageContext?.web?.serverRelativeUrl || "";
+
   const lowerSiteRoot = currentSiteRoot.toLowerCase();
 
   const buildImageUrlFromNewsImage = (newsImage: string | undefined): string => {
@@ -46,23 +87,19 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
 
     const raw = newsImage.trim();
 
-    // absolute URL making it dynamic
     if (raw.startsWith("http://") || raw.startsWith("https://")) {
       return raw;
     }
 
-    // server-relative path
     if (raw.startsWith("/")) {
       return `${tenantOrigin}${raw}`;
     }
 
-    // relative path
     return `${tenantOrigin}/${raw}`;
   };
 
   const rawEvents = props.Allevent || [];
 
-  // Filter: only keep events that clearly belong to the current site where WebPart is uploaded
   const eventsFromCurrentSite = React.useMemo(
     () =>
       rawEvents.filter((ev: any) => {
@@ -93,14 +130,14 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
         title: ev.title || ev.Title,
         imageUrl: newsImageUrl || ev.imageUrl || "",
         imageCount: ev.imageCount ?? 26,
-        date:
-          typeof rawDate === "string" ? rawDate.split("\n")[0] : (rawDate as string),
+        date: typeof rawDate === "string" ? rawDate.split("\n")[0] : String(rawDate),
       } as IEventItem;
     });
   };
 
   const dummyEvents = convertToDummyEvents(eventsFromCurrentSite);
   console.log("[EventGalleryHome] events", dummyEvents);
+
   React.useEffect(() => {
     const loadImages = async () => {
       const result = await sp.web.lists
@@ -131,6 +168,34 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
     setSelectedEvent(null);
   };
 
+  // ✅ FIX: Hook must be above conditional returns (to avoid React #197)
+  const groupedVisible = React.useMemo(() => {
+    const visibleEvents = dummyEvents.slice(0, visibleCount);
+
+    const map = new Map<
+      string,
+      { key: string; label: string; items: IEventItem[]; sort: number }
+    >();
+
+    visibleEvents.forEach((ev) => {
+      const dt = parseDateSafe(ev.date);
+      const key = dt ? getMonthKey(dt) : "unknown";
+      const label = dt ? getMonthLabel(dt) : "Unknown";
+
+      if (!map.has(key)) {
+        map.set(key, {
+          key,
+          label,
+          items: [],
+          sort: dt ? new Date(dt.getFullYear(), dt.getMonth(), 1).getTime() : 0,
+        });
+      }
+      map.get(key)!.items.push(ev);
+    });
+
+    return Array.from(map.values()).sort((a, b) => b.sort - a.sort);
+  }, [dummyEvents, visibleCount]);
+
   // Detail view
   if (selectedEvent) {
     return (
@@ -157,71 +222,72 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
         >
           <div>
             <h3>No events to show</h3>
-            <p>
-              This site has no events yet. Please create event pages to see them
-              here.
-            </p>
+            <p>This site has no events yet. Please create event pages to see them here.</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // Gallery grid
-  const visibleEvents = dummyEvents.slice(0, visibleCount);
-
   return (
     <div className={styles.eventGallery}>
-      <div className={styles.galleryGrid}>
-        {visibleEvents.map((event) => {
-          const imgSrc = event.imageUrl || FALLBACK_IMAGE;
+      {/* Month-wise sections */}
+      {groupedVisible.map((group) => (
+        <div key={group.key} className={styles.monthSection}>
+          <div className={styles.monthHeading}>{group.label}</div>
 
-          return (
-            <div
-              key={event.id}
-              className={styles.eventCard}
-              onClick={() => handleEventClick(event)}
-            >
-              <div className={styles.imageContainer}>
-                <img
-                  src={imgSrc}
-                  alt={event.title}
-                  onError={(e) => {
-                    const target = e.currentTarget as HTMLImageElement;
-                    if (target.src !== FALLBACK_IMAGE) {
-                      target.src = FALLBACK_IMAGE;
-                    }
-                  }}
-                />
-                <div className={styles.overlay}>
-                  <h3 className={styles.eventTitle}>
-                    {event.title}
-                    <svg
-                      className={styles.arrow}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </h3>
-                  <div className={styles.cardFooter}>
-                    <span className={styles.imageCount}>
-                      {event.imageCount} images
-                    </span>
-                    <span className={styles.eventDate}>{event.date}</span>
+          <div className={styles.galleryGrid}>
+            {group.items.map((event) => {
+              const imgSrc = event.imageUrl || FALLBACK_IMAGE;
+
+              return (
+                <div
+                  key={event.id}
+                  className={styles.eventCard}
+                  onClick={() => handleEventClick(event)}
+                >
+                  <div className={styles.imageContainer}>
+                    <img
+                      src={imgSrc}
+                      alt={event.title}
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        if (target.src !== FALLBACK_IMAGE) {
+                          target.src = FALLBACK_IMAGE;
+                        }
+                      }}
+                    />
+                    <div className={styles.overlay}>
+                      <h3 className={styles.eventTitle}>
+                        {event.title}
+                        <svg
+                          className={styles.arrow}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </h3>
+                      <div className={styles.cardFooter}>
+                        <span className={styles.imageCount}>
+                          {event.imageCount} images
+                        </span>
+                        <span className={styles.eventDate}>{event.date}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
 
       {visibleCount < dummyEvents.length && (
         <div className={styles.loadMoreContainer}>

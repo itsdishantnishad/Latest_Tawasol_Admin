@@ -1,9 +1,11 @@
+
+
 import * as React from "react";
 import styles from "./NewsView.module.scss";
 import type { NewsRow, ViewMode } from "./NewsView";
 import { Image, ImageFit, Icon } from "@fluentui/react";
 
-// SVGs from shared constants
+
 import {
   GovernanceRiskandComplianceSVG,
   HealthSafetyEnvironmentSVG,
@@ -14,11 +16,9 @@ import {
   DHREIconSVG,
 } from "../../assets/constants";
 
-// Helper: convert raw SVG string to a data URI
 const svgToDataUri = (svg: string): string =>
   `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 
-/* Department & Category icon maps with descriptive keys – now from constants.ts */
 const departmentIconSrcByKey: Record<string, string> = {
   governance_risk_and_compliance: svgToDataUri(GovernanceRiskandComplianceSVG),
   health_safety_environment: svgToDataUri(HealthSafetyEnvironmentSVG),
@@ -97,6 +97,38 @@ export interface INewsResultsProps {
 
 type AnimationState = { animateGrid: boolean; animateList: boolean };
 
+// ✅ NEW: Month grouping helpers (minimal addition)
+const MONTHS = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December",
+];
+
+const parseDateSafe = (value?: string): Date | null => {
+  if (!value) return null;
+
+  const d = new Date(value);
+  if (!isNaN(d.getTime())) return d;
+
+  // fallback: DD/MM/YYYY or DD-MM-YYYY
+  const m = value.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) {
+    const dd = parseInt(m[1], 10);
+    const mm = parseInt(m[2], 10) - 1;
+    const yyyy = parseInt(m[3], 10);
+    const d2 = new Date(yyyy, mm, dd);
+    return isNaN(d2.getTime()) ? null : d2;
+  }
+
+  return null;
+};
+
+const getMonthKey = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+
+const getMonthLabel = (d: Date) => `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+
+type MonthGroup = { key: string; label: string; sort: number; items: NewsRow[] };
+
 export default class NewsResults extends React.Component<INewsResultsProps, AnimationState> {
   private hasAnimatedListOnce = false;
   private animationTimers: number[] = [];
@@ -145,6 +177,34 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
         <span>{newsItem.pageView} Views</span>
       </span>
     );
+  }
+
+ // Group items by Month + Year 
+  private groupByMonthYear(items: NewsRow[]): MonthGroup[] {
+    const map = new Map<string, MonthGroup>();
+
+    items.forEach((row) => {
+      const dt = parseDateSafe(row.created);
+      const key = dt ? getMonthKey(dt) : "unknown";
+      const label = dt ? getMonthLabel(dt) : "Unknown";
+      const sort = dt ? new Date(dt.getFullYear(), dt.getMonth(), 1).getTime() : 0;
+
+      if (!map.has(key)) map.set(key, { key, label, sort, items: [] });
+      map.get(key)!.items.push(row);
+    });
+
+    const groups = Array.from(map.values()).sort((a, b) => b.sort - a.sort);
+
+    // optional: sort inside month by created desc
+    groups.forEach((g) => {
+      g.items.sort((a, b) => {
+        const da = parseDateSafe(a.created)?.getTime() ?? 0;
+        const db = parseDateSafe(b.created)?.getTime() ?? 0;
+        return db - da;
+      });
+    });
+
+    return groups;
   }
 
   /* GRID */
@@ -246,10 +306,11 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
           const previewImageSrc = getImageSrcOrPlaceholder(newsItem.newsImage);
           const { departmentIconSrc, categoryIconSrc } = getIconSourcePaths(newsItem.department, newsItem.newsType);
           const targetUrl = resolveTargetUrl(newsItem);
+          const key = newsItem.listItemId ?? targetUrl ?? newsItem.title ?? index;
 
           return (
-            <>
-              <li key={newsItem.listItemId ?? targetUrl ?? newsItem.title} className={styles.listItem}>
+            <React.Fragment key={key}>
+              <li className={styles.listItem}>
                 <a
                   className={styles.listItemLink}
                   href={targetUrl || "#"}
@@ -275,32 +336,34 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
 
                   <div className={styles.listBody}>
                     <div className={styles.leftRow}>
-                      {(newsItem.department || newsItem.tags?.length) && <div>
-                        {newsItem.department && (
-                          <span className={styles.listDeptGroup}>
-                            {departmentIconSrc && (
-                              <Image
-                                className={styles.listDeptIcon}
-                                src={departmentIconSrc}
-                                alt=""
-                                width={16}
-                                height={16}
-                                imageFit={ImageFit.contain}
-                              />
-                            )}
-                            <span className={styles.listDept}>{newsItem.department}</span>
-                          </span>
-                        )}
-                        {Array.isArray(newsItem.tags) && newsItem.tags.length > 0 && (
-                          <span className={styles.hashes}>
-                            {newsItem.tags.slice(0, 3).map((tag, tagIndex) => (
-                              <span key={tagIndex} className={styles.hash}>
-                                #{tag}
-                              </span>
-                            ))}
-                          </span>
-                        )}
-                      </div>}
+                      {(newsItem.department || newsItem.tags?.length) && (
+                        <div>
+                          {newsItem.department && (
+                            <span className={styles.listDeptGroup}>
+                              {departmentIconSrc && (
+                                <Image
+                                  className={styles.listDeptIcon}
+                                  src={departmentIconSrc}
+                                  alt=""
+                                  width={16}
+                                  height={16}
+                                  imageFit={ImageFit.contain}
+                                />
+                              )}
+                              <span className={styles.listDept}>{newsItem.department}</span>
+                            </span>
+                          )}
+                          {Array.isArray(newsItem.tags) && newsItem.tags.length > 0 && (
+                            <span className={styles.hashes}>
+                              {newsItem.tags.slice(0, 3).map((tag, tagIndex) => (
+                                <span key={tagIndex} className={styles.hash}>
+                                  #{tag}
+                                </span>
+                              ))}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <span className={styles.listTitle}>{newsItem.title}</span>
                     </div>
                     <div className={styles.rightRow}>
@@ -320,7 +383,7 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
                 </a>
               </li>
               {newsItems.length - 1 !== index && <div className={styles.separator} />}
-            </>
+            </React.Fragment>
           );
         })}
       </ul>
@@ -330,6 +393,19 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
   public render() {
     const { items, view } = this.props;
     if (!items || items.length === 0) return <div className={styles.empty}>No news found.</div>;
-    return view === "grid" ? this.renderGrid(items) : this.renderList(items);
+
+    // ✅ NEW: group filtered items month-wise
+    const groups = this.groupByMonthYear(items);
+
+    return (
+      <div className={styles.monthResults}>
+        {groups.map((g) => (
+          <div key={g.key} className={styles.monthSection}>
+            <div className={styles.monthHeading}>{g.label}</div>
+            {view === "grid" ? this.renderGrid(g.items) : this.renderList(g.items)}
+          </div>
+        ))}
+      </div>
+    );
   }
 }

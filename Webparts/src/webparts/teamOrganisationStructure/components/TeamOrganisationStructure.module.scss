@@ -1,11 +1,10 @@
-// @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap");
 
+// @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap");
 .wrapper {
   background: #FFF4EA;
   padding: 80px 76px;
 }
 
-/* Heading */
 .title {
   font-family: "Instrument Serif", serif;
   font-size: 42px;
@@ -33,44 +32,22 @@
   margin: 0px 0 60px
 }
 
-/* ===== People grid ===== */
 .row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: clamp(14px, 1.5vw, 18px);
-  // margin-bottom: clamp(18px, 2vw, 22px);
   margin-bottom: 52px;
 
-  @media (max-width: 1200px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  @media (max-width: 900px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (max-width: 640px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .name {
-    color: #000;
-    font-size: 18px;
-    font-weight: 500;
-    margin-bottom: 0px;
-    line-height: 24px;
-    font-family: "Inter", sans-serif;
-  }
+  @media (max-width: 1200px) { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 640px) { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Cards */
 .card {
   text-align: left;
   position: relative;
   border-radius: 12px;
-  // padding: 10px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
-  // outline: 1px solid transparent;
 }
 
 .card:hover,
@@ -83,9 +60,7 @@
   margin: 0 auto;
   text-align: center;
 }
-.cardMd {}
 
-/* Selected highlight (Mariam style) */
 .cardSelected {
   outline: 1px solid #F0BB82;
   border-radius: 12px;
@@ -95,28 +70,10 @@
   box-shadow: inset 0 4px 4px 0 #FED3A4;
 }
 
-/* Image */
-.photoWrap {
-  width: 100%;
-  margin-bottom: 0;
-  // aspect-ratio: 4 / 5;
-  // border-radius: 12px;
-  // overflow: hidden;
-  // background: #FFF4EA;
-}
-.photo {
-  width: 100%;
-  // height: 100%;
-  object-fit: cover;
-  // object-position: center 15%;
-  display: block;
-}
-.photoFallback {
-  width: 100%;
-  height: 100%;
-}
+.photoWrap { width: 100%; margin-bottom: 0; }
+.photo { width: 100%; object-fit: cover; display: block; }
+.photoFallback { width: 100%; height: 100%; }
 
-/* Underline accents */
 .accent {
   background: #da291c;
   border-radius: 50px;
@@ -124,10 +81,7 @@
   margin: 24px 0 20px;
   width: 50%;
 }
-.accentCenter {
-  margin-left: auto;
-  margin-right: auto;
-}
+.accentCenter { margin-left: auto; margin-right: auto; }
 
 .name {
   color: #000;
@@ -146,7 +100,6 @@
   font-family: "Inter", sans-serif;
 }
 
-/* ===== Departments band (appears under selected row) ===== */
 .deptBand {
   margin: 14px 0 26px;
   padding: 22px 10px 6px;
@@ -165,7 +118,6 @@
   margin-bottom: 18px;
 }
 
-/* Rail + stubs */
 .deptRail {
   position: relative;
   height: 22px;
@@ -191,27 +143,17 @@
   transform: translateX(-50%);
 }
 
-/* Boxes grid */
 .deptGrid {
   display: grid;
   grid-template-columns: repeat(7, minmax(140px, 1fr));
   gap: clamp(10px, 1.4vw, 16px);
   justify-items: center;
 
-  @media (max-width: 1200px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  @media (max-width: 900px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (max-width: 640px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  @media (max-width: 1200px) { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 640px) { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Department orange box – Figma spec */
 .deptBox {
   width: 168px;
   max-width: 168px;
@@ -232,93 +174,54 @@
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
-  letter-spacing: 0;
-  color: #000000;
+  color: #000;
 }
 
 .deptLink {
   text-decoration: none;
   color: inherit;
+  display: block;
 }
 
-/* a11y helpers */
-.clickable { cursor: pointer; }
-.srOnly {
-  position: absolute !important;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
+/* ✅ IMPORTANT: box + bullets wrapper */
+.deptCol {
+  width: 168px;
+  max-width: 168px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
-/* --------------------------------- Responsive (overall) --------------------------------- */
+/* ✅ Bullet pointers */
+.deptList {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  list-style: disc;
 
-/* Tablet down – soften padding & center cards */
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: #000;
+}
+
+.deptList li {
+  margin: 0 0 10px;
+}
+
 @media (max-width: 768px) {
-  .wrapper {
-    padding: 32px 16px 40px;
-    border-radius: 8px;
-  }
-
-  .title {
-    font-size: 32px;
-    margin-bottom: 22px;
-  }
-
-  .card {
-    max-width: 260px;
-    // margin: 0 auto;
-  }
-
-  .cardLg {
-    width: 100%;
-    max-width: 260px;
-  }
-
-  .name {
-    font-size: 20px;
-    line-height: 28px;
-  }
-
-  .role {
-    font-size: 14px;
-    line-height: 22px;
-  }
-
-  .deptBand {
-    margin: 12px 0 22px;
-    padding-top: 18px;
-  }
+  .wrapper { padding: 32px 16px 40px; border-radius: 8px; }
+  .title { font-size: 32px; margin-bottom: 22px; }
+  .card { max-width: 260px; }
+  .cardLg { width: 100%; max-width: 260px; }
+  .name { font-size: 20px; line-height: 28px; }
+  .role { font-size: 14px; line-height: 22px; }
+  .deptBand { margin: 12px 0 22px; padding-top: 18px; }
 }
 
-/* Small phones – single column cards (like thin Figma screenshot) */
 @media (max-width: 480px) {
-  .row {
-    grid-template-columns: 1fr;
-  }
-
-  .wrapper {
-    padding: 28px 12px 32px;
-    border-radius: 0;
-  }
-
-  .card,
-  .cardLg {
-    width: 100%;
-    max-width: 280px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .title {
-    font-size: 28px;
-  }
-
-  .deptGrid {
-    grid-template-columns: repeat(2, minmax(140px, 1fr));
-  }
+  .row { grid-template-columns: 1fr; }
+  .wrapper { padding: 28px 12px 32px; border-radius: 0; }
+  .card, .cardLg { width: 100%; max-width: 280px; margin-left: auto; margin-right: auto; }
+  .title { font-size: 28px; }
+  .deptGrid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
 }
