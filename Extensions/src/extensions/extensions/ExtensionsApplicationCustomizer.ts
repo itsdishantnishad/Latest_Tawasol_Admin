@@ -34,8 +34,8 @@ const MAX_NOTIFS: number = 100;
  * - Set PERMISSIONS_LIST_TITLE to the display name of the list you created.
  * - Internal column name for emails: UserPermission (you confirmed Field=UserPermission).
  */
-const PERMISSIONS_LIST_TITLE = 'PermissionList'; // <-- change this to your list's display name if different
-const PERMISSIONS_EMAIL_FIELD = 'UserPermission'; // internal field name you provided
+// const PERMISSIONS_LIST_TITLE = 'PermissionList'; // <-- change this to your list's display name if different
+// const PERMISSIONS_EMAIL_FIELD = 'UserPermission'; // internal field name you provided
 
 type AmplitudeProps = Record<string, unknown>;
 
@@ -171,27 +171,27 @@ export default class ExtensionsApplicationCustomizer
    * Check if the current user email exists in the permissions list.
    * Returns true if an item with UserPermission eq userEmail exists.
    */
-  private async isUserInPermissionList(userEmail: string): Promise<boolean> {
-    try {
-      if (!PERMISSIONS_LIST_TITLE || !userEmail) return false;
+  // private async isUserInPermissionList(userEmail: string): Promise<boolean> {
+  //   try {
+  //     if (!PERMISSIONS_LIST_TITLE || !userEmail) return false;
 
-      // Escape single quotes in email for OData filter
-      const safeEmail = userEmail.replace(/'/g, "''");
+  //     // Escape single quotes in email for OData filter
+  //     const safeEmail = userEmail.replace(/'/g, "''");
 
-      // Build REST endpoint (use encoded list title but raw email inside quotes)
-      const safeListTitle = encodeURIComponent(PERMISSIONS_LIST_TITLE);
-      const api = `${this.webUrl}/_api/web/lists/getbytitle('${safeListTitle}')/items?$select=Id&$filter=${PERMISSIONS_EMAIL_FIELD} eq '${safeEmail}'&$top=1`;
+  //     // Build REST endpoint (use encoded list title but raw email inside quotes)
+  //     const safeListTitle = encodeURIComponent(PERMISSIONS_LIST_TITLE);
+  //     const api = `${this.webUrl}/_api/web/lists/getbytitle('${safeListTitle}')/items?$select=Id&$filter=${PERMISSIONS_EMAIL_FIELD} eq '${safeEmail}'&$top=1`;
 
-      const resp: SPHttpClientResponse = await this.context.spHttpClient.get(api, SPHttpClient.configurations.v1);
-      if (!resp.ok) return false;
-      const data = await resp.json() as { value?: any[] };
-      return Array.isArray(data.value) && data.value.length > 0;
-    } catch (e) {
-      // safe default: treat as not allowed
-      // console.error('isUserInPermissionList error', e);
-      return false;
-    }
-  }
+  //     const resp: SPHttpClientResponse = await this.context.spHttpClient.get(api, SPHttpClient.configurations.v1);
+  //     if (!resp.ok) return false;
+  //     const data = await resp.json() as { value?: any[] };
+  //     return Array.isArray(data.value) && data.value.length > 0;
+  //   } catch (e) {
+  //     // safe default: treat as not allowed
+  //     // console.error('isUserInPermissionList error', e);
+  //     return false;
+  //   }
+  // }
 
   /**
    * Hide top command bar / edit controls for users who are NOT in the permissions list.
@@ -200,92 +200,92 @@ export default class ExtensionsApplicationCustomizer
    *  - Else if user email exists in PERMISSIONS_LIST_TITLE (UserPermission column) => allow
    *  - Else => hide header/actions
    */
-  private async hideTopBarForNonAdmins(): Promise<void> {
-    // Detect if user is site collection admin / tenant admin (best-effort)
-    const pageCtx: any = this.context.pageContext || {};
-    const isSiteAdmin = Boolean(
-      pageCtx.legacyPageContext?.isSiteAdmin ||
-      pageCtx.user?.isSiteAdmin ||
-      (pageCtx.legacyPageContext && (pageCtx.legacyPageContext as any).isSiteAdmin)
-    );
+  // private async hideTopBarForNonAdmins(): Promise<void> {
+  //   // Detect if user is site collection admin / tenant admin (best-effort)
+  //   const pageCtx: any = this.context.pageContext || {};
+  //   const isSiteAdmin = Boolean(
+  //     pageCtx.legacyPageContext?.isSiteAdmin ||
+  //     pageCtx.user?.isSiteAdmin ||
+  //     (pageCtx.legacyPageContext && (pageCtx.legacyPageContext as any).isSiteAdmin)
+  //   );
 
-    if (isSiteAdmin) {
-      // Admins see everything
-      return;
-    }
+  //   if (isSiteAdmin) {
+  //     // Admins see everything
+  //     return;
+  //   }
 
-    // Check if user is granted in permission list
-    const email = this.userEmail || '';
-    const allowed = await this.isUserInPermissionList(email);
+  //   // Check if user is granted in permission list
+  //   const email = this.userEmail || '';
+  //   const allowed = await this.isUserInPermissionList(email);
 
-    if (allowed) {
-      // user present in list -> allow UI
-      return;
-    }
+  //   if (allowed) {
+  //     // user present in list -> allow UI
+  //     return;
+  //   }
 
-    // Otherwise hide command bar and edit controls (same logic as before)
-    const hideFn = (): void => {
-      try {
-        const headerSelectors = [
-          '[data-automationid="PageCommandBar"]',
-          '[data-automationid="SiteHeader"]',
-          '#spCommandBar',
-          '.CanvasPageHeader-actions',
-          '.sp-commandbar-commands',
-          '.od-HeaderActions'
-        ];
-        headerSelectors.forEach((sel) => {
-          const el = document.querySelector(sel) as HTMLElement | null;
-          if (el && el.style.display !== 'none') {
-            el.style.display = 'none';
-          }
-        });
+  //   // Otherwise hide command bar and edit controls (same logic as before)
+  //   const hideFn = (): void => {
+  //     try {
+  //       const headerSelectors = [
+  //         '[data-automationid="PageCommandBar"]',
+  //         '[data-automationid="SiteHeader"]',
+  //         '#spCommandBar',
+  //         '.CanvasPageHeader-actions',
+  //         '.sp-commandbar-commands',
+  //         '.od-HeaderActions'
+  //       ];
+  //       headerSelectors.forEach((sel) => {
+  //         const el = document.querySelector(sel) as HTMLElement | null;
+  //         if (el && el.style.display !== 'none') {
+  //           el.style.display = 'none';
+  //         }
+  //       });
 
-        const editSelectors = [
-          'button[aria-label="Edit"]',
-          'button[title="Edit"]',
-          'button[aria-label="Edit page"]',
-          '[data-automationid="PageCommandBar_Edit"]',
-          'button[aria-label*="Edit"]',
-          'button[aria-label*="Page details"]',
-          'button[aria-label*="Preview"]'
-        ];
-        editSelectors.forEach((sel) => {
-          const btns = document.querySelectorAll(sel);
-          btns.forEach((b) => {
-            const be = b as HTMLElement;
-            if (be && be.style.display !== 'none') {
-              be.style.display = 'none';
-            }
-          });
-        });
+  //       const editSelectors = [
+  //         'button[aria-label="Edit"]',
+  //         'button[title="Edit"]',
+  //         'button[aria-label="Edit page"]',
+  //         '[data-automationid="PageCommandBar_Edit"]',
+  //         'button[aria-label*="Edit"]',
+  //         'button[aria-label*="Page details"]',
+  //         'button[aria-label*="Preview"]'
+  //       ];
+  //       editSelectors.forEach((sel) => {
+  //         const btns = document.querySelectorAll(sel);
+  //         btns.forEach((b) => {
+  //           const be = b as HTMLElement;
+  //           if (be && be.style.display !== 'none') {
+  //             be.style.display = 'none';
+  //           }
+  //         });
+  //       });
 
-        const headerActionGroup = document.querySelector('.sp-commandbar-commands, .CanvasPageHeader-actions, .od-HeaderActions');
-        if (headerActionGroup) {
-          (headerActionGroup as HTMLElement).style.display = 'none';
-        }
-      } catch (e) {
-        // ignore
-      }
-    };
+  //       const headerActionGroup = document.querySelector('.sp-commandbar-commands, .CanvasPageHeader-actions, .od-HeaderActions');
+  //       if (headerActionGroup) {
+  //         (headerActionGroup as HTMLElement).style.display = 'none';
+  //       }
+  //     } catch (e) {
+  //       // ignore
+  //     }
+  //   };
 
-    // Apply immediately
-    hideFn();
+  //   // Apply immediately
+  //   hideFn();
 
-    // Ensure it stays hidden on re-renders
-    if (!this.topBarObserver) {
-      this.topBarObserver = new MutationObserver(() => {
-        hideFn();
-      });
-      try {
-        this.topBarObserver.observe(document.body, { childList: true, subtree: true });
-      } catch {
-        // ignore observe errors
-      }
-    } else {
-      hideFn();
-    }
-  }
+  //   // Ensure it stays hidden on re-renders
+  //   if (!this.topBarObserver) {
+  //     this.topBarObserver = new MutationObserver(() => {
+  //       hideFn();
+  //     });
+  //     try {
+  //       this.topBarObserver.observe(document.body, { childList: true, subtree: true });
+  //     } catch {
+  //       // ignore observe errors
+  //     }
+  //   } else {
+  //     hideFn();
+  //   }
+  // }
 
   /** Configure Amplitude user + log "SharePoint Page Viewed" with pageType from CT */
   private async configureAmplitude(): Promise<void> {
@@ -327,7 +327,7 @@ export default class ExtensionsApplicationCustomizer
     this.hideAppBar();
 
     // 👉 Hide top command bar & edit buttons from users who are not in permission list
-    await this.hideTopBarForNonAdmins();
+    // await this.hideTopBarForNonAdmins();
 
     this.initAmplitude();
     this.injectFont();
