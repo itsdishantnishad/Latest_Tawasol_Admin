@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { useState } from "react";
 import styles from "../EventGallery.module.scss";
@@ -30,8 +29,18 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-const parseDateSafe = (value: string): Date | null => {
+// ✅ UPDATED: safer date parser (minimal but prevents crashes)
+const parseDateSafe = (value: any): Date | null => {
   if (!value) return null;
+
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+
+  if (typeof value === "number") {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  if (typeof value !== "string") return null;
 
   const d = new Date(value);
   if (!isNaN(d.getTime())) return d;
@@ -67,8 +76,10 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
   const tenantOrigin: string =
     props?.context?.pageContext?.web?.absoluteUrl?.split("/sites")[0] ||
     (typeof window !== "undefined" ? window.location.origin : "");
+
   const currentSiteRoot: string =
     props?.context?.pageContext?.web?.serverRelativeUrl || "";
+
   const lowerSiteRoot = currentSiteRoot.toLowerCase();
 
   const buildImageUrlFromNewsImage = (newsImage: string | undefined): string => {
@@ -119,7 +130,7 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
         title: ev.title || ev.Title,
         imageUrl: newsImageUrl || ev.imageUrl || "",
         imageCount: ev.imageCount ?? 26,
-        date: typeof rawDate === "string" ? rawDate.split("\n")[0] : (rawDate as string),
+        date: typeof rawDate === "string" ? rawDate.split("\n")[0] : String(rawDate),
       } as IEventItem;
     });
   };
@@ -157,6 +168,34 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
     setSelectedEvent(null);
   };
 
+  // ✅ FIX: Hook must be above conditional returns (to avoid React #197)
+  const groupedVisible = React.useMemo(() => {
+    const visibleEvents = dummyEvents.slice(0, visibleCount);
+
+    const map = new Map<
+      string,
+      { key: string; label: string; items: IEventItem[]; sort: number }
+    >();
+
+    visibleEvents.forEach((ev) => {
+      const dt = parseDateSafe(ev.date);
+      const key = dt ? getMonthKey(dt) : "unknown";
+      const label = dt ? getMonthLabel(dt) : "Unknown";
+
+      if (!map.has(key)) {
+        map.set(key, {
+          key,
+          label,
+          items: [],
+          sort: dt ? new Date(dt.getFullYear(), dt.getMonth(), 1).getTime() : 0,
+        });
+      }
+      map.get(key)!.items.push(ev);
+    });
+
+    return Array.from(map.values()).sort((a, b) => b.sort - a.sort);
+  }, [dummyEvents, visibleCount]);
+
   // Detail view
   if (selectedEvent) {
     return (
@@ -190,36 +229,9 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
     );
   }
 
-  // Gallery grid
-  const visibleEvents = dummyEvents.slice(0, visibleCount);
-
-  //  group visible events month-wise 
-  const groupedVisible = React.useMemo(() => {
-    const map = new Map<string, { key: string; label: string; items: IEventItem[]; sort: number }>();
-
-    visibleEvents.forEach((ev) => {
-      const dt = parseDateSafe(ev.date);
-      const key = dt ? getMonthKey(dt) : "unknown";
-      const label = dt ? getMonthLabel(dt) : "Unknown";
-
-      if (!map.has(key)) {
-        map.set(key, {
-          key,
-          label,
-          items: [],
-          sort: dt ? new Date(dt.getFullYear(), dt.getMonth(), 1).getTime() : 0,
-        });
-      }
-      map.get(key)!.items.push(ev);
-    });
-
-    // keep newest month first 
-    return Array.from(map.values()).sort((a, b) => b.sort - a.sort);
-  }, [visibleEvents]);
-
   return (
     <div className={styles.eventGallery}>
-      {/* ✅ Month-wise sections */}
+      {/* Month-wise sections */}
       {groupedVisible.map((group) => (
         <div key={group.key} className={styles.monthSection}>
           <div className={styles.monthHeading}>{group.label}</div>
