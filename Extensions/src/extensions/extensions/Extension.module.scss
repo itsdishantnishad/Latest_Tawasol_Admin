@@ -149,16 +149,16 @@
   left: 50% !important;
   bottom: var(--float-base-bottom);
   width: 480px;
-  height: 64px;
+  height: 84px;
   background: rgba(255,255,255,.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: 16px;
-  border: 2px solid #e5e5e5;
-  padding: 5px 2px;
+  // border: 2px solid #e5e5e5;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  // justify-content: center;
   font-family: 'Inter', sans-serif;
   box-shadow: 0 8px 24px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
   z-index: 10000;
@@ -171,29 +171,35 @@
 }
 
 .TIRButtonGroup {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 8px;
-  width: calc(100% - 12px);
-  height: 54px;
+  // display: grid;
+  // grid-auto-flow: column;
+  // grid-auto-columns: 1fr;
+  // gap: 8px;
+  // width: calc(100% - 12px);
+  // height: 54px;
+  display: flex;
+  gap: 10px;
+  width: 100%;
 }
 
 .TIRNavItem {
+  align-items: center;
   border-radius: 8px;
+  color: #3A3B43;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
   gap: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #000;
+  justify-content: center;
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background .2s ease, color .2s ease;
+  height: 60px;
+  flex: 1;
 }
 
-.TIRNavItem:hover { color: #fff; background: #000; }
+.TIRNavItem:hover { color: #fff; background: linear-gradient(120.65deg, #000000 3.36%, #666666 134.56%); }
 .TIRNavItem:hover .TIRNavIcon { filter: brightness(0) invert(1); }
 
 .TIRNavIcon { width: 20px; height: 20px; }

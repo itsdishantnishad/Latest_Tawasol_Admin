@@ -1,3 +1,4 @@
+// MainPage.tsx
 
 import * as React from "react";
 import styles from "./MainPage.module.scss";
@@ -11,16 +12,23 @@ export interface IMainPageProps {
   onNavigateToLeave?: () => void;
   onNavigateToHRLetter?: () => void;
   // onNavigateToHoliday?: () => void;
-  context:WebPartContext
+  context: WebPartContext;
+
+  // Incoming change
+  badges?: Array<{ name: string; imageUrl: string }>;
 }
 
 export default class MainPage extends React.Component<IMainPageProps> {
   public render(): React.ReactElement<IMainPageProps> {
-    const { onNavigateToLeave, onNavigateToHRLetter} = this.props;
+    const { onNavigateToLeave, onNavigateToHRLetter } = this.props;
+
+    // DEBUG_REMOVE_LATER: badges coming from parent
+    console.log("[MainPage] Badges:", this.props.badges);
 
     return (
       <div className={[styles.pageInner, this.props.className || ""].join(" ")}>
-        <ProfileHeader />
+        <ProfileHeader context={this.props.context} badges={this.props.badges} />
+
         <div className={styles.columns}>
           <div className={styles.leftCol} role="region" aria-label="Main feed">
             <LeftSection />
