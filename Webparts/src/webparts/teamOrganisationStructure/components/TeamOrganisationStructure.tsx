@@ -1,11 +1,8 @@
+
 import * as React from "react";
 import styles from "./TeamOrganisationStructure.module.scss";
 import { ITeamOrganisationStructureProps } from "./ITeamOrganisationStructureProps";
-import {
-  listServices,
-  OrgMember,
-  OrgDepartment,
-} from "../../services/listServices";
+import { listServices, OrgMember, OrgDepartment } from "../../services/listServices";
 import { ListName } from "../../services/Constants";
 
 export interface ITeamOrganisationStructureState {
@@ -42,9 +39,7 @@ export default class TeamOrganisationStructure extends React.Component<
     await this.loadMembers();
   }
 
-  public async componentDidUpdate(
-    prevProps: ITeamOrganisationStructureProps
-  ): Promise<void> {
+  public async componentDidUpdate(prevProps: ITeamOrganisationStructureProps): Promise<void> {
     const prevTitle = (prevProps.listTitle || "").trim();
     const nextTitle = (this.props.listTitle || "").trim();
     if (prevTitle !== nextTitle) {
@@ -62,8 +57,7 @@ export default class TeamOrganisationStructure extends React.Component<
         departments: [],
       });
 
-      const sourceList =
-        this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
+      const sourceList = this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
       const members = await this.spService.getOrganisationMembers(sourceList);
 
       this.setState({ items: members, loading: false });
@@ -100,10 +94,7 @@ export default class TeamOrganisationStructure extends React.Component<
       },
       async () => {
         const { selectedId } = this.state;
-
-        if (selectedId !== member.id) {
-          return;
-        }
+        if (selectedId !== member.id) return;
 
         const key = (member.user || "").trim();
         if (!key) {
@@ -116,13 +107,11 @@ export default class TeamOrganisationStructure extends React.Component<
         }
 
         try {
-          const deptList =
-            (this.props.deptListTitle || ListName.TEAM_ORG_DEPARTMENTS).trim();
+          const deptList = (this.props.deptListTitle || ListName.TEAM_ORG_DEPARTMENTS).trim();
+          const depts = await this.spService.getDepartmentsByMember(deptList, key);
 
-          const depts = await this.spService.getDepartmentsByMember(
-            deptList,
-            key
-          );
+          // Debug (optional): uncomment if needed
+          // console.log("Departments from service:", depts);
 
           this.setState((current) =>
             current.selectedId === member.id
@@ -139,6 +128,14 @@ export default class TeamOrganisationStructure extends React.Component<
       }
     );
   };
+
+  private parseBullets(raw?: string): string[] {
+    if (!raw) return [];
+    return raw
+      .split(/\r?\n/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+  }
 
   public render(): React.ReactElement<ITeamOrganisationStructureProps> {
     const { items, loading, error, selectedLevel } = this.state;
@@ -164,19 +161,13 @@ export default class TeamOrganisationStructure extends React.Component<
 
         {!loading && !error && (
           <>
-            {rootMember && (
-              <div className={styles.topCardWrap}>
-                {this.renderCard(rootMember, true)}
-              </div>
-            )}
+            {rootMember && <div className={styles.topCardWrap}>{this.renderCard(rootMember, true)}</div>}
 
             {orderedLevels.map((level) => (
               <React.Fragment key={level}>
                 <div className={styles.row}>
                   {membersByLevel[level].map((person) => (
-                    <React.Fragment key={person.id}>
-                      {this.renderCard(person, false)}
-                    </React.Fragment>
+                    <React.Fragment key={person.id}>{this.renderCard(person, false)}</React.Fragment>
                   ))}
                 </div>
 
@@ -199,35 +190,20 @@ export default class TeamOrganisationStructure extends React.Component<
         aria-pressed={isSelected}
         aria-label={`Select ${member.name}`}
         onClick={() => this.onCardClick(member)}
-        onKeyDown={(e) =>
-          (e.key === "Enter" || e.key === " ") && this.onCardClick(member)
-        }
-        className={[
-          styles.card,
-          isRoot ? styles.cardLg : "",
-          isSelected ? styles.cardSelected : "",
-        ]
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && this.onCardClick(member)}
+        className={[styles.card, isRoot ? styles.cardLg : "", isSelected ? styles.cardSelected : ""]
           .filter(Boolean)
           .join(" ")}
       >
         <div className={styles.photoWrap}>
           {member.photoUrl ? (
-            <img
-              className={styles.photo}
-              src={member.photoUrl}
-              alt={member.name}
-            />
+            <img className={styles.photo} src={member.photoUrl} alt={member.name} />
           ) : (
             <div className={styles.photoFallback} aria-label="No image" />
           )}
         </div>
 
-        <div
-          className={`${styles.accent} ${
-            isRoot ? styles.accentCenter : ""
-          }`}
-          aria-hidden
-        />
+        <div className={`${styles.accent} ${isRoot ? styles.accentCenter : ""}`} aria-hidden />
         <div className={styles.name}>{member.name}</div>
         <div className={styles.role}>{member.role}</div>
       </div>
@@ -240,14 +216,7 @@ export default class TeamOrganisationStructure extends React.Component<
     const count = Math.max(departments.length, 1);
     const stubs = new Array(count).fill(0).map((_, i) => {
       const pct = (i + 0.5) * (100 / count);
-      return (
-        <span
-          key={i}
-          className={styles.stub}
-          style={{ left: `${pct}%` }}
-          aria-hidden
-        />
-      );
+      return <span key={i} className={styles.stub} style={{ left: `${pct}%` }} aria-hidden />;
     });
 
     return (
@@ -258,42 +227,51 @@ export default class TeamOrganisationStructure extends React.Component<
           {stubs}
         </div>
 
-        {loadingDepts && (
-          <div className={styles.state}>Loading departments…</div>
-        )}
+        {loadingDepts && <div className={styles.state}>Loading departments…</div>}
 
         {!loadingDepts && (
           <div className={styles.deptGrid}>
             {departments.length === 0 && (
-              <div className={styles.state}>
-                No departments mapped for this person.
-              </div>
+              <div className={styles.state}>No departments mapped for this person.</div>
             )}
 
             {departments.map((d, i) => {
-              const inner = (
-                <div
-                  className={styles.deptBox}
-                  role="group"
-                  aria-label={d.name}
-                >
+              const rawPointers =
+                (d.itemsText as string) ||
+                ((d as any).TIRDepartmentItems as string) ||
+                "";
+
+              const bullets = this.parseBullets(rawPointers);
+
+              const box = (
+                <div className={styles.deptBox} role="group" aria-label={d.name}>
                   {d.name}
                 </div>
               );
-              return d.url ? (
-                <a
-                  key={i}
-                  className={styles.deptLink}
-                  href={d.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={d.name}
-                >
-                  {inner}
-                </a>
-              ) : (
-                <div key={i} title={d.name}>
-                  {inner}
+
+              return (
+                <div key={i} className={styles.deptCol}>
+                  {d.url ? (
+                    <a
+                      className={styles.deptLink}
+                      href={d.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={d.name}
+                    >
+                      {box}
+                    </a>
+                  ) : (
+                    <div title={d.name}>{box}</div>
+                  )}
+
+                  {bullets.length > 0 && (
+                    <ul className={styles.deptList}>
+                      {bullets.map((b, bi) => (
+                        <li key={bi}>{b}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               );
             })}
