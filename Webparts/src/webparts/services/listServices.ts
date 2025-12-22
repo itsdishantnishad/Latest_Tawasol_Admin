@@ -1,3 +1,4 @@
+
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import { SPFI, spfi, SPFx } from "@pnp/sp";
 
@@ -63,7 +64,8 @@ export type OrgMember = {
   userEmail?: string;
 };
 
-export type OrgDepartment = { name: string; url?: string };
+// ✅ UPDATED (ONLY dept+pointers related change)
+export type OrgDepartment = { name: string; url?: string; itemsText?: string };
 
 export type DashboardCategory = {
   id: number;
@@ -205,10 +207,7 @@ export class listServices {
           cells["DepartmentOWSTEXT"] ||
           cells["Department"] ||
           "",
-        tag:
-          cells["TIRTagOWSTEXT"] ||
-          cells["ContentType"] ||
-          "",
+        tag: cells["TIRTagOWSTEXT"] || cells["ContentType"] || "",
       } as DocumentSummary;
     });
   }
@@ -315,7 +314,10 @@ export class listServices {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getNewsStorybyID(ID?: number, ctxArg?: WebPartContext): Promise<any[]> {
+  public async getNewsStorybyID(
+    ID?: number,
+    ctxArg?: WebPartContext
+  ): Promise<any[]> {
     let results;
 
     // Use the *page URL* instead of ListItemId so templates/provisioning are safe
@@ -390,12 +392,7 @@ export class listServices {
         Querytext: "*",
         RowLimit: 1,
         TrimDuplicates: false,
-        SelectProperties: [
-          "Title",
-          "TIREventEndDate",
-          "TIREventStartDate",
-          "TIRLocation",
-        ],
+        SelectProperties: ["Title", "TIREventEndDate", "TIREventStartDate", "TIRLocation"],
         QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
         HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
         EnableInterleaving: true,
@@ -440,7 +437,7 @@ export class listServices {
 
       return results.PrimarySearchResults.map((item: any) => {
         return {
-         ID: item.Id,
+          ID: item.Id,
           title: item.Title,
           eventEndDate: item.TIREventEndDate,
           eventStartDate: item.TIREventStartDate,
@@ -454,6 +451,7 @@ export class listServices {
       return Promise.reject(error);
     }
   }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getAllTraining(): Promise<any[]> {
     let results;
@@ -502,71 +500,71 @@ export class listServices {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getAllEvents(): Promise<any[]> {
-      let results;
-      const constraints = `AND ContentTypeId:(${ContentTypeId.EVENT}*)`;
+    let results;
+    const constraints = `AND ContentTypeId:(${ContentTypeId.EVENT}*)`;
 
-      try {
-        const searchOptions: ISearchQuery = {
-          Querytext: "*",
-          TrimDuplicates: false,
-          SelectProperties: [
-            "Id",
-            "Title",
-            "TIREventEndDate",
-            "TIREventStartDate",
-            "TIRLocation",
-            "TIREventCategory",
-            "URL",
-            "PictureThumbnailURL",
-            "BannerImageUrlOWSURLH",
-            "PublishingImage",
-            "Path"
-          ],
-          QueryTemplate: `{searchTerms}`,
-          HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
-          EnableInterleaving: true
-        };
+    try {
+      const searchOptions: ISearchQuery = {
+        Querytext: "*",
+        TrimDuplicates: false,
+        SelectProperties: [
+          "Id",
+          "Title",
+          "TIREventEndDate",
+          "TIREventStartDate",
+          "TIRLocation",
+          "TIREventCategory",
+          "URL",
+          "PictureThumbnailURL",
+          "BannerImageUrlOWSURLH",
+          "PublishingImage",
+          "Path",
+        ],
+        QueryTemplate: `{searchTerms}`,
+        HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
+        EnableInterleaving: true,
+      };
 
-        searchOptions.RowLimit = 500;
-        results = await this.sp.search(searchOptions);
+      searchOptions.RowLimit = 500;
+      results = await this.sp.search(searchOptions);
 
-        return results.PrimarySearchResults.map((item: any) => {
-          let img: string = "";
+      return results.PrimarySearchResults.map((item: any) => {
+        let img: string = "";
 
-          if (item.PictureThumbnailURL) {
-            img = item.PictureThumbnailURL;
+        if (item.PictureThumbnailURL) {
+          img = item.PictureThumbnailURL;
+        }
+        if (!img && item.BannerImageUrlOWSURLH) {
+          const raw = String(item.BannerImageUrlOWSURLH);
+          img = raw.split(",")[0].trim();
+        }
+
+        if (!img && item.PublishingImage) {
+          const match = String(item.PublishingImage).match(/src="([^"]+)"/i);
+          if (match && match[1]) {
+            img = match[1];
           }
-          if (!img && item.BannerImageUrlOWSURLH) {
-            const raw = String(item.BannerImageUrlOWSURLH);
-            img = raw.split(",")[0].trim();
-          }
+        }
+        if (!img && item.URL) {
+          img = listServices.getImageUrlFromPage(item.URL, 200);
+        }
 
-          if (!img && item.PublishingImage) {
-            const match = String(item.PublishingImage).match(/src="([^"]+)"/i);
-            if (match && match[1]) {
-              img = match[1];
-            }
-          }
-          if (!img && item.URL) {
-            img = listServices.getImageUrlFromPage(item.URL, 200);
-          }
-
-          return {
-            ID: item.Id,
-            title: item.Title,
-            eventEndDate: item.TIREventEndDate,
-            eventStartDate: item.TIREventStartDate,
-            location: item.TIRLocation,
-            newsImage: img,                      
-            category: item.TIREventCategory,
-            pageUrl: item.URL,                    
-            path: item.Path
-          } as any;
-        });
-      } catch (error) {
-        return Promise.reject(error);
-      }
+        return {
+          ID: item.Id,
+          title: item.Title,
+          eventEndDate: item.TIREventEndDate,
+          eventStartDate: item.TIREventStartDate,
+          location: item.TIRLocation,
+          newsImage: img,
+          category: item.TIREventCategory,
+          pageUrl: item.URL,
+          path: item.Path,
+        } as any;
+      });
+    } catch (error) {
+      return Promise.reject(error);
     }
+  }
 
   /** ===== Simple list-based loaders (Apps, Joiners, Portfolio, Values) ===== */
 
@@ -576,7 +574,7 @@ export class listServices {
     try {
       results = await this.sp.web.lists
         .getByTitle(listName)
-        .items.select("Title", "TIRSortOrder", "TIRIconURL", "URL","TIRAppType")
+        .items.select("Title", "TIRSortOrder", "TIRIconURL", "URL", "TIRAppType")
         .orderBy("TIRSortOrder", true)();
 
       return results.map((item: any) => {
@@ -592,10 +590,13 @@ export class listServices {
       return Promise.reject(error);
     }
   }
-  
+
   // get custom app links
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getCustomAppLinks(listName: string, userEmail: string): Promise<any[]> {
+  public async getCustomAppLinks(
+    listName: string,
+    userEmail: string
+  ): Promise<any[]> {
     let results: any[] = [];
     try {
       results = await this.sp.web.lists
@@ -607,12 +608,18 @@ export class listServices {
       return Promise.reject(error);
     }
   }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getNewJoiners(listName: string): Promise<any[]> {
     const results = await this.sp.web.lists
       .getByTitle(listName)
-      .items
-      .select("Title", "TIRSortOrder", "TIRDesignation", "TIRUserPicture", "TIRDescription")
+      .items.select(
+        "Title",
+        "TIRSortOrder",
+        "TIRDesignation",
+        "TIRUserPicture",
+        "TIRDescription"
+      )
       .orderBy("TIRSortOrder", false)(); // false = descending
 
     return results.map((item: any) => ({
@@ -620,7 +627,7 @@ export class listServices {
       SortOrder: Number(item.TIRSortOrder),
       Designation: item.TIRDesignation,
       UserPicture: item.TIRUserPicture ? item.TIRUserPicture.Url : "#",
-      Description: item.TIRDescription
+      Description: item.TIRDescription,
     }));
   }
 
@@ -678,9 +685,7 @@ export class listServices {
 
   /** ===== Org Structure / Departments ===== */
 
-  public async getOrganisationMembers(
-    listTitle: string
-  ): Promise<OrgMember[]> {
+  public async getOrganisationMembers(listTitle: string): Promise<OrgMember[]> {
     const rows = await this.sp.web.lists
       .getByTitle(listTitle)
       .items.select(
@@ -710,7 +715,7 @@ export class listServices {
         level: Number(it?.TIRLevel ?? 99),
         sort: Number(it?.TIRSortOrder ?? 9999),
         photoUrl,
-        user: userTitle
+        user: userTitle,
       };
     });
 
@@ -725,20 +730,22 @@ export class listServices {
     return mapped;
   }
 
+  // ✅ UPDATED (ONLY dept+pointers related change)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getDepartmentsByMember(
     listTitle: string,
     memberDisplayName: string
   ): Promise<OrgDepartment[]> {
-
     const targetName = memberDisplayName.trim().toLowerCase();
 
     const deptRows: any[] = await this.sp.web.lists
       .getByTitle(listTitle)
       .items.select(
         "Id",
+        "Title", // ✅ added (fallback dept name)
         "URL",
         "TIRDepartment",
+        "TIRDepartmentItems", // ✅ added (Field internal name)
         "TIRDepartmentMember/Title"
       )
       .expand("TIRDepartmentMember")();
@@ -771,21 +778,21 @@ export class listServices {
       });
     });
 
-    if (!wssIds.length) {
-      return [];
-    }
-
-    const filter = wssIds.map((id) => `Id eq ${id}`).join(" or ");
-
-    const termRows: any[] = await this.sp.web.lists
-      .getByTitle("TaxonomyHiddenList")
-      .items.select("Id", "Title")
-      .filter(filter)();
-
+    // ✅ taxonomy map (keep your old logic, just safer)
     const labelById = new Map<number, string>();
-    termRows.forEach((row) => {
-      labelById.set(Number(row.Id), row.Title as string);
-    });
+
+    if (wssIds.length) {
+      const filter = wssIds.map((id) => `Id eq ${id}`).join(" or ");
+
+      const termRows: any[] = await this.sp.web.lists
+        .getByTitle("TaxonomyHiddenList")
+        .items.select("Id", "Title")
+        .filter(filter)();
+
+      termRows.forEach((row) => {
+        labelById.set(Number(row.Id), row.Title as string);
+      });
+    }
 
     const result: OrgDepartment[] = memberRows.map((item) => {
       const raw = item.TIRDepartment;
@@ -800,20 +807,30 @@ export class listServices {
         deptName = label || "";
       }
 
+      // ✅ fallback to Title if taxonomy not filled
+      if (!deptName) {
+        deptName = item?.Title || "";
+      }
+
       const urlField = item.URL;
       const url =
         urlField && typeof urlField === "object"
           ? urlField.Url
           : urlField || undefined;
 
+      // ✅ pointers data (multiline)
+      const pointersRaw: string = item?.TIRDepartmentItems || "";
+
       return {
         name: deptName,
         url,
+        itemsText: pointersRaw, // ✅ TSX will render bullets from this
       };
     });
 
     return result;
   }
+
   /** ===== Policies & Procedures: Document Functions ===== */
 
   public async getDocumentFunctions(
@@ -916,13 +933,12 @@ export class listServices {
 
       return rows.map((row: any) => {
         const icon = row?.TIRIconURL;
-        const thumbUrl = typeof icon === "string" ? icon : icon?.Url || undefined;
+        const thumbUrl =
+          typeof icon === "string" ? icon : icon?.Url || undefined;
 
         const cat = row?.TIRCategoryID || {};
         const categoryName = cat?.Title || "";
-        const categoryIdValue = Number(
-          row?.TIRCategoryIDId || cat?.Id || 0
-        );
+        const categoryIdValue = Number(row?.TIRCategoryIDId || cat?.Id || 0);
 
         const embedField = row?.URL;
         const embedUrl =
@@ -993,8 +1009,7 @@ export class listServices {
 
     const res: any = await this.sp.search(query);
     const rows =
-      res?.RawSearchResults?.PrimaryQueryResult?.RelevantResults?.Table
-        ?.Rows ||
+      res?.RawSearchResults?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
       res?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
       res?.PrimarySearchResultsTable?.Rows ||
       [];
@@ -1029,8 +1044,7 @@ export class listServices {
 
     const res: any = await this.sp.search(query);
     const rows =
-      res?.RawSearchResults?.PrimaryQueryResult?.RelevantResults?.Table
-        ?.Rows ||
+      res?.RawSearchResults?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
       res?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
       res?.PrimarySearchResultsTable?.Rows ||
       [];
@@ -1109,9 +1123,7 @@ export class listServices {
 
         if (leftEndMs !== rightEndMs) return leftEndMs - rightEndMs;
 
-        const leftStartMs = left.startIso
-          ? new Date(left.startIso).getTime()
-          : 0;
+        const leftStartMs = left.startIso ? new Date(left.startIso).getTime() : 0;
         const rightStartMs = right.startIso
           ? new Date(right.startIso).getTime()
           : 0;

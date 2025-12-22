@@ -1,0 +1,80 @@
+.segmentWrap {
+  top: 414px;   
+  width: auto;
+  min-width: 440px;
+  height: 56px;
+  padding: 8px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  border-radius: 360px;
+  border: 1px solid #FBBF7F;
+
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.82) 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(251, 191, 127, 0.25);
+
+  background-clip: padding-box;
+  opacity: 1;
+}
+
+.segmentWrapAbsolute {
+  position: absolute;
+  top: 184px;
+  left: 584px;
+}
+
+.segmentBtn {
+  flex: 1;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 360px;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  background: transparent;
+  outline: none;
+  appearance: none;
+}
+
+.segmentBtnActive {
+  background: radial-gradient(120% 120% at 0% 0%, #DDA160 0%, #FFDBB4 100%);
+  border: 1px solid #F0BB82;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+}
+
+.segmentBtnIdle {
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.segmentText {
+  height: 20px;
+  line-height: 20px;
+  white-space: nowrap;
+  text-align: center;
+
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  font-weight: 600;
+  font-size: 16px;
+  color: #3A3A3A;
+}
+
+.segmentBtnIdle:hover,
+.segmentBtnIdle:focus-visible {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.segmentBtnActive:focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0.14);
+  outline-offset: 2px;
+}

@@ -596,3 +596,36 @@ $muted: #6C6C6C;
   background-color: #E8E8E8;
   margin: 24px 0;
 }
+
+
+
+
+
+.monthResults {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.monthSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.monthHeading {
+  width: 95px;
+  height: 28px;
+  opacity: 1;
+  margin: 0;
+
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: 0px;
+  color: #000000;
+
+  white-space: nowrap;   
+  display: inline-block;
+}

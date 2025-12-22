@@ -152,7 +152,7 @@
 
 .identityCard {
   width: 100%;
-  max-width: 491px;
+  max-width: 522px;
   min-height: 132px;
   display: flex;
   gap: 20px;
@@ -172,6 +172,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  width: 100%;
 }
 
 .firstName,
@@ -431,7 +432,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 49px;
   color: #da291c;
 }
 

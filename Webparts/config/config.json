@@ -146,14 +146,6 @@
         }
       ]
     },
-    "policies-and-procedures-views-web-part": {
-      "components": [
-        {
-          "entrypoint": "./lib/webparts/policiesAndProceduresViews/PoliciesAndProceduresViewsWebPart.js",
-          "manifest": "./src/webparts/policiesAndProceduresViews/PoliciesAndProceduresViewsWebPart.manifest.json"
-        }
-      ]
-    },
     "event-gallery-web-part": {
       "components": [
         {
@@ -279,7 +271,6 @@
     "DashboardsWebPartStrings": "lib/webparts/dashboards/loc/{locale}.js",
     "VivaEngageHeaderWebPartStrings": "lib/webparts/vivaEngageHeader/loc/{locale}.js",
     "PoliciesAndProceduresWebPartStrings": "lib/webparts/policiesAndProcedures/loc/{locale}.js",
-    "PoliciesAndProceduresViewsWebPartStrings": "lib/webparts/policiesAndProceduresViews/loc/{locale}.js",
     "EventGalleryWebPartStrings": "lib/webparts/eventGallery/loc/{locale}.js",
     "GlobalBannerWebPartStrings": "lib/webparts/globalBanner/loc/{locale}.js",
     "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js",
