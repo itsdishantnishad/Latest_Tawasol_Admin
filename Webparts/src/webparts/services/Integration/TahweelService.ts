@@ -37,7 +37,7 @@ const TAHWEEL_TASKS_API_CONFIG = {
   taskListEndpoint: "/api/Tahweel/GetTahweelApprovalList",
   taskApprovalUrlEndpoint: "/api/Tahweel/GetTahweelTaskApprovalUrl",
 
-  // ✅ NEW
+  // NEW
   activeEmployeesEndpoint: "/api/Tahweel/GetActiveEmployees",
 
   apiKeyHeaderName: "x-api-key",
@@ -557,10 +557,10 @@ export class TahweelService {
   }
 
   // ---------------------------
-  // ✅ GetActiveEmployees (Birthdays / Anniversaries)
+  // GetActiveEmployees (Birthdays / Anniversaries)
   // ---------------------------
 
-  // ✅ FIXED: GET cannot have body -> send DOB/DOJ in query string
+  // FIXED: GET cannot have body -> send DOB/DOJ in query string
   public async fetchActiveEmployees(flags: { DOB: "0" | "1"; DOJ: "0" | "1" }): Promise<TahweelActiveEmployee[]> {
     const baseUrl =
       `${TAHWEEL_TASKS_API_CONFIG.apiBaseUrl.replace(/\/$/, "")}${TAHWEEL_TASKS_API_CONFIG.activeEmployeesEndpoint}`;
