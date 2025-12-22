@@ -10,8 +10,8 @@
   height: 470px;
   // overflow: hidden;
 
-  @media (max-width: 580px){
-    height: 400px;
+  @media (max-width: 580px) {
+    height: 350px;
     padding: 0;
     overflow: unset;
   }
@@ -80,146 +80,137 @@
   -webkit-tap-highlight-color: transparent;
   outline: none;
   /* Use CSS variables coming from TSX */
-  transform: translate(
-      calc(-50% + var(--x, 0px)),
-      var(--y, 0px)
-    )
-  rotate(var(--rotation, 0deg))
-  scale(var(--scale, 1));
-  @media (max-width: 580px){
+  transform: translate(calc(-50% + var(--x, 0px)), var(--y, 0px))
+    rotate(var(--rotation, 0deg)) scale(var(--scale, 1));
+  @media (max-width: 580px) {
     padding: 0;
-    transform: translate(
-      calc(-50% + var(--x, 0px)),
-      var(--y, 0px)
-    )
-    rotate(var(--rotation, 0deg)) 
-    scale(calc(var(--scale, 1) * 1.2));
+    transform: translate(calc(-50% + var(--x, 0px)), var(--y, 0px))
+      rotate(var(--rotation, 0deg)) scale(calc(var(--scale, 1) * 1.2));
   }
 
-/* Clickable / disabled states mapped from TSX className */
-.cardClickable {
-  pointer-events: auto;
-  cursor: pointer;
-}
+  /* Clickable / disabled states mapped from TSX className */
+  .cardClickable {
+    pointer-events: auto;
+    cursor: pointer;
+  }
 
-.cardDisabled {
-  pointer-events: none;
-  cursor: default;
-}
+  .cardDisabled {
+    pointer-events: none;
+    cursor: default;
+  }
 
-.cardInner {
-  position: relative;
-  width: 180px;
-  height: 220px;
-  border-radius: 15px;
-  display: flex;
-  justify-content: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  @media (max-width: 767px){
-    height: 220px;
+  .cardInner {
+    position: relative;
     width: 180px;
-    padding: 16px;
+    height: 220px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    @media (max-width: 767px) {
+      height: 220px;
+      width: 180px;
+      padding: 16px;
+    }
+    @media (max-width: 580px) {
+      padding: 0;
+      height: 180px;
+      width: 140px;
+    }
   }
-  @media (max-width: 580px){
-    padding: 0;
-    height: 180px;
-    width: 140px;
+
+  .cardSelected {
+    border: 6px solid #e38e32;
+    box-shadow: 0px 16px 32px 0px #fbd290;
   }
-}
 
-.cardSelected {
-  border: 6px solid #E38E32;
-  box-shadow: 0px 16px 32px 0px #FBD290;
-}
-
-.cardTextContainer {
-  bottom: 0;
-  color: #fff;
-  padding: 15px;
-  position: absolute;
-  text-align: center;
-  @media (max-width: 580px){
-    padding: 5px;
+  .cardTextContainer {
+    bottom: 0;
+    color: #fff;
+    padding: 15px;
+    position: absolute;
+    text-align: center;
+    @media (max-width: 580px) {
+      padding: 5px;
+    }
   }
-}
 
-.cardTitle {
-  font-size: 18px;
-  line-height: 24px;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  @media (max-width: 580px){
+  .cardTitle {
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 600;
+    font-family: "Inter", sans-serif;
+    @media (max-width: 580px) {
+      font-size: 14px;
+      line-height: 22px;
+    }
+  }
+
+  .cardSubtitle {
     font-size: 14px;
     line-height: 22px;
+    margin-top: 0;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    @media (max-width: 580px) {
+      font-size: 12px;
+      line-height: 18px;
+    }
   }
-}
 
-.cardSubtitle {
-  font-size: 14px;
-  line-height: 22px;
-  margin-top: 0;
-  font-weight: 400;
-  letter-spacing: -0.5px;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  @media (max-width: 580px){
-    font-size: 12px;
-    line-height: 18px;
+  /* Background variants */
+  .dashboardCard {
+    background-image: url("../FeatureContent/assets/Dashboard.svg");
   }
-}
 
-/* Background variants */
-.dashboardCard {
-  background-image: url("../FeatureContent/assets/Dashboard.svg");
-}
+  .galleryCard {
+    background-image: url("../FeatureContent/assets/ImageGallery.svg");
+  }
 
-.galleryCard {
-  background-image: url("../FeatureContent/assets/ImageGallery.svg");
-}
+  .documentsCard {
+    background-image: url("../FeatureContent/assets/Documents.svg");
+  }
 
-.documentsCard {
-  background-image: url("../FeatureContent/assets/Documents.svg");
-}
+  .eventsCard {
+    background-image: url("../FeatureContent/assets/Events.svg");
+  }
 
-.eventsCard {
-  background-image: url("../FeatureContent/assets/Events.svg");
-}
+  .celebrateCard {
+    background-image: url("../FeatureContent/assets/LetsCelebrate.svg");
+  }
 
-.celebrateCard {
-  background-image: url("../FeatureContent/assets/LetsCelebrate.svg");
-}
+  .meetingCard {
+    background-image: url("../FeatureContent/assets/Meeting.svg");
+  }
 
-.meetingCard {
-  background-image: url("../FeatureContent/assets/Meeting.svg");
-}
+  .serviceLinksCard {
+    background-image: url("../FeatureContent/assets/Service-Links.svg");
+  }
 
-.serviceLinksCard {
-  background-image: url("../FeatureContent/assets/Service-Links.svg");
-}
+  .interactiveFormsCard {
+    background-image: url("../FeatureContent/assets/InteractiveForms.svg");
+  }
 
-.interactiveFormsCard {
-  background-image: url("../FeatureContent/assets/InteractiveForms.svg");
-}
+  .offersCard {
+    background-image: url("../FeatureContent/assets/Offers.svg");
+  }
 
-.offersCard {
-  background-image: url("../FeatureContent/assets/Offers.svg");
-}
+  .trainingCard {
+    background-image: url("../FeatureContent/assets/Training.svg");
+  }
 
-.trainingCard {
-  background-image: url("../FeatureContent/assets/Training.svg");
-}
+  .aboutDhreCard {
+    background-image: url("../FeatureContent/assets/AboutDHRE.svg");
+  }
 
-.aboutDhreCard {
-  background-image: url("../FeatureContent/assets/AboutDHRE.svg");
-}
+  .tasksCard {
+    background-image: url("../FeatureContent/assets/Tasks.svg");
+  }
 
-.tasksCard {
-  background-image: url("../FeatureContent/assets/Tasks.svg");
-}
-
-.beverageCard {
-  background-image: url("../FeatureContent/assets/Services.svg");
-}
-
+  .beverageCard {
+    background-image: url("../FeatureContent/assets/Services.svg");
+  }
 }

@@ -1,55 +1,56 @@
 @import "~@fluentui/react/dist/sass/References.scss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
 @font-face {
-  font-family: 'Instrument Serif Regular';
-  src: local('Instrument Serif Regular'), url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+  font-family: "Instrument Serif Regular";
+  src: local("Instrument Serif Regular"),
+    url("../../assets/fonts/instrumentserif-regular.woff") format("woff");
 }
 
-
 @font-face {
-  font-family: 'Instrument Serif Italic';
-  src: local('Instrument Serif Italic'), url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+  font-family: "Instrument Serif Italic";
+  src: local("Instrument Serif Italic"),
+    url("../../assets/fonts/instrumentserif-italic.woff") format("woff");
 }
 
 .featureWheelContainer {
   background-color: transparent;
 }
 
-.headingSection{
+.headingSection {
   margin-top: 50px;
   text-align: center;
   margin-bottom: 50px;
-  h1{
-    font-family: 'Instrument Serif Regular';
+  h1 {
+    font-family: "Instrument Serif Regular";
     font-size: 42px;
     line-height: 100%;
     letter-spacing: 1px;
     color: #000000;
     margin: 0;
     margin-bottom: 12px;
-    @media (max-width: 580px){
+    @media (max-width: 580px) {
       font-size: 32px;
       color: #101820;
     }
     font-weight: 400;
-    span{
-      color: #DA291C;
-      font-family: 'Instrument Serif Italic';
+    span {
+      color: #da291c;
+      font-family: "Instrument Serif Italic";
     }
   }
-  h6{
+  h6 {
     font-family: "Inter", sans-serif;
     font-size: 16px;
     line-height: 24px;
     letter-spacing: 1px;
-    color: #5B6770;
+    color: #5b6770;
     margin: 0;
     font-weight: 400;
-    @media (max-width: 580px){
+    @media (max-width: 580px) {
       font-size: 14px;
       line-height: 22px;
-      color: #6C6C6C;
+      color: #6c6c6c;
       letter-spacing: -0.5px;
     }
   }
@@ -70,13 +71,16 @@
 @media (max-width: 768px) {
   .wheelSection {
     padding: 0;
+    padding-top: 30px;
   }
 }
 
 .titleContainer {
   text-align: center;
   margin-top: 40px;
-  @media (max-width: 767px){
+  padding: 16px;
+
+  @media (max-width: 767px) {
     margin-top: 0;
   }
 }
@@ -86,45 +90,45 @@
   align-items: center;
   justify-content: center;
   gap: 40px;
-  .desktopImage{
+  .desktopImage {
     display: block;
-    @media (max-width: 767px){
+    @media (max-width: 767px) {
       display: none;
     }
   }
-  .mobImage{
+  .mobImage {
     display: none;
-    @media (max-width: 767px){
+    @media (max-width: 767px) {
       display: block;
     }
-    @media (max-width: 580px){
+    @media (max-width: 580px) {
       gap: 5px;
     }
-    @media (max-width: 380px){
+    @media (max-width: 380px) {
       width: 45px;
     }
   }
-  @media (max-width: 767px){
+  @media (max-width: 767px) {
     gap: 10px;
   }
-  @media (max-width: 580px){
+  @media (max-width: 580px) {
     gap: 5px;
   }
 }
 
 .title {
-  font-family: 'Instrument Serif Italic';
+  font-family: "Instrument Serif Italic";
   font-style: italic;
   font-weight: 400;
   font-size: 42px;
   line-height: normal;
   color: #000000;
   margin: 0;
-  white-space: nowrap;
-  @media (max-width: 580px){
+
+  @media (max-width: 580px) {
     font-size: 28px;
   }
-  @media (max-width: 380px){
+  @media (max-width: 380px) {
     font-size: 20px;
   }
 }
@@ -136,13 +140,13 @@
   line-height: 24px;
   color: #5b6770;
   margin-top: 12px;
-  @media (max-width: 580px){
+  @media (max-width: 580px) {
     font-size: 14px;
     line-height: 22px;
     letter-spacing: -0.5px;
-    color: #6C6C6C;
+    color: #6c6c6c;
   }
-  @media (max-width: 380px){
+  @media (max-width: 380px) {
     font-size: 12px;
   }
 }

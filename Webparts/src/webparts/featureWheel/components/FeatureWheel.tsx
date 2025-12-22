@@ -42,7 +42,7 @@ const FeatureTitle: React.FC<FeatureTitleProps> = ({ header, subHeader }) => {
         <img src={leftHeadingLine} alt="" className={styles.desktopImage} />
         <img src={leftHeadingLineMobile} alt="" className={styles.mobImage} />
       </div>
-      <p className={styles.subtitle}>{subHeader}</p>
+      <div className={styles.subtitle}>{subHeader}</div>
     </div>
   );
 };
@@ -80,18 +80,6 @@ const featureTitleContent: Record<
     subHeader:
       "All your essential forms – legacy, claims, business excellence, and more",
   },
-  dashboard: {
-    header: "Dashboard",
-    subHeader: "Track everything at a glance – insights made simple!",
-  },
-  offers: {
-    header: "Get Offers & Discounts",
-    subHeader: "Save more with benefits designed for you",
-  },
-  training: {
-    header: "Enroll Yourself in Upcoming Trainings",
-    subHeader: "Grow your skills with tailored learning sessions",
-  },
   about_dhre: {
     header: "About DHRE",
     subHeader:
@@ -105,14 +93,24 @@ const featureTitleContent: Record<
     header: "Beverage Menu",
     subHeader: "Find your favourite drink to fuel your day",
   },
+  dashboard: {
+    header: "Dashboard",
+    subHeader: "Track everything at a glance – insights made simple!",
+  },
+  offers: {
+    header: "Get Offers & Discounts",
+    subHeader: "Save more with benefits designed for you",
+  },
+  training: {
+    header: "Enroll Yourself in Upcoming Trainings",
+    subHeader: "Grow your skills with tailored learning sessions",
+  },
 };
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
   const [selectedFeature, setSelectedFeature] = useState<string>("gallery");
 
   const handleViewAll = () => {
-    // Placeholder – you can add navigation logic here if you want
-    // to handle View All with a callback instead of anchor links.
     console.log("View all clicked for:", selectedFeature);
   };
 

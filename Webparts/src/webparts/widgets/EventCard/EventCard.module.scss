@@ -1,0 +1,157 @@
+/* instructor row */
+.instructorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.instructorAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: #111827;
+}
+
+.instructorInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.instructorName {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 18px;
+  color: #3a3b43;
+}
+
+.instructorTitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  color: #6c6c6c;
+  margin-top: 2px;
+}
+
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #ffffff;
+  border: 1px solid #f0edeb;
+}
+
+.imageContainer {
+  position: relative;
+
+  .image {
+    width: 100%;
+    object-fit: cover;
+  }
+}
+
+.squareBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: #ffffff;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  color: #3a3b43;
+}
+
+.circleBadge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  border: 0.5px solid;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.dateBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #ffffff;
+  border-radius: 4px;
+  padding: 1px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.day {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #000000;
+  border-radius: 4px 4px 0 0;
+  min-width: 37px;
+  padding: 4px;
+}
+
+.month {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #101820;
+}
+
+.body {
+  padding: 16px;
+
+  .header {
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    color: #101820;
+  }
+
+  .metaRow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metaText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #3a3b43;
+  font-family: Inter;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.mTop16 {
+  margin-top: 16px;
+}

@@ -15,10 +15,9 @@
   display: flex;
   justify-content: center;
   gap: 0;
-  // margin-bottom: 50px;
   background: #fff;
-  border: 1px solid #FBBF7F;
-  border-radius: 50px;
+  border: 1px solid #fbbf7f;
+  border-radius: 999px;
   padding: 4px;
   width: fit-content;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -33,7 +32,7 @@
   font-size: 16px;
   line-height: 20px;
   font-weight: 600;
-  color: #3A3B43;
+  color: #3a3b43;
   transition: all 0.3s ease;
   white-space: nowrap;
   display: flex;
@@ -41,18 +40,23 @@
   gap: 8px;
 
   &:hover {
-    color: #3A3B43;
+    color: #3a3b43;
   }
 }
 
 .activeTab {
-  background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #DDA160 0%, #FFDBB4 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
-  color: #3A3B43;
+  background: radial-gradient(
+      245.31% 848.44% at 112.5% -164.06%,
+      #dda160 0%,
+      #ffdbb4 100%
+    )
+    /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
+  color: #3a3b43;
   font-weight: 600;
 }
 
 .count {
-  color: #DA291C;
+  color: #da291c;
   font-size: 16px;
   line-height: 20px;
   font-weight: 600;
@@ -128,10 +132,10 @@
   /* Soft halo behind the border */
   background: radial-gradient(
     circle,
-    rgba(224, 152, 144, 0.12) 20%,   /* subtle tint near center */
-    rgba(224, 152, 144, 0.06) 55%,   /* fading */
-    rgba(224, 152, 144, 0.03) 75%,   /* almost gone */
-    transparent 100%                /* clean edge */
+    rgba(224, 152, 144, 0.12) 20%,
+    /* subtle tint near center */ rgba(224, 152, 144, 0.06) 55%,
+    /* fading */ rgba(224, 152, 144, 0.03) 75%,
+    /* almost gone */ transparent 100% /* clean edge */
   );
 }
 
@@ -148,7 +152,6 @@
   background: transparent;
 }
 
-
 // Profile Card
 .profileCard {
   display: flex;
@@ -157,12 +160,12 @@
   justify-content: center;
   position: absolute;
   /* This matches the Figma 'gap: 10px' -> space between image and name */
-  gap: 10px; 
+  gap: 10px;
 }
 
 .profileImageWrapper {
   background-color: #fff;
-  border: 2px solid #DA291C;
+  border: 2px solid #da291c;
   border-radius: 50%;
   box-sizing: border-box;
   height: 64px;
@@ -184,7 +187,7 @@
 }
 
 .profileName {
-  color: #3A3B43;
+  color: #3a3b43;
   font-family: Segoe UI, sans-serif;
   font-size: 14px;
   font-weight: 500;
@@ -215,7 +218,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -229,7 +233,7 @@
   align-items: center;
   justify-content: center;
   min-height: 300px;
-  
+
   p {
     font-size: 16px;
     color: #666;
@@ -287,7 +291,8 @@
   background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
   border: none;
   border-radius: 167px;
-  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
+  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, 0.51),
+    inset 0 4px 4px 0 #768b9e;
   color: #fff;
   cursor: pointer;
   font-family: Inter, sans-serif;
@@ -299,7 +304,7 @@
   padding: 0;
   text-align: center;
   text-decoration: none;
-  transition: all .3s ease;
+  transition: all 0.3s ease;
   place-content: center;
 }
 
@@ -338,14 +343,22 @@
   }
 
   .tabs {
-    flex-wrap: wrap;
+    width: 100%;
+    border: none;
+    background: transparent;
+    box-shadow: unset;
+    border-radius: 0;
+    gap: 8px;
     padding: 3px;
     margin-bottom: 30px;
+    justify-content: flex-start;
+    overflow-x: auto;
   }
 
   .tab {
+    border: 1px solid #fbbf7f;
     padding: 10px 20px;
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .count {
@@ -394,6 +407,7 @@
 
   .bottomSection {
     margin-top: 30px;
+    position: static;
   }
 }
 
@@ -406,11 +420,11 @@
 
   .navButton {
     transform: rotate(90deg);
-    
+
     &:first-child {
       order: -1;
     }
-    
+
     &:last-child {
       order: 1;
     }
