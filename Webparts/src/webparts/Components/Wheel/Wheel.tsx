@@ -30,71 +30,71 @@ interface Feature {
 }
 
 const features: Feature[] = [
-    {
-        id: "gallery",
-        title: "Image Gallery",
-        subtitle: "Past events images and memories"
-    },
-    {
-        id: "documents",
-        title: "Policies & Procedures",
-        subtitle: "All files in one place"
-    },
-    {
-        id: "events",
-        title: "Events",
-        subtitle: "Discover whats happening next"
-    },
-    {
-        id: "employee_events",
-        title: "Let’s Celebrate",
-        subtitle: "Birthday, anniversary & new joiners"
-    },
-    {
-        id: "meetings",
-        title: "Meeting",
-        subtitle: "Connect, discuss, move forward"
-    },
-    {
-        id: "service_links",
-        title: "Service Links",
-        subtitle: "Quick access, zero hassle"
-    },
-    {
-        id: "forms",
-        title: "Interactive Forms",
-        subtitle: "All interactive forms In one place"
-    },
-    {
-        id: "dashboard",
-        title: "Dashboard",
-        subtitle: "Track, analyze, optimize"
-    },
-    {
-        id: "offers",
-        title: "Offers",
-        subtitle: "Exclusive deals just for you"
-    },
-    {
-        id: "training",
-        title: "Training",
-        subtitle: "Grow skills, unlock new doors"
-    },
-    {
-        id: "about_dhre",
-        title: "About DHRE",
-        subtitle: "Journey through DHRE"
-    },
-    {
-        id: "tasks",
-        title: "Task",
-        subtitle: "Get things done with clarity"
-    },
-    {
-        id: "beverage_menu",
-        title: "Services",
-        subtitle: "Simplify your journey ahead"
-    },
+  {
+    id: "gallery",
+    title: "Image Gallery",
+    subtitle: "Past events images and memories"
+  },
+  {
+    id: "documents",
+    title: "Policies & Procedures",
+    subtitle: "All files in one place"
+  },
+  {
+    id: "events",
+    title: "Events",
+    subtitle: "Discover whats happening next"
+  },
+  {
+    id: "employee_events",
+    title: "Let’s Celebrate",
+    subtitle: "Birthday, anniversary & new joiners"
+  },
+  {
+    id: "meetings",
+    title: "Meeting",
+    subtitle: "Connect, discuss, move forward"
+  },
+  {
+    id: "service_links",
+    title: "Service Links",
+    subtitle: "Quick access, zero hassle"
+  },
+  {
+    id: "forms",
+    title: "Interactive Forms",
+    subtitle: "All interactive forms In one place"
+  },
+  {
+    id: "dashboard",
+    title: "Dashboard",
+    subtitle: "Track, analyze, optimize"
+  },
+  {
+    id: "offers",
+    title: "Offers",
+    subtitle: "Exclusive deals just for you"
+  },
+  {
+    id: "training",
+    title: "Training",
+    subtitle: "Grow skills, unlock new doors"
+  },
+  {
+    id: "about_dhre",
+    title: "About DHRE",
+    subtitle: "Journey through DHRE"
+  },
+  {
+    id: "tasks",
+    title: "Task",
+    subtitle: "Get things done with clarity"
+  },
+  {
+    id: "beverage_menu",
+    title: "Services",
+    subtitle: "Simplify your journey ahead"
+  },
 ];
 
 interface FeatureWheelProps {
@@ -193,9 +193,8 @@ const Wheel: React.FC<FeatureWheelProps> = ({
               style={getCardStyle(x, y, cardRotation, scale)}
             >
               <div
-                className={`${styles.cardInner} ${
-                  bgClassById[card.id] || ""
-                } ${isSelected ? styles.cardSelected : ""}`}
+                className={`${styles.cardInner} ${bgClassById[card.id] || ""
+                  } ${isSelected ? styles.cardSelected : ""}`}
               >
                 <div className={styles.cardTextContainer}>
                   <div className={styles.cardTitle}>{card.title}</div>

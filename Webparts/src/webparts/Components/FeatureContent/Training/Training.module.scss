@@ -1,8 +1,3 @@
-
-
-
-@import "~@fluentui/react/dist/sass/References.scss";
-
 .trainingContainer {
   padding: 50px 0;
 }
@@ -37,7 +32,6 @@
   line-height: normal;
   color: #000000;
   margin: 0;
-  white-space: nowrap;
 }
 
 .subtitle {
@@ -51,10 +45,10 @@
 
 .trainingGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, minmax(300px, 1fr));
   gap: 24px;
   max-width: 1280px;
-  margin: 0 auto 40px;
+  margin: 0 auto;
 }
 
 .trainingCard {
@@ -120,7 +114,6 @@
   line-height: 16px;
   color: #111827;
 }
-
 
 /* top-right date card: 6-7 / OCT */
 .dateBadge {
@@ -275,6 +268,7 @@
 }
 
 .buttonContainer {
+  margin-top: 40px;
   text-align: center;
 
   a {
@@ -349,6 +343,11 @@
   }
 
   .trainingGrid {
-    grid-template-columns: 1fr;
+    gap: 16px;
+    overflow-x: auto;
+  }
+
+  .buttonContainer {
+    margin-top: 24px;
   }
 }

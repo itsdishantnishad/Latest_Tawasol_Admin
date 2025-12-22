@@ -452,3 +452,74 @@
     transition: transform 0.2s ease;
   }
 }
+// Add these to your Training.module.scss
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  width: 100%;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.requestButton {
+  background-color: #0078d4;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: #005a9e;
+  }
+}
+
+.pendingButton {
+  background-color: #ffb900;
+  color: #000;
+}
+
+.joinButton {
+  // Keep your existing join button styles
+}
+
+.feedbackButton {
+  background-color: #8764b8;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: #6b4c94;
+  }
+}
+
+.rejectedButton {
+  background-color: #d13438;
+  color: white;
+}
+
+.pastTrainingButton {
+  background-color: #8a8886;
+  color: white;
+}
+
+.loadingButton {
+  background-color: #e1dfdd;
+  color: #605e5c;
+}
+
+.errorMessage {
+  color: #d13438;
+  font-size: 12px;
+  margin: 8px 0;
+  padding: 8px;
+  background-color: #fde7e9;
+  border-radius: 4px;
+}

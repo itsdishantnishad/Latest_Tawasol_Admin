@@ -1,11 +1,8 @@
 import * as React from 'react';
 import styles from './Dashboard.module.scss';
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
-// import rightArrow from '../assets/arrow-right.svg';
-// import leftHeadingLine from  "../images/leftArrow.svg";
-// import rightHeadingLine from "../images/rightArrow.svg"
-// const leftHeadingLine: string = require("../images/leftArrow.svg");
-// const rightHeadingLine: string = require("../images/rightArrow.svg");
+import ConditionalLink from '../../ConditionalLink/ConditionalLink';
+
 const rightArrow = require("../images/arrow-right.svg");
 const dashboardImageOne = require("../images/footfall.svg");
 const dashboardImageTwo = require("../images/disqualification.svg");
@@ -66,9 +63,8 @@ interface DashboardCardProps {
 
 const DashboardCard = ({ image, header, subHeader, targetUrl }: DashboardCardProps): JSX.Element => {
     return (
-        <a
-            href={targetUrl}
-            className={styles.dashboardCard}
+        <ConditionalLink
+            to={targetUrl}
         >
             <img src={image.url} alt={image.alt} className={styles.dashboardImage} />
             <div className={styles.dashboardInfo}>
@@ -78,7 +74,7 @@ const DashboardCard = ({ image, header, subHeader, targetUrl }: DashboardCardPro
                 </div>
                 <div className={`${styles.dashboardDescription} ${styles.mTop8}`}>{subHeader}</div>
             </div>
-        </a>
+        </ConditionalLink>
     )
 }
 
@@ -128,22 +124,11 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
                     ))
                 }
             </div >
-
-            {/* View All Button */}
-            {/* <PrimaryButton label="View All" onClick={()=>{props.onViewAll(props.seeAllURL)}} /> */}
             <div className={styles.buttonContainer}>
-                <a href={viewAllHref} className={styles.viewAllButton}>
-                    View All
-                </a>
+                <ConditionalLink to={viewAllHref}>
+                    <PrimaryButton label='View All' />
+                </ConditionalLink>
             </div>
-            {/* <div className={styles.buttonContainer}>
-                <button className={styles.viewAllButton} onClick={props.onViewAll}>
-                    View All
-                </button>
-                <a href={props.seeAllURL} className={styles.viewAllButton}>
-                   View All
-                </a>
-            </div> */}
         </div >
     );
 };

@@ -392,7 +392,13 @@ export class listServices {
         Querytext: "*",
         RowLimit: 1,
         TrimDuplicates: false,
-        SelectProperties: ["Title", "TIREventEndDate", "TIREventStartDate", "TIRLocation"],
+        SelectProperties: [
+          "Title",
+          "TIREventEndDate",
+          "TIREventStartDate",
+          "TIRLocation",
+          "ListItemID"
+        ],
         QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
         HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
         EnableInterleaving: true,
@@ -404,6 +410,7 @@ export class listServices {
           eventEndDate: item.TIREventEndDate,
           eventStartDate: item.TIREventStartDate,
           location: item.TIRLocation,
+          ID: item.ListItemID
         } as any;
       });
     } catch (error) {
@@ -469,6 +476,7 @@ export class listServices {
           "TIRInstructorOWSUSER",
           "URL",
           "TIRJoiningURLOWSMTXT",
+          "ListItemID"
         ],
         QueryTemplate: `{searchTerms}`,
         HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
@@ -489,6 +497,7 @@ export class listServices {
           joiningURL: item.TIRJoiningURLOWSMTXT,
           instructor: instructorInfo,
           pageUrl: item.URL,
+          ID: item.ListItemID
         } as any;
       });
     } catch (error) {

@@ -128,6 +128,7 @@ const AllComponents: React.FC<Props> = ({
       endDate: endDateStr,
       subtitle: "",
       time: timeRange,
+      trainingId:  item.ID ,
     };
   });
 };
@@ -140,7 +141,7 @@ const AllComponents: React.FC<Props> = ({
   const myAlldata = [...myEvents, ...myTrainings, ...filteredMeetings];
   const previousEvents = parsedEvents.filter(
     (e: any) => e.eventDateTime && e.eventDateTime < now
-  );
+  ).slice(0,3); // show only 6 previous events
 
   return (
     <>
@@ -177,7 +178,7 @@ const AllComponents: React.FC<Props> = ({
 
               <h5>Trainings</h5>
               {mappedTrainings.map((event: any) => (
-                <Trainingcard key={event.id} {...event} />
+                <Trainingcard key={event.id} {...event} context={context}/>
               ))}
 
               <h5>Meetings</h5>
@@ -274,7 +275,7 @@ const AllComponents: React.FC<Props> = ({
             <div className={styles.eventsWrapper}>
               <h5>My Trainings</h5>
               {myTrainings.map((training: any) => (
-                <Trainingcard key={training.id} {...training} />
+                <Trainingcard key={training.id} {...training} context={context} />
               ))}
             </div>
 

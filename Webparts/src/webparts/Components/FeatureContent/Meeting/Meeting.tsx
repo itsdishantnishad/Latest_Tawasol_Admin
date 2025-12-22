@@ -165,6 +165,8 @@
 
 import * as React from 'react';
 import styles from './Meeting.module.scss';
+import ConditionalLink from "../../ConditionalLink/ConditionalLink";
+import PrimaryButton from "../../PrimaryButton/PrimaryButton";
 
 export interface IMeeting {
   id: string;
@@ -179,7 +181,7 @@ export interface IMeetingProps {
   meetings?: IMeeting[]; // still kept so parent props won't break
   onViewAll?: () => void;
   seeAllURL?: string;
-  
+
   context: any; // (ideally WebPartContext)
 }
 
@@ -201,7 +203,7 @@ export const Meeting: React.FC<IMeetingProps> = (props) => {
 
     const raw = configured || "SitePages/Events-And-Trainings.aspx";
 
- 
+
     if (/^https?:\/\//i.test(raw)) {
       try {
         const parsed = new URL(raw);
@@ -211,7 +213,7 @@ export const Meeting: React.FC<IMeetingProps> = (props) => {
       }
     }
 
-    
+
     if (raw.startsWith("/")) {
       return `${origin}${raw}`;
     }
@@ -226,7 +228,7 @@ export const Meeting: React.FC<IMeetingProps> = (props) => {
       {/* Just show 4 SVG images */}
       <div className={styles.imageGrid}>
         {images.map((src, index) => (
-          <div key={index} className={styles.imageWrapper}>
+          <div key={index}>
             <img
               src={src}
               alt={`Meeting illustration ${index + 1}`}
@@ -238,9 +240,9 @@ export const Meeting: React.FC<IMeetingProps> = (props) => {
 
       {/* View All Button (uses dynamic viewAllHref) */}
       <div className={styles.buttonContainer}>
-        <a href={viewAllHref} className={styles.viewAllButton}>
-          View All
-        </a>
+        <ConditionalLink to={viewAllHref}>
+          <PrimaryButton label="View All" />
+        </ConditionalLink>
       </div>
     </div>
   );

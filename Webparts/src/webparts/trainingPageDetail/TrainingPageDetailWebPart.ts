@@ -27,7 +27,8 @@ export default class TrainingPageDetailWebPart
     const element: React.ReactElement<ITrainingPageDetailProps> = React.createElement(
       TrainingPageDetail,
       {
-        trainingItem: this.trainingItem
+        trainingItem: this.trainingItem,
+        context: this.context
       }
     );
 
@@ -40,6 +41,7 @@ export default class TrainingPageDetailWebPart
     this.spService = new listServices(this.context);
 
     const pageId = this.context.pageContext.listItem?.id;
+    // const pageId = 101; // temp hardcoded for testing
 
     if (pageId) {
       try {

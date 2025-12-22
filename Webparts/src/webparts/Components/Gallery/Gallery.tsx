@@ -1,5 +1,7 @@
 import * as React from 'react';
 import styles from './Gallery.module.scss';
+import PrimaryButton from '../PrimaryButton/PrimaryButton';
+import ConditionalLink from '../ConditionalLink/ConditionalLink';
 
 export interface IGalleryProps {
   images?: IGalleryImage[];
@@ -39,7 +41,7 @@ const defaultImages: IGalleryImage[] = [
   { id: '6', url: img6, alt: 'Two women posing by Eid Al Etihad backdrop' },
   { id: '7', url: img7, alt: 'Audience seated facing stage at outdoor event' },
   { id: '8', url: img8, alt: 'Mascot posing with a child at the event' },
-//   { id: '9', url: img9, alt: 'Children with face paint posing for a photo' }
+  //   { id: '9', url: img9, alt: 'Children with face paint posing for a photo' }
 ];
 
 export const Gallery: React.FC<IGalleryProps> = (props) => {
@@ -84,9 +86,8 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
           {images.slice(0, 4).map((image, index) => (
             <div
               key={image.id}
-              className={`${styles.imageItem} ${
-                index === 0 || index === 3 ? styles.shortImage : styles.tallImage
-              }`}
+              className={`${styles.imageItem} ${index === 0 || index === 3 ? styles.shortImage : styles.tallImage
+                }`}
             >
               <img src={image.url} alt={image.alt || `Gallery image ${index + 1}`} />
             </div>
@@ -98,9 +99,8 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
           {images.slice(4, 8).map((image, index) => (
             <div
               key={image.id}
-              className={`${styles.imageItem} ${
-                index === 0 || index === 3 ? styles.shortImage : styles.tallImage
-              }`}
+              className={`${styles.imageItem} ${index === 0 || index === 3 ? styles.shortImage : styles.tallImage
+                }`}
             >
               <img src={image.url} alt={image.alt || `Gallery image ${index + 5}`} />
             </div>
@@ -122,9 +122,9 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
 
       {/* View All Button */}
       <div className={styles.buttonContainer}>
-        <a href={viewAllHref} className={styles.viewAllButton}>
-          View All
-        </a>
+        <ConditionalLink to={viewAllHref}>
+          <PrimaryButton label='View All' />
+        </ConditionalLink>
       </div>
     </div>
   );

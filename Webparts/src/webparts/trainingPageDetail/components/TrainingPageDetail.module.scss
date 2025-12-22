@@ -70,3 +70,34 @@
   line-height: 20px;
   width: -webkit-fill-available;
 }
+.joinButton {
+  background-color: #28a745 !important; // Green for join
+}
+
+.feedbackButton {
+  background-color: #007bff !important; // Blue for feedback
+}
+
+.pendingButton {
+  background-color: #ffc107 !important; // Yellow for pending
+  cursor: not-allowed;
+}
+
+.rejectedButton {
+  background-color: #dc3545 !important; // Red for rejected
+  cursor: not-allowed;
+}
+
+.errorMessage {
+  color: #dc3545;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f8d7da;
+  border-radius: 4px;
+}
+.pastTrainingButton {
+  background-color: #f3f3f3;
+  color: #888;
+  cursor: not-allowed;
+  border: 1px solid #ddd;
+}
