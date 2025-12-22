@@ -267,12 +267,14 @@
 
 .TIRFooterBottom {
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  // display: grid;
+  display: flex;
+  // grid-template-columns: 1fr auto 1fr;
   align-items: center;
   font-size: 13px;
   color: #aaa;
-  gap: 12px;
+  // gap: 12px;
+  justify-content: flex-end;
 }
 
 .TIRFooterBottom span:first-child { justify-self: start; }
