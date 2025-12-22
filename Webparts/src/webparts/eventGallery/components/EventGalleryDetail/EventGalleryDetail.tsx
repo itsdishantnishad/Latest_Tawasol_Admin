@@ -34,7 +34,10 @@ const resolveImageUrl = (img: any): string => {
   if (!raw) return "";
 
   // absolute URL
-  if (typeof raw === "string" && (raw.startsWith("http://") || raw.startsWith("https://"))) {
+  if (
+    typeof raw === "string" &&
+    (raw.startsWith("http://") || raw.startsWith("https://"))
+  ) {
     return raw;
   }
 
@@ -48,7 +51,8 @@ const resolveImageUrl = (img: any): string => {
 };
 
 const EventDetail: React.FC<IEventDetailProps> = (props) => {
-  const { eventTitle, eventDate, imageCount, onBack, eventdata, images } = props;
+  const { eventTitle, eventDate, imageCount, onBack, eventdata, images } =
+    props;
 
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [showFindMyPhoto, setShowFindMyPhoto] = useState<boolean>(false);
@@ -84,9 +88,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
   };
 
   const currentPhotoIndex =
-    selectedPhoto != null
-      ? images.findIndex((p) => p.Id === selectedPhoto)
-      : 0;
+    selectedPhoto != null ? images.findIndex((p) => p.Id === selectedPhoto) : 0;
 
   const goToPrevious = (): void => {
     if (currentPhotoIndex > 0) {
@@ -155,7 +157,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       if (!file) return;
       if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) return;
       if (file.size > 5 * 1024 * 1024) return;
-      onUpload(file); 
+      onUpload(file);
     };
 
     return (
@@ -252,16 +254,42 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
     setSelectedEvent(event);
   };
 
+  const getTitleParts = (title: string) => {
+    if (!title) return { first: "", rest: "" };
+
+    const parts = title.trim().split(" ");
+    return {
+      first: parts[0],
+      rest: parts.slice(1).join(" "),
+    };
+  };
+
+  const { first, rest } = getTitleParts(eventTitle);
+
   return (
     <div className={styles.eventDetail}>
       {/* Header */}
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={onBack}>
-          ← Back to Gallery
-        </button>
+        <div className={styles.breadcrumb}>
+          <span className={styles.backArrow}>‹</span>
+          <span className={styles.backText}>Back |</span>
+
+          <button
+            className={styles.breadcrumbLink}
+            onClick={onBack}
+            type="button"
+          >
+            Events Gallery
+          </button>
+
+          <span className={styles.separator}>›</span>
+
+          <span className={styles.current}>{eventTitle}</span>
+        </div>
+
         <div className={styles.titleSection}>
           <h1 className={styles.eventTitle}>
-            <span className={styles.oneText}>One</span> {eventTitle}
+            <span className={styles.oneText}>{first}</span> {rest}
           </h1>
           <p className={styles.eventMeta}>
             {eventDate} / {imageCount} Images
@@ -273,6 +301,41 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
             onClick={toggleFindMyPhoto}
           >
             Find my Photo <span className={styles.dropdownIcon}>▼</span>
+          </button>
+          <button type="button" className={styles.copyLink}>
+            {" "}
+            Copy Link
+            <span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <g clip-path="url(#clip0_24861_24346)">
+                  <path
+                    d="M6.66602 8.66697C6.95232 9.04972 7.31759 9.36642 7.73705 9.5956C8.15651 9.82477 8.62035 9.96105 9.09712 9.99519C9.57388 10.0293 10.0524 9.96055 10.5002 9.79349C10.9481 9.62643 11.3548 9.36502 11.6927 9.02697L13.6927 7.02697C14.2999 6.3983 14.6359 5.55629 14.6283 4.6823C14.6207 3.80831 14.2701 2.97227 13.6521 2.35424C13.0341 1.73621 12.198 1.38565 11.324 1.37806C10.45 1.37046 9.60802 1.70644 8.97935 2.31364L7.83268 3.45364"
+                    stroke="black"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M9.33347 7.33381C9.04716 6.95106 8.68189 6.63435 8.26243 6.40518C7.84297 6.17601 7.37913 6.03973 6.90237 6.00559C6.4256 5.97144 5.94708 6.04023 5.49924 6.20729C5.0514 6.37435 4.64472 6.63576 4.3068 6.97381L2.3068 8.97381C1.69961 9.60248 1.36363 10.4445 1.37122 11.3185C1.37881 12.1925 1.72938 13.0285 2.3474 13.6465C2.96543 14.2646 3.80147 14.6151 4.67546 14.6227C5.54945 14.6303 6.39146 14.2943 7.02013 13.6871L8.16013 12.5471"
+                    stroke="black"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0_24861_24346">
+                    <rect width="16" height="16" fill="white" />
+                  </clipPath>
+                </defs>
+              </svg>
+            </span>
           </button>
 
           {showFindMyPhoto && (
@@ -361,9 +424,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       {/* More Event Gallery Section */}
       <div className={styles.moreEventsSection}>
         <div className={styles.moreEventsHeader}>
-          <h2 className={styles.moreEventsTitle}>
-            More Event Gallery
-          </h2>
+          <h2 className={styles.moreEventsTitle}>View Other Albums</h2>
           <button className={styles.viewAllButton} onClick={onBack}>
             View All
           </button>
@@ -384,10 +445,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
       {/* Lightbox */}
       {selectedPhoto !== null && currentPhotoIndex > -1 && (
         <div className={styles.lightboxOverlay}>
-          <div
-            className={styles.lightboxContainer}
-            onClick={closeLightbox}
-          >
+          <div className={styles.lightboxContainer} onClick={closeLightbox}>
             <div className={styles.counter}>
               {currentPhotoIndex + 1} / {images.length}
             </div>
