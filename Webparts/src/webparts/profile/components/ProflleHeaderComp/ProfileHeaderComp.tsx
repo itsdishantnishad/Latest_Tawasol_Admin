@@ -1,3 +1,5 @@
+// ProfileHeaderComp.tsx
+
 import * as React from "react";
 import { Text, Spinner, SpinnerSize } from "@fluentui/react";
 import {
@@ -14,7 +16,19 @@ import {
 } from "../services/profileHeaderServices";
 import styles from "./ProfileHeader.module.scss";
 
+// ===============================
+// ✅ Tahweel (Oracle) — NOT USED NOW
+// Keep commented so you can re-enable without re-work
+// ===============================
+// import { TahweelService, TahweelAdDetails } from "../../../services/Integration/TahweelService";
+
 const ProfileIcon_URL = require("../../assets/profileCircleImg.svg");
+
+// ✅ File name (SiteAssets)
+const PROFILE_HEADER_BG_FILE_NAME = "Gradient.svg";
+
+// ✅ Packaged fallback
+const ProfileHeaderBgAsset: string = require("../../assets/Gradient.svg");
 
 type StatItem = { label: string; value: number };
 type BadgeItem = { name: string; imageUrl: string };
@@ -40,6 +54,9 @@ interface IProfileHeaderState {
   designation: string;
   department: string;
 
+  // ✅ Tahweel fields (NOT USED NOW) — keep for future uncomment
+  // personNumber: string;
+
   showMenu: boolean;
   copyFeedback: boolean;
   isLoading: boolean;
@@ -56,12 +73,16 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
   private graphPhotoObjectUrl: string | null = null;
 
+  // ✅ Tahweel instance (NOT USED NOW)
+  // private tahweelService: TahweelService;
+
   public static defaultProps: Partial<IProfileHeaderProps> = {
     stats: [
-      { label: "Posts", value: 3 },
-      { label: "Followers", value: 21 },
-      { label: "Following", value: 20 },
-      { label: "Praises", value: 5 },
+      // ✅ only comment (remove nahi)
+      // { label: "Posts", value: 3 },
+      // { label: "Followers", value: 21 },
+      // { label: "Following", value: 20 },
+      // { label: "Praises", value: 5 },
     ],
     actionNavigateUrl: "/sites/Tawasol",
   };
@@ -71,9 +92,13 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
     this.state = {
       currentPhoto: "",
+
       fullName: props.fullName || "",
       designation: "",
       department: props.department || "",
+
+      // ✅ Tahweel field (NOT USED NOW)
+      // personNumber: "",
 
       showMenu: false,
       copyFeedback: false,
@@ -86,6 +111,9 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     };
 
     this.menuRef = React.createRef();
+
+    // ✅ Tahweel init (NOT USED NOW)
+    // this.tahweelService = new TahweelService({ httpClient: this.props.context.httpClient });
   }
 
   public componentDidMount(): void {
@@ -127,6 +155,33 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     return url;
   }
 
+  // ✅ Header background (SiteAssets + packaged assets fallback)
+  private getHeaderBgStyle = (): React.CSSProperties => {
+    const webUrl = (this.props.context?.pageContext?.web?.absoluteUrl || this.state.siteUrl || "").trim();
+
+    const file = encodeURIComponent(PROFILE_HEADER_BG_FILE_NAME);
+    const siteAssetsUrl = webUrl ? `${webUrl}/SiteAssets/${file}` : "";
+
+    // ✅ Multiple backgrounds:
+    // 1) SiteAssets file (if exists)
+    // 2) Packaged asset (always available once bundled)
+    // 3) Fallback gradient (if svg blocked)
+    const layers: string[] = [];
+
+    if (siteAssetsUrl) layers.push(`url("${siteAssetsUrl}")`);
+    if (ProfileHeaderBgAsset) layers.push(`url("${ProfileHeaderBgAsset}")`);
+
+    layers.push(`linear-gradient(90deg,#fbd8c7 0%,#fee2cf 35%,#ffd6b6 68%,#ffe4d1 100%)`);
+
+    return {
+      backgroundImage: layers.join(", "),
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      width: "100%",
+    };
+  };
+
   private initializeProfile = async (): Promise<void> => {
     try {
       const siteUrl = await getSiteUrl();
@@ -135,15 +190,30 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       const savedBadge = loadSelectedBadge();
       if (savedBadge) this.setState({ selectedBadge: savedBadge });
 
-      // ✅ Graph-first (name, jobTitle, dept + HQ photo)
-      const [graphInfo, graphPhotoBlob] = await Promise.all([
-        fetchGraphMeInfo(this.props.context),
-        fetchGraphMyPhotoBlob(this.props.context),
-      ]);
+      // (optional) context email, helpful for logs/future
+      this.getUserEmailFromContext();
 
-      const graphPhotoUrl = this.setGraphPhotoFromBlob(graphPhotoBlob);
+      // ----------------------------
+      // 1) Graph info + HQ photo (preferred)
+      // ----------------------------
+      let graphInfo: any = null;
+      try {
+        graphInfo = await fetchGraphMeInfo(this.props.context);
+      } catch {
+        // ignore
+      }
 
-      // SharePoint fallbacks
+      let graphPhotoUrl = "";
+      try {
+        const blob = await fetchGraphMyPhotoBlob(this.props.context);
+        graphPhotoUrl = this.setGraphPhotoFromBlob(blob);
+      } catch {
+        // ignore
+      }
+
+      // ----------------------------
+      // 2) SharePoint photo + SP user info (fallbacks)
+      // ----------------------------
       let spPhotoUrl = "";
       try {
         const photoUrl = await fetchUserProfilePicture();
@@ -159,19 +229,31 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
         // ignore
       }
 
+      // ----------------------------
+      // ✅ Final merge priority (Graph > SPInfo > props/state)
+      // ----------------------------
+      const gName =
+        (graphInfo?.displayName ||
+          graphInfo?.fullName ||
+          `${graphInfo?.givenName || ""} ${graphInfo?.surname || ""}` ||
+          "").trim();
+
+      const gDesig = (graphInfo?.jobTitle || graphInfo?.designation || "").trim();
+      const gDept = (graphInfo?.department || "").trim();
+
       const finalFullName =
-        (graphInfo?.fullName || "").trim() ||
+        gName ||
         (spInfo?.fullName || "").trim() ||
         (this.state.fullName || "").trim();
 
-      const finalDesignation = (graphInfo?.designation || "").trim();
+      const finalDesignation = gDesig;
 
       const finalDepartment =
-        (graphInfo?.department || "").trim() ||
+        gDept ||
         (spInfo?.department || "").trim() ||
         (this.state.department || "").trim();
 
-      // ✅ IMPORTANT: prefer Graph photo (HQ) to avoid blur
+      // ✅ Photo preference: Graph HQ > SharePoint photo
       const finalPhoto = (graphPhotoUrl || "").trim() || (spPhotoUrl || "").trim();
 
       this.setState({
@@ -182,15 +264,23 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
         error: null,
       });
 
-      console.log("[ProfileHeader] Loaded (Graph-first):", {
-        email: this.getUserEmailFromContext(),
-        name: finalFullName,
-        designation: finalDesignation,
-        department: finalDepartment,
-        hasGraphPhoto: !!graphPhotoUrl,
-        hasSpPhoto: !!spPhotoUrl,
-      });
-    } catch (error) {
+      // ===============================
+      // ✅ Tahweel block (NOT USED NOW)
+      // If ever needed, uncomment imports + init in constructor + this block.
+      // ===============================
+      /*
+      const userEmail = this.getUserEmailFromContext();
+      let adDetails: TahweelAdDetails | null = null;
+      try {
+        if (userEmail) adDetails = await this.tahweelService.fetchAdDetailsByEmail(userEmail);
+      } catch { }
+
+      // Then merge:
+      // - fullName/designation/department from adDetails (if desired)
+      // - imageDataUrl and personNumber
+      this.setState({ personNumber: (adDetails?.personNumber || "").trim() });
+      */
+    } catch {
       this.setState({ error: "Failed to load profile" });
     } finally {
       this.setState({ isLoading: false });
@@ -304,13 +394,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     );
   };
 
-  private renderStat = (s: StatItem, idx: number): React.ReactElement => (
-    <div className={styles.statBox} key={idx}>
-      <div className={styles.statNumber}>{s.value}</div>
-      <div className={styles.statLabel}>{s.label}</div>
-    </div>
-  );
-
   private renderAvatarCore(): React.ReactElement {
     const { isLoading, currentPhoto, fullName } = this.state;
 
@@ -351,14 +434,13 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
   }
 
   public render(): React.ReactElement {
-    const { stats, badges } = this.props;
-    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors } =
-      this.state;
+    const { badges } = this.props;
+    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors } = this.state;
 
     const subtitle = (designation || "").trim() || (department || "").trim() || "—";
 
     return (
-      <div className={styles.headerWrap}>
+      <div className={styles.headerWrap} style={this.getHeaderBgStyle()}>
         <div className={styles.identityCard}>
           <div className={styles.avatarWrap}>
             {this.renderAvatarCore()}
@@ -398,15 +480,35 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
               disabled={isLoading}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
-                <path d="M14.9922 17.5H16.5022C19.5222 17.5 22.0022 15.03 22.0022 12C22.0022 8.98 19.5322 6.5 16.5022 6.5H14.9922" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M9.00391 6.5H7.50391C4.47391 6.5 2.00391 8.97 2.00391 12C2.00391 15.02 4.47391 17.5 7.50391 17.5H9.00391" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M8.00391 12H16.0039" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M14.9922 17.5H16.5022C19.5222 17.5 22.0022 15.03 22.0022 12C22.0022 8.98 19.5322 6.5 16.5022 6.5H14.9922"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M9.00391 6.5H7.50391C4.47391 6.5 2.00391 8.97 2.00391 12C2.00391 15.02 4.47391 17.5 7.50391 17.5H9.00391"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M8.00391 12H16.0039"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </button>
 
             {copyFeedback && (
               <div className={styles.copyPill} role="status" aria-live="polite">
-                <span className={styles.copyDot} aria-hidden="true">!</span>
+                <span className={styles.copyDot} aria-hidden="true">
+                  !
+                </span>
                 <span className={styles.copyText}>Profile Copied</span>
                 <button type="button" className={styles.copyClose} aria-label="Close" onClick={() => this.setState({ copyFeedback: false })}>
                   ×
@@ -450,7 +552,11 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
             />
           </div>
 
-          {error && <div className={styles.errorMessage} role="alert">{error}</div>}
+          {error && (
+            <div className={styles.errorMessage} role="alert">
+              {error}
+            </div>
+          )}
 
           {badges && badges.length > 0 ? (
             <div className={styles.badgesRow} aria-label="Badges">
@@ -467,7 +573,9 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
                   aria-label={`Select badge ${b.name}`}
                 >
                   {badgeImageErrors[b.name] ? (
-                    <div className={styles.badgePlaceholder} title={`Failed to load: ${b.name}`}>?</div>
+                    <div className={styles.badgePlaceholder} title={`Failed to load: ${b.name}`}>
+                      ?
+                    </div>
                   ) : (
                     <img className={styles.badgeImg} src={b.imageUrl} alt={b.name} onError={() => this.handleBadgeImageError(b.name)} />
                   )}
@@ -477,9 +585,12 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
             </div>
           ) : null}
 
+          {/* ✅ ONLY COMMENT (remove nahi) */}
+          {/*
           <div className={styles.statsRow} role="region" aria-label="Profile stats">
             {stats.slice(0, 4).map(this.renderStat)}
           </div>
+          */}
         </div>
       </div>
     );
