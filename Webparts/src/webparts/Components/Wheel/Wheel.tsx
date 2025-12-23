@@ -32,7 +32,7 @@ interface Feature {
 const features: Feature[] = [
   {
     id: "gallery",
-    title: "Image Gallery",
+    title: "DHRE Gallery",
     subtitle: "Past events images and memories"
   },
   {
