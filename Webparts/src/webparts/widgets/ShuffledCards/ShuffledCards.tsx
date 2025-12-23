@@ -10,6 +10,8 @@ interface Card {
     subHeader?: string;
 }
 
+const rotations = ["-5deg", "5deg", "10deg"];
+
 const ShuffledCards: React.FC<{ cards: Card[] }> = ({ cards }) => {
     const [isMweb, setIsMweb] = useState<boolean>(false);
 
@@ -19,17 +21,21 @@ const ShuffledCards: React.FC<{ cards: Card[] }> = ({ cards }) => {
         };
 
         checkWindowSize();
-        window.addEventListener('resize', checkWindowSize);
+        window.addEventListener("resize", checkWindowSize);
 
         return () => {
-            window.removeEventListener('resize', checkWindowSize);
+            window.removeEventListener("resize", checkWindowSize);
         };
-    }, [])
+    }, []);
 
     return (
         <div className={styles.wrapper}>
-            {
-                cards.map((card, index) => (
+            {cards.map((card, index) => {
+                const rotation = isMweb
+                    ? "0deg"
+                    : rotations[index % rotations.length];
+
+                return (
                     <ConditionalLink
                         key={card.id || index}
                         to={card.url}
@@ -37,18 +43,20 @@ const ShuffledCards: React.FC<{ cards: Card[] }> = ({ cards }) => {
                         <div
                             className={styles.body}
                             style={{
-                                transform: `rotate(${isMweb ? '0deg' : index % 2 === 0 ? '-2deg' : '2deg'})`,
-                                ...(card.backgroundImage && { backgroundImage: `url(${card.backgroundImage})` }),
+                                transform: `rotate(${rotation})`,
+                                ...(card.backgroundImage && {
+                                    backgroundImage: `url(${card.backgroundImage})`,
+                                }),
                             }}
                         >
-                            <h3 className={styles.header}>{card.header}</h3>
-                            {card.subHeader && <p className={styles.subHeader}>{card.subHeader}</p>}
+                            {/* <h3 className={styles.header}>{card.header}</h3> */}
+                            {/* {card.subHeader && <p className={styles.subHeader}>{card.subHeader}</p>} */}
                         </div>
                     </ConditionalLink>
-                ))
-            }
+                );
+            })}
         </div>
-    )
-}
+    );
+};
 
-export default ShuffledCards
+export default ShuffledCards;

@@ -182,19 +182,8 @@ const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
       isBlocking={isSubmitting}
       containerClassName={styles.modalContainer}
     >
-      <div className={styles.eventRegistration}>
-        <div className={styles.header}>
+      <div className={styles.content}>
           <h2 className={styles.title}>Event Registration</h2>
-          <IconButton
-            iconProps={{ iconName: 'Cancel' }}
-            ariaLabel="Close"
-            onClick={handleDismiss}
-            className={styles.closeButton}
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <div className={styles.content}>
           {submitMessage && (
             <MessageBar
               messageBarType={submitMessage.type}
@@ -263,7 +252,6 @@ const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
             disabled={isSubmitting}
           />
         </div>
-      </div>
     </Modal>
   );
 };
