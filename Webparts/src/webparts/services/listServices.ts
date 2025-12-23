@@ -281,6 +281,7 @@ export class listServices {
           "owstaxIdTIRDepartment",
           "TIRDepartment",
           "URL",
+          "Path",
           "owstaxIdTIRNewsType",
           "TIRNewsType",
           "ModifiedOWSDATE",
@@ -313,8 +314,10 @@ export class listServices {
           newsImage: listServices.getImageUrlFromPage(item.URL, 200),
           newsType: item.TIRNewsType ? item.TIRNewsType : "",
           author: item.CreatedBy,
-          authorEmail: item.AuthorOWSUSER ? item.AuthorOWSUSER.split("|")[0] : "",
-          path: item.FileRef,
+          authorEmail: item.AuthorOWSUSER
+            ? item.AuthorOWSUSER.split("|")[0]
+            : "",
+          path: item.Path || item.FileRef || item.URL, // ✅ real page link first,
           created: item.Created,
           pageDescription: item.Description,
           lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).fromNow() : "",
