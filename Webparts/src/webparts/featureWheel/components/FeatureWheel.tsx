@@ -98,7 +98,7 @@ const featureTitleContent: Record<
     subHeader: "Track everything at a glance – insights made simple!",
   },
   offers: {
-    header: "Get Offers & Discounts",
+    header: "Offers & Benefits",
     subHeader: "Save more with benefits designed for you",
   },
   training: {
@@ -174,6 +174,20 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
           />
         );
 
+      case "about_dhre":
+        return <AboutDHRE context={props.context} />;
+
+      case "tasks":
+        return <TaskApprovals context={props.context} />;
+
+      case 'beverage_menu':
+        return (
+          <BeverageMenu
+            context={props.context}
+            seeAllURL={props.beverageMenu} // add this prop to webpart if needed
+          />
+        );
+
       case "dashboard":
         return (
           <Dashboard
@@ -198,20 +212,6 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
             seeAllURL={props.trainingAndDevelopment}
             topCount={4}
             listTitle="Site Pages"
-          />
-        );
-
-      case "about_dhre":
-        return <AboutDHRE context={props.context} />;
-
-      case "tasks":
-        return <TaskApprovals context={props.context} />;
-
-      case 'beverage_menu':
-        return (
-          <BeverageMenu
-            context={props.context}
-            seeAllURL={props.beverageMenu} // add this prop to webpart if needed
           />
         );
 
