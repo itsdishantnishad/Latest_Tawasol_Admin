@@ -1,24 +1,62 @@
+/* ProfileHeader.module.scss */
 
 .flexCol {
   display: flex;
   flex-direction: column;
 }
 
+/* =========================================================
+   ✅ HERO FULL WIDTH (LEFT+RIGHT) + ✅ ZERO GAP FROM TOP
+   ========================================================= */
 .headerWrap {
-  padding: 24px;
-  border-radius: 8px;
-  background: linear-gradient(
-    90deg,
-    #fbd8c7 0%,
-    #fee2cf 35%,
-    #ffd6b6 68%,
-    #ffe4d1 100%
-  );
+  /* ✅ Full-bleed edge-to-edge (both sides) */
+  width: 100vw;
+  max-width: 100vw;
+
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* ✅ Remove rounded card look */
+  border-radius: 0;
+
+  /* ✅ Stick to global header (make gap ZERO) */
+  margin-top: -48px; /* if still tiny gap, make it -56px */
+
+  /* ✅ Bigger header */
+  min-height: 320px;
+  padding: 44px 56px;
+
+  /* background image comes from TSX inline style */
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
+
   box-sizing: border-box;
+  overflow: hidden;
 }
+
+/* ✅ Only remove TOP spacing (don’t touch left/right canvas padding) */
+:global(#spPageCanvasContent) {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+:global(.CanvasZoneRow) {
+  margin-top: 0 !important;
+}
+
+:global(.ControlZone) {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* ========================================================= */
 
 .cornerLeft {
   position: absolute;
@@ -55,20 +93,16 @@
 }
 
 .actions {
-  align-self: flex-end;
-}
-
-.actions {
-  align-self: flex-end;
+  align-self: flex-start;
   position: relative;
+  margin-left: auto;
 }
 
 /* Floating "Profile Copied" pill */
 .copyPill {
   position: absolute;
   top: 44px;
- right: 0;
- left: auto;
+  right: 0;
   z-index: 999;
 
   display: inline-flex;
@@ -80,7 +114,7 @@
   padding: 12px;
   border-radius: 12px;
 
-  background: #EEFDF2;
+  background: #eefdf2;
   box-sizing: border-box;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
@@ -89,7 +123,7 @@
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  background: #10CF68;
+  background: #10cf68;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
@@ -105,7 +139,7 @@
   font-weight: 500;
   font-size: 12px;
   line-height: 16px;
-  color: #3A3B43;
+  color: #3a3b43;
   white-space: nowrap;
 }
 
@@ -117,14 +151,13 @@
   background: transparent;
   padding: 0;
   cursor: pointer;
-  color: #3A3B43;
+  color: #3a3b43;
   font-size: 16px;
   line-height: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
-
 
 .iconBtn {
   appearance: none;
@@ -141,29 +174,24 @@
   justify-content: center;
 }
 
-.iconBtn svg[width="16"] {
-  width: 16px;
-  height: 16px;
-}
-
 .kebabBtn {
   margin-left: 20px;
 }
 
 .identityCard {
   width: 100%;
-  max-width: 522px;
-  min-height: 132px;
+  max-width: 780px;
+  min-height: 160px;
   display: flex;
-  gap: 20px;
+  gap: 24px;
   align-items: center;
 }
 
 .avatar {
-  width: 132px;
-  height: 132px;
+  width: 150px;
+  height: 150px;
   border-radius: 360px;
-  border: 2.4px solid #f0edeb; /* beige 25% */
+  border: 2.4px solid #f0edeb;
   object-fit: cover;
   background-color: #f0edeb;
 }
@@ -179,12 +207,14 @@
 .lastName {
   font-family: "Instrument Serif", serif;
   font-weight: 400;
-  font-size: 36px;
+  font-size: 40px;
   line-height: 100%;
 }
+
 .firstName {
   color: #da291c;
 }
+
 .lastName {
   color: #101820;
 }
@@ -192,14 +222,14 @@
 .nameRow {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 10px;
+  
 }
 
 .department {
-  margin-top: 4px;
+  margin-top: 6px;
   height: 24px;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
@@ -209,6 +239,7 @@
   text-overflow: ellipsis;
 }
 
+/* Stats (currently commented in TSX) */
 .statsRow {
   display: grid;
   grid-auto-flow: column;
@@ -233,26 +264,25 @@
   justify-content: center;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
+
 .statNumber {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: #da291c;
   line-height: 20px;
   margin-bottom: 2px;
 }
+
 .statLabel {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size: 12px;
   font-weight: 400;
   color: #3a3b43;
   line-height: 16px;
 }
 
-/* === KEBAB MENU (MINIMAL ADDITION) === */
-
+/* === KEBAB MENU === */
 .kebabWrapper {
   position: relative;
   display: inline-block;
@@ -261,17 +291,16 @@
 .changePhotoBtn {
   display: flex;
   align-items: center;
-  gap: 12px;                  /* gap between icon + text */
+  gap: 12px;
   width: 327px;
   height: 48px;
   padding: 12px 20px;
-  background-color: #FEF1E5;  /* Figma color */
+  background-color: #fef1e5;
   border: none;
-  border-radius: 8px 8px 0 0; /* top small radius, bottom 0 */
+  border-radius: 8px 8px 0 0;
   cursor: pointer;
   outline: none;
 
-  /* optional: keep it subtle on hover */
   &:hover {
     background-color: #fde4cf;
   }
@@ -286,7 +315,7 @@
 .changePhotoLabel {
   font-size: 14px;
   line-height: 20px;
-  color: #101820;             
+  color: #101820;
 }
 
 .dropdownMenu {
@@ -297,40 +326,25 @@
   background: #ffffff;
   border-radius: 8px;
   padding: 6px 0;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   z-index: 10;
 }
 
-.dropdownItem {
-  padding: 10px 14px;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  font-size: 14px;
-  cursor: pointer;
-  color: #101820;
-  transition: background 0.15s ease;
-}
-
-.dropdownItem:hover {
-  background: #f3f3f3;
-}
-
-
 .badgesRow {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: flex-start;
   justify-content: flex-end;
-  margin-top: auto;
+  margin-top: 14px;
   flex-wrap: wrap;
 }
 
 .badgeItem {
-  width: auto;
-  height: auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
   align-items: center;
+  margin-top: 120px;
 }
 
 .badgeImg {
@@ -344,33 +358,21 @@
 }
 
 .badgeName {
-  /* ❌ remove fixed width */
-  width: fit-content;
-  /* fallback */
   width: max-content;
-
   height: 18px;
   border-radius: 4px;
-
-  /* give proper horizontal breathing space like figma */
   padding: 1px 8px;
-  box-sizing: border-box;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   background: #da291c;
   color: #ffffff;
-
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 500;
   font-size: 12px;
   line-height: 16px;
-
   white-space: nowrap;
 }
-
 
 .badgePlaceholder {
   width: 48px;
@@ -378,40 +380,30 @@
   border-radius: 999px;
   background: #ffffff;
   border: 1.5px solid #da291c;
-  box-sizing: border-box;
-  
   display: flex;
   align-items: center;
   justify-content: center;
-  
   font-size: 20px;
   color: #da291c;
   font-weight: 600;
-  flex-shrink: 0;
 }
 
-
-/* ✅ avatar wrapper for overlay badge */
 .avatarWrap {
   position: relative;
-  width: 132px;
-  height: 132px;
+  width: 150px;
+  height: 150px;
   flex-shrink: 0;
 }
 
-/* ✅ overlay badge layout like screenshot */
 .avatarBadge {
   position: absolute;
   width: 38px;
   height: 39px;
-
   right: -2px;
   bottom: -2px;
-
   border-radius: 999px;
   background: #ffffff;
   border: 2px solid #da291c;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -432,13 +424,53 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 49px;
+  font-size: 16px;
   color: #da291c;
 }
 
+/* ======= responsive ======= */
+@media (max-width: 768px) {
+  .headerWrap {
+    min-height: 260px;
+    padding: 28px 20px;
+    margin-top: -36px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 560px) {
+  .headerWrap {
+    min-height: 220px;
+    padding: 22px 16px;
+    margin-top: -28px;
+  }
+
+  .avtar {
+    width: 96px;
+    height: 96px;
+    margin-top: 110px;
+    
+  }
+
+  .avatarWrap {
+    width: 96px;
+    height: 96px;
+  }
+
+  .firstName,
+  .lastName {
+    font-size: 28px;
+  }
+
+  .department {
+    font-size: 14px;
+    line-height: 20px;
+    white-space: normal;
+  }
+}
 
 /* +++++++++ error message +++++++++ */
-
 .errorMessage {
   display: flex;
   align-items: center;
@@ -469,45 +501,3 @@
     transform: translateY(0);
   }
 }
-
-
-/* ======= responsive ======= */
-@media (max-width: 768px) {
-  .headerWrap {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .statsRow {
-    justify-content: stretch;
-    grid-template-columns: repeat(4, minmax(72px, 1fr));
-    grid-auto-flow: row;
-    max-width: none;
-    width: 100%;
-  }
-}
-@media (max-width: 560px) {
-  .avatar {
-    width: 96px;
-    height: 96px;
-  }
-  .firstName,
-  .lastName {
-    font-size: 28px;
-  }
-  .department {
-    font-size: 14px;
-    line-height: 20px;
-    max-width: none;
-    white-space: normal;
-  }
-  .statsRow {
-    grid-template-columns: repeat(2, 1fr);
-    row-gap: 8px;
-  }
-}
-
-
-
-
-
-
