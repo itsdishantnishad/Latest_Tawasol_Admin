@@ -1,4 +1,5 @@
-// src/webparts/letsMeetDetail/components/LetsMeetDetail.tsx
+
+
 import * as React from "react";
 import styles from "./LetsMeetDetail.module.scss";
 import type { ILetsMeetDetailProps } from "./ILetsMeetDetailProps";
@@ -33,13 +34,9 @@ export default class LetsMeetDetail extends React.Component<
     super(props);
 
     const listTitle = props.sitePagesListTitle || "Site Pages";
-    const contentTypeName = props.contentTypeName || "Lets Meet Video Page";
+    const contentTypeName = props.contentTypeName || "TIRLetsConnect";
 
-    this.dataService = new LetsMeetDataService(
-      props.context,
-      listTitle,
-      contentTypeName
-    );
+    this.dataService = new LetsMeetDataService(props.context, listTitle, contentTypeName);
     this.mappingService = new LetsMeetMappingService(props.context);
   }
 
@@ -51,7 +48,7 @@ export default class LetsMeetDetail extends React.Component<
       if (!currentVm) {
         this.setState({
           loading: false,
-          error: `Please set page property "LetsMeetYouTubeUrl" for this page.`,
+          error: `Please set page property "URL" (YouTube link) for this page.`,
           current: null,
           suggestions: [],
           isPlaying: false,
@@ -60,10 +57,7 @@ export default class LetsMeetDetail extends React.Component<
       }
 
       const maxSuggestions = this.props.maxSuggestions ?? 10;
-      const suggestionsItems = await this.dataService.fetchSuggestions(
-        currentVm.id,
-        maxSuggestions
-      );
+      const suggestionsItems = await this.dataService.fetchSuggestions(currentVm.id, maxSuggestions);
       const suggestionsVm = this.mappingService.mapToViewModels(suggestionsItems);
 
       this.setState({
@@ -87,9 +81,7 @@ export default class LetsMeetDetail extends React.Component<
   public render(): React.ReactElement<ILetsMeetDetailProps> | null {
     const { loading, error, current, suggestions, isPlaying } = this.state;
 
-    if (loading) {
-      return <div className={styles.letsMeetDetail}>Loading...</div>;
-    }
+    if (loading) return <div className={styles.letsMeetDetail}>Loading...</div>;
 
     if (error) {
       return (
@@ -99,9 +91,7 @@ export default class LetsMeetDetail extends React.Component<
       );
     }
 
-    if (!current) {
-      return null;
-    }
+    if (!current) return null;
 
     return (
       <section className={styles.letsMeetDetail}>
@@ -175,9 +165,7 @@ export default class LetsMeetDetail extends React.Component<
                 />
 
                 <div className={styles.episodeOverlay}>
-                  <div className={styles.episodeKicker}>Let&apos;s Meet</div>
                   <div className={styles.episodeTitle}>{item.title}</div>
-
                   <span className={styles.playBtnSmall} aria-hidden="true">
                     <span className={styles.playTriangleSmall} />
                   </span>

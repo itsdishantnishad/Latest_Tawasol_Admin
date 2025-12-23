@@ -1,4 +1,4 @@
-// src/webparts/letsMeetDetail/services/LetsMeetMappingService.ts
+
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import { PageVideoItem } from "./LetsMeetDataService";
 
@@ -16,7 +16,7 @@ export class LetsMeetMappingService {
   constructor(private context: WebPartContext) {}
 
   public mapToViewModel(item: PageVideoItem): ViewModel | null {
-    const youtubeUrl = (item?.LetsMeetYouTubeUrl || "").trim();
+    const youtubeUrl = this.getUrlValue(item?.URL).trim();
     if (!youtubeUrl) return null;
 
     const videoId = this.parseYouTubeId(youtubeUrl);
@@ -43,12 +43,16 @@ export class LetsMeetMappingService {
       .filter((vm): vm is ViewModel => vm !== null);
   }
 
+  private getUrlValue(val: any): string {
+    if (!val) return "";
+    if (typeof val === "string") return val;
+    return val?.Url || val?.url || "";
+  }
+
   private toAbsoluteUrl(serverRelative: string): string {
     const webAbs = this.context.pageContext.web.absoluteUrl;
     const origin = new URL(webAbs).origin;
-    return serverRelative.startsWith("http")
-      ? serverRelative
-      : `${origin}${serverRelative}`;
+    return serverRelative.startsWith("http") ? serverRelative : `${origin}${serverRelative}`;
   }
 
   private parseYouTubeId(url: string): string | null {
