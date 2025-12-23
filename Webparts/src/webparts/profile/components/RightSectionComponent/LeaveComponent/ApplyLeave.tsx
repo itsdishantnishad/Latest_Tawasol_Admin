@@ -1,121 +1,195 @@
-// src/webparts/<yourWebPart>/components/LeaveComponent/ApplyLeave.tsx
 import * as React from "react";
 import styles from "./ApplyLeave.module.scss";
-import { TahweelService } from "../../../../services/Integration/TahweelService";
+import { TahweelService, TahweelEmployeeLeaveBalance } from "../../../../services/Integration/TahweelService";
 
 export interface IApplyLeaveCardProps {
-  context: any;
-  onApply?: () => void;
-
-  // UI text (optional)
   periodText?: string;
+  onApply?: () => void;
+  context: any;
 }
 
 export interface IApplyLeaveCardState {
   loading: boolean;
-  leaveBalanceText: string; // "20" or "No balance found"
-  periodText: string;       // "as of 20th November"
+
+  // what we show in the big value area
+  displayValue: string;
+  isMessage: boolean;
+
+  // what we show below "Leave Balance"
+  periodText: string;
+
+  // for debugging / optional display later
   error: string;
 }
 
+const EMPTY_TEXT = "—";
+
+const monthMap: { [k: string]: number } = {
+  JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
+  JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11,
+};
+
 export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps, IApplyLeaveCardState> {
-  private readonly tahweelService: TahweelService;
+  private tahweelService: TahweelService;
 
   constructor(props: IApplyLeaveCardProps) {
     super(props);
 
     this.state = {
       loading: true,
-      leaveBalanceText: "—",
-      periodText: props.periodText || this.formatAsOfText(new Date()),
+      displayValue: EMPTY_TEXT,
+      isMessage: false,
+      periodText: EMPTY_TEXT,
       error: "",
     };
 
-    this.tahweelService = new TahweelService({
-      httpClient: this.props.context.httpClient,
-    });
+    this.tahweelService = new TahweelService({ httpClient: this.props.context.httpClient });
   }
 
   public async componentDidMount(): Promise<void> {
     await this.loadLeaveBalance();
   }
 
-  private formatAsOfText(d: Date): string {
-    const day = d.getDate();
-    const month = d.toLocaleString("en-GB", { month: "long" });
+  private getUserEmailFromContext(): string {
+    return ((this.props.context?.pageContext?.user?.email || "") + "").trim();
+  }
 
-    const suffix =
-      day % 100 >= 11 && day % 100 <= 13
-        ? "th"
-        : day % 10 === 1
-        ? "st"
-        : day % 10 === 2
-        ? "nd"
-        : day % 10 === 3
-        ? "rd"
-        : "th";
+  private ordinal(n: number): string {
+    const v = n % 100;
+    if (v >= 11 && v <= 13) return n + "th";
+    const r = n % 10;
+    if (r === 1) return n + "st";
+    if (r === 2) return n + "nd";
+    if (r === 3) return n + "rd";
+    return n + "th";
+  }
 
-    return `as of ${day}${suffix} ${month}`;
+  private parseTillDate(raw?: string): Date | null {
+    const v = (raw || "").trim();
+    if (!v) return null;
+
+    // supports "DD-MMM-YYYY" (example: 31-DEC-2025)
+    const parts = v.split("-");
+    if (parts.length === 3 && parts[1] && parts[1].length === 3) {
+      const d = parseInt(parts[0], 10);
+      const mon = (parts[1] || "").toUpperCase();
+      const y = parseInt(parts[2], 10);
+      const m = monthMap[mon];
+
+      if (!isNaN(d) && !isNaN(y) && m !== undefined) {
+        return new Date(y, m, d);
+      }
+    }
+
+    // fallback: Date parser
+    const dt = new Date(v);
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+
+  private formatAsOf(tillDateRaw?: string): string {
+    const dt = this.parseTillDate(tillDateRaw);
+    if (!dt) return EMPTY_TEXT;
+
+    const day = dt.getDate();
+    const month = dt.toLocaleString("en-GB", { month: "short" });
+    const year = dt.getFullYear();
+
+    return `as of ${this.ordinal(day)} ${month} ${year}`;
   }
 
   private async loadLeaveBalance(): Promise<void> {
-    const userEmail: string = (this.props.context?.pageContext?.user?.email || "").trim();
-
-    if (!userEmail) {
-      this.setState({
-        loading: false,
-        leaveBalanceText: "No Balance Found",
-        error: "User email not available.",
-      });
-      return;
-    }
-
     this.setState({ loading: true, error: "" });
 
     try {
-      // 1) Email -> person number
-      const personRes = await this.tahweelService.fetchPersonNumberByEmail(userEmail);
+      const email = this.getUserEmailFromContext();
+      if (!email) {
+        this.setState({
+          loading: false,
+          displayValue: "Employee Number Not Present",
+          isMessage: true,
+          periodText: EMPTY_TEXT,
+          error: "User email not found in context.",
+        });
+        return;
+      }
 
-      // 2) person number -> leave balance
-      const leaveRes = await this.tahweelService.fetchLeaveBalanceByPersonNumber(personRes.personNumber);
+      const res: TahweelEmployeeLeaveBalance = await this.tahweelService.fetchEmployeeLeaveBalanceByEmail(email);
+
+      // - if no PERSON_NUMBER -> "Employee Number Not Present"
+      // - else if no balance -> "No Balance Found"
+      if (!res.hasPersonNumber) {
+        this.setState({
+          loading: false,
+          displayValue: "Employee Number Not Present",
+          isMessage: true,
+          periodText: EMPTY_TEXT,
+          error: "PERSON_NUMBER missing from API response",
+        });
+        return;
+      }
+
+      if (!res.hasBalance) {
+        this.setState({
+          loading: false,
+          displayValue: "No Balance Found",
+          isMessage: true,
+          periodText: this.props.periodText || this.formatAsOf(res.tillDate),
+          error: "LEAVE_BALANCE missing from API response",
+        });
+        return;
+      }
 
       this.setState({
         loading: false,
-        leaveBalanceText: leaveRes.hasBalance ? leaveRes.balance : "No Balance Found",
-        periodText: this.props.periodText || this.formatAsOfText(new Date()),
-        error: leaveRes.hasBalance ? "" : "No Balance Found", // you can hide this if you don’t want text
+        displayValue: (res.leaveBalance || "").trim() || EMPTY_TEXT,
+        isMessage: false,
+        periodText: this.props.periodText || this.formatAsOf(res.tillDate),
+        error: "",
       });
     } catch (e: any) {
       this.setState({
         loading: false,
-        leaveBalanceText: "No Balance Found",
-        error: e?.message || "Failed to fetch leave balance.",
+        displayValue: "No Balance Found",
+        isMessage: true,
+        periodText: EMPTY_TEXT,
+        error: e?.message || "Failed to load leave balance",
       });
     }
   }
 
   public render(): React.ReactElement<IApplyLeaveCardProps> {
     const { onApply } = this.props;
-    const { loading, leaveBalanceText, periodText } = this.state;
+    const { loading, displayValue, isMessage, periodText } = this.state;
 
     return (
-      <section className={styles.card} aria-label="Apply for Leave">
+      <div className={styles.card}>
         <div className={styles.headTitle}>Apply for Leave</div>
 
         <p className={styles.subText}>
           Apply for leave in just a few clicks and track your leave balance with ease
         </p>
 
-        <div className={styles.balanceBox}>
-          <div className={styles.balanceNumber}>{loading ? "—" : leaveBalanceText}</div>
+        <div className={styles.balanceBox} aria-busy={loading}>
+          <div className={`${styles.balanceNumber} ${isMessage ? styles.balanceNumberMessage : ""}`}>
+            {loading ? EMPTY_TEXT : (displayValue || EMPTY_TEXT)}
+          </div>
+
           <div className={styles.balanceLabel}>Leave Balance</div>
-          <div className={styles.balancePeriod}>{periodText}</div>
+
+          <div className={styles.balancePeriod}>
+            {loading ? EMPTY_TEXT : (periodText || EMPTY_TEXT)}
+          </div>
         </div>
 
-        <button type="button" className={styles.cta} onClick={onApply} disabled={loading}>
+        <button
+          type="button"
+          className={styles.cta}
+          onClick={onApply}
+          disabled={loading}
+        >
           <span className={styles.ctaText}>Apply Leave</span>
         </button>
-      </section>
+      </div>
     );
   }
 }
