@@ -20,6 +20,11 @@ const monthMap: { [k: string]: number } = {
   JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11,
 };
 
+const monthNames: string[] = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 const parseMonthDay = (raw?: string): { m: number; d: number } | null => {
   const v = (raw || "").trim();
   if (!v) return null;
@@ -56,6 +61,11 @@ const dayDiffFromToday = (m: number, d: number): number => {
   return Math.floor((candidate.getTime() - today.getTime()) / MS_PER_DAY);
 };
 
+const formatDayMonth = (m: number, d: number): string => {
+  const month = monthNames[m] || "";
+  return `${d} ${month}`.trim();
+};
+
 const Birthday: React.FC<BirthdaysFeedProps> = ({
   items,
   webAbsoluteUrl,
@@ -70,16 +80,34 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
         const md = parseMonthDay(x.date);
         if (!md) return null;
         const diff = dayDiffFromToday(md.m, md.d);
-        return { item: x, diff };
+        return { item: x, diff, md };
       })
-      .filter((x): x is { item: IPersonBase; diff: number } => !!x)
+      .filter((x): x is { item: IPersonBase; diff: number; md: { m: number; d: number } } => !!x)
       .filter((x) => x.diff >= 0)
       .sort((a, b) => a.diff - b.diff);
 
     const today = rows.filter((x) => x.diff === 0).map((x) => x.item);
-    const upcoming = rows.filter((x) => x.diff > 0).map((x) => x.item);
 
-    return { today, upcoming };
+    // upcoming rows (diff > 0), grouped by day+month
+    const upcomingRows = rows.filter((x) => x.diff > 0);
+
+    const groups: Array<{ key: string; label: string; items: IPersonBase[] }> = [];
+    const idxByKey: { [k: string]: number } = {};
+
+    for (let i = 0; i < upcomingRows.length; i++) {
+      const r = upcomingRows[i];
+      const key = `${r.md.m}-${r.md.d}`;
+      const label = formatDayMonth(r.md.m, r.md.d);
+
+      if (idxByKey[key] === undefined) {
+        idxByKey[key] = groups.length;
+        groups.push({ key, label, items: [r.item] });
+      } else {
+        groups[idxByKey[key]].items.push(r.item);
+      }
+    }
+
+    return { today, upcomingGroups: groups };
   }, [items]);
 
   return (
@@ -101,11 +129,37 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
           <span>{upcomingTitle}</span>
         </button>
 
-        <PeopleSimpleFeed
-          items={buckets.upcoming}
-          webAbsoluteUrl={webAbsoluteUrl}
-          emptyText={emptyUpcomingText}
-        />
+        {(!buckets.upcomingGroups || buckets.upcomingGroups.length === 0) ? (
+          <PeopleSimpleFeed
+            items={[]}
+            webAbsoluteUrl={webAbsoluteUrl}
+            emptyText={emptyUpcomingText}
+            renderCta={() => null}
+          />
+        ) : (
+          <div>
+            {buckets.upcomingGroups.map((g) => (
+              <div key={g.key}>
+                {/* Date heading like: "21 December" */}
+                <div
+                  style={{
+                    padding: "10px 0 6px",
+                    fontWeight: 600,
+                    fontSize: "14px",
+                  }}
+                >
+                  {g.label}
+                </div>
+
+                <PeopleSimpleFeed
+                  items={g.items}
+                  webAbsoluteUrl={webAbsoluteUrl}
+                  renderCta={() => null}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
