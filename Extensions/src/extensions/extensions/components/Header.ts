@@ -221,8 +221,8 @@ export class Header {
               class="${styles.TIRAvatar}"
               role="button"
               tabindex="0"
-              aria-label="Open profile"
-              title="Open profile"
+              aria-label="Profile"
+              title="Profile"
             >
               <img src="${this.photoService.getMedium(this.userUpn)}" alt="User" />
             </div>
