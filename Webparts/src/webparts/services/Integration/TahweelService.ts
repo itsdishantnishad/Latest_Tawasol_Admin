@@ -676,6 +676,7 @@ export interface TahweelApproval {
 
 export interface TahweelTaskListApiResponse {
   approvals: TahweelApproval[];
+  totalCount?: number; // ✅ NEW (optional) - for widget + future use
 }
 
 /**
@@ -998,7 +999,80 @@ export class TahweelService {
     return (url || "").toString().trim();
   }
 
-  /** Tahweel task listing */
+  /**
+   * ✅ NEW (Widget/Homepage optimized)
+   * - Returns totalCount of ALL tasks
+   * - Generates redirectURL only for topN items (performance)
+   */
+  public async fetchTahweelApprovalsForWidget(
+    employeeNumber: string,
+    topN: number = 4
+  ): Promise<TahweelTaskListApiResponse> {
+    const emp = (employeeNumber || "").trim();
+    if (!emp) throw new Error("Tahweel approvals failed: EmployeeNumber is required.");
+
+    const requestUrl =
+      `${TAHWEEL_AZURE_API_CONFIG.apiBaseUrl.replace(/\/$/, "")}${TAHWEEL_AZURE_API_CONFIG.taskListEndpoint}`;
+
+    const headers = this.buildTahweelAzureHeaders();
+
+    const options: IHttpClientOptions = {
+      headers,
+      body: JSON.stringify({
+        [TAHWEEL_AZURE_API_CONFIG.employeeNumberField]: emp,
+      }),
+    };
+
+    const response: HttpClientResponse = await this.httpClient.post(
+      requestUrl,
+      HttpClient.configurations.v1,
+      options
+    );
+
+    if (!response.ok) {
+      const t = await response.text().catch(() => "");
+      throw new Error(`Tahweel approvals failed: ${response.status} ${response.statusText}. ${t}`);
+    }
+
+    const txt = await response.text().catch(() => "");
+    const parsed = this.safeParsePossiblyDoubleEncodedJson(txt) as TahweelTaskListApiRawResponse;
+
+    const items: TahweelRawTaskItem[] = Array.isArray(parsed?.items) ? parsed.items : [];
+    const totalCount = items.length;
+
+    const safeTopN = Math.max(0, topN || 0);
+    const topItems = items.slice(0, safeTopN);
+
+    const approvals: TahweelApproval[] = await Promise.all(
+      topItems.map(async (item) => {
+        const number = (item?.number || "").toString().trim();
+        let redirectURL = "";
+
+        if (number) {
+          try {
+            redirectURL = await this.fetchTahweelTaskApprovalUrl(emp, number);
+          } catch {
+            redirectURL = "";
+          }
+        }
+
+        return {
+          workflowNumber: number || "",
+          taskTitle: (item?.title || "").toString(),
+          priority: (item?.priority ?? "").toString(),
+          dueDate: (item?.assignedDate || "").toString(),
+          requestorName: (item?.createdBy || "").toString(),
+          workitemId: number || (item?.taskId || "").toString(),
+          originSystem: "Tahweel",
+          redirectURL,
+        };
+      })
+    );
+
+    return { approvals, totalCount };
+  }
+
+  /** Tahweel task listing (FULL - generates URL for every item) */
   public async fetchTahweelApprovalsByEmployeeNumber(employeeNumber: string): Promise<TahweelTaskListApiResponse> {
     const emp = (employeeNumber || "").trim();
     if (!emp) throw new Error("Tahweel approvals failed: EmployeeNumber is required.");
@@ -1030,10 +1104,11 @@ export class TahweelService {
     const parsed = this.safeParsePossiblyDoubleEncodedJson(txt) as TahweelTaskListApiRawResponse;
 
     const items: TahweelRawTaskItem[] = Array.isArray(parsed?.items) ? parsed.items : [];
+    const totalCount = items.length;
 
     const approvals: TahweelApproval[] = await Promise.all(
       items.map(async (item) => {
-        const number = (item?.number || "").toString();
+        const number = (item?.number || "").toString().trim();
         let redirectURL = "";
 
         if (number) {
@@ -1057,7 +1132,7 @@ export class TahweelService {
       })
     );
 
-    return { approvals };
+    return { approvals, totalCount };
   }
 
   // ---------------------------

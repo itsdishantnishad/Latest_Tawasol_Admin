@@ -520,113 +520,6 @@ export interface ILetsCelebrateProps {
   context: any;
 }
 
-const defaultCelebrations = {
-  birthdays: [
-    {
-      id: "1",
-      name: "John Doe",
-      department: "Engineering",
-      date: "Today",
-      type: "birthday" as const,
-      image: "https://i.pravatar.cc/150?img=1",
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      department: "Marketing",
-      date: "Tomorrow",
-      type: "birthday" as const,
-      image: "https://i.pravatar.cc/150?img=2",
-    },
-    {
-      id: "3",
-      name: "Mike Johnson",
-      department: "Sales",
-      date: "Dec 15",
-      type: "birthday" as const,
-      image: "https://i.pravatar.cc/150?img=3",
-    },
-    {
-      id: "4",
-      name: "Sarah Williams",
-      department: "HR",
-      date: "Dec 20",
-      type: "birthday" as const,
-      image: "https://i.pravatar.cc/150?img=4",
-    },
-  ],
-  anniversaries: [
-    {
-      id: "5",
-      name: "Robert Brown",
-      department: "Engineering",
-      date: "5 Years",
-      type: "anniversary" as const,
-      image: "https://i.pravatar.cc/150?img=5",
-    },
-    {
-      id: "6",
-      name: "Emily Davis",
-      department: "Operations",
-      date: "10 Years",
-      type: "anniversary" as const,
-      image: "https://i.pravatar.cc/150?img=6",
-    },
-    {
-      id: "7",
-      name: "David Wilson",
-      department: "Finance",
-      date: "3 Years",
-      type: "anniversary" as const,
-      image: "https://i.pravatar.cc/150?img=7",
-    },
-    {
-      id: "8",
-      name: "Lisa Anderson",
-      department: "Legal",
-      date: "7 Years",
-      type: "anniversary" as const,
-      image: "https://i.pravatar.cc/150?img=8",
-    },
-  ],
-  newJoiners: [
-    {
-      id: "9",
-      name: "Tom Harris",
-      department: "Engineering",
-      date: "This Week",
-      type: "newJoiner" as const,
-      image: "https://i.pravatar.cc/150?img=9",
-    },
-    {
-      id: "10",
-      name: "Anna Martin",
-      department: "Design",
-      date: "This Week",
-      type: "newJoiner" as const,
-      image: "https://i.pravatar.cc/150?img=10",
-    },
-  ],
-  Achievements: [
-    {
-      id: "11",
-      name: "Project Alpha",
-      department: "Engineering",
-      date: "Completed",
-      type: "Achievement" as const,
-      image: "https://i.pravatar.cc/150?img=11",
-    },
-    {
-      id: "12",
-      name: "Sales Milestone",
-      department: "Sales",
-      date: "Achieved",
-      type: "Achievement" as const,
-      image: "https://i.pravatar.cc/150?img=12",
-    },
-  ],
-};
-
 // Position assignments for outer circle (2 positions - left and right)
 const outerPositions: Array<"left" | "right"> = ["left", "right"];
 
@@ -714,7 +607,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     "birthdays" | "anniversaries" | "newJoiners" | "Achievements"
   >("newJoiners");
   const [currentPage, setCurrentPage] = React.useState(0);
-  const [spNewJoiners, setSpNewJoiners] = React.useState<any[]>([]);
+  const [spNewJoiners, setSpNewJoiners] = React.useState<ICelebration[]>([]);
 
   // ✅ API-driven (Today only, max 4, random on reload)
   const [apiBirthdays, setApiBirthdays] = React.useState<ICelebration[]>([]);
@@ -738,12 +631,12 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
           const spService = new listServices(props.context);
           const data = await spService.getNewJoiners("New Joiner");
 
-          const mappedData = (data || []).map((item) => ({
-            id: item.Id,
-            name: item.Title,
-            department: item.Department,
+          const mappedData: ICelebration[] = (data || []).map((item: any) => ({
+            id: (item.Id || item.ID || item.id || item.Title || "").toString(),
+            name: (item.Title || item.name || "").toString(),
+            department: (item.Department || item.department || "").toString(),
             type: "newJoiner" as const,
-            image: item.UserPicture,
+            image: (item.UserPicture || item.image || "").toString(),
           }));
 
           if (mounted) setSpNewJoiners(mappedData);
@@ -825,27 +718,24 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     };
   }, [props.context]);
 
-  // ✅ Use API for Birthdays/Anniversaries (today-only, max 4), keep existing for others
+  // ✅ No dummy fallback now
   const celebrations = {
     birthdays: props.celebrations?.birthdays ?? apiBirthdays,
     anniversaries: props.celebrations?.anniversaries ?? apiAnniversaries,
-    newJoiners:
-      props.celebrations?.newJoiners ??
-      (spNewJoiners.length > 0 ? spNewJoiners : defaultCelebrations.newJoiners),
-    Achievements:
-      props.celebrations?.Achievements ?? defaultCelebrations.Achievements ?? [],
+    newJoiners: props.celebrations?.newJoiners ?? spNewJoiners,
+    Achievements: props.celebrations?.Achievements ?? [],
   };
 
   const tabs = [
     {
       key: "birthdays" as const,
       label: "Birthdays",
-      count: celebrations.birthdays.length, // <= 4 (today-only)
+      count: celebrations.birthdays.length,
     },
     {
       key: "anniversaries" as const,
       label: "Anniversaries",
-      count: celebrations.anniversaries.length, // <= 4 (today-only)
+      count: celebrations.anniversaries.length,
     },
     {
       key: "newJoiners" as const,
@@ -859,7 +749,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     },
   ];
 
-  const currentCelebrations: ICelebration[] = (celebrations as any)[activeTab] ?? [];
+  const currentCelebrations: ICelebration[] =
+    (celebrations as any)[activeTab] ?? [];
 
   // ✅ Wheel displays max 4 per page (matches UI positions)
   const itemsPerPage = 4;

@@ -8,37 +8,25 @@
   padding: 0 60px;
 }
 
-/* action column */
-.actionCell {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.actionItem {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.actionIcon {
-  width: 24px;
-  height: 24px;
-  display: inline-block;
-}
-
 .requestorWrapper {
   display: flex;
   align-items: center;
   gap: 12px;
+}
 
-  img {
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: 50%;
-  }
+.avatarCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  background: #ffffff;
+  border: 1px solid rgba(16, 24, 32, 0.12);
+  color: #101820;
 }
 
 .requestorName {
@@ -49,14 +37,34 @@
   color: #3a3b43;
 }
 
-.ctaWrapper {
-  margin-top: 40px;
+.viewDetailsLink {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #101820;
+  text-decoration: underline;
 }
-// Button Container
+
+.loadingMessage,
+.emptyMessage {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  padding: 12px 0;
+  color: #3a3b43;
+}
+
+.errormessage {
+  margin-top: 10px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  color: #b00020;
+}
+
 .buttonContainer {
   display: flex;
   justify-content: center;
 }
+
 .viewAllButton {
   background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
   border: none;
