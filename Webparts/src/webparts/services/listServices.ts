@@ -254,6 +254,7 @@ export class listServices {
           "owstaxIdTIRDepartment",
           "TIRDepartment",
           "URL",
+          "Path",
           "owstaxIdTIRNewsType",
           "TIRNewsType",
           "ModifiedOWSDATE",
@@ -295,7 +296,7 @@ export class listServices {
           authorEmail: item.AuthorOWSUSER
             ? item.AuthorOWSUSER.split("|")[0]
             : "",
-          path: item.FileRef,
+          path: item.Path || item.FileRef || item.URL, // ✅ real page link first,
           created: item.Created,
           pageDescription: item.Description,
           lastModified: item.ModifiedOWSDATE
