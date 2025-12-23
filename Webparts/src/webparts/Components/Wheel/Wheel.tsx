@@ -66,21 +66,6 @@ const features: Feature[] = [
     subtitle: "All interactive forms In one place"
   },
   {
-    id: "dashboard",
-    title: "Dashboard",
-    subtitle: "Track, analyze, optimize"
-  },
-  {
-    id: "offers",
-    title: "Offers",
-    subtitle: "Exclusive deals just for you"
-  },
-  {
-    id: "training",
-    title: "Training",
-    subtitle: "Grow skills, unlock new doors"
-  },
-  {
     id: "about_dhre",
     title: "About DHRE",
     subtitle: "Journey through DHRE"
@@ -94,6 +79,21 @@ const features: Feature[] = [
     id: "beverage_menu",
     title: "Services",
     subtitle: "Simplify your journey ahead"
+  },
+  {
+    id: "dashboard",
+    title: "Dashboard",
+    subtitle: "Track, analyze, optimize"
+  },
+  {
+    id: "offers",
+    title: "Offers & Benefits",
+    subtitle: "Exclusive perks just for you"
+  },
+  {
+    id: "training",
+    title: "Training",
+    subtitle: "Grow skills, unlock new doors"
   },
 ];
 
