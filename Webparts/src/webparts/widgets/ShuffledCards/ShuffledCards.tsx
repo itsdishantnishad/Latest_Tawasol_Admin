@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./ShuffledCards.module.scss";
 import ConditionalLink from "../../Components/ConditionalLink/ConditionalLink";
 
@@ -11,6 +11,21 @@ interface Card {
 }
 
 const ShuffledCards: React.FC<{ cards: Card[] }> = ({ cards }) => {
+    const [isMweb, setIsMweb] = useState<boolean>(false);
+
+    useEffect(() => {
+        const checkWindowSize = (): void => {
+            setIsMweb(window.innerWidth <= 768);
+        };
+
+        checkWindowSize();
+        window.addEventListener('resize', checkWindowSize);
+
+        return () => {
+            window.removeEventListener('resize', checkWindowSize);
+        };
+    }, [])
+
     return (
         <div className={styles.wrapper}>
             {
@@ -22,7 +37,7 @@ const ShuffledCards: React.FC<{ cards: Card[] }> = ({ cards }) => {
                         <div
                             className={styles.body}
                             style={{
-                                transform: `rotate(${index % 2 === 0 ? '-2deg' : '2deg'})`,
+                                transform: `rotate(${isMweb ? '0deg' : index % 2 === 0 ? '-2deg' : '2deg'})`,
                                 ...(card.backgroundImage && { backgroundImage: `url(${card.backgroundImage})` }),
                             }}
                         >

@@ -4,9 +4,12 @@ import * as React from "react";
 import styles from "./Training.module.scss";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import EventCard from "../../../widgets/EventCard/EventCard";
+import ConditionalLink from "../../ConditionalLink/ConditionalLink";
+import PrimaryButton from "../../PrimaryButton/PrimaryButton";
 
-const Location_Icon_URL = require("../assets/LocationIcon.png");
-const Time_Icon_URL = require("../assets/clockIcon.png");
+const locationIcon = require("../assets/LocationIcon.png");
+const timeIcon = require("../assets/clockIcon.png");
 
 export interface ITraining {
   id: string;
@@ -107,8 +110,8 @@ const mapItemToTraining = (item: any): ITraining => {
     start && end
       ? `${formatTime(start)} - ${formatTime(end)}`
       : start
-      ? formatTime(start)
-      : "";
+        ? formatTime(start)
+        : "";
 
   const { day: dateDay, month: dateMonth } = formatDateRange(start, end);
 
@@ -252,7 +255,7 @@ export const Training: React.FC<ITrainingProps> = (props) => {
       }
     };
 
-    loadTrainings();
+    void loadTrainings();
   }, [
     props.trainings,
     props.context,
@@ -309,87 +312,32 @@ export const Training: React.FC<ITrainingProps> = (props) => {
     <div className={styles.trainingContainer}>
       <div className={styles.trainingGrid}>
         {trainings.map((training) => (
-          <a
-            key={training.id}
-            href={training.url}
-            className={styles.trainingCard}
-          >
-            <div className={styles.imageContainer}>
-              <img
-                src={training.image}
-                alt={training.title}
-                className={styles.trainingImage}
-              />
-              <div className={styles.imageOverlay} />
-
-              <div className={styles.modeBadge}>
-                {training.level || "Classroom"}
-              </div>
-
-              {training.dateDay && training.dateMonth && (
-                <div className={styles.dateBadge}>
-                  <div className={styles.dateDay}>{training.dateDay}</div>
-                  <div className={styles.dateMonth}>{training.dateMonth}</div>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.trainingInfo}>
-              <h3 className={styles.trainingTitle}>{training.title}</h3>
-
-              <div className={styles.metaRow}>
-                {training.duration && (
-                  <div className={styles.metaItem}>
-                    <img src={Time_Icon_URL} className={styles.metaIcon} alt="" />
-                    <span className={styles.metaText}>{training.duration}</span>
-                  </div>
-                )}
-
-                {training.location && (
-                  <div className={styles.metaItem}>
-                    <img
-                      src={Location_Icon_URL}
-                      className={styles.metaIcon}
-                      alt=""
-                    />
-                    <span className={styles.metaText}>{training.location}</span>
-                  </div>
-                )}
-              </div>
-
-              {training.instructorName && (
-                <div className={styles.instructorRow}>
-                  <div className={styles.instructorAvatar}>
-                    {getInitials(training.instructorName)}
-                  </div>
-                  <div className={styles.instructorInfo}>
-                    <div className={styles.instructorName}>
-                      {training.instructorName}
-                    </div>
-                    {training.instructorTitle && (
-                      <div className={styles.instructorTitle}>
-                        {training.instructorTitle}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <button
-                className={styles.requestButton}
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  alert(
-                    `Your request for "${training.title}" has been captured.\n\n` +
-                      "In the next phase, this button will open the actual approval workflow."
-                  );
-                }}
-              >
-                Request for Approval
-              </button>
-            </div>
-          </a>
+          <React.Fragment key={training.id}>
+            <EventCard
+              imageUrl={training.image}
+              redirectUrl={training.url}
+              infoTag={training.level || 'Classroom'}
+              tagShape='square'
+              date={{ day: training.dateDay, month: training.dateMonth }}
+              header={training.title}
+              infoList={[
+                ...(training.duration ? [{ iconUrl: timeIcon, text: training.duration }] : []),
+                ...(training.location ? [{ iconUrl: locationIcon, text: training.location }] : []),
+              ]}
+              creator={{
+                header: training.instructorName,
+                subHeader: training.instructorTitle
+              }}
+              onCtaClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                alert(
+                  `Your request for "${training.title}" has been captured.\n\n` +
+                  "In the next phase, this button will open the actual approval workflow."
+                );
+              }}
+            />
+          </React.Fragment>
         ))}
       </div>
 
@@ -404,9 +352,9 @@ export const Training: React.FC<ITrainingProps> = (props) => {
               View All
             </button>
           ) : viewAllUrl ? (
-            <a href={viewAllUrl} className={styles.viewAllButton}>
-              View All
-            </a>
+            <ConditionalLink to={viewAllUrl}>
+              <PrimaryButton label="View All" />
+            </ConditionalLink>
           ) : null}
         </div>
       )}
