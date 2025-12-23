@@ -47,10 +47,7 @@ const FeatureTitle: React.FC<FeatureTitleProps> = ({ header, subHeader }) => {
   );
 };
 
-const featureTitleContent: Record<
-  string,
-  { header: string; subHeader: string }
-> = {
+const featureTitleContent: Record<string, { header: string; subHeader: string }> = {
   gallery: {
     header: "A Glimpse through our lens",
     subHeader: "Recent milestones and cherished memories we've Immortalised",
@@ -77,13 +74,11 @@ const featureTitleContent: Record<
   },
   forms: {
     header: "Interactive Forms",
-    subHeader:
-      "All your essential forms – legacy, claims, business excellence, and more",
+    subHeader: "All your essential forms – legacy, claims, business excellence, and more",
   },
   about_dhre: {
     header: "About DHRE",
-    subHeader:
-      "Dive deep into DHRE: Our departments, culture, and core values.",
+    subHeader: "Dive deep into DHRE: Our departments, culture, and core values.",
   },
   tasks: {
     header: "Task Approvals",
@@ -117,22 +112,10 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
   const renderFeatureContent = () => {
     switch (selectedFeature) {
       case "gallery":
-        return (
-          <Gallery
-            context={props.context}
-            seeAllURL={props.imageGallery}
-            onViewAll={handleViewAll}
-          />
-        );
+        return <Gallery context={props.context} seeAllURL={props.imageGallery} onViewAll={handleViewAll} />;
 
       case "documents":
-        return (
-          <Documents
-            // context={props.context}
-            seeAllURL={props.documents}
-            onViewAll={handleViewAll}
-          />
-        );
+        return <Documents seeAllURL={props.documents} onViewAll={handleViewAll} />;
 
       case "events":
         return (
@@ -146,64 +129,31 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         );
 
       case "employee_events":
-        return (
-          <LetsCelebrate
-            context={props.context}
-            seeAllURL={props.letsCelebrate}
-            onViewAll={handleViewAll}
-          />
-        );
+        return <LetsCelebrate context={props.context} seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />;
 
       case "meetings":
-        return (
-          <Meeting
-            context={props.context}
-            seeAllURL={props.meeting}
-            onViewAll={handleViewAll}
-          />
-        );
+        return <Meeting context={props.context} seeAllURL={props.meeting} onViewAll={handleViewAll} />;
 
       case "service_links":
         return <ServiceLinks context={props.context} />;
 
       case "forms":
-        return (
-          <Forms
-            seeAllURL={props.interactiveForms}
-            onViewAll={handleViewAll}
-          />
-        );
+        return <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />;
 
       case "about_dhre":
         return <AboutDHRE context={props.context} />;
 
       case "tasks":
-        return <TaskApprovals context={props.context} />;
+        return <TaskApprovals context={props.context} seeAllURL={props.taskApprovals} />;
 
-      case 'beverage_menu':
-        return (
-          <BeverageMenu
-            context={props.context}
-            seeAllURL={props.beverageMenu} // add this prop to webpart if needed
-          />
-        );
+      case "beverage_menu":
+        return <BeverageMenu context={props.context} seeAllURL={props.beverageMenu} />;
 
       case "dashboard":
-        return (
-          <Dashboard
-            context={props.context}
-            seeAllURL={props.dashboard}
-            onViewAll={handleViewAll}
-          />
-        );
+        return <Dashboard context={props.context} seeAllURL={props.dashboard} onViewAll={handleViewAll} />;
 
       case "offers":
-        return (
-          <Offers
-            seeAllURL={props.getOffersAndDiscounts}
-            onViewAll={handleViewAll}
-          />
-        );
+        return <Offers seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />;
 
       case "training":
         return (
@@ -230,10 +180,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
       </div>
 
       <section className={styles.wheelSection}>
-        <Wheel
-          selectedFeature={selectedFeature}
-          onFeatureSelect={setSelectedFeature}
-        />
+        <Wheel selectedFeature={selectedFeature} onFeatureSelect={setSelectedFeature} />
       </section>
 
       <FeatureTitle
