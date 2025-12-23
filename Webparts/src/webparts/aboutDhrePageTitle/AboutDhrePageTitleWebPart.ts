@@ -1,3 +1,5 @@
+
+
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
@@ -12,24 +14,22 @@ import AboutDhrePageTitle from './components/AboutDhrePageTitle';
 import { IAboutDhrePageTitleProps } from './components/IAboutDhrePageTitleProps';
 
 export interface IAboutDhrePageTitleWebPartProps {
-  title: string;
+  title: string;        // "About"
+  subTitle: string;     // "DHRE"
   description: string;
   imageUrl: string;
-
 }
 
 export default class AboutDhrePageTitleWebPart extends BaseClientSideWebPart<IAboutDhrePageTitleWebPartProps> {
-
-
 
   public render(): void {
     const element: React.ReactElement<IAboutDhrePageTitleProps> = React.createElement(
       AboutDhrePageTitle,
       {
-        title: this.properties.title || "About DHRE",
+        title: this.properties.title || "About",
+        subTitle: this.properties.subTitle || "DHRE",
         description: this.properties.description || "Add description from property pane.",
         imageUrl: this.properties.imageUrl || "",
-
       }
     );
 
@@ -38,40 +38,35 @@ export default class AboutDhrePageTitleWebPart extends BaseClientSideWebPart<IAb
 
   protected onInit(): Promise<void> {
     return this._getEnvironmentMessage().then(message => {
-      this
+      this;
     });
   }
 
-
-
   private _getEnvironmentMessage(): Promise<string> {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
+    if (!!this.context.sdks.microsoftTeams) {
       return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
         .then(context => {
           let environmentMessage: string = '';
           switch (context.app.host.name) {
-            case 'Office': // running in Office
+            case 'Office':
               environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
               break;
-            case 'Outlook': // running in Outlook
+            case 'Outlook':
               environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
               break;
-            case 'Teams': // running in Teams
+            case 'Teams':
             case 'TeamsModern':
               environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
               break;
             default:
               environmentMessage = strings.UnknownEnvironment;
           }
-
           return environmentMessage;
         });
     }
 
     return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
   }
-
-
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
@@ -91,7 +86,10 @@ export default class AboutDhrePageTitleWebPart extends BaseClientSideWebPart<IAb
               groupName: "Content",
               groupFields: [
                 PropertyPaneTextField("title", {
-                  label: "Title",
+                  label: "Title (Black)",
+                }),
+                PropertyPaneTextField("subTitle", {
+                  label: "Sub Title (Red)",
                 }),
                 PropertyPaneTextField("description", {
                   label: "Description",
@@ -109,5 +107,4 @@ export default class AboutDhrePageTitleWebPart extends BaseClientSideWebPart<IAb
       ],
     };
   }
-
 }
