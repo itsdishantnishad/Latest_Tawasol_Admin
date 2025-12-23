@@ -3,6 +3,7 @@
 import * as React from "react";
 import styles from "./LetsCelebrate.module.scss";
 import { listServices } from "../../../services/listServices";
+import { getSP } from "../../../services/spSetUp/pnpConfig";
 import {
   TahweelService,
   TahweelActiveEmployee,
@@ -37,7 +38,7 @@ export interface ILetsCelebrateProps {
 const outerPositions: Array<"left" | "right"> = ["left", "right"];
 
 // Position assignments for inner circle (2 positions)
-const innerPositions: Array<"bottom-left" | "bottom-right" | "bottom-right"> = [
+const innerPositions: Array<"bottom-left" | "bottom-right"> = [
   "bottom-left",
   "bottom-right",
 ];
@@ -115,24 +116,51 @@ const normalizeFullName = (raw: string): string => {
   return v.replace(/\s+/g, " ");
 };
 
+// ✅ Image/Hyperlink column URL extractor (object/string/JSON-string safe)
+const extractUrl = (value: any): string => {
+  if (!value) return "";
+
+  if (typeof value === "string") {
+    const s = value.trim();
+    if (!s) return "";
+    if ((s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]"))) {
+      try {
+        const parsed = JSON.parse(s);
+        return parsed?.Url || parsed?.url || parsed?.serverRelativeUrl || "";
+      } catch {
+        return s;
+      }
+    }
+    return s;
+  }
+
+  if (typeof value === "object") {
+    return value.Url || value.url || value.URL || value.serverRelativeUrl || "";
+  }
+
+  return "";
+};
+
 export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const [activeTab, setActiveTab] = React.useState<
     "birthdays" | "anniversaries" | "newJoiners" | "Achievements"
   >("newJoiners");
-  const [currentPage, setCurrentPage] = React.useState(0);
-  const [spNewJoiners, setSpNewJoiners] = React.useState<ICelebration[]>([]);
 
-  //  API-driven (Today only, max 4, random on reload)
+  const [currentPage, setCurrentPage] = React.useState(0);
+
+  // SP - New Joiners + Achievements
+  const [spNewJoiners, setSpNewJoiners] = React.useState<ICelebration[]>([]);
+  const [spAchievements, setSpAchievements] = React.useState<ICelebration[]>([]);
+  const [loadingAchievements, setLoadingAchievements] = React.useState<boolean>(true);
+  const [errorAchievements, setErrorAchievements] = React.useState<string | null>(null);
+
+  // API-driven (Today only, max 4, random on reload)
   const [apiBirthdays, setApiBirthdays] = React.useState<ICelebration[]>([]);
-  const [apiAnniversaries, setApiAnniversaries] = React.useState<ICelebration[]>(
-    []
-  );
+  const [apiAnniversaries, setApiAnniversaries] = React.useState<ICelebration[]>([]);
   const [loadingBirthdays, setLoadingBirthdays] = React.useState<boolean>(true);
-  const [loadingAnniversaries, setLoadingAnniversaries] =
-    React.useState<boolean>(true);
+  const [loadingAnniversaries, setLoadingAnniversaries] = React.useState<boolean>(true);
   const [errorBirthdays, setErrorBirthdays] = React.useState<string | null>(null);
-  const [errorAnniversaries, setErrorAnniversaries] =
-    React.useState<string | null>(null);
+  const [errorAnniversaries, setErrorAnniversaries] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let mounted = true;
@@ -156,6 +184,50 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
         } catch (error) {
           console.error("Error fetching new joiners:", error);
           if (mounted) setSpNewJoiners([]);
+        }
+      })();
+
+      // ✅ Achievements (SP) - "User Achievements" list
+      const achievementsP = (async () => {
+        setLoadingAchievements(true);
+        setErrorAchievements(null);
+
+        try {
+          const sp = getSP(props.context);
+
+          const rows: any[] =
+            (await sp.web.lists
+              .getByTitle("User Achievements")
+              .items.select(
+                "Id",
+                "Title",
+                "TIRDesignation",
+                "TIRMonthOfAchievement",
+                "TIRUserPicture",
+                "TIRContact",
+                "TIRDescription"
+              )()) || [];
+
+          const mapped: ICelebration[] = rows
+            .map((it: any) => ({
+              id: (it.Id || it.ID || it.id || it.Title || "").toString(),
+              name: (it.Title || "").toString(),
+              department: (it.TIRDesignation || "").toString(),
+              date: (it.TIRMonthOfAchievement || "").toString(),
+              type: "Achievement" as const,
+              image: extractUrl(it.TIRUserPicture),
+            }))
+            .filter((x) => !!x.name);
+
+          if (mounted) setSpAchievements(mapped);
+        } catch (e: any) {
+          console.error("Error fetching achievements:", e);
+          if (mounted) {
+            setSpAchievements([]);
+            setErrorAchievements(e?.message || "Failed to load achievements.");
+          }
+        } finally {
+          if (mounted) setLoadingAchievements(false);
         }
       })();
 
@@ -222,7 +294,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
         }
       })();
 
-      await Promise.all([newJoinersP, birthdaysP, anniversariesP]);
+      await Promise.all([newJoinersP, achievementsP, birthdaysP, anniversariesP]);
     };
 
     fetchAll();
@@ -231,12 +303,12 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     };
   }, [props.context]);
 
-  //  No dummy fallback now
+  // ✅ No dummy fallback now
   const celebrations = {
     birthdays: props.celebrations?.birthdays ?? apiBirthdays,
     anniversaries: props.celebrations?.anniversaries ?? apiAnniversaries,
     newJoiners: props.celebrations?.newJoiners ?? spNewJoiners,
-    Achievements: props.celebrations?.Achievements ?? [],
+    Achievements: props.celebrations?.Achievements ?? spAchievements,
   };
 
   const tabs = [
@@ -262,10 +334,9 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     },
   ];
 
-  const currentCelebrations: ICelebration[] =
-    (celebrations as any)[activeTab] ?? [];
+  const currentCelebrations: ICelebration[] = (celebrations as any)[activeTab] ?? [];
 
-  //  Wheel displays max 4 per page (matches UI positions)
+  // ✅ Wheel displays max 4 per page (matches UI positions)
   const itemsPerPage = 4;
   const totalPages = Math.max(1, Math.ceil(currentCelebrations.length / itemsPerPage));
   const currentItems = currentCelebrations.slice(
@@ -291,16 +362,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const getOuterCirclePosition = (index: number): React.CSSProperties => {
     const position = outerPositions[index % 2];
     const positionMap: Record<string, React.CSSProperties> = {
-      left: {
-        top: "50%",
-        left: "0%",
-        transform: "translate(-50%, -50%)",
-      },
-      right: {
-        top: "50%",
-        right: "0%",
-        transform: "translate(50%, -50%)",
-      },
+      left: { top: "50%", left: "0%", transform: "translate(-50%, -50%)" },
+      right: { top: "50%", right: "0%", transform: "translate(50%, -50%)" },
     };
     return positionMap[position] || {};
   };
@@ -308,16 +371,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const getInnerCirclePosition = (index: number): React.CSSProperties => {
     const position = innerPositions[index % 2];
     const positionMap: Record<string, React.CSSProperties> = {
-      "bottom-left": {
-        top: "75%",
-        left: "0%",
-        transform: "translate(0%, 0%)",
-      },
-      "bottom-right": {
-        top: "75%",
-        right: "0%",
-        transform: "translate(0%, 0%)",
-      },
+      "bottom-left": { top: "75%", left: "0%", transform: "translate(0%, 0%)" },
+      "bottom-right": { top: "75%", right: "0%", transform: "translate(0%, 0%)" },
     };
     return positionMap[position] || {};
   };
@@ -339,23 +394,23 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
       }
     }
 
-    if (raw.startsWith("/")) {
-      return `${origin}${raw}`;
-    }
-
+    if (raw.startsWith("/")) return `${origin}${raw}`;
     return `${webUrl}/${raw}`;
   }, [props.seeAllURL, webUrl, origin]);
   // --- END ---
 
   const isLoadingActive =
     (activeTab === "birthdays" && loadingBirthdays) ||
-    (activeTab === "anniversaries" && loadingAnniversaries);
+    (activeTab === "anniversaries" && loadingAnniversaries) ||
+    (activeTab === "Achievements" && loadingAchievements);
 
   const activeError =
     activeTab === "birthdays"
       ? errorBirthdays
       : activeTab === "anniversaries"
       ? errorAnniversaries
+      : activeTab === "Achievements"
+      ? errorAchievements
       : null;
 
   const emptyLabel = (tabs.find((t) => t.key === activeTab)?.label || "").toLowerCase();
