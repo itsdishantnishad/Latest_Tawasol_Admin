@@ -6,24 +6,18 @@
 //  */
 // const TAHWEEL_AZURE_API_CONFIG = {
 //   apiBaseUrl: "https://wapp-corpdms-dev-001.azurewebsites.net",
-
 //   // Tasks
 //   taskListEndpoint: "/api/Tahweel/GetTahweelApprovalList",
 //   taskApprovalUrlEndpoint: "/api/Tahweel/GetTahweelTaskApprovalUrl",
-
 //   // Profile
 //   adDetailsEndpoint: "/api/Tahweel/GetADDetails",
-
 //   // Leave
 //   leaveBalanceEndpoint: "/api/Tahweel/GetEmployeeLeaveBalance",
-
 //   // Employees (Birthdays / Anniversaries)
 //   activeEmployeesEndpoint: "/api/Tahweel/GetActiveEmployees",
-
 //   // Auth
 //   apiKeyHeaderName: "x-api-key",
 //   apiKey: "qnwCDLTzcXO50lteD3S5By408lqputhj89ihYtiHW6o=",
-
 //   // Fields
 //   employeeNumberField: "EmployeeNumber",
 //   taskNumberField: "TaskNumber",
@@ -50,19 +44,18 @@
 
 // export interface TahweelTaskListApiResponse {
 //   approvals: TahweelApproval[];
+//   totalCount?: number; 
 // }
 
 // /**
 //  * Tahweel AD details mapped for Profile Header
 //  */
 // export interface TahweelAdDetails {
-//   employeeNumber: string; // the number we send to API
-//   personNumber: string; // person_number from API (fallback to employeeNumber)
-
+//   employeeNumber: string; 
+//   personNumber: string;
 //   fullName: string;
 //   designation: string;
 //   department: string;
-
 //   imageBase64?: string;
 //   imageDataUrl?: string;
 // }
@@ -72,10 +65,9 @@
 //  * NOTE: as per your note, PERSON_NUMBER is what you treat as employee/person number
 //  */
 // export interface TahweelEmployeeLeaveBalance {
-//   personNumber: string; // PERSON_NUMBER
-//   leaveBalance: string; // LEAVE_BALANCE
-//   tillDate: string; // TILL_DATE
-
+//   personNumber: string; 
+//   leaveBalance: string; 
+//   tillDate: string; 
 //   hasPersonNumber: boolean;
 //   hasBalance: boolean;
 // }
@@ -86,24 +78,15 @@
 // export interface TahweelActiveEmployee {
 //   personNumber: string;
 //   fullName: string;
-
 //   doj: string;
 //   dateOfBirth: string;
-
 //   designation?: string;
 //   department?: string;
 //   division?: string;
-
 //   email?: string;
-
-//   /** raw (can be base64 or url) */
 //   imageRaw?: string;
-
-//   /** final usable URL (http(s) / server relative / data:image...) */
 //   imageUrl?: string;
 //   imageDataUrl?: string;
-
-//   // extras if needed later
 //   location?: string;
 //   skill?: string;
 // }
@@ -182,7 +165,6 @@
 
 // export class TahweelService {
 //   private readonly httpClient: HttpClient;
-
 //   // shared cache across instances (Task + Profile + Leave balance)
 //   private static _personNumberPromiseByEmail: {
 //     [email: string]: Promise<{ personNumber: string; decodedXml: string }>;
@@ -372,7 +354,80 @@
 //     return (url || "").toString().trim();
 //   }
 
-//   /** Tahweel task listing */
+//   /**
+//    * ✅ NEW (Widget/Homepage optimized)
+//    * - Returns totalCount of ALL tasks
+//    * - Generates redirectURL only for topN items (performance)
+//    */
+//   public async fetchTahweelApprovalsForWidget(
+//     employeeNumber: string,
+//     topN: number = 4
+//   ): Promise<TahweelTaskListApiResponse> {
+//     const emp = (employeeNumber || "").trim();
+//     if (!emp) throw new Error("Tahweel approvals failed: EmployeeNumber is required.");
+
+//     const requestUrl =
+//       `${TAHWEEL_AZURE_API_CONFIG.apiBaseUrl.replace(/\/$/, "")}${TAHWEEL_AZURE_API_CONFIG.taskListEndpoint}`;
+
+//     const headers = this.buildTahweelAzureHeaders();
+
+//     const options: IHttpClientOptions = {
+//       headers,
+//       body: JSON.stringify({
+//         [TAHWEEL_AZURE_API_CONFIG.employeeNumberField]: emp,
+//       }),
+//     };
+
+//     const response: HttpClientResponse = await this.httpClient.post(
+//       requestUrl,
+//       HttpClient.configurations.v1,
+//       options
+//     );
+
+//     if (!response.ok) {
+//       const t = await response.text().catch(() => "");
+//       throw new Error(`Tahweel approvals failed: ${response.status} ${response.statusText}. ${t}`);
+//     }
+
+//     const txt = await response.text().catch(() => "");
+//     const parsed = this.safeParsePossiblyDoubleEncodedJson(txt) as TahweelTaskListApiRawResponse;
+
+//     const items: TahweelRawTaskItem[] = Array.isArray(parsed?.items) ? parsed.items : [];
+//     const totalCount = items.length;
+
+//     const safeTopN = Math.max(0, topN || 0);
+//     const topItems = items.slice(0, safeTopN);
+
+//     const approvals: TahweelApproval[] = await Promise.all(
+//       topItems.map(async (item) => {
+//         const number = (item?.number || "").toString().trim();
+//         let redirectURL = "";
+
+//         if (number) {
+//           try {
+//             redirectURL = await this.fetchTahweelTaskApprovalUrl(emp, number);
+//           } catch {
+//             redirectURL = "";
+//           }
+//         }
+
+//         return {
+//           workflowNumber: number || "",
+//           taskTitle: (item?.title || "").toString(),
+//           priority: (item?.priority ?? "").toString(),
+//           dueDate: (item?.assignedDate || "").toString(),
+//           requestorName: (item?.createdBy || "").toString(),
+//           workitemId: number || (item?.taskId || "").toString(),
+//           originSystem: "Tahweel",
+//           redirectURL,
+//         };
+//       })
+//     );
+
+//     return { approvals, totalCount };
+//   }
+
+//   /** Tahweel task listing (FULL - generates URL for every item) */
 //   public async fetchTahweelApprovalsByEmployeeNumber(employeeNumber: string): Promise<TahweelTaskListApiResponse> {
 //     const emp = (employeeNumber || "").trim();
 //     if (!emp) throw new Error("Tahweel approvals failed: EmployeeNumber is required.");
@@ -404,10 +459,11 @@
 //     const parsed = this.safeParsePossiblyDoubleEncodedJson(txt) as TahweelTaskListApiRawResponse;
 
 //     const items: TahweelRawTaskItem[] = Array.isArray(parsed?.items) ? parsed.items : [];
+//     const totalCount = items.length;
 
 //     const approvals: TahweelApproval[] = await Promise.all(
 //       items.map(async (item) => {
-//         const number = (item?.number || "").toString();
+//         const number = (item?.number || "").toString().trim();
 //         let redirectURL = "";
 
 //         if (number) {
@@ -431,7 +487,7 @@
 //       })
 //     );
 
-//     return { approvals };
+//     return { approvals, totalCount };
 //   }
 
 //   // ---------------------------
@@ -511,8 +567,8 @@
 //   // ---------------------------
 
 //   /**
-//    * Fetch active employees for DOB/DOJ celebrations.
-//    * You were testing GET with body in Postman; here we use POST (more reliable).
+//    * POST now, so SPFx should call POST with JSON body.
+//    * Body example: { "DOB": "1", "DOJ": "0" }
 //    */
 //   public async fetchActiveEmployees(payload: { DOB: string; DOJ: string }): Promise<TahweelActiveEmployee[]> {
 //     const requestUrl =
@@ -548,7 +604,7 @@
 //       const personNumber = (r.person_number || "").toString().trim();
 //       const fullName = (r.full_name || "").toString().trim();
 
-//       const doj = (r.doj || "").toString().trim();
+//       const dojVal = (r.doj || "").toString().trim();
 //       const dateOfBirth = (r.date_of_birth || "").toString().trim();
 
 //       const designation = (r.designation || "").toString().trim();
@@ -573,7 +629,7 @@
 //       return {
 //         personNumber,
 //         fullName,
-//         doj,
+//         doj: dojVal,
 //         dateOfBirth,
 //         designation,
 //         department,
@@ -624,26 +680,51 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// src/webparts/services/Integration/TahweelService.ts
+
 import { HttpClient, IHttpClientOptions, HttpClientResponse } from "@microsoft/sp-http";
 
 /**
  * Tahweel Azure Web App config
- * (Tasks, Profile AD Details, Leave Balance, Active Employees)
+ * (Tasks, Leave Balance, Active Employees)
+ * NOTE: AD Details endpoint kept but AD section is commented out (Profile now uses Graph).
  */
 const TAHWEEL_AZURE_API_CONFIG = {
   apiBaseUrl: "https://wapp-corpdms-dev-001.azurewebsites.net",
+
   // Tasks
   taskListEndpoint: "/api/Tahweel/GetTahweelApprovalList",
   taskApprovalUrlEndpoint: "/api/Tahweel/GetTahweelTaskApprovalUrl",
-  // Profile
+
+  // Profile (kept for future use)
+  // adDetailsEndpoint: "/api/Tahweel/GetADDetails",
   adDetailsEndpoint: "/api/Tahweel/GetADDetails",
+
   // Leave
   leaveBalanceEndpoint: "/api/Tahweel/GetEmployeeLeaveBalance",
+
   // Employees (Birthdays / Anniversaries)
   activeEmployeesEndpoint: "/api/Tahweel/GetActiveEmployees",
+
   // Auth
   apiKeyHeaderName: "x-api-key",
   apiKey: "qnwCDLTzcXO50lteD3S5By408lqputhj89ihYtiHW6o=",
+
   // Fields
   employeeNumberField: "EmployeeNumber",
   taskNumberField: "TaskNumber",
@@ -670,30 +751,16 @@ export interface TahweelApproval {
 
 export interface TahweelTaskListApiResponse {
   approvals: TahweelApproval[];
-  totalCount?: number; 
-}
-
-/**
- * Tahweel AD details mapped for Profile Header
- */
-export interface TahweelAdDetails {
-  employeeNumber: string; 
-  personNumber: string;
-  fullName: string;
-  designation: string;
-  department: string;
-  imageBase64?: string;
-  imageDataUrl?: string;
+  totalCount?: number;
 }
 
 /**
  * Leave balance result used by ApplyLeave
- * NOTE: as per your note, PERSON_NUMBER is what you treat as employee/person number
  */
 export interface TahweelEmployeeLeaveBalance {
-  personNumber: string; 
-  leaveBalance: string; 
-  tillDate: string; 
+  personNumber: string; // PERSON_NUMBER
+  leaveBalance: string; // LEAVE_BALANCE
+  tillDate: string; // TILL_DATE
   hasPersonNumber: boolean;
   hasBalance: boolean;
 }
@@ -704,15 +771,20 @@ export interface TahweelEmployeeLeaveBalance {
 export interface TahweelActiveEmployee {
   personNumber: string;
   fullName: string;
+
   doj: string;
   dateOfBirth: string;
+
   designation?: string;
   department?: string;
   division?: string;
+
   email?: string;
+
   imageRaw?: string;
   imageUrl?: string;
   imageDataUrl?: string;
+
   location?: string;
   skill?: string;
 }
@@ -738,21 +810,6 @@ type TahweelTaskUrlApiRawResponse = {
     result?: { text?: string };
     xml?: string | boolean;
   };
-  [key: string]: any;
-};
-
-type TahweelAdDetailsApiItem = {
-  person_number?: string;
-  full_name?: string;
-  designation?: string;
-  department?: string;
-  image?: string;
-  [key: string]: any;
-};
-
-type TahweelAdDetailsApiResponse = {
-  status_code?: number;
-  data?: TahweelAdDetailsApiItem[];
   [key: string]: any;
 };
 
@@ -789,9 +846,43 @@ type TahweelActiveEmployeesApiResponse = {
   [key: string]: any;
 };
 
+/**
+ * ---------------------------
+ * (Optional) Tahweel Profile: AD Details
+ * Commented because ProfileHeader now uses Graph.
+ * Keep for future reuse.
+ * ---------------------------
+ *
+ * export interface TahweelAdDetails {
+ *   employeeNumber: string;
+ *   personNumber: string;
+ *   fullName: string;
+ *   designation: string;
+ *   department: string;
+ *   imageBase64?: string;
+ *   imageDataUrl?: string;
+ * }
+ *
+ * type TahweelAdDetailsApiItem = {
+ *   person_number?: string;
+ *   full_name?: string;
+ *   designation?: string;
+ *   department?: string;
+ *   image?: string;
+ *   [key: string]: any;
+ * };
+ *
+ * type TahweelAdDetailsApiResponse = {
+ *   status_code?: number;
+ *   data?: TahweelAdDetailsApiItem[];
+ *   [key: string]: any;
+ * };
+ */
+
 export class TahweelService {
   private readonly httpClient: HttpClient;
-  // shared cache across instances (Task + Profile + Leave balance)
+
+  // shared cache across instances (Task + Leave balance)
   private static _personNumberPromiseByEmail: {
     [email: string]: Promise<{ personNumber: string; decodedXml: string }>;
   } = {};
@@ -835,12 +926,10 @@ export class TahweelService {
     return headers;
   }
 
-  /** Base64 image support (AD Details / Active Employees can return base64) */
   private buildImageDataUrl(imageBase64?: string): string {
     const b64 = (imageBase64 || "").replace(/\s+/g, "");
     if (!b64) return "";
 
-    // if already a data url, keep it
     if (/^data:image\//i.test(b64)) return b64;
 
     const isPng = b64.indexOf("iVBOR") === 0;
@@ -862,7 +951,6 @@ export class TahweelService {
   // Leave Balance (Azure Web App)
   // ---------------------------
 
-  /** Email -> { PERSON_NUMBER, LEAVE_BALANCE, TILL_DATE } */
   public async fetchEmployeeLeaveBalanceByEmail(email: string): Promise<TahweelEmployeeLeaveBalance> {
     const effectiveEmail = (email || "").trim();
     if (!effectiveEmail) throw new Error("Email is required for leave balance.");
@@ -879,11 +967,7 @@ export class TahweelService {
       }),
     };
 
-    const response: HttpClientResponse = await this.httpClient.post(
-      requestUrl,
-      HttpClient.configurations.v1,
-      options
-    );
+    const response: HttpClientResponse = await this.httpClient.post(requestUrl, HttpClient.configurations.v1, options);
 
     if (!response.ok) {
       const t = await response.text().catch(() => "");
@@ -913,11 +997,6 @@ export class TahweelService {
     };
   }
 
-  /**
-   * Task.tsx and ProfileHeaderComp.tsx still call this.
-   * Now sourced from Leave Balance API (PERSON_NUMBER).
-   * decodedXml kept for backward-compat (empty string).
-   */
   public async fetchPersonNumberByEmail(email: string): Promise<{ personNumber: string; decodedXml: string }> {
     const effectiveEmail = (email || "").trim();
     if (!effectiveEmail) throw new Error("Email is required to fetch person number.");
@@ -941,7 +1020,6 @@ export class TahweelService {
   // Tahweel Tasks
   // ---------------------------
 
-  /** Action URL generator */
   public async fetchTahweelTaskApprovalUrl(employeeNumber: string, taskNumber: string): Promise<string> {
     const emp = (employeeNumber || "").trim();
     const taskNo = (taskNumber || "").trim();
@@ -962,11 +1040,7 @@ export class TahweelService {
       }),
     };
 
-    const response: HttpClientResponse = await this.httpClient.post(
-      requestUrl,
-      HttpClient.configurations.v1,
-      options
-    );
+    const response: HttpClientResponse = await this.httpClient.post(requestUrl, HttpClient.configurations.v1, options);
 
     if (!response.ok) {
       const t = await response.text().catch(() => "");
@@ -980,15 +1054,7 @@ export class TahweelService {
     return (url || "").toString().trim();
   }
 
-  /**
-   * ✅ NEW (Widget/Homepage optimized)
-   * - Returns totalCount of ALL tasks
-   * - Generates redirectURL only for topN items (performance)
-   */
-  public async fetchTahweelApprovalsForWidget(
-    employeeNumber: string,
-    topN: number = 4
-  ): Promise<TahweelTaskListApiResponse> {
+  public async fetchTahweelApprovalsForWidget(employeeNumber: string, topN: number = 4): Promise<TahweelTaskListApiResponse> {
     const emp = (employeeNumber || "").trim();
     if (!emp) throw new Error("Tahweel approvals failed: EmployeeNumber is required.");
 
@@ -1004,11 +1070,7 @@ export class TahweelService {
       }),
     };
 
-    const response: HttpClientResponse = await this.httpClient.post(
-      requestUrl,
-      HttpClient.configurations.v1,
-      options
-    );
+    const response: HttpClientResponse = await this.httpClient.post(requestUrl, HttpClient.configurations.v1, options);
 
     if (!response.ok) {
       const t = await response.text().catch(() => "");
@@ -1053,7 +1115,6 @@ export class TahweelService {
     return { approvals, totalCount };
   }
 
-  /** Tahweel task listing (FULL - generates URL for every item) */
   public async fetchTahweelApprovalsByEmployeeNumber(employeeNumber: string): Promise<TahweelTaskListApiResponse> {
     const emp = (employeeNumber || "").trim();
     if (!emp) throw new Error("Tahweel approvals failed: EmployeeNumber is required.");
@@ -1070,11 +1131,7 @@ export class TahweelService {
       }),
     };
 
-    const response: HttpClientResponse = await this.httpClient.post(
-      requestUrl,
-      HttpClient.configurations.v1,
-      options
-    );
+    const response: HttpClientResponse = await this.httpClient.post(requestUrl, HttpClient.configurations.v1, options);
 
     if (!response.ok) {
       const t = await response.text().catch(() => "");
@@ -1117,85 +1174,9 @@ export class TahweelService {
   }
 
   // ---------------------------
-  // Tahweel Profile: AD Details
-  // ---------------------------
-
-  /** Email -> personNumber -> GetADDetails */
-  public async fetchAdDetailsByEmail(email: string): Promise<TahweelAdDetails | null> {
-    const effectiveEmail = (email || "").trim();
-    if (!effectiveEmail) throw new Error("Email is required to fetch AD details.");
-
-    const personRes = await this.fetchPersonNumberByEmail(effectiveEmail);
-    const employeeNumber = (personRes?.personNumber || "").trim();
-    if (!employeeNumber) throw new Error("Employee/Person number not found for AD details.");
-
-    return this.fetchAdDetailsByEmployeeNumber(employeeNumber);
-  }
-
-  public async fetchAdDetailsByEmployeeNumber(employeeNumber: string): Promise<TahweelAdDetails | null> {
-    const emp = (employeeNumber || "").trim();
-    if (!emp) throw new Error("EmployeeNumber is required for AD details.");
-
-    const requestUrl =
-      `${TAHWEEL_AZURE_API_CONFIG.apiBaseUrl.replace(/\/$/, "")}${TAHWEEL_AZURE_API_CONFIG.adDetailsEndpoint}`;
-
-    const headers = this.buildTahweelAzureHeaders();
-
-    const options: IHttpClientOptions = {
-      headers,
-      body: JSON.stringify({
-        [TAHWEEL_AZURE_API_CONFIG.employeeNumberField]: emp,
-      }),
-    };
-
-    const response: HttpClientResponse = await this.httpClient.post(
-      requestUrl,
-      HttpClient.configurations.v1,
-      options
-    );
-
-    if (!response.ok) {
-      const t = await response.text().catch(() => "");
-      throw new Error(`Tahweel GetADDetails failed: ${response.status} ${response.statusText}. ${t}`);
-    }
-
-    const responseText = await response.text().catch(() => "");
-    const parsed = this.safeParsePossiblyDoubleEncodedJson(responseText) as TahweelAdDetailsApiResponse;
-
-    const first: TahweelAdDetailsApiItem | undefined =
-      Array.isArray(parsed?.data) && parsed.data.length > 0 ? parsed.data[0] : undefined;
-
-    if (!first) return null;
-
-    const fullName = (first.full_name || "").toString().trim();
-    const designation = (first.designation || "").toString().trim();
-    const department = (first.department || "").toString().trim();
-    const personNumberFromApi = (first.person_number || "").toString().trim();
-
-    let imageBase64 = (first.image || "").toString();
-    if (imageBase64) imageBase64 = imageBase64.replace(/\s+/g, "");
-
-    const imageDataUrl = this.buildImageDataUrl(imageBase64);
-
-    return {
-      employeeNumber: emp,
-      personNumber: personNumberFromApi || emp,
-      fullName,
-      designation,
-      department,
-      imageBase64: imageBase64 || undefined,
-      imageDataUrl: imageDataUrl || undefined,
-    };
-  }
-
-  // ---------------------------
   // Active Employees (Birthdays / Anniversaries)
   // ---------------------------
 
-  /**
-   * POST now, so SPFx should call POST with JSON body.
-   * Body example: { "DOB": "1", "DOJ": "0" }
-   */
   public async fetchActiveEmployees(payload: { DOB: string; DOJ: string }): Promise<TahweelActiveEmployee[]> {
     const requestUrl =
       `${TAHWEEL_AZURE_API_CONFIG.apiBaseUrl.replace(/\/$/, "")}${TAHWEEL_AZURE_API_CONFIG.activeEmployeesEndpoint}`;
@@ -1210,11 +1191,7 @@ export class TahweelService {
       }),
     };
 
-    const response: HttpClientResponse = await this.httpClient.post(
-      requestUrl,
-      HttpClient.configurations.v1,
-      options
-    );
+    const response: HttpClientResponse = await this.httpClient.post(requestUrl, HttpClient.configurations.v1, options);
 
     if (!response.ok) {
       const t = await response.text().catch(() => "");
@@ -1241,13 +1218,11 @@ export class TahweelService {
 
       const imageRaw = (r.image || "").toString().trim();
 
-      // Determine final usable image
       let finalUrl = "";
       if (imageRaw) {
         if (this.isHttpUrl(imageRaw) || /^data:image\//i.test(imageRaw) || this.isServerRelative(imageRaw)) {
           finalUrl = imageRaw;
         } else {
-          // assume base64
           finalUrl = this.buildImageDataUrl(imageRaw);
         }
       }
