@@ -1,6 +1,6 @@
 export interface IAboutDhrePageTitleProps {
-  title?: string;
-  description?: string;
-  imageUrl?: string;
-
+  title: string;
+  subTitle: string;
+  description: string;
+  imageUrl: string;
 }

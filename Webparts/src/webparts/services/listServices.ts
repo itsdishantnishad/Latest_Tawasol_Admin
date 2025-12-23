@@ -1,4 +1,3 @@
-
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import { SPFI, spfi, SPFx } from "@pnp/sp";
 
@@ -128,37 +127,22 @@ export class listServices {
     return absoluteUrl.replace(`${parser.protocol}//${parser.hostname}`, "");
   }
 
-  public static getImageUrlFromPage(
-    pathToAspxPage: string,
-    imageWidth: any
-  ): string {
+  public static getImageUrlFromPage(pathToAspxPage: string, imageWidth: any): string {
     try {
-      const serverRelativePath = listServices.convertToRelativeUrl(
-        pathToAspxPage
-      );
+      const serverRelativePath = listServices.convertToRelativeUrl(pathToAspxPage);
       const parser = document.createElement("a");
       parser.href = pathToAspxPage;
-      const sitePath = pathToAspxPage.replace(
-        `${parser.protocol}//${parser.hostname}`,
-        ""
-      );
+      const sitePath = pathToAspxPage.replace(`${parser.protocol}//${parser.hostname}`, "");
       const sitePathArray = sitePath.split("/");
-      const sitePathInfo =
-        sitePathArray[0] + "/" + sitePathArray[1] + "/" + sitePathArray[2];
+      const sitePathInfo = sitePathArray[0] + "/" + sitePathArray[1] + "/" + sitePathArray[2];
 
       if (serverRelativePath.indexOf(".aspx") === -1) {
         return "";
       } else {
-        // always a number, never ""
-        const lastIndex = serverRelativePath
-          ? serverRelativePath.lastIndexOf("/") + 1
-          : 0;
+        const lastIndex = serverRelativePath ? serverRelativePath.lastIndexOf("/") + 1 : 0;
 
         const fileName = serverRelativePath.substring(lastIndex);
-        const fileFinalURL = serverRelativePath.replace(
-          fileName,
-          encodeURIComponent(fileName)
-        );
+        const fileFinalURL = serverRelativePath.replace(fileName, encodeURIComponent(fileName));
         const previewUrl = `${sitePathInfo}/_layouts/15/getpreview.ashx?resolution=6&path=${fileFinalURL}&clientType=modernWebPart`;
         return previewUrl;
       }
@@ -172,6 +156,56 @@ export class listServices {
     const tmp = document.createElement("div");
     tmp.innerHTML = html;
     return (tmp.textContent || tmp.innerText || "").replace(/\s+/g, " ").trim();
+  }
+
+  // ✅ UPDATED helper: strip HTML BUT keep line breaks (for bullet pointers)
+  private static toPlainTextWithLines(raw?: string): string {
+    if (!raw) return "";
+
+    let s = String(raw);
+
+    // decode entities (handles &lt;div ...&gt; cases). Try twice for double-encoding.
+    const decodeOnce = (val: string): string => {
+      const ta = document.createElement("textarea");
+      ta.innerHTML = val;
+      return ta.value;
+    };
+
+    for (let i = 0; i < 2; i++) {
+      if (/[&](lt|gt|amp|quot|apos|#\d+);/i.test(s)) {
+        const decoded = decodeOnce(s);
+        if (decoded === s) break;
+        s = decoded;
+      }
+    }
+
+    // If it contains HTML tags, convert block boundaries to newlines BEFORE removing tags
+    const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(s) || s.indexOf("ExternalClass") > -1;
+
+    if (looksLikeHtml) {
+      s = s
+        // br => newline
+        .replace(/<br\s*\/?>/gi, "\n")
+        // opening block tags => newline (IMPORTANT: fixes "Kartik<p>Arnav</p>" => Kartik\nArnav)
+        .replace(/<(p|div|li|tr|h[1-6]|blockquote)(\s[^>]*)?>/gi, "\n")
+        // closing block tags => newline
+        .replace(/<\/(p|div|li|tr|h[1-6]|blockquote)>/gi, "\n")
+        // remove any remaining tags
+        .replace(/<[^>]+>/g, "");
+    }
+
+    // normalize newlines + spaces
+    s = s
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .replace(/\u00A0/g, " "); // nbsp
+
+    const lines = s
+      .split("\n")
+      .map((l) => l.replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+
+    return lines.join("\n");
   }
 
   private toAbsoluteUrl(serverRelative: string): string {
@@ -201,12 +235,7 @@ export class listServices {
         name: cells["Title"] || cells["Filename"] || "Document",
         url: cells["Path"],
         ext: (cells["FileType"] || "").toLowerCase(),
-        // Prefer future custom MPs if available; fall back to generic ones
-        dept:
-          cells["TIRDepartmentOWSTEXT"] ||
-          cells["DepartmentOWSTEXT"] ||
-          cells["Department"] ||
-          "",
+        dept: cells["TIRDepartmentOWSTEXT"] || cells["DepartmentOWSTEXT"] || cells["Department"] || "",
         tag: cells["TIRTagOWSTEXT"] || cells["ContentType"] || "",
       } as DocumentSummary;
     });
@@ -222,9 +251,7 @@ export class listServices {
       if (parts.length === 0) return null;
       const email = parts[0] || "";
       const name = parts[1] || "";
-      const role = parts[2]?.includes("i:0#.f|membership|")
-        ? ""
-        : parts[2] || "";
+      const role = parts[2]?.includes("i:0#.f|membership|") ? "" : parts[2] || "";
       return { id: email, name, email, role };
     } catch (err) {
       console.error("Error parsing user field:", err, userFieldValue);
@@ -273,15 +300,9 @@ export class listServices {
         const readTimeRaw = item.TIRReadTimeOWSNMBR;
         const viewCountRaw = item.ViewCount;
 
-        const readTime =
-          readTimeRaw === "" || readTimeRaw == null
-            ? 0
-            : Math.trunc(Number(readTimeRaw));
+        const readTime = readTimeRaw === "" || readTimeRaw == null ? 0 : Math.trunc(Number(readTimeRaw));
 
-        const pageView =
-          viewCountRaw === "" || viewCountRaw == null
-            ? 0
-            : Math.trunc(Number(viewCountRaw));
+        const pageView = viewCountRaw === "" || viewCountRaw == null ? 0 : Math.trunc(Number(viewCountRaw));
 
         return {
           title: item.Title,
@@ -292,15 +313,11 @@ export class listServices {
           newsImage: listServices.getImageUrlFromPage(item.URL, 200),
           newsType: item.TIRNewsType ? item.TIRNewsType : "",
           author: item.CreatedBy,
-          authorEmail: item.AuthorOWSUSER
-            ? item.AuthorOWSUSER.split("|")[0]
-            : "",
+          authorEmail: item.AuthorOWSUSER ? item.AuthorOWSUSER.split("|")[0] : "",
           path: item.FileRef,
           created: item.Created,
           pageDescription: item.Description,
-          lastModified: item.ModifiedOWSDATE
-            ? moment(item.ModifiedOWSDATE.split(";")[0]).fromNow()
-            : "",
+          lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).fromNow() : "",
           publishedISO: item.ModifiedOWSDATE
             ? String(item.ModifiedOWSDATE).split(";")[0]
             : item.Created
@@ -314,22 +331,16 @@ export class listServices {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getNewsStorybyID(
-    ID?: number,
-    ctxArg?: WebPartContext
-  ): Promise<any[]> {
+  public async getNewsStorybyID(ID?: number, ctxArg?: WebPartContext): Promise<any[]> {
     let results;
 
-    // Use the *page URL* instead of ListItemId so templates/provisioning are safe
     const siteCtx = ctxArg || this.context;
     const siteAbsoluteUrl = siteCtx.pageContext.site.absoluteUrl;
-    const serverRequestPath = siteCtx.pageContext.site.serverRequestPath; // e.g. /sites/.../SitePages/Page.aspx
+    const serverRequestPath = siteCtx.pageContext.site.serverRequestPath;
     const origin = new URL(siteAbsoluteUrl).origin;
     const pageUrl = `${origin}${serverRequestPath}`;
 
-    const constraints =
-      `AND ContentTypeId:(${ContentTypeId.NEWS_STORY}*) ` +
-      `AND Path:"${pageUrl}"`;
+    const constraints = `AND ContentTypeId:(${ContentTypeId.NEWS_STORY}*) AND Path:"${pageUrl}"`;
 
     try {
       results = await this.sp.search({
@@ -368,9 +379,7 @@ export class listServices {
           newsImage: listServices.getImageUrlFromPage(item.URL, 200),
           newsType: item.TIRNewsType ? item.TIRNewsType : "",
           author: item.CreatedBy,
-          authorEmail: item.AuthorOWSUSER
-            ? item.AuthorOWSUSER.split("|")[0]
-            : "",
+          authorEmail: item.AuthorOWSUSER ? item.AuthorOWSUSER.split("|")[0] : "",
           path: item.FileRef,
           created: item.Created,
         } as any;
@@ -392,13 +401,7 @@ export class listServices {
         Querytext: "*",
         RowLimit: 1,
         TrimDuplicates: false,
-        SelectProperties: [
-          "Title",
-          "TIREventEndDate",
-          "TIREventStartDate",
-          "TIRLocation",
-          "ListItemID"
-        ],
+        SelectProperties: ["Title", "TIREventEndDate", "TIREventStartDate", "TIRLocation"],
         QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
         HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
         EnableInterleaving: true,
@@ -410,7 +413,6 @@ export class listServices {
           eventEndDate: item.TIREventEndDate,
           eventStartDate: item.TIREventStartDate,
           location: item.TIRLocation,
-          ID: item.ListItemID
         } as any;
       });
     } catch (error) {
@@ -428,15 +430,7 @@ export class listServices {
         Querytext: "*",
         RowLimit: 1,
         TrimDuplicates: false,
-        SelectProperties: [
-          "Id",
-          "Title",
-          "TIREventEndDate",
-          "TIREventStartDate",
-          "TIRLocation",
-          "TIREventCategory",
-          "URL",
-        ],
+        SelectProperties: ["Id", "Title", "TIREventEndDate", "TIREventStartDate", "TIRLocation", "TIREventCategory", "URL"],
         QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
         HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
         EnableInterleaving: true,
@@ -476,7 +470,6 @@ export class listServices {
           "TIRInstructorOWSUSER",
           "URL",
           "TIRJoiningURLOWSMTXT",
-          "ListItemID"
         ],
         QueryTemplate: `{searchTerms}`,
         HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
@@ -497,7 +490,6 @@ export class listServices {
           joiningURL: item.TIRJoiningURLOWSMTXT,
           instructor: instructorInfo,
           pageUrl: item.URL,
-          ID: item.ListItemID
         } as any;
       });
     } catch (error) {
@@ -600,12 +592,8 @@ export class listServices {
     }
   }
 
-  // get custom app links
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getCustomAppLinks(
-    listName: string,
-    userEmail: string
-  ): Promise<any[]> {
+  public async getCustomAppLinks(listName: string, userEmail: string): Promise<any[]> {
     let results: any[] = [];
     try {
       results = await this.sp.web.lists
@@ -622,14 +610,8 @@ export class listServices {
   public async getNewJoiners(listName: string): Promise<any[]> {
     const results = await this.sp.web.lists
       .getByTitle(listName)
-      .items.select(
-        "Title",
-        "TIRSortOrder",
-        "TIRDesignation",
-        "TIRUserPicture",
-        "TIRDescription"
-      )
-      .orderBy("TIRSortOrder", false)(); // false = descending
+      .items.select("Title", "TIRSortOrder", "TIRDesignation", "TIRUserPicture", "TIRDescription")
+      .orderBy("TIRSortOrder", false)();
 
     return results.map((item: any) => ({
       Title: item.Title,
@@ -646,13 +628,7 @@ export class listServices {
     try {
       results = await this.sp.web.lists
         .getByTitle(listName)
-        .items.select(
-          "Title",
-          "TIRSortOrder",
-          "TIRIconURL",
-          "TIRPortfolioCategory",
-          "TIRColumnLayout"
-        )
+        .items.select("Title", "TIRSortOrder", "TIRIconURL", "TIRPortfolioCategory", "TIRColumnLayout")
         .orderBy("TIRSortOrder", true)();
 
       return results.map((item: any) => {
@@ -660,9 +636,7 @@ export class listServices {
           Title: item.Title,
           SortOrder: item.TIRSortOrder,
           IconURL: item.TIRIconURL ? item.TIRIconURL.Url : "#",
-          PortfolioCategory: item.TIRPortfolioCategory
-            ? item.TIRPortfolioCategory
-            : "",
+          PortfolioCategory: item.TIRPortfolioCategory ? item.TIRPortfolioCategory : "",
           ColumnLayout: Number(item.TIRColumnLayout) || 2,
         } as any;
       });
@@ -697,15 +671,7 @@ export class listServices {
   public async getOrganisationMembers(listTitle: string): Promise<OrgMember[]> {
     const rows = await this.sp.web.lists
       .getByTitle(listTitle)
-      .items.select(
-        "Id",
-        "Title",
-        "TIRDesignation",
-        "TIRLevel",
-        "TIRSortOrder",
-        "TIRUserPicture",
-        "TIRUser/Title"
-      )
+      .items.select("Id", "Title", "TIRDesignation", "TIRLevel", "TIRSortOrder", "TIRUserPicture", "TIRUser/Title")
       .orderBy("TIRLevel", true)
       .orderBy("TIRSortOrder", true)
       .expand("TIRUser")();
@@ -729,11 +695,7 @@ export class listServices {
     });
 
     mapped.sort((a, b) =>
-      a.level !== b.level
-        ? a.level - b.level
-        : a.sort !== b.sort
-        ? a.sort - b.sort
-        : a.name.localeCompare(b.name)
+      a.level !== b.level ? a.level - b.level : a.sort !== b.sort ? a.sort - b.sort : a.name.localeCompare(b.name)
     );
 
     return mapped;
@@ -741,53 +703,32 @@ export class listServices {
 
   // ✅ UPDATED (ONLY dept+pointers related change)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getDepartmentsByMember(
-    listTitle: string,
-    memberDisplayName: string
-  ): Promise<OrgDepartment[]> {
+  public async getDepartmentsByMember(listTitle: string, memberDisplayName: string): Promise<OrgDepartment[]> {
     const targetName = memberDisplayName.trim().toLowerCase();
 
     const deptRows: any[] = await this.sp.web.lists
       .getByTitle(listTitle)
-      .items.select(
-        "Id",
-        "Title", // ✅ added (fallback dept name)
-        "URL",
-        "TIRDepartment",
-        "TIRDepartmentItems", // ✅ added (Field internal name)
-        "TIRDepartmentMember/Title"
-      )
+      .items.select("Id", "Title", "URL", "TIRDepartment", "TIRDepartmentItems", "TIRDepartmentMember/Title")
       .expand("TIRDepartmentMember")();
 
     const memberRows = deptRows.filter((item) => {
-      const people: any[] = Array.isArray(item.TIRDepartmentMember)
-        ? item.TIRDepartmentMember
-        : [];
-
-      return people.some(
-        (p) => (p?.Title || "").trim().toLowerCase() === targetName
-      );
+      const people: any[] = Array.isArray(item.TIRDepartmentMember) ? item.TIRDepartmentMember : [];
+      return people.some((p) => (p?.Title || "").trim().toLowerCase() === targetName);
     });
 
-    if (!memberRows.length) {
-      return [];
-    }
+    if (!memberRows.length) return [];
 
     const wssIds: number[] = [];
 
     memberRows.forEach((item) => {
       const raw = item.TIRDepartment;
       const values = Array.isArray(raw) ? raw : raw ? [raw] : [];
-
       values.forEach((v: any) => {
         const id = Number(v?.WssId);
-        if (id && !wssIds.includes(id)) {
-          wssIds.push(id);
-        }
+        if (id && !wssIds.includes(id)) wssIds.push(id);
       });
     });
 
-    // ✅ taxonomy map (keep your old logic, just safer)
     const labelById = new Map<number, string>();
 
     if (wssIds.length) {
@@ -816,24 +757,19 @@ export class listServices {
         deptName = label || "";
       }
 
-      // ✅ fallback to Title if taxonomy not filled
-      if (!deptName) {
-        deptName = item?.Title || "";
-      }
+      if (!deptName) deptName = item?.Title || "";
 
       const urlField = item.URL;
-      const url =
-        urlField && typeof urlField === "object"
-          ? urlField.Url
-          : urlField || undefined;
+      const url = urlField && typeof urlField === "object" ? urlField.Url : urlField || undefined;
 
-      // ✅ pointers data (multiline)
+      // ✅ IMPORTANT: normalize pointers => multiline plain text with \n between items
       const pointersRaw: string = item?.TIRDepartmentItems || "";
+      const pointersClean = listServices.toPlainTextWithLines(pointersRaw);
 
       return {
         name: deptName,
         url,
-        itemsText: pointersRaw, // ✅ TSX will render bullets from this
+        itemsText: pointersClean,
       };
     });
 
@@ -842,20 +778,11 @@ export class listServices {
 
   /** ===== Policies & Procedures: Document Functions ===== */
 
-  public async getDocumentFunctions(
-    listTitle: string
-  ): Promise<DocumentFunctionRow[]> {
+  public async getDocumentFunctions(listTitle: string): Promise<DocumentFunctionRow[]> {
     try {
       const rows: any[] = await this.sp.web.lists
         .getByTitle(listTitle)
-        .items.select(
-          "Id",
-          "Title",
-          "TIRDocumentFunction",
-          "TIRIconURL",
-          "URL",
-          "TIRSortOrder"
-        )
+        .items.select("Id", "Title", "TIRDocumentFunction", "TIRIconURL", "URL", "TIRSortOrder")
         .orderBy("TIRSortOrder", true)();
 
       return rows.map((r: any) => {
@@ -866,14 +793,8 @@ export class listServices {
           id: Number(r?.Id) || 0,
           title: r?.Title || "",
           functionType: r?.TIRDocumentFunction || "",
-          iconUrl:
-            typeof iconField === "string"
-              ? iconField
-              : iconField?.Url || undefined,
-          targetUrl:
-            typeof urlField === "string"
-              ? urlField
-              : urlField?.Url || undefined,
+          iconUrl: typeof iconField === "string" ? iconField : iconField?.Url || undefined,
+          targetUrl: typeof urlField === "string" ? urlField : urlField?.Url || undefined,
           sortOrder: Number(r?.TIRSortOrder ?? 9999),
         } as DocumentFunctionRow;
       });
@@ -884,9 +805,7 @@ export class listServices {
 
   /** ===== Dashboards ===== */
 
-  public async getDashboardCategories(
-    listTitle: string
-  ): Promise<DashboardCategory[]> {
+  public async getDashboardCategories(listTitle: string): Promise<DashboardCategory[]> {
     try {
       const rows: any[] = await this.sp.web.lists
         .getByTitle(listTitle)
@@ -914,23 +833,12 @@ export class listServices {
     try {
       let query = this.sp.web.lists
         .getByTitle(listTitle)
-        .items.select(
-          "Id",
-          "Title",
-          "TIRDescription",
-          "TIRIconURL",
-          "TIRSortOrder",
-          "URL",
-          "TIRCategoryIDId",
-          "TIRCategoryID/Id",
-          "TIRCategoryID/Title"
-        )
+        .items.select("Id", "Title", "TIRDescription", "TIRIconURL", "TIRSortOrder", "URL", "TIRCategoryIDId", "TIRCategoryID/Id", "TIRCategoryID/Title")
         .expand("TIRCategoryID")
         .orderBy("TIRSortOrder", true);
 
       const filters: string[] = [];
-      if (typeof categoryId === "number")
-        filters.push(`TIRCategoryIDId eq ${categoryId}`);
+      if (typeof categoryId === "number") filters.push(`TIRCategoryIDId eq ${categoryId}`);
       if (typeof excludeId === "number") filters.push(`Id ne ${excludeId}`);
       if (filters.length) query = query.filter(filters.join(" and "));
 
@@ -942,18 +850,14 @@ export class listServices {
 
       return rows.map((row: any) => {
         const icon = row?.TIRIconURL;
-        const thumbUrl =
-          typeof icon === "string" ? icon : icon?.Url || undefined;
+        const thumbUrl = typeof icon === "string" ? icon : icon?.Url || undefined;
 
         const cat = row?.TIRCategoryID || {};
         const categoryName = cat?.Title || "";
         const categoryIdValue = Number(row?.TIRCategoryIDId || cat?.Id || 0);
 
         const embedField = row?.URL;
-        const embedUrl =
-          typeof embedField === "string"
-            ? embedField
-            : embedField?.Url || undefined;
+        const embedUrl = typeof embedField === "string" ? embedField : embedField?.Url || undefined;
 
         return {
           id: Number(row?.Id) || 0,
@@ -971,10 +875,7 @@ export class listServices {
     }
   }
 
-  public async getDashboardById(
-    listTitle: string,
-    itemId: number
-  ): Promise<DashboardItem | null> {
+  public async getDashboardById(listTitle: string, itemId: number): Promise<DashboardItem | null> {
     try {
       const allItems = await this.getDashboards(listTitle);
       const match = allItems.find((it) => it.id === itemId);
@@ -986,14 +887,8 @@ export class listServices {
 
   /** ===== Boards: Recently Updated / Most Used ===== */
 
-  public async getRecentlyUpdatedDocuments(
-    dmsLibraryRoot: string,
-    rowLimit: number = 6
-  ): Promise<DocumentSummary[]> {
-    const rootRel = (dmsLibraryRoot || "/sites/Intranet/DMS").replace(
-      /\/$/,
-      ""
-    );
+  public async getRecentlyUpdatedDocuments(dmsLibraryRoot: string, rowLimit: number = 6): Promise<DocumentSummary[]> {
+    const rootRel = (dmsLibraryRoot || "/sites/Intranet/DMS").replace(/\/$/, "");
     const rootAbs = this.toAbsoluteUrl(rootRel);
 
     const query: ISearchQuery = {
@@ -1013,7 +908,7 @@ export class listServices {
         "Department",
         "ContentType",
       ],
-      SortList: [{ Property: "LastModifiedTime", Direction: 1 /* desc */ }],
+      SortList: [{ Property: "LastModifiedTime", Direction: 1 }],
     };
 
     const res: any = await this.sp.search(query);
@@ -1026,9 +921,7 @@ export class listServices {
     return listServices.mapSearchRowsToDocs(rows);
   }
 
-  public async getMostUsedDocumentsOnSite(
-    rowLimit: number = 6
-  ): Promise<DocumentSummary[]> {
+  public async getMostUsedDocumentsOnSite(rowLimit: number = 6): Promise<DocumentSummary[]> {
     const siteUrl = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
 
     const query: ISearchQuery = {
@@ -1048,7 +941,7 @@ export class listServices {
         "Department",
         "ContentType",
       ],
-      SortList: [{ Property: "ViewsLifeTime", Direction: 1 /* desc */ }],
+      SortList: [{ Property: "ViewsLifeTime", Direction: 1 }],
     };
 
     const res: any = await this.sp.search(query);
@@ -1069,73 +962,49 @@ export class listServices {
     try {
       const sharePointItems: any[] = await this.sp.web.lists
         .getByTitle(listTitle)
-        .items.select(
-          "Id,Title,TIRDescription,TIRIconURL,TIREventStartDate,TIREventEndDate,TIRIsActive"
-        )
+        .items.select("Id,Title,TIRDescription,TIRIconURL,TIREventStartDate,TIREventEndDate,TIRIsActive")
         .orderBy("TIREventStartDate", false)();
 
       const currentLocalMs = currentDateTime.getTime();
 
-      const mappedItems: AnnouncementBannerListItem[] = (sharePointItems || [])
-        .map((rawItem: any) => {
-          const rawIconField = rawItem?.TIRIconURL;
-          const resolvedIconUrl =
-            typeof rawIconField === "string"
-              ? rawIconField
-              : rawIconField?.Url || undefined;
+      const mappedItems: AnnouncementBannerListItem[] = (sharePointItems || []).map((rawItem: any) => {
+        const rawIconField = rawItem?.TIRIconURL;
+        const resolvedIconUrl = typeof rawIconField === "string" ? rawIconField : rawIconField?.Url || undefined;
 
-          const startIsoRaw = rawItem?.TIREventStartDate
-            ? String(rawItem.TIREventStartDate)
-            : undefined;
-          const endIsoRaw = rawItem?.TIREventEndDate
-            ? String(rawItem.TIREventEndDate)
-            : undefined;
+        const startIsoRaw = rawItem?.TIREventStartDate ? String(rawItem.TIREventStartDate) : undefined;
+        const endIsoRaw = rawItem?.TIREventEndDate ? String(rawItem.TIREventEndDate) : undefined;
 
-          const startIsoLocal = this.toLocalIso(startIsoRaw);
-          const endIsoLocal = this.toLocalIso(endIsoRaw);
+        const startIsoLocal = this.toLocalIso(startIsoRaw);
+        const endIsoLocal = this.toLocalIso(endIsoRaw);
 
-          return {
-            id: Number(rawItem?.Id) || 0,
-            title: rawItem?.Title || "",
-            description: listServices.toPlainText(rawItem?.TIRDescription || ""),
-            iconUrl: resolvedIconUrl,
-            startIso: startIsoLocal,
-            endIso: endIsoLocal,
-            isActive: Boolean(rawItem?.TIRIsActive),
-          } as AnnouncementBannerListItem;
-        });
+        return {
+          id: Number(rawItem?.Id) || 0,
+          title: rawItem?.Title || "",
+          description: listServices.toPlainText(rawItem?.TIRDescription || ""),
+          iconUrl: resolvedIconUrl,
+          startIso: startIsoLocal,
+          endIso: endIsoLocal,
+          isActive: Boolean(rawItem?.TIRIsActive),
+        } as AnnouncementBannerListItem;
+      });
 
       const filteredActiveItems = mappedItems.filter((item) => {
         if (!item.isActive) return false;
 
-        const startTimestampMs = item.startIso
-          ? new Date(item.startIso).getTime()
-          : Number.NEGATIVE_INFINITY;
+        const startTimestampMs = item.startIso ? new Date(item.startIso).getTime() : Number.NEGATIVE_INFINITY;
+        const endTimestampMs = item.endIso ? new Date(item.endIso).getTime() : Number.POSITIVE_INFINITY;
 
-        const endTimestampMs = item.endIso
-          ? new Date(item.endIso).getTime()
-          : Number.POSITIVE_INFINITY;
-
-        return (
-          startTimestampMs <= currentLocalMs &&
-          currentLocalMs <= endTimestampMs
-        );
+        return startTimestampMs <= currentLocalMs && currentLocalMs <= endTimestampMs;
       });
 
       filteredActiveItems.sort((left, right) => {
-        const leftEndMs = left.endIso
-          ? new Date(left.endIso).getTime()
-          : Number.POSITIVE_INFINITY;
-        const rightEndMs = right.endIso
-          ? new Date(right.endIso).getTime()
-          : Number.POSITIVE_INFINITY;
+        const leftEndMs = left.endIso ? new Date(left.endIso).getTime() : Number.POSITIVE_INFINITY;
+        const rightEndMs = right.endIso ? new Date(right.endIso).getTime() : Number.POSITIVE_INFINITY;
 
         if (leftEndMs !== rightEndMs) return leftEndMs - rightEndMs;
 
         const leftStartMs = left.startIso ? new Date(left.startIso).getTime() : 0;
-        const rightStartMs = right.startIso
-          ? new Date(right.startIso).getTime()
-          : 0;
+        const rightStartMs = right.startIso ? new Date(right.startIso).getTime() : 0;
 
         return rightStartMs - leftStartMs;
       });
