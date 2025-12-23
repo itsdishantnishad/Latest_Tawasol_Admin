@@ -632,24 +632,18 @@ import { HttpClient, IHttpClientOptions, HttpClientResponse } from "@microsoft/s
  */
 const TAHWEEL_AZURE_API_CONFIG = {
   apiBaseUrl: "https://wapp-corpdms-dev-001.azurewebsites.net",
-
   // Tasks
   taskListEndpoint: "/api/Tahweel/GetTahweelApprovalList",
   taskApprovalUrlEndpoint: "/api/Tahweel/GetTahweelTaskApprovalUrl",
-
   // Profile
   adDetailsEndpoint: "/api/Tahweel/GetADDetails",
-
   // Leave
   leaveBalanceEndpoint: "/api/Tahweel/GetEmployeeLeaveBalance",
-
   // Employees (Birthdays / Anniversaries)
   activeEmployeesEndpoint: "/api/Tahweel/GetActiveEmployees",
-
   // Auth
   apiKeyHeaderName: "x-api-key",
   apiKey: "qnwCDLTzcXO50lteD3S5By408lqputhj89ihYtiHW6o=",
-
   // Fields
   employeeNumberField: "EmployeeNumber",
   taskNumberField: "TaskNumber",
@@ -676,20 +670,18 @@ export interface TahweelApproval {
 
 export interface TahweelTaskListApiResponse {
   approvals: TahweelApproval[];
-  totalCount?: number; // ✅ NEW (optional) - for widget + future use
+  totalCount?: number; 
 }
 
 /**
  * Tahweel AD details mapped for Profile Header
  */
 export interface TahweelAdDetails {
-  employeeNumber: string; // the number we send to API
-  personNumber: string; // person_number from API (fallback to employeeNumber)
-
+  employeeNumber: string; 
+  personNumber: string;
   fullName: string;
   designation: string;
   department: string;
-
   imageBase64?: string;
   imageDataUrl?: string;
 }
@@ -699,10 +691,9 @@ export interface TahweelAdDetails {
  * NOTE: as per your note, PERSON_NUMBER is what you treat as employee/person number
  */
 export interface TahweelEmployeeLeaveBalance {
-  personNumber: string; // PERSON_NUMBER
-  leaveBalance: string; // LEAVE_BALANCE
-  tillDate: string; // TILL_DATE
-
+  personNumber: string; 
+  leaveBalance: string; 
+  tillDate: string; 
   hasPersonNumber: boolean;
   hasBalance: boolean;
 }
@@ -713,24 +704,15 @@ export interface TahweelEmployeeLeaveBalance {
 export interface TahweelActiveEmployee {
   personNumber: string;
   fullName: string;
-
   doj: string;
   dateOfBirth: string;
-
   designation?: string;
   department?: string;
   division?: string;
-
   email?: string;
-
-  /** raw (can be base64 or url) */
   imageRaw?: string;
-
-  /** final usable URL (http(s) / server relative / data:image...) */
   imageUrl?: string;
   imageDataUrl?: string;
-
-  // extras if needed later
   location?: string;
   skill?: string;
 }
@@ -809,7 +791,6 @@ type TahweelActiveEmployeesApiResponse = {
 
 export class TahweelService {
   private readonly httpClient: HttpClient;
-
   // shared cache across instances (Task + Profile + Leave balance)
   private static _personNumberPromiseByEmail: {
     [email: string]: Promise<{ personNumber: string; decodedXml: string }>;

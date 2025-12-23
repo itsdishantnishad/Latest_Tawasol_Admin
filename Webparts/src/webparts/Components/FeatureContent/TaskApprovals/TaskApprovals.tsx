@@ -1,3 +1,5 @@
+// src/webparts/Components/FeatureContent/TaskApprovals/TaskApprovals.tsx
+
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./TaskApprovals.module.scss";
@@ -81,9 +83,22 @@ const getInitials = (name: string): string => {
   return (first + last).toUpperCase();
 };
 
+// ✅ SPFx-safe replacement for Promise.allSettled
+type Settled<T> =
+  | { status: "fulfilled"; value: T }
+  | { status: "rejected"; reason: any };
+
+const settle = async <T,>(p: Promise<T>): Promise<Settled<T>> => {
+  try {
+    const value = await p;
+    return { status: "fulfilled", value };
+  } catch (reason) {
+    return { status: "rejected", reason };
+  }
+};
+
 const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
   const [activeCategoryIndex, setActiveCategoryIndex] = useState<number>(0);
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [counts, setCounts] = useState<Record<SystemKey, number>>({
@@ -92,7 +107,6 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
     ServiceNow: 0,
   });
 
-  // store only TOP_ROWS preview rows per system (widget behavior)
   const [rowsBySystem, setRowsBySystem] = useState<Record<SystemKey, TaskRow[]>>({
     Tahweel: [],
     Salesforce: [],
@@ -108,7 +122,6 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
   const snService = useMemo(() => new ServiceNowApprovalService({ httpClient }), [httpClient]);
   const tahweelService = useMemo(() => new TahweelService({ httpClient }), [httpClient]);
 
-  // Categories (icons: remove localhost hardcode)
   const categories: ICategoryItem[] = useMemo(
     () => [
       { id: "Tahweel", name: "Tahweel", icon: svgToDataUri(TahweelSVG), count: counts.Tahweel },
@@ -127,24 +140,32 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
 
     const load = async (): Promise<void> => {
       if (!httpClient) return;
+
       if (!userEmail) {
-        setErrorBySystem({ Salesforce: "User email not found.", ServiceNow: "User email not found.", Tahweel: "User email not found." });
+        setErrorBySystem({
+          Salesforce: "User email not found.",
+          ServiceNow: "User email not found.",
+          Tahweel: "User email not found.",
+        });
         return;
       }
 
       setIsLoading(true);
       setErrorBySystem({});
 
-      // load all 3 in parallel (but Tahweel needs person number first)
       const sfPromise = sfService.fetchApprovalsByEmail(userEmail);
       const snPromise = snService.fetchApprovalsByEmail(userEmail);
       const tahPromise = (async () => {
         const { personNumber } = await tahweelService.fetchPersonNumberByEmail(userEmail);
-        // ✅ widget-optimized method (top N urls, but totalCount preserved)
         return tahweelService.fetchTahweelApprovalsForWidget(personNumber, TOP_ROWS);
       })();
 
-      const [sfRes, snRes, tahRes] = await Promise.allSettled([sfPromise, snPromise, tahPromise]);
+      // ✅ no allSettled, SPFx safe
+      const [sfRes, snRes, tahRes] = await Promise.all([
+        settle(sfPromise),
+        settle(snPromise),
+        settle(tahPromise),
+      ]);
 
       if (cancelled) return;
 
@@ -218,7 +239,11 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
     load().catch((e) => {
       if (cancelled) return;
       setIsLoading(false);
-      setErrorBySystem({ [activeSystem]: e?.message || "Failed to load approvals." });
+      setErrorBySystem({
+        Tahweel: e?.message || "Failed to load approvals.",
+        Salesforce: e?.message || "Failed to load approvals.",
+        ServiceNow: e?.message || "Failed to load approvals.",
+      });
     });
 
     return () => {
@@ -231,15 +256,13 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
     setActiveCategoryIndex(index);
   };
 
-  // --- DYNAMIC VIEW-ALL URL WITH DEFAULT (fix your default) ---
+  // --- View All URL ---
   const webUrl: string = props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
   const origin: string = new URL(webUrl).origin;
 
   const viewAllHref = React.useMemo(() => {
     const configured = (props.seeAllURL || "").trim();
-
-    // ✅ change default to your Task page
-    const raw = configured || "SitePages/Task-Approvals.aspx";
+    const raw = configured || "SitePages/Tasks.aspx";
 
     if (/^https?:\/\//i.test(raw)) {
       try {
@@ -253,7 +276,6 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
     if (raw.startsWith("/")) return `${origin}${raw}`;
     return `${webUrl}/${raw}`;
   }, [props.seeAllURL, webUrl, origin]);
-  // --- END ---
 
   const tableColumns: TableColumn<TaskRow>[] = [
     { columnKey: "workflowNumber", label: "Workflow No." },
