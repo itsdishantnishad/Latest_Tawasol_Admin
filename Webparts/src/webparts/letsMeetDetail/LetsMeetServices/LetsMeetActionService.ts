@@ -1,4 +1,3 @@
-// src/webparts/letsMeetDetail/services/LetsMeetActionService.ts
 
 export class LetsMeetActionService {
   public static getEmbedUrl(videoId: string): string {
