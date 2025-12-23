@@ -43,7 +43,7 @@ export const fetchGraphMeInfo = async (
 };
 
 /**
- * ✅ Highest quality photo from Graph.
+ *  Highest quality photo from Graph.
  * NOTE: Your typings reject responseType("blob") and responseType("arraybuffer")
  * So we cast to any to keep SPFx compile happy.
  */

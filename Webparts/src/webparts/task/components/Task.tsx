@@ -43,7 +43,7 @@ export interface ITaskState {
   data: Record<SystemFilterOption, TaskRowItem[]>;
   loaded: Record<SystemFilterOption, boolean>;
 
-  // ✅ for high volumes (UI performance) + future backend paging support
+  //  for high volumes (UI performance) + future backend paging support
   visibleCountByTab: Record<SystemFilterOption, number>;
   totalCountByTab: Record<SystemFilterOption, number>;
 }
@@ -54,7 +54,7 @@ const TABLE_COLUMN_COUNT = 6;
 const DATE_LOCALE = "en-GB";
 const DATE_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short", year: "numeric" };
 
-// ✅ high-volume: render only N rows initially, allow Load More
+//  high-volume: render only N rows initially, allow Load More
 const PAGE_SIZE = 20;
 
 const SYSTEM_TAB_DEFINITIONS = [
@@ -143,14 +143,14 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
         ServiceNow: false,
       },
 
-      // ✅ paging defaults
+      //  paging defaults
       visibleCountByTab: {
         Tahweel: PAGE_SIZE,
         Salesforce: PAGE_SIZE,
         ServiceNow: PAGE_SIZE,
       },
 
-      // ✅ counts: future-ready for backend totalCount
+      //  counts: future-ready for backend totalCount
       totalCountByTab: {
         Tahweel: 0,
         Salesforce: 0,
@@ -164,7 +164,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
   }
 
   public async componentDidMount(): Promise<void> {
-    // ✅ keep your existing behavior: load only default tab on mount (Salesforce)
+    //  keep your existing behavior: load only default tab on mount (Salesforce)
     await this.loadTabData(this.state.selectedTabValue);
   }
 
@@ -243,7 +243,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
 
       if (seq !== this._loadSequence) return;
 
-      const totalCount = rows.length; // ✅ for now
+      const totalCount = rows.length; //  for now
       const initialVisible = Math.min(this.state.visibleCountByTab[tab] || PAGE_SIZE, totalCount || 0);
 
       this.setState((prev) => ({
@@ -251,7 +251,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
         data: { ...prev.data, [tab]: rows },
         loaded: { ...prev.loaded, [tab]: true },
 
-        // ✅ update counts & paging state
+        //  update counts & paging state
         totalCountByTab: { ...prev.totalCountByTab, [tab]: totalCount },
         visibleCountByTab: { ...prev.visibleCountByTab, [tab]: initialVisible || PAGE_SIZE },
       }));
@@ -270,7 +270,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
 
     this.setState({ selectedTabValue: value, errorMessage: undefined });
 
-    // ✅ lazy load on click (Tahweel/ServiceNow)
+    //  lazy load on click (Tahweel/ServiceNow)
     await this.loadTabData(value);
   };
 
@@ -297,7 +297,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
 
     const systemTabs = SYSTEM_TAB_DEFINITIONS.map((t) => ({
       ...t,
-      // ✅ show true total when backend supports it; for now it becomes rows.length after loading that tab
+      //  show true total when backend supports it; for now it becomes rows.length after loading that tab
       count: (totalCountByTab[t.key] ?? data[t.key].length) || 0,
     }));
 
@@ -389,7 +389,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
                   <>
                     {activeRowsToRender.map(renderTaskRow)}
 
-                    {/* ✅ Load More row (client-side paging / render protection) */}
+                    {/*  Load More row (client-side paging / render protection) */}
                     {canLoadMore && (
                       <TableRow>
                         <TableCell colSpan={TABLE_COLUMN_COUNT}>

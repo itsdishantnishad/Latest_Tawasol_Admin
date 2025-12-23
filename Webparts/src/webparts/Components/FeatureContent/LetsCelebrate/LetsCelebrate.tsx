@@ -122,7 +122,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const [currentPage, setCurrentPage] = React.useState(0);
   const [spNewJoiners, setSpNewJoiners] = React.useState<ICelebration[]>([]);
 
-  // ✅ API-driven (Today only, max 4, random on reload)
+  //  API-driven (Today only, max 4, random on reload)
   const [apiBirthdays, setApiBirthdays] = React.useState<ICelebration[]>([]);
   const [apiAnniversaries, setApiAnniversaries] = React.useState<ICelebration[]>(
     []
@@ -231,7 +231,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     };
   }, [props.context]);
 
-  // ✅ No dummy fallback now
+  //  No dummy fallback now
   const celebrations = {
     birthdays: props.celebrations?.birthdays ?? apiBirthdays,
     anniversaries: props.celebrations?.anniversaries ?? apiAnniversaries,
@@ -265,7 +265,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const currentCelebrations: ICelebration[] =
     (celebrations as any)[activeTab] ?? [];
 
-  // ✅ Wheel displays max 4 per page (matches UI positions)
+  //  Wheel displays max 4 per page (matches UI positions)
   const itemsPerPage = 4;
   const totalPages = Math.max(1, Math.ceil(currentCelebrations.length / itemsPerPage));
   const currentItems = currentCelebrations.slice(

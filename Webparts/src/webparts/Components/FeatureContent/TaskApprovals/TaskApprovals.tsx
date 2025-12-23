@@ -83,7 +83,7 @@ const getInitials = (name: string): string => {
   return (first + last).toUpperCase();
 };
 
-// ✅ SPFx-safe replacement for Promise.allSettled
+//  SPFx-safe replacement for Promise.allSettled
 type Settled<T> =
   | { status: "fulfilled"; value: T }
   | { status: "rejected"; reason: any };
@@ -160,7 +160,7 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
         return tahweelService.fetchTahweelApprovalsForWidget(personNumber, TOP_ROWS);
       })();
 
-      // ✅ no allSettled, SPFx safe
+      //  no allSettled, SPFx safe
       const [sfRes, snRes, tahRes] = await Promise.all([
         settle(sfPromise),
         settle(snPromise),
