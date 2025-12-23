@@ -93,13 +93,13 @@
   // max-width: 800px;
   // width: 50vw;
   position: relative;
-  top: -50px;
+  top: -30px;
 }
 
 .outerCircle {
   position: relative;
-  width: 50vw;
-  height: 50vw;
+  width: 582px;
+  height: 582px;
   border-radius: 50%;
   // border: 1px solid rgba(224, 152, 144, 0.15);
   border: 1px solid #4b4b4b38;
@@ -117,8 +117,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 30vw;
-  height: 30vw;
+  width: 305px;
+  height: 305px;
   border-radius: 50%;
   border: 1px solid #4b4b4b38;
   background: radial-gradient(
@@ -160,9 +160,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 57px;
+  gap: 47px;
   position: absolute;
-  bottom: 1%;
+  bottom: 0;
   width: 100%;
 }
 

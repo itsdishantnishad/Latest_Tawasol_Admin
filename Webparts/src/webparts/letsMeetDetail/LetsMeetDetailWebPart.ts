@@ -34,10 +34,8 @@ export default class LetsMeetDetailWebPart extends BaseClientSideWebPart<ILetsMe
     const element: React.ReactElement<ILetsMeetDetailProps> = React.createElement(
       LetsMeetDetail,
       {
-        context: this.context, // ✅ REQUIRED (fixes your error)
-
-        // optional
-        contentTypeName: this.properties.contentTypeName || "Lets Meet Video Page",
+        context: this.context, 
+        contentTypeName: this.properties.contentTypeName || "TIRLetsConnect",
         sitePagesListTitle: this.properties.sitePagesListTitle || "Site Pages",
         maxSuggestions: this.properties.maxSuggestions ?? 10,
         openYouTubeInNewTab: this.properties.openYouTubeInNewTab ?? true
@@ -48,8 +46,8 @@ export default class LetsMeetDetailWebPart extends BaseClientSideWebPart<ILetsMe
   }
 
   protected onInit(): Promise<void> {
-    // set defaults (so property pane not blank)
-    if (!this.properties.contentTypeName) this.properties.contentTypeName = "Lets Meet Video Page";
+
+    if (!this.properties.contentTypeName) this.properties.contentTypeName = "TIRLetsConnect";
     if (!this.properties.sitePagesListTitle) this.properties.sitePagesListTitle = "Site Pages";
     if (this.properties.maxSuggestions === undefined) this.properties.maxSuggestions = 10;
     if (this.properties.openYouTubeInNewTab === undefined) this.properties.openYouTubeInNewTab = true;

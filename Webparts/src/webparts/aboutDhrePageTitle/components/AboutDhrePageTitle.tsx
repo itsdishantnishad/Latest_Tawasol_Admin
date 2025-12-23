@@ -1,14 +1,12 @@
+
+
 import * as React from 'react';
 import styles from './AboutDhrePageTitle.module.scss';
 import type { IAboutDhrePageTitleProps } from './IAboutDhrePageTitleProps';
 
 export default class AboutDhrePageTitle extends React.Component<IAboutDhrePageTitleProps, {}> {
   public render(): React.ReactElement<IAboutDhrePageTitleProps> {
-    const {
-      title,
-      description,
-      imageUrl
-    } = this.props;
+    const { title, subTitle, description, imageUrl } = this.props;
 
     return (
       <div className={styles.bannerBg}>
@@ -16,14 +14,17 @@ export default class AboutDhrePageTitle extends React.Component<IAboutDhrePageTi
           role="banner"
           className={styles.banner}
           style={imageUrl ? { backgroundImage: `url(${imageUrl})` } : undefined}
-          aria-label={title}
+          aria-label={`${title} ${subTitle}`}
         >
-          {/* gradient overlay */}
+          {/* light gradient overlay (figma style) */}
           <div className={styles.shade} />
 
           {/* content */}
           <div className={styles.inner}>
-            <h2 className={styles.heading}>{title}</h2>
+            <h2 className={styles.heading}>
+              <span className={styles.title}>{title}</span>{" "}
+              <span className={styles.subTitle}>{subTitle}</span>
+            </h2>
 
             <div className={styles.divider} aria-hidden="true">
               <span className={styles.line} />
@@ -34,7 +35,6 @@ export default class AboutDhrePageTitle extends React.Component<IAboutDhrePageTi
           </div>
         </section>
       </div>
-
     );
   }
 }

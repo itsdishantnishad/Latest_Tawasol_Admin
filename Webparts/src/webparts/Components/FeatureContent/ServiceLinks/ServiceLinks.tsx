@@ -108,10 +108,10 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
   // Outer position mapper
   const getOuterCirclePosition = (position?: OuterPosition): React.CSSProperties => {
     const positionMap: Record<OuterPosition, React.CSSProperties> = {
-      "top-left": { top: "15%", left: "15%", transform: "translate(-50%, -50%)" },
-      "bottom-left": { bottom: "15%", left: "15%", transform: "translate(-50%, 50%)" },
-      "top-right": { top: "15%", right: "15%", transform: "translate(50%, -50%)" },
-      "bottom-right": { bottom: "15%", right: "15%", transform: "translate(50%, 50%)" },
+      "top-left": { top: "20%", left: "10%", transform: "translate(-50%, -50%)" },
+      "bottom-left": { bottom: "20%", left: "10%", transform: "translate(-50%, 50%)" },
+      "top-right": { top: "20%", right: "10%", transform: "translate(50%, -50%)" },
+      "bottom-right": { bottom: "20%", right: "10%", transform: "translate(50%, 50%)" },
     };
     return (position && positionMap[position]) || { top: "50%", left: "50%", transform: "translate(-50%,-50%)" };
   };
@@ -119,9 +119,9 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
   // Inner position mapper
   const getInnerCirclePosition = (position?: InnerPosition): React.CSSProperties => {
     const positionMap: Record<InnerPosition, React.CSSProperties> = {
-      "left-center": { top: "50%", left: "0%", transform: "translate(-50%, -50%)" },
-      "top-center": { top: "0%", left: "50%", transform: "translate(-50%, -50%)" },
-      "right-center": { top: "50%", right: "0%", transform: "translate(50%, -50%)" },
+      "left-center": { top: "65%", left: "5%", transform: "translate(-50%, -50%)" },
+      "top-center": { top: "10%", left: "50%", transform: "translate(-50%, -50%)" },
+      "right-center": { top: "65%", right: "5%", transform: "translate(50%, -50%)" },
     };
     return (position && positionMap[position]) || { top: "50%", left: "50%", transform: "translate(-50%,-50%)" };
   };
