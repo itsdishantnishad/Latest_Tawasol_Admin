@@ -4,9 +4,9 @@ import PrimaryButton from "../../PrimaryButton/PrimaryButton";
 import ShuffledCards from "../../../widgets/ShuffledCards/ShuffledCards";
 import ConditionalLink from "../../ConditionalLink/ConditionalLink";
 
-const HotBeverageIcon: string = require("./assets/HotBeverage.svg");
-const ColdBeverageIcon: string = require("./assets/ColdBeverage.svg");
-const TeaMenuIcon: string = require("./assets/TeaMenu.svg");
+const HotBeverageIcon: string = require("./assets/HotBeverage.png");
+const ColdBeverageIcon: string = require("./assets/ColdBeverage.png");
+const TeaMenuIcon: string = require("./assets/TeaMenu.png");
 
 interface BeverageCard {
   id: number;
