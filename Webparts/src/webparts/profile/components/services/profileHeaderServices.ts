@@ -2,15 +2,82 @@ import { getSP } from "./spSetup";
 import "@pnp/sp/profiles";
 import "@pnp/sp/files";
 import "@pnp/sp/folders";
+import type { MSGraphClientV3 } from "@microsoft/sp-http";
 
+/**
+ * GRAPH HELPERS
+ */
+const getGraphClient = async (context: any): Promise<MSGraphClientV3 | null> => {
+  const factory = context?.msGraphClientFactory;
+  if (!factory?.getClient) return null;
+
+  try {
+    // Most SPFx projects support v3 via "3"
+    return (await factory.getClient("3")) as MSGraphClientV3;
+  } catch {
+    try {
+      return (await factory.getClient()) as MSGraphClientV3;
+    } catch {
+      return null;
+    }
+  }
+};
+
+export const fetchGraphMeInfo = async (
+  context: any
+): Promise<{ fullName: string; designation: string; department: string } | null> => {
+  const client = await getGraphClient(context);
+  if (!client) return null;
+
+  try {
+    const me = await client.api("/me").select("displayName,jobTitle,department").get();
+    return {
+      fullName: (me?.displayName || "").toString().trim(),
+      designation: (me?.jobTitle || "").toString().trim(),
+      department: (me?.department || "").toString().trim(),
+    };
+  } catch (e) {
+    console.log("[profileHeaderServices] Graph /me failed:", e);
+    return null;
+  }
+};
+
+/**
+ *  Highest quality photo from Graph.
+ * NOTE: Your typings reject responseType("blob") and responseType("arraybuffer")
+ * So we cast to any to keep SPFx compile happy.
+ */
+export const fetchGraphMyPhotoBlob = async (context: any): Promise<Blob | null> => {
+  const client = await getGraphClient(context);
+  if (!client) return null;
+
+  try {
+    // Cast fixes: Argument of type '"arraybuffer"' is not assignable to parameter of type 'ResponseType'
+    const ab: ArrayBuffer = await (client.api("/me/photo/$value") as any)
+      .responseType("arraybuffer")
+      .get();
+
+    if (!ab || !ab.byteLength) return null;
+
+    // Usually JPEG; even if not, browser still renders in most cases
+    return new Blob([ab], { type: "image/jpeg" });
+  } catch (e) {
+    console.log("[profileHeaderServices] Graph photo failed:", e);
+    return null;
+  }
+};
+
+/**
+ * SHAREPOINT PROFILE FALLBACKS
+ */
 export const fetchUserProfilePicture = async (): Promise<string | null> => {
   try {
     const sp = getSP();
     const profile: any = await sp.profiles.myProperties();
+
     const fromTopLevel = profile?.PictureUrl || profile?.PictureURL;
     const fromProps =
-      profile?.UserProfileProperties?.find((p: any) => p.Key === "PictureURL")
-        ?.Value;
+      profile?.UserProfileProperties?.find((p: any) => p.Key === "PictureURL")?.Value;
 
     const pictureUrl = fromTopLevel || fromProps || null;
     return pictureUrl;
@@ -27,11 +94,10 @@ export const fetchCurrentUserInfo = async (): Promise<{
   try {
     const sp = getSP();
     const profile: any = await sp.profiles.myProperties();
-    
+
     const fullName = profile?.DisplayName || profile?.AccountName || "";
-    const department = 
-      profile?.UserProfileProperties?.find((p: any) => p.Key === "Department")
-        ?.Value || "";
+    const department =
+      profile?.UserProfileProperties?.find((p: any) => p.Key === "Department")?.Value || "";
 
     return { fullName, department };
   } catch (error) {
@@ -43,14 +109,13 @@ export const fetchCurrentUserInfo = async (): Promise<{
 export const getSiteUrl = async (): Promise<string> => {
   try {
     const ctx: any = (window as any)?._spPageContextInfo;
-    if (ctx?.webServerRelativeUrl) {
-      return ctx.webServerRelativeUrl;
-    }
+    if (ctx?.webServerRelativeUrl) return ctx.webServerRelativeUrl;
 
     if (ctx?.webAbsoluteUrl) {
       const url = new URL(ctx.webAbsoluteUrl);
       return url.pathname || "/";
     }
+
     const current = new URL(window.location.href);
     return current.pathname.replace(/\/SitePages\/.*/i, "");
   } catch (error) {
@@ -59,45 +124,33 @@ export const getSiteUrl = async (): Promise<string> => {
   }
 };
 
-export const uploadProfilePicture = async (
-  file: File,
-  siteUrl: string
-): Promise<string | null> => {
+export const uploadProfilePicture = async (file: File, siteUrl: string): Promise<string | null> => {
   try {
-    if (!file.type.startsWith("image/")) {
-      throw new Error("Please select a valid image file");
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      throw new Error("File size must be less than 5MB");
-    }
+    if (!file.type.startsWith("image/")) throw new Error("Please select a valid image file");
+    if (file.size > 5 * 1024 * 1024) throw new Error("File size must be less than 5MB");
 
     const sp = getSP();
     const fileName = `${Date.now()}-${file.name}`;
     const fileContent = await file.arrayBuffer();
 
-    const normalizedSiteUrl = siteUrl.endsWith("/")
-      ? siteUrl.slice(0, -1)
-      : siteUrl;
+    const normalizedSiteUrl = siteUrl.endsWith("/") ? siteUrl.slice(0, -1) : siteUrl;
     const folderServerRelativePath = `${normalizedSiteUrl}/User Photos`;
 
     await sp.web
       .getFolderByServerRelativePath(folderServerRelativePath)
       .files.addUsingPath(fileName, fileContent, { Overwrite: true });
-    const serverRelativeUrl = `${folderServerRelativePath}/${fileName}`;
-    return serverRelativeUrl;
+
+    return `${folderServerRelativePath}/${fileName}`;
   } catch (error) {
     console.error("Failed to upload profile picture:", error);
     throw error;
   }
 };
 
-export const updateUserProfilePicture = async (
-  photoUrl: string
-): Promise<void> => {
+export const updateUserProfilePicture = async (photoUrl: string): Promise<void> => {
   try {
     const absoluteUrl =
-      (window as any)?._spPageContextInfo?.webAbsoluteUrl ??
-      document.location.origin;
+      (window as any)?._spPageContextInfo?.webAbsoluteUrl ?? document.location.origin;
 
     const response = await fetch(
       `${absoluteUrl}/_api/SP.UserProfiles.PeopleManager/SetMyProfilePicture`,
@@ -107,55 +160,21 @@ export const updateUserProfilePicture = async (
           "Content-Type": "application/json;odata=verbose",
           Accept: "application/json;odata=verbose",
           "X-RequestDigest":
-            (document.getElementById("__REQUESTDIGEST") as HTMLInputElement)
-              ?.value || "",
+            (document.getElementById("__REQUESTDIGEST") as HTMLInputElement)?.value || "",
         },
         body: JSON.stringify({ imageUrl: photoUrl }),
       }
     );
 
-    if (!response.ok) {
-      throw new Error("Failed to update profile picture");
-    }
-
-    console.log("Profile picture updated successfully");
+    if (!response.ok) throw new Error("Failed to update profile picture");
   } catch (error) {
     console.error("Failed to update profile picture:", error);
     throw error;
   }
 };
 
-export const copyProfileToClipboard = async (
-  fullName: string,
-  department: string
-): Promise<void> => {
-  const profileText = `${fullName}\n${department}`;
-  await navigator.clipboard.writeText(profileText);
-};
-
-export const fetchImagesFromLibrary = async (
-  libraryName: string,
-  siteUrl: string 
-): Promise<any[]> => {
-  try {
-    const sp = getSP();
-    const items = await sp.web.lists.getByTitle(libraryName).items();
-    return items;
-  } catch (error) {
-    console.error("Failed to fetch images from library:", error);
-    return [];
-  }
-};
-
-export const getFileMetadata = async (fileUrl: string): Promise<any> => {
-  try {
-    const sp = getSP();
-    const file = sp.web.getFileByServerRelativePath(fileUrl);
-    return await file();
-  } catch (error) {
-    console.error("Failed to fetch file metadata:", error);
-    return null;
-  }
+export const copyProfileToClipboard = async (fullName: string, department: string): Promise<void> => {
+  await navigator.clipboard.writeText(`${fullName}\n${department}`);
 };
 
 export type SelectedBadge = { name: string; imageUrl: string };
@@ -188,7 +207,3 @@ export const loadSelectedBadge = (): SelectedBadge | null => {
     return null;
   }
 };
-
-
-
-

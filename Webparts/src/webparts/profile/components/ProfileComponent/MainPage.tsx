@@ -4,7 +4,7 @@ import * as React from "react";
 import styles from "./MainPage.module.scss";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import ProfileHeader from "../ProflleHeaderComp/ProfileHeaderComp";
-import LeftSection from "../LeftSectionComponent/LeftSection/LeftSection";
+// import LeftSection from "../LeftSectionComponent/LeftSection/LeftSection";
 import RightSection from "../RightSectionComponent/RightSection/RightSection";
 
 export interface IMainPageProps {
@@ -30,9 +30,9 @@ export default class MainPage extends React.Component<IMainPageProps> {
         <ProfileHeader context={this.props.context} badges={this.props.badges} />
 
         <div className={styles.columns}>
-          <div className={styles.leftCol} role="region" aria-label="Main feed">
+          {/* <div className={styles.leftCol} role="region" aria-label="Main feed">
             <LeftSection />
-          </div>
+          </div> */}
 
           <aside className={styles.rightCol} role="complementary" aria-label="Sidebar widgets">
             <RightSection

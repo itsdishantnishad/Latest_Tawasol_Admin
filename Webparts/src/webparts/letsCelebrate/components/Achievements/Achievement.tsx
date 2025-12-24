@@ -1,3 +1,4 @@
+// Achievement.tsx
 
 import * as React from "react";
 import { getSP } from "../../../services/spSetUp/pnpConfig";
@@ -32,25 +33,81 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
 
         const response = await sp.web.lists
           .getByTitle("User Achievements")
-          .items.select("ID",  "Title", "Designation", "MonthofAchievement", "AchievementDescription", "ProfilePicture",  "ContactInformation" )();
-          setItems(response);
-         } catch (err: any) {
-          setError(`Failed to load achievements: ${err.message}`);
-         } finally {
-         setLoading(false);
-       }
+          .items.select(
+            "Id",
+            "Title",
+            "TIRDesignation",
+            "TIRMonthOfAchievement",
+            "TIRDescription",
+            "TIRUserPicture",
+            "TIRContact"
+          )();
+
+        setItems(response || []);
+      } catch (err: any) {
+        setError(`Failed to load achievements: ${err?.message || err}`);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
   }, [context]);
 
+  // Handles Hyperlink/Image column returned as object/string/JSON-string safely
+  const extractUrl = (value: any): string | null => {
+    if (!value) return null;
+
+    // If SharePoint returns JSON string for Image/Hyperlink columns
+    if (typeof value === "string") {
+      const s = value.trim();
+      if (!s) return null;
+
+      // try JSON parse (Image column sometimes returns JSON string)
+      if ((s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]"))) {
+        try {
+          const parsed = JSON.parse(s);
+          if (parsed?.Url) return parsed.Url;
+          if (parsed?.url) return parsed.url;
+          if (parsed?.serverRelativeUrl) return parsed.serverRelativeUrl;
+        } catch {
+          // ignore
+        }
+      }
+
+      return s;
+    }
+
+    // Hyperlink/Image object commonly has Url
+    if (typeof value === "object") {
+      return value.Url || value.url || value.URL || value.serverRelativeUrl || null;
+    }
+
+    return null;
+  };
+
   const groupedItems = React.useMemo(() => {
     const groups: Record<string, any[]> = {};
-    const monthMap: Record<string, string> = { jan: "January", feb: "February", mar: "March", apr: "April", may: "May",
-      jun: "June", jul: "July", aug: "August", sep: "September", oct: "October", nov: "November", dec: "December" };
 
-    items.forEach(item => {
-      const rawMonth = item.MonthofAchievement || "Unknown";
+    const monthMap: Record<string, string> = {
+      jan: "January",
+      feb: "February",
+      mar: "March",
+      apr: "April",
+      may: "May",
+      jun: "June",
+      jul: "July",
+      aug: "August",
+      sep: "September",
+      oct: "October",
+      nov: "November",
+      dec: "December",
+    };
+
+    items.forEach((item) => {
+      // ✅ use new column
+      const rawMonth: string = item?.TIRMonthOfAchievement || "Unknown";
+
       const shortMonth = rawMonth.split("-")[0]?.toLowerCase().slice(0, 3) || "";
       const fullMonth =
         monthMap[shortMonth] || rawMonth.replace(/[-\d]/g, "").trim() || "Unknown";
@@ -63,7 +120,8 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
   }, [items]);
 
   const getNameParts = (fullName: string) => {
-    const parts = fullName?.split(" ") || ["Unknown"];
+    const parts = (fullName || "").trim().split(" ").filter(Boolean);
+    if (!parts.length) return { first: "Unknown", last: "" };
     return { first: parts[0], last: parts.slice(1).join(" ") || "" };
   };
 
@@ -100,12 +158,12 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
       <div className={styles.feed}>
         {Object.keys(groupedItems)
           .slice(0, visibleMonths)
-          .map(month => (
+          .map((month) => (
             <div key={month} className={styles.monthSection}>
               <button
                 className={styles.monthHeader}
                 onClick={() =>
-                  setExpandedMonths(prev => ({ ...prev, [month]: !prev[month] }))
+                  setExpandedMonths((prev) => ({ ...prev, [month]: !prev[month] }))
                 }
                 aria-expanded={expandedMonths[month]}
               >
@@ -113,33 +171,28 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
                 <img
                   src={ArrowDown_Icon}
                   alt=""
-                  className={`${styles.chevron} ${
-                    expandedMonths[month] ? styles.open : ""
-                  }`}
+                  className={`${styles.chevron} ${expandedMonths[month] ? styles.open : ""}`}
                 />
               </button>
 
               {expandedMonths[month] && (
                 <div className={styles.monthContent}>
-                  {groupedItems[month].map(item => {
-                    const { first, last } = getNameParts(item.Title);
+                  {groupedItems[month].map((item: any) => {
+                    const { first, last } = getNameParts(item?.Title);
 
-                    // Typed URL extractor
-                    let imageUrl: string | null = null;
+                    // ✅ use new column
+                    const imageUrl = extractUrl(item?.TIRUserPicture);
 
-                    if (item.ProfilePicture) {
-                      if (typeof item.ProfilePicture === "object") {
-                        imageUrl = item.ProfilePicture.Url || null;
-                      } else if (typeof item.ProfilePicture === "string") {
-                        imageUrl = item.ProfilePicture;
-                      }
-                    }
+                    // ✅ use new columns
+                    const designation = item?.TIRDesignation || "Team Member";
+                    const contact = item?.TIRContact || "";
+                    const description = item?.TIRDescription || "";
 
                     return (
-                      <article key={item.ID} className={styles.achievement}>
+                      <article key={item?.Id} className={styles.achievement}>
                         <div className={styles.imageWrapper}>
                           {imageUrl ? (
-                            <img className={styles.photo} src={imageUrl} alt={item.Title} />
+                            <img className={styles.photo} src={imageUrl} alt={item?.Title || ""} />
                           ) : (
                             <div className={styles.noImage}>No Image</div>
                           )}
@@ -152,17 +205,16 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
                                 <span className={styles.firstName}>{first}</span>
                                 <span className={styles.lastName}>{last}</span>
                               </h2>
-                              <div className={styles.role}>
-                                {item.Designation || "Team Member"}
-                              </div>
+
+                              <div className={styles.role}>{designation}</div>
                             </div>
 
                             <a
                               className={styles.sayCongratulations}
                               target="_blank"
-                              href={`https://teams.microsoft.com/l/chat/0/0?users=${
-                                item.ContactInformation || ""
-                              }&message=Congratulations`}
+                              href={`https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(
+                                contact
+                              )}&message=Congratulations`}
                               rel="noreferrer"
                             >
                               <img
@@ -174,19 +226,15 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
                             </a>
                           </div>
 
-                          {item.AchievementDescription && (
+                          {!!description && (
                             <p
                               className={styles.description}
-                              dangerouslySetInnerHTML={{
-                                __html: item.AchievementDescription
-                              }}
+                              dangerouslySetInnerHTML={{ __html: description }}
                             />
                           )}
 
-                          {item.ContactInformation && (
-                            <p className={styles.connect}>
-                              Lets connect : {item.ContactInformation}
-                            </p>
+                          {!!contact && (
+                            <p className={styles.connect}>Lets connect : {contact}</p>
                           )}
                         </div>
                       </article>
@@ -199,10 +247,7 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
       </div>
 
       {visibleMonths < Object.keys(groupedItems).length && (
-        <button
-          className={styles.loadMoreBtn}
-          onClick={() => setVisibleMonths(prev => prev + 8)}
-        >
+        <button className={styles.loadMoreBtn} onClick={() => setVisibleMonths((p) => p + 8)}>
           Load More
         </button>
       )}

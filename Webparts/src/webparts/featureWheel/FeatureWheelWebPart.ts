@@ -23,8 +23,7 @@ export interface IFeatureWheelWebPartProps {
   meeting: string;
   interactiveForms: string;
   dashboard: string;
-
-  // 🔹 NEW – Beverage Menu URL
+  taskApprovals: string;
   beverageMenu: string;
 }
 
@@ -43,6 +42,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
         interactiveForms: this.properties.interactiveForms,
         dashboard: this.properties.dashboard,
         beverageMenu: this.properties.beverageMenu,
+        taskApprovals: this.properties.taskApprovals,
         context: this.context,
       }
     );
@@ -144,6 +144,9 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
                 }),
                 PropertyPaneTextField("beverageMenu", {
                   label: "Please enter URL for 'Beverage Menu' view all",
+                }),
+                PropertyPaneTextField("taskApprovals", {
+                  label: "Please enter URL for 'Task Approvals' view all",
                 }),
               ],
             },
