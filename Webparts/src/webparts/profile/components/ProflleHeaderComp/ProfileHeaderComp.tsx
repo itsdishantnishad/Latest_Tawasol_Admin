@@ -18,6 +18,12 @@ import { TahweelService, TahweelAdDetails } from "../../../services/Integration/
 
 const ProfileIcon_URL = require("../../assets/profileCircleImg.svg");
 
+// ✅ File name (SiteAssets) as you said
+const PROFILE_HEADER_BG_FILE_NAME = "Gradient.svg";
+
+// ✅ ALSO keep a packaged asset fallback (so background will show even if SiteAssets path is wrong / blocked)
+const ProfileHeaderBgAsset: string = require("../../assets/Gradient.svg");
+
 type StatItem = { label: string; value: number };
 type BadgeItem = { name: string; imageUrl: string };
 
@@ -61,10 +67,11 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
   public static defaultProps: Partial<IProfileHeaderProps> = {
     stats: [
-      { label: "Posts", value: 3 },
-      { label: "Followers", value: 21 },
-      { label: "Following", value: 20 },
-      { label: "Praises", value: 5 },
+      // ✅ only comment (remove nahi)
+      // { label: "Posts", value: 3 },
+      // { label: "Followers", value: 21 },
+      // { label: "Following", value: 20 },
+      // { label: "Praises", value: 5 },
     ],
     actionNavigateUrl: "/sites/Tawasol",
   };
@@ -109,6 +116,35 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     return email;
   }
 
+  // ✅ Header background (SiteAssets + packaged assets fallback) - FIXED
+  private getHeaderBgStyle = (): React.CSSProperties => {
+    const webUrl = (this.props.context?.pageContext?.web?.absoluteUrl || this.state.siteUrl || "").trim();
+
+    const file = encodeURIComponent(PROFILE_HEADER_BG_FILE_NAME);
+    const siteAssetsUrl = webUrl ? `${webUrl}/SiteAssets/${file}` : "";
+
+    // ✅ Multiple backgrounds:
+    // 1) SiteAssets file (if exists)
+    // 2) Packaged asset (always available once bundled)
+    // 3) Fallback gradient (if svg blocked)
+    const layers: string[] = [];
+
+    if (siteAssetsUrl) layers.push(`url("${siteAssetsUrl}")`);
+    if (ProfileHeaderBgAsset) layers.push(`url("${ProfileHeaderBgAsset}")`);
+
+    layers.push(
+      `linear-gradient(90deg,#fbd8c7 0%,#fee2cf 35%,#ffd6b6 68%,#ffe4d1 100%)`
+    );
+
+    return {
+      backgroundImage: layers.join(", "),
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      width: "100%",
+    };
+  };
+
   private initializeProfile = async (): Promise<void> => {
     try {
       const siteUrl = await getSiteUrl();
@@ -127,7 +163,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
           adDetails = await this.tahweelService.fetchAdDetailsByEmail(userEmail);
         }
       } catch (e) {
-        // DEBUG_REMOVE_LATER: Tahweel AD Details error log
         console.log("[ProfileHeader] Tahweel AD Details error:", e);
       }
 
@@ -169,18 +204,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
         department: finalDepartment,
         personNumber: (adDetails?.personNumber || "").trim(),
         error: null,
-      });
-
-      // DEBUG_REMOVE_LATER: ProfileHeader loaded summary log
-      console.log("[ProfileHeader] Loaded:", {
-        email: userEmail,
-        personNumber: (adDetails?.personNumber || "").trim(),
-        employeeNumber: (adDetails?.employeeNumber || "").trim(),
-        name: finalFullName,
-        designation: finalDesignation,
-        department: finalDepartment,
-        hasTahweelImage: !!(adDetails?.imageDataUrl),
-        hasSpPhoto: !!spPhotoUrl,
       });
     } catch (error) {
       this.setState({ error: "Failed to load profile" });
@@ -247,7 +270,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
   };
 
   private handleBadgeImageError = (badgeName: string): void => {
-    // DEBUG_REMOVE_LATER: badge image error log
     console.warn(`[ProfileHeader] Badge image failed: ${badgeName}`);
     this.setState((prev) => ({
       badgeImageErrors: {
@@ -287,20 +309,18 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
     return (
       <div className={styles.nameRow}>
-        <Text className={styles.firstName} block>{first}</Text>
+        <Text className={styles.firstName} block>
+          {first}
+        </Text>
         {rest.length > 0 && (
-          <Text className={styles.lastName} block>{" "}{rest.join(" ")}</Text>
+          <Text className={styles.lastName} block>
+            {" "}
+            {rest.join(" ")}
+          </Text>
         )}
       </div>
     );
   };
-
-  private renderStat = (s: StatItem, idx: number): React.ReactElement => (
-    <div className={styles.statBox} key={idx}>
-      <div className={styles.statNumber}>{s.value}</div>
-      <div className={styles.statLabel}>{s.label}</div>
-    </div>
-  );
 
   private renderAvatarCore(): React.ReactElement {
     const { isLoading, currentPhoto, fullName } = this.state;
@@ -342,23 +362,20 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
   }
 
   public render(): React.ReactElement {
-    const { stats, badges } = this.props;
-    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors } = this.state;
+    const { badges } = this.props;
+    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors } =
+      this.state;
 
     const subtitle = (designation || "").trim() || (department || "").trim() || "—";
 
     return (
-      <div className={styles.headerWrap}>
+      <div className={styles.headerWrap} style={this.getHeaderBgStyle()}>
         <div className={styles.identityCard}>
           <div className={styles.avatarWrap}>
             {this.renderAvatarCore()}
 
             {selectedBadge ? (
-              <div
-                className={styles.avatarBadge}
-                title={selectedBadge.name}
-                aria-label={`Selected badge: ${selectedBadge.name}`}
-              >
+              <div className={styles.avatarBadge} title={selectedBadge.name} aria-label={`Selected badge: ${selectedBadge.name}`}>
                 {badgeImageErrors[selectedBadge.name] ? (
                   <div className={styles.avatarBadgeFallback}>?</div>
                 ) : (
@@ -375,7 +392,9 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
           <div className={styles.metaCol}>
             {this.renderName()}
-            <Text className={styles.department} block>{subtitle}</Text>
+            <Text className={styles.department} block>
+              {subtitle}
+            </Text>
           </div>
         </div>
 
@@ -390,15 +409,35 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
               disabled={isLoading}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
-                <path d="M14.9922 17.5H16.5022C19.5222 17.5 22.0022 15.03 22.0022 12C22.0022 8.98 19.5322 6.5 16.5022 6.5H14.9922" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M9.00391 6.5H7.50391C4.47391 6.5 2.00391 8.97 2.00391 12C2.00391 15.02 4.47391 17.5 7.50391 17.5H9.00391" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M8.00391 12H16.0039" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M14.9922 17.5H16.5022C19.5222 17.5 22.0022 15.03 22.0022 12C22.0022 8.98 19.5322 6.5 16.5022 6.5H14.9922"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M9.00391 6.5H7.50391C4.47391 6.5 2.00391 8.97 2.00391 12C2.00391 15.02 4.47391 17.5 7.50391 17.5H9.00391"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M8.00391 12H16.0039"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </button>
 
             {copyFeedback && (
               <div className={styles.copyPill} role="status" aria-live="polite">
-                <span className={styles.copyDot} aria-hidden="true">!</span>
+                <span className={styles.copyDot} aria-hidden="true">
+                  !
+                </span>
                 <span className={styles.copyText}>Profile Copied</span>
                 <button
                   type="button"
@@ -429,12 +468,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
               {showMenu && (
                 <div className={styles.dropdownMenu}>
-                  <button
-                    type="button"
-                    className={styles.changePhotoBtn}
-                    onClick={this.openFileDialog}
-                    role="menuitem"
-                  >
+                  <button type="button" className={styles.changePhotoBtn} onClick={this.openFileDialog} role="menuitem">
                     <img src={ProfileIcon_URL} className={styles.changePhotoIcon} alt="" />
                     <span className={styles.changePhotoLabel}>Change Profile Photo</span>
                   </button>
@@ -492,9 +526,12 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
             </div>
           ) : null}
 
+          {/* ✅ ONLY COMMENT (remove nahi) */}
+          {/*
           <div className={styles.statsRow} role="region" aria-label="Profile stats">
             {stats.slice(0, 4).map(this.renderStat)}
           </div>
+          */}
         </div>
       </div>
     );
