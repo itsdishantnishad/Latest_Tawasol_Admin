@@ -4,6 +4,19 @@
   --ov-accent: #DA291C;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: local('Instrument Serif Regular'), url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: local('Instrument Serif Italic'), url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
+
 /* Full-bleed #FFF4EA background */
 .fullBleed {
   position: relative;
@@ -43,16 +56,14 @@
   text-align: center;
 }
 .headingOur {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Italic';
   font-weight: 400;
-  font-style: italic;
   font-size: 42px;
   color: #DA291C;
 }
 .headingValues {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Regular';
   font-weight: 400;
-  font-style: normal;
   font-size: 42px;
   color: #000000;
 }
@@ -98,7 +109,7 @@
 /* Description text for each card */
 .description {
   color: #3A3B43;
-  font-family: Inter, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
