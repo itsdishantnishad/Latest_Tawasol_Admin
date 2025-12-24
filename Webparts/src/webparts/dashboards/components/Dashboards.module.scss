@@ -219,13 +219,13 @@
     border: 1px solid #ffe5c8;
     border-radius: 10px;
     overflow: hidden;
-    height: 400px;
+    height: 920px;
 }
 
 .embedWrap :global(iframe) {
     display: block;
     height: 100%;
-    padding: 15px;
+    padding: 0px 14px;
     width: calc(100% - 30px);
 }
 
