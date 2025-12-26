@@ -55,22 +55,28 @@ const NewJoiner: React.FC<INewJoinersFeedProps> = ({
                     </header>
 
                     <div className={styles.ctaCol}>
-                      <a
-                        className={styles.sayHello}
-                        target="_blank"
-                        data-interception="off"
-                        href={
-                          "https://teams.microsoft.com/l/chat/0/0?users=" +
-                          (item.UserEmail || "") +
-                          "&message=Hello"
-                        }
-                        rel="noreferrer"
-                      >
-                        <span className={styles.helloIcon} aria-hidden="true">
-                          🤝
-                        </span>
-                        <span>Say Hello</span>
-                      </a>
+                      {(() => {
+                      //  const dummyEmail = "dishant.nishad@essencetechlabs.com"; 
+                       // const emailToUse = (item?.UserEmail && item.UserEmail.trim()) || dummyEmail;
+                        const emailToUse = item?.UserEmail?.trim();
+                        const teamsChatUrl = `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(
+                          emailToUse
+                        )}&message=${encodeURIComponent("Hello")}`;
+                        return (
+                          <a
+                            className={styles.sayHello}
+                            target="_blank"
+                            rel="noreferrer"
+                            data-interception="off"
+                            href={teamsChatUrl}
+                          >
+                            <span className={styles.helloIcon} aria-hidden="true">
+                              🤝
+                            </span>
+                            <span>Say Hello</span>
+                          </a>
+                        );
+                      })()}
                     </div>
                   </div>
 
