@@ -169,7 +169,8 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
   }
 
   private getUserEmailOrThrow(): string {
-    const userEmail = (this.props.userEmail || "").trim();
+    // const userEmail = (this.props.userEmail || "").trim();
+    const userEmail = ("mohamed.thahir-c@dhre.ae").trim();
     if (!userEmail) throw new Error("User email is required.");
     return userEmail;
   }

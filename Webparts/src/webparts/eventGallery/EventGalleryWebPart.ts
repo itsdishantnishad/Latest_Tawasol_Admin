@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import * as ReactDom from "react-dom";
 import { Version } from "@microsoft/sp-core-library";
@@ -37,7 +36,7 @@ export default class EventGalleryWebPart extends BaseClientSideWebPart<IEventGal
         context: this.context,
         EventItem: this.EventItem,
         sitePagesListTitle: this.properties.sitePagesListTitle || "Site Pages",
-        contentTypeName: this.properties.contentTypeName || "Lets Meet Video Page",
+        contentTypeName: this.properties.contentTypeName || "TIRLetsConnect",
         maxItems: this.properties.maxItems ?? 12,
         letsMeetDescription: this.properties.letsMeetDescription || "",
       }
@@ -48,7 +47,7 @@ export default class EventGalleryWebPart extends BaseClientSideWebPart<IEventGal
   protected async onInit(): Promise<void> {
     
     if (!this.properties.sitePagesListTitle) this.properties.sitePagesListTitle = "Site Pages";
-    if (!this.properties.contentTypeName) this.properties.contentTypeName = "Lets Meet Video Page";
+    if (!this.properties.contentTypeName) this.properties.contentTypeName = "TIRLetsConnect";
     if (this.properties.maxItems === undefined) this.properties.maxItems = 12;
     if (this.properties.letsMeetDescription === undefined) {
       this.properties.letsMeetDescription =
@@ -105,10 +104,10 @@ export default class EventGalleryWebPart extends BaseClientSideWebPart<IEventGal
                   label: "Site Pages Library Title",
                 }),
                 PropertyPaneTextField("contentTypeName", {
-                  label: "Lets Meet Content Type Name",
+                  label: "Lets Connect Content Type Name",
                 }),
                 PropertyPaneSlider("maxItems", {
-                  label: "Lets Meet Max Items",
+                  label: "Lets Connect Max Items",
                   min: 1,
                   max: 2000,
                 }),

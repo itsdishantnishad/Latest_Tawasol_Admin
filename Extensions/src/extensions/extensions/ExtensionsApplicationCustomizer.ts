@@ -16,10 +16,9 @@ import { IDS, resolveUrls } from './shared/constants';
 import { NotificationService } from './services/notificationService';
 import { FooterService } from './services/FooterService';
 import { AmplitudeService } from './services/AmplitudeService';
-
-// Onboarding import
 import Onbo from './components/Onbo';
 import { IOnboConfig } from './components/Onbo';
+import { HideSocialBarService } from './services/HideSocialBarService';
 
 export interface IExtensionsApplicationCustomizerProperties {
   testMessage: string;
@@ -63,12 +62,269 @@ export default class ExtensionsApplicationCustomizer
   // Footer service
   private footerService!: FooterService;
 
-  // ✅ Amplitude Service
+  //  Amplitude Service
   private amplitude!: AmplitudeService;
 
   private observer?: MutationObserver;
   private topBarObserver?: MutationObserver;
   private debounceId?: number;
+
+  // Hide Social Bar
+  private hideSocialBar?: HideSocialBarService;
+
+
+
+// =========================================================
+// Global BREADCRUMB IMPLEMENTATION - PRODUCTION READY
+
+private _breadcrumbHostId = "tir-global-breadcrumb-host";
+private _breadcrumbStylesInjected = false;
+
+private readonly _breadcrumbCSS = `
+.__gbc_row{display:inline-flex;align-items:center;gap:20px;height:22px;margin-bottom:20px;}
+.__gbc_back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;font-family:Inter,Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;letter-spacing:0;color:#000;font-weight:400;}
+.__gbc_back:hover{opacity:.7;}
+.__gbc_back svg{width:18px;height:18px;display:block}
+.__gbc_divider{width:1px;height:16px;background:rgba(58,59,67,.35)}
+.__gbc_wrap{display:inline-flex;align-items:center;gap:10px;height:22px;font-family:Inter,Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;letter-spacing:0;color:#3A3B43;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+.__gbc_link{color:#A7A7A7;font-weight:400;text-decoration:none;cursor:pointer;font-size:14px;line-height:22px;}
+.__gbc_link:hover{text-decoration:underline}
+.__gbc_sep{color:#B9BCC3;opacity:1;margin:0 2px;user-select:none}
+.__gbc_current{color:#3A3B43;font-weight:500;font-size:14px;line-height:22px;font-family:Inter,sans-serif;}
+`;
+
+private readonly _backSvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.25 19.25L7.75 12l6.5-7.25" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+// Methods
+private ensureBreadcrumbStyles(): void {
+  if (this._breadcrumbStylesInjected) return;
+  const s = document.createElement("style");
+  s.setAttribute("data-global-breadcrumbs", "1");
+  s.appendChild(document.createTextNode(this._breadcrumbCSS));
+  document.head.appendChild(s);
+  this._breadcrumbStylesInjected = true;
+}
+
+private isSitePagesUrl(): boolean {
+  return (window.location.pathname || "").toLowerCase().includes("/sitepages/");
+}
+
+private isHomePage(): boolean {
+  const p = (window.location.pathname || "").toLowerCase();
+  return p.endsWith("/sitepages/home.aspx") || (!p.includes("/sitepages/") && p.endsWith("/"));
+}
+
+private getModernPageTitle(): string {
+  const h1 = document.querySelector('h1[data-automation-id="pageHeaderTitle"]') ||
+              document.querySelector("h1.od-TitleText") ||
+              document.querySelector("h1");
+  const t = (h1?.textContent || "").trim();
+  if (t) return t;
+
+  const docTitle = (document.title || "").trim();
+  return docTitle ? (docTitle.split(" - ")[0] || docTitle).trim() : "Details";
+}
+
+private ensureBreadcrumbHost(): HTMLElement | null {
+  let host = document.getElementById(this._breadcrumbHostId) as HTMLElement | null;
+
+  // Find suitable container with fallback strategies
+  let container = document.querySelector('[data-automation-id="TitleRegion"]') as HTMLElement | null;
+  
+  if (!container) {
+    container = document.querySelector('[data-automation-id="contentScrollRegion"]') as HTMLElement | null;
+  }
+  if (!container) {
+    container = document.querySelector('.CanvasZone') as HTMLElement | null;
+  }
+  if (!container) {
+    container = document.querySelector('[data-automation-id="CanvasSection"]') as HTMLElement | null;
+  }
+  if (!container) {
+    container = document.querySelector('main') as HTMLElement | null;
+  }
+  if (!container) {
+    container = document.querySelector('[class*="Canvas"]') as HTMLElement | null;
+  }
+
+  if (!container) return null;
+
+  if (!host) {
+    host = document.createElement("div");
+    host.id = this._breadcrumbHostId;
+  }
+
+  Object.assign(host.style, {
+    display: "block",
+    boxSizing: "border-box",
+    width: "100%",
+    maxWidth: "1200px",
+    background: "transparent",
+    padding: "0 32px",
+    margin: "20px auto"
+  });
+
+  if (host.parentElement !== container) {
+    container.prepend(host);
+  } else if (container.firstElementChild !== host) {
+    container.prepend(host);
+  }
+  
+  return host;
+}
+
+private unmountBreadcrumb(): void {
+  const host = document.getElementById(this._breadcrumbHostId);
+  if (host) {
+    try { host.remove(); } catch { /* ignore */ }
+  }
+}
+
+private goBack = (ev?: Event): void => {
+  try { ev?.preventDefault(); } catch {}
+  window.history.back();
+};
+
+private onNavigated = (): void => {
+  void this.renderBreadcrumbIfNeededSafe();
+};
+
+private async getCurrentSitePageInfo(): Promise<{ 
+  title: string; 
+  isNews: boolean;
+  contentType?: string;
+}> {
+  try {
+    const webUrl = (this.context?.pageContext?.web?.absoluteUrl || "").replace(/\/$/, "");
+    let serverRel = window.location.pathname || "";
+    try { serverRel = decodeURIComponent(serverRel); } catch {}
+    serverRel = serverRel.replace(/'/g, "''");
+
+    if (!webUrl || !serverRel) return { title: "", isNews: false };
+
+    const api = `${webUrl}/_api/web/GetFileByServerRelativePath(decodedurl='${serverRel}')/ListItemAllFields?$select=Title,PromotedState,ContentType/Name&$expand=ContentType`;
+
+    const res = await this.context.spHttpClient.get(api, SPHttpClient.configurations.v1);
+    if (!res.ok) return { title: "", isNews: false };
+
+    const data = (await res.json()) as any;
+    const title = String(data?.Title || "").trim();
+    const ctName = String(data?.ContentType?.Name || "").toLowerCase();
+    const promoted = Number(data?.PromotedState);
+
+    return { 
+      title, 
+      isNews: promoted === 2 || ctName.includes("news"),
+      contentType: data?.ContentType?.Name
+    };
+  } catch {
+    return { title: "", isNews: false };
+  }
+}
+
+private buildBreadcrumbContent(host: HTMLElement, section: string, current: string): void {
+  host.innerHTML = "";
+
+  const row = document.createElement("div");
+  row.className = "__gbc_row";
+
+  const backBtn = document.createElement("button");
+  backBtn.className = "__gbc_back";
+  backBtn.type = "button";
+  backBtn.addEventListener("click", this.goBack);
+
+  const svgSpan = document.createElement("span");
+  svgSpan.setAttribute("aria-hidden", "true");
+  svgSpan.innerHTML = this._backSvg;
+
+  const backText = document.createElement("span");
+  backText.textContent = "Back";
+
+  backBtn.appendChild(svgSpan);
+  backBtn.appendChild(backText);
+
+  const divider = document.createElement("span");
+  divider.className = "__gbc_divider";
+  divider.setAttribute("aria-hidden", "true");
+
+  const nav = document.createElement("nav");
+  nav.className = "__gbc_wrap";
+
+  const sectionLink = document.createElement("a");
+  sectionLink.href = "#";
+  sectionLink.className = "__gbc_link";
+  sectionLink.textContent = section;
+  sectionLink.addEventListener("click", this.goBack);
+
+  const sep = document.createElement("span");
+  sep.className = "__gbc_sep";
+  sep.textContent = "›";
+
+  const currentSpan = document.createElement("span");
+  currentSpan.className = "__gbc_current";
+  currentSpan.textContent = current;
+
+  nav.appendChild(sectionLink);
+  nav.appendChild(sep);
+  nav.appendChild(currentSpan);
+
+  row.appendChild(backBtn);
+  row.appendChild(divider);
+  row.appendChild(nav);
+
+  host.appendChild(row);
+}
+
+private renderBreadcrumbDom(section: string, current: string): void {
+  this.ensureBreadcrumbStyles();
+  const host = this.ensureBreadcrumbHost();
+  
+  if (!host) {
+    // Retry after DOM ready
+    setTimeout(() => {
+      const retryHost = this.ensureBreadcrumbHost();
+      if (retryHost) {
+        this.buildBreadcrumbContent(retryHost, section, current);
+      }
+    }, 500);
+    return;
+  }
+
+  this.buildBreadcrumbContent(host, section, current);
+}
+
+private async renderBreadcrumbIfNeededSafe(): Promise<void> {
+  try {
+    await this.renderBreadcrumbIfNeeded();
+  } catch (e) {
+    // Silently fail - breadcrumb is non-critical
+  }
+}
+
+private async renderBreadcrumbIfNeeded(): Promise<void> {
+  if (this.isHomePage() || !this.isSitePagesUrl()) {
+    this.unmountBreadcrumb();
+    return;
+  }
+  
+  const info = await this.getCurrentSitePageInfo();
+  let section = "Pages";
+  const title = info.title || this.getModernPageTitle();
+
+  if (info.isNews) {
+    section = "News Story";
+  } else if (info.contentType) {
+    // Use contentType from getCurrentSitePageInfo instead
+    const ctName = info.contentType.toLowerCase();
+    if (ctName.includes("event")) {
+      section = "Events";
+    } else if (ctName.includes("training")) {
+      section = "Training";
+    }
+  }
+  
+  this.renderBreadcrumbDom(section, title);
+}
 
   private get webUrl(): string {
     return this.context.pageContext.web.absoluteUrl;
@@ -237,6 +493,38 @@ export default class ExtensionsApplicationCustomizer
     // 👉 Hide SharePoint app bar (left)
     this.hideAppBar();
 
+
+    // Hide Social Bar per page (Like/Comment/Views/Save)
+    this.hideSocialBar = new HideSocialBarService({
+      // Show ONLY comments (hide social bar + remove line)
+      // ui: "commentsOnly",
+
+      // Hide whole block (social bar + comments wrapper)
+      // ui: "hideAll",
+
+      mode: "hideOn",
+      // ui: "commentsOnly",
+      ui: "hideAll",
+      webServerRelativeUrl: this.context.pageContext.web.serverRelativeUrl,
+      pages: [
+        "SitePages/Lets-Celebrate.aspx",
+        "SitePages/Tasks.aspx",
+        "SitePages/Events-And-Trainings.aspx",
+        "SitePages/NewsView.aspx"
+      ],
+
+      // VICE_VERSA
+      // Show the social bar ONLY on the pages you list
+      // All other pages → social bar is hidden
+
+      // mode: "showOnly",
+      // pages: [
+      //   "SitePages/Policy.aspx",
+      //   "SitePages/Confidential*"
+      // ]
+    });
+
+    this.hideSocialBar.apply();
     // 👉 Hide top command bar & edit buttons from users who are not in permission list
     // await this.hideTopBarForNonAdmins();
 
@@ -307,10 +595,18 @@ export default class ExtensionsApplicationCustomizer
     // Initial render of footer and floating nav
     await this.refreshNavAndFooter();
 
+    // Breadcrumb initialization
+  await this.renderBreadcrumbIfNeededSafe();
+  this.context.application.navigatedEvent.add(this, this.onNavigated);
+  setTimeout(() => void this.renderBreadcrumbIfNeededSafe(), 800);
+
     // Observe DOM changes for re-rendering
     this.context.application.navigatedEvent.add(this, () => {
       // give SP a moment to swap the canvas
-      window.setTimeout((): void => { void this.refreshNavAndFooter(); }, 200);
+      window.setTimeout((): void => {
+        this.hideSocialBar?.apply(); // re-apply on modern navigation
+        void this.refreshNavAndFooter();
+      }, 200);
     });
 
     window.addEventListener('scroll', this.updateSuggest, true);
@@ -442,6 +738,7 @@ export default class ExtensionsApplicationCustomizer
     this.notifications?.dispose();
     this.floatingNav?.dispose();
     this.footer?.dispose();
+    this.hideSocialBar?.dispose();
     if (this.observer) {
       try { this.observer.disconnect(); } catch { /* ignore */ }
     }
@@ -451,6 +748,12 @@ export default class ExtensionsApplicationCustomizer
     window.removeEventListener('scroll', this.updateSuggest, true);
     window.removeEventListener('resize', this.updateSuggest);
     this.onboarding?.dispose();
+    
+    try {
+    this.context.application.navigatedEvent.remove(this, this.onNavigated);
+    } catch {}
+     this.unmountBreadcrumb();
+
   }
 
   /* Hide Viva Engage "View all" button only */

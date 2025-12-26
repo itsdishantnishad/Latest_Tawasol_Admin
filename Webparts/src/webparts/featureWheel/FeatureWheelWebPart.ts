@@ -124,8 +124,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
                   label: "Please enter URL for 'Upcoming events' see all",
                 }),
                 PropertyPaneTextField("getOffersAndDiscounts", {
-                  label:
-                    "Please enter URL for 'Get Offers & Discounts' see all",
+                  label: "Please enter URL for 'Offers & Benefits' view all",
                 }),
                 PropertyPaneTextField("imageGallery", {
                   label: "Please enter URL for 'Image Gallery' see all",
