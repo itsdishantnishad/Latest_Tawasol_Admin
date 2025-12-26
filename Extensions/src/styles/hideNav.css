@@ -1,31 +1,117 @@
-/* Keep your comments — not removing them */
+/* =========================================================
+   SharePoint chrome cleanup
+   ========================================================= */
 
-/* Hide Hub nav */ 
-/* #sp-appBar, */ 
-/* .sp-App-hubNav, */ 
-.ms-HubNav { display: none; } 
+/* Hide Hub nav */
+.ms-HubNav {
+  display: none !important;
+}
 
-#spSiteHeader { height: 0; } 
-
-/* #spCommandBar, */ 
-[data-sp-feature-tag="Site header host"], 
-div [data-automationid="pageHeader"] { display: none !important; } 
-
-#SuiteNavWrapper { z-index: 0 !important; } 
-#SuiteNavWrapper.hide { transition: all .3s ease-out; height: 0; overflow: hidden; visibility: hidden; } 
-#SuiteNavWrapper.show { height: 48px; z-index: 12 !important; transition: height .3s ease-out, z-index 0s .4s; visibility: visible; } 
-
-#hide-ribbon-wrap { background-image: linear-gradient(to right, #B50007 0%, #B50007 100%); cursor: pointer; } 
-#hide-ribbon-inner { cursor: pointer; width: 100%; display: flex; justify-content: center; height: 12px; } 
-.hide-ribbon-icon { color: white; padding-top: 4px; font-size: 12px; transition: transform .3s; } 
-.hide-ribbon-icon.open { transform: rotate(180deg); transition: transform .3s; } 
-.icon-button { cursor: pointer; border: none; background-color: transparent; display: flex; align-items: center; } 
-
-/* Remove native site title/page header to avoid duplicate "Tawasol" */
+/* Hide native site header / page header areas */
 [data-sp-feature-tag="Site header host"],
+div[data-automationid="pageHeader"],
 div[role="banner"] [data-automationid*="SiteHeader"] .od-SiteHeader-brandText,
 div[role="banner"] [data-automationid*="SiteHeader"] .od-SiteHeader-titleArea,
-div[data-automationid*="TitleRegion"],
-div[data-automationid="pageHeader"] { display: none !important; }
+div[data-automationid*="TitleRegion"] {
+  display: none !important;
+}
 
-#spSiteHeader, [data-automationid="SiteHeader"] { height: 0 !important; overflow: hidden !important; }
+#spSiteHeader,
+[data-automationid="SiteHeader"] {
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Suite bar show/hide (keep if you use it) */
+#SuiteNavWrapper {
+  z-index: 0 !important;
+}
+#SuiteNavWrapper.hide {
+  transition: all 0.3s ease-out;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+#SuiteNavWrapper.show {
+  height: 48px;
+  z-index: 12 !important;
+  transition: height 0.3s ease-out, z-index 0s 0.4s;
+  visibility: visible;
+}
+
+/* Ribbon toggle (keep if you use it) */
+#hide-ribbon-wrap {
+  background-image: linear-gradient(to right, #b50007 0%, #b50007 100%);
+  cursor: pointer;
+}
+#hide-ribbon-inner {
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  height: 12px;
+}
+.hide-ribbon-icon {
+  color: #fff;
+  padding-top: 4px;
+  font-size: 12px;
+  transition: transform 0.3s;
+}
+.hide-ribbon-icon.open {
+  transform: rotate(180deg);
+}
+.icon-button {
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+}
+
+/* =========================================================
+   Social bar + comments controls
+   Body classes used:
+   - tir-hide-socialbar  => hide Like/Views/Save bar + remove divider line
+   - tir-hide-comments   => hide whole comments area
+   ========================================================= */
+
+/* Hide Like/Views/Save social bar row */
+body.tir-hide-socialbar [data-automation-id="socialBar"],
+body.tir-hide-socialbar [data-automation-id="SocialBar"],
+body.tir-hide-socialbar [data-automation-id="sp-socialbar"],
+body.tir-hide-socialbar [data-automation-id*="socialbar"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+}
+
+/* Remove extra spacing around comments wrapper (your tenant uses id="CommentsWrapper") */
+body.tir-hide-socialbar #CommentsWrapper {
+  border-top: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* ✅ Remove the black divider line (it is ::before on the comments root) */
+body.tir-hide-socialbar #CommentsWrapper [data-sp-feature-tag="Comments"]::before,
+body.tir-hide-socialbar #CommentsWrapper [data-sp-feature-tag="Comments"]::after,
+body.tir-hide-socialbar #CommentsWrapper > div::before {
+  content: none !important;
+  display: none !important;
+  border: 0 !important;
+  height: 0 !important;
+}
+
+/* If any explicit separators exist */
+body.tir-hide-socialbar #CommentsWrapper hr,
+body.tir-hide-socialbar #CommentsWrapper [role="separator"] {
+  display: none !important;
+}
+
+/* Hide ENTIRE comments area (social + comments) */
+body.tir-hide-comments #CommentsWrapper,
+body.tir-hide-comments #CommentsWrapper * {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+}
