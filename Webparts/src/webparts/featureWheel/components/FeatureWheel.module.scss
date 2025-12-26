@@ -57,8 +57,9 @@
 }
 
 .wheelSection {
-  padding: 30px 60px 0;
+  padding: 20px 60px 0;
   overflow: hidden;
+  position: relative;
   // background-color: transparent;
 }
 
@@ -77,8 +78,8 @@
 
 .titleContainer {
   text-align: center;
-  margin-top: 40px;
-  padding: 16px;
+  margin-top: 0px;
+  padding: 0px;
 
   @media (max-width: 767px) {
     margin-top: 0;

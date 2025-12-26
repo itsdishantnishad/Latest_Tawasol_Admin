@@ -53,7 +53,7 @@ const featureTitleContent: Record<string, { header: string; subHeader: string }>
     subHeader: "Recent milestones and cherished memories we've Immortalised",
   },
   documents: {
-    header: "Policy and Procedure",
+    header: "Policies and Procedures",
     subHeader: "Everything you need, neatly organized",
   },
   events: {
