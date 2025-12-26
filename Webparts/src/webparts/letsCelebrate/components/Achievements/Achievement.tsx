@@ -119,6 +119,24 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
     return groups;
   }, [items]);
 
+
+  React.useEffect(() => {
+  const monthsToAutoOpen = Object.keys(groupedItems).slice(0, visibleMonths);
+  if (!monthsToAutoOpen.length) return;
+
+  setExpandedMonths((prev) => {
+    const next = { ...prev };
+
+    // ✅ open each visible month by default (but don't override user's toggles)
+    monthsToAutoOpen.forEach((m) => {
+      if (next[m] === undefined) next[m] = true;
+    });
+
+    return next;
+  });
+}, [groupedItems, visibleMonths]);
+
+
   const getNameParts = (fullName: string) => {
     const parts = (fullName || "").trim().split(" ").filter(Boolean);
     if (!parts.length) return { first: "Unknown", last: "" };
@@ -165,7 +183,7 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
                 onClick={() =>
                   setExpandedMonths((prev) => ({ ...prev, [month]: !prev[month] }))
                 }
-                aria-expanded={expandedMonths[month]}
+                aria-expanded={!!expandedMonths[month]}
               >
                 <h3 className={styles.monthTitle}>{month}</h3>
                 <img
