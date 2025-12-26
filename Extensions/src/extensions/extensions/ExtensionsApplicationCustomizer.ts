@@ -16,10 +16,9 @@ import { IDS, resolveUrls } from './shared/constants';
 import { NotificationService } from './services/notificationService';
 import { FooterService } from './services/FooterService';
 import { AmplitudeService } from './services/AmplitudeService';
-
-// Onboarding import
 import Onbo from './components/Onbo';
 import { IOnboConfig } from './components/Onbo';
+import { HideSocialBarService } from './services/HideSocialBarService';
 
 export interface IExtensionsApplicationCustomizerProperties {
   testMessage: string;
@@ -63,12 +62,15 @@ export default class ExtensionsApplicationCustomizer
   // Footer service
   private footerService!: FooterService;
 
-  // ✅ Amplitude Service
+  //  Amplitude Service
   private amplitude!: AmplitudeService;
 
   private observer?: MutationObserver;
   private topBarObserver?: MutationObserver;
   private debounceId?: number;
+
+  // Hide Social Bar
+  private hideSocialBar?: HideSocialBarService;
 
 
 
@@ -491,6 +493,38 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     // 👉 Hide SharePoint app bar (left)
     this.hideAppBar();
 
+
+    // Hide Social Bar per page (Like/Comment/Views/Save)
+    this.hideSocialBar = new HideSocialBarService({
+      // Show ONLY comments (hide social bar + remove line)
+      // ui: "commentsOnly",
+
+      // Hide whole block (social bar + comments wrapper)
+      // ui: "hideAll",
+
+      mode: "hideOn",
+      // ui: "commentsOnly",
+      ui: "hideAll",
+      webServerRelativeUrl: this.context.pageContext.web.serverRelativeUrl,
+      pages: [
+        "SitePages/Lets-Celebrate.aspx",
+        "SitePages/Tasks.aspx",
+        "SitePages/Events-And-Trainings.aspx",
+        "SitePages/NewsView.aspx"
+      ],
+
+      // VICE_VERSA
+      // Show the social bar ONLY on the pages you list
+      // All other pages → social bar is hidden
+
+      // mode: "showOnly",
+      // pages: [
+      //   "SitePages/Policy.aspx",
+      //   "SitePages/Confidential*"
+      // ]
+    });
+
+    this.hideSocialBar.apply();
     // 👉 Hide top command bar & edit buttons from users who are not in permission list
     // await this.hideTopBarForNonAdmins();
 
@@ -569,7 +603,10 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     // Observe DOM changes for re-rendering
     this.context.application.navigatedEvent.add(this, () => {
       // give SP a moment to swap the canvas
-      window.setTimeout((): void => { void this.refreshNavAndFooter(); }, 200);
+      window.setTimeout((): void => {
+        this.hideSocialBar?.apply(); // re-apply on modern navigation
+        void this.refreshNavAndFooter();
+      }, 200);
     });
 
     window.addEventListener('scroll', this.updateSuggest, true);
@@ -701,6 +738,7 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     this.notifications?.dispose();
     this.floatingNav?.dispose();
     this.footer?.dispose();
+    this.hideSocialBar?.dispose();
     if (this.observer) {
       try { this.observer.disconnect(); } catch { /* ignore */ }
     }

@@ -1,4 +1,3 @@
-
 import { SPHttpClient } from "@microsoft/sp-http";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 
@@ -98,7 +97,7 @@ export class LetsMeetDataService {
     }
 
     const urlInternal = await this.getFieldInternalNameByTitle("URL");
-    const sortInternal = await this.getFieldInternalNameByTitle("Sort Order");
+    const sortInternal = await this.getFieldInternalNameByTitle("TIRSortOrder");
 
     this._urlInternal = urlInternal;
     this._sortInternal = sortInternal;

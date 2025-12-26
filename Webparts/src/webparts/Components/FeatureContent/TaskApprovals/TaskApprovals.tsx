@@ -16,6 +16,8 @@ import { TahweelService, TahweelApproval } from "../../../services/Integration/T
 
 type SystemKey = "Tahweel" | "Salesforce" | "ServiceNow";
 
+const DEFAULT_ACTIVE_TAB: SystemKey = "Salesforce";
+
 type TaskRow = {
   workitemId: string;
   workflowNumber: string;
@@ -115,12 +117,18 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
 
   const [errorBySystem, setErrorBySystem] = useState<Partial<Record<SystemKey, string>>>({});
 
-  const userEmail: string = (props?.context?.pageContext?.user?.email || "").trim();
+  // const userEmail: string = (props?.context?.pageContext?.user?.email || "").trim();
+  const userEmail: string = ("mohamed.thahir-c@dhre.ae").trim();
   const httpClient = props?.context?.httpClient;
 
   const sfService = useMemo(() => new SfApprovalService({ httpClient }), [httpClient]);
   const snService = useMemo(() => new ServiceNowApprovalService({ httpClient }), [httpClient]);
   const tahweelService = useMemo(() => new TahweelService({ httpClient }), [httpClient]);
+
+  const getDefaultIndex = (cats: ICategoryItem[], key: SystemKey): number => {
+    const idx = cats.findIndex((c) => (c.id as SystemKey) === key);
+    return idx >= 0 ? idx : 0;
+  };
 
   const categories: ICategoryItem[] = useMemo(
     () => [
@@ -130,8 +138,13 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
     ],
     [counts]
   );
+  
+  useEffect(() => {
+    setActiveCategoryIndex(getDefaultIndex(categories, DEFAULT_ACTIVE_TAB));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const activeSystem: SystemKey = (categories[activeCategoryIndex]?.id as SystemKey) || "Tahweel";
+  const activeSystem: SystemKey = (categories[activeCategoryIndex]?.id as SystemKey) || "Salesforce";
   const activeRows = rowsBySystem[activeSystem] || [];
   const activeError = errorBySystem[activeSystem];
 
