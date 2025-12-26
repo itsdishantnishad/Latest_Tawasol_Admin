@@ -1,3 +1,5 @@
+
+
 import * as React from 'react';
 import view from './ViewPage.module.scss';
 import { IPoliciesAndProceduresItem } from './ViewPageList';
@@ -16,7 +18,7 @@ export default class PoliciesAndProceduresPreview
       <img
         src={ICON_PREVIEW_PLACEHOLDER}
         alt=""
-        className={view.previewIconImg}   // << NEW class
+        className={view.previewIconImg}
       />
     );
   }
@@ -24,6 +26,7 @@ export default class PoliciesAndProceduresPreview
   public render(): React.ReactElement<IPoliciesAndProceduresPreviewProps> {
     const { item, categoryTitle } = this.props;
 
+    // ✅ IMPORTANT: preview should show placeholder until user clicks a file
     if (!item || item.isFolder) {
       return (
         <div className={view.previewCard}>
@@ -55,3 +58,6 @@ export default class PoliciesAndProceduresPreview
     );
   }
 }
+
+
+

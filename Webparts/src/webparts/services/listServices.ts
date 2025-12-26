@@ -63,7 +63,7 @@ export type OrgMember = {
   userEmail?: string;
 };
 
-//  UPDATED (ONLY dept+pointers related change)
+// ✅ UPDATED (ONLY dept+pointers related change)
 export type OrgDepartment = { name: string; url?: string; itemsText?: string };
 
 export type DashboardCategory = {
@@ -158,7 +158,7 @@ export class listServices {
     return (tmp.textContent || tmp.innerText || "").replace(/\s+/g, " ").trim();
   }
 
-  //  UPDATED helper: strip HTML BUT keep line breaks (for bullet pointers)
+  // ✅ UPDATED helper: strip HTML BUT keep line breaks (for bullet pointers)
   private static toPlainTextWithLines(raw?: string): string {
     if (!raw) return "";
 
@@ -172,12 +172,18 @@ export class listServices {
     };
 
     for (let i = 0; i < 2; i++) {
-      if (/[&](lt|gt|amp|quot|apos|#\d+);/i.test(s)) {
+      if (/[&](lt|gt|amp|quot|apos|nbsp|#\d+);/i.test(s)) {
         const decoded = decodeOnce(s);
         if (decoded === s) break;
         s = decoded;
       }
     }
+
+    // normalize common entities
+    s = s
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&#160;/g, " ")
+      .replace(/\u00A0/g, " ");
 
     // If it contains HTML tags, convert block boundaries to newlines BEFORE removing tags
     const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(s) || s.indexOf("ExternalClass") > -1;
@@ -186,25 +192,28 @@ export class listServices {
       s = s
         // br => newline
         .replace(/<br\s*\/?>/gi, "\n")
-        // opening block tags => newline (IMPORTANT: fixes "Kartik<p>Arnav</p>" => Kartik\nArnav)
-        .replace(/<(p|div|li|tr|h[1-6]|blockquote)(\s[^>]*)?>/gi, "\n")
+        // opening block tags => newline (fixes "Kartik<p>Arnav</p>" => Kartik\nArnav)
+        .replace(/<(p|div|li|tr|h[1-6]|blockquote|ul|ol)(\s[^>]*)?>/gi, "\n")
         // closing block tags => newline
-        .replace(/<\/(p|div|li|tr|h[1-6]|blockquote)>/gi, "\n")
+        .replace(/<\/(p|div|li|tr|h[1-6]|blockquote|ul|ol)>/gi, "\n")
         // remove any remaining tags
         .replace(/<[^>]+>/g, "");
     }
 
+    // Treat pasted bullet symbols as separators too
+    s = s.replace(/\u2022/g, "\n").replace(/\u00B7/g, "\n");
+
     // normalize newlines + spaces
     s = s
       .replace(/\r\n/g, "\n")
-      .replace(/\r/g, "\n")
-      .replace(/\u00A0/g, " "); // nbsp
+      .replace(/\r/g, "\n");
 
     const lines = s
       .split("\n")
       .map((l) => l.replace(/\s+/g, " ").trim())
       .filter(Boolean);
 
+    // collapse too many lines, then join back with real \n
     return lines.join("\n");
   }
 
@@ -281,7 +290,6 @@ export class listServices {
           "owstaxIdTIRDepartment",
           "TIRDepartment",
           "URL",
-          "Path",
           "owstaxIdTIRNewsType",
           "TIRNewsType",
           "ModifiedOWSDATE",
@@ -302,7 +310,6 @@ export class listServices {
         const viewCountRaw = item.ViewCount;
 
         const readTime = readTimeRaw === "" || readTimeRaw == null ? 0 : Math.trunc(Number(readTimeRaw));
-
         const pageView = viewCountRaw === "" || viewCountRaw == null ? 0 : Math.trunc(Number(viewCountRaw));
 
         return {
@@ -314,10 +321,8 @@ export class listServices {
           newsImage: listServices.getImageUrlFromPage(item.URL, 200),
           newsType: item.TIRNewsType ? item.TIRNewsType : "",
           author: item.CreatedBy,
-          authorEmail: item.AuthorOWSUSER
-            ? item.AuthorOWSUSER.split("|")[0]
-            : "",
-          path: item.Path || item.FileRef || item.URL, //  real page link first,
+          authorEmail: item.AuthorOWSUSER ? item.AuthorOWSUSER.split("|")[0] : "",
+          path: item.FileRef,
           created: item.Created,
           pageDescription: item.Description,
           lastModified: item.ModifiedOWSDATE ? moment(item.ModifiedOWSDATE.split(";")[0]).fromNow() : "",
@@ -704,7 +709,7 @@ export class listServices {
     return mapped;
   }
 
-  //  UPDATED (ONLY dept+pointers related change)
+  // ✅ UPDATED (ONLY dept+pointers related change)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getDepartmentsByMember(listTitle: string, memberDisplayName: string): Promise<OrgDepartment[]> {
     const targetName = memberDisplayName.trim().toLowerCase();
@@ -765,7 +770,7 @@ export class listServices {
       const urlField = item.URL;
       const url = urlField && typeof urlField === "object" ? urlField.Url : urlField || undefined;
 
-      //  IMPORTANT: normalize pointers => multiline plain text with \n between items
+      // ✅ IMPORTANT: normalize pointers => multiline plain text with \n between items
       const pointersRaw: string = item?.TIRDepartmentItems || "";
       const pointersClean = listServices.toPlainTextWithLines(pointersRaw);
 
@@ -836,7 +841,17 @@ export class listServices {
     try {
       let query = this.sp.web.lists
         .getByTitle(listTitle)
-        .items.select("Id", "Title", "TIRDescription", "TIRIconURL", "TIRSortOrder", "URL", "TIRCategoryIDId", "TIRCategoryID/Id", "TIRCategoryID/Title")
+        .items.select(
+          "Id",
+          "Title",
+          "TIRDescription",
+          "TIRIconURL",
+          "TIRSortOrder",
+          "URL",
+          "TIRCategoryIDId",
+          "TIRCategoryID/Id",
+          "TIRCategoryID/Title"
+        )
         .expand("TIRCategoryID")
         .orderBy("TIRSortOrder", true);
 
@@ -845,7 +860,6 @@ export class listServices {
       if (typeof excludeId === "number") filters.push(`Id ne ${excludeId}`);
       if (filters.length) query = query.filter(filters.join(" and "));
 
-      if (typeof top === "number" && top > 0) query = query.top(top);
       if (typeof top === "number" && top > 0) query = query.top(top);
       if (typeof skip === "number" && skip > 0) query = query.skip(skip);
 

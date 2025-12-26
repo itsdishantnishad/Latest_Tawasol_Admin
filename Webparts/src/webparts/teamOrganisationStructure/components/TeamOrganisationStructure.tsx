@@ -127,17 +127,15 @@ export default class TeamOrganisationStructure extends React.Component<
 
   /**
    * ✅ IMPORTANT:
-   * SharePoint multiline (rich text) often comes as HTML (<div><p>..</p></div>)
-   * We convert HTML -> real text WITH line breaks using innerText, then split into bullets.
+   * Even after service cleaning, some cases may still contain HTML.
+   * Keep this as safety.
    */
   private normalizeMultiline(raw?: string): string {
     if (!raw) return "";
 
     const s = String(raw);
 
-    // if it looks like HTML, decode + keep line breaks
-    const looksHtml = /<\/?[a-z][\s\S]*>/i.test(s);
-
+    const looksHtml = /<\/?[a-z][\s\S]*>/i.test(s) || s.indexOf("ExternalClass") > -1;
     if (looksHtml && typeof document !== "undefined") {
       const tmp = document.createElement("div");
       tmp.innerHTML = s;
@@ -147,17 +145,24 @@ export default class TeamOrganisationStructure extends React.Component<
       return text;
     }
 
-    // plain text case
     return s.replace(/\u00A0/g, " ");
   }
 
   private parseBullets(raw?: string): string[] {
-    const text = this.normalizeMultiline(raw);
+    const text = this.normalizeMultiline(raw)
+      // treat bullet symbols as separators too
+      .replace(/\u2022/g, "\n")
+      .replace(/\u00B7/g, "\n")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .trim();
 
-    return text
-      .split(/\r?\n/)
-      .map((x) => x.replace(/^[\u2022•\-\*]\s*/g, "").trim()) // remove leading bullet chars if pasted
+    const lines = text
+      .split("\n")
+      .map((x) => x.replace(/^[\u2022•\-\*]\s*/g, "").trim())
       .filter(Boolean);
+
+    return lines;
   }
 
   public render(): React.ReactElement<ITeamOrganisationStructureProps> {
@@ -260,7 +265,6 @@ export default class TeamOrganisationStructure extends React.Component<
 
             {departments.map((d, i) => {
               const rawPointers = (d.itemsText as string) || "";
-
               const bullets = this.parseBullets(rawPointers);
 
               const box = (
@@ -285,7 +289,7 @@ export default class TeamOrganisationStructure extends React.Component<
                     <div title={d.name}>{box}</div>
                   )}
 
-                  {/* ✅ Bullet list (same like Figma) */}
+                  {/* ✅ Bullet list (Figma style) */}
                   {bullets.length > 0 && (
                     <ul className={styles.deptList}>
                       {bullets.map((b, bi) => (
