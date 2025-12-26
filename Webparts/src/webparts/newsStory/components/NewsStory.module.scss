@@ -439,16 +439,12 @@
 /* Top gradient */
 .topGradient {
   position: absolute;
-  inset: 0 0 auto 0;
   height: 180px;
   pointer-events: none;
   z-index: 2;
-
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.28) 0%,
-    rgba(0, 0, 0, 0) 75%
-  );
+  
+  background: linear-gradient(180deg, #fff4ea, rgba(255, 244, 234, .7) 35%, rgba(255, 244, 234, 0));
+  inset: 0px 0px 0 0px;
 }
 
 /* Bottom fog gradient */
@@ -470,7 +466,7 @@
 /* ✅ Title + arrows row */
 .captionBar {
   align-items: center;
-  bottom: 24px;
+  bottom: 32px;
   display: flex;
   gap: 24px;
   justify-content: center;
@@ -550,7 +546,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
+  padding: 0 60px;
   z-index: 8;
   pointer-events: none; 
 }

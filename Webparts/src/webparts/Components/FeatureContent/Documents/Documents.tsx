@@ -4,10 +4,10 @@ import ShuffledCards from '../../../widgets/ShuffledCards/ShuffledCards';
 import ConditionalLink from '../../ConditionalLink/ConditionalLink';
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
 
-const ProjectDevelopmentIcon = require("../assets/ProjectDevelopement.svg");
-const CommercialIcon = require("../assets/Commercial.svg");
-const ProjectDeliveryIcon = require("../assets/ProjectDelivery.svg");
-const ProjectSecurityIcon = require("../assets/ProjectSecurity.svg");
+const ProjectDevelopmentIcon = require("../assets/001.png");
+const CommercialIcon = require("../assets/002.png");
+const ProjectDeliveryIcon = require("../assets/003.png");
+const ProjectSecurityIcon = require("../assets/004.png");
 
 export interface IDocument {
   id: string;
@@ -59,7 +59,7 @@ export const Documents: React.FC<IDocumentsProps> = (props) => {
 
       <div className={styles.ctaWrapper}>
         <ConditionalLink to="https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SitePages/PoliciesAndProcedures.aspx">
-          <PrimaryButton label="View All Physical Forms" />
+          <PrimaryButton label="View All" />
         </ConditionalLink>
       </div>
     </div>
