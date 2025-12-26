@@ -254,7 +254,9 @@ export default class ExtensionsApplicationCustomizer
       webServerRelativeUrl: this.context.pageContext.web.serverRelativeUrl,
       pages: [
         "SitePages/Lets-Celebrate.aspx",
-        "SitePages/Tasks.aspx"
+        "SitePages/Tasks.aspx",
+        "SitePages/Events-And-Trainings.aspx",
+        "SitePages/NewsView.aspx"
       ],
 
       // VICE_VERSA
