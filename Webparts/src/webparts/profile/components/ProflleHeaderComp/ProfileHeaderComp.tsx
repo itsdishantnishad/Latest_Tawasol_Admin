@@ -1,4 +1,6 @@
 // ProfileHeaderComp.tsx
+// ✅ Graph-only version (Tahweel removed completely)
+// ✅ Keeps: Graph info + HQ photo, SharePoint fallbacks, background SiteAssets+packaged fallback, badges, copy profile, upload photo, cleanup.
 
 import * as React from "react";
 import { Text, Spinner, SpinnerSize } from "@fluentui/react";
@@ -15,12 +17,6 @@ import {
   loadSelectedBadge,
 } from "../services/profileHeaderServices";
 import styles from "./ProfileHeader.module.scss";
-
-// ===============================
-// Tahweel (Oracle) — NOT USED NOW
-// Keep commented so you can re-enable without re-work
-// ===============================
-// import { TahweelService, TahweelAdDetails } from "../../../services/Integration/TahweelService";
 
 const ProfileIcon_URL = require("../../assets/profileCircleImg.svg");
 
@@ -54,9 +50,6 @@ interface IProfileHeaderState {
   designation: string;
   department: string;
 
-  // Tahweel fields (NOT USED NOW) — keep for future uncomment
-  // personNumber: string;
-
   showMenu: boolean;
   copyFeedback: boolean;
   isLoading: boolean;
@@ -73,12 +66,9 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
   private graphPhotoObjectUrl: string | null = null;
 
-  //  Tahweel instance (NOT USED NOW)
-  // private tahweelService: TahweelService;
-
   public static defaultProps: Partial<IProfileHeaderProps> = {
     stats: [
-      //  only comment (remove nahi)
+      // ✅ only comment (remove nahi)
       // { label: "Posts", value: 3 },
       // { label: "Followers", value: 21 },
       // { label: "Following", value: 20 },
@@ -97,9 +87,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       designation: "",
       department: props.department || "",
 
-      //  Tahweel field (NOT USED NOW)
-      // personNumber: "",
-
       showMenu: false,
       copyFeedback: false,
       isLoading: true,
@@ -111,14 +98,11 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     };
 
     this.menuRef = React.createRef();
-
-    //  Tahweel init (NOT USED NOW)
-    // this.tahweelService = new TahweelService({ httpClient: this.props.context.httpClient });
   }
 
   public componentDidMount(): void {
     document.addEventListener("click", this.handleOutsideClick);
-    this.initializeProfile();
+    void this.initializeProfile();
   }
 
   public componentWillUnmount(): void {
@@ -155,14 +139,14 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     return url;
   }
 
-  //  Header background (SiteAssets + packaged assets fallback)
+  // ✅ Header background (SiteAssets + packaged assets fallback)
   private getHeaderBgStyle = (): React.CSSProperties => {
     const webUrl = (this.props.context?.pageContext?.web?.absoluteUrl || this.state.siteUrl || "").trim();
 
     const file = encodeURIComponent(PROFILE_HEADER_BG_FILE_NAME);
     const siteAssetsUrl = webUrl ? `${webUrl}/SiteAssets/${file}` : "";
 
-    //  Multiple backgrounds:
+    // ✅ Multiple backgrounds:
     // 1) SiteAssets file (if exists)
     // 2) Packaged asset (always available once bundled)
     // 3) Fallback gradient (if svg blocked)
@@ -230,7 +214,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       }
 
       // ----------------------------
-      //  Final merge priority (Graph > SPInfo > props/state)
+      // Final merge priority (Graph > SPInfo > props/state)
       // ----------------------------
       const gName =
         (graphInfo?.displayName ||
@@ -242,18 +226,14 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       const gDept = (graphInfo?.department || "").trim();
 
       const finalFullName =
-        gName ||
-        (spInfo?.fullName || "").trim() ||
-        (this.state.fullName || "").trim();
+        gName || (spInfo?.fullName || "").trim() || (this.state.fullName || "").trim();
 
       const finalDesignation = gDesig;
 
       const finalDepartment =
-        gDept ||
-        (spInfo?.department || "").trim() ||
-        (this.state.department || "").trim();
+        gDept || (spInfo?.department || "").trim() || (this.state.department || "").trim();
 
-      //  Photo preference: Graph HQ > SharePoint photo
+      // Photo preference: Graph HQ > SharePoint photo
       const finalPhoto = (graphPhotoUrl || "").trim() || (spPhotoUrl || "").trim();
 
       this.setState({
@@ -263,23 +243,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
         department: finalDepartment,
         error: null,
       });
-
-      // ===============================
-      //  Tahweel block (NOT USED NOW)
-      // If ever needed, uncomment imports + init in constructor + this block.
-      // ===============================
-      /*
-      const userEmail = this.getUserEmailFromContext();
-      let adDetails: TahweelAdDetails | null = null;
-      try {
-        if (userEmail) adDetails = await this.tahweelService.fetchAdDetailsByEmail(userEmail);
-      } catch { }
-
-      // Then merge:
-      // - fullName/designation/department from adDetails (if desired)
-      // - imageDataUrl and personNumber
-      this.setState({ personNumber: (adDetails?.personNumber || "").trim() });
-      */
     } catch {
       this.setState({ error: "Failed to load profile" });
     } finally {
@@ -309,6 +272,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     try {
       const { siteUrl } = this.state;
 
+      // ✅ instant preview
       const reader = new FileReader();
       reader.onload = (event) => {
         const photoData = event.target?.result as string;
@@ -316,6 +280,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       };
       reader.readAsDataURL(file);
 
+      // ✅ upload to SharePoint + update user profile picture
       const uploadedUrl = await uploadProfilePicture(file, siteUrl);
       if (uploadedUrl) {
         await updateUserProfilePicture(uploadedUrl);
@@ -494,13 +459,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                <path
-                  d="M8.00391 12H16.0039"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <path d="M8.00391 12H16.0039" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
@@ -585,7 +544,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
             </div>
           ) : null}
 
-          {/*  ONLY COMMENT (remove nahi) */}
+          {/* ✅ ONLY COMMENT (remove nahi) */}
           {/*
           <div className={styles.statsRow} role="region" aria-label="Profile stats">
             {stats.slice(0, 4).map(this.renderStat)}

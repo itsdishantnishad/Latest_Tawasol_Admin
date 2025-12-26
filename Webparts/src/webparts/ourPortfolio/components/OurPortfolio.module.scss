@@ -1,3 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: local('Instrument Serif Regular'), url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: local('Instrument Serif Italic'), url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
+
+
 .wrapper {
   background: #FFF4EA;
   padding: 60px;
@@ -11,18 +25,16 @@
   letter-spacing: 1px;
 }
 .our {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Italic';
   font-weight: 400;
-  font-style: italic;
   font-size: 42px;
   line-height: 100%;
   letter-spacing: 1px;
   color: #DA291C;
 }
 .portfolio {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Regular';
   font-weight: 400;
-  font-style: normal;
   font-size: 42px;
   line-height: 100%;
   letter-spacing: 1px;
@@ -62,7 +74,7 @@
   height: auto;
 }
 .brandFallback {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Regular';
   font-size: 18px;
   letter-spacing: 1px;
   color: #222;
