@@ -57,7 +57,7 @@ export const Offers: React.FC<IOffersProps> = (props) => {
 
             <div className={styles.ctaWrapper}>
                 <ConditionalLink to="https://dubaiholding.sharepoint.com/sites/TawasolUAT/SitePages/Offers-&-Benefits.aspx">
-                    <PrimaryButton label="View All Physical Forms" />
+                    <PrimaryButton label="View All" />
                 </ConditionalLink>
             </div>
         </div>
