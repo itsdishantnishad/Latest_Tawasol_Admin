@@ -97,14 +97,14 @@
 // }
 
 .aboutDhreSection {
-  padding: 60px 20px;
+  padding: 40px 60px;
 }
 
 /* ==== Grid layout ==== */
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(240px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
 }
 
 @media (max-width: 768px) {
@@ -131,40 +131,40 @@
 
 /* ==== Icon (SVG image) ==== */
 .icon {
-  display: block;
+  // display: block;
   width: 100%; /* grid column ko fill kare */
-  max-width: 260px; /* bohot zyada na phail jaye */
-  height: auto;
-  object-fit: contain;
+  // max-width: 260px; /* bohot zyada na phail jaye */
+  // height: auto;
+  // object-fit: contain;
 }
 
 /* ==== Button container ==== */
 .buttonContainer {
   margin-top: 40px;
   text-align: center;
+  display: flex;
+  justify-content: center;
 }
 
 /* ==== Know More / View All button ==== */
 .viewAllButton {
   background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
   border: none;
-  border-radius: 167px;
-  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, 0.51),
-    inset 0 4px 4px 0 #768b9e;
+  border-radius: 50px;
+  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
   color: #fff;
   cursor: pointer;
-  font-family: Inter, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 600;
   height: 36px;
   line-height: 20px;
-  min-width: 150px;
-  padding: 8px 20px;
-  transition: all 0.3s ease;
+  padding: 0;
+  place-content: center;
+  text-align: center;
   text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  transition: all .3s ease;
+  min-width: 120px;
 }
 
 .viewAllButton:hover {
