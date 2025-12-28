@@ -5,9 +5,9 @@ import ShuffledCards from "../../../widgets/ShuffledCards/ShuffledCards";
 import ConditionalLink from "../../ConditionalLink/ConditionalLink";
 import PrimaryButton from "../../PrimaryButton/PrimaryButton";
 
-const EmployeePrivilegesIcon = require("../assets/EP.png");
-const MedicalInsuranceIcon = require("../assets/MedicalInsurance.svg");
-const EmployeeOffersIcon = require("../assets/EmployeeOffers.svg");
+const EmployeePrivilegesIcon = require("../assets/EP_1.png");
+const MedicalInsuranceIcon = require("../assets/MedicalInsurance.png");
+const EmployeeOffersIcon = require("../assets/EmployeeOffers.png");
 
 export interface IOffer {
   id: string;
@@ -85,7 +85,7 @@ export const Offers: React.FC<IOffersProps> = (props) => {
 
       <div className={styles.ctaWrapper}>
         <ConditionalLink to={viewAllHref}>
-          <PrimaryButton label="View All Offers & Benefits" />
+          <PrimaryButton label="View All" />
         </ConditionalLink>
       </div>
     </div>
