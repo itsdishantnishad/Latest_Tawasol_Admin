@@ -106,10 +106,7 @@
 .row:first-child { border-top: none; }
 .rowActive { background: #fff9f3; }
 
-.cellCheckbox { /* reserved for typings */ }
-.cellIcon     { /* reserved for typings */ }
 .cellName     { max-width: 420px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cellTag      { /* reserved for typings */ }
 .cellDept     {
   font-size: 14px;
   font-weight: 400;
@@ -200,11 +197,9 @@
   line-height: 16px;
   font-weight: 500;
 }
-.exportIcon     { /* reserved for typings */ }
-.exportText     { /* reserved for typings */ }
+
 
 /* ================= Children ================= */
-.listBody { /* reserved for typings */ }
 .gridBody {
   display: grid;
   grid-template-columns: repeat(3, minmax(200px, 1fr));
@@ -268,4 +263,10 @@
   font-size: 14px;
   line-height: 22px;
   color: #000;
+}
+
+
+.folderNested {
+  margin-left: 24px;   // nested folder ka indent
+  margin-top: 8px;
 }

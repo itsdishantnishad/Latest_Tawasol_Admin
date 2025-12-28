@@ -1,3 +1,5 @@
+
+
 import * as React from 'react';
 import { SearchBox } from '@fluentui/react';
 import styles from './PoliciesAndProcedures.module.scss';
@@ -11,7 +13,6 @@ import { ListName } from '../../services/Constants';
 
 export interface ILandingProps { title: string; context: WebPartContext; }
 
-/** Core function tile model */
 export interface FunctionCategory {
   key: string;
   title: string;
@@ -21,7 +22,6 @@ export interface FunctionCategory {
   href?: string;
 }
 
-/** Support function tile model */
 export interface SupportDepartment {
   key: string;
   title: string;
@@ -34,8 +34,6 @@ interface LandingViewState {
   coreFunctionCards: FunctionCategory[];
   supportFunctionCards: SupportDepartment[];
   activeFunctionName?: string;
-  // FUTURE: keep href for deep-linking
-  // activeFunctionHref?: string;
 }
 
 export default class Landing extends React.Component<ILandingProps, LandingViewState> {
@@ -45,11 +43,9 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
     supportFunctionCards: []
   };
 
-  /** On-type search handler */
   private handleSearchInputChange = (_?: any, newValue?: string): void =>
     this.setState({ searchText: newValue || '' });
 
-  /** Load Core/Support function directories for tiles */
   public async componentDidMount(): Promise<void> {
     const svc = new listServices(this.props.context);
     const functionDirectory: DocumentFunctionRow[] =
@@ -76,28 +72,22 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
     this.setState({ coreFunctionCards, supportFunctionCards });
   }
 
-  /** CURRENT: open the internal ViewPage (by display name) */
-  private showFunctionDetailView = (functionDisplayName: string /*, href?: string*/): void => {
-    // FUTURE — navigate to target URL instead:
-    // if (href) { window.location.assign(href); return; }
-
-    this.setState({
-      activeFunctionName: functionDisplayName
-      // , activeFunctionHref: href
-    });
+  private showFunctionDetailView = (functionDisplayName: string): void => {
+    this.setState({ activeFunctionName: functionDisplayName });
   };
 
-  /** Close detail view and return to tiles landing */
   private closeFunctionDetailView = (): void =>
-    this.setState({ activeFunctionName: undefined /*, activeFunctionHref: undefined */ });
+    this.setState({ activeFunctionName: undefined });
+
+  private getDmsLibraryRoot(): string {
+    // ✅ your library is: /sites/TawasolBETA/GRC framework Documents
+    const siteRel = this.props.context.pageContext.web.serverRelativeUrl || '';
+    const base = siteRel === '/' ? '' : siteRel;
+    return `${base}/GRC framework Documents`;
+  }
 
   public render(): React.ReactElement<ILandingProps> {
-    const {
-      searchText,
-      coreFunctionCards,
-      supportFunctionCards,
-      activeFunctionName
-    } = this.state;
+    const { searchText, coreFunctionCards, supportFunctionCards, activeFunctionName } = this.state;
 
     if (activeFunctionName) {
       return (
@@ -105,11 +95,8 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
           context={this.props.context}
           functionDisplayName={activeFunctionName}
           onBackToLanding={this.closeFunctionDetailView}
-          /*
-            FUTURE — enable real DMS provider in client env:
-            useSharePointProvider={true}
-            dmsLibraryRoot="/sites/Intranet/DMS"
-          */
+          useSharePointProvider={true}
+          dmsLibraryRoot={this.getDmsLibraryRoot()}
         />
       );
     }
@@ -128,7 +115,7 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
           categories={coreFunctionCards}
           departments={[]}
           searchText={searchText}
-          onOpenFunctionView={this.showFunctionDetailView /* FUTURE: extend to (title, href) */}
+          onOpenFunctionView={this.showFunctionDetailView}
         />
 
         <div className={styles.sectionHeading} style={{ marginTop: 12 }}>Support Function</div>
@@ -137,17 +124,10 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
           categories={[]}
           departments={supportFunctionCards}
           searchText={searchText}
-          onOpenFunctionView={this.showFunctionDetailView /* FUTURE: extend to (title, href) */}
+          onOpenFunctionView={this.showFunctionDetailView}
         />
 
-        <Boards
-          context={this.props.context}
-          /*
-            FUTURE — switch Boards to live data:
-            useSharePointProvider={true}
-            dmsLibraryRoot="/sites/Intranet/DMS"
-          */
-        />
+        <Boards context={this.props.context} />
       </div>
     );
   }
