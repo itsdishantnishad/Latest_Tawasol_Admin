@@ -10,20 +10,16 @@
 }
 
 .vivaHeader {
-  /* existing background + layout */
-  background-color: #FFF4EA;
+  background-color: #fff4ea;
+  background-position: center bottom 0;
   background-repeat: no-repeat;
-  background-position: center bottom;
-  background-size: 59% auto;
-
-  margin-bottom: -35px;     /* gentle overlap to remove visible gap */
-
+  background-size: 50%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  margin-bottom: -35px;
   min-height: 200px;
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
 }
 
 .wrap {
@@ -71,9 +67,9 @@
 
 /* big desktops */
 @media (max-width: 1600px) {
-  .vivaHeader {
-    background-size: 65% auto;
-  }
+  // .vivaHeader {
+  //   background-size: 65% auto;
+  // }
 }
 
 /* laptop-ish */
