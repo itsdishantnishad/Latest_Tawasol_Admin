@@ -30,31 +30,31 @@ const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /* ─────────────────────────────
    Minimal in-file Breadcrumb
    ───────────────────────────── */
-const Breadcrumb: React.FC<{ homeUrl?: string }> = ({ homeUrl }) => {
-  const goBack = () => window.history.back();
-  const url = homeUrl || '/';
+// const Breadcrumb: React.FC<{ homeUrl?: string }> = ({ homeUrl }) => {
+//   const goBack = () => window.history.back();
+//   const url = homeUrl || '/';
 
-  return (
-    <div className={styles.breadcrumb}>
-      <button type="button" className={styles.backBtn} onClick={goBack}>
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
-          <path d="M12.5 15L7.5 10L12.5 5" stroke="#000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        <span>Back</span>
-      </button>
+//   return (
+//     <div className={styles.breadcrumb}>
+//       <button type="button" className={styles.backBtn} onClick={goBack}>
+//         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+//           <path d="M12.5 15L7.5 10L12.5 5" stroke="#000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+//         </svg>
+//         <span>Back</span>
+//       </button>
 
-      <div className={styles.breadDivider} />
+//       <div className={styles.breadDivider} />
 
-      <div className={styles.linksContainer}>
-        <a className={styles.crumbLink} href={url}>Home</a>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-          <path d="M6 12L10 8L6 4" stroke="#9ba3ae" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        <span className={styles.crumbCurrent}>Offers &amp; Benefits</span>
-      </div>
-    </div>
-  );
-};
+//       <div className={styles.linksContainer}>
+//         <a className={styles.crumbLink} href={url}>Home</a>
+//         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+//           <path d="M6 12L10 8L6 4" stroke="#9ba3ae" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+//         </svg>
+//         <span className={styles.crumbCurrent}>Offers &amp; Benefits</span>
+//       </div>
+//     </div>
+//   );
+// };
 
 export default class OffersBenefits extends React.Component<IOffersBenefitsProps, State> {
   private abort?: AbortController;
@@ -320,7 +320,7 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
     return (
       <div className={styles.wrapper}>
         {/* Breadcrumb */}
-        <Breadcrumb homeUrl={this.props.homeUrl} />
+        {/* <Breadcrumb homeUrl={this.props.homeUrl} /> */}
 
         {/* Segmented tabs */}
         <div className={styles.segWrap}>

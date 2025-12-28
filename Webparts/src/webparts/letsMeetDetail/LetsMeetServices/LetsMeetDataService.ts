@@ -97,7 +97,7 @@ export class LetsMeetDataService {
     }
 
     const urlInternal = await this.getFieldInternalNameByTitle("URL");
-    const sortInternal = await this.getFieldInternalNameByTitle("TIRSortOrder");
+    const sortInternal = await this.getFieldInternalNameByTitle("Sort Order");
 
     this._urlInternal = urlInternal;
     this._sortInternal = sortInternal;
