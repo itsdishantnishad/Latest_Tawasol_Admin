@@ -4,10 +4,10 @@ import PrimaryButton from '../../PrimaryButton/PrimaryButton';
 import ConditionalLink from '../../ConditionalLink/ConditionalLink';
 
 const rightArrow = require("../images/arrow-right.svg");
-const dashboardImageOne = require("../images/footfall.svg");
-const dashboardImageTwo = require("../images/disqualification.svg");
-const dashboardImageThree = require("../images/cxi-score.svg");
-const dashboardImageFour = require("../images/sales-report.svg");
+const dashboardImageOne = require("../images/footfall.png");
+const dashboardImageTwo = require("../images/disqualification.png");
+const dashboardImageThree = require("../images/cxi-score.png");
+const dashboardImageFour = require("../images/sales-report.png");
 export interface IDashboard {
     id: string;
     header: string;

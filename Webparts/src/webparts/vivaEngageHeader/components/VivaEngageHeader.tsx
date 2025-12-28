@@ -25,7 +25,7 @@ export default class VivaEngageHeader
           </div>
 
           <h2 className={styles.title}>
-            <span>Trending Posts</span> <span className={styles.in}>in</span> <span>DHRE</span>
+            <span>Trending Posts in</span> <span className={styles.dhre}>DHRE</span> 
           </h2>
 
           {/* Right strip = full SVG (includes line + arrowhead) */}
