@@ -148,8 +148,21 @@ const mapSharePointTrainingsForAll = (data: any[]) => {
 const Training: React.FC<ITrainingmoduleProps> = (props) => {
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
   const [expandedMonths, setExpandedMonths] = React.useState<IAccordionState>(
-    {}
-  );
+  () => {
+    const initialState: IAccordionState = {};
+    (props.AllTrainingdata || []).forEach((item) => {
+      const startDateStr = item.eventStartDate?.split("\n")[0]?.trim();
+      if (startDateStr) {
+        const date = new Date(startDateStr);
+        const monthLabel = `${date.toLocaleString("default", {
+          month: "long",
+        })} ${date.getFullYear()}`;
+        initialState[monthLabel] = true; 
+      }
+    });
+    return initialState;
+  }
+);
 
   // Map SharePoint data to your component format
   const mappedTrainings = React.useMemo(
