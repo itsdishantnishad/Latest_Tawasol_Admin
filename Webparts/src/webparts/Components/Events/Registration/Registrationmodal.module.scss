@@ -2,11 +2,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-@font-face {
-  font-family: 'bukra-font';
-  src: local('bukra-font'), url('../../../assets/fonts/29LT-Bukra.woff') format('woff');
-}
-
 .modalContainer {
   border-radius: 8px;
   background: linear-gradient(89.65deg, #FEF1DB 7.61%, #FDEBD2 47.34%, #F9E3C7 95.71%);
@@ -25,7 +20,7 @@
     font-weight: 500;
     color: #000000;
     line-height: 120%;
-    font-family: 'bukra-font';
+    font-family: 'Inter', sans-serif;
     margin-bottom: 48px;
     margin-top: 0;
   }
