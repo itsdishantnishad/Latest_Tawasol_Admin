@@ -605,6 +605,11 @@
   box-shadow: none;
   cursor: default;
   transform: none !important;
+  .navChevron{
+    img{
+      opacity: 0.5 !important;
+    }
+  }
 }
 
 
