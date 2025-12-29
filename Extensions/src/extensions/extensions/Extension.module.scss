@@ -169,6 +169,7 @@
   transform: translate(-50%, calc(-1 * var(--float-raise)));
   transition: transform .24s ease;
   will-change: transform;
+  zoom: 0.8;
 }
 
 .TIRButtonGroup {

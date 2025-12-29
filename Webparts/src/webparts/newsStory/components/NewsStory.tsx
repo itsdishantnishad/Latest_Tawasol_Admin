@@ -229,7 +229,8 @@ const LeftArrowImg: string = require('../../assets/LeftArrow.png');
 const RightArrowImg: string = require('../../assets/RightArrow.png');
 
 // ✅ Side arrow vector icons (SVG)
-const LeftArrowIcon: string = require('../../assets/LeftVector.svg') as string;
+// const LeftArrowIcon: string = require('../../assets/LeftVector.svg') as string;
+const LeftArrowIcon: string = require('../../assets/blackLeft.svg') as string;
 const RightVectorIcon: string = require('../../assets/VectorIcon.svg') as string;
 
 const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
