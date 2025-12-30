@@ -63,7 +63,7 @@ export type OrgMember = {
   userEmail?: string;
 };
 
-// ✅ UPDATED (ONLY dept+pointers related change)
+// UPDATED (ONLY dept+pointers related change)
 export type OrgDepartment = { name: string; url?: string; itemsText?: string };
 
 export type DashboardCategory = {
@@ -158,7 +158,7 @@ export class listServices {
     return (tmp.textContent || tmp.innerText || "").replace(/\s+/g, " ").trim();
   }
 
-  // ✅ UPDATED helper: strip HTML BUT keep line breaks (for bullet pointers)
+  // UPDATED helper: strip HTML BUT keep line breaks (for bullet pointers)
   private static toPlainTextWithLines(raw?: string): string {
     if (!raw) return "";
 
@@ -709,7 +709,7 @@ export class listServices {
     return mapped;
   }
 
-  // ✅ UPDATED (ONLY dept+pointers related change)
+  // UPDATED (ONLY dept+pointers related change)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getDepartmentsByMember(listTitle: string, memberDisplayName: string): Promise<OrgDepartment[]> {
     const targetName = memberDisplayName.trim().toLowerCase();
@@ -770,7 +770,7 @@ export class listServices {
       const urlField = item.URL;
       const url = urlField && typeof urlField === "object" ? urlField.Url : urlField || undefined;
 
-      // ✅ IMPORTANT: normalize pointers => multiline plain text with \n between items
+      // IMPORTANT: normalize pointers => multiline plain text with \n between items
       const pointersRaw: string = item?.TIRDepartmentItems || "";
       const pointersClean = listServices.toPlainTextWithLines(pointersRaw);
 
