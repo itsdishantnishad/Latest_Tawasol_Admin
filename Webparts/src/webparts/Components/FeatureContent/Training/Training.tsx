@@ -8,8 +8,8 @@ import EventCard from "../../../widgets/EventCard/EventCard";
 import ConditionalLink from "../../ConditionalLink/ConditionalLink";
 import PrimaryButton from "../../PrimaryButton/PrimaryButton";
 
-const locationIcon = require("../assets/LocationIcon.png");
-const timeIcon = require("../assets/clockIcon.png");
+const locationIcon = require("../assets/LocationIcon.svg");
+const timeIcon = require("../assets/clockIcon.svg");
 
 export interface ITraining {
   id: string;
