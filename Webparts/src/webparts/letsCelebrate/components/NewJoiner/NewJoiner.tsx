@@ -56,12 +56,14 @@ const NewJoiner: React.FC<INewJoinersFeedProps> = ({
 
                     <div className={styles.ctaCol}>
                       {(() => {
-                      //  const dummyEmail = "dishant.nishad@essencetechlabs.com"; 
-                       // const emailToUse = (item?.UserEmail && item.UserEmail.trim()) || dummyEmail;
-                        const emailToUse = item?.UserEmail?.trim();
-                        const teamsChatUrl = `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(
-                          emailToUse
-                        )}&message=${encodeURIComponent("Hello")}`;
+                        //  const dummyEmail = "dishant.nishad@essencetechlabs.com"; 
+                        // const emailToUse = (item?.UserEmail && item.UserEmail.trim()) || dummyEmail;
+                        const emailToUse = item?.TIRUserEmail?.trim();
+                        if (!emailToUse) {
+                          return null;
+                        }
+                        console.log(emailToUse);
+                        const teamsChatUrl = `https://teams.microsoft.com/l/chat/0/0?users=${emailToUse}`;
                         return (
                           <a
                             className={styles.sayHello}
