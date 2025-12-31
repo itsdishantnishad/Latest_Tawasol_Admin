@@ -4,7 +4,7 @@ import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
 import ConditionalLink from '../../ConditionalLink/ConditionalLink';
-
+import EventRegistration from '../../Events/Registration/RegistrationModal';
 const Location_Icon_URL = require("../assets/LocationIcon.png");
 const Time_Icon_URL = require("../assets/clockIcon.png");
 
@@ -117,7 +117,8 @@ export const Events: React.FC<IEventsProps> = (props) => {
   const [events, setEvents] = React.useState<IEvent[]>(props.events || []);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-
+  const [isRegisterOpen, setIsRegisterOpen] = React.useState(false);
+  const [selectedEventId, setSelectedEventId] = React.useState<string | null>(null);
   React.useEffect(() => {
     if (props.events && props.events.length > 0) {
       setEvents(props.events);
@@ -232,6 +233,8 @@ export const Events: React.FC<IEventsProps> = (props) => {
     );
   }
 
+
+
   return (
     <div className={styles.eventsContainer}>
       <div className={styles.eventsGrid}>
@@ -266,10 +269,26 @@ export const Events: React.FC<IEventsProps> = (props) => {
                 </div>
               )}
             </div>
+            <button
+              className={styles.registerButton}
+              onClick={() => {
+                setSelectedEventId(event.id);
+                setIsRegisterOpen(true);
+              }}
+            >
+              Register
+            </button>
           </div>
         ))}
       </div>
-
+      {isRegisterOpen && selectedEventId && props.context && (
+        <EventRegistration
+          isOpen={isRegisterOpen}
+          onDismiss={() => setIsRegisterOpen(false)}
+          context={props.context}
+          eventId={selectedEventId}
+        />
+      )}
       <div className={styles.buttonContainer}>
         <ConditionalLink to={props.seeAllURL || '#'}>
           <PrimaryButton label='View All' />
