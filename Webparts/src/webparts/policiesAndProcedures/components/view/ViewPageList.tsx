@@ -122,7 +122,13 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
         <div>
           <Checkbox
             checked={checked}
-            onChange={(e) => { e?.stopPropagation(); this.toggleOne(listItem.id, folderId); }}
+            onChange={(e, isChecked) => {
+              e?.stopPropagation();
+              this.toggleOne(listItem.id, folderId);
+              if (isChecked) {
+                this.props.onOpenFile(listItem);
+              }
+            }}
           />
         </div>
 
@@ -210,7 +216,13 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
 
         <Checkbox
           checked={checked}
-          onChange={(e) => { e?.stopPropagation(); this.toggleOne(listItem.id, folderId); }}
+          onChange={(e, isChecked) => {
+            e?.stopPropagation();
+            this.toggleOne(listItem.id, folderId);
+            if (isChecked) {
+              this.props.onOpenFile(listItem);
+            }
+          }}
           styles={{ root: { position: 'absolute', top: 8, left: 8 } }}
         />
       </div>
@@ -218,7 +230,7 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
   };
 
   /**
-   * ✅ NEW: Recursive renderer for folder children
+   *  Recursive renderer for folder children
    * - Shows subfolders ALSO
    * - Clicking folder loads children using parent handler (dataProvider)
    */
@@ -324,7 +336,7 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
               )}
             </div>
 
-            {/* ✅ recursive children render (folders + files) */}
+            {/* recursive children render (folders + files) */}
             {this.renderFolderChildrenRecursive(folder.id)}
           </div>
         )}
