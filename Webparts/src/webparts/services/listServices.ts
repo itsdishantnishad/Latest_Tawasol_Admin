@@ -618,7 +618,7 @@ export class listServices {
   public async getNewJoiners(listName: string): Promise<any[]> {
     const results = await this.sp.web.lists
       .getByTitle(listName)
-      .items.select("Title", "TIRSortOrder", "TIRDesignation", "TIRUserPicture", "TIRDescription")
+      .items.select("Title", "TIRSortOrder", "TIRDesignation", "TIRUserPicture", "TIRDescription","TIRUserEmail")
       .orderBy("TIRSortOrder", false)();
 
     return results.map((item: any) => ({
@@ -627,6 +627,7 @@ export class listServices {
       Designation: item.TIRDesignation,
       UserPicture: item.TIRUserPicture ? item.TIRUserPicture.Url : "#",
       Description: item.TIRDescription,
+      TIRUserEmail: item.TIRUserEmail
     }));
   }
 
