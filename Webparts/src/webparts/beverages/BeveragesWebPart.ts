@@ -23,7 +23,7 @@ export default class BeveragesWebPart extends BaseClientSideWebPart<IBeveragesWe
   public render(): void {
     const element = React.createElement(Beverages, {
       context: this.context,
-      listTitle: "Beverages Menu List",
+      listTitle: "Beverages Menu",
     });
 
     ReactDom.render(element, this.domElement);
