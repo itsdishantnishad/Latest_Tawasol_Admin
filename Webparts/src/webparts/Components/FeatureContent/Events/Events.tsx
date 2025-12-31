@@ -269,16 +269,17 @@ export const Events: React.FC<IEventsProps> = (props) => {
                   <span className={styles.metaText}>{event.location}</span>
                 </div>
               )}
+              <button
+                className={styles.registerButton}
+                onClick={() => {
+                  setSelectedEventId(event.id);
+                  setIsRegisterOpen(true);
+                }}
+              >
+                Register
+              </button>
             </div>
-            <button
-              className={styles.registerButton}
-              onClick={() => {
-                setSelectedEventId(event.id);
-                setIsRegisterOpen(true);
-              }}
-            >
-              Register
-            </button>
+            
           </div>
         ))}
       </div>
