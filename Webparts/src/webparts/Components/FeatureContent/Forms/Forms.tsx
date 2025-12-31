@@ -18,9 +18,9 @@ export interface IFormsProps {
 }
 
 // ✅ SVG backgrounds (place these in: ../images/ folder relative to Forms.tsx)
-const HumanCapitalBG: string = require("../assets/Human_Capital.png");
-const ContractsProcurementBG: string = require("../assets/Contract_Procurement_Hub.png");
-const BusinessExcellenceBG: string = require("../assets/Business_Excellence.png");
+const HumanCapitalBG: string = require("../assets/Human_Capital.svg");
+const ContractsProcurementBG: string = require("../assets/Contract_Procurement_Hub.svg");
+const BusinessExcellenceBG: string = require("../assets/Business_Excellence.svg");
 
 const defaultForms: IForm[] = [
   {
