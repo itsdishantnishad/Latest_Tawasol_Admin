@@ -371,8 +371,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const getInnerCirclePosition = (index: number): React.CSSProperties => {
     const position = innerPositions[index % 2];
     const positionMap: Record<string, React.CSSProperties> = {
-      "bottom-left": { top: "75%", left: "0%", transform: "translate(0%, 0%)" },
-      "bottom-right": { top: "75%", right: "0%", transform: "translate(0%, 0%)" },
+      "bottom-left": { top: "75%", left: "-10%", transform: "translate(0%, 0%)" },
+      "bottom-right": { top: "75%", right: "-10%", transform: "translate(0%, 0%)" },
     };
     return positionMap[position] || {};
   };
@@ -478,7 +478,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                       />
                     </div>
                     <div className={styles.profileName}>{item.name}</div>
-                    <div className={styles.HoverText}>Congrats {item.name} on his this achievements</div>
+                    <div className={styles.HoverText}>Wish {item.name} to their onboarding</div>
                   </div>
                 ))}
 
@@ -502,6 +502,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                         />
                       </div>
                       <div className={styles.profileName}>{item.name}</div>
+                      <div className={styles.HoverText}>Wish {item.name} to their onboarding</div>
                     </div>
                   ))}
 
