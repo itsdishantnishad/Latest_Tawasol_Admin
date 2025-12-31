@@ -5,8 +5,9 @@ import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
 import ConditionalLink from '../../ConditionalLink/ConditionalLink';
 import EventRegistration from '../../Events/Registration/RegistrationModal';
-const Location_Icon_URL = require("../assets/LocationIcon.png");
-const Time_Icon_URL = require("../assets/clockIcon.png");
+
+const Location_Icon_URL = require("../assets/LocationIcon.svg");
+const Time_Icon_URL = require("../assets/clockIcon.svg");
 
 /** SITE-LEVEL TIR EVENT CONTENT TYPE BASE ID */
 const TIR_EVENT_CT_BASE_ID =

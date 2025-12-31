@@ -5,7 +5,7 @@ import ShuffledCards from "../../../widgets/ShuffledCards/ShuffledCards";
 import ConditionalLink from "../../ConditionalLink/ConditionalLink";
 import PrimaryButton from "../../PrimaryButton/PrimaryButton";
 
-const EmployeePrivilegesIcon = require("../assets/EP_1.png");
+const EmployeePrivilegesIcon = require("../assets/EP.png");
 const MedicalInsuranceIcon = require("../assets/MedicalInsurance.png");
 const EmployeeOffersIcon = require("../assets/EmployeeOffers.png");
 
