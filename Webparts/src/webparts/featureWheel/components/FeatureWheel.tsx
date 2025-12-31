@@ -115,7 +115,13 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         return <Gallery context={props.context} seeAllURL={props.imageGallery} onViewAll={handleViewAll} />;
 
       case "documents":
-        return <Documents seeAllURL={props.documents} onViewAll={handleViewAll} />;
+        return (
+          <Documents
+            context={props.context}
+            seeAllURL={props.documents}
+            onViewAll={handleViewAll}
+          />
+        );
 
       case "events":
         return (
