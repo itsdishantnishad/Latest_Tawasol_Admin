@@ -1,0 +1,99 @@
+.featureSelector {
+  height: 250px;
+  display: grid;
+  grid-template-columns: repeat(13, 110px);
+  justify-content: center;
+}
+
+.card {
+  width: 120px;
+  height: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 15px 7.933px 18.247px -7.933px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  background-color: #ebb885;
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  transform: rotate(var(--rotation, 0deg)) translateY(var(--translateY, 0px));
+  transform-origin: center center;
+  transition: scale 0.3s ease-out;
+}
+
+.cardSelected {
+  z-index: 1;
+  outline: 6px solid #dc6408;
+  box-shadow: 0 11.202px 22.403px 0 #e38e32;
+  scale: 1.1;
+}
+
+.cardLabel {
+  padding: 15px 10px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+  font-family: "Inter", sans-serif;
+  color: #ffffff;
+  text-align: center;
+
+  @media (max-width: 580px) {
+    font-size: 14px;
+    line-height: 22px;
+  }
+}
+
+/* Background variants */
+.dashboardCard {
+  background-image: url("../../Components/FeatureContent/assets/Dashboard.svg");
+}
+
+.galleryCard {
+  background-image: url("../../Components/FeatureContent/assets/ImageGallery.svg");
+}
+
+.documentsCard {
+  background-image: url("../../Components/FeatureContent/assets/Documents.svg");
+}
+
+.eventsCard {
+  background-image: url("../../Components/FeatureContent/assets/Events.svg");
+}
+
+.celebrateCard {
+  background-image: url("../../Components/FeatureContent/assets/LetsCelebrate.svg");
+}
+
+.meetingCard {
+  background-image: url("../../Components/FeatureContent/assets/Meeting.svg");
+}
+
+.serviceLinksCard {
+  background-image: url("../../Components/FeatureContent/assets/Service-Links.svg");
+}
+
+.interactiveFormsCard {
+  background-image: url("../../Components/FeatureContent/assets/InteractiveForms.svg");
+}
+
+.offersCard {
+  background-image: url("../../Components/FeatureContent/assets/Offers.svg");
+}
+
+.trainingCard {
+  background-image: url("../../Components/FeatureContent/assets/Training.svg");
+}
+
+.aboutDhreCard {
+  background-image: url("../../Components/FeatureContent/assets/AboutDHRE.svg");
+}
+
+.tasksCard {
+  background-image: url("../../Components/FeatureContent/assets/Tasks.svg");
+}
+
+.beverageCard {
+  background-image: url("../../Components/FeatureContent/assets/Services.svg");
+}
