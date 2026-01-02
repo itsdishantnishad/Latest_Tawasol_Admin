@@ -4,8 +4,8 @@ import styles from './Meeting.module.scss';
 
 import ConditionalLink from '../../Components/ConditionalLink/ConditionalLink';
 import PrimaryButton from '../../Components/PrimaryButton/PrimaryButton';
-const ClockIcon = require('../assets/clockImg.svg');
-const LocationIcon = require('../assets/locationImg.svg');
+const ClockIcon = require('../assets/clockIcon.svg');
+const LocationIcon = require('../assets/locationIcon.svg');
 
 export interface MeetingItem {
   id: string;
