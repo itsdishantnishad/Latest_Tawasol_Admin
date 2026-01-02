@@ -29,7 +29,7 @@ type IPoliciesAndProceduresViewState = {
   currentItems: IPoliciesAndProceduresItem[];
   selectedItem?: IPoliciesAndProceduresItem;
 
-  // ✅ SINGLE expanded folder id (matches ViewPageList.tsx)
+  // SINGLE expanded folder id (matches ViewPageList.tsx)
   expandedFolderId?: string;
 
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
@@ -69,7 +69,7 @@ export default class PoliciesAndProceduresView extends React.Component<
     const rootItems = await this.dataProvider.getRootItems(this.props.functionDisplayName);
     this.setState({
       currentItems: rootItems
-      // ✅ keep selectedItem undefined until user clicks file
+      // keep selectedItem undefined until user clicks file
     });
   }
 
