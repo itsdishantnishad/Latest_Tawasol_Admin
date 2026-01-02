@@ -2,13 +2,14 @@
 import * as React from 'react';
 import MeetingCards from './Meeting';
 
-export default class MeetingWheelPanel extends React.Component<{
+export interface IMeetingWheelPanelProps {
   latest: any[];
   allMeetings?: any[];
-  showingAll?: boolean;
-  onViewAll?: () => void;
-}> {
-  
+  context: any;
+  seeAllURL?: string;
+}
+
+export default class MeetingWheelPanel extends React.Component<IMeetingWheelPanelProps>{
   private toItems = (x: any[]) => x.map(m => ({
     id: m.id, 
     title: m.subject, 
@@ -22,18 +23,21 @@ export default class MeetingWheelPanel extends React.Component<{
   }));
 
   render() {
-    const { latest, allMeetings, onViewAll, showingAll } = this.props;
-    const displayItems = showingAll && allMeetings ? allMeetings : latest;
-    return (
-      <section>
-        <div style={{ marginTop: showingAll ? 0 : 16 }}>
-          <MeetingCards 
-            items={this.toItems(displayItems)} 
-            onViewAll={onViewAll}
-            showingAll={showingAll}
-          />
-        </div>
-      </section>
-    );
-  }
+  const { latest, allMeetings, context, seeAllURL } = this.props;
+
+  const displayItems = allMeetings ?? latest;
+
+  return (
+    <section>
+      <div style={{ marginTop: 16 }}>
+        <MeetingCards
+          items={this.toItems(displayItems)}
+          context={context}
+          seeAllURL={seeAllURL}
+        />
+      </div>
+    </section>
+  );
+}
+
 }
