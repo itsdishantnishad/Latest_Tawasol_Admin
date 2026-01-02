@@ -29,9 +29,10 @@
     transition: all .5s ease;
     width: 200px;
     padding: 100px;
+    will-change: transform;
 
   &:hover {
-    // transform: translateY(-4px) scale(1.02) !important;
+    transform: translateY(-4px) scale(1.02) !important;
     z-index: 1;
   }
 }
