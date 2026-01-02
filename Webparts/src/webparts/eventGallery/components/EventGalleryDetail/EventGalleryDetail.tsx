@@ -3,6 +3,58 @@ import { useState } from "react";
 import styles from "./EventGalleryDetail.module.scss";
 import EventGalleryCard from "../EventGalleryHome/EventGalleryCard";
 
+// carousel icons
+const PrevIcon = require("../../../assets/left_Button_Gallery.svg");
+const NextIcon = require("../../../assets/Right_Button_Gallery.svg");
+
+/* ======================================================
+   🔮 FUTURE AZURE FACE API SERVICE (STUB)
+   ====================================================== */
+
+interface IFaceMatchResult {
+  fileRef: string;
+  confidence: number;
+}
+
+/**
+ * IMPORTANT:
+ * - In real implementation this will call:
+ *   Azure Function / API Management
+ * - NEVER call Azure Face API directly from SPFx
+ */
+class FaceRecognitionService {
+  public static async findMatchingImages(
+    uploadedImage: string,
+    eventImages: any[]
+  ): Promise<IFaceMatchResult[]> {
+
+    // 🔮 MOCK IMPLEMENTATION (FOR NOW)
+    // Replace with Azure Function call later
+
+    console.log("Face API called with image:", uploadedImage);
+
+    // Simulate delay
+    await new Promise((res) => setTimeout(res, 1200));
+
+    // Fake logic: return random 1–2 matches
+    const shuffled = [...eventImages].sort(() => 0.5 - Math.random());
+    const picked = shuffled.slice(0, Math.min(2, eventImages.length));
+
+    return picked.map((img) => ({
+      fileRef:
+        img.FileRef ||
+        img.ServerRelativeUrl ||
+        img.Url ||
+        img.url,
+      confidence: Math.random() * (0.95 - 0.75) + 0.75
+    }));
+  }
+}
+
+/* ======================================================
+   COMPONENT
+   ====================================================== */
+
 interface IEventDetailProps {
   eventId: number;
   eventTitle: string;
@@ -12,12 +64,6 @@ interface IEventDetailProps {
   eventdata: any[];
   images: any[];
   dymaicUrl: string;
-}
-
-interface IPhoto {
-  id: number;
-  url: string;
-  alt: string;
 }
 
 const resolveImageUrl = (img: any): string => {
@@ -32,243 +78,117 @@ const resolveImageUrl = (img: any): string => {
     img.serverRelativeUrl;
 
   if (!raw) return "";
+  if (raw.startsWith("http")) return raw;
 
-  // absolute URL
-  if (
-    typeof raw === "string" &&
-    (raw.startsWith("http://") || raw.startsWith("https://"))
-  ) {
-    return raw;
-  }
-
-  // Tenant Origin
-  const origin =
-    typeof window !== "undefined" && window.location && window.location.origin
-      ? window.location.origin
-      : "";
-
-  return `${origin}${raw}`;
+  return `${window.location.origin}${raw}`;
 };
 
 const EventDetail: React.FC<IEventDetailProps> = (props) => {
   const { eventTitle, eventDate, imageCount, onBack, eventdata, images } =
     props;
 
-  const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
-  const [showFindMyPhoto, setShowFindMyPhoto] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>("profile");
-  const [faceRecognized, setFaceRecognized] = useState<boolean>(false);
-  const profileImageUrl =
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200";
+  /* ================= STATE ================= */
+
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [showFindMyPhoto, setShowFindMyPhoto] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile");
+
   const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
+
+  const [finding, setFinding] = useState(false);
+  const [matchedIndexes, setMatchedIndexes] = useState<number[]>([]);
+
   const videoRef = React.useRef<HTMLVideoElement>(null);
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
 
-  const openLightbox = (photoId: number): void => {
-    setSelectedPhoto(photoId);
-  };
+  /* ================= LIGHTBOX ================= */
 
-  const closeLightbox = (): void => {
-    setSelectedPhoto(null);
-  };
+  const openLightbox = (index: number) => setActiveIndex(index);
+  const closeLightbox = () => setActiveIndex(null);
 
-  const toggleFindMyPhoto = (): void => {
-    setShowFindMyPhoto(!showFindMyPhoto);
-  };
-
-  const handleTabClick = (tab: string): void => {
-    setActiveTab(tab);
-    if (tab === "profile") {
-      // Simulate face recognition after selecting profile picture
-      setTimeout(() => {
-        setFaceRecognized(true);
-      }, 1000);
+  const goToPrevious = () => {
+    if (activeIndex !== null && activeIndex > 0) {
+      setActiveIndex(activeIndex - 1);
     }
   };
 
-  const currentPhotoIndex =
-    selectedPhoto != null ? images.findIndex((p) => p.Id === selectedPhoto) : 0;
-
-  const goToPrevious = (): void => {
-    if (currentPhotoIndex > 0) {
-      setSelectedPhoto(images[currentPhotoIndex - 1].Id);
+  const goToNext = () => {
+    if (activeIndex !== null && activeIndex < images.length - 1) {
+      setActiveIndex(activeIndex + 1);
     }
   };
 
-  const goToNext = (): void => {
-    if (currentPhotoIndex < images.length - 1) {
-      setSelectedPhoto(images[currentPhotoIndex + 1].Id);
-    }
-  };
+  /* ================= FACE RECOGNITION FLOW ================= */
 
-  // FIX: this now expects a File, used by UploadPhotoPanel
   const handleUploadChange = (file: File) => {
     const url = URL.createObjectURL(file);
     setUploadedPreview(url);
+    runFaceRecognition(url);
   };
 
   const capturePhoto = () => {
-    const canvas = document.createElement("canvas");
     const video = videoRef.current;
     if (!video) return;
 
+    const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d")?.drawImage(video, 0, 0);
 
     const img = canvas.toDataURL("image/png");
     setCapturedPreview(img);
+    runFaceRecognition(img);
   };
 
-  const onContinueWithPhoto = () => {
-    // this is final confirm after capture photo
-    // here you can send preview image to API OR set in state
-    console.log("final captured image: ", capturedPreview);
+  const runFaceRecognition = async (imageBase64: string) => {
+    try {
+      setFinding(true);
 
-    // same logic what I do in profile / upload continue flow
-    //  handleFinalSubmit(capturedPreview);
+      const matches =
+        await FaceRecognitionService.findMatchingImages(
+          imageBase64,
+          images
+        );
+
+      // 🔗 Map matches → carousel indexes
+      const indexes = matches
+        .map((m) =>
+          images.findIndex(
+            (img) =>
+              (img.FileRef ||
+                img.ServerRelativeUrl ||
+                img.Url ||
+                img.url) === m.fileRef
+          )
+        )
+        .filter((i) => i !== -1);
+
+      setMatchedIndexes(indexes);
+
+      if (indexes.length > 0) {
+        setActiveIndex(indexes[0]); // open first match
+      }
+    } catch (e) {
+      console.error("Face recognition failed", e);
+    } finally {
+      setFinding(false);
+    }
   };
 
-  const useProfilePicture = () => {
-    setFaceRecognized(true);
-  };
-
-  const ProfilePhotoPanel = ({ profileUrl, onUse }: any) => (
-    <div className={styles.profileConfirmWrapper}>
-      <div className={styles.profileConfirmBox}>
-        <img src={profileUrl} className={styles.profileCircleImage} />
-        <div className={styles.checkIcon}>✓</div>
-      </div>
-
-      <button className={styles.continueBtn} onClick={onUse}>
-        Continue
-      </button>
-    </div>
-  );
-
-  const UploadPhotoPanel = ({ preview, onUpload }: any) => {
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-    const handleClick = () => fileInputRef.current?.click();
-
-    const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) return;
-      if (file.size > 5 * 1024 * 1024) return;
-      onUpload(file);
-    };
-
-    return (
-      <div className={styles.uploadWrapper}>
-        <h2 className={styles.panelTitle}>Face Recognition</h2>
-        <p className={styles.panelSub}>
-          File picker modal opens (jpg/png only, &lt;5MB)
-        </p>
-
-        {!preview && (
-          <div className={styles.dropZone} onClick={handleClick}>
-            <div className={styles.uploadIconPlaceholder}></div>
-            <span className={styles.dropText}>
-              Drag an image or{" "}
-              <span className={styles.uploadLink}>Upload a file</span>
-            </span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".jpg, .jpeg, .png"
-              className={styles.hiddenFileInput}
-              onChange={handleFile}
-            />
-          </div>
-        )}
-
-        {preview && (
-          <div className={styles.previewContainer}>
-            <img src={preview} className={styles.previewImage} />
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const TakePhotoPanel = ({
-    preview,
-    videoRef,
-    onCapture,
-    onContinue,
-  }: any) => {
-    // start camera automatically
-    React.useEffect(() => {
-      (async () => {
-        if (videoRef.current) {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-              video: true,
-            });
-            videoRef.current.srcObject = stream;
-          } catch (err) {
-            console.log("Camera permission denied:", err);
-          }
-        }
-      })();
-    }, [videoRef]);
-
-    return (
-      <div className={styles.uploadWrapper}>
-        <h2 className={styles.panelTitle}>Face Recognition</h2>
-        <p className={styles.panelSub}>
-          Take a picture using your device camera
-        </p>
-
-        {!preview && (
-          <div className={styles.dropZoneCamera}>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className={styles.cameraVideo}
-            ></video>
-            <button className={styles.captureBtn} onClick={onCapture}>
-              Capture
-            </button>
-          </div>
-        )}
-
-        {preview && (
-          <>
-            <div className={styles.previewContainer}>
-              <img src={preview} className={styles.previewImage} />
-            </div>
-            <button className={styles.usePhotoBtn} onClick={onContinue}>
-              Continue
-            </button>
-          </>
-        )}
-      </div>
-    );
-  };
-
-  const handleEventClick = (event: any): void => {
-    setSelectedEvent(event);
-  };
+  /* ================= TITLE ================= */
 
   const getTitleParts = (title: string) => {
-    if (!title) return { first: "", rest: "" };
-
     const parts = title.trim().split(" ");
-    return {
-      first: parts[0],
-      rest: parts.slice(1).join(" "),
-    };
+    return { first: parts[0], rest: parts.slice(1).join(" ") };
   };
 
   const { first, rest } = getTitleParts(eventTitle);
 
+  /* ================= RENDER ================= */
+
   return (
     <div className={styles.eventDetail}>
-      {/* Header */}
+      {/* ================= HEADER ================= */}
       <div className={styles.header}>
         <div className={styles.breadcrumb}>
           <span className={styles.backArrow}>‹</span>
@@ -283,7 +203,6 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
           </button>
 
           <span className={styles.separator}>›</span>
-
           <span className={styles.current}>{eventTitle}</span>
         </div>
 
@@ -295,197 +214,178 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
             {eventDate} / {imageCount} Images
           </p>
         </div>
+
         <div className={styles.findPhotoWrapper}>
           <button
             className={styles.findPhotoButton}
-            onClick={toggleFindMyPhoto}
+            onClick={() => setShowFindMyPhoto(!showFindMyPhoto)}
           >
             Find my Photo <span className={styles.dropdownIcon}>▼</span>
-          </button>
-          <button type="button" className={styles.copyLink}>
-            {" "}
-            Copy Link
-            <span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-              >
-                <g clip-path="url(#clip0_24861_24346)">
-                  <path
-                    d="M6.66602 8.66697C6.95232 9.04972 7.31759 9.36642 7.73705 9.5956C8.15651 9.82477 8.62035 9.96105 9.09712 9.99519C9.57388 10.0293 10.0524 9.96055 10.5002 9.79349C10.9481 9.62643 11.3548 9.36502 11.6927 9.02697L13.6927 7.02697C14.2999 6.3983 14.6359 5.55629 14.6283 4.6823C14.6207 3.80831 14.2701 2.97227 13.6521 2.35424C13.0341 1.73621 12.198 1.38565 11.324 1.37806C10.45 1.37046 9.60802 1.70644 8.97935 2.31364L7.83268 3.45364"
-                    stroke="black"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <path
-                    d="M9.33347 7.33381C9.04716 6.95106 8.68189 6.63435 8.26243 6.40518C7.84297 6.17601 7.37913 6.03973 6.90237 6.00559C6.4256 5.97144 5.94708 6.04023 5.49924 6.20729C5.0514 6.37435 4.64472 6.63576 4.3068 6.97381L2.3068 8.97381C1.69961 9.60248 1.36363 10.4445 1.37122 11.3185C1.37881 12.1925 1.72938 13.0285 2.3474 13.6465C2.96543 14.2646 3.80147 14.6151 4.67546 14.6227C5.54945 14.6303 6.39146 14.2943 7.02013 13.6871L8.16013 12.5471"
-                    stroke="black"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </g>
-                <defs>
-                  <clipPath id="clip0_24861_24346">
-                    <rect width="16" height="16" fill="white" />
-                  </clipPath>
-                </defs>
-              </svg>
-            </span>
           </button>
 
           {showFindMyPhoto && (
             <div className={styles.findPhotoDropdown}>
-              <div className={styles.dropdownContent}>
-                <div className={styles.tabButtons}>
-                  {["profile", "upload", "take"].map((tab) => (
+              <div className={styles.tabButtons}>
+                {["profile", "upload", "take"].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`${styles.tabButton} ${
+                      activeTab === tab ? styles.active : ""
+                    }`}
+                    onClick={() => setActiveTab(tab)}
+                  >
+                    {tab === "profile"
+                      ? "Use Profile Picture"
+                      : tab === "upload"
+                      ? "Upload Photo"
+                      : "Take a Picture"}
+                  </button>
+                ))}
+              </div>
+
+              <div className={styles.recognitionSection}>
+                {finding && <p>Finding your photos…</p>}
+
+                {activeTab === "upload" && (
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png"
+                    onChange={(e) =>
+                      e.target.files &&
+                      handleUploadChange(e.target.files[0])
+                    }
+                  />
+                )}
+
+                {activeTab === "take" && (
+                  <>
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      className={styles.cameraVideo}
+                    />
                     <button
-                      key={tab}
-                      className={`${styles.tabButton} ${
-                        activeTab === tab ? styles.active : ""
-                      }`}
-                      onClick={() => handleTabClick(tab)}
+                      className={styles.captureBtn}
+                      onClick={capturePhoto}
                     >
-                      {tab === "profile"
-                        ? "Use Profile Picture"
-                        : tab === "upload"
-                        ? "Upload Photo"
-                        : "Take a Picture"}
+                      Capture
                     </button>
-                  ))}
-                </div>
-
-                <div className={styles.recognitionSection}>
-                  {activeTab === "profile" && (
-                    <>
-                      <h3 className={styles.recognitionTitle}>
-                        Face Recognition
-                      </h3>
-
-                      {!faceRecognized ? (
-                        <p className={styles.recognitionMessage}>
-                          We found a photo linked to your account. Please
-                          confirm to continue.
-                        </p>
-                      ) : (
-                        <p className={styles.recognitionMessage}>
-                          Face recognized! Showing your photos...
-                        </p>
-                      )}
-                    </>
-                  )}
-                  {activeTab === "profile" && (
-                    <ProfilePhotoPanel
-                      profileUrl={profileImageUrl}
-                      onUse={useProfilePicture}
-                    />
-                  )}
-                  {activeTab === "upload" && (
-                    <UploadPhotoPanel
-                      preview={uploadedPreview}
-                      onUpload={handleUploadChange}
-                    />
-                  )}
-                  {activeTab === "take" && (
-                    <TakePhotoPanel
-                      preview={capturedPreview}
-                      videoRef={videoRef}
-                      onCapture={capturePhoto}
-                      onContinue={onContinueWithPhoto}
-                    />
-                  )}
-                </div>
+                  </>
+                )}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Photo Grid */}
+      {/* ================= GRID ================= */}
       <div className={styles.photoGrid}>
-        {images.map((photo) => (
+        {images.map((photo, index) => (
           <div
-            key={photo.Id}
+            key={index}
             className={styles.photoItem}
-            onClick={() => openLightbox(photo.Id)}
+            onClick={() => openLightbox(index)}
           >
-            <img
-              src={resolveImageUrl(photo)} // dynamic URL here
-              alt={photo.alt || eventTitle}
-            />
+            <img src={resolveImageUrl(photo)} />
           </div>
         ))}
       </div>
 
-      {/* More Event Gallery Section */}
-      <div className={styles.moreEventsSection}>
-        <div className={styles.moreEventsHeader}>
-          <h2 className={styles.moreEventsTitle}>View Other Albums</h2>
-          <button className={styles.viewAllButton} onClick={onBack}>
-            View All
-          </button>
+      {/* ================= MORE EVENTS ================= */}
+      {eventdata && eventdata.length > 0 && (
+        <div className={styles.moreEventsSection}>
+          <div className={styles.moreEventsHeader}>
+            <h2 className={styles.moreEventsTitle}>View Other Albums</h2>
+
+            <button
+              className={styles.viewAllButton}
+              onClick={onBack}
+              type="button"
+            >
+              View All
+            </button>
+          </div>
+
+          <div className={styles.moreEventsCardsRow}>
+            {eventdata.slice(0, 2).map((event) => (
+              <EventGalleryCard
+                key={event.id}
+                event={event}
+                onClick={() => {
+                  // 🔮 future: navigate to selected album
+                  // onAlbumClick(event)
+                }}
+              />
+            ))}
+          </div>
         </div>
+      )}
 
-        <div className={styles.moreEventsCardsRow}>
-          {/* map your event cards here */}
-          {eventdata.slice(0, 2).map((event) => (
-            <EventGalleryCard
-              key={event.id}
-              event={event}
-              onClick={() => handleEventClick(event)}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Lightbox */}
-      {selectedPhoto !== null && currentPhotoIndex > -1 && (
-        <div className={styles.lightboxOverlay}>
-          <div className={styles.lightboxContainer} onClick={closeLightbox}>
-            <div className={styles.counter}>
-              {currentPhotoIndex + 1} / {images.length}
-            </div>
-
-            <button className={styles.closeBtn} onClick={closeLightbox}>
+      {/* ================= LIGHTBOX ================= */}
+      {activeIndex !== null && (
+        <div
+          className={styles.lightboxOverlay}
+          onClick={closeLightbox}
+        >
+          <div
+            className={styles.lightboxContainer}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className={styles.closeBtn}
+              onClick={closeLightbox}
+            >
               ×
             </button>
 
-            {/* previous preview */}
-            {currentPhotoIndex > 0 && (
-              <div
-                className={styles.sideThumbsLeft}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToPrevious();
-                }}
-              >
-                <img src={resolveImageUrl(images[currentPhotoIndex - 1])} />
-              </div>
-            )}
-
             <img
+              src={resolveImageUrl(images[activeIndex])}
               className={styles.mainImage}
-              src={resolveImageUrl(images[currentPhotoIndex])}
-              alt=""
-              onClick={(e) => e.stopPropagation()}
             />
 
-            {/* next preview */}
-            {currentPhotoIndex < images.length - 1 && (
+            {activeIndex > 0 && (
               <div
-                className={styles.sideThumbsRight}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToNext();
-                }}
+                className={styles.sideThumbsLeft}
+                onClick={goToPrevious}
               >
-                <img src={resolveImageUrl(images[currentPhotoIndex + 1])} />
+                <img
+                  src={resolveImageUrl(images[activeIndex - 1])}
+                />
               </div>
             )}
+
+            {activeIndex < images.length - 1 && (
+              <div
+                className={styles.sideThumbsRight}
+                onClick={goToNext}
+              >
+                <img
+                  src={resolveImageUrl(images[activeIndex + 1])}
+                />
+              </div>
+            )}
+
+            <div className={styles.carouselControls}>
+              <button
+                className={styles.carouselBtn}
+                onClick={goToPrevious}
+                disabled={activeIndex === 0}
+              >
+                <img src={PrevIcon} />
+              </button>
+
+              <span className={styles.carouselCounter}>
+                {activeIndex + 1} / {images.length}
+              </span>
+
+              <button
+                className={styles.carouselBtn}
+                onClick={goToNext}
+                disabled={activeIndex === images.length - 1}
+              >
+                <img src={NextIcon} />
+              </button>
+            </div>
           </div>
         </div>
       )}

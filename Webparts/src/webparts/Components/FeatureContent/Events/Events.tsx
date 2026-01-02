@@ -120,6 +120,40 @@ export const Events: React.FC<IEventsProps> = (props) => {
   const [error, setError] = React.useState<string | null>(null);
   const [isRegisterOpen, setIsRegisterOpen] = React.useState(false);
   const [selectedEventId, setSelectedEventId] = React.useState<string | null>(null);
+
+  // ======================
+  //  DYNAMIC VIEW-ALL URL 
+  // ======================
+  const webUrl: string | undefined =
+    props.context?.pageContext.web.absoluteUrl.replace(/\/$/, "");
+
+  const origin: string | undefined = webUrl
+    ? new URL(webUrl).origin
+    : undefined;
+
+  const viewAllHref = React.useMemo(() => {
+    const configured = (props.seeAllURL || "").trim();
+    const raw = configured || "SitePages/Events-and-Trainings.aspx";
+
+    if (!webUrl || !origin) return raw;
+
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const parsed = new URL(raw);
+        return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      } catch {
+        return raw;
+      }
+    }
+
+    if (raw.startsWith("/")) {
+      return `${origin}${raw}`;
+    }
+
+    return `${webUrl}/${raw}`;
+  }, [props.seeAllURL, webUrl, origin]);
+  // =========================================================
+
   React.useEffect(() => {
     if (props.events && props.events.length > 0) {
       setEvents(props.events);
@@ -142,7 +176,6 @@ export const Events: React.FC<IEventsProps> = (props) => {
         const fetchTop = Math.max(top * 3, 20);
         const safeListTitle = listTitle.replace(/'/g, "''");
 
-        /** BASE QUERY — EVENTS ONLY */
         const requestUrl =
           `${webUrl}/_api/web/lists/getbytitle('${safeListTitle}')/items` +
           `?$select=Id,Title,BannerImageUrl,TIREventStartDate,TIREventEndDate,TIRLocation,TIREventCategory,ContentTypeId` +
@@ -162,7 +195,6 @@ export const Events: React.FC<IEventsProps> = (props) => {
 
         const json = await response.json();
 
-        /** RESTORE OLD WORKING LOGIC (FieldValuesAsText) */
         const itemsWithLabels = await Promise.all(
           (json.value || []).map(async (item: any) => {
             try {
@@ -185,7 +217,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
                 };
               }
             } catch {
-              // ignore single item failure
+              // ignore
             }
             return item;
           })
@@ -234,8 +266,6 @@ export const Events: React.FC<IEventsProps> = (props) => {
     );
   }
 
-
-
   return (
     <div className={styles.eventsContainer}>
       <div className={styles.eventsGrid}>
@@ -270,6 +300,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
                 </div>
               )}
             </div>
+
             <button
               className={styles.registerButton}
               onClick={() => {
@@ -282,6 +313,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
           </div>
         ))}
       </div>
+
       {isRegisterOpen && selectedEventId && props.context && (
         <EventRegistration
           isOpen={isRegisterOpen}
@@ -290,9 +322,10 @@ export const Events: React.FC<IEventsProps> = (props) => {
           eventId={selectedEventId}
         />
       )}
+
       <div className={styles.buttonContainer}>
-        <ConditionalLink to={props.seeAllURL || '#'}>
-          <PrimaryButton label='View All' />
+        <ConditionalLink to={viewAllHref}>
+          <PrimaryButton label="View All" />
         </ConditionalLink>
       </div>
     </div>

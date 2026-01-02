@@ -873,3 +873,39 @@
 .current {
   color: #6f6f6f;
 }
+
+.carouselControls {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 10px 20px;
+  border-radius: 40px;
+}
+
+.carouselBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.carouselCounter {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
