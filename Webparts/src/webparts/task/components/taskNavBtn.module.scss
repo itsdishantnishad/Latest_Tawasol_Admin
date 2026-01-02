@@ -1,77 +1,187 @@
+// .segmentWrap {
+//   width: 392px;
+//   height: 56px;
+//   padding: 8px;
+//   margin: 32px auto 48px; /* center it; no overlap with table */
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+//   gap: 8px;
+//   border-radius: 360px;
+//   border: 1px solid #fbbf7f;
+//   background: linear-gradient(
+//     180deg,
+//     rgba(255, 255, 255, 0.92) 0%,
+//     rgba(255, 255, 255, 0.82) 100%
+//   );
+//   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04),
+//     0 0 0 1px rgba(251, 191, 127, 0.25);
+// }
+
+// /* kept for compatibility; does nothing now */
+// .segmentWrapAbsolute {
+//   position: static;
+// }
+
+// .segmentBtn {
+//   width: 120px;
+//   height: 40px;
+//   border-radius: 360px;
+//   border: none;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   background: transparent;
+//   cursor: pointer;
+//   position: relative;
+//   overflow: hidden;
+// }
+
+// .segmentBtnActive {
+//   /* visual handled by activeBg; keep a subtle border for focus ring match */
+//   border: 1px solid #f0bb82;
+// }
+
+// .segmentBtnIdle {
+//   background: transparent;
+//   border: 1px solid transparent;
+// }
+// .segmentBtnIdle:hover {
+//   background: rgba(255, 255, 255, 0.4);
+//   border-color: rgba(0, 0, 0, 0.05);
+// }
+
+// .activeBg {
+//   position: absolute;
+//   inset: 0;
+//   z-index: 0;
+//   pointer-events: none;
+//   svg {
+//     width: 100%;
+//     height: 100%;
+//     display: block;
+//     border-radius: 360px;
+//   }
+// }
+
+// .segmentText {
+//   position: relative;
+//   z-index: 1;
+//   min-width: 88px;
+//   line-height: 20px;
+//   text-align: center;
+//   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+//   font-weight: 600;
+//   font-size: 16px;
+//   color: #3a3a3a;
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .segmentWrap {
-  width: 392px;
-  height: 56px;
-  padding: 8px;
-  margin: 32px auto 48px; /* center it; no overlap with table */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  border-radius: 360px;
-  border: 1px solid #fbbf7f;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.92) 0%,
-    rgba(255, 255, 255, 0.82) 100%
-  );
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(251, 191, 127, 0.25);
-}
-
-/* kept for compatibility; does nothing now */
-.segmentWrapAbsolute {
-  position: static;
-}
-
-.segmentBtn {
-  width: 120px;
-  height: 40px;
-  border-radius: 360px;
-  border: none;
+  width: 100%;
+  margin: 32px auto 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  cursor: pointer;
+  gap: 16px;
+}
+
+.segmentBtn {
   position: relative;
+  height: 56px;
+  min-width: 260px;
+  padding: 0 18px;
+  border-radius: 360px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
   overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .segmentBtnActive {
-  /* visual handled by activeBg; keep a subtle border for focus ring match */
   border: 1px solid #f0bb82;
+  background: #f0bb82;
 }
 
 .segmentBtnIdle {
-  background: transparent;
-  border: 1px solid transparent;
-}
-.segmentBtnIdle:hover {
-  background: rgba(255, 255, 255, 0.4);
-  border-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.72);
 }
 
-.activeBg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
+.segmentBtnIdle:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.tabInner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iconWrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  overflow: hidden;
+  margin-left: -13px;
+  margin-right: 4px;
+}
+
+.iconSvg {
+  width: 70px;
+  height: 70px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
   svg {
-    width: 100%;
-    height: 100%;
+    width: 41px;
+    height: 41px;
     display: block;
-    border-radius: 360px;
   }
 }
 
 .segmentText {
-  position: relative;
-  z-index: 1;
-  min-width: 88px;
-  line-height: 20px;
-  text-align: center;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
   font-weight: 600;
   font-size: 16px;
+  line-height: 20px;
   color: #3a3a3a;
+}
+
+.countText {
+  margin-left: auto;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 20px;
+  color: #da291c;
 }

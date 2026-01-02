@@ -36,6 +36,7 @@
       }
     ],
     "webApiPermissionRequests": [
+      { "resource": "Microsoft Graph", "scope": "User.Read.All" },
       { "resource": "Microsoft Graph", "scope": "People.Read" }
     ]
   },

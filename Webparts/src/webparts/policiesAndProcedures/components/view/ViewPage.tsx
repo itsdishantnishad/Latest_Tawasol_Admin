@@ -1,3 +1,5 @@
+
+
 import * as React from 'react';
 import { Breadcrumb, IBreadcrumbItem } from '@fluentui/react';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
@@ -26,7 +28,10 @@ type IPoliciesAndProceduresViewState = {
   breadcrumbs: IBreadcrumbItem[];
   currentItems: IPoliciesAndProceduresItem[];
   selectedItem?: IPoliciesAndProceduresItem;
+
+  // SINGLE expanded folder id (matches ViewPageList.tsx)
   expandedFolderId?: string;
+
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
   folderViewMode: Record<string, FolderViewMode>;
 };
@@ -41,7 +46,10 @@ export default class PoliciesAndProceduresView extends React.Component<
     super(props);
 
     this.dataProvider = props.useSharePointProvider
-      ? new PoliciesAndProceduresSharePointProvider(props.context, props.dmsLibraryRoot || '/sites/Intranet/DMS')
+      ? new PoliciesAndProceduresSharePointProvider(
+          props.context,
+          props.dmsLibraryRoot || '/sites/Intranet/DMS'
+        )
       : new PoliciesAndProceduresDummyProvider();
 
     this.state = {
@@ -50,35 +58,44 @@ export default class PoliciesAndProceduresView extends React.Component<
         { key: 'bread-function', text: props.functionDisplayName, isCurrentItem: true }
       ],
       currentItems: [],
+      selectedItem: undefined, // ✅ do not auto preview
+      expandedFolderId: undefined,
       expandedChildren: {},
       folderViewMode: {}
     };
   }
 
-  async componentDidMount(): Promise<void> {
+  public async componentDidMount(): Promise<void> {
     const rootItems = await this.dataProvider.getRootItems(this.props.functionDisplayName);
     this.setState({
-      currentItems: rootItems,
-      selectedItem: rootItems.find(item => !item.isFolder)
+      currentItems: rootItems
+      // keep selectedItem undefined until user clicks file
     });
   }
 
-  private handleOpenFile = (fileItem: IPoliciesAndProceduresItem): void =>
+  private handleOpenFile = (fileItem: IPoliciesAndProceduresItem): void => {
     this.setState({ selectedItem: fileItem });
+  };
 
   private handleToggleFolder = async (folderItem: IPoliciesAndProceduresItem): Promise<void> => {
     const { expandedFolderId, expandedChildren } = this.state;
 
+    // collapse same folder
     if (expandedFolderId === folderItem.id) {
       this.setState({ expandedFolderId: undefined });
       return;
     }
 
+    // load children first time
     if (!expandedChildren[folderItem.id] && folderItem.serverRelativeUrl) {
-      const children = await this.dataProvider.getFolderChildren(this.props.functionDisplayName, folderItem.serverRelativeUrl);
+      const children = await this.dataProvider.getFolderChildren(
+        this.props.functionDisplayName,
+        folderItem.serverRelativeUrl
+      );
+
       this.setState(prev => ({
         expandedFolderId: folderItem.id,
-        expandedChildren: { ...prev.expandedChildren, [folderItem.id]: children },
+        expandedChildren: { ...prev.expandedChildren, [folderItem.id]: children }
       }));
     } else {
       this.setState({ expandedFolderId: folderItem.id });
@@ -89,14 +106,24 @@ export default class PoliciesAndProceduresView extends React.Component<
     this.setState(prev => ({ folderViewMode: { ...prev.folderViewMode, [folderId]: mode } }));
   };
 
+  private onExportCsv = (): void => {
+    // NOTE: Export logic is already inside ViewPageList.tsx (exportSelectedToCsv).
+    // If later you want export button in parent, we can wire it here.
+  };
+
   private renderTopBar(): React.ReactNode {
     return (
       <div className={view.topBar}>
-        <button className={view.backBtn} onClick={this.props.onBackToLanding} aria-label="Back" title="Back">
-          <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }} />
+        <p onClick={this.props.onBackToLanding}>
+          <span
+            aria-hidden="true"
+            dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }}
+            style={{ verticalAlign: 'sub' }}
+          />
           <span>Back</span>
-        </button>
-        <Breadcrumb items={this.state.breadcrumbs} />
+        </p>
+        <p>|</p>
+        <Breadcrumb items={this.state.breadcrumbs} className={view.breadStyle} />
         <div className={view.searchSlot} />
       </div>
     );
@@ -116,7 +143,7 @@ export default class PoliciesAndProceduresView extends React.Component<
               activeId={selectedItem?.id}
               onOpenFile={this.handleOpenFile}
               onToggleFolder={this.handleToggleFolder}
-              expandedFolderId={expandedFolderId}
+              expandedFolderId={expandedFolderId}       
               expandedChildren={expandedChildren}
               onSwitchFolderView={this.handleSwitchFolderView}
               getFolderViewMode={(fid) => folderViewMode[fid] || 'list'}
@@ -124,7 +151,10 @@ export default class PoliciesAndProceduresView extends React.Component<
           </div>
 
           <div className={view.rightPane}>
-            <PoliciesandProceduresPreview item={selectedItem} categoryTitle={this.props.functionDisplayName} />
+            <PoliciesandProceduresPreview
+              item={selectedItem}
+              categoryTitle={this.props.functionDisplayName}
+            />
           </div>
         </div>
       </section>

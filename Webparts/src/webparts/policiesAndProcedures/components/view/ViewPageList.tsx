@@ -1,3 +1,6 @@
+
+
+
 import * as React from 'react';
 import { Checkbox, IconButton } from '@fluentui/react';
 import styles from './ViewPage.module.scss';
@@ -27,7 +30,9 @@ export interface IPoliciesAndProceduresListProps {
   onOpenFile: (fileItem: IPoliciesAndProceduresItem) => void;
   onToggleFolder: (folderItem: IPoliciesAndProceduresItem) => void;
 
+  // ✅ single expand id (matches your ViewPage.tsx)
   expandedFolderId?: string;
+
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
 
   onSwitchFolderView: (folderId: string, mode: 'list' | 'grid') => void;
@@ -104,39 +109,57 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
     URL.revokeObjectURL(url);
   };
 
-  // ---------- renderers ----------
+  // ---------- render helpers ----------
   private renderTypeIcon = (listItem: IPoliciesAndProceduresItem): React.ReactNode => (
     <img className={styles.typeIcon} src={this.getIconUrl(listItem)} alt="" />
   );
 
   private renderFileRow = (listItem: IPoliciesAndProceduresItem, isActive: boolean, folderId?: string): React.ReactNode => {
     const checked = this.isSelected(listItem.id, folderId);
+
     return (
       <div key={listItem.id} className={`${styles.row} ${isActive ? styles.rowActive : ''}`}>
-        <div className={styles.cellCheckbox}>
-          <Checkbox checked={checked} onChange={(e) => { e?.stopPropagation(); this.toggleOne(listItem.id, folderId); }} />
+        <div>
+          <Checkbox
+            checked={checked}
+            onChange={(e, isChecked) => {
+              e?.stopPropagation();
+              this.toggleOne(listItem.id, folderId);
+              if (isChecked) {
+                this.props.onOpenFile(listItem);
+              }
+            }}
+          />
         </div>
 
-        {/* ONLY icon clicks open preview */}
-        <div className={styles.cellIcon}>
-          <button type="button" className={styles.openBtn} aria-label={`Open ${listItem.name}`}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}>
+        {/* ONLY icon/name click opens preview */}
+        <div>
+          <button
+            type="button"
+            className={styles.openBtn}
+            aria-label={`Open ${listItem.name}`}
+            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
+          >
             {this.renderTypeIcon(listItem)}
           </button>
         </div>
 
         <div className={styles.cellName}>
-          {/* ONLY name clicks open preview */}
-          <button type="button" className={`${styles.nameStrong} ${styles.openBtn}`}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}>
+          <button
+            type="button"
+            className={`${styles.nameStrong} ${styles.openBtn}`}
+            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
+          >
             {listItem.name}
           </button>
+
           <div className={styles.meta}>
-            Modified by : {listItem.modifiedBy || '-'} &nbsp;•&nbsp; Modified on : {listItem.modifiedOn ? listItem.modifiedOn.toLocaleDateString() : '-'}
+            Modified by : {listItem.modifiedBy || '-'} &nbsp;•&nbsp;
+            Modified on : {listItem.modifiedOn ? listItem.modifiedOn.toLocaleDateString() : '-'}
           </div>
         </div>
 
-        <div className={styles.cellTag}>
+        <div>
           {listItem.tag && (
             <span className={styles.tagPill}>
               <img src={ICON_TAG} alt="" className={styles.tagIcon} />
@@ -152,18 +175,26 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
 
   private renderGridCard = (listItem: IPoliciesAndProceduresItem, isActive: boolean, folderId?: string): React.ReactNode => {
     const checked = this.isSelected(listItem.id, folderId);
+
     return (
       <div key={listItem.id} className={`${styles.card} ${isActive ? styles.cardActive : ''}`}>
         <div className={styles.cardThumb}>
-          <button type="button" className={styles.openBtn} aria-label={`Open ${listItem.name}`}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}>
+          <button
+            type="button"
+            className={styles.openBtn}
+            aria-label={`Open ${listItem.name}`}
+            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
+          >
             {this.renderTypeIcon(listItem)}
           </button>
         </div>
 
         <div className={styles.cardTitle}>
-          <button type="button" className={styles.openBtn}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}>
+          <button
+            type="button"
+            className={styles.openBtn}
+            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
+          >
             {listItem.name}
           </button>
         </div>
@@ -185,50 +216,91 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
 
         <Checkbox
           checked={checked}
-          onChange={(e) => { e?.stopPropagation(); this.toggleOne(listItem.id, folderId); }}
+          onChange={(e, isChecked) => {
+            e?.stopPropagation();
+            this.toggleOne(listItem.id, folderId);
+            if (isChecked) {
+              this.props.onOpenFile(listItem);
+            }
+          }}
           styles={{ root: { position: 'absolute', top: 8, left: 8 } }}
         />
       </div>
     );
   };
 
-  private renderFolderBlock = (folder: IPoliciesAndProceduresItem): React.ReactNode => {
+  /**
+   *  Recursive renderer for folder children
+   * - Shows subfolders ALSO
+   * - Clicking folder loads children using parent handler (dataProvider)
+   */
+  private renderFolderChildrenRecursive = (folderId: string): React.ReactNode => {
+    const children = this.props.expandedChildren[folderId] || [];
+    const folders = children.filter(x => x.isFolder);
+    const files = children.filter(x => !x.isFolder);
+
+    return (
+      <div>
+        {/* Subfolders */}
+        {folders.map(sf => this.renderFolderBlock(sf, true))}
+
+        {/* Files */}
+        {this.props.getFolderViewMode(folderId) === 'list' && (
+          <div>
+            {files.map(file => this.renderFileRow(file, this.props.activeId === file.id, folderId))}
+          </div>
+        )}
+
+        {this.props.getFolderViewMode(folderId) === 'grid' && (
+          <div className={styles.gridBody}>
+            {files.map(file => this.renderGridCard(file, this.props.activeId === file.id, folderId))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  private renderFolderBlock = (folder: IPoliciesAndProceduresItem, isNested?: boolean): React.ReactNode => {
     const { expandedFolderId, expandedChildren, getFolderViewMode } = this.props;
+
     const isExpanded = expandedFolderId === folder.id;
     const mode = getFolderViewMode(folder.id);
 
-    const files = (expandedChildren[folder.id] || []).filter(x => !x.isFolder);
-    const allFileIds = files.map(f => f.id);
-    const selectedFiles = files.filter(f => this.isSelected(f.id, folder.id));
+    const children = expandedChildren[folder.id] || [];
+    const filesOnly = children.filter(x => !x.isFolder);
+
+    const allFileIds = filesOnly.map(f => f.id);
+    const selectedFiles = filesOnly.filter(f => this.isSelected(f.id, folder.id));
     const allSelected = allFileIds.length > 0 && allFileIds.every(id => this.isSelected(id, folder.id));
 
     return (
-      <div key={folder.id} className={styles.folderBlock}>
+      <div key={folder.id} className={`${styles.folderBlock} ${isNested ? styles.folderNested : ''}`}>
+
         <button
           className={styles.folderHeader}
-          onClick={() => this.props.onToggleFolder(folder)}
+          onClick={(e) => { e.stopPropagation(); this.props.onToggleFolder(folder); }}
           aria-expanded={isExpanded}
+          type="button"
         >
-          {/* expand/collapse arrow */}
           <img src={isExpanded ? ICON_ARROW_UP : ICON_ARROW_DOWN} alt="" className={styles.typeIcon} />
-          {/* folder glyph */}
           <span className={styles.folderIconWrap}>
             <img className={styles.typeIcon} src={ICON_FOLDER} alt="" />
           </span>
           <span className={styles.folderTitle}>{folder.name}</span>
 
-          {/* view toggles with your SVGs */}
           <div className={styles.folderToolbar}>
             <IconButton
               className={mode === 'list' ? styles.viewBtnActive : styles.viewBtn}
               onRenderIcon={() => <img src={ICON_DOC_FOLDER_LIST} alt="" className={styles.typeIcon} />}
-              title="List view" ariaLabel="List view"
+              title="List view"
+              ariaLabel="List view"
               onClick={(e) => { e.stopPropagation(); this.props.onSwitchFolderView(folder.id, 'list'); }}
             />
             <IconButton
               className={mode === 'grid' ? styles.viewBtnActive : styles.viewBtn}
               onRenderIcon={() => <img src={ICON_DOC_FOLDER_GRID} alt="" className={styles.typeIcon} />}
-              title="Grid view" ariaLabel="Grid view"
+              title="Grid view"
+              ariaLabel="Grid view"
               onClick={(e) => { e.stopPropagation(); this.props.onSwitchFolderView(folder.id, 'grid'); }}
             />
           </div>
@@ -248,7 +320,6 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
                 />
               </div>
 
-              {/* Only show export when any file is selected */}
               {selectedFiles.length > 0 && (
                 <div
                   className={styles.actionBarRight}
@@ -260,22 +331,13 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
                   }}
                 >
                   <img src={ICON_EXPORT_TO_CSV} alt="" className={styles.typeIcon} />
-                  <span className={styles.exportText}>Export to CSV</span>
+                  <span>Export to CSV</span>
                 </div>
               )}
             </div>
 
-            {mode === 'list' && (
-              <div className={styles.listBody}>
-                {files.map(file => this.renderFileRow(file, this.props.activeId === file.id, folder.id))}
-              </div>
-            )}
-
-            {mode === 'grid' && (
-              <div className={styles.gridBody}>
-                {files.map(file => this.renderGridCard(file, this.props.activeId === file.id, folder.id))}
-              </div>
-            )}
+            {/* recursive children render (folders + files) */}
+            {this.renderFolderChildrenRecursive(folder.id)}
           </div>
         )}
       </div>
@@ -284,13 +346,16 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
 
   public render(): React.ReactElement<IPoliciesAndProceduresListProps> {
     const { items } = this.props;
+    const rootFolders = items.filter(x => x.isFolder);
+    const rootFiles = items.filter(x => !x.isFolder);
+
     return (
       <div>
-        {items.map(item =>
-          item.isFolder
-            ? this.renderFolderBlock(item)
-            : this.renderFileRow(item, this.props.activeId === item.id)
-        )}
+        {/* Root folders */}
+        {rootFolders.map(f => this.renderFolderBlock(f))}
+
+        {/* Root files */}
+        {rootFiles.map(file => this.renderFileRow(file, this.props.activeId === file.id))}
       </div>
     );
   }

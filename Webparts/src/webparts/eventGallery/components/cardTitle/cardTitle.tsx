@@ -226,7 +226,7 @@ export const CardTitlegallery: React.FC = () => {
       {/* Content */}
       <div className={styles.content}>
         <h1 className={styles.title}>
-          <span className={styles.titleEvents}>Events</span>
+          <span className={styles.titleEvents}>DHRE</span>
           <span className={styles.titleTrainings}>Gallery</span>
         </h1>
         <p className={styles.description}>

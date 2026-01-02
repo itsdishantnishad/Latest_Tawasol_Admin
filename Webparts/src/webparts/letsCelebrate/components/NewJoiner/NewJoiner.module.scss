@@ -1,3 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: local('Instrument Serif Regular'), url('/../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: local('Instrument Serif Italic'), url('/../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
+
 .content {
   min-height: 300px;
   display: flex;
@@ -9,7 +22,7 @@
 /* ==== Feed wrapper ==== */
 .feed {
   display: grid;
-  gap: 36px;
+  gap: 0;
 }
 
 /* ==== Each person card ==== */
@@ -17,22 +30,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 16px;
+  padding-top: 32px;
 }
 .card {
-  display: grid;
-  grid-template-columns: 220px 1fr; /* left image | right content | CTA */
+  display: flex;
+  // flex-wrap: wrap;
   gap: 20px;
   align-items: start;
-  padding: 15px 0 26px 0;
-  border-bottom: 1px solid #eee;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #F8CCA3;
 
   @media (max-width: 900px) {
-    grid-template-columns: 140px 1fr;
+    // grid-template-columns: 140px 1fr;
     .ctaCol { grid-column: 1 / -1; justify-content: flex-start; }
   }
 
   @media (max-width: 640px) {
-    grid-template-columns: 1fr;
+    // grid-template-columns: 1fr;
     .left { order: -1; }
     .ctaCol { grid-column: 1 / -1; }
   }
@@ -49,16 +64,16 @@
 .right {
   display: grid;
   grid-auto-rows: min-content;
-  gap: 10px;               /* spacing between header, meta, body */
-  align-content: start;    /* keep content packed to the top */
+  gap: 10px;               
+  align-content: start;    
 }
 
 /* ==== image ==== */
 .photo {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
+  height: 286px;
   object-fit: cover;
+  width: 260px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
@@ -67,20 +82,20 @@
 
 .name {
   margin: 0 0 5px 0;
-  font-family: Instrument Serif;
+  font-family: 'Instrument Serif Regular';
+  font-size: 36px;
   font-weight: 400;
-  font-size: 28px;
-  color: #222;
-  line-height: 1.2;
+  line-height: 100%;
+  color: #000000;
 }
 
-.nameDecor { color: #e85b54; font-style: italic; }
+.nameDecor { color: #DA291C; font-family: 'Instrument Serif Italic'; }
 .role{
-  color: #6C6C6C;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 500;
-  font-family: 'Inter';
+  color: #3A3B43;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
 }
 
 /* ==== meta rows ==== */
@@ -91,26 +106,49 @@
 .body {
   display: grid;
   gap: 10px;          /* vertical spacing between paragraphs */
-  margin-top: 6px;    /* small breathing room after meta */
+  margin-top: 0px;    /* small breathing room after meta */
 }
 
-.para {
+.para{
   margin: 0;
-  color: #3b3b3b;
-  line-height: 1.65;
-  font-size: 15px;
+  div{
+    color: #3A3B43 !important;
+    font-size: 16px !important;
+    line-height: 24px !important;
+    margin: 0 !important;
+    font-weight: 400 !important;
+    font-family: 'Inter', sans-serif !important;
+  }
 }
 
 /* ==== CTA column & button ==== */
 .ctaCol { display: flex; justify-content: flex-end; }
 
 .sayHello {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 16px; text-decoration: none; font-weight: 600; background: #fff;
-  border-radius: 50px; color: #000; border: 1.5px solid #C5B9AC;
-
+  align-items: center;
+  background: transparent;
+  border: 1.5px solid #101820;
+  border-radius: 50px;
+  color: #000;
+  display: inline-flex;
+  font-weight: 600;
+  gap: 8px;
+  padding: 8px 20px;
+  text-decoration: none;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  line-height: 20px;
   &:hover { filter: brightness(0.98); }
   &:active { transform: translateY(1px); }
 }
 
 .helloIcon { font-size: 16px; line-height: 0; }
+
+.emptyState {
+  p{
+    color: #777;
+    font-style: italic;
+    text-align: center;
+    margin: 0;
+  }
+}

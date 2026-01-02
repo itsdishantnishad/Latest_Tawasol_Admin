@@ -1,125 +1,86 @@
 import * as React from 'react';
 import styles from './Meeting.module.scss';
-// import leftHeadingLine from "../images/leftArrow.svg"
-// import rightHeadingLine from "../images/rightArrow.svg"
-const leftHeadingLine: string = require("../images/leftArrow.svg");
-const rightHeadingLine: string = require("../images/rightArrow.svg");
+import ConditionalLink from "../../ConditionalLink/ConditionalLink";
+import PrimaryButton from "../../PrimaryButton/PrimaryButton";
+
 export interface IMeeting {
-    id: string;
-    title: string;
-    date: string;
-    time: string;
-    location: string;
-    isFeatured?: boolean;
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  isFeatured?: boolean;
 }
 
 export interface IMeetingProps {
-    meetings?: IMeeting[];
-    onViewAll?: () => void;
-    seeAllURL?: string;
+  meetings?: IMeeting[]; // still kept so parent props won't break
+  onViewAll?: () => void;
+  seeAllURL?: string;
+
+  context: any; // (ideally WebPartContext)
 }
 
-const defaultMeetings: IMeeting[] = [
-    {
-        id: '1',
-        title: 'Weekly project update',
-        date: 'Today, 03:00 PM',
-        time: '03:00 PM',
-        location: '11th Floor, Vision Tower'
-    },
-    {
-        id: '2',
-        title: 'Daily Stand-up meeting',
-        date: '23 Aug, 01:00 PM',
-        time: '01:00 PM',
-        location: '11th Floor, Vision Tower'
-    },
-    {
-        id: '3',
-        title: 'All hands meeting',
-        date: '24 Aug, 03:00 PM',
-        time: '03:00 PM',
-        location: '11th Floor, Vision Tower',
-        isFeatured: true
-    },
-    {
-        id: '4',
-        title: 'Daily Stand-up meeting',
-        date: '23 Aug, 01:00 PM',
-        time: '01:00 PM',
-        location: '11th Floor, Vision Tower'
-    },
-    {
-        id: '5',
-        title: 'Weekly project update',
-        date: 'Today, 03:00 PM',
-        time: '03:00 PM',
-        location: '11th Floor, Vision Tower'
-    },
-];
+// SVGs are in: src/webparts/Components/FeatureContent/assets
+const meetingImg30: string = require('../assets/30.svg');
+const meetingImg31: string = require('../assets/31.svg');
+const meetingImg32: string = require('../assets/32.svg');
+const meetingImg33: string = require('../assets/33.svg');
 
 export const Meeting: React.FC<IMeetingProps> = (props) => {
-    const meetings = props.meetings || defaultMeetings;
-    //   const [currentIndex, setCurrentIndex] = React.useState(2); // Start with featured in center
+  const images: string[] = [meetingImg30, meetingImg31, meetingImg32, meetingImg33];
 
-    // const handlePrev = () => {
-    //     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
-    // };
+  // ===== VIEW ALL FUNCTIONALITY (same as tumhara purana logic) =====
+  const webUrl: string = props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+  const origin: string = new URL(webUrl).origin;
 
-    // const handleNext = () => {
-    //     setCurrentIndex((prev) => (prev < meetings.length - 1 ? prev + 1 : prev));
-    // };
+  const viewAllHref = React.useMemo(() => {
+    const configured = (props.seeAllURL || "").trim();
 
-    return (
-        <div className={styles.meetingContainer}>
+    const raw = configured || "SitePages/Events-And-Trainings.aspx";
 
-            {/* Carousel */}
-            <div className={styles.carouselContainer} >
-                <div className={styles.carousel}>
-                    {meetings.map((meeting, index) => {
-                        //const offset = index - currentIndex;
-                        const offset = index - 0;
-                        // const isActive = index === currentIndex;
-                        const isActive = true;
-                        return (
-                            <div
-                                key={meeting.id}
-                                className={`${styles.meetingCard} ${isActive ? styles.active : ''}`}
-                                style={{
-                                    transform: `translateX(${offset * 320}px) scale(${isActive ? 1 : 0.85})`,
-                                    opacity: Math.abs(offset) > 2 ? 0 : isActive ? 1 : 0.5,
-                                    zIndex: isActive ? 10 : 5 - Math.abs(offset),
-                                }}
-                            >
-                                <div className={styles.cardHeader}>
-                                    <div className={styles.dateTime}>
-                                        <div className={styles.date}>{meeting.date.split(',')[0]}</div>
-                                        <div className={styles.time}>{meeting.time}</div>
-                                    </div>
-                                    <div className={styles.location}>{meeting.location}</div>
-                                </div>
-                                <div className={styles.cardBody}>
-                                    <h3 className={styles.meetingTitle}>{meeting.title}</h3>
-                                    <button className={styles.joinButton}>Join</button>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div >
 
-            {/* View All Button */}
-            <div className={styles.buttonContainer}>
-                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
-                    View All
-                </button> */}
-                <a href={props.seeAllURL} className={styles.viewAllButton}>
-                    View All
-                </a>
-            </div>
-        </div >
-    );
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const parsed = new URL(raw);
+        return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      } catch {
+        return raw;
+      }
+    }
+
+
+    if (raw.startsWith("/")) {
+      return `${origin}${raw}`;
+    }
+
+    // Web-relative (SitePages/Page.aspx)
+    return `${webUrl}/${raw}`;
+  }, [props.seeAllURL, webUrl, origin]);
+  // ================================================================
+
+  return (
+    <div className={styles.meetingContainer}>
+      {/* Just show 4 SVG images */}
+      <div className={styles.imageGrid}>
+        {images.map((src, index) => (
+          <div key={index}>
+            <img
+              src={src}
+              alt={`Meeting illustration ${index + 1}`}
+              className={styles.meetingImage}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* View All Button (uses dynamic viewAllHref) */}
+      <div className={styles.buttonContainer}>
+        <ConditionalLink to={viewAllHref}>
+          <PrimaryButton label="View All" />
+        </ConditionalLink>
+      </div>
+    </div>
+  );
 };
 
 export default Meeting;
-

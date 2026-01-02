@@ -14,9 +14,10 @@ export interface ITeamOrganisationStructureState {
   loadingDepts: boolean;
 }
 
-export default class TeamOrganisationStructure
-  extends React.Component<ITeamOrganisationStructureProps, ITeamOrganisationStructureState> {
-
+export default class TeamOrganisationStructure extends React.Component<
+  ITeamOrganisationStructureProps,
+  ITeamOrganisationStructureState
+> {
   private spService: listServices;
 
   constructor(props: ITeamOrganisationStructureProps) {
@@ -28,64 +29,153 @@ export default class TeamOrganisationStructure
       selectedId: null,
       selectedLevel: null,
       departments: [],
-      loadingDepts: false
+      loadingDepts: false,
     };
     this.spService = new listServices(this.props.context);
   }
 
-  async componentDidMount(): Promise<void> { await this.loadMembers(); }
+  public async componentDidMount(): Promise<void> {
+    await this.loadMembers();
+  }
 
-  async componentDidUpdate(prevProps: ITeamOrganisationStructureProps): Promise<void> {
+  public async componentDidUpdate(prevProps: ITeamOrganisationStructureProps): Promise<void> {
     const prevTitle = (prevProps.listTitle || "").trim();
     const nextTitle = (this.props.listTitle || "").trim();
-    if (prevTitle !== nextTitle) await this.loadMembers();
+    if (prevTitle !== nextTitle) {
+      await this.loadMembers();
+    }
   }
 
   private async loadMembers(): Promise<void> {
     try {
-      this.setState({ loading: true, error: null, selectedId: null, selectedLevel: null, departments: [] });
+      this.setState({
+        loading: true,
+        error: null,
+        selectedId: null,
+        selectedLevel: null,
+        departments: [],
+      });
+
       const sourceList = this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
-      const members = await this.spService.getOrganisationMembers(sourceList);     
+      const members = await this.spService.getOrganisationMembers(sourceList);
+
       this.setState({ items: members, loading: false });
-    } catch (err: any) {   
-      this.setState({ error: err?.message || "Failed to load.", loading: false });
+    } catch (err: any) {
+      this.setState({
+        error: err?.message || "Failed to load.",
+        loading: false,
+      });
     }
   }
 
-  private onCardClick = async (member: OrgMember): Promise<void> => {
+  private onCardClick = (member: OrgMember): void => {
+    this.setState(
+      (prev) => {
+        const isSamePerson = prev.selectedId === member.id;
 
-    try {
-      const depts = await this.spService.getDepartmentsByMember(ListName.TEAM_ORG_DEPARTMENTS, member.user);
-      this.setState({ departments: depts, loadingDepts: false });
-    } catch (e) {   
-      this.setState({ departments: [], loadingDepts: false });
-    } 
+        if (isSamePerson) {
+          return {
+            ...prev,
+            selectedId: null,
+            selectedLevel: null,
+            departments: [],
+            loadingDepts: false,
+          };
+        }
 
-    this.setState(prev => {
-      const isSame = prev.selectedId === member.id;
-      return {
-        selectedId: isSame ? null : member.id,
-        selectedLevel: isSame ? null : member.level,
-        departments: isSame ? [] : prev.departments,
-        loadingDepts: !isSame
-      };
-    }, async () => {
-      const { selectedId } = this.state;
-      if (!selectedId) {       
-        return;
+        return {
+          ...prev,
+          selectedId: member.id,
+          selectedLevel: member.level,
+          departments: [],
+          loadingDepts: true,
+        };
+      },
+      async () => {
+        const { selectedId } = this.state;
+        if (selectedId !== member.id) return;
+
+        const key = (member.user || "").trim();
+        if (!key) {
+          this.setState((current) =>
+            current.selectedId === member.id
+              ? { ...current, departments: [], loadingDepts: false }
+              : current
+          );
+          return;
+        }
+
+        try {
+          const deptList = (this.props.deptListTitle || ListName.TEAM_ORG_DEPARTMENTS).trim();
+          const depts = await this.spService.getDepartmentsByMember(deptList, key);
+
+          this.setState((current) =>
+            current.selectedId === member.id
+              ? { ...current, departments: depts, loadingDepts: false }
+              : current
+          );
+        } catch {
+          this.setState((current) =>
+            current.selectedId === member.id
+              ? { ...current, departments: [], loadingDepts: false }
+              : current
+          );
+        }
       }
-    });
+    );
   };
+
+  /**
+   * ✅ IMPORTANT:
+   * Even after service cleaning, some cases may still contain HTML.
+   * Keep this as safety.
+   */
+  private normalizeMultiline(raw?: string): string {
+    if (!raw) return "";
+
+    const s = String(raw);
+
+    const looksHtml = /<\/?[a-z][\s\S]*>/i.test(s) || s.indexOf("ExternalClass") > -1;
+    if (looksHtml && typeof document !== "undefined") {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = s;
+
+      // innerText preserves line breaks between <p>, <div>, <br>, <li>, etc.
+      const text = (tmp.innerText || tmp.textContent || "").replace(/\u00A0/g, " ");
+      return text;
+    }
+
+    return s.replace(/\u00A0/g, " ");
+  }
+
+  private parseBullets(raw?: string): string[] {
+    const text = this.normalizeMultiline(raw)
+      // treat bullet symbols as separators too
+      .replace(/\u2022/g, "\n")
+      .replace(/\u00B7/g, "\n")
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .trim();
+
+    const lines = text
+      .split("\n")
+      .map((x) => x.replace(/^[\u2022•\-\*]\s*/g, "").trim())
+      .filter(Boolean);
+
+    return lines;
+  }
 
   public render(): React.ReactElement<ITeamOrganisationStructureProps> {
     const { items, loading, error, selectedLevel } = this.state;
 
-    const rootMember = items.find(m => m.level === 0);
-    const nonRoot = items.filter(m => m.level !== 0);
+    const rootMember = items.find((m) => m.level === 0);
+    const nonRoot = items.filter((m) => m.level !== 0);
 
     const membersByLevel: Record<number, OrgMember[]> = {};
-    nonRoot.forEach(m => (membersByLevel[m.level] ||= []).push(m));
-    const orderedLevels = Object.keys(membersByLevel).map(Number).sort((l, r) => l - r);
+    nonRoot.forEach((m) => (membersByLevel[m.level] ||= []).push(m));
+    const orderedLevels = Object.keys(membersByLevel)
+      .map(Number)
+      .sort((l, r) => l - r);
 
     return (
       <section className={styles.wrapper} aria-labelledby="teamOrgHeading">
@@ -99,19 +189,13 @@ export default class TeamOrganisationStructure
 
         {!loading && !error && (
           <>
-            {rootMember && (
-              <div className={styles.topCardWrap}>
-                {this.renderCard(rootMember, /*isRoot*/ true)}
-              </div>
-            )}
+            {rootMember && <div className={styles.topCardWrap}>{this.renderCard(rootMember, true)}</div>}
 
-            {orderedLevels.map(level => (
+            {orderedLevels.map((level) => (
               <React.Fragment key={level}>
                 <div className={styles.row}>
-                  {membersByLevel[level].map(person => (
-                    <React.Fragment key={person.id}>
-                      {this.renderCard(person, false)}
-                    </React.Fragment>
+                  {membersByLevel[level].map((person) => (
+                    <React.Fragment key={person.id}>{this.renderCard(person, false)}</React.Fragment>
                   ))}
                 </div>
 
@@ -135,16 +219,16 @@ export default class TeamOrganisationStructure
         aria-label={`Select ${member.name}`}
         onClick={() => this.onCardClick(member)}
         onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && this.onCardClick(member)}
-        className={[
-          styles.card,
-          isRoot ? styles.cardLg : (styles as any).cardMd,
-          isSelected ? styles.cardSelected : ""
-        ].join(" ")}
+        className={[styles.card, isRoot ? styles.cardLg : "", isSelected ? styles.cardSelected : ""]
+          .filter(Boolean)
+          .join(" ")}
       >
         <div className={styles.photoWrap}>
-          {member.photoUrl
-            ? <img className={styles.photo} src={member.photoUrl} alt={member.name} />
-            : <div className={styles.photoFallback} aria-label="No image" />}
+          {member.photoUrl ? (
+            <img className={styles.photo} src={member.photoUrl} alt={member.name} />
+          ) : (
+            <div className={styles.photoFallback} aria-label="No image" />
+          )}
         </div>
 
         <div className={`${styles.accent} ${isRoot ? styles.accentCenter : ""}`} aria-hidden />
@@ -167,7 +251,9 @@ export default class TeamOrganisationStructure
       <div className={styles.deptBand}>
         <div className={styles.deptTitle}>DEPARTMENTS</div>
 
-        <div className={styles.deptRail} aria-hidden>{stubs}</div>
+        <div className={styles.deptRail} aria-hidden>
+          {stubs}
+        </div>
 
         {loadingDepts && <div className={styles.state}>Loading departments…</div>}
 
@@ -178,14 +264,41 @@ export default class TeamOrganisationStructure
             )}
 
             {departments.map((d, i) => {
-              const inner = (
+              const rawPointers = (d.itemsText as string) || "";
+              const bullets = this.parseBullets(rawPointers);
+
+              const box = (
                 <div className={styles.deptBox} role="group" aria-label={d.name}>
                   {d.name}
                 </div>
               );
-              return d.url
-                ? <a key={i} className={styles.deptLink} href={d.url} target="_blank" rel="noopener noreferrer" title={d.name}>{inner}</a>
-                : <div key={i} title={d.name}>{inner}</div>;
+
+              return (
+                <div key={i} className={styles.deptCol}>
+                  {d.url ? (
+                    <a
+                      className={styles.deptLink}
+                      href={d.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={d.name}
+                    >
+                      {box}
+                    </a>
+                  ) : (
+                    <div title={d.name}>{box}</div>
+                  )}
+
+                  {/* ✅ Bullet list (Figma style) */}
+                  {bullets.length > 0 && (
+                    <ul className={styles.deptList}>
+                      {bullets.map((b, bi) => (
+                        <li key={bi}>{b}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
             })}
           </div>
         )}

@@ -43,11 +43,6 @@ export const LearningLinks: React.FC<ILearningLinksProps> = ({
 
       <div className={styles.linksGrid}>
         {links.map((link) => {
-          // build inline style for the logo container
-          const logoStyle: React.CSSProperties = {
-            backgroundImage: link.logo ? `url(${link.logo})` : undefined,
-            backgroundColor: link.backgroundColor || undefined
-          };
 
           return (
             <div
@@ -61,11 +56,17 @@ export const LearningLinks: React.FC<ILearningLinksProps> = ({
             >
               <div
                 className={styles.logoContainer}
-                style={logoStyle}
-                // put the alt text into aria-hidden=false if you want screen readers to read it,
-                // but since this is decorative we keep it hidden from AT and rely on the aria-label above.
-                aria-hidden={!!link.logo}
-              />
+                style={{ backgroundColor: link.backgroundColor }}
+              >
+                {link.logo && (
+                  <img
+                    src={link.logo}
+                    alt={link.logoAlt}
+                    className={styles.logoImage}
+                    loading="lazy"
+                  />
+                )}
+              </div>
 
               <div className={styles.linkTitle}>
                 <h3>{link.title}</h3>

@@ -1,3 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: local('Instrument Serif Regular'), url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: local('Instrument Serif Italic'), url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
+
 
 /* --- Container --- */
 .wrap {
@@ -11,14 +24,20 @@
   display: grid;
   grid-template-columns: 350px 1fr;
   gap: 60px;
-  align-items: center;
-  margin-bottom: 60px;
+  align-items: flex-start;
+  margin-bottom: 80px;
+  @media (max-width: 991px){
+    display: flex;
+    flex-wrap: wrap;
+  }
 }
 
-.leftPic img {
-  width: 100%;
-  height: auto;
-  display: block;
+.leftPic{
+  img {
+    // width: 100%;
+    // height: auto;
+    display: block;
+  }
 }
 
 /* ✅ this was missing earlier */
@@ -29,8 +48,8 @@
 
 /* Headings */
 .sectionTitle {
-  margin: 0 0 40px 0;
-  line-height: 100%;
+  margin: 0 0 24px 0;
+  line-height: 1;
   letter-spacing: 1px;
   display: flex;
   align-items: baseline;
@@ -38,15 +57,14 @@
 }
 
 .our {
-  font-family: "Instrument Serif",;
+  font-family: 'Instrument Serif Italic';
   color: #d6362d;               /* red accent */
   font-size: 42px;
   font-weight: 400;
-  font-style: italic;
 }
 
 .main {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Regular';
   font-size: 42px;
   color: #000;
   font-weight: 400;
@@ -69,7 +87,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 28px;
-  margin-top: 0;
+  margin-top: 60px;
 }
 
 .point {
@@ -77,20 +95,22 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;  /* left align like Figma */
-  gap: 40px;
+  gap: 11px;
+  max-width: 75%;
 }
 
 
 .numImg {
-  width: 64px;    
-  height: auto;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 11px;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
 }
 
 /* fallback text number ke liye bhi same placement/size */
 .numTxt {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Regular';
   font-size: 86px;
   color: #d6362d;
   line-height: 1;

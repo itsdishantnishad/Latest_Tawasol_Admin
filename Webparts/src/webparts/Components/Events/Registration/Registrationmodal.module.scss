@@ -1,229 +1,212 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 .modalContainer {
-  :global(.ms-Dialog-main) {
-    max-width: 670px !important;
-    width: 670px;
-    border-radius: 12px;
-    overflow: hidden;
+  border-radius: 8px;
+  background: linear-gradient(89.65deg, #FEF1DB 7.61%, #FDEBD2 47.34%, #F9E3C7 95.71%);
+  width: 500px;
+}
+
+.content {
+  padding: 40px;
+  // background: #f5f5f7;
+  // max-height: 600px;
+  // overflow-y: auto;
+
+  .title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+    color: #000000;
+    line-height: 120%;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 48px;
+    margin-top: 0;
+  }
+
+  .messageBar {
+    margin-bottom: 24px;
+    border-radius: 8px;
+  }
+
+  .formField {
+    margin-bottom: 40px;
+
+    .label {
+      color: #000;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 100%;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .textField {
+      :global(.ms-TextField-fieldGroup) {
+        border: transparent;
+        background: #fff;
+        border-radius: 50px;
+        height: 48px;
+
+        input {
+          color: #86868b;
+          font-size: 16px;
+          line-height: 24px;
+          padding: 12px 16px;
+          font-weight: 400;
+
+          &::placeholder {
+            font-size: 16px;
+            line-height: 24px;
+            color: #6C6C6C;
+          }
+        }
+      }
+
+      &:hover {
+        :global(.ms-TextField-fieldGroup) {
+          border-color: #b3b3b8;
+        }
+      }
+
+      :global(.ms-TextField-fieldGroup.is-focused) {
+        border-color: #4a8fd7;
+      }
+    }
+
+    .dropdown {
+      :global(.ms-Dropdown-title) {
+        border: 1px solid #d1d1d6;
+        background: #ffffff;
+        border-radius: 50px;
+        height: 48px;
+        line-height: 24px;
+        font-size: 16px;
+        color: #86868b;
+        padding: 12px 16px;
+      }
+
+      :global(.ms-Dropdown-caretDownWrapper) {
+        height: 52px;
+        line-height: 52px;
+        padding-right: 12px;
+
+        i {
+          color: #86868b;
+        }
+      }
+
+      &:hover {
+        :global(.ms-Dropdown-title) {
+          border-color: #b3b3b8;
+        }
+      }
+
+      :global(.ms-Dropdown.is-open .ms-Dropdown-title) {
+        border-color: #4a8fd7;
+      }
+    }
+
+    .choiceGroup {
+      :global(.ms-ChoiceFieldGroup) {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      :global(.ms-ChoiceField) {
+        // margin: 0;
+
+        :global(.ms-ChoiceField-wrapper) {
+          display: flex;
+          align-items: center;
+        }
+
+        :global(.ms-ChoiceField-field) {
+          vertical-align: sub;
+          display: inline-block;
+          padding-left: 30px;
+          &::before {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #1a1a1a;
+            background: #ffffff;
+          }
+
+          &::after {
+            width: 12px;
+            height: 12px;
+            left: 6px;
+            top: 6px;
+            background: #1a1a1a;
+          }
+
+          &:hover::before {
+            border-color: #4a8fd7;
+          }
+        }
+
+        :global(.ms-ChoiceField-labelWrapper) {
+          :global(.ms-Label) {
+            font-size: 16px;
+            color: #1a1a1a;
+            padding-left: 8px;
+          }
+        }
+      }
+
+      :global(.ms-ChoiceField.is-checked) {
+        :global(.ms-ChoiceField-field::before) {
+          border-color: #1a1a1a;
+        }
+      }
+    }
+  }
+
+  .submitButton {
+    background: radial-gradient(883.19% 262.8% at 112.5% -164.06%, #101820 0, #202d39 100%);
+    box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
+    border: none;
+    border-radius: 50px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 500;
+    height: 48px;
+    margin-top: 0;
+    width: 100%;
+
+    &:hover {
+      background: #1a1a1a;
+    }
+
+    &:active {
+      background: #333333;
+    }
+
+    span {
+      font-weight: 500;
+    }
   }
 }
 
-.eventRegistration {
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
+// Scrollbar styling
+.content::-webkit-scrollbar {
+  width: 8px;
+}
 
-  .header {
-    background: linear-gradient(135deg, #4a8fd7 0%, #5b9fd8 100%);
-    padding: 32px 40px;
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.content::-webkit-scrollbar-track {
+  background: #e5e5e7;
+  border-radius: 4px;
+}
 
-    .title {
-      margin: 0;
-      font-size: 32px;
-      font-weight: 400;
-      color: #ffffff;
-      line-height: 1.2;
-    }
+.content::-webkit-scrollbar-thumb {
+  background: #c7c7cc;
+  border-radius: 4px;
 
-    .closeButton {
-      color: #ffffff;
-      
-      i {
-        font-size: 16px;
-        color: #ffffff;
-      }
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #ffffff;
-      }
-    }
-  }
-
-  .content {
-    padding: 40px;
-    background: #f5f5f7;
-    max-height: 600px;
-    overflow-y: auto;
-
-    .messageBar {
-      margin-bottom: 24px;
-      border-radius: 8px;
-    }
-
-    .formField {
-      margin-bottom: 32px;
-
-      .label {
-        display: block;
-        font-size: 18px;
-        font-weight: 500;
-        color: #1a1a1a;
-        margin-bottom: 12px;
-      }
-
-      .textField {
-        :global(.ms-TextField-fieldGroup) {
-          background: #ffffff;
-          border: 1px solid #d1d1d6;
-          border-radius: 8px;
-          height: 52px;
-
-          input {
-            font-size: 16px;
-            color: #86868b;
-            padding: 0 16px;
-
-            &::placeholder {
-              color: #86868b;
-            }
-          }
-        }
-
-        &:hover {
-          :global(.ms-TextField-fieldGroup) {
-            border-color: #b3b3b8;
-          }
-        }
-
-        :global(.ms-TextField-fieldGroup.is-focused) {
-          border-color: #4a8fd7;
-        }
-      }
-
-      .dropdown {
-        :global(.ms-Dropdown-title) {
-          background: #ffffff;
-          border: 1px solid #d1d1d6;
-          border-radius: 8px;
-          height: 52px;
-          line-height: 50px;
-          font-size: 16px;
-          color: #86868b;
-          padding: 0 16px;
-        }
-
-        :global(.ms-Dropdown-caretDownWrapper) {
-          height: 52px;
-          line-height: 52px;
-          padding-right: 12px;
-
-          i {
-            color: #86868b;
-          }
-        }
-
-        &:hover {
-          :global(.ms-Dropdown-title) {
-            border-color: #b3b3b8;
-          }
-        }
-
-        :global(.ms-Dropdown.is-open .ms-Dropdown-title) {
-          border-color: #4a8fd7;
-        }
-      }
-
-      .choiceGroup {
-        :global(.ms-ChoiceFieldGroup) {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        :global(.ms-ChoiceField) {
-          margin: 0;
-
-          :global(.ms-ChoiceField-wrapper) {
-            display: flex;
-            align-items: center;
-          }
-
-          :global(.ms-ChoiceField-field) {
-            &::before {
-              width: 24px;
-              height: 24px;
-              border: 2px solid #1a1a1a;
-              background: #ffffff;
-            }
-
-            &::after {
-              width: 12px;
-              height: 12px;
-              left: 6px;
-              top: 6px;
-              background: #1a1a1a;
-            }
-
-            &:hover::before {
-              border-color: #4a8fd7;
-            }
-          }
-
-          :global(.ms-ChoiceField-labelWrapper) {
-            :global(.ms-Label) {
-              font-size: 16px;
-              color: #1a1a1a;
-              padding-left: 8px;
-            }
-          }
-        }
-
-        :global(.ms-ChoiceField.is-checked) {
-          :global(.ms-ChoiceField-field::before) {
-            border-color: #1a1a1a;
-          }
-        }
-      }
-    }
-
-    .submitButton {
-      width: 100%;
-      height: 52px;
-      background: #000000;
-      border: none;
-      border-radius: 8px;
-      font-size: 18px;
-      font-weight: 500;
-      color: #ffffff;
-      margin-top: 24px;
-      cursor: pointer;
-
-      &:hover {
-        background: #1a1a1a;
-      }
-
-      &:active {
-        background: #333333;
-      }
-
-      span {
-        font-weight: 500;
-      }
-    }
-  }
-
-  // Scrollbar styling
-  .content::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .content::-webkit-scrollbar-track {
-    background: #e5e5e7;
-    border-radius: 4px;
-  }
-
-  .content::-webkit-scrollbar-thumb {
-    background: #c7c7cc;
-    border-radius: 4px;
-
-    &:hover {
-      background: #b3b3b8;
-    }
+  &:hover {
+    background: #b3b3b8;
   }
 }

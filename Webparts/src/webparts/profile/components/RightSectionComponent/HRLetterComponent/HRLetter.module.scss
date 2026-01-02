@@ -62,6 +62,11 @@
   justify-content: center;
   cursor: pointer;
   min-width: 240px;
+  transition: background-color 0.1s ease-in-out;
+}
+
+.cta:hover{
+  background-color: #FEEAD6;
 }
 
 .ctaText {
@@ -72,6 +77,7 @@
   line-height: 20px;
   color: #000000;
 }
+
 
 @media (max-width: 480px) {
   .card {
@@ -89,3 +95,4 @@
     height: 140px;
   }
 }
+

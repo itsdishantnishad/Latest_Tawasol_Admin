@@ -5,7 +5,7 @@ import { IVivaEngageHeaderProps } from "./IVivaEngageHeaderProps";
 // assets are one level up from /components
 const LeftSideArrow: string  = require("../assets/LeftSideArrow.svg");
 const RightSideArrow: string = require("../assets/RightSideArrow.svg");
-const BackgroundSvg: string  = require("../assets/Background.svg");
+const BackgroundSvg: string  = require("../assets/DHREImg.svg");
 
 interface IVivaEngageHeaderState { }
 
@@ -25,7 +25,7 @@ export default class VivaEngageHeader
           </div>
 
           <h2 className={styles.title}>
-            <span>Trending Posts</span> <span className={styles.in}>in</span> <span>DHRE</span>
+            <span>Trending Posts in</span> <span className={styles.dhre}>DHRE</span> 
           </h2>
 
           {/* Right strip = full SVG (includes line + arrowhead) */}

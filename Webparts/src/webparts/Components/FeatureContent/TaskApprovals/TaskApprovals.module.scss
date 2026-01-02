@@ -1,0 +1,106 @@
+// src/webparts/Components/FeatureContent/TaskApprovals/TaskApprovals.module.scss
+
+.taskApprovalsContainer {
+  width: 100%;
+  padding: 40px 60px;
+}
+
+.tableWrapper {
+  margin-top: 40px;
+  padding: 0 60px;
+}
+
+.loadingMessage {
+  padding: 14px 0;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  color: #3a3b43;
+}
+
+.emptyMessage {
+  padding: 14px 0;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  color: #3a3b43;
+}
+
+.errormessage {
+  margin-top: 12px;
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  color: #b42318;
+}
+
+/* Requested By */
+.requestorWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Inter, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #101820;
+  background: #e9eef3;
+}
+
+.requestorName {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  color: #3a3b43;
+}
+
+/* Action link */
+.viewDetailsLink {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #101820;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+/* Button Container */
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.viewAllButton {
+  background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
+  border: none;
+  border-radius: 167px;
+  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, 0.51), inset 0 4px 4px 0 #768b9e;
+  color: #fff;
+  cursor: pointer;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  min-width: 105px;
+  height: 36px;
+  padding: 0;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  place-content: center;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

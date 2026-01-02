@@ -7,45 +7,62 @@ import CalendarViewComponent from "./Calendarview/CalendarView";
 export interface IAlleventsProps {
   AllEventItems:any;
   context?: any;
+  viewtype?: string;
 }
 
 const AllEvents: React.FC<IAlleventsProps> = (props) => {
   const now = new Date();
+  const sitepageurl = `${props?.context?.pageContext?.web?.absoluteUrl}/SitePages/`;
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
-  const [viewType, setViewType] = React.useState<"list" | "calendar">("list");
 
   const parsedEvents = React.useMemo(() => {
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
-    return (props.AllEventItems || []).map((item: any) => {
-      const startDateStr = item.eventStartDate?.split("\n\n")[1]?.trim();
-      const endDateStr = item.eventEndDate?.split("\n\n")[1]?.trim();
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
-      const eventStart = startDateStr ? new Date(startDateStr) : null;
-      const eventEnd = endDateStr ? new Date(endDateStr) : null;
+  return (props.AllEventItems || []).map((item: any) => {
 
-      let time = "Not specified";
-      if (eventStart && eventEnd) {
-        const formatTime = (date: Date) => date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-        time = `${formatTime(eventStart)} - ${formatTime(eventEnd)}`;
-      }
+    // Always use FIRST LINE → accurate, same as UI
+    const startDateStr = item.eventStartDate?.split("\n")[0]?.trim();
+    const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim();
 
-      return {
-        date: eventStart ? String(eventStart.getDate()).padStart(2, "0") : "",
-        month: eventStart ? months[eventStart.getMonth()] : "",
-        day: eventStart ? days[eventStart.getDay()] : "",
-        title: item.title || "Untitled Event",
-        time,
-        imageUrl: item.newsImage || "",
-        eventDateTime: eventStart,
-        isregistered: !!item.isRegistered,
-        ID: item.ID,
-        context: props.context,
-        ...item
-      };
-    });
-  }, [props.AllEventItems]);
+    // Parse EXACTLY as SharePoint stored it
+    const eventStart = startDateStr ? new Date(startDateStr) : null;
+    const eventEnd   = endDateStr ? new Date(endDateStr) : null;
+
+    // FIX location duplication
+    const location = item.location?.split("\n")[0]?.trim() || "";
+
+    let time = "Not specified";
+
+    if (eventStart && eventEnd) {
+      const formatTime = (date: Date) =>
+        date.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true
+        });
+
+      time = `${formatTime(eventStart)} - ${formatTime(eventEnd)}`;
+    }
+
+    return {
+      ...item,
+      date: eventStart ? String(eventStart.getDate()).padStart(2, "0") : "",
+      month: eventStart ? months[eventStart.getMonth()] : "",
+      day: eventStart ? days[eventStart.getDay()] : "",
+      title: item.title || "Untitled Event",
+      time,
+      location,
+      eventDateTime: eventStart,
+      category:item.category,
+      imageUrl: item.newsImage || "",
+      isregistered: !!item.isRegistered,
+    };
+  });
+}, [props.AllEventItems]);
+
+
 
   const upcomingEvents = parsedEvents.filter((e:any) => e.eventDateTime && e.eventDateTime > now);
   const previousEvents = parsedEvents.filter((e:any) => e.eventDateTime && e.eventDateTime < now);
@@ -65,20 +82,8 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
         </div>
       </div>
 
-      {activeTab === "all" && (
-        <div className={styles.viewSwitchContainer} style={{margin:"20px 0"}}>
-          <button className={`${styles.tabButton} ${viewType === "list" ? styles.activeTab : ""}`} onClick={() => setViewType("list")}>
-            List View
-          </button>
-
-          <button className={`${styles.tabButton} ${viewType === "calendar" ? styles.activeTab : ""}`} onClick={() => setViewType("calendar")}>
-            Calendar
-          </button>
-        </div>
-      )}
-
       {activeTab === "all" ? (
-        viewType === "list" ? (
+        props.viewtype === "list" ? (
           <div className={styles.eventsContainer}>
             <div className={styles.eventsWrapper}>
               {upcomingEvents.length > 0 ? (
@@ -95,7 +100,7 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
               <div className={styles.gridLayout}>
                 {previousEvents.length > 0 ? (
                   previousEvents.map((event:any, index:any) => (
-                    <PreviousEventCard key={index} title={event.title} date={`${event.day}, ${event.date} ${event.month}`} imageUrl={event.imageUrl} imageCount={0}/>
+                    <PreviousEventCard key={index} title={event.title} date={`${event.day}, ${event.date} ${event.month}`} imageUrl={event.imageUrl} imageCount={0} pageUrl={event?.pageUrl}/>
                   ))
                 ) : (
                   <p>No previous events found.</p>

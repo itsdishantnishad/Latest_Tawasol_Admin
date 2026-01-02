@@ -32,3 +32,11 @@ obj
 
 # Styles Generated Code
 *.scss.ts
+
+#yomen file
+.yo-rc.json
+
+
+salesforceConfig.json
+
+serviceNowConfig.json

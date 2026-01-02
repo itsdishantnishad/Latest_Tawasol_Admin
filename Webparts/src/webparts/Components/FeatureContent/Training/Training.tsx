@@ -1,120 +1,365 @@
-import * as React from 'react';
-import styles from './Training.module.scss';
-// import leftHeadingLine from "../images/leftArrow.svg";
-// import rightHeadingLine from "../images/rightArrow.svg";
-const rightHeadingLine: string = require("../images/rightArrow.svg");
-const leftHeadingLine: string = require("../images/leftArrow.svg");
+// src/webparts/featureWheel/Components/FeatureContent/Training/Training.tsx
+
+import * as React from "react";
+import styles from "./Training.module.scss";
+import { WebPartContext } from "@microsoft/sp-webpart-base";
+import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import EventCard from "../../../widgets/EventCard/EventCard";
+import ConditionalLink from "../../ConditionalLink/ConditionalLink";
+import PrimaryButton from "../../PrimaryButton/PrimaryButton";
+
+const locationIcon = require("../assets/LocationIcon.svg");
+const timeIcon = require("../assets/clockIcon.svg");
 
 export interface ITraining {
-    id: string;
-    title: string;
-    description: string;
-    image: string;
-    duration?: string;
-    level?: string;
-    url: string;
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  duration?: string;
+  level?: string;
+  url: string;
+  dateDay: string;
+  dateMonth: string;
+  location?: string;
+  instructorName?: string;
+  instructorTitle?: string;
 }
 
 export interface ITrainingProps {
-    trainings?: ITraining[];
-    onViewAll?: () => void;
-    seeAllURL?: string;
+  trainings?: ITraining[];
+  onViewAll?: () => void;
+  seeAllURL?: string;
+  context?: WebPartContext;
+
+  /**
+   * Usually "Site Pages". Keep this if you want,
+   * but note list titles can differ in localized tenants.
+   */
+  listTitle?: string;
+
+  /**
+   * OPTIONAL: if you pass a siteUrl, it will only be honored
+   * if it's the SAME tenant/origin as the current page.
+   * (prevents accidental cross-tenant 403)
+   */
+  siteUrl?: string;
+
+  topCount?: number;
 }
 
-const defaultTrainings: ITraining[] = [
-    {
-        id: '1',
-        title: 'Leadership Development',
-        description: 'Master essential leadership skills to drive team success and organizational growth.',
-        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400',
-        duration: '8 weeks',
-        level: 'Intermediate',
-        url: '#'
-    },
-    {
-        id: '2',
-        title: 'Technical Skills Workshop',
-        description: 'Enhance your technical expertise with hands-on training and real-world projects.',
-        image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=400',
-        duration: '4 weeks',
-        level: 'Advanced',
-        url: '#'
-    },
-    {
-        id: '3',
-        title: 'Communication Excellence',
-        description: 'Develop effective communication strategies to improve workplace collaboration.',
-        image: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400',
-        duration: '6 weeks',
-        level: 'Beginner',
-        url: '#'
-    },
-    {
-        id: '4',
-        title: 'Project Management Fundamentals',
-        description: 'Learn proven methodologies to plan, execute, and deliver successful projects.',
-        image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400',
-        duration: '10 weeks',
-        level: 'Intermediate',
-        url: '#'
-    },
-];
+const formatTime = (date: Date | null): string => {
+  if (!date) return "";
+  return date.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+const formatDateRange = (
+  start: Date | null,
+  end: Date | null
+): { day: string; month: string } => {
+  if (!start) return { day: "", month: "" };
+
+  const month = start
+    .toLocaleString(undefined, { month: "short" })
+    .toUpperCase();
+
+  if (!end || start.toDateString() === end.toDateString()) {
+    return {
+      day: start.getDate().toString().padStart(2, "0"),
+      month,
+    };
+  }
+
+  if (
+    start.getMonth() === end.getMonth() &&
+    start.getFullYear() === end.getFullYear()
+  ) {
+    return {
+      day: `${start.getDate()}-${end.getDate()}`,
+      month,
+    };
+  }
+
+  return {
+    day: start.getDate().toString(),
+    month,
+  };
+};
+
+const getInitials = (fullName?: string): string => {
+  if (!fullName) return "";
+  const parts = fullName
+    .split(" ")
+    .filter((p) => !!p && p.trim().length > 0);
+
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+};
+
+const mapItemToTraining = (item: any): ITraining => {
+  const start = item.TIREventStartDate ? new Date(item.TIREventStartDate) : null;
+  const end = item.TIREventEndDate ? new Date(item.TIREventEndDate) : null;
+
+  const duration =
+    start && end
+      ? `${formatTime(start)} - ${formatTime(end)}`
+      : start
+        ? formatTime(start)
+        : "";
+
+  const { day: dateDay, month: dateMonth } = formatDateRange(start, end);
+
+  const description = item.TIRLocation || "Click to view training details";
+
+  let imageUrl = "https://via.placeholder.com/400x250?text=Training";
+  const banner = item.BannerImageUrl;
+
+  if (banner) {
+    if (typeof banner === "string") {
+      const firstPart = banner.split(",")[0]?.trim();
+      if (firstPart) imageUrl = firstPart;
+    } else if (banner.Url) {
+      imageUrl = banner.Url;
+    }
+  }
+
+  const joiningUrl: string = (item.TIRJoiningURL || "").trim();
+  const fileUrl: string = item.FileRef || "#";
+  const url = joiningUrl || fileUrl;
+
+  const instructor = item.TIRInstructor;
+  const instructorName: string | undefined =
+    instructor && (instructor.Title || instructor.Name);
+  const instructorTitle: string | undefined = instructor && instructor.JobTitle;
+
+  return {
+    id: item.Id?.toString() || "",
+    title: item.Title || "Untitled Training",
+    description,
+    image: imageUrl,
+    duration,
+    level: "Classroom",
+    url,
+    dateDay,
+    dateMonth,
+    location: item.TIRLocation,
+    instructorName,
+    instructorTitle,
+  };
+};
 
 export const Training: React.FC<ITrainingProps> = (props) => {
-    const trainings = props.trainings || defaultTrainings;
+  const [trainings, setTrainings] = React.useState<ITraining[]>(
+    props.trainings || []
+  );
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (props.trainings && props.trainings.length > 0) {
+      setTrainings(props.trainings);
+      return;
+    }
+
+    if (!props.context) {
+      setTrainings(props.trainings || []);
+      return;
+    }
+
+    const loadTrainings = async (): Promise<void> => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // ✅ Always prefer current site
+        const ctxWebUrl = props.context!.pageContext.web.absoluteUrl;
+        let webUrl = ctxWebUrl;
+
+        // ✅ Only honor props.siteUrl when it's SAME tenant/origin
+        if (props.siteUrl) {
+          try {
+            const ctxOrigin = new URL(ctxWebUrl).origin;
+            const cfg = new URL(props.siteUrl);
+
+            if (cfg.origin === ctxOrigin) {
+              webUrl = cfg.href.replace(/\/$/, "");
+            } else {
+              // Prevent cross-tenant calls -> 403
+              console.warn(
+                "[Training] Ignoring siteUrl because it is cross-tenant:",
+                cfg.origin,
+                "!=",
+                ctxOrigin
+              );
+            }
+          } catch {
+            // ignore invalid URL
+          }
+        }
+
+        const listTitle = props.listTitle || "Site Pages";
+        const top = props.topCount || 4;
+
+        const fetchTop = Math.max(top * 3, 20);
+        const safeListTitle = listTitle.replace(/'/g, "''");
+
+        const requestUrl =
+          `${webUrl}/_api/web/lists/getbytitle('${safeListTitle}')/items` +
+          `?$select=Id,Title,BannerImageUrl,TIREventStartDate,TIREventEndDate,TIRLocation,TIRJoiningURL,FileRef,ContentType/Name,ContentTypeId,TIRInstructor/Title,TIRInstructor/JobTitle` +
+          `&$expand=ContentType,TIRInstructor` +
+          `&$orderby=TIREventStartDate desc` +
+          `&$top=${fetchTop}`;
+
+        const response: SPHttpClientResponse =
+          await props.context!.spHttpClient.get(
+            requestUrl,
+            SPHttpClient.configurations.v1
+          );
+
+        if (!response.ok) {
+          const body = await response.text();
+          throw new Error(
+            `SharePoint request failed (${response.status}): ${body || response.statusText}`
+          );
+        }
+
+        const json = await response.json();
+
+        if (!json.value || json.value.length === 0) {
+          setTrainings([]);
+          return;
+        }
+
+        // Keep your CT filter
+        const trainingItems = (json.value || []).filter(
+          (item: any) =>
+            item.ContentType && item.ContentType.Name === "TIR Training"
+        );
+
+        const mapped: ITraining[] = trainingItems
+          .map(mapItemToTraining)
+          .slice(0, top);
+
+        setTrainings(mapped);
+      } catch (e: any) {
+        setError(e?.message || "Unknown error");
+        setTrainings([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadTrainings();
+  }, [
+    props.trainings,
+    props.context,
+    props.listTitle,
+    props.siteUrl,
+    props.topCount,
+  ]);
+
+  // ---------- VIEW ALL URL LOGIC ----------
+  const web = props.context?.pageContext.web;
+
+  const configured = props.seeAllURL;
+  const raw = configured || "SitePages/Events-And-Trainings.aspx";
+
+  let viewAllUrl: string | undefined;
+
+  if (raw) {
+    if (raw.startsWith("http")) {
+      viewAllUrl = raw; // absolute
+    } else if (raw.startsWith("/")) {
+      viewAllUrl = raw; // server-relative
+    } else if (web) {
+      // site-relative -> prefix current site
+      const serverRel = web.serverRelativeUrl.replace(/\/$/, "");
+      const rel = raw.replace(/^\//, "");
+      viewAllUrl = `${serverRel}/${rel}`;
+    } else {
+      viewAllUrl = raw;
+    }
+  }
+  // ----------------------------------------
+
+  if (loading) {
+    return <div className={styles.trainingContainer}>Loading trainings...</div>;
+  }
+
+  if (error) {
     return (
-        <div className={styles.trainingContainer}>
-
-            {/* Training Grid */}
-            <div className={styles.trainingGrid}>
-                {trainings.map((training) => (
-                    <a
-                        key={training.id}
-                        href={training.url}
-                        className={styles.trainingCard}
-                    >
-                        <div className={styles.imageContainer}>
-                            <img src={training.image} alt={training.title} className={styles.trainingImage} />
-                            <div className={styles.imageOverlay} />
-                            {training.level && (
-                                <span className={styles.levelBadge}>{training.level}</span>
-                            )}
-                        </div>
-                        <div className={styles.trainingInfo}>
-                            <h3 className={styles.trainingTitle}>
-                                {training.title}
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={styles.arrowIcon}>
-                                    <path d="M7 13L13 7M13 7H7M13 7V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </h3>
-                            <p className={styles.trainingDescription}>{training.description}</p>
-                            {training.duration && (
-                                <div className={styles.duration}>
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
-                                        <path d="M8 4V8L11 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                    </svg>
-                                    {training.duration}
-                                </div>
-                            )}
-                        </div>
-                    </a>
-                ))}
-            </div>
-
-            {/* View All Button */}
-            <div className={styles.buttonContainer}>
-                <a href={props.seeAllURL} className={styles.viewAllButton}>
-                    View All
-                </a>
-                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
-                    View All
-                </button> */}
-            </div>
-        </div>
+      <div className={styles.trainingContainer}>
+        <p style={{ color: "red" }}>Error loading trainings: {error}</p>
+      </div>
     );
+  }
+
+  if (!trainings || trainings.length === 0) {
+    return (
+      <div className={styles.trainingContainer}>
+        <p>No trainings found</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.trainingContainer}>
+      <div className={styles.trainingGrid}>
+        {trainings.map((training) => (
+          <React.Fragment key={training.id}>
+            <EventCard
+              imageUrl={training.image}
+              redirectUrl={training.url}
+              infoTag={training.level || 'Classroom'}
+              tagShape='square'
+              date={{ day: training.dateDay, month: training.dateMonth }}
+              header={training.title}
+              infoList={[
+                ...(training.duration ? [{ iconUrl: timeIcon, text: training.duration }] : []),
+                ...(training.location ? [{ iconUrl: locationIcon, text: training.location }] : []),
+              ]}
+              creator={{
+                header: training.instructorName,
+                subHeader: training.instructorTitle
+              }}
+              onCtaClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                alert(
+                  `Your request for "${training.title}" has been captured.\n\n` +
+                  "In the next phase, this button will open the actual approval workflow."
+                );
+              }}
+            />
+          </React.Fragment>
+        ))}
+      </div>
+
+      {(props.onViewAll || viewAllUrl) && (
+        <div className={styles.buttonContainer}>
+          {props.onViewAll ? (
+            <button
+              type="button"
+              className={styles.viewAllButton}
+              onClick={props.onViewAll}
+            >
+              View All
+            </button>
+          ) : viewAllUrl ? (
+            <ConditionalLink to={viewAllUrl}>
+              <PrimaryButton label="View All" />
+            </ConditionalLink>
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Training;
-

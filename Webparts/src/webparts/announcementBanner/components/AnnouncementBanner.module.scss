@@ -1,0 +1,178 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.wrap {
+  width: min(1320px, 96vw);
+  margin: 20px auto 12px;
+  padding: 0 8px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  background: #101820;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 16px 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.15);
+}
+
+.iconCol {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.iconImg {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: brightness(1.1);
+}
+
+.iconFallback {
+  font-size: 22px;
+  color: #f8c94c; /* amber fallback */
+}
+
+.contentCol {
+  min-width: 0;
+}
+
+.title {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.desc {
+  margin: 4px 0 0;
+  color: rgba(255,255,255,.85);
+  font-size: 12.5px;
+  line-height: 1.45;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  max-width: none;
+  word-break: break-word;
+}
+
+.actionCol {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  :global(.ms-Button) {
+    border-radius: 999px;
+    padding: 0 16px;
+  }
+}
+
+/* 👍 pop animation after click */
+.thumbsUpAnimation {
+  font-size: 20px;
+  line-height: 1;
+  animation: thumbsPop 0.9s ease-out forwards;
+  user-select: none;
+}
+
+/* persistent 👍 (post-refresh) */
+.thumbsUpStatic {
+  font-size: 20px;
+  line-height: 1;
+  user-select: none;
+}
+
+@keyframes thumbsPop {
+  0%   { transform: scale(0.6); opacity: 0; filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  40%  { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 6px 10px rgba(0,0,0,.25)); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* --------------------------------- Responsive --------------------------------- */
+
+@media (max-width: 1600px) {
+  .wrap {
+    width: min(1320px, 96vw);
+  }
+}
+
+@media (max-width: 1360px) {
+  .wrap {
+    width: min(1200px, 96vw);
+  }
+  .card {
+    padding: 14px 14px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .wrap {
+    width: min(1000px, 96vw);
+  }
+  .card {
+    grid-template-columns: 40px 1fr auto;
+    gap: 12px;
+  }
+  .title {
+    font-size: 14px;
+  }
+  .desc {
+    font-size: 12px;
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 991px) {
+  .wrap {
+    width: min(900px, 96vw);
+    margin: 18px auto 10px;
+  }
+  .card {
+    padding: 12px 12px;
+  }
+}
+
+@media (max-width: 800px) {
+  .wrap {
+    width: 100%;
+    margin: 16px auto 8px;
+  }
+  .card {
+    grid-template-columns: 36px 1fr auto;
+    gap: 10px;
+  }
+  .title {
+    font-size: 13.5px;
+  }
+  .desc {
+    font-size: 11.5px;
+  }
+}
+
+/* phones */
+@media (max-width: 640px) {
+  .wrap {
+    width: 100%;
+    margin: 14px auto 8px;
+    padding: 0 6px;
+  }
+
+  .card {
+    grid-template-columns: 32px 1fr;
+    grid-auto-rows: auto;
+    gap: 10px;
+    padding: 10px 10px;
+  }
+
+  .actionCol {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+
+  .desc {
+    white-space: normal;
+    max-width: 100%;
+  }
+}

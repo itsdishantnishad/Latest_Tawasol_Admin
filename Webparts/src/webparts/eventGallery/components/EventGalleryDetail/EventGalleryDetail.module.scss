@@ -1,10 +1,8 @@
 @import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
 
 .eventDetail {
-  padding: 40px 60px;
-  max-width: 1400px;
-  margin: 0 auto;
-  background: #F5F3EF;
+  background-color: #fef7f0;
+  padding: 20px 60px;
   min-height: 100vh;
 }
 
@@ -98,7 +96,7 @@
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   padding: 24px;
-  min-width: 500px;
+  width: 500px;
   z-index: 100;
   animation: slideDown 0.3s ease;
 }
@@ -284,7 +282,6 @@
 
 /* More Events Section */
 .moreEventsSection {
-  margin-top: 60px;
   padding-top: 40px;
   border-top: 1px solid #ddd;
 }
@@ -297,33 +294,30 @@
 }
 
 .moreEventsTitle {
-  font-size: 28px;
+  color: #000000;
+  font-size: 24px;
   font-weight: 500;
-  margin: 0;
-  color: #333;
-}
-
-.galleryHighlight {
-  background: #FFD700;
-  padding: 2px 8px;
-  border-radius: 2px;
+  line-height: 32px;
 }
 
 .viewAllButton {
-  background: #1e293b;
-  color: white;
+  background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
   border: none;
-  padding: 10px 24px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
+  border-radius: 50px;
+  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
+  color: #fff;
   cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #334155;
-    transform: translateY(-2px);
-  }
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  height: 36px;
+  line-height: 20px;
+  min-width: 105px;
+  padding: 0;
+  place-content: center;
+  text-align: center;
+  text-decoration: none;
+  transition: all .3s ease;
 }
 
 /* Lightbox */
@@ -433,9 +427,10 @@
   }
 
   .findPhotoDropdown {
-    min-width: 90vw;
-    left: 5vw;
-    transform: none;
+    left: 0;
+    right: 0;
+    width: 90%;
+    transform: translateX(2%);
   }
 
   .tabButtons {
@@ -651,43 +646,11 @@
   }
 }
 
-.moreEventsSection {
-  background: #000;
-  padding: 40px 50px;
-  border-radius: 18px;
-  margin-top: 30px;
-}
-
 .moreEventsHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 28px;
-}
-
-.moreEventsTitle {
-  font-size: 28px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.galleryHighlight {
-  color: #676cff; // you can put theme primary if needed
-}
-
-.viewAllButton {
-  background: #1f1f1f;
-  color: #fff;
-  border: none;
-  padding: 12px 32px;
-  font-size: 15px;
-  border-radius: 32px;
-  cursor: pointer;
-  transition: all .2s ease;
-
-  &:hover {
-    opacity: .85;
-  }
 }
 
 .moreEventsCardsRow {
@@ -843,4 +806,106 @@
 .sideThumbsLeft:hover,
 .sideThumbsRight:hover {
   opacity: 1;
+}
+.copyLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 24px;
+  font-weight: 400;
+  font: inter;
+
+  color: #3a3a3a;
+  opacity: 1;
+
+  cursor: pointer;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 400;
+  color: #9b9b9b;
+}
+
+.backArrow {
+  font-size: 22px;
+  line-height: 24px;
+}
+
+.backText {
+  color: #9b9b9b;
+}
+
+.breadcrumbLink {
+  background: none;
+  border: none;
+  padding: 0;
+
+  font-size: inherit;
+  font-weight: inherit;
+  color: #bdbdbd;
+
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.separator {
+  color: #9b9b9b;
+}
+
+.current {
+  color: #6f6f6f;
+}
+
+.carouselControls {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 10px 20px;
+  border-radius: 40px;
+}
+
+.carouselBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.carouselCounter {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
 }

@@ -1,0 +1,311 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.meetingSection {
+  padding: 40px 0 0;
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.titleSection {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.titleArrow {
+  width: 141.479px;
+  height: 18.889px;
+  opacity: 1;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+}
+
+
+.meetingTitle {
+  margin: 0;
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 42px;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: #000000;
+  text-align: center;
+}
+
+.meetingDescription {
+  margin: 8px auto 0;
+  max-width: 600px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
+    sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0;
+  color: #5b6770;
+  text-align: center;
+}
+
+.wrap {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 257px);
+  column-gap: 24px;
+  row-gap: 24px;
+  justify-content: center;
+}
+
+@media (max-width: 1200px) { .grid { grid-template-columns: repeat(3, 257px); } }
+@media (max-width: 930px)  { .grid { grid-template-columns: repeat(2, 257px); } }
+@media (max-width: 640px)  { .grid { grid-template-columns: repeat(1, 257px); } }
+
+.card {
+  width: 257px;
+  height: 330px;
+  border-radius: 12.06px;
+  border: 0.86px solid #E5E8EB;
+  background: #FFFFFF;
+  box-shadow:
+    0 10px 24px rgba(16, 24, 32, 0.05),
+    0  2px  6px rgba(16, 24, 32, 0.06);
+  backdrop-filter: blur(27.57px);
+  padding: 8px 8px 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.card > .row,
+.card > .timeLine { margin-top: 0; }
+
+.card > .row:nth-child(2) {
+  position: absolute;
+  top: 110px;
+  left: 0; right: 0;
+}
+
+.card > .timeLine {
+  position: absolute;
+  top: 136px;
+  left: 0; right: 0;
+  padding-left: 36px;
+}
+
+.card > .row:nth-child(4) {
+  position: absolute;
+  top: 174px;
+  left: 0; right: 0;
+}
+
+.card > .row:nth-child(5) {
+  position: absolute;
+  top: 214px;
+  left: 0; right: 0;
+}
+
+.card > .joinBtn{
+  top:276px;
+}
+
+.titleTile {
+  width: 100%;
+  height: 85px;
+  border-radius: 8px;
+  background: #D6E8F9;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  margin: 0;
+}
+
+.titleText {
+  font-family: 'Inter', Segoe UI, Arial, sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 16.05px;
+  line-height: 24.07px;
+  letter-spacing: 0px;
+  color: #101820;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metaLine {
+  width: 200px;
+  font-family: 'Inter', Segoe UI, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: 0;
+  color: #3A3B43;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metaSingle {
+  width: 200px;
+  font-family: 'Inter', Segoe UI, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: 0;
+  color: #3A3B43;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeLine {
+  margin-top: 4px;
+  padding-left: 48px;
+}
+
+.iconClock,
+.iconLocation {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  margin-left: 8px;
+  margin-right: 4px;
+  display: inline-block;
+  opacity: 1;
+}
+
+.timeText {
+  width: auto;
+  max-width: 100%;
+  height: 22px;
+  opacity: 1;
+  font-family: 'Inter', Segoe UI, Arial, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: 0px;
+  color: #3A3B43;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 8px;
+}
+
+.avatarIcon {
+  font-size: 20px;
+  color: #444;
+  margin-left: 8px;
+}
+
+.joinBtn {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  width: auto;
+  max-width: 225px;
+  margin: 0 auto;
+  height: 36px;
+  border-radius: 167px;
+  padding: 0 12px;
+  border: none;
+  cursor: pointer;
+  background: radial-gradient(107.22% 100% at 50% 0%, #101820 0%, #202D39 100%);
+  color: #FFFFFF;
+  box-shadow:
+    0px 4px 4px 0px #768B9E inset,
+    -4px -6px 4px 0px #00000082 inset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .06s ease-in-out, filter .06s ease-in-out;
+}
+
+.joinBtn:hover  { filter: brightness(1.05); transform: translateY(-1px); }
+.joinBtn:active { filter: brightness(0.98); transform: translateY(0); }
+.joinBtn:disabled { opacity: .6; cursor: default; }
+
+.joinText {
+  min-width: 72px;
+  font-family: 'Inter', Segoe UI, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: #FFFFFF;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.viewAllWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.viewAllBtn {
+  min-width: 120px;
+  height: 36px;
+  border-radius: 999px;
+  background: radial-gradient(107.22% 100% at 50% 0%, #101820 0%, #202D39 100%);
+  color: #fff;
+  border: none;
+  padding: 0 16px;
+  cursor: pointer;
+  box-shadow:
+    0px 4px 4px 0px #768B9E inset,
+    -4px -6px 4px 0px #00000082 inset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .06s ease-in-out, filter .06s ease-in-out;
+}
+
+.viewAllBtn:hover  { filter: brightness(1.05); transform: translateY(-1px); }
+.viewAllBtn:active { filter: brightness(0.98); transform: translateY(0); }
+
+.viewAllText {
+  font-family: 'Inter', Segoe UI, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+}

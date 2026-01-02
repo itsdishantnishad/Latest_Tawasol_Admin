@@ -1,11 +1,69 @@
 @import "~@fluentui/react/dist/sass/References.scss";
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+@font-face {
+  font-family: "Instrument Serif Regular";
+  src: local("Instrument Serif Regular"),
+    url("../../assets/fonts/instrumentserif-regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Instrument Serif Italic";
+  src: local("Instrument Serif Italic"),
+    url("../../assets/fonts/instrumentserif-italic.woff") format("woff");
+}
 
 .featureWheelContainer {
   background-color: transparent;
+  zoom: 0.80;
+}
+
+.headingSection {
+  margin-top: 50px;
+  text-align: center;
+  margin-bottom: 50px;
+  h1 {
+    font-family: "Instrument Serif Regular";
+    font-size: 42px;
+    line-height: 100%;
+    letter-spacing: 1px;
+    color: #000000;
+    margin: 0;
+    margin-bottom: 12px;
+    @media (max-width: 580px) {
+      font-size: 32px;
+      color: #101820;
+    }
+    font-weight: 400;
+    span {
+      color: #da291c;
+      font-family: "Instrument Serif Italic";
+    }
+  }
+  h6 {
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 1px;
+    color: #5b6770;
+    margin: 0;
+    font-weight: 400;
+    @media (max-width: 580px) {
+      font-size: 14px;
+      line-height: 22px;
+      color: #6c6c6c;
+      letter-spacing: -0.5px;
+    }
+  }
 }
 
 .wheelSection {
-  padding: 50px 20px 0;
+  padding: 20px 60px 0;
+  overflow: hidden;
+  position: relative;
+  background-image: url('../images/Doodles.svg');
+  background-size: 100%;
+  background-position: top;
   // background-color: transparent;
 }
 
@@ -17,13 +75,19 @@
 // Responsive design
 @media (max-width: 768px) {
   .wheelSection {
-    padding: 40px 16px;
+    padding: 0;
+    padding-top: 30px;
   }
 }
 
 .titleContainer {
   text-align: center;
-  margin-top: 40px;
+  margin-top: 0px;
+  padding: 0px;
+
+  @media (max-width: 767px) {
+    margin-top: 0;
+  }
 }
 
 .headerContent {
@@ -31,17 +95,47 @@
   align-items: center;
   justify-content: center;
   gap: 40px;
+  .desktopImage {
+    display: block;
+    @media (max-width: 767px) {
+      display: none;
+    }
+  }
+  .mobImage {
+    display: none;
+    @media (max-width: 767px) {
+      display: block;
+    }
+    @media (max-width: 580px) {
+      gap: 5px;
+    }
+    @media (max-width: 380px) {
+      width: 45px;
+    }
+  }
+  @media (max-width: 767px) {
+    gap: 10px;
+  }
+  @media (max-width: 580px) {
+    gap: 5px;
+  }
 }
 
 .title {
-  font-family: "Instrument Serif", serif;
+  font-family: "Instrument Serif Italic";
   font-style: italic;
   font-weight: 400;
   font-size: 42px;
   line-height: normal;
   color: #000000;
   margin: 0;
-  white-space: nowrap;
+
+  @media (max-width: 580px) {
+    font-size: 28px;
+  }
+  @media (max-width: 380px) {
+    font-size: 20px;
+  }
 }
 
 .subtitle {
@@ -51,8 +145,18 @@
   line-height: 24px;
   color: #5b6770;
   margin-top: 12px;
+  @media (max-width: 580px) {
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: -0.5px;
+    color: #6c6c6c;
+  }
+  @media (max-width: 380px) {
+    font-size: 12px;
+  }
 }
 
 .featureWheelBanner {
   width: 100%;
+  margin-block: 100px;
 }

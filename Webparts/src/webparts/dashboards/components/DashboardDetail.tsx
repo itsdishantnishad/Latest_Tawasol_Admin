@@ -13,7 +13,7 @@ export interface IDashboardDetailProps {
   showViewAll: boolean;
 }
 
-export default class DashboardDetail extends React.Component<IDashboardDetailProps, {}> {
+export default class DashboardDetail extends React.Component<IDashboardDetailProps> {
   render(): React.ReactElement<IDashboardDetailProps> {
     const { item, related, onOpen, onViewAll, showSection, showViewAll } = this.props;
 
@@ -41,7 +41,7 @@ export default class DashboardDetail extends React.Component<IDashboardDetailPro
 
         {showSection && (
           <>
-            <Text variant="large" className={ui.moreTitle}>More Dashboards</Text>
+            <span className={ui.moreTitle}>More Dashboards</span>
 
             <div className={ui.relatedGrid}>
               {related.map(it => (
@@ -56,15 +56,15 @@ export default class DashboardDetail extends React.Component<IDashboardDetailPro
                   ) : (
                     <div className={ui.cardImg} />
                   )}
-                  <Text variant="medium" className={ui.cardTitle}>{it.title}</Text>
-                  {it.body && <Text variant="small" className={ui.cardBody}>{it.body}</Text>}
+                  <span className={ui.cardTitle}>{it.title}</span>
+                  {it.body && <span className={ui.cardBody}>{it.body}</span>}
                 </div>
               ))}
             </div>
 
             {showViewAll && (
               <div className={ui.viewAllRow}>
-                <PrimaryButton text="View All" onClick={onViewAll} />
+                <PrimaryButton className={ui.viewButtonBlack} text="View All" onClick={onViewAll} />
               </div>
             )}
           </>

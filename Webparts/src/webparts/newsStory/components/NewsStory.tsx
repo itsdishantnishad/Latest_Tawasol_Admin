@@ -1,92 +1,195 @@
 import * as React from 'react';
-// import styles from './NewsStory.module.scss';
 import type { INewsStoryProps } from './INewsStoryProps';
 import Slider, { Settings } from 'react-slick';
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import { useRef } from "react";
-import { FontIcon } from '@fluentui/react/lib/Icon';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 import styles from './NewsStory.module.scss';
 import { listServices } from '../../services/listServices';
-import NewsType from '../../Components/News/NewsType';
 
 export interface INewsStoryState {
   promos: any[];
 }
 
 export interface ICarouselProps {
-  promos: any[],
-  interval: number
+  promos: any[];
+  interval: number;
+  webUrl: string;
 }
 
-const NEWSVIEW_URL =
-  "https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SitePages/NewsView.aspx";
+// Placeholder URL
+const PLACEHOLDER_URL = 'https://placehold.net/400x400.png';
+
+// Center caption arrows
+const LeftArrowImg: string = require('../../assets/LeftArrow.png');
+const RightArrowImg: string = require('../../assets/RightArrow.png');
+
+// Side arrow icons
+const LeftArrowIcon: string = require('../../assets/blackLeft.svg') as string;
+const RightVectorIcon: string = require('../../assets/VectorIcon.svg') as string;
 
 const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any 
-  let sliderRef: any = useRef(null);
+  const sliderRef = React.useRef<any>(null);
+  const [currentIndex, setCurrentIndex] = React.useState<number>(0);
 
-  const next = (): void => { sliderRef.slickNext(); };
-  const prev = (): void => { sliderRef.slickPrev(); };
+  React.useEffect(() => {
+    setCurrentIndex(0);
+  }, [props.promos?.length]);
+
+  const total = props.promos?.length || 0;
+  const canPrev = currentIndex > 0;
+  const canNext = total > 0 && currentIndex < total - 1;
+
+  const next = (): void => {
+    if (!canNext) return;
+    sliderRef.current?.slickNext?.();
+  };
+
+  const prev = (): void => {
+    if (!canPrev) return;
+    sliderRef.current?.slickPrev?.();
+  };
+
+  const onNewsImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>): void => {
+    const img = e.currentTarget;
+    if (img.dataset.fallbackApplied === 'true') return;
+    img.dataset.fallbackApplied = 'true';
+    img.src = PLACEHOLDER_URL;
+  };
+
+  // Convert server-relative path to absolute
+  const resolveUrl = (rawUrl: string): string => {
+    const u = (rawUrl || '').trim();
+    if (!u) return '';
+
+    if (/^https?:\/\//i.test(u)) return u;
+    if (u.startsWith('/')) return `${window.location.origin}${u}`;
+
+    const base = props.webUrl.replace(/\/$/, '');
+    return `${base}/${u.replace(/^\//, '')}`;
+  };
+
+  /**
+   * Extract article page URL ONLY from preview image:
+   * getpreview.ashx?path=/SitePages/Article.aspx
+   */
+  const getItemUrl = (news: any): string => {
+    const imgUrl: string = news?.newsImage || '';
+    const match = imgUrl.match(/[?&]path=([^&]+)/i);
+
+    if (!match || !match[1]) return '';
+
+    return resolveUrl(decodeURIComponent(match[1]));
+  };
 
   const settings: Settings = {
     dots: true,
-    infinite: props.promos && props.promos.length <= 1 ? false : true,
+    arrows: false,
+    infinite: false,
     slidesToShow: 1,
     slidesToScroll: 1,
-    //autoplay: props.interval > 0,
     autoplaySpeed: props.interval,
-    className: "promotionalBanner",
-    appendDots: (dots: React.ReactNode) => (
-      <div>
-        <div className={styles.buttons}>
-          <ul style={{ margin: "0px", display: "contents" }}>{dots}</ul>
-          <div style={{ display: 'flex', paddingLeft: "0px", paddingTop: "25px" }}>
-            <div onClick={prev}>
-              <FontIcon aria-label="Previous" iconName="ChevronLeftMed" />
-            </div>
-            <div onClick={next} className={styles.RightArrow}>
-              <FontIcon aria-label="Next" iconName="ChevronRightMed" />
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
+    afterChange: (idx: number) => setCurrentIndex(idx),
   };
 
   return (
-    <Slider ref={slider => (sliderRef = slider)}  {...settings}>
-      {props.promos.map((news: any) => {
+    <Slider ref={(s: any) => (sliderRef.current = s)} {...settings}>
+      {props.promos.map((news: any, index: number) => {
+        const imgSrc =
+          news?.newsImage && String(news.newsImage).trim()
+            ? String(news.newsImage).trim()
+            : PLACEHOLDER_URL;
+
+        const detailUrl = getItemUrl(news);
+
         return (
           <div
             className={styles.bannerCard}
-            key={news.id}
+            key={news.path || news.title || index}
             role="button"
             tabIndex={0}
-            onClick={() => window.open(NEWSVIEW_URL, "_self")}
-            onKeyDown={(e) => e.key === "Enter" && window.open(NEWSVIEW_URL, "_self")}
+            onClick={() => {
+              if (detailUrl) {
+                window.open(detailUrl, '_self');
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && detailUrl) {
+                window.open(detailUrl, '_self');
+              }
+            }}
             style={{ cursor: 'pointer' }}
           >
-            <div className={styles.bannerCard__PromoDetailsContent}>
-              <div style={{ height: "100%", flex: '1 1 50%' }}>
-                <div style={{ width: "max-content" }}>
-                  <NewsType newsType={news.newsType} />
-                </div>
-                <div className={styles.bannerCard__PromoDetailsContent__title}>
-                  {news.title}
-                </div>
-                <div style={{ marginTop: "20px" }}>
-                  <div className={styles.bannerCard__PromoDetailsContent__values}>
-                    <span>{news.lastModified}</span>
-                    <span style={{ backgroundColor: '#6c6c6c', width: '5px', height: '5px', borderRadius: '50%' }}></span>
-                    <span>{news.readTime} min read</span>
-                    <span style={{ backgroundColor: '#6c6c6c', width: '5px', height: '5px', borderRadius: '50%' }}></span>
-                    <span>{news.pageView} Views</span>
-                  </div>
-                </div>
+            <div className={styles.heroMedia}>
+              <img
+                className={styles.heroImage}
+                src={imgSrc}
+                onError={onNewsImgError}
+                alt={news?.title ? String(news.title) : 'News banner'}
+              />
+
+              {/* <div className={styles.topGradient} /> */}
+              {/* <div className={styles.bottomGradient} /> */}
+
+              <div className={styles.sideNav}>
+                <button
+                  type="button"
+                  className={`${styles.navIcon} ${canPrev ? styles.navIconActive : styles.navIconDisabled}`}
+                  aria-label="Previous slide"
+                  disabled={!canPrev}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    prev();
+                  }}
+                >
+                  <span className={styles.navChevron}>
+                    <img src={LeftArrowIcon} alt="" />
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  className={`${styles.navIcon} ${canNext ? styles.navIconActive : styles.navIconDisabled}`}
+                  aria-label="Next slide"
+                  disabled={!canNext}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    next();
+                  }}
+                >
+                  <span className={styles.navChevron}>
+                    <img src={RightVectorIcon} alt="" />
+                  </span>
+                </button>
               </div>
-              <div style={{ height: "100%", display: 'flex', justifyContent: 'flex-end', flex: "1 1 50%", overflow: 'hidden' }}>
-                <img style={{ height: "100%", borderRadius: "10px", width: "100%" }} src={news.newsImage} />
+
+              <div className={styles.captionBar}>
+                <button
+                  type="button"
+                  className={styles.captionDecor}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    prev();
+                  }}
+                >
+                  <img src={RightArrowImg} alt="" />
+                </button>
+
+                <div className={styles.captionTitle}>{news?.title || ''}</div>
+
+                <button
+                  type="button"
+                  className={styles.captionDecor}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    next();
+                  }}
+                >
+                  <img src={LeftArrowImg} alt="" />
+                </button>
               </div>
             </div>
           </div>
@@ -98,6 +201,7 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
 
 export default class NewsStory extends React.Component<INewsStoryProps, INewsStoryState> {
   private spService: listServices;
+
   public constructor(props: INewsStoryProps) {
     super(props);
     this.state = { promos: [] };
@@ -105,15 +209,28 @@ export default class NewsStory extends React.Component<INewsStoryProps, INewsSto
   }
 
   public render(): React.ReactElement<INewsStoryProps> {
+    const webUrl = this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, '');
+
     return (
       <div className={styles.promotionalBanner}>
-        <AutoPlayMethods promos={this.state.promos} interval={this.props.interval} />
+        <AutoPlayMethods
+          promos={this.state.promos}
+          interval={this.props.interval}
+          webUrl={webUrl}
+        />
       </div>
     );
   }
 
-  async componentDidMount(): Promise<void> {
-    const listItems = await this.spService.getNewsStory();
-    this.setState({ promos: listItems });
+  public async componentDidMount(): Promise<void> {
+    try {
+      const maxItems =
+        this.props.maxItems && this.props.maxItems > 0 ? this.props.maxItems : 3;
+
+      const listItems = await this.spService.getNewsStory(maxItems);
+      this.setState({ promos: listItems });
+    } catch (error) {
+      console.error('Error loading news story', error);
+    }
   }
 }

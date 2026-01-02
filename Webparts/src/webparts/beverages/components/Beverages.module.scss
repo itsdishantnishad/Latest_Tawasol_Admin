@@ -1,0 +1,133 @@
+.wrapper {
+  width: 100%;
+  background: #FFF4EA;
+  padding: 30px 20px 60px;
+  box-sizing: border-box;
+}
+
+/* ---------------- TITLES ---------------- */
+.menuTitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 32px;
+  color: #000;
+  margin-bottom: 16px;
+}
+
+.menuItem {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #3A3B43;
+  padding: 6px 0;
+  border-bottom: 1px solid #FDDFC4;
+  width: 243px;
+}
+
+/* ---------------- MENU GRID ---------------- */
+.menuCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.menuRow {
+  display: flex;
+  gap: 72px;
+  align-items: flex-start;
+}
+
+/* ---------------- CATEGORY LAYOUT ---------------- */
+.categoriesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 80px;
+  margin-top: 160px;
+  width: 100%;
+}
+
+/* 🔥 FIXED CATEGORY BLOCK */
+.categoryBlock {
+  display: flex;
+  align-items: flex-start;
+  gap: 48px; /* consistent gap */
+}
+
+/* 🔥 KEY LOGIC */
+.fullRow {
+  flex-basis: 100%;
+  width: 100%;
+}
+
+.inlineRow {
+  flex-basis: auto;
+}
+
+/* ---------------- IMAGE COLUMN (KEY FIX) ---------------- */
+.imgWrap {
+  position: relative;
+  width: 420px;              
+  min-width: 420px;
+  display: flex;
+  align-items: center;       
+  justify-content: center;   
+}
+
+/* ellipse stays centered */
+.ellipseImg {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* images sit above ellipse */
+.hotImg,
+.milkImg,
+.teaImg,
+.coldImg {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  height: auto;
+}
+
+/* keep original visual sizes */
+.hotImg { width: 375px; }
+.milkImg { width: 332px; }
+.teaImg  { width: 352px; }
+.coldImg { width: 230px; }
+
+.categoryMenu {
+  min-width: 300px;
+}
+
+.errorText {
+  color: #a80000;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 1024px) {
+  .categoriesContainer {
+    flex-direction: column;
+    margin-top: 60px;
+    gap: 60px;
+  }
+
+  .categoryBlock {
+    flex-direction: column;
+    width: 100%;
+    gap: 24px;
+  }
+
+  .imgWrap {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .menuRow {
+    gap: 32px;
+  }
+}

@@ -1,146 +1,101 @@
 import * as React from 'react';
 import styles from './Documents.module.scss';
-// import leftHeadingLine from "../images/leftArrow.svg";
-// import rightHeadingLine from "../images/rightArrow.svg";
-// import docIcon from '../images/doc-icon.svg';
-// import pdfIcon from '../images/pdf-icon.svg';
-const leftHeadingLine: string = require("../images/leftArrow.svg");
-const rightHeadingLine: string = require("../images/rightArrow.svg");
-const docIcon: string = require("../images/doc-icon.svg");
-const pdfIcon: string = require("../images/pdf-icon.svg");
+import ShuffledCards from '../../../widgets/ShuffledCards/ShuffledCards';
+import ConditionalLink from '../../ConditionalLink/ConditionalLink';
+import PrimaryButton from '../../PrimaryButton/PrimaryButton';
+
+const ProjectDevelopmentIcon = require("../assets/001.png");
+const CommercialIcon = require("../assets/002.png");
+const ProjectDeliveryIcon = require("../assets/003.png");
+const ProjectSecurityIcon = require("../assets/004.png");
 
 export interface IDocument {
-    id: string;
-    title: string;
-    modifiedBy: string;
-    tag: string;
-    iconType: 'pdf' | 'word' | 'excel' | 'other';
-    url: string;
+  id: string;
+  header: string;
+  url: string;
+  backgroundImage: string;
 }
 
 export interface IDocumentsProps {
-    documents?: IDocument[];
-    onViewAll?: () => void;
-    seeAllURL?: string;
+  documents?: IDocument[];
+  onViewAll?: (seeAllURL: string) => void;
+  seeAllURL?: string;
+  context: any;
 }
 
 const defaultDocuments: IDocument[] = [
-    {
-        id: '1',
-        title: 'DHRE Human Capital Policy Manual.pdf',
-        modifiedBy: 'Hinaa Sheikh',
-        tag: 'Awareness Sessions',
-        iconType: 'pdf',
-        url: '#'
-    },
-    {
-        id: '2',
-        title: 'DHRE Human Capital Policy Manual.pdf',
-        modifiedBy: 'Hinaa Sheikh',
-        tag: 'Awareness Sessions',
-        iconType: 'word',
-        url: '#'
-    },
-    {
-        id: '3',
-        title: 'DHRE Human Capital Policy Manual.pdf',
-        modifiedBy: 'Hinaa Sheikh',
-        tag: 'Awareness Sessions',
-        iconType: 'pdf',
-        url: '#'
-    },
-    {
-        id: '4',
-        title: 'DHRE Human Capital Policy Manual.pdf',
-        modifiedBy: 'Hinaa Sheikh',
-        tag: 'HC',
-        iconType: 'word',
-        url: '#'
-    },
-    {
-        id: '5',
-        title: 'DHRE Human Capital Policy Manual.pdf',
-        modifiedBy: 'Hinaa Sheikh',
-        tag: 'Awareness Sessions',
-        iconType: 'other',
-        url: '#'
-    },
+  {
+    id: '1',
+    header: 'Project Development',
+    url: '#',
+    backgroundImage: ProjectDevelopmentIcon
+  },
+  {
+    id: '2',
+    header: 'Commercial',
+    url: '#',
+    backgroundImage: CommercialIcon
+  },
+  {
+    id: '3',
+    header: 'Project Delivery',
+    url: '#',
+    backgroundImage: ProjectDeliveryIcon
+  },
+  {
+    id: '4',
+    header: 'Project Security',
+    url: '#',
+    backgroundImage: ProjectSecurityIcon
+  },
 ];
 
 export const Documents: React.FC<IDocumentsProps> = (props) => {
-    const documents = props.documents || defaultDocuments;
+  const documents = props.documents || defaultDocuments;
 
-    const getIcon = (iconType: IDocument['iconType']) => {
-        switch (iconType) {
-            case 'pdf':
-                return (
-                    // <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                    //     <rect width="48" height="48" rx="4" fill="#E53E3E" />
-                    //     <path d="M24 16V32M16 24H32" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                    // </svg>
-                    <img src={docIcon} alt="" />
-                );
-            case 'word':
-                return (
-                    // <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                    //     <rect width="48" height="48" rx="4" fill="#2B6CB0" />
-                    //     <path d="M24 16V32M16 24H32" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                    // </svg>
-                    <img src={pdfIcon} alt="" />
-                );
-            default:
-                return (
-                    // <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                    //     <rect width="48" height="48" rx="4" fill="#D53F8C" />
-                    //     <path d="M24 16V32M16 24H32" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                    // </svg>
-                    <img src={pdfIcon} alt="" />
-                );
-        }
-    };
+  // ==========================
+  // DYNAMIC VIEW-ALL URL 
+  // ==========================
+  const webUrl: string = props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+  const origin: string = new URL(webUrl).origin;
 
-    return (
-        <div className={styles.documentsContainer}>
-            {/* Documents Grid */}
-            <div className={styles.documentsGrid} >
-                {
-                    documents.map((doc, index) => (
-                        <a
-                            key={doc.id}
-                            href={doc.url}
-                            className={styles.documentCard}
-                            style={{
-                                transform: `rotate(${index % 2 === 0 ? '-2deg' : '2deg'})`,
-                            }}
-                        >
-                            <div className={styles.iconContainer}>
-                                {getIcon(doc.iconType)}
-                            </div>
-                            <div className={styles.documentInfo}>
-                                <h3 className={styles.documentTitle}>{doc.title}</h3>
-                                <p className={styles.modifiedBy}>Modified by : {doc.modifiedBy}</p>
-                                <span className={styles.tag}>
-                                    <span className={styles.tagDot}></span>
-                                    {doc.tag}
-                                </span>
-                            </div>
-                        </a>
-                    ))
-                }
-            </div >
+  const viewAllHref = React.useMemo(() => {
+    const configured = (props.seeAllURL || "").trim();
 
-            {/* View All Button */}
-            <div className={styles.buttonContainer}>
-                <a href={props.seeAllURL} className={styles.viewAllButton}>
-                    View All
-                </a>
-                {/* <button className={styles.viewAllButton} onClick={props.onViewAll}>
-                    View All
-                </button> */}
-            </div>
-        </div>
-    );
+    // Default fallback page inside same site
+    const raw = configured || "SitePages/PoliciesAndProcedures.aspx";
+
+    // Absolute URL → keep path, enforce same tenant
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const parsed = new URL(raw);
+        return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      } catch {
+        return raw;
+      }
+    }
+
+    // Root-relative (/sites/xxx/...)
+    if (raw.startsWith("/")) {
+      return `${origin}${raw}`;
+    }
+
+    // Site-relative (SitePages/xxx.aspx)
+    return `${webUrl}/${raw}`;
+  }, [props.seeAllURL, webUrl, origin]);
+  // =========================================================
+
+  return (
+    <div>
+      <ShuffledCards cards={documents} />
+
+      <div className={styles.ctaWrapper}>
+        <ConditionalLink to={viewAllHref}>
+          <PrimaryButton label="View All" />
+        </ConditionalLink>
+      </div>
+    </div>
+  );
 };
 
 export default Documents;
-

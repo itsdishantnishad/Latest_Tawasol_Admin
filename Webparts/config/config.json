@@ -146,14 +146,6 @@
         }
       ]
     },
-    "policies-and-procedures-views-web-part": {
-      "components": [
-        {
-          "entrypoint": "./lib/webparts/policiesAndProceduresViews/PoliciesAndProceduresViewsWebPart.js",
-          "manifest": "./src/webparts/policiesAndProceduresViews/PoliciesAndProceduresViewsWebPart.manifest.json"
-        }
-      ]
-    },
     "event-gallery-web-part": {
       "components": [
         {
@@ -175,6 +167,94 @@
         {
           "entrypoint": "./lib/webparts/profile/ProfileWebPart.js",
           "manifest": "./src/webparts/profile/ProfileWebPart.manifest.json"
+        }
+      ]
+    },
+    "meeting-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/meeting/MeetingWebPart.js",
+          "manifest": "./src/webparts/meeting/MeetingWebPart.manifest.json"
+        }
+      ]
+    },
+    "onboarding-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/onboarding/OnboardingWebPart.js",
+          "manifest": "./src/webparts/onboarding/OnboardingWebPart.manifest.json"
+        }
+      ]
+    },
+    "offers-benefits-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/offersBenefits/OffersBenefitsWebPart.js",
+          "manifest": "./src/webparts/offersBenefits/OffersBenefitsWebPart.manifest.json"
+        }
+      ]
+    },
+    "announcement-banner-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/announcementBanner/AnnouncementBannerWebPart.js",
+          "manifest": "./src/webparts/announcementBanner/AnnouncementBannerWebPart.manifest.json"
+        }
+      ]
+    },
+    "greetings-banner-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/greetingsBanner/GreetingsBannerWebPart.js",
+          "manifest": "./src/webparts/greetingsBanner/GreetingsBannerWebPart.manifest.json"
+        }
+      ]
+    },
+    "beverages-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/beverages/BeveragesWebPart.js",
+          "manifest": "./src/webparts/beverages/BeveragesWebPart.manifest.json"
+        }
+      ]
+    },
+    "help-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/help/HelpWebPart.js",
+          "manifest": "./src/webparts/help/HelpWebPart.manifest.json"
+        }
+      ]
+    },
+    "event-detail-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/eventDetail/EventDetailWebPart.js",
+          "manifest": "./src/webparts/eventDetail/EventDetailWebPart.manifest.json"
+        }
+      ]
+    },
+    "other-upcoming-events-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/otherUpcomingEvents/OtherUpcomingEventsWebPart.js",
+          "manifest": "./src/webparts/otherUpcomingEvents/OtherUpcomingEventsWebPart.manifest.json"
+        }
+      ]
+    },
+    "lets-meet-detail-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/letsMeetDetail/LetsMeetDetailWebPart.js",
+          "manifest": "./src/webparts/letsMeetDetail/LetsMeetDetailWebPart.manifest.json"
+        }
+      ]
+    },
+    "lets-meet-gallery-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/letsMeetGallery/LetsMeetGalleryWebPart.js",
+          "manifest": "./src/webparts/letsMeetGallery/LetsMeetGalleryWebPart.manifest.json"
         }
       ]
     }
@@ -199,9 +279,20 @@
     "DashboardsWebPartStrings": "lib/webparts/dashboards/loc/{locale}.js",
     "VivaEngageHeaderWebPartStrings": "lib/webparts/vivaEngageHeader/loc/{locale}.js",
     "PoliciesAndProceduresWebPartStrings": "lib/webparts/policiesAndProcedures/loc/{locale}.js",
-    "PoliciesAndProceduresViewsWebPartStrings": "lib/webparts/policiesAndProceduresViews/loc/{locale}.js",
     "EventGalleryWebPartStrings": "lib/webparts/eventGallery/loc/{locale}.js",
     "GlobalBannerWebPartStrings": "lib/webparts/globalBanner/loc/{locale}.js",
-    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js"
+    "ProfileWebPartStrings": "lib/webparts/profile/loc/{locale}.js",
+    "MeetingWebPartStrings": "lib/webparts/meeting/loc/{locale}.js",
+    "OnboardingWebPartStrings": "lib/webparts/onboarding/loc/{locale}.js",
+    "OffersBenefitsWebPartStrings": "lib/webparts/offersBenefits/loc/{locale}.js",
+    "AnnouncementBannerWebPartStrings": "lib/webparts/announcementBanner/loc/{locale}.js",
+    "GreetingsBannerWebPartStrings": "lib/webparts/greetingsBanner/loc/{locale}.js",
+    "BeveragesWebPartStrings": "lib/webparts/beverages/loc/{locale}.js",
+    "HelpWebPartStrings": "lib/webparts/help/loc/{locale}.js",
+    "EventDetailWebPartStrings": "lib/webparts/eventDetail/loc/{locale}.js",
+    "FormsLibraryWebPartStrings": "lib/webparts/formsLibrary/loc/{locale}.js",
+    "OtherUpcomingEventsWebPartStrings": "lib/webparts/otherUpcomingEvents/loc/{locale}.js",
+    "LetsMeetGalleryWebPartStrings": "lib/webparts/letsMeetGallery/loc/{locale}.js",
+    "LetsMeetDetailWebPartStrings": "lib/webparts/letsMeetDetail/loc/{locale}.js"
   }
 }

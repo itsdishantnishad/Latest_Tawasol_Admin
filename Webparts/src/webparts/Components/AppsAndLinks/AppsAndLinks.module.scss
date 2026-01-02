@@ -1,66 +1,528 @@
-@import '~@fluentui/react/dist/sass/References.scss';
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-.appsAndLinksContainer {
-    background-color: white;
+.serviceLinkModal {
+  [role="heading"] {
+    font-size: 20px;
+    line-height: 28px !important;
+    font-weight: 500 !important;
+    color: #000000 !important;
+    font-family: 'Inter', sans-serif !important;
+  }
 
-    .appsContent {
-        background-color: white;
-
-
-        .category {
-            font-size: 16px;
-        }
-
-        .apps {
-            display: grid;
-            /* Creates a 3-column layout where each column takes up an equal fraction of the available space */
-            grid-template-columns: repeat(6, 1fr);
-            gap: 0px;
-            /* Adds space between the grid items */
-            padding: 10px;
-        }
-
-        .appItem {
-            padding: 12px;
-            text-align: center;
-            /* Centers the content inside each item */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: sans-serif;
-        }
-    }
-
-    .addLinkContent {
-        background-color: white;
-
-        .category {
-            font-size: 16px;
-
-            .addCustomLinksContent {
-                background-color: white;
-
-                .customLinksContent {
-                    display: grid;
-                    gap: 0;
-                    grid-template-columns: repeat(6, 1fr);
-                    padding: 10px;
-                }
-
-                .customLinks {
-                    align-items: center;
-                    display: -ms-flexbox;
-                    display: flex;
-                    font-family: sans-serif;
-                    justify-content: center;
-                    padding: 12px;
-                    text-align: center;                
-            }
-        }
-    }
-
-    .input {
-        display: grid;
-    }
+  .container {
+    padding: 0 50px 50px;
+  }
 }
+
+.tabContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 30px;
+  background-color: #ffffff66;
+  padding: 6px;
+  border-radius: 25px;
+  width: fit-content;
+  margin: 0 auto 24px;
+  border: 1px solid #FBBF7F;
+}
+
+.tab {
+  background-color: transparent;
+  border: none;
+  border-radius: 20px;
+  color: #3A3B43;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  padding: 10px 30px;
+  transition: all .3s ease;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.activeTab {
+  background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #dda160 0, #ffdbb4 100%);
+  color: #3A3B43;
+}
+
+.content {
+  min-height: 400px;
+}
+
+.linksGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(6, 1fr);
+  padding: 0;
+}
+
+.linkItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+  // &:hover {
+  //   transform: translateY(-3px);
+  // }
+}
+
+.iconCircle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #ffffff66;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.icon {
+  font-size: 32px;
+}
+
+.appIcon {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+.linkTitle {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  text-align: center;
+  color: #000000;
+  letter-spacing: -0.5px;
+  font-family: 'Inter', sans-serif;
+}
+
+.addLinkButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.addIcon {
+  font-size: 36px;
+  color: #666;
+}
+
+.customLinkItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  &:hover .menuWrapper{
+    display: block;
+  }
+}
+
+.deleteButton {
+  position: absolute;
+  top: -5px;
+  right: 20px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background-color: #ff4444;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.addLinkForm {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.formTitle {
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.cancelButton {
+  padding: 10px 24px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  background-color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.saveButton {
+  padding: 10px 24px;
+  font-size: 14px;
+  border: none;
+  background-color: #0078d4;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.emptyState {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  padding: 40px;
+}
+
+:global(.ms-Dialog-main) {
+  background-color: #FDECDC !important;
+  border-radius: 8px;
+}
+
+.optionsButton {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.menuPopup {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  width: 140px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  z-index: 30;
+}
+
+.menuItem {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:hover {
+    background: #fdf4e6;
+  }
+}
+
+.menuItemDelete {
+  padding: 12px 16px;
+  cursor: pointer;
+  color: #c75043;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover {
+    background: #fdecea;
+  }
+}
+
+.deleteConfirm {
+  background: #d9534f;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.menuWrapper {
+  position: absolute;
+  top: 0px;
+  right: 40%;
+  display: none;
+  button {
+    background: transparent;
+    left: 100%;
+    &:hover{
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+  }
+}
+
+.menu {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+  width: 120px;
+  z-index: 1000;
+  padding: 6px 0;
+
+  display: flex;
+  flex-direction: column;
+
+  button {
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: #444;
+
+    &:hover {
+      background-color: #f3f3f3;
+    }
+  }
+}
+
+.inlineForm {
+  background-color: transparent;
+  border: 1px solid #F8CCA3;
+  border-radius: 4px;
+  margin-top: 24px;
+  padding: 16px;
+  font-family: 'Inter', sans-serif;
+}
+
+.formTitle {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  color: #6C6C6C;
+}
+
+.formFields {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 20px;
+
+  .formField {
+    width: 100%;
+
+    .inputLine {
+      font-family: 'Inter', sans-serif;
+
+      label {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        line-height: 22px;
+        font-weight: 500;
+        color: #3A3B43;
+        margin-bottom: 8px;
+      }
+
+      :global {
+        .ms-TextField-fieldGroup {
+          height: 48px;
+          border: 1px solid #F8CCA3;
+          overflow: hidden;
+          border-radius: 8px;
+
+          input {
+            padding: 12px 20px;
+
+            &::placeholder {
+              color: #A7A7A7;
+              font-size: 16px;
+              line-height: 24px;
+              font-weight: 400;
+            }
+          }
+
+          &::after{
+            &:hover {
+              border: 1px solid #F8CCA3;
+            }
+          }
+
+          &::after{
+            &:active {
+              border: 1px solid #F8CCA3;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.formActions {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+
+  button {
+    width: 100%;
+    height: 48px;
+    border-radius: 50px;
+    border: 1.5px solid #101820;
+
+    &:last-child {
+      border: 0;
+      box-shadow: 0px 4px 4px 0px #C7CFD6 inset;
+      background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #A6ABB0 0%, #A3A8AC 100%);
+
+      &:hover {
+        box-shadow: -4px -6px 4px 0px #00000082 inset;
+        background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #101820 0%, #202D39 100%);
+      }
+    }
+  }
+}
+
+// Add these styles to your existing SCSS file
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #F8CCA3;
+  margin: 0;
+}
+
+.successMessage {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #10b981;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+  z-index: 1000;
+}
+
+.successIcon {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.successText {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+}
+
+.menuedit {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  padding: 0;
+  border: 1px solid #F8CCA3;
+  overflow: hidden;
+}
+
+.menuedit button {
+  align-items: center;
+  background: 0 0;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  line-height: 22px;
+  gap: 10px;
+  padding: 10px 14px;
+  text-align: left;
+  width: 100%;
+  color: #3A3B43;
+  font-family: 'Inter', sans-serif;
+}
+
+.menuedit button:hover {
+  background: #f9f1e7; // same as your beige hover look
+}
+
+.menuedit button svg {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+}
+
+
+:global {
+  .ms-Dialog-inner {
+    padding: 0;
+  }
 }

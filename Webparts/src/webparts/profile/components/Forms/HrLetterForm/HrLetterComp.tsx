@@ -2,15 +2,14 @@ import * as React from "react";
 import styles from "./HrLetter.module.scss";
 
 import {
-  Dropdown,
   IDropdownOption,
   TextField,
   PrimaryButton,
   DefaultButton,
 } from "@fluentui/react";
+import Dropdown from "../../../../Components/Dropdown/Dropdown";
 
 const UploadIcon = require("../../../assets/uploadIcon.svg")
-const DownArrowIcon = require("../../../assets/VectorIcon.svg")
 
 const documentTypeOptions: IDropdownOption[] = [
   { key: "DHRE Letter - Employment Certificate (English)", text: "DHRE Letter - Employment Certificate (English)" },
@@ -64,15 +63,11 @@ export default class HRLetterComponent
             {/* Document Type */}
             <div className={styles.documentTypeWrap}>
               <label className={styles.fieldLabel}>Document Type</label>
-              <div className={styles.documentTypeShell}>
-                <Dropdown
-                  className={styles.fuiInput}
-                  options={documentTypeOptions}
-                  selectedKey={this.state.documentType}
-                  onChange={(_, o) => this.setState({ documentType: o?.key as string })}
-                  onRenderCaretDown={() => <img src={DownArrowIcon} style={{ width: 24, height: 24 }} />}
-                />
-              </div>
+              <Dropdown
+                options={documentTypeOptions}
+                selectedKey={this.state.documentType}
+                onChange={(_, o) => this.setState({ documentType: o?.key as string })}
+              />
             </div>
 
             {/* Addressed To */}
@@ -92,28 +87,20 @@ export default class HRLetterComponent
             <div className={styles.cityCountryRow}>
               <div className={styles.cityWrap}>
                 <label className={styles.fieldLabel}>City</label>
-                <div className={styles.cityShell}>
-                  <Dropdown
-                    className={styles.fuiInput}
-                    options={cityOptions}
-                    selectedKey={this.state.city}
-                    onChange={(_, o) => this.setState({ city: o?.key as string })}
-                    onRenderCaretDown={() => <img src={DownArrowIcon} style={{ width: 24, height: 24 }} />}
-                  />
-                </div>
+                <Dropdown
+                  options={cityOptions}
+                  selectedKey={this.state.city}
+                  onChange={(_, o) => this.setState({ city: o?.key as string })}
+                />
               </div>
 
               <div className={styles.countryWrap}>
                 <label className={styles.fieldLabel}>Address Country</label>
-                <div className={styles.countryShell}>
-                  <Dropdown
-                    className={styles.fuiInput}
-                    options={countryOptions}
-                    selectedKey={this.state.country}
-                    onChange={(_, o) => this.setState({ country: o?.key as string })}
-                    onRenderCaretDown={() => <img src={DownArrowIcon} style={{ width: 24, height: 24 }} />}
-                  />
-                </div>
+                <Dropdown
+                  options={countryOptions}
+                  selectedKey={this.state.country}
+                  onChange={(_, o) => this.setState({ country: o?.key as string })}
+                />
               </div>
             </div>
 

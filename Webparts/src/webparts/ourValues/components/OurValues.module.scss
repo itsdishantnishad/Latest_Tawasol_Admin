@@ -1,9 +1,22 @@
-root {
+:root {
   --ov-text:   #3A3B43;
   --ov-title:  #3A3B43;
   --ov-accent: #DA291C;
 }
- 
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: local('Instrument Serif Regular'), url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: local('Instrument Serif Italic'), url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
+
 /* Full-bleed #FFF4EA background */
 .fullBleed {
   position: relative;
@@ -21,61 +34,47 @@ root {
   background: #FFF4EA;
   z-index: -1;
 }
- 
+
 /* Outer padding around the section */
 .root {
-  padding: 48px 24px;
+  padding: 80px 60px;
 }
- 
+
 .container {
-  // max-width: 1200px;
   margin: 0 auto;
-  padding: 12px 36px;
+  padding: 0;
 }
- 
+
 /* Heading */
 .heading {
-  line-height: 100%;
-  letter-spacing: 1px;
-  text-align: center;
-  margin-bottom: 32px;
- 
-  /* use flex + gap to mimic Stack tokens */
   display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
+  justify-content: center;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 40px;
+  text-align: center;
 }
 .headingOur {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Italic';
   font-weight: 400;
-  font-style: italic;
   font-size: 42px;
   color: #DA291C;
 }
 .headingValues {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Regular';
   font-weight: 400;
-  font-style: normal;
   font-size: 42px;
   color: #000000;
 }
 
- 
-/* Grid */
+/* Grid (desktop / tablet) */
 .grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
 }
- 
-@media (max-width: 1100px) {
-  .grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 640px) {
-  .grid { grid-template-columns: 1fr; }
-}
- 
+
 /* Card */
 .card {
   display: flex;
@@ -87,7 +86,7 @@ root {
   height: auto;
   padding: 30px;
 }
- 
+
 /* Icon */
 .icon {
   max-width: 60px;
@@ -97,7 +96,7 @@ root {
   margin-bottom: 1rem;
   height: auto;
 }
- 
+
 /* Title text */
 .title {
   color: #3A3B43;
@@ -107,18 +106,15 @@ root {
   font-family: 'Inter', sans-serif;
 }
 
-/* Description container */
- 
 /* Description text for each card */
 .description {
   color: #3A3B43;
-  font-family: Inter, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
 }
- 
- 
+
 .description :global(*) {
   font-family: "Inter", sans-serif !important;
   background: transparent !important;
@@ -132,4 +128,93 @@ root {
 .description :global(strong) {
   font: inherit !important;
   color: inherit !important;
+}
+
+/* --------------------------- Carousel (mobile layout) --------------------------- */
+
+.carousel {
+  margin-top: 16px;
+  display: none;              /* hidden by default (shown only on mobile) */
+}
+
+/* Scroll container – touch/drag horizontally */
+.carouselViewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;   /* softer snap so end card reachable */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.carouselViewport::-webkit-scrollbar {
+  display: none;
+}
+
+/* Inner flex track */
+.carouselTrack {
+  display: flex;
+  gap: 16px;
+  padding: 0 16px 16px;       /* breathing space so first/last aren’t cut */
+  box-sizing: border-box;
+}
+
+/* ⬇️ Each slide = full viewport width (fixes scrolling),
+      card inside slide will control the visual width */
+.carouselSlide {
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  scroll-snap-align: start;
+  display: flex;
+  justify-content: flex-start;
+}
+/* --------------------------------- Responsive --------------------------------- */
+
+@media (max-width: 1600px) {
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1360px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1100px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 991px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 800px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .root {
+    padding: 32px 16px;
+  }
+
+  .container {
+    padding: 12px 8px;
+  }
+
+  .headingOur,
+  .headingValues {
+    font-size: 32px;
+  }
+
+  /* hide grid, show mobile carousel */
+  .grid {
+    display: none;
+  }
+
+  .carousel {
+    display: block;
+  }
+
+  /* mobile heading left-aligned */
+  .heading {
+    justify-content: flex-start;
+    text-align: left;
+  }
 }

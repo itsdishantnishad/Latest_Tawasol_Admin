@@ -1,3 +1,5 @@
+// src/webparts/featureWheel/FeatureWheelWebPart.ts
+
 import * as React from "react";
 import * as ReactDom from "react-dom";
 import { Version } from "@microsoft/sp-core-library";
@@ -21,6 +23,8 @@ export interface IFeatureWheelWebPartProps {
   meeting: string;
   interactiveForms: string;
   dashboard: string;
+  taskApprovals: string;
+  beverageMenu: string;
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
@@ -37,7 +41,9 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
         meeting: this.properties.meeting,
         interactiveForms: this.properties.interactiveForms,
         dashboard: this.properties.dashboard,
-        context: this.context
+        beverageMenu: this.properties.beverageMenu,
+        taskApprovals: this.properties.taskApprovals,
+        context: this.context,
       }
     );
 
@@ -45,28 +51,29 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
   }
 
   protected onInit(): Promise<void> {
-    return this._getEnvironmentMessage().then(message => { return; });
+    return this._getEnvironmentMessage().then(() => {
+      return;
+    });
   }
 
   private _getEnvironmentMessage(): Promise<string> {
     if (!!this.context.sdks.microsoftTeams) {
-      // running in Teams, office.com or Outlook
       return this.context.sdks.microsoftTeams.teamsJs.app
         .getContext()
         .then((context) => {
           let environmentMessage: string = "";
           switch (context.app.host.name) {
-            case "Office": // running in Office
+            case "Office":
               environmentMessage = this.context.isServedFromLocalhost
                 ? strings.AppLocalEnvironmentOffice
                 : strings.AppOfficeEnvironment;
               break;
-            case "Outlook": // running in Outlook
+            case "Outlook":
               environmentMessage = this.context.isServedFromLocalhost
                 ? strings.AppLocalEnvironmentOutlook
                 : strings.AppOutlookEnvironment;
               break;
-            case "Teams": // running in Teams
+            case "Teams":
             case "TeamsModern":
               environmentMessage = this.context.isServedFromLocalhost
                 ? strings.AppLocalEnvironmentTeams
@@ -106,38 +113,45 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('letsCelebrate', {
-                  label: "Please enter URL for 'Let's Celebrate' see all"
+                PropertyPaneTextField("letsCelebrate", {
+                  label: "Please enter URL for 'Let's Celebrate' see all",
                 }),
-                PropertyPaneTextField('trainingAndDevelopment', {
-                  label: "Please enter URL for 'Training & Development' see all"
+                PropertyPaneTextField("trainingAndDevelopment", {
+                  label:
+                    "Please enter URL for 'Training & Development' see all",
                 }),
-                PropertyPaneTextField('upcomingEvents', {
-                  label: "Please enter URL for 'Upcoming events' see all"
+                PropertyPaneTextField("upcomingEvents", {
+                  label: "Please enter URL for 'Upcoming events' see all",
                 }),
-                PropertyPaneTextField('getOffersAndDiscounts', {
-                  label: "Please enter URL for 'Get Offers & Discounts' see all"
+                PropertyPaneTextField("getOffersAndDiscounts", {
+                  label: "Please enter URL for 'Offers & Benefits' view all",
                 }),
-                PropertyPaneTextField('imageGallery', {
-                  label: "Please enter URL for 'Image Gallery' see all"
+                PropertyPaneTextField("imageGallery", {
+                  label: "Please enter URL for 'Image Gallery' see all",
                 }),
-                PropertyPaneTextField('documents', {
-                  label: "Please enter URL for 'Documents' see all"
+                PropertyPaneTextField("documents", {
+                  label: "Please enter URL for 'Documents' see all",
                 }),
-                 PropertyPaneTextField('meeting', {
-                  label: "Please enter URL for 'Meeting' view all"
+                PropertyPaneTextField("meeting", {
+                  label: "Please enter URL for 'Meeting' view all",
                 }),
-                PropertyPaneTextField('interactiveForms', {
-                  label: "Please enter URL for 'Interactive Forms' view all"
+                PropertyPaneTextField("interactiveForms", {
+                  label: "Please enter URL for 'Interactive Forms' view all",
                 }),
-                  PropertyPaneTextField('dashboard', {
-                  label: "Please enter URL for 'Dashboard' view all"
-                })
-              ]
-            }
-          ]
-        }
-      ]
+                PropertyPaneTextField("dashboard", {
+                  label: "Please enter URL for 'Dashboard' view all",
+                }),
+                PropertyPaneTextField("beverageMenu", {
+                  label: "Please enter URL for 'Beverage Menu' view all",
+                }),
+                PropertyPaneTextField("taskApprovals", {
+                  label: "Please enter URL for 'Task Approvals' view all",
+                }),
+              ],
+            },
+          ],
+        },
+      ],
     };
   }
 }

@@ -1,279 +1,341 @@
-import * as React from 'react';
-import styles from './ServiceLinks.module.scss';
+import * as React from "react";
+import styles from "./ServiceLinks.module.scss";
 
-import PrimaryButton from '../../PrimaryButton/PrimaryButton';
+import PrimaryButton from "../../PrimaryButton/PrimaryButton";
+import AppsAndLinks from "../../AppsAndLinks/AppsAndLinks";
+import { listServices } from "../../../services/listServices";
 
-const jiraIcon: string = require("../../../featureWheel/images/jira.png");
-const slackIcon: string = require("../../../featureWheel/images/slack.png");
-const outlookIcon: string = require("../../../featureWheel/images/outlooks.png");
-const microsoftTeamsIcon: string = require("../../../featureWheel/images/teams.png");
+type OuterPosition = "top-left" | "bottom-left" | "top-right" | "bottom-right";
+type InnerPosition = "left-center" | "top-center" | "right-center";
+export type Position = OuterPosition | InnerPosition;
 
 export interface IServiceLink {
-    id: string;
-    name: string;
-    icon: string;
-    url: string;
-    position?: 'top-left' | 'left-center' | 'bottom-left' | 'top-right' | 'right-center' | 'bottom-right' | 'top-center';
-    relativeTo?: 'outer' | 'inner';
+  id: string;
+  name: string;
+  icon: string;
+  url: string;
+  position?: Position; // optional — we compute layout per page
+  relativeTo?: "outer" | "inner";
+  category?: "quick" | "app" | "custom";
 }
 
 export interface IServiceLinksProps {
-    services?: IServiceLink[];
-    onViewAll?: () => void;
+  services?: IServiceLink[];
+  context: any;
 }
 
-const defaultServices: IServiceLink[] = [
-    // Outer circle services (6 cards)
-    {
-        id: '1',
-        name: 'JIRA',
-        icon: jiraIcon,
-        url: '#',
-        position: 'top-left',
-        relativeTo: 'outer'
-    },
-    {
-        id: '2',
-        name: 'JIRA',
-        icon: jiraIcon,
-        url: '#',
-        position: 'left-center',
-        relativeTo: 'outer'
-    },
-    {
-        id: '3',
-        name: 'JIRA',
-        icon: jiraIcon,
-        url: '#',
-        position: 'bottom-left',
-        relativeTo: 'outer'
-    },
-    {
-        id: '4',
-        name: 'JIRA',
-        icon: jiraIcon,
-        url: '#',
-        position: 'top-right',
-        relativeTo: 'outer'
-    },
-    {
-        id: '5',
-        name: 'JIRA',
-        icon: jiraIcon,
-        url: '#',
-        position: 'right-center',
-        relativeTo: 'outer'
-    },
-    {
-        id: '6',
-        name: 'JIRA',
-        icon: jiraIcon,
-        url: '#',
-        position: 'bottom-right',
-        relativeTo: 'outer'
-    },
-    // Inner circle services (3 cards)
-    {
-        id: '7',
-        name: 'Slack',
-        icon: slackIcon,
-        url: '#',
-        position: 'left-center',
-        relativeTo: 'inner'
-    },
-    {
-        id: '8',
-        name: 'Outlook',
-        icon: outlookIcon,
-        url: '#',
-        position: 'top-center',
-        relativeTo: 'inner'
-    },
-    {
-        id: '9',
-        name: 'Microsoft Teams',
-        icon: microsoftTeamsIcon,
-        url: '#',
-        position: 'right-center',
-        relativeTo: 'inner'
-    },
-    {
-        id: '10',
-        name: 'Outlook',
-        icon: outlookIcon,
-        url: '#',
-        position: 'top-center',
-        relativeTo: 'inner'
-    },
-    {
-        id: '11',
-        name: 'Microsoft Teams',
-        icon: microsoftTeamsIcon,
-        url: '#',
-        position: 'right-center',
-        relativeTo: 'inner'
-    },
+// exactly four outer positions
+const outerPositions: OuterPosition[] = [
+  "top-left",
+  "bottom-left",
+  "top-right",
+  "bottom-right",
 ];
 
+// Resolve URLs so "www.google.com" becomes "https://www.google.com"
+const resolveUrl = (raw?: string): string => {
+  const url = (raw || "").trim();
+  if (!url || url === "#") return "#";
+
+  // already absolute or special schemes
+  if (/^(https?:\/\/)/i.test(url)) return url;
+  if (/^(mailto:|tel:|sms:|teams:|#)/i.test(url)) return url;
+
+  // protocol-relative
+  if (url.startsWith("//")) return `https:${url}`;
+
+  // common case: www.*
+  if (/^www\./i.test(url)) return `https://${url}`;
+
+  // site-relative
+  if (url.startsWith("/")) return `${window.location.origin}${url}`;
+
+  // if user types like "sites/xxx" or "SitePages/xxx"
+  if (/^(sites\/|SitePages\/|Lists\/)/i.test(url)) return `${window.location.origin}/${url}`;
+
+  // default: treat as a domain/external host
+  return `https://${url}`;
+};
+
+const handleOpenNewTab = (e: React.MouseEvent<HTMLAnchorElement>, rawUrl?: string): void => {
+  const finalUrl = resolveUrl(rawUrl);
+  if (finalUrl === "#") {
+    e.preventDefault();
+    return;
+  }
+
+  e.preventDefault(); // stop SharePoint SPA navigation
+  window.open(finalUrl, "_blank", "noopener,noreferrer");
+};
+
+// exactly three inner positions
+const innerPositions: InnerPosition[] = ["left-center", "top-center", "right-center"];
+
 export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
-    const services = props.services || defaultServices;
-    const [currentPage, setCurrentPage] = React.useState(0);
-    const itemsPerPage = 9; // 6 outer circle + 3 inner circle cards
-    const totalPages = Math.ceil(services.length / itemsPerPage);
-    const currentServices = services.slice(
-        currentPage * itemsPerPage,
-        (currentPage + 1) * itemsPerPage
-    );
+  const [currentPage, setCurrentPage] = React.useState<number>(0);
+  const [data, setData] = React.useState<any[]>([]);
+  const [customLinks, setCustomLinks] = React.useState<any[]>([]);
+  const [isHidden, setIsHidden] = React.useState<boolean>(true);
+  const [activeTab, setActiveTab] = React.useState<"quick" | "app" | "custom">("quick");
+  const [services, setServices] = React.useState<IServiceLink[]>([]);
 
-    const handlePrev = (): void => {
-        setCurrentPage((prev) => (prev > 0 ? prev - 1 : totalPages - 1));
+  // 4 outer + 3 inner = 7 items per page
+  const itemsPerPage = 7;
+
+  //  Strong new-tab behavior for SharePoint (prevents interception + forces window.open)
+  const handleOpenNewTab = (e: React.MouseEvent<HTMLAnchorElement>, url?: string): void => {
+    const safeUrl = (url || "").trim();
+    if (!safeUrl || safeUrl === "#") {
+      e.preventDefault();
+      return;
+    }
+
+    e.preventDefault(); // stop SharePoint SPA nav
+    window.open(safeUrl, "_blank", "noopener,noreferrer");
+  };
+
+  // Transform API data into a flat list; position/relativeTo not relied on here.
+  const transformApiDataToServices = (apiData: any[], customData: any[]): IServiceLink[] => {
+    const serviceLinks: IServiceLink[] = [];
+
+    const quickLinks = apiData.filter((item) => item.AppType === "Quick Links");
+    quickLinks.forEach((item, index) => {
+      serviceLinks.push({
+        id: `quick-${index}`,
+        name: item.Title,
+        icon: item.IconURL || "#",
+        url: item.URL,
+        category: "quick",
+      });
+    });
+
+    const appLinks = apiData.filter((item) => item.AppType === "App Links");
+    appLinks.forEach((item, index) => {
+      serviceLinks.push({
+        id: `app-${index}`,
+        name: item.Title,
+        icon: item.IconURL || "#",
+        url: item.URL,
+        category: "app",
+      });
+    });
+
+    customData.forEach((item, index) => {
+      serviceLinks.push({
+        id: `custom-${index}`,
+        name: item.Title,
+        icon: item.IconURL || "#",
+        url: item.URL,
+        category: "custom",
+      });
+    });
+
+    return serviceLinks;
+  };
+
+  const filteredServices = services.filter((service) => service.category === activeTab);
+  const totalPages = Math.max(1, Math.ceil(filteredServices.length / itemsPerPage));
+  const currentServices = filteredServices.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
+
+  const handlePrev = (): void => {
+    setCurrentPage((prev) => (prev > 0 ? prev - 1 : totalPages - 1));
+  };
+
+  const handleNext = (): void => {
+    setCurrentPage((prev) => (prev < totalPages - 1 ? prev + 1 : 0));
+  };
+
+  const handleTabChange = (tab: "quick" | "app" | "custom"): void => {
+    setActiveTab(tab);
+    setCurrentPage(0);
+  };
+
+  // Outer position mapper
+  const getOuterCirclePosition = (position?: OuterPosition): React.CSSProperties => {
+    const positionMap: Record<OuterPosition, React.CSSProperties> = {
+      "top-left": { top: "20%", left: "10%", transform: "translate(-50%, -50%)" },
+      "bottom-left": { bottom: "20%", left: "10%", transform: "translate(-50%, 50%)" },
+      "top-right": { top: "20%", right: "10%", transform: "translate(50%, -50%)" },
+      "bottom-right": { bottom: "20%", right: "10%", transform: "translate(50%, 50%)" },
+    };
+    return (position && positionMap[position]) || {
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%,-50%)",
+    };
+  };
+
+  // Inner position mapper
+  const getInnerCirclePosition = (position?: InnerPosition): React.CSSProperties => {
+    const positionMap: Record<InnerPosition, React.CSSProperties> = {
+      "left-center": { top: "65%", left: "5%", transform: "translate(-50%, -50%)" },
+      "top-center": { top: "10%", left: "50%", transform: "translate(-50%, -50%)" },
+      "right-center": { top: "65%", right: "5%", transform: "translate(50%, -50%)" },
+    };
+    return (position && positionMap[position]) || {
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%,-50%)",
+    };
+  };
+
+  const userEmail = props.context.pageContext.user.loginName;
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const spService = new listServices(props.context);
+
+        const appsResult: any = await spService.getApps("Apps");
+        setData(appsResult);
+
+        let updatedcustomLinks: any[] = [];
+        const customResult: any = await spService.getCustomAppLinks("Custom App Links", userEmail);
+        if (customResult && customResult.length > 0 && customResult[0]["TIRCustomLinkAttribute"]) {
+          updatedcustomLinks = JSON.parse(customResult[0]["TIRCustomLinkAttribute"]);
+          setCustomLinks(updatedcustomLinks);
+        }
+
+        const transformed = transformApiDataToServices(appsResult || [], updatedcustomLinks || []);
+        setServices(transformed);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
     };
 
-    const handleNext = (): void => {
-        setCurrentPage((prev) => (prev < totalPages - 1 ? prev + 1 : 0));
-    };
+    fetchData();
+  }, [props.context, userEmail]);
 
-    // Calculate positions for cards bound to outer circle
-    const getOuterCirclePosition = (position: string): React.CSSProperties => {
-        // Position cards around the outer circle at 6 specific points
-        const positionMap: Record<string, React.CSSProperties> = {
-            'top-left': {
-                top: '15%',
-                left: '15%',
-                transform: 'translate(-50%, -50%)'
-            },
-            'left-center': {
-                top: '50%',
-                left: '0%',
-                transform: 'translate(-50%, -50%)'
-            },
-            'bottom-left': {
-                bottom: '15%',
-                left: '15%',
-                transform: 'translate(-50%, 50%)'
-            },
-            'top-right': {
-                top: '15%',
-                right: '15%',
-                transform: 'translate(50%, -50%)'
-            },
-            'right-center': {
-                top: '50%',
-                right: '0%',
-                transform: 'translate(50%, -50%)'
-            },
-            'bottom-right': {
-                bottom: '15%',
-                right: '15%',
-                transform: 'translate(50%, 50%)'
-            }
-        };
-        return positionMap[position] || { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
-    };
+  const showAppsLinksDialog = (): void => setIsHidden(false);
+  const hideAppsAndLinks = (): void => setIsHidden(true);
 
-    // Calculate positions for cards bound to inner circle
-    const getInnerCirclePosition = (position: string): React.CSSProperties => {
-        // Position cards around the inner circle at 3 specific points
-        const positionMap: Record<string, React.CSSProperties> = {
-            'left-center': {
-                top: '50%',
-                left: '0%',
-                transform: 'translate(-50%, -50%)'
-            },
-            'top-center': {
-                top: '0%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)'
-            },
-            'right-center': {
-                top: '50%',
-                right: '0%',
-                transform: 'translate(50%, -50%)'
-            }
-        };
-        return positionMap[position] || { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
-    };
+  return (
+    <div className={styles.serviceLinksContainer}>
+      <AppsAndLinks
+        savedApps={data}
+        hideAppsAndLinks={hideAppsAndLinks}
+        isHidden={isHidden}
+        context={props.context}
+      />
 
-    return (
-        <div className={styles.serviceLinksContainer}>
-            {/* Circular Services Layout with Navigation */}
-            <div className={styles.wheelWrapper}>
-                <button className={styles.navButton} onClick={handlePrev}>
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                        <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
+      <div className={styles.tabContainer}>
+        <button
+          className={`${styles.tab} ${activeTab === "quick" ? styles.activeTab : ""}`}
+          onClick={() => handleTabChange("quick")}
+        >
+          Quick Links
+        </button>
+        <button
+          className={`${styles.tab} ${activeTab === "app" ? styles.activeTab : ""}`}
+          onClick={() => handleTabChange("app")}
+        >
+          App Links
+        </button>
+        <button
+          className={`${styles.tab} ${activeTab === "custom" ? styles.activeTab : ""}`}
+          onClick={() => handleTabChange("custom")}
+        >
+          Custom links
+        </button>
+      </div>
 
-                <div className={styles.outerCircle}>
-                    {/* Render outer circle service cards */}
-                    {currentServices
-                        .filter(service => service.relativeTo === 'outer' && service.position)
-                        .map((service) => {
-                            const position = service.position || 'top-left';
-                            return (
-                                <a
-                                    key={service.id}
-                                    href={service.url}
-                                    className={styles.serviceCard}
-                                    style={getOuterCirclePosition(position)}
-                                >
-                                    <img src={service.icon} alt={service.name} width={80} height={80} />
-                                    <span className={styles.serviceName}>{service.name}</span>
-                                </a>
-                            );
-                        })}
+      <div className={styles.wheelWrapper}>
+        <button className={styles.navButton} onClick={handlePrev} disabled={totalPages <= 1}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M15 18L9 12L15 6"
+              stroke="currentColor"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
 
-                    {/* Inner circle with service cards */}
-                    <div className={styles.innerCircle}>
-                        {/* Render inner circle service cards */}
-                        {currentServices
-                            .filter(service => service.relativeTo === 'inner' && service.position)
-                            .map((service) => {
-                                const position = service.position || 'top-center';
-                                return (
-                                    <a
-                                        key={service.id}
-                                        href={service.url}
-                                        className={styles.serviceCard}
-                                        style={getInnerCirclePosition(position)}
-                                    >
-                                        <img src={service.icon} alt={service.name} width={80} height={80} />
-                                        <span className={styles.serviceName}>{service.name}</span>
-                                    </a>
-                                );
-                            })}
-                    </div>
-                </div>
+        <div className={styles.circleContainer}>
+          <div className={styles.outerCircle}>
+            {/* OUTER circle service cards (first 4 items of the current page) */}
+            {currentServices.slice(0, 4).map((service, idx) => {
+              const position = outerPositions[idx]; // 0..3
+              return (
+                <a
+                  key={service.id}
+                  href={resolveUrl(service.url)}
+                  className={styles.serviceCard}
+                  style={getOuterCirclePosition(position)}
+                  data-interception="off"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => handleOpenNewTab(e, service.url)}
+                >
+                  {service.icon && service.icon !== "#" && (
+                    <img src={service.icon} alt={service.name} width={64} height={64} />
+                  )}
+                  <span className={styles.serviceName}>{service.name}</span>
+                </a>
+              );
+            })}
 
-                <button className={styles.navButton} onClick={handleNext}>
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                        <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
+            {/* INNER circle service cards (next 3 items of the current page) */}
+            <div className={styles.innerCircle}>
+              {currentServices.slice(4, 7).map((service, idx) => {
+                const position = innerPositions[idx]; // 0..2
+                return (
+                  <a
+                    key={service.id}
+                    href={resolveUrl(service.url)}
+                    className={styles.serviceCard}
+                    style={getInnerCirclePosition(position)}
+                    data-interception="off"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => handleOpenNewTab(e, service.url)}
+                  >
+                    {service.icon && service.icon !== "#" && (
+                      <img src={service.icon} alt={service.name} width={64} height={64} />
+                    )}
+                    <span className={styles.serviceName}>{service.name}</span>
+                  </a>
+                );
+              })}
             </div>
-
-            <div className={styles.commonButtonArea}>
-                {/* Pagination Dots */}
-                {
-                    totalPages > 1 && (
-                        <div className={styles.pagination}>
-                            {Array.from({ length: totalPages }).map((_, index) => (
-                                <button
-                                    key={index}
-                                    className={`${styles.dot} ${index === currentPage ? styles.activeDot : ''}`}
-                                    onClick={() => setCurrentPage(index)}
-                                    aria-label={`Go to page ${index + 1}`}
-                                />
-                            ))}
-                        </div>
-                    )
-                }
-
-                <PrimaryButton label="View All" onClick={props.onViewAll} />
-            </div>
+          </div>
         </div>
-    );
+
+        <button className={styles.navButton} onClick={handleNext} disabled={totalPages <= 1}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M9 18L15 12L9 6"
+              stroke="currentColor"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div className={styles.commonButtonArea}>
+        {/* Pagination Dots */}
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            {Array.from({ length: totalPages }).map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""}`}
+                onClick={() => setCurrentPage(index)}
+                aria-label={`Go to page ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
+        <PrimaryButton label="View All" onClick={showAppsLinksDialog} />
+      </div>
+    </div>
+  );
 };
 
 export default ServiceLinks;
-

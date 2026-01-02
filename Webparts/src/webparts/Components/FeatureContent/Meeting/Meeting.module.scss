@@ -51,6 +51,24 @@
   margin: 0;
 }
 
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(300px, 1fr));
+  gap: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.meetingImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ====== OLD carousel styles (ab use nahi ho rahe, but safe to keep) ====== */
+
 .carouselContainer {
   position: relative;
   width: 100%;
@@ -170,11 +188,7 @@
 }
 
 .buttonContainer {
-  text-align: center;
-  
-  a {
-    text-decoration: none;
-  }
+  margin-top: 40px;
 }
 
 .viewAllButton {
@@ -249,5 +263,14 @@
 
   .meetingCard {
     width: 240px;
+  }
+
+  .imageGrid {
+    gap: 16px;
+    overflow-x: auto;
+  }
+
+  .buttonContainer {
+    margin-top: 24px;
   }
 }

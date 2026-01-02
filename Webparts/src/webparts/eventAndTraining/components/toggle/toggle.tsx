@@ -1,95 +1,255 @@
-import * as React from 'react';
-import styles from './EventsTrainingsToggle.module.scss';
-import { Icon } from '@fluentui/react/lib/Icon';
-import Trainingmodule from '../../../Components/Trainings/Training';
-import Allevents from '../../../Components/Events/AllEvents';
+import * as React from "react";
+import styles from "./EventsTrainingsToggle.module.scss";
+import { Icon } from "@fluentui/react/lib/Icon";
+import Trainingmodule from "../../../Components/Trainings/Training";
+import Allevents from "../../../Components/Events/AllEvents";
+import AllMeetings from "../../../Components/TeamsMeeting/TeamsComponent";
+import AllComponents from "../../../Components/All/Allcomponent";
 
 export interface IEventsTrainingsToggleProps {
-  onToggleChange?: (selectedTab: 'events' | 'trainings') => void;
-  onSearchChange?: (searchText: string) => void;
+  onTabChange?: (tab: string) => void;
+  onSearchChange?: (text: string) => void;
   Trainingdata?: any[];
   Eventdata?: any[];
   context?: any;
 }
-
+const meetingsData = [
+    {
+      id: 1,
+      date: {
+        day: "Monday",
+        date: "19",
+        month: "November",
+      },
+      meetingType: "Microsoft Teams Meeting",
+      title: "Team Introduction",
+      time: "11:00 AM - 12:30 PM",
+      organizer: {
+        name: "Mohammed Ali",
+        initials: "MA",
+      },
+      eventEndDate: "11/19/2025 11:15:00 PM\n\n2025-11-19T23:15:00Z",
+      eventStartDate: "11/19/2025 9:10:00 PM\n\n2025-11-19T21:10:00Z",
+      Eventtype: "Teams",
+    },
+    {
+      id: 2,
+      date: {
+        day: "Friday",
+        date: "23",
+        month: "November",
+      },
+      meetingType: "Microsoft Teams Meeting",
+      title: "Team Introduction",
+      time: "10:00 AM - 10:30 AM",
+      organizer: {
+        name: "Mohammed Ali",
+        initials: "MA",
+      },
+      eventEndDate: "11/23/2025 11:15:00 PM\n\n2025-11-23T23:15:00Z",
+      eventStartDate: "11/23/2025 9:10:00 PM\n\n2025-11-23T21:10:00Z",
+      Eventtype: "Teams",
+    },
+    {
+      id: 3,
+      date: {
+        day: "Friday",
+        date: "30",
+        month: "November",
+      },
+      meetingType: "Microsoft Teams Meeting",
+      title: "Project Discussion",
+      time: "12:00 PM - 1:00 PM",
+      organizer: {
+        name: "Farhan Mohammed",
+        initials: "FM",
+      },
+      eventEndDate: "11/30/2025 11:15:00 PM\n\n2025-11-30T23:15:00Z",
+      eventStartDate: "11/30/2025 9:10:00 PM\n\n2025-11-30T21:10:00Z",
+      Eventtype: "Teams",
+    },
+  ];
 const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = ({
   Trainingdata = [],
   Eventdata = [],
   context,
-  onToggleChange,
-  onSearchChange
+  onTabChange,
+  onSearchChange,
 }) => {
-  const [selectedTab, setSelectedTab] = React.useState<'events' | 'trainings'>('events');
-  const [searchText, setSearchText] = React.useState<string>('');
+  const [activeTab, setActiveTab] = React.useState("All");
+  const [viewMode, setViewMode] = React.useState<"list" | "calendar">("list");
+  const [searchText, setSearchText] = React.useState("");
 
-  const handleToggle = (tab: 'events' | 'trainings') => {
-    setSelectedTab(tab);
-    setSearchText(''); 
-    onToggleChange?.(tab);
+  const tabs = ["All", "Events", "Trainings", "Meetings"];
+
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab);
+    setSearchText("");
+    onTabChange?.(tab);
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const text = event.target.value;
-    setSearchText(text);
-    onSearchChange?.(text);
+  const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchText(value);
+    onSearchChange?.(value);
   };
 
-  // Filter data based on search text and active tab
+  /* ---------------- FILTER DATA ------------------- */
   const filteredEvents = React.useMemo(() => {
-    if (!searchText) return Eventdata;
-    return Eventdata.filter(event =>
-      event.title?.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [Eventdata, searchText]);
+    let list = [...Eventdata];
+
+    if (activeTab !== "All" && activeTab === "Events") {
+      list = Eventdata;
+    }
+
+    if (searchText) {
+      list = list.filter((i) =>
+        i.title?.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    return list;
+  }, [Eventdata, activeTab, searchText]);
 
   const filteredTrainings = React.useMemo(() => {
-    if (!searchText) return Trainingdata;
-    return Trainingdata.filter(training =>
-      training.title?.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [Trainingdata, searchText]);
+    let list = [...Trainingdata];
+
+    if (activeTab !== "All" && activeTab === "Trainings") {
+      list = Trainingdata;
+    }
+
+    if (searchText) {
+      list = list.filter((i) =>
+        i.title?.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    return list;
+  }, [Trainingdata, activeTab, searchText]);
 
   return (
     <>
-      <div className={styles.container}>
-        <div className={styles.toggleWrapper}>
-          <div className={styles.toggleContainer}>
-            <button
-              className={`${styles.toggleButton} ${selectedTab === 'events' ? styles.active : ''}`}
-              onClick={() => handleToggle('events')}
-            >
-              Events
-            </button>
-            <button
-              className={`${styles.toggleButton} ${selectedTab === 'trainings' ? styles.active : ''}`}
-              onClick={() => handleToggle('trainings')}
-            >
-              Trainings
-            </button>
+      <div className={styles.paddingSection}>
+        {/* ------------------ TOP BAR ------------------ */}
+        <div className={styles.topWrapper}>
+          {/* Tabs */}
+          <div className={styles.tabContainer}>
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                className={`${styles.tabButton} ${
+                  activeTab === tab ? styles.activeTab : ""
+                }`}
+                onClick={() => handleTabClick(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Right side toggle */}
+          <div className={styles.viewToggleWrapper}>
+            <div className={styles.viewToggle}>
+              {/* Calendar View */}
+              <button
+                className={`${styles.viewBtn} ${
+                  viewMode === "calendar" ? styles.viewActive : ""
+                }`}
+                onClick={() => setViewMode("calendar")}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="M8 5.75C7.59 5.75 7.25 5.41 7.25 5V2C7.25 1.59 7.59 1.25 8 1.25C8.41 1.25 8.75 1.59 8.75 2V5C8.75 5.41 8.41 5.75 8 5.75Z"
+                    fill="#101820"
+                  />
+                  <path
+                    d="M16 5.75C15.59 5.75 15.25 5.41 15.25 5V2C15.25 1.59 15.59 1.25 16 1.25C16.41 1.25 16.75 1.59 16.75 2V5C16.75 5.41 16.41 5.75 16 5.75Z"
+                    fill="#101820"
+                  />
+                  <path
+                    d="M20.5 9.83984H3.5C3.09 9.83984 2.75 9.49984 2.75 9.08984C2.75 8.67984 3.09 8.33984 3.5 8.33984H20.5C20.91 8.33984 21.25 8.67984 21.25 9.08984C21.25 9.49984 20.91 9.83984 20.5 9.83984Z"
+                    fill="#101820"
+                  />
+                  <path
+                    d="M16 22.75H8C4.35 22.75 2.25 20.65 2.25 17V8.5C2.25 4.85 4.35 2.75 8 2.75H16C19.65 2.75 21.75 4.85 21.75 8.5V17C21.75 20.65 19.65 22.75 16 22.75ZM8 4.25C5.14 4.25 3.75 5.64 3.75 8.5V17C3.75 19.86 5.14 21.25 8 21.25H16C18.86 21.25 20.25 19.86 20.25 17V8.5C20.25 5.64 18.86 4.25 16 4.25H8Z"
+                    fill="#101820"
+                  />
+                  <path
+                    d="M8.5 14.5C8.37 14.5 8.24 14.47 8.12 14.42C8 14.37 7.89001 14.3 7.79001 14.21C7.70001 14.11 7.62999 14 7.57999 13.88C7.52999 13.76 7.5 13.63 7.5 13.5C7.5 13.24 7.61001 12.98 7.79001 12.79C7.89001 12.7 8 12.63 8.12 12.58C8.3 12.5 8.50001 12.48 8.70001 12.52C8.76001 12.53 8.82 12.55 8.88 12.58C8.94 12.6 9 12.63 9.06 12.67C9.11 12.71 9.15999 12.75 9.20999 12.79C9.24999 12.84 9.29999 12.89 9.32999 12.94C9.36999 13 9.40001 13.06 9.42001 13.12C9.45001 13.18 9.47001 13.24 9.48001 13.3C9.49001 13.37 9.5 13.43 9.5 13.5C9.5 13.76 9.38999 14.02 9.20999 14.21C9.01999 14.39 8.76 14.5 8.5 14.5Z"
+                    fill="#101820"
+                  />
+                  <path
+                    d="M12 14.4989C11.74 14.4989 11.48 14.3889 11.29 14.2089C11.25 14.1589 11.21 14.1089 11.17 14.0589C11.13 13.9989 11.1 13.9389 11.08 13.8789C11.05 13.8189 11.03 13.7589 11.02 13.6989C11.01 13.6289 11 13.5689 11 13.4989C11 13.3689 11.03 13.2389 11.08 13.1189C11.13 12.9989 11.2 12.8889 11.29 12.7889C11.57 12.5089 12.02 12.4189 12.38 12.5789C12.51 12.6289 12.61 12.6989 12.71 12.7889C12.89 12.9789 13 13.2389 13 13.4989C13 13.5689 12.99 13.6289 12.98 13.6989C12.97 13.7589 12.95 13.8189 12.92 13.8789C12.9 13.9389 12.87 13.9989 12.83 14.0589C12.79 14.1089 12.75 14.1589 12.71 14.2089C12.61 14.2989 12.51 14.3689 12.38 14.4189C12.26 14.4689 12.13 14.4989 12 14.4989Z"
+                    fill="#101820"
+                  />
+                  <path
+                    d="M8.5 17.9989C8.37 17.9989 8.24 17.9689 8.12 17.9189C8 17.8689 7.89001 17.7989 7.79001 17.7089C7.70001 17.6089 7.62999 17.5089 7.57999 17.3789C7.52999 17.2589 7.5 17.1289 7.5 16.9989C7.5 16.7389 7.61001 16.4789 7.79001 16.2889C7.89001 16.1989 8 16.1289 8.12 16.0789C8.49 15.9189 8.92999 16.0089 9.20999 16.2889C9.24999 16.3389 9.29999 16.3889 9.32999 16.4389C9.36999 16.4989 9.40001 16.5589 9.42001 16.6189C9.45001 16.6789 9.47001 16.7389 9.48001 16.8089C9.49001 16.8689 9.5 16.9389 9.5 16.9989C9.5 17.2589 9.38999 17.5189 9.20999 17.7089C9.01999 17.8889 8.76 17.9989 8.5 17.9989Z"
+                    fill="#101820"
+                  />
+                </svg>
+              </button>
+
+              {/* List View */}
+              <button
+                className={`${styles.viewBtn} ${
+                  viewMode === "list" ? styles.viewActive : ""
+                }`}
+                onClick={() => setViewMode("list")}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="60"
+                  height="60"
+                  viewBox="0 0 40 40"
+                  fill="none"
+                >
+                  <path
+                    d="M12.5 26.6641H27.5"
+                    stroke="black"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M12.5 15H27.5"
+                    stroke="black"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
-
-        <div className={styles.searchContainer}>
-          <Icon iconName="Search" className={styles.searchIcon} />
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder={`Search ${selectedTab === 'events' ? 'Events' : 'Trainings'}`}
-            value={searchText}
-            onChange={handleSearchChange}
-          />
-        </div>
-      </div>
-
-      <div>
-        {selectedTab === 'events' ? (
-          <Allevents          
+        {/* ------------------ CONTENT ------------------ */}
+        {activeTab === "Events" ? (
+          <Allevents
             AllEventItems={filteredEvents}
             context={context}
+            viewtype={viewMode}
+          />
+        ) : activeTab === "Meetings" ? (
+          <AllMeetings meetingsData={meetingsData} context={context} viewtype={viewMode} />
+        ) : activeTab === "All" ? (
+          <AllComponents
+            filteredEvents={filteredEvents}
+            filteredMeetings={meetingsData}
+            filteredTrainings={filteredTrainings}
+            context={context}
+            viewMode={viewMode}
           />
         ) : (
-          <Trainingmodule           
+          <Trainingmodule
             AllTrainingdata={filteredTrainings}
+            context={context}
+            viewtype={viewMode}
           />
         )}
       </div>
