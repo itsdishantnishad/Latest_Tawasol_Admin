@@ -162,10 +162,11 @@ import { pickFeatured } from '../services/meetingServices/pickFeatured';
 export interface IMeetingProps {
   source: 'my' | 'team';
   teamId?: string;
-  daysAhead: number; 
-  take: number; 
-  refreshMins: number; 
-  demoMode?: boolean; 
+  daysAhead: number;
+  take: number;
+  refreshMins: number;
+  demoMode?: boolean;
+  seeAllURL?: string;
 }
 
 export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps> {
@@ -238,17 +239,15 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
   private _showingAll: boolean = false;
 
   private _renderRows(rows: any[], ttl: number, cacheKey: string) {
-    const { latest4} = pickFeatured(rows);
+    const { latest4 } = pickFeatured(rows);
 
     const element = React.createElement(MeetingWheelPanel, {
       latest: latest4,
       allMeetings: rows,
-      showingAll: this._showingAll, 
-      onViewAll: () => {
-        this._showingAll = !this._showingAll;
-        this._renderRows(rows, ttl, cacheKey);
-      }
+      context: this.context,
+      seeAllURL: this.properties.seeAllURL,
     });
+
 
     ReactDom.render(element, this.domElement);
     if (!this._showingAll) {
@@ -371,6 +370,11 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
                     { key: 'team', text: 'Team/Group calendar (/groups/{id})' }
                   ]
                 }),
+                PropertyPaneTextField('seeAllURL', {
+                  label: 'View All URL',
+                  placeholder: 'SitePages/Events-And-Trainings.aspx'
+                }),
+
                 PropertyPaneTextField('teamId', {
                   label: 'Team/Group Id (when Source = Team)'
                 }),
@@ -386,7 +390,7 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
                 }),
                 PropertyPaneSlider('refreshMins', {
                   label: 'Refresh every (mins)',
-                  min: 1,
+                  min: 10,
                   max: 30
                 }),
                 PropertyPaneToggle('demoMode', {
