@@ -309,16 +309,6 @@ export const Events: React.FC<IEventsProps> = (props) => {
                 Register
               </button>
             </div>
-
-            <button
-              className={styles.registerButton}
-              onClick={() => {
-                setSelectedEventId(event.id);
-                setIsRegisterOpen(true);
-              }}
-            >
-              Register
-            </button>
           </div>
         ))}
       </div>
