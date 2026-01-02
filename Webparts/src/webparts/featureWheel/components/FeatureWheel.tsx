@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState } from "react";
 import type { IFeatureWheelProps } from "./IFeatureWheelProps";
 
-import Wheel from "../../Components/Wheel/Wheel";
+// import Wheel from "../../Components/Wheel/Wheel";
 import Gallery from "../../Components/Gallery/Gallery";
 import Documents from "../../Components/FeatureContent/Documents/Documents";
 import Events from "../../Components/FeatureContent/Events/Events";
@@ -18,6 +18,7 @@ import Training from "../../Components/FeatureContent/Training/Training";
 import AboutDHRE from "../../Components/FeatureContent/AboutDHRE/AboutDHRE";
 import TaskApprovals from "../../Components/FeatureContent/TaskApprovals/TaskApprovals";
 import BeverageMenu from "../../Components/FeatureContent/BeverageMenu/BeverageMenu";
+import FeatureSelector from "../../widgets/FeatureSelector/FeatureSelector";
 
 import styles from "./FeatureWheel.module.scss";
 
@@ -47,7 +48,108 @@ const FeatureTitle: React.FC<FeatureTitleProps> = ({ header, subHeader }) => {
   );
 };
 
-const featureTitleContent: Record<string, { header: string; subHeader: string }> = {
+export interface Feature {
+  id: string;
+  title: string;
+  subtitle: string;
+  backgroundImage: string;
+}
+
+const features: Feature[] = [
+  {
+    id: "dashboard",
+    title: "Dashboard",
+    subtitle: "Track, analyze, optimize",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/Dashboard.svg')",
+  },
+  {
+    id: "offers",
+    title: "Offers & Benefits",
+    subtitle: "Exclusive perks just for you",
+    backgroundImage: "url('../../Components/FeatureContent/assets/Offers.svg')",
+  },
+  {
+    id: "training",
+    title: "Training",
+    subtitle: "Grow skills, unlock new doors",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/Training.svg')",
+  },
+  {
+    id: "gallery",
+    title: "DHRE Gallery",
+    subtitle: "Past events images and memories",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/ImageGallery.svg')",
+  },
+  {
+    id: "documents",
+    title: "Policies & Procedures",
+    subtitle: "All files in one place",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/Documents.svg')",
+  },
+  {
+    id: "events",
+    title: "Events",
+    subtitle: "Discover whats happening next",
+    backgroundImage: "url('../../Components/FeatureContent/assets/Events.svg')",
+  },
+  {
+    id: "employee_events",
+    title: "Let’s Celebrate",
+    subtitle: "Birthday, anniversary & new joiners",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/LetsCelebrate.svg')",
+  },
+  {
+    id: "meetings",
+    title: "Meeting",
+    subtitle: "Connect, discuss, move forward",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/Meeting.svg')",
+  },
+  {
+    id: "service_links",
+    title: "Service Links",
+    subtitle: "Quick access, zero hassle",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/Service-Links.svg')",
+  },
+  {
+    id: "forms",
+    title: "Interactive Forms",
+    subtitle: "All interactive forms In one place",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/InteractiveForms.svg')",
+  },
+  {
+    id: "about_dhre",
+    title: "About DHRE",
+    subtitle: "Journey through DHRE",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/AboutDHRE.svg')",
+  },
+  {
+    id: "tasks",
+    title: "Task",
+    subtitle: "Get things done with clarity",
+    backgroundImage: "url('../../Components/FeatureContent/assets/Tasks.svg')",
+  },
+  {
+    id: "beverage_menu",
+    title: "Services",
+    subtitle: "Simplify your journey ahead",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/Services.svg')",
+  },
+];
+
+const featureTitleContent: Record<
+  string,
+  { header: string; subHeader: string }
+> = {
   gallery: {
     header: "A Glimpse through our lens",
     subHeader: "Recent milestones and cherished memories we've Immortalised",
@@ -74,11 +176,13 @@ const featureTitleContent: Record<string, { header: string; subHeader: string }>
   },
   forms: {
     header: "Interactive Forms",
-    subHeader: "All your essential forms – legacy, claims, business excellence, and more",
+    subHeader:
+      "All your essential forms – legacy, claims, business excellence, and more",
   },
   about_dhre: {
     header: "About DHRE",
-    subHeader: "Dive deep into DHRE: Our departments, culture, and core values.",
+    subHeader:
+      "Dive deep into DHRE: Our departments, culture, and core values.",
   },
   tasks: {
     header: "Task Approvals",
@@ -103,7 +207,8 @@ const featureTitleContent: Record<string, { header: string; subHeader: string }>
 };
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
-  const [selectedFeature, setSelectedFeature] = useState<string>("gallery");
+  const [selectedFeature, setSelectedFeature] =
+    useState<string>("employee_events");
 
   const handleViewAll = () => {
     console.log("View all clicked for:", selectedFeature);
@@ -112,10 +217,22 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
   const renderFeatureContent = () => {
     switch (selectedFeature) {
       case "gallery":
-        return <Gallery context={props.context} seeAllURL={props.imageGallery} onViewAll={handleViewAll} />;
+        return (
+          <Gallery
+            context={props.context}
+            seeAllURL={props.imageGallery}
+            onViewAll={handleViewAll}
+          />
+        );
 
       case "documents":
-        return <Documents seeAllURL={props.documents} onViewAll={handleViewAll} />;
+        return (
+          <Documents
+            context={props.context}
+            seeAllURL={props.documents}
+            onViewAll={handleViewAll}
+          />
+        );
 
       case "events":
         return (
@@ -129,28 +246,52 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         );
 
       case "employee_events":
-        return <LetsCelebrate context={props.context} seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />;
+        return (
+          <LetsCelebrate
+            context={props.context}
+            seeAllURL={props.letsCelebrate}
+            onViewAll={handleViewAll}
+          />
+        );
 
       case "meetings":
-        return <Meeting context={props.context} seeAllURL={props.meeting} onViewAll={handleViewAll} />;
+        return <Meeting context={props.context} seeAllURL={props.meeting}/>;
 
       case "service_links":
         return <ServiceLinks context={props.context} />;
 
       case "forms":
-        return <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />;
+        return (
+          <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />
+        );
 
       case "about_dhre":
         return <AboutDHRE context={props.context} />;
 
       case "tasks":
-        return <TaskApprovals context={props.context} seeAllURL={props.taskApprovals} />;
+        return (
+          <TaskApprovals
+            context={props.context}
+            seeAllURL={props.taskApprovals}
+          />
+        );
 
       case "beverage_menu":
-        return <BeverageMenu context={props.context} seeAllURL={props.beverageMenu} />;
+        return (
+          <BeverageMenu
+            context={props.context}
+            seeAllURL={props.beverageMenu}
+          />
+        );
 
       case "dashboard":
-        return <Dashboard context={props.context} seeAllURL={props.dashboard} onViewAll={handleViewAll} />;
+        return (
+          <Dashboard
+            context={props.context}
+            seeAllURL={props.dashboard}
+            onViewAll={handleViewAll}
+          />
+        );
 
       case "offers":
         return (
@@ -185,9 +326,17 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         <h6>Scroll to see all the menus under Tawasol</h6>
       </div>
 
-      <section className={styles.wheelSection}>
-        <Wheel selectedFeature={selectedFeature} onFeatureSelect={setSelectedFeature} />
-      </section>
+      {/* <section className={styles.wheelSection}>
+        <Wheel
+          selectedFeature={selectedFeature}
+          onFeatureSelect={setSelectedFeature}
+        />
+      </section> */}
+      <FeatureSelector
+        features={features}
+        selectedFeature={selectedFeature}
+        onFeatureSelect={setSelectedFeature}
+      />
 
       <FeatureTitle
         header={featureTitleContent[selectedFeature].header}

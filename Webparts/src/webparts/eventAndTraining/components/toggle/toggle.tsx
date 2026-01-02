@@ -5,12 +5,14 @@ import Trainingmodule from "../../../Components/Trainings/Training";
 import Allevents from "../../../Components/Events/AllEvents";
 import AllMeetings from "../../../Components/TeamsMeeting/TeamsComponent";
 import AllComponents from "../../../Components/All/Allcomponent";
+import { mapGraphMeetingToUI } from "../../../services/meetingServices/mapGraphMeetingToUI";
 
 export interface IEventsTrainingsToggleProps {
   onTabChange?: (tab: string) => void;
   onSearchChange?: (text: string) => void;
   Trainingdata?: any[];
   Eventdata?: any[];
+  MeetingsData?: any[]
   context?: any;
 }
 const meetingsData = [
@@ -69,13 +71,25 @@ const meetingsData = [
       Eventtype: "Teams",
     },
   ];
-const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = ({
-  Trainingdata = [],
-  Eventdata = [],
-  context,
-  onTabChange,
-  onSearchChange,
-}) => {
+const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = (props) => {
+
+  const {
+    Trainingdata = [],
+    Eventdata = [],
+    MeetingsData = [],
+    context,
+    onTabChange,
+    onSearchChange,
+  } = props;
+  
+    const mappedMeetings = React.useMemo(() => {
+      return MeetingsData.map(mapGraphMeetingToUI);
+   }, [MeetingsData]);
+   
+   console.log("MeetingsData (raw):", MeetingsData);
+   console.log("Mapped meetings:", mappedMeetings);
+
+
   const [activeTab, setActiveTab] = React.useState("All");
   const [viewMode, setViewMode] = React.useState<"list" | "calendar">("list");
   const [searchText, setSearchText] = React.useState("");
@@ -236,11 +250,16 @@ const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = ({
             viewtype={viewMode}
           />
         ) : activeTab === "Meetings" ? (
-          <AllMeetings meetingsData={meetingsData} context={context} viewtype={viewMode} />
+          <AllMeetings
+  meetingsData={mappedMeetings}
+  context={context}
+  viewtype={viewMode}
+/>
+
         ) : activeTab === "All" ? (
           <AllComponents
             filteredEvents={filteredEvents}
-            filteredMeetings={meetingsData}
+            filteredMeetings={mappedMeetings}
             filteredTrainings={filteredTrainings}
             context={context}
             viewMode={viewMode}

@@ -12,10 +12,15 @@ import * as strings from 'EventAndTrainingWebPartStrings';
 import EventAndTraining from './components/EventAndTraining';
 import { IEventAndTrainingProps } from './components/IEventAndTrainingProps';
 import { listServices } from "../services/listServices";
+import { MSGraphClientV3 } from "@microsoft/sp-http";
+import { GraphMeetingsProvider } from '../services/meetingServices/GraphMeetingsProvider';
+
 export interface IEventAndTrainingWebPartProps {
   description: string;
   context: any;
 }
+
+
 
 export default class EventAndTrainingWebPart extends BaseClientSideWebPart<IEventAndTrainingWebPartProps> {
 
@@ -30,6 +35,7 @@ export default class EventAndTrainingWebPart extends BaseClientSideWebPart<IEven
       {       
         trainingItem: this.trainingItem,
         EventItem: this.EventItem,
+        MeetingsData: this._meetings || [],
         context:this.context
       }
     );
@@ -37,10 +43,16 @@ export default class EventAndTrainingWebPart extends BaseClientSideWebPart<IEven
     ReactDom.render(element, this.domElement);
   }
 
+  private _meetings: any[] = [];
+
   async onInit(): Promise<void> {
     this.spService = new listServices(this.context);
     this.trainingItem = await this.spService.getAllTraining();
     this.EventItem = await this.spService.getAllEvents();
+     const graph = await this.context.msGraphClientFactory.getClient("3");
+    const provider = new GraphMeetingsProvider(graph);
+    this._meetings = await provider.getUpcoming(7, 20);
+    this.render();
   }
  
 

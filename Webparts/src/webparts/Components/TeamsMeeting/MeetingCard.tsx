@@ -3,8 +3,13 @@ import styles from "./TeamsComponent.module.scss";
 
 const outlookIcon: string = require("../../assets/outlook-icon.svg");
 const TeamsIcon: string = require("../../assets/TeamsIcon.png");
+
+const getOrganizerAvatar = (event: any): string => {
+  return event.avatarUrl || event.organizer?.avatarUrl || "https://i.pravatar.cc/150?img=1";
+};
+
 // MeetingCard Component
-const MeetingCard = ({ event, onJoinClick }:any) => {
+const MeetingCard = ({ event, onJoinClick }: any) => {
   return (
     <div className={styles.meetingCard}>
       <div className={styles.dateSection}>
@@ -52,7 +57,7 @@ const MeetingCard = ({ event, onJoinClick }:any) => {
               width="400"
               height="400"
               preserveAspectRatio="none"
-              xlinkHref={TeamsIcon}  />
+              xlinkHref={TeamsIcon} />
           </defs>
         </svg>
       </div>
@@ -78,9 +83,9 @@ const MeetingCard = ({ event, onJoinClick }:any) => {
           </div>
 
           <div className={styles.infoRow}>
-          <img 
-              src={"https://i.pravatar.cc/150?img=1"} 
-              alt={event.organizer.name} 
+            <img
+              src={getOrganizerAvatar(event)}
+              alt={event.organizer?.name || 'Organizer'}
               className={styles.instructorImage}
             />
             <span className={styles.infoText}>

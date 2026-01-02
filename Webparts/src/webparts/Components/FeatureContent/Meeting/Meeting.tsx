@@ -1,84 +1,74 @@
 import * as React from 'react';
 import styles from './Meeting.module.scss';
-import ConditionalLink from "../../ConditionalLink/ConditionalLink";
-import PrimaryButton from "../../PrimaryButton/PrimaryButton";
+import { MSGraphClientV3 } from '@microsoft/sp-http';
 
-export interface IMeeting {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  isFeatured?: boolean;
-}
+import { GraphMeetingsProvider } from '../../../services/meetingServices/GraphMeetingsProvider';
+import MeetingCards from '../../../meeting/components/Meeting';
 
 export interface IMeetingProps {
-  meetings?: IMeeting[]; // still kept so parent props won't break
-  onViewAll?: () => void;
+  context: any;
   seeAllURL?: string;
-
-  context: any; // (ideally WebPartContext)
 }
 
-// SVGs are in: src/webparts/Components/FeatureContent/assets
-const meetingImg30: string = require('../assets/30.svg');
-const meetingImg31: string = require('../assets/31.svg');
-const meetingImg32: string = require('../assets/32.svg');
-const meetingImg33: string = require('../assets/33.svg');
+const mapToMeetingItems = (rows: any[]) =>
+  rows.map((m) => ({
+    id: m.id,
+    title: m.subject,
+    start: m.start,
+    end: m.end,
+    location: m.location,
+    organizerName: m.organizer,
+    description: m.description,
+    joinUrl: m.joinUrl,
+    avatarUrl: m.avatarUrl
+  }));
 
-export const Meeting: React.FC<IMeetingProps> = (props) => {
-  const images: string[] = [meetingImg30, meetingImg31, meetingImg32, meetingImg33];
+const Meeting: React.FC<IMeetingProps> = ({ context, seeAllURL }) => {
+  const [items, setItems] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
-  // ===== VIEW ALL FUNCTIONALITY (same as tumhara purana logic) =====
-  const webUrl: string = props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
-  const origin: string = new URL(webUrl).origin;
+  React.useEffect(() => {
+    let cancelled = false;
 
-  const viewAllHref = React.useMemo(() => {
-    const configured = (props.seeAllURL || "").trim();
-
-    const raw = configured || "SitePages/Events-And-Trainings.aspx";
-
-
-    if (/^https?:\/\//i.test(raw)) {
+    const load = async () => {
       try {
-        const parsed = new URL(raw);
-        return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
-      } catch {
-        return raw;
+        const graph = (await context.msGraphClientFactory.getClient('3')) as MSGraphClientV3;
+        const provider = new GraphMeetingsProvider(graph);
+
+        const rows = await provider.getUpcoming(7, 4); 
+
+        if (!cancelled) {
+          setItems(mapToMeetingItems(rows || [])); 
+        }
+      } catch (e) {
+        console.error('Meeting load failed', e);
+        if (!cancelled) setItems([]);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-    }
+    };
 
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [context]);
 
-    if (raw.startsWith("/")) {
-      return `${origin}${raw}`;
-    }
+  if (loading) {
+    return <div className={styles.meetingContainer}>Loading meetings…</div>;
+  }
 
-    // Web-relative (SitePages/Page.aspx)
-    return `${webUrl}/${raw}`;
-  }, [props.seeAllURL, webUrl, origin]);
-  // ================================================================
+  if (!items.length) {
+    return <div className={styles.meetingContainer}>No upcoming meetings</div>;
+  }
 
   return (
     <div className={styles.meetingContainer}>
-      {/* Just show 4 SVG images */}
-      <div className={styles.imageGrid}>
-        {images.map((src, index) => (
-          <div key={index}>
-            <img
-              src={src}
-              alt={`Meeting illustration ${index + 1}`}
-              className={styles.meetingImage}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* View All Button (uses dynamic viewAllHref) */}
-      <div className={styles.buttonContainer}>
-        <ConditionalLink to={viewAllHref}>
-          <PrimaryButton label="View All" />
-        </ConditionalLink>
-      </div>
+      <MeetingCards
+        items={items}
+        context={context}
+        seeAllURL={seeAllURL}
+      />
     </div>
   );
 };

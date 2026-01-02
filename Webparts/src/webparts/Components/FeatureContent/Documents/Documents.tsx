@@ -18,10 +18,10 @@ export interface IDocument {
 
 export interface IDocumentsProps {
   documents?: IDocument[];
-  onViewAll?: () => void;
+  onViewAll?: (seeAllURL: string) => void;
   seeAllURL?: string;
+  context: any;
 }
-
 
 const defaultDocuments: IDocument[] = [
   {
@@ -53,12 +53,44 @@ const defaultDocuments: IDocument[] = [
 export const Documents: React.FC<IDocumentsProps> = (props) => {
   const documents = props.documents || defaultDocuments;
 
+  // ==========================
+  // DYNAMIC VIEW-ALL URL 
+  // ==========================
+  const webUrl: string = props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+  const origin: string = new URL(webUrl).origin;
+
+  const viewAllHref = React.useMemo(() => {
+    const configured = (props.seeAllURL || "").trim();
+
+    // Default fallback page inside same site
+    const raw = configured || "SitePages/PoliciesAndProcedures.aspx";
+
+    // Absolute URL → keep path, enforce same tenant
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const parsed = new URL(raw);
+        return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      } catch {
+        return raw;
+      }
+    }
+
+    // Root-relative (/sites/xxx/...)
+    if (raw.startsWith("/")) {
+      return `${origin}${raw}`;
+    }
+
+    // Site-relative (SitePages/xxx.aspx)
+    return `${webUrl}/${raw}`;
+  }, [props.seeAllURL, webUrl, origin]);
+  // =========================================================
+
   return (
     <div>
       <ShuffledCards cards={documents} />
 
       <div className={styles.ctaWrapper}>
-        <ConditionalLink to="https://orgessence.sharepoint.com/sites/IntranetRevampTawasol/SitePages/PoliciesAndProcedures.aspx">
+        <ConditionalLink to={viewAllHref}>
           <PrimaryButton label="View All" />
         </ConditionalLink>
       </div>
@@ -67,7 +99,3 @@ export const Documents: React.FC<IDocumentsProps> = (props) => {
 };
 
 export default Documents;
-
-
-
-

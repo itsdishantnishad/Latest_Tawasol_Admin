@@ -4,4 +4,5 @@ export interface IMeetingProps {
   environmentMessage: string;
   hasTeamsContext: boolean;
   userDisplayName: string;
+  seeAllURL?: string;
 }
