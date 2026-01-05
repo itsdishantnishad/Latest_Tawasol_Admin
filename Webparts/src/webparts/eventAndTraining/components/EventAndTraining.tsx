@@ -6,7 +6,6 @@ import type { IEventAndTrainingProps } from './IEventAndTrainingProps';
 // import Training from '../../Components/Trainings/Training';
 import EventsTrainingsToggle from '../components/toggle/toggle';
 import { CardTitle } from './cardTitle/cardTitle';
-
 export interface IEventAndTrainingState {
   selectedTab: any;
 }
@@ -20,9 +19,8 @@ export default class EventAndTraining extends React.Component<IEventAndTrainingP
     };
   }
 
-
   public render(): React.ReactElement<IEventAndTrainingProps> {
-    const { trainingItem: AlltrainingItem, EventItem: AllEventItems } =
+    const { trainingItem: AlltrainingItem, EventItem: AllEventItems,MeetingsData } =
       this.props;
 
     // const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
@@ -40,6 +38,7 @@ export default class EventAndTraining extends React.Component<IEventAndTrainingP
         <EventsTrainingsToggle
           Trainingdata={AlltrainingItem}
           Eventdata={AllEventItems}
+          MeetingsData={MeetingsData}
           context={this.props.context}
         />
       </>

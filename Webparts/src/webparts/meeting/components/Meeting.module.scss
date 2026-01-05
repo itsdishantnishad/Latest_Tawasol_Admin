@@ -130,7 +130,9 @@
   width: 100%;
   height: 85px;
   border-radius: 8px;
-  background: #D6E8F9;
+  background: radial-gradient(circle at top, #DDA160 0%, #FFDBB4 100%);
+  border: 1px solid #F0BB82;
+  box-shadow: 0px -2px 4px 0px #FED3A4 inset;
   padding: 8px 10px;
   box-sizing: border-box;
   overflow: hidden;
@@ -138,6 +140,7 @@
   align-items: flex-start;
   margin: 0;
 }
+
 
 .titleText {
   font-family: 'Inter', Segoe UI, Arial, sans-serif;
@@ -279,7 +282,7 @@
 .viewAllWrap {
   display: flex;
   justify-content: center;
-  margin-top: 8px;
+  margin-top: 40px;
 }
 
 .viewAllBtn {

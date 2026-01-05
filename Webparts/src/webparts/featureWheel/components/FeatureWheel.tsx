@@ -255,13 +255,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         );
 
       case "meetings":
-        return (
-          <Meeting
-            context={props.context}
-            seeAllURL={props.meeting}
-            onViewAll={handleViewAll}
-          />
-        );
+        return <Meeting context={props.context} seeAllURL={props.meeting}/>;
 
       case "service_links":
         return <ServiceLinks context={props.context} />;
