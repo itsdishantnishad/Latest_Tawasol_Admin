@@ -1,29 +1,297 @@
 
+// import { ApplicationCustomizerContext } from "@microsoft/sp-application-base";
+// import { SPHttpClient } from "@microsoft/sp-http";
+
+// export interface IOnboConfig {
+//   homeUrl: string;
+//   URL: string;
+//   onComplete?: () => void;
+// }
+
+// const playCircle: string = require("../assets/onboardingPlaycircle.png");
+// const arrowLeft: string = require("../assets/onboardingArrowleft.png");
+// const arrowRight: string = require("../assets/onboardingArrowright.png");
+
+// export default class Onbo {
+//   private static readonly LIST_TITLE = "Onboarding";
+
+//   private _context: ApplicationCustomizerContext;
+//   private _config: IOnboConfig;
+//   private _container: HTMLDivElement | null = null;
+//   private _videoEl: HTMLVideoElement | null = null;
+
+//   constructor(context: ApplicationCustomizerContext, config: IOnboConfig) {
+//     this._context = context; // ✅ now USED
+//     this._config = config;
+//   }
+
+//   /* ================= LIST ================= */
+
+//   public static async loadStateFromList(
+//     context: ApplicationCustomizerContext
+//   ): Promise<{ URL: string; hasSeen: boolean }> {
+//     const webUrl = context.pageContext.web.absoluteUrl;
+//     const spHttpClient = context.spHttpClient;
+
+//     const userLogin = context.pageContext.user.loginName || "";
+//     const loginForFilter = userLogin.replace(/'/g, "''");
+
+//     let URL = "";
+//     let hasSeen = false;
+
+//     const cfgResp = await spHttpClient.get(
+//       `${webUrl}/_api/web/lists/GetByTitle('${Onbo.LIST_TITLE}')/items?$select=URL&$top=1`,
+//       SPHttpClient.configurations.v1
+//     );
+
+//     if (cfgResp.ok) {
+//       const json = await cfgResp.json();
+//       if (json.value?.[0]?.URL) {
+//         URL = json.value[0].URL.Url;
+//       }
+//     }
+
+//     const userResp = await spHttpClient.get(
+//       `${webUrl}/_api/web/lists/GetByTitle('${Onbo.LIST_TITLE}')/items?$select=TIRUserID&$filter=TIRUserID eq '${loginForFilter}'&$top=1`,
+//       SPHttpClient.configurations.v1
+//     );
+
+//     if (userResp.ok) {
+//       const json = await userResp.json();
+//       hasSeen = json.value?.length > 0;
+//     }
+
+//     return { URL, hasSeen };
+//   }
+
+//   public static async markSeenInList(
+//     context: ApplicationCustomizerContext
+//   ): Promise<void> {
+//     const webUrl = context.pageContext.web.absoluteUrl;
+//     const spHttpClient = context.spHttpClient;
+//     const userLogin = context.pageContext.user.loginName || "";
+
+//     await spHttpClient.post(
+//       `${webUrl}/_api/web/lists/GetByTitle('${Onbo.LIST_TITLE}')/items`,
+//       SPHttpClient.configurations.v1,
+//       {
+//         headers: {
+//           accept: "application/json;odata=nometadata",
+//           "content-type": "application/json;odata=nometadata"
+//         },
+//         body: JSON.stringify({
+//           Title: userLogin,
+//           TIRUserID: userLogin
+//         })
+//       }
+//     );
+//   }
+
+//   /* ================= RENDER ================= */
+
+//   public render(): void {
+//     if (this._container) return;
+
+//     this._injectStylesIfNeeded();
+
+//     this._container = document.createElement("div");
+//     this._container.className = "tw-onboard-backdrop";
+//     this._container.innerHTML = this._getHtml();
+
+//     document.body.appendChild(this._container);
+//     this._attachEvents();
+//   }
+
+//   public dispose(): void {
+//     if (this._container?.parentNode) {
+//       this._container.parentNode.removeChild(this._container);
+//       this._container = null;
+//     }
+//   }
+
+//   private _getHtml(): string {
+//     return `
+//       <div class="tw-onboard-wrapper">
+//         <div class="tw-onboard-header">
+//           <h1>Welcome to the All New Tawasol!</h1>
+//           <p>
+//             Access company news, tasks, and support – all from one place.
+//             No more jumping between tools.
+//           </p>
+//         </div>
+
+//         <div class="tw-onboard-video-frame">
+//           <video
+//             class="tw-onboard-video"
+//             src="${this._config.URL}"
+//             muted
+//             playsinline
+//           ></video>
+
+//           <div class="tw-onboard-video-overlay">
+//             <img src="${playCircle}" class="tw-onboard-play-img" />
+//           </div>
+
+//           <div class="tw-onboard-caption">
+//             <img src="${arrowLeft}" />
+//             <span>Jumeirah Marsa Al Arab</span>
+//             <img src="${arrowRight}" />
+//           </div>
+//         </div>
+
+//         <div class="tw-onboard-footer">
+//           <button class="tw-onboard-btn-primary">
+//             Let’s Get Started
+//           </button>
+//         </div>
+//       </div>
+//     `;
+//   }
+
+//   /* ================= EVENTS ================= */
+
+//   private _attachEvents(): void {
+//     if (!this._container) return;
+
+//     this._videoEl = this._container.querySelector(
+//       ".tw-onboard-video"
+//     ) as HTMLVideoElement;
+
+//     const overlay = this._container.querySelector(
+//       ".tw-onboard-video-overlay"
+//     ) as HTMLDivElement;
+
+//     overlay?.addEventListener("click", async () => {
+//       overlay.style.display = "none";
+//       await this._videoEl?.play();
+//     });
+
+//     const button = this._container.querySelector(
+//       ".tw-onboard-btn-primary"
+//     ) as HTMLButtonElement;
+
+//     button?.addEventListener("click", async () => {
+//       await Onbo.markSeenInList(this._context); // ✅ context USED
+//       this.dispose();
+//       if (this._config.homeUrl) {
+//         window.location.href = this._config.homeUrl;
+//       }
+//     });
+//   }
+
+//   /* ================= INLINE CSS ================= */
+
+//   private _injectStylesIfNeeded(): void {
+//     if (document.getElementById("tw-onboard-styles")) return;
+
+//     const style = document.createElement("style");
+//     style.id = "tw-onboard-styles";
+//     style.innerHTML = `
+//       .tw-onboard-backdrop {
+//         position: fixed;
+//         inset: 0;
+//         background: #FFF4EA;
+//         overflow-y: auto;
+//         z-index: 999999;
+//       }
+
+//       .tw-onboard-wrapper {
+//         max-width: 1440px;
+//         margin: 0 auto;
+//         padding: 80px 40px 64px;
+//       }
+
+//       .tw-onboard-header {
+//         text-align: center;
+//         margin-bottom: 48px;
+//       }
+
+//       .tw-onboard-video-frame {
+//         position: relative;
+//         width: 100%;
+//         height: 520px;
+//         border-radius: 12px;
+//         overflow: hidden;
+//       }
+
+//       .tw-onboard-video {
+//         width: 100%;
+//         height: 100%;
+//         object-fit: cover;
+//       }
+
+//       .tw-onboard-video-overlay {
+//         position: absolute;
+//         inset: 0;
+//         display: flex;
+//         justify-content: center;
+//         align-items: center;
+//         cursor: pointer;
+//       }
+
+//       .tw-onboard-play-img {
+//         width: 120px;
+//       }
+
+//       .tw-onboard-caption {
+//         position: absolute;
+//         bottom: 24px;
+//         left: 50%;
+//         transform: translateX(-50%);
+//         display: flex;
+//         gap: 16px;
+//         font-weight: 500;
+//       }
+
+//       .tw-onboard-footer {
+//         display: flex;
+//         justify-content: center;
+//         margin-top: 40px;
+//       }
+
+//       .tw-onboard-btn-primary {
+//         padding: 12px 32px;
+//         border-radius: 999px;
+//         background: #1F2D3A;
+//         color: #fff;
+//         border: none;
+//         cursor: pointer;
+//       }
+//     `;
+//     document.head.appendChild(style);
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
 import { ApplicationCustomizerContext } from "@microsoft/sp-application-base";
-import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import { SPHttpClient } from "@microsoft/sp-http";
 
 export interface IOnboConfig {
-  homeUrl: string;      
-  videoUrl: string;      
-  onComplete?: () => void;
+  homeUrl: string;
+  URL: string;
+  title: string;
 }
 
-
-
 const playCircle: string = require("../assets/onboardingPlaycircle.png");
-
 const arrowLeft: string = require("../assets/onboardingArrowleft.png");
-
 const arrowRight: string = require("../assets/onboardingArrowright.png");
 
 export default class Onbo {
-  private static readonly LIST_TITLE: string = "TawasolOnboarding";
+  private static readonly LIST_TITLE = "Onboarding";
 
   private _context: ApplicationCustomizerContext;
   private _config: IOnboConfig;
   private _container: HTMLDivElement | null = null;
-  private _buttonHandler: any;
-  private _playHandler: any;
   private _videoEl: HTMLVideoElement | null = null;
 
   constructor(context: ApplicationCustomizerContext, config: IOnboConfig) {
@@ -31,547 +299,220 @@ export default class Onbo {
     this._config = config;
   }
 
-  // ========= LIST HELPERS =========
-
+  /* ======================================================
+     READ SHAREPOINT LIST
+     ====================================================== */
 
   public static async loadStateFromList(
     context: ApplicationCustomizerContext
-  ): Promise<{ videoUrl: string; hasSeen: boolean }> {
+  ): Promise<{ URL: string; title: string; hasSeen: boolean }> {
 
-    const webUrl: string = context.pageContext.web.absoluteUrl;
-    const spHttpClient: SPHttpClient = context.spHttpClient;
-    const listTitle: string = Onbo.LIST_TITLE;
+    const webUrl = context.pageContext.web.absoluteUrl;
+    const sp = context.spHttpClient;
 
-    const userLogin: string = context.pageContext.user.loginName || "";
-    const loginForFilter: string = userLogin.replace(/'/g, "''");
+    const userLogin = context.pageContext.user.loginName || "";
+    const safeLogin = userLogin.replace(/'/g, "''");
 
-    let videoUrl: string = "";
-    let hasSeen: boolean = false;
+    let URL = "";
+    let title = "";
+    let hasSeen = false;
 
-    // 1) row  VideoUrl filled 
-    const cfgUrl: string =
-      `${webUrl}/_api/web/lists/GetByTitle('${listTitle}')/items` +
-      `?$select=Id,Title,VideoUrl&$filter=VideoUrl ne null and VideoUrl ne ''&$top=1`;
+    // 🔹 Fetch Title + URL
+    const cfgResp = await sp.get(
+      `${webUrl}/_api/web/lists/GetByTitle('${Onbo.LIST_TITLE}')/items?$select=Title,URL&$top=1`,
+      SPHttpClient.configurations.v1
+    );
 
-    try {
-      const cfgResp: SPHttpClientResponse = await spHttpClient.get(
-        cfgUrl,
-        SPHttpClient.configurations.v1
-      );
-      if (cfgResp.ok) {
-        const cfgJson: any = await cfgResp.json();
-        if (cfgJson.value && cfgJson.value.length > 0) {
-          videoUrl = cfgJson.value[0].VideoUrl || "";
-        }
+    if (cfgResp.ok) {
+      const json = await cfgResp.json();
+      if (json.value?.length) {
+        title = json.value[0].Title || "";
+        URL = json.value[0].URL?.Url || "";
       }
-    } catch {
-      
     }
 
-    // 2) UserIDName == current user?
-    const userUrl: string =
-      `${webUrl}/_api/web/lists/GetByTitle('${listTitle}')/items` +
-      `?$select=Id,UserIDName&$filter=UserIDName eq '${loginForFilter}'&$top=1`;
+    // 🔹 Check if user already completed onboarding
+    const userResp = await sp.get(
+      `${webUrl}/_api/web/lists/GetByTitle('${Onbo.LIST_TITLE}')/items?$select=TIRUserID&$filter=TIRUserID eq '${safeLogin}'&$top=1`,
+      SPHttpClient.configurations.v1
+    );
 
-    try {
-      const userResp: SPHttpClientResponse = await spHttpClient.get(
-        userUrl,
-        SPHttpClient.configurations.v1
-      );
-      if (userResp.ok) {
-        const userJson: any = await userResp.json();
-        hasSeen = userJson.value && userJson.value.length > 0;
-      }
-    } catch {
-      
+    if (userResp.ok) {
+      const json = await userResp.json();
+      hasSeen = json.value?.length > 0;
     }
 
-    return { videoUrl, hasSeen };
+    return { URL, title, hasSeen };
   }
 
-  /**
-   *for  Current user  creating item:
-   * Title = loginName, UserIDName = loginName
-   */
-  public static async markSeenInList(context: ApplicationCustomizerContext): Promise<void> {
-    const webUrl: string = context.pageContext.web.absoluteUrl;
-    const spHttpClient: SPHttpClient = context.spHttpClient;
-    const listTitle: string = Onbo.LIST_TITLE;
+  /* ======================================================
+     MARK AS SEEN
+     ====================================================== */
 
-    const userLogin: string = context.pageContext.user.loginName || "";
+  private async _markSeen(): Promise<void> {
+    const webUrl = this._context.pageContext.web.absoluteUrl;
+    const sp = this._context.spHttpClient;
+    const userLogin = this._context.pageContext.user.loginName || "";
 
-    const body: string = JSON.stringify({
-      Title: userLogin,
-      UserIDName: userLogin
-    });
-
-    try {
-      await spHttpClient.post(
-        `${webUrl}/_api/web/lists/GetByTitle('${listTitle}')/items`,
-        SPHttpClient.configurations.v1,
-        {
-          headers: {
-            accept: "application/json;odata=nometadata",
-            "content-type": "application/json;odata=nometadata"
-          },
-          body
-        }
-      );
-    } catch {
-      
-    }
+    await sp.post(
+      `${webUrl}/_api/web/lists/GetByTitle('${Onbo.LIST_TITLE}')/items`,
+      SPHttpClient.configurations.v1,
+      {
+        headers: {
+          accept: "application/json;odata=nometadata",
+          "content-type": "application/json;odata=nometadata"
+        },
+        body: JSON.stringify({
+          Title: userLogin,
+          TIRUserID: userLogin
+        })
+      }
+    );
   }
 
-  // ========= RENDER / DISPOSE =========
+  /* ======================================================
+     RENDER
+     ====================================================== */
 
   public render(): void {
     if (this._container) return;
 
-    this._injectStylesIfNeeded();
+    this._injectStyles();
 
     this._container = document.createElement("div");
     this._container.className = "tw-onboard-backdrop";
     this._container.innerHTML = this._getHtml();
-    document.body.appendChild(this._container);
 
+    document.body.appendChild(this._container);
     this._attachEvents();
   }
 
-  public dispose(): void {
-    if (this._container && this._container.parentNode) {
-      this._detachEvents();
-      this._container.parentNode.removeChild(this._container);
-      this._container = null;
-    }
-  }
-
-  // ========= INTERNAL UI MARKUP =========
-
   private _getHtml(): string {
-    const title: string = "Welcome to the All New Tawasol!";
-    const subtitle: string =
-      "Access company news, tasks, and support – all from one place. No more jumping between tools.";
-
-    const videoUrl: string = this._config.videoUrl;
-
     return `
-      <div class="tw-onboard-center">
-        <div class="tw-onboard-card">
-          <div class="tw-onboard-header">
-            <h1 class="tw-onboard-title">${title}</h1>
-            <p class="tw-onboard-subtitle">${subtitle}</p>
+      <div class="tw-onboard-wrapper">
+
+        <div class="tw-onboard-header">
+          <h1>Welcome to the All New Tawasol!</h1>
+          <p>Access company news, tasks, and support – all from one place.</p>
+        </div>
+
+        <div class="tw-onboard-video-frame">
+          <video class="tw-onboard-video" src="${this._config.URL}" muted playsinline></video>
+
+          <div class="tw-onboard-video-overlay">
+            <img src="${playCircle}" class="tw-onboard-play-img" />
           </div>
 
-          <div class="tw-onboard-video-wrapper">
-            <div class="tw-onboard-video-frame">
-              <video class="tw-onboard-video" src="${videoUrl}" playsinline></video>
-
-              <!-- Play circle -->
-              <div class="tw-onboard-video-overlay">
-                <img src="${playCircle}" class="tw-onboard-play-img" alt="Play video" />
-              </div>
-
-              <!-- Caption + arrows -->
-              <div class="tw-onboard-video-caption">
-                <img src="${arrowLeft}" class="tw-onboard-caption-arrow" alt="" />
-                <span class="tw-onboard-caption-text">Jumeirah Marsa Al Arab</span>
-                <img src="${arrowRight}" class="tw-onboard-caption-arrow" alt="" />
-              </div>
-            </div>
-          </div>
-
-          <div class="tw-onboard-footer">
-            <button type="button" class="tw-onboard-btn-primary">
-              <span>Let’s Get Started</span>
-            </button>
+          <div class="tw-onboard-caption">
+            <img src="${arrowLeft}" />
+            <span>${this._config.title}</span>
+            <img src="${arrowRight}" />
           </div>
         </div>
+
+        <div class="tw-onboard-footer">
+          <button class="tw-onboard-btn-primary">Let’s Get Started</button>
+        </div>
+
       </div>
     `;
   }
 
-  // ========= EVENTS =========
-
   private _attachEvents(): void {
     if (!this._container) return;
 
-    const button = this._container.querySelector(
-      ".tw-onboard-btn-primary"
-    ) as HTMLButtonElement | null;
+    this._videoEl = this._container.querySelector(".tw-onboard-video") as HTMLVideoElement;
+    const overlay = this._container.querySelector(".tw-onboard-video-overlay") as HTMLDivElement;
+    const btn = this._container.querySelector(".tw-onboard-btn-primary") as HTMLButtonElement;
 
-    if (button) {
-      this._buttonHandler = this._onPrimaryClick.bind(this);
-      button.addEventListener("click", this._buttonHandler);
-    }
+    overlay?.addEventListener("click", async () => {
+      overlay.style.display = "none";
+      await this._videoEl?.play();
+    });
 
-    this._videoEl = this._container.querySelector(
-      ".tw-onboard-video"
-    ) as HTMLVideoElement | null;
-
-    const playImg = this._container.querySelector(
-      ".tw-onboard-play-img"
-    ) as HTMLImageElement | null;
-
-    if (this._videoEl && playImg) {
-      this._playHandler = () => {
-        if (!this._videoEl) return;
-        if (this._videoEl.paused) {
-          void this._videoEl.play();
-        } else {
-          this._videoEl.pause();
-        }
-      };
-      playImg.addEventListener("click", this._playHandler);
-    }
-  }
-
-  private _detachEvents(): void {
-    if (!this._container) return;
-
-    const button = this._container.querySelector(
-      ".tw-onboard-btn-primary"
-    ) as HTMLButtonElement | null;
-
-    if (button && this._buttonHandler) {
-      button.removeEventListener("click", this._buttonHandler);
-    }
-
-    const playImg = this._container.querySelector(
-      ".tw-onboard-play-img"
-    ) as HTMLImageElement | null;
-
-    if (playImg && this._playHandler) {
-      playImg.removeEventListener("click", this._playHandler);
-    }
-  }
-
-
-  private async _onPrimaryClick(ev: MouseEvent): Promise<void> {
-    ev.preventDefault();
-
-    try {
-      await Onbo.markSeenInList(this._context);
-    } catch {
-      
-    }
-
-    if (this._config.onComplete) {
-      this._config.onComplete();
-    }
-
-    this.dispose();
-
-    // intranet home  redirect
-    if (this._config.homeUrl) {
+    btn?.addEventListener("click", async () => {
+      await this._markSeen();
+      this.dispose();
       window.location.href = this._config.homeUrl;
-    }
+    });
   }
 
+  public dispose(): void {
+    this._container?.remove();
+    this._container = null;
+  }
 
+  /* ======================================================
+     INLINE CSS (FIGMA-MATCH)
+     ====================================================== */
 
+  private _injectStyles(): void {
+    if (document.getElementById("tw-onboard-style")) return;
 
-
-  // ========= INLINE CSS =========
-
-
-    private _injectStylesIfNeeded(): void {
-    const styleId: string = "tw-onboard-styles";
-    if (document.getElementById(styleId)) return;
-
-    const style: HTMLStyleElement = document.createElement("style");
-    style.id = styleId;
-    style.type = "text/css";
-
-    style.innerHTML = `
-      :root {
-        --tw-onboard-bg: #FFF4EA;
-        --tw-onboard-card-bg: #FFF4EA;
-        --tw-onboard-video-bg: #FFFFFF66;
-        --tw-onboard-text: #101820;
-        --tw-onboard-muted: #4F4F4F;
-        --tw-onboard-button-bg: #1F2D3A;
-      }
-
-      /* FULLSCREEN BACKDROP – scroll allowed */
+    const s = document.createElement("style");
+    s.id = "tw-onboard-style";
+    s.innerHTML = `
       .tw-onboard-backdrop {
         position: fixed;
         inset: 0;
-        width: 100vw;
-        height: 100vh;
-        background: var(--tw-onboard-bg);
+        background: #FFF4EA;
+        overflow-y: auto;
         z-index: 999999;
-        overflow-y: auto;             
       }
 
-      .tw-onboard-center {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;          
-        justify-content: center;
-        padding: 40px 0;
-        box-sizing: border-box;
-      }
-
-      /* MAIN CARD  */
-      .tw-onboard-card {
-        width: min(1440px, 100vw);     
-        height: 860px;                
-        background: var(--tw-onboard-card-bg);
-        border-radius: 12px;
-        box-sizing: border-box;
-        padding: 60px 15 px 64px;       
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.06);
-      }
-
-      /* HEADER */
-      .tw-onboard-header {
-        max-width: 807px;
-        margin: 0 auto 32px;
+      .tw-onboard-wrapper {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 80px 40px;
         text-align: center;
-        flex-shrink: 0;
-      }
-
-      .tw-onboard-title {
-        margin: 0 0 16px 0;
-        font-size: 32px;
-        line-height: 40px;
-        font-weight: 600;
-        color: var(--tw-onboard-text);
-      }
-
-      .tw-onboard-subtitle {
-        margin: 0;
-        font-size: 16px;
-        line-height: 24px;
-        color: var(--tw-onboard-muted);
-      }
-
-      /* VIDEO AREA – bigger & wider */
-      .tw-onboard-video-wrapper {
-        height: 600px;                
-        display: flex;
-        justify-content: center;
-        margin-bottom: 24px;
       }
 
       .tw-onboard-video-frame {
-        width: 100%;                  
-        height: 100%;
-        background: var(--tw-onboard-video-bg);
-        border-radius: 8px;
-        padding: 0;                   
-        box-sizing: border-box;
         position: relative;
+        height: 520px;
+        border-radius: 12px;
         overflow: hidden;
       }
 
       .tw-onboard-video {
         width: 100%;
         height: 100%;
-        border-radius: 5px;
         object-fit: cover;
-        display: block;
       }
 
-      /* PLAY BUTTON center */
       .tw-onboard-video-overlay {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        onclick: hover ;
-      }
-
-      .tw-onboard-play-img {
-        width: 114px;
-        height: 114px;
-        display: block;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         cursor: pointer;
       }
 
-      /* CAPTION + ARROWS */
-      .tw-onboard-video-caption {
+      .tw-onboard-caption {
         position: absolute;
+        bottom: 24px;
         left: 50%;
-        bottom: 56px;                  
         transform: translateX(-50%);
-        display: inline-flex;
-        align-items: center;
-        gap: 16px;
-        white-space: nowrap;
-        pointer-events: none;
-      }
-
-      .tw-onboard-caption-text {
-        font-size: 14px;
-        line-height: 20px;
-        font-weight: 500;
-        color: #000000;
-      }
-
-      .tw-onboard-caption-arrow {
-        height: 18px;
-        width: auto;
-        flex-shrink: 0;
-        display: block;
-       
-      }
-
-      /* FOOTER BUTTON  */
-      .tw-onboard-footer {
-        margin-top: auto;             
         display: flex;
-        justify-content: center;
-        flex-shrink: 0;
+        gap: 16px;
+        font-weight: 500;
+      }
+
+      .tw-onboard-footer {
+        margin-top: 40px;
       }
 
       .tw-onboard-btn-primary {
-        min-width: 180px;
-        height: 48px;
-        padding: 0 12px;
-        border-radius: 167px;
+        padding: 12px 32px;
+        border-radius: 999px;
+        background: #1F2D3A;
+        color: #fff;
         border: none;
-        cursor: pointer;
         font-size: 16px;
-        font-weight: 500;
-        line-height: 24px;
-        color: #FFFFFF;
-        background: var(--tw-onboard-button-bg);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow:
-          0px 4px 4px #768B9E inset,
-          -4px -6px 4px #00000082 inset;
-        transition: transform .1s ease, box-shadow .1s ease, opacity .1s ease;
+        cursor: pointer;
       }
-
-      .tw-onboard-btn-primary:hover {
-        opacity: 0.96;
-        transform: translateY(-1px);
-      }
-
-      .tw-onboard-btn-primary:active {
-        transform: translateY(0);
-      }
-
-
-
-
-
-      /* --------- RESPONSIVE --------- */
-      /* --------- RESPONSIVE (MOBILE) --------- */
-
-
-@media (max-width: 768px) {
-
-  /* Card overall */
-  .tw-onboard-center {
-    align-items: flex-start;
-    padding: 24px 0;
-  }
-
-  .tw-onboard-card {
-    width: 100vw;
-    height: auto;
-    padding: 24px 16px 24px;   /* left/right 16px (343 + 16 + 16 = 375) */
-    border-radius: 24px;
-  }
-
-  /* Heading */
-  .tw-onboard-header {
-    margin: 0 auto 20px;
-  }
-
-  .tw-onboard-title {
-    font-size: 20px;
-    line-height: 28px;
-    font-weight: 600;
-  }
-
-  /* Subheading */
-  .tw-onboard-subtitle {
-    font-size: 16px;
-    line-height: 24px;
-    color: #6C6C6C;
-    text-align: center;
-  }
-
-  /* Video + arrows block */
-  .tw-onboard-video-wrapper {
-    height: 450px;              /* Figma: height 450 */
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-  }
-
-  .tw-onboard-video-frame {
-    width: 343px;               /* Figma: width 343 */
-    max-width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    padding: 0;
-  }
-
-  .tw-onboard-video {
-    border-radius: 8px;
-  }
-
-  /* Caption (arrows + text) – keep visible on mobile */
-  .tw-onboard-video-caption {
-    bottom: 32px;
-  }
-
-  /* Play icon slightly smaller on mobile */
-  .tw-onboard-play-img {
-    width: 80px;
-    height: 80px;
-  }
-
-  /* Button */
-  .tw-onboard-footer {
-    margin-top: 24px;
-  }
-
-  .tw-onboard-btn-primary {
-    width: 343px;               /* Figma: width 343 */
-    max-width: 100%;
-    height: 40px;               /* Figma: height 40 */
-    border-radius: 167px;
-    padding: 0 12px;
-    font-size: 16px;
-
-    /* Figma radial gradient */
-    background: radial-gradient(
-      245.31% 848.44% at 112.5% -164.06%,
-      #101820 0%,
-      #202D39 100%
-    );
-    box-shadow:
-      0px 4px 4px #768B9E inset,
-      -4px -6px 4px #00000082 inset;
-  }
-}  
-  .tw-onboard-video-overlay {
-  cursor: pointer;   /* pura circle area clickable feel */
-}
-
-.tw-onboard-play-img {
-  cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease, filter 0.15s ease;
-}
-
-.tw-onboard-play-img:hover {
-  transform: scale(1.06);  /* thoda zoom */
-  opacity: 0.95;
-  filter: drop-shadow(0 0 8px rgba(218, 41, 28, 0.35));
-}
-
-
     `;
-
-    document.head.appendChild(style);
-    }
+    document.head.appendChild(s);
   }
+}

@@ -547,16 +547,22 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     const urls = resolveUrls(this.webUrl);
 
     // Onboarding
-    try {
-      const state = await Onbo.loadStateFromList(this.context);
-      if (!state.hasSeen && state.videoUrl) {
-        const cfg: IOnboConfig = { homeUrl: urls.home, videoUrl: state.videoUrl };
-        this.onboarding = new Onbo(this.context, cfg);
-        this.onboarding.render();
-      }
-    } catch (err) {
-      console.error('Onboarding load failed', err);
-    }
+    // Onboarding
+try {
+  const state = await Onbo.loadStateFromList(this.context);
+  if (!state.hasSeen && state.URL) {
+    const cfg: IOnboConfig = { 
+      homeUrl: urls.home, 
+      URL: state.URL,
+      title: state.title   // ✅ FIX
+    };
+    this.onboarding = new Onbo(this.context, cfg);
+    this.onboarding.render();
+  }
+} catch (err) {
+  console.error('Onboarding load failed', err);
+}
+
 
     // Services
     this.search = new SearchService(this.webUrl, this.context.msGraphClientFactory, this.context.spHttpClient as SPHttpClient);
