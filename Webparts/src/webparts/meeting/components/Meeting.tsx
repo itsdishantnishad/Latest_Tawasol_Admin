@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { FontIcon } from '@fluentui/react';
 import styles from './Meeting.module.scss';
-import MeetingHeader from './meetingHeader'; 
 
+import ConditionalLink from '../../Components/ConditionalLink/ConditionalLink';
+import PrimaryButton from '../../Components/PrimaryButton/PrimaryButton';
 const ClockIcon = require('../assets/clockIcon.svg');
 const LocationIcon = require('../assets/locationIcon.svg');
 
@@ -20,11 +21,38 @@ export interface MeetingItem {
 
 interface MeetingProps {
   items: MeetingItem[];
-  onViewAll?: () => void;
-  showingAll?: boolean;
+  context: any;
+  seeAllURL?: string;
 }
 
 export default class Meeting extends React.Component<MeetingProps> {
+
+private getViewAllHref(): string {
+    const { context, seeAllURL } = this.props;
+
+    const webUrl: string =
+      context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+    const origin: string = new URL(webUrl).origin;
+
+    const configured = (seeAllURL || "").trim();
+    const raw = configured || "SitePages/Events-And-Trainings.aspx";
+
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const parsed = new URL(raw);
+        return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      } catch {
+        return raw;
+      }
+    }
+
+    if (raw.startsWith("/")) {
+      return `${origin}${raw}`;
+    }
+
+    return `${webUrl}/${raw}`;
+  }
+
   private fmtDate(d: string) {
     const dt = new Date(d);
     const weekday = new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(dt);
@@ -89,27 +117,21 @@ export default class Meeting extends React.Component<MeetingProps> {
   );
 
   render() {
-    const { items, onViewAll, showingAll } = this.props;
+   const { items } = this.props;
+   const viewAllHref = this.getViewAllHref(); ;
 
     return (
       <section className={styles.meetingSection}>
-        <MeetingHeader
-          title="See your Meetings Scheduled"
-          subtitle="Connect, collaborate, and drive decisions together"
-        />
-
         <div className={styles.wrap}>
           <div className={styles.grid}>{items.map(this.renderCard)}</div>
 
-          {onViewAll && (
+         
             <div className={styles.viewAllWrap}>
-              <button className={styles.viewAllBtn} onClick={onViewAll}>
-                <span className={styles.viewAllText}>
-                  {showingAll ? 'Show Less' : 'View All'}
-                </span>
-              </button>
-            </div>
-          )}
+              <ConditionalLink to={viewAllHref}>
+               <PrimaryButton label="View All" />
+              </ConditionalLink>
+          </div>
+          
         </div>
       </section>
     );

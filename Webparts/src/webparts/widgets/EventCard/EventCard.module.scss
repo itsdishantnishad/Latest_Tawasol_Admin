@@ -119,7 +119,9 @@
 .body {
   padding: 16px;
   position: relative;
-  min-height: 250px;
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
 
   .header {
     font-family: "Inter", sans-serif;
@@ -160,10 +162,8 @@
 }
 
 .mTop16 {
-  margin-top: 0;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  left: 0;
-  padding: 16px;
+  margin-top: auto;
+  button{
+    padding: 10px 16px !important;
+  }
 }
