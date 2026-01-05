@@ -331,6 +331,12 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
             className={styles.lightboxContainer}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* COUNTER (TOP CENTER) */}
+            <span className={styles.carouselCounter}>
+              {activeIndex + 1} / {images.length}
+            </span>
+
+            {/* CLOSE */}
             <button
               className={styles.closeBtn}
               onClick={closeLightbox}
@@ -338,33 +344,33 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
               ×
             </button>
 
+            {/* MAIN IMAGE */}
             <img
               src={resolveImageUrl(images[activeIndex])}
               className={styles.mainImage}
             />
 
+            {/* LEFT PREVIEW */}
             {activeIndex > 0 && (
               <div
                 className={styles.sideThumbsLeft}
                 onClick={goToPrevious}
               >
-                <img
-                  src={resolveImageUrl(images[activeIndex - 1])}
-                />
+                <img src={resolveImageUrl(images[activeIndex - 1])} />
               </div>
             )}
 
+            {/* RIGHT PREVIEW */}
             {activeIndex < images.length - 1 && (
               <div
                 className={styles.sideThumbsRight}
                 onClick={goToNext}
               >
-                <img
-                  src={resolveImageUrl(images[activeIndex + 1])}
-                />
+                <img src={resolveImageUrl(images[activeIndex + 1])} />
               </div>
             )}
 
+            {/* BOTTOM CONTROLS (INSIDE container) */}
             <div className={styles.carouselControls}>
               <button
                 className={styles.carouselBtn}
@@ -373,10 +379,6 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
               >
                 <img src={PrevIcon} />
               </button>
-
-              <span className={styles.carouselCounter}>
-                {activeIndex + 1} / {images.length}
-              </span>
 
               <button
                 className={styles.carouselBtn}
