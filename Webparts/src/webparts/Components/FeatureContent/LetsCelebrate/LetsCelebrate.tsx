@@ -12,6 +12,7 @@ import {
 const cakeImage: string = require("../images/Cake-1.svg");
 const newJoinerCenter: string = require("../images/Newjoiner.svg");
 const aniversaryImage: string = require("../images/aniversary.svg");
+const Congratulations_Icon: string = require("../../../letsCelebrate/assets/congratulationIcon.jpg");
 
 export interface ICelebration {
   id: string;
@@ -20,6 +21,8 @@ export interface ICelebration {
   date?: string;
   type: "birthday" | "anniversary" | "newJoiner" | "Achievement";
   image?: string;
+  description?: string;
+  contact?: string;
 }
 
 export interface ILetsCelebrateProps {
@@ -178,6 +181,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
             department: (item.Department || item.department || "").toString(),
             type: "newJoiner" as const,
             image: (item.UserPicture || item.image || "").toString(),
+            description: (item.TIRDescription || "").toString(),
+            contact: (item.TIRContact || "").toString(),
           }));
 
           if (mounted) setSpNewJoiners(mappedData);
@@ -205,7 +210,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                 "TIRMonthOfAchievement",
                 "TIRUserPicture",
                 "TIRContact",
-                "TIRDescription"
+                "TIRDescription",
               )()) || [];
 
           const mapped: ICelebration[] = rows
@@ -216,6 +221,9 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
               date: (it.TIRMonthOfAchievement || "").toString(),
               type: "Achievement" as const,
               image: extractUrl(it.TIRUserPicture),
+              description: (it.TIRDescription || "").toString(),
+              contact: (it.TIRContact || "").toString(),
+
             }))
             .filter((x) => !!x.name);
 
@@ -230,6 +238,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
           if (mounted) setLoadingAchievements(false);
         }
       })();
+
 
       // Birthdays + Anniversaries (Tahweel)
       const tahweel = new TahweelService({
@@ -337,9 +346,15 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const currentCelebrations: ICelebration[] = (celebrations as any)[activeTab] ?? [];
 
   // ✅ Wheel displays max 4 per page (matches UI positions)
-  const itemsPerPage = 4;
-  const totalPages = Math.max(1, Math.ceil(currentCelebrations.length / itemsPerPage));
-  const currentItems = currentCelebrations.slice(
+  // Sort achievements by latest first, keep others as-is
+  const sortedCelebrations = activeTab === "Achievements"
+    ? [...currentCelebrations].sort((a, b) => parseInt(b.id) - parseInt(a.id))
+    : currentCelebrations;
+
+  // Show 1 achievement per page, 4 for others
+  const itemsPerPage = activeTab === "Achievements" ? 1 : 4;
+  const totalPages = Math.max(1, Math.ceil(sortedCelebrations.length / itemsPerPage));
+  const currentItems = sortedCelebrations.slice(
     currentPage * itemsPerPage,
     (currentPage + 1) * itemsPerPage
   );
@@ -377,6 +392,12 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     return positionMap[position] || {};
   };
 
+  const getNameParts = (fullName: string) => {
+    const parts = (fullName || "").trim().split(" ").filter(Boolean);
+    if (!parts.length) return { first: "Unknown", last: "" };
+    return { first: parts[0], last: parts.slice(1).join(" ") || "" };
+  };
+
   // --- DYNAMIC VIEW-ALL URL WITH DEFAULT ---
   const webUrl: string = props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
   const origin: string = new URL(webUrl).origin;
@@ -408,18 +429,18 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     activeTab === "birthdays"
       ? errorBirthdays
       : activeTab === "anniversaries"
-      ? errorAnniversaries
-      : activeTab === "Achievements"
-      ? errorAchievements
-      : null;
+        ? errorAnniversaries
+        : activeTab === "Achievements"
+          ? errorAchievements
+          : null;
 
   const emptyLabel = (tabs.find((t) => t.key === activeTab)?.label || "").toLowerCase();
 
   const emptyMessage = activeError
     ? activeError
     : isLoadingActive
-    ? `Loading ${emptyLabel}...`
-    : `No ${emptyLabel} to celebrate right now`;
+      ? `Loading ${emptyLabel}...`
+      : `No ${emptyLabel} to celebrate right now`;
 
   return (
     <div className={styles.celebrateContainer}>
@@ -437,136 +458,274 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
       </div>
 
       {/* Content */}
+
+      {/* Content */}
       <div className={styles.content}>
         {currentCelebrations.length > 0 ? (
-          <div className={styles.wheelWrapper}>
-            <button
-              className={styles.navButton}
-              onClick={handlePrev}
-              disabled={totalPages <= 1}
-              style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
-            >
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M15 18L9 12L15 6"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+          <>
+            {activeTab === "Achievements" ? (
+              // Achievement Card Layout
+              <div className={styles.achievementWrapper}>
+                <button
+                  className={styles.navButton}
+                  onClick={handlePrev}
+                  disabled={totalPages <= 1}
+                  style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M15 18L9 12L15 6"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
 
-            <div className={styles.circleContainer}>
-              <div className={styles.outerCircle}>
-                {currentItems.slice(0, 2).map((item, index) => (
-                  <div
-                    key={item.id}
-                    className={styles.profileCard}
-                    style={getOuterCirclePosition(index)}
-                  >
-                    <div className={styles.profileImageWrapper}>
-                      <img
-                        src={
-                          item.image ||
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                            item.name
-                          )}&background=ffecd1&color=333&size=200`
-                        }
-                        alt={item.name}
-                        className={styles.profileImage}
-                      />
+                <div className={styles.achievementCardContainer}>
+                  <div className={styles.achievementCircleContainer}>
+                    <div className={styles.achievementOuterCircle}>
+                      <div className={styles.achievementInnerCircle} />
                     </div>
-                    <div className={styles.profileName}>{item.name}</div>
-                    <div className={styles.HoverText}>Wish {item.name} to their onboarding</div>
                   </div>
-                ))}
 
-                <div className={styles.innerCircle}>
-                  {currentItems.slice(2, 4).map((item, index) => (
-                    <div
-                      key={item.id}
-                      className={styles.profileCard}
-                      style={getInnerCirclePosition(index)}
-                    >
-                      <div className={styles.profileImageWrapper}>
+                  {currentItems.map((item) => {
+                    const { first, last } = getNameParts(item.name);
+                    const imageUrl = item.image;
+                    const designation = item.department || "Team Member";
+                    const contact = item.contact || "";
+                    const description = item.description || "";
+
+                    return (
+                      <article key={item.id} className={styles.achievementCard}>
+                        <div className={styles.achievementImageWrapper}>
+                          {imageUrl ? (
+                            <img
+                              className={styles.achievementPhoto}
+                              src={imageUrl}
+                              alt={item.name || ""}
+                            />
+                          ) : (
+                            <div className={styles.achievementNoImage}>No Image</div>
+                          )}
+                        </div>
+
+                        <div className={styles.achievementContentWrapper}>
+                          <div className={styles.achievementHeaderRow}>
+                            <div className={styles.achievementNameSection}>
+                              <h2 className={styles.achievementName}>
+                                <span className={styles.achievementFirstName}>{first}</span>
+                                <span className={styles.achievementLastName}>{last}</span>
+                              </h2>
+                              <div className={styles.achievementRole}>{designation}</div>
+                            </div>
+
+                            <a
+                              className={styles.sayCongratulations}
+                              target="_blank"
+                              href={`https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(
+                                contact
+                              )}&message=Congratulations`}
+                              rel="noreferrer"
+                            >
+                              <img
+                                src={Congratulations_Icon}
+                                alt=""
+                                className={styles.congratulationsIcon}
+                              />
+                              <span>Say Congratulations</span>
+                            </a>
+                          </div>
+
+                          {!!description && (
+                            <p
+                              className={styles.achievementDescription}
+                              dangerouslySetInnerHTML={{ __html: description }}
+                            />
+                          )}
+
+                          {!!contact && (
+                            <p className={styles.achievementConnect}>Lets connect : {contact}</p>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+
+                  {totalPages > 1 && (
+                    <div className={styles.achievementPagination}>
+                      {Array.from({ length: totalPages }).map((_, index) => (
+                        <button
+                          key={index}
+                          className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""}`}
+                          onClick={() => setCurrentPage(index)}
+                          aria-label={`Go to page ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  <div className={styles.achievementButtonContainer}>
+                    <a href={viewAllHref} className={styles.viewAllButton}>
+                      View All
+                    </a>
+                  </div>
+                </div>
+
+                <button
+                  className={styles.navButton}
+                  onClick={handleNext}
+                  disabled={totalPages <= 1}
+                  style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M9 18L15 12L9 6"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              // Wheel Layout for other tabs
+              <div className={styles.wheelWrapper}>
+                <button
+                  className={styles.navButton}
+                  onClick={handlePrev}
+                  disabled={totalPages <= 1}
+                  style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M15 18L9 12L15 6"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+
+                <div className={styles.circleContainer}>
+                  <div className={styles.outerCircle}>
+                    {currentItems.slice(0, 2).map((item, index) => (
+                      <div
+                        key={item.id}
+                        className={styles.profileCard}
+                        style={getOuterCirclePosition(index)}
+                      >
+                        <div className={styles.profileImageWrapper}>
+                          <img
+                            src={
+                              item.image ||
+                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                item.name
+                              )}&background=ffecd1&color=333&size=200`
+                            }
+                            alt={item.name}
+                            className={styles.profileImage}
+                          />
+                        </div>
+                        <div className={styles.profileName}>{item.name}</div>
+                        <div className={styles.HoverText}>Wish {item.name} to their onboarding</div>
+                      </div>
+                    ))}
+
+                    <div className={styles.innerCircle}>
+                      {currentItems.slice(2, 4).map((item, index) => (
+                        <div
+                          key={item.id}
+                          className={styles.profileCard}
+                          style={getInnerCirclePosition(index)}
+                        >
+                          <div className={styles.profileImageWrapper}>
+                            <img
+                              src={
+                                item.image ||
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                  item.name
+                                )}&background=ffecd1&color=333&size=200`
+                              }
+                              alt={item.name}
+                              className={styles.profileImage}
+                            />
+                          </div>
+                          <div className={styles.profileName}>{item.name}</div>
+                          <div className={styles.HoverText}>
+                            Wish {item.name} to their onboarding
+                          </div>
+                        </div>
+                      ))}
+
+                      <div className={styles.centerIllustration}>
                         <img
                           src={
-                            item.image ||
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              item.name
-                            )}&background=ffecd1&color=333&size=200`
+                            activeTab === "newJoiners"
+                              ? newJoinerCenter
+                              : activeTab === "anniversaries"
+                                ? aniversaryImage
+                                : cakeImage
                           }
-                          alt={item.name}
-                          className={styles.profileImage}
+                          alt="Celebration"
+                          className={styles.illustrationImage}
                         />
                       </div>
-                      <div className={styles.profileName}>{item.name}</div>
-                      <div className={styles.HoverText}>Wish {item.name} to their onboarding</div>
                     </div>
-                  ))}
+                  </div>
 
-                  <div className={styles.centerIllustration}>
-                    <img
-                      src={
-                        activeTab === "newJoiners"
-                          ? newJoinerCenter
-                          : activeTab === "anniversaries"
-                          ? aniversaryImage
-                          : cakeImage
-                      }
-                      alt="Celebration"
-                      className={styles.illustrationImage}
+                  <div className={styles.bottomSection}>
+                    {totalPages > 1 && (
+                      <div className={styles.pagination}>
+                        {Array.from({ length: totalPages }).map((_, index) => (
+                          <button
+                            key={index}
+                            className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""
+                              }`}
+                            onClick={() => setCurrentPage(index)}
+                            aria-label={`Go to page ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    <div className={styles.buttonContainer}>
+                      <a href={viewAllHref} className={styles.viewAllButton}>
+                        View All
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  className={styles.navButton}
+                  onClick={handleNext}
+                  disabled={totalPages <= 1}
+                  style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M9 18L15 12L9 6"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
-                  </div>
-                </div>
+                  </svg>
+                </button>
               </div>
-
-              <div className={styles.bottomSection}>
-                {totalPages > 1 && (
-                  <div className={styles.pagination}>
-                    {Array.from({ length: totalPages }).map((_, index) => (
-                      <button
-                        key={index}
-                        className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""}`}
-                        onClick={() => setCurrentPage(index)}
-                        aria-label={`Go to page ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                <div className={styles.buttonContainer}>
-                  <a href={viewAllHref} className={styles.viewAllButton}>
-                    View All
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <button
-              className={styles.navButton}
-              onClick={handleNext}
-              disabled={totalPages <= 1}
-              style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
-            >
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M9 18L15 12L9 6"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
+            )}
+          </>
         ) : (
           <div className={styles.emptyState}>
             <p>{emptyMessage}</p>
           </div>
         )}
       </div>
+
     </div>
   );
 };
