@@ -107,28 +107,24 @@
 /* Top gradient */
 .topGradient {
   position: absolute;
-  height: 180px;
+  // height: 180px;
   pointer-events: none;
   z-index: 2;
   
-  background: linear-gradient(180deg, #fff4ea, rgba(255, 244, 234, .7) 35%, rgba(255, 244, 234, 0));
+  background: linear-gradient(to bottom, rgb(255 244 234) 0%, rgb(255 255 255 / 0%) 25%);
   inset: 0px 0px 0 0px;
 }
 
 /* Bottom fog gradient */
 .bottomGradient {
   position: absolute;
-  inset: auto 0 -1px 0;
-  height: 180px;
+  // inset: auto 0 -1px 0;
+  // height: 180px;
   pointer-events: none;
   z-index: 2;
-
-  background: linear-gradient(
-    0deg,
-    rgba(255, 244, 234, 1) 0%,
-    rgba(255, 244, 234, 0.70) 35%,
-    rgba(255, 244, 234, 0) 100%
-  );
+  background: linear-gradient(0deg, #fff4ea 0, hsla(0, 0%, 100%, 0) 25%);
+  inset: auto 0 -1px 0;
+  top: 0;
 }
 
 /* ✅ Title + arrows row */
