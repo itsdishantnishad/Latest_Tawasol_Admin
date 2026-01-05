@@ -5,6 +5,7 @@ import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
 import ConditionalLink from '../../ConditionalLink/ConditionalLink';
 import EventRegistration from '../../Events/Registration/RegistrationModal';
+import { EventsTrainingsTabKey } from "../../NavTabs/eventsTrainingsTabs";
 
 const Location_Icon_URL = require("../assets/LocationIcon.svg");
 const Time_Icon_URL = require("../assets/clockIcon.svg");
@@ -323,7 +324,9 @@ export const Events: React.FC<IEventsProps> = (props) => {
       )}
 
       <div className={styles.buttonContainer}>
-        <ConditionalLink to={viewAllHref}>
+        <ConditionalLink
+          to={`${viewAllHref}?tab=${EventsTrainingsTabKey.Events}`}
+        >
           <PrimaryButton label="View All" />
         </ConditionalLink>
       </div>

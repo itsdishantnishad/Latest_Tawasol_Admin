@@ -7,7 +7,7 @@ import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import EventCard from "../../../widgets/EventCard/EventCard";
 import ConditionalLink from "../../ConditionalLink/ConditionalLink";
 import PrimaryButton from "../../PrimaryButton/PrimaryButton";
-
+import { EventsTrainingsTabKey } from "../../NavTabs/eventsTrainingsTabs";
 const locationIcon = require("../assets/LocationIcon.svg");
 const timeIcon = require("../assets/clockIcon.svg");
 
@@ -341,23 +341,25 @@ export const Training: React.FC<ITrainingProps> = (props) => {
         ))}
       </div>
 
-      {(props.onViewAll || viewAllUrl) && (
-        <div className={styles.buttonContainer}>
-          {props.onViewAll ? (
-            <button
-              type="button"
-              className={styles.viewAllButton}
-              onClick={props.onViewAll}
-            >
-              View All
-            </button>
-          ) : viewAllUrl ? (
-            <ConditionalLink to={viewAllUrl}>
-              <PrimaryButton label="View All" />
-            </ConditionalLink>
-          ) : null}
-        </div>
-      )}
+        {(props.onViewAll || viewAllUrl) && (
+          <div className={styles.buttonContainer}>
+            {props.onViewAll ? (
+              <button
+                type="button"
+                className={styles.viewAllButton}
+                onClick={props.onViewAll}
+              >
+                View All
+              </button>
+            ) : viewAllUrl ? (
+              <ConditionalLink
+                to={`${viewAllUrl}?tab=${EventsTrainingsTabKey.Trainings}`}
+              >
+                <PrimaryButton label="View All" />
+              </ConditionalLink>
+            ) : null}
+          </div>
+        )}
     </div>
   );
 };

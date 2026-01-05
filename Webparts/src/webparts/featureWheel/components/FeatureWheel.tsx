@@ -19,7 +19,7 @@ import AboutDHRE from "../../Components/FeatureContent/AboutDHRE/AboutDHRE";
 import TaskApprovals from "../../Components/FeatureContent/TaskApprovals/TaskApprovals";
 import BeverageMenu from "../../Components/FeatureContent/BeverageMenu/BeverageMenu";
 import FeatureSelector from "../../widgets/FeatureSelector/FeatureSelector";
-
+import { EventsTrainingsTabKey } from "../../Components/NavTabs/eventsTrainingsTabs";
 import styles from "./FeatureWheel.module.scss";
 
 const leftHeadingLine: string = require("../images/leftArrow.svg");
@@ -255,7 +255,12 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         );
 
       case "meetings":
-        return <Meeting context={props.context} seeAllURL={props.meeting}/>;
+        return (
+          <Meeting
+            context={props.context}
+            seeAllURL={`${props.meeting}?tab=${EventsTrainingsTabKey.Meetings}`}
+          />
+        );
 
       case "service_links":
         return <ServiceLinks context={props.context} />;
