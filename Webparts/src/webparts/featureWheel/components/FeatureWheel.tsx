@@ -90,11 +90,12 @@ const features: Feature[] = [
     backgroundImage:
       "url('../../Components/FeatureContent/assets/Documents.svg')",
   },
-  {
-    id: "events",
-    title: "Events",
-    subtitle: "Discover whats happening next",
-    backgroundImage: "url('../../Components/FeatureContent/assets/Events.svg')",
+ {
+    id: "about_dhre",
+    title: "About DHRE",
+    subtitle: "Journey through DHRE",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/AboutDHRE.svg')",
   },
   {
     id: "employee_events",
@@ -125,11 +126,10 @@ const features: Feature[] = [
       "url('../../Components/FeatureContent/assets/InteractiveForms.svg')",
   },
   {
-    id: "about_dhre",
-    title: "About DHRE",
-    subtitle: "Journey through DHRE",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/AboutDHRE.svg')",
+    id: "events",
+    title: "Events",
+    subtitle: "Discover whats happening next",
+    backgroundImage: "url('../../Components/FeatureContent/assets/Events.svg')",
   },
   {
     id: "tasks",
