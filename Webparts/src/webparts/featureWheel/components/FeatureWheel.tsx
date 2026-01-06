@@ -65,27 +65,27 @@ const features: Feature[] = [
   },
   {
     id: "offers",
-    title: "Offers & Benefits",
+    title: "Offers",
     subtitle: "Exclusive perks just for you",
     backgroundImage: "url('../../Components/FeatureContent/assets/Offers.svg')",
   },
   {
     id: "training",
-    title: "Training",
+    title: "Trainings",
     subtitle: "Grow skills, unlock new doors",
     backgroundImage:
       "url('../../Components/FeatureContent/assets/Training.svg')",
   },
   {
     id: "gallery",
-    title: "DHRE Gallery",
+    title: "Gallery",
     subtitle: "Past events images and memories",
     backgroundImage:
       "url('../../Components/FeatureContent/assets/ImageGallery.svg')",
   },
   {
     id: "documents",
-    title: "Policies & Procedures",
+    title: "Procedures",
     subtitle: "All files in one place",
     backgroundImage:
       "url('../../Components/FeatureContent/assets/Documents.svg')",
@@ -99,28 +99,28 @@ const features: Feature[] = [
   },
   {
     id: "employee_events",
-    title: "Let’s Celebrate",
+    title: "Lets Celebrate",
     subtitle: "Birthday, anniversary & new joiners",
     backgroundImage:
       "url('../../Components/FeatureContent/assets/LetsCelebrate.svg')",
   },
   {
     id: "meetings",
-    title: "Meeting",
+    title: "Meetings",
     subtitle: "Connect, discuss, move forward",
     backgroundImage:
       "url('../../Components/FeatureContent/assets/Meeting.svg')",
   },
   {
     id: "service_links",
-    title: "Service Links",
+    title: "Links",
     subtitle: "Quick access, zero hassle",
     backgroundImage:
       "url('../../Components/FeatureContent/assets/Service-Links.svg')",
   },
   {
     id: "forms",
-    title: "Interactive Forms",
+    title: "Forms",
     subtitle: "All interactive forms In one place",
     backgroundImage:
       "url('../../Components/FeatureContent/assets/InteractiveForms.svg')",
@@ -133,7 +133,7 @@ const features: Feature[] = [
   },
   {
     id: "tasks",
-    title: "Task",
+    title: "Tasks",
     subtitle: "Get things done with clarity",
     backgroundImage: "url('../../Components/FeatureContent/assets/Tasks.svg')",
   },
