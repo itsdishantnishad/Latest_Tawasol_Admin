@@ -21,6 +21,7 @@
   padding: 4px;
   width: fit-content;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 5;
 }
 
 .tab {
@@ -69,6 +70,7 @@
   justify-content: center;
   align-items: center;
   min-height: 550px;
+  overflow: visible;
 }
 
 // Wheel Layout
@@ -341,6 +343,283 @@
   min-width: 105px;
 }
 
+
+// ============================================
+// ADD THESE STYLES TO YOUR EXISTING LetsCelebrate.module.scss
+// (at the end of the file, after all existing styles)
+// ============================================
+
+// Achievement Card Layout
+.achievementWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 120px;
+  max-width: 1320px;
+  margin: 0 auto;
+  min-height: 500px;
+}
+
+.achievementCardContainer {
+  width: 872px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+}
+
+.achievementCard {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  gap: 24px;
+
+  width: 872px;
+  height: 242px;
+
+  align-items: center;
+  overflow: hidden;
+}
+
+
+.achievementImageWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.achievementPhoto {
+  width: 210px;
+  height: 242px;
+  border-radius: 4px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.achievementNoImage {
+  width: 210px;
+  height: 242px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f3f4f6;
+  border: 2px dashed #bbb;
+  color: #777;
+  font-size: 14px;
+  border-radius: 4px;
+  font-style: italic;
+}
+
+.achievementContentWrapper {
+  height: 242px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+
+.achievementHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.achievementNameSection {
+  flex: 1;
+}
+
+.achievementName {
+  margin: 0;
+  font-family: "Instrument Serif", serif;
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 100%;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.achievementName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 520px;
+}
+
+
+.achievementFirstName {
+  color: #DA291C;
+  font-style: italic;
+}
+
+.achievementLastName {
+  color: #000000;
+  font-style: normal;
+}
+
+.achievementRole {
+  color: #3a3b43;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  margin-top: 4px;
+}
+
+.achievementDescription {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0px;
+  color: #3A3B43;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 5;   
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+
+.achievementConnect {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0px;
+  color: #000000;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.achievementConnect {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.sayCongratulations {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 1.5px solid #c5b9ac;
+  border-radius: 50px;
+  color: #000;
+  text-decoration: none;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    filter: brightness(0.98);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.congratulationsIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.achievementPagination {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.achievementButtonContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+// Responsive for Achievement Cards
+@media (max-width: 1024px) {
+  .achievementWrapper {
+    gap: 40px;
+  }
+
+  .achievementCardContainer {
+    width: 90%;
+    max-width: 800px;
+  }
+
+  .achievementCard {
+    grid-template-columns: 180px 1fr;
+    gap: 20px;
+  }
+
+  .achievementPhoto,
+  .achievementNoImage {
+    width: 180px;
+    height: 210px;
+  }
+
+  .achievementContentWrapper {
+    width: 100%;
+  }
+
+  .achievementName {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .achievementWrapper {
+    gap: 16px;
+  }
+
+  .achievementCardContainer {
+    width: 100%;
+  }
+
+  .achievementCard {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    height: auto;
+  }
+
+  .achievementPhoto,
+  .achievementNoImage {
+    width: 100%;
+    height: 280px;
+  }
+
+  .achievementContentWrapper {
+    width: 100%;
+  }
+
+  .achievementName {
+    font-size: 24px;
+  }
+
+  .achievementHeaderRow {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sayCongratulations {
+    align-self: flex-start;
+  }
+}
+
+
 // Responsive Design
 @media (max-width: 1024px) {
   .wheelWrapper {
@@ -480,4 +759,67 @@
     font-size: 10px;
     max-width: 70px;
   }
+}
+
+
+/* ============================================
+   Achievement 
+   ============================================ */
+
+.achievementWrapper {
+  position: relative;
+}
+
+/* .circleContainer */
+.achievementCircleContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 75vw;
+  height: 75vw;
+  max-width: 800px;
+  max-height: 800px;
+
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Same as .outerCircle */
+.achievementOuterCircle {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid #e0989026;
+
+  background: radial-gradient(
+    circle,
+    rgba(224, 152, 144, 0.12) 20%,
+    rgba(224, 152, 144, 0.06) 55%,
+    rgba(224, 152, 144, 0.03) 75%,
+    transparent 100%
+  );
+}
+
+/*  .innerCircle */
+.achievementInnerCircle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  border: 1px solid #e0989026;
+  background: transparent;
+}
+
+/* Keep cards above */
+.achievementCardContainer,
+.navButton {
+  position: relative;
+  z-index: 2;
 }
