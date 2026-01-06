@@ -226,6 +226,14 @@
         }
       ]
     },
+    "forms-library-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/formsLibrary/FormsLibraryWebPart.js",
+          "manifest": "./src/webparts/formsLibrary/FormsLibraryWebPart.manifest.json"
+        }
+      ]
+    },
     "event-detail-web-part": {
       "components": [
         {
