@@ -29,6 +29,7 @@ export interface IEvent {
   startDate?: Date | null;
   endDate?: Date | null;
   isRegistered?: boolean;
+  detailUrl?: string;
 }
 
 export interface IEventsProps {
@@ -111,7 +112,8 @@ const mapItemToEvent = (item: any): IEvent => {
     location: item.TIRLocation || '',
     startDate: start,
     endDate: end,
-    isRegistered: false
+    isRegistered: false,
+    detailUrl: item.FileRef || ''
   };
 };
 
@@ -179,7 +181,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
 
         const requestUrl =
           `${webUrl}/_api/web/lists/getbytitle('${safeListTitle}')/items` +
-          `?$select=Id,Title,BannerImageUrl,TIREventStartDate,TIREventEndDate,TIRLocation,TIREventCategory,ContentTypeId` +
+          `?$select=Id,FileRef,Title,BannerImageUrl,TIREventStartDate,TIREventEndDate,TIRLocation,TIREventCategory,ContentTypeId` +
           `&$filter=startswith(ContentTypeId,'${TIR_EVENT_CT_BASE_ID}') and TIREventStartDate ne null` +
           `&$orderby=TIREventStartDate desc` +
           `&$top=${fetchTop}`;
@@ -271,7 +273,18 @@ export const Events: React.FC<IEventsProps> = (props) => {
     <div className={styles.eventsContainer}>
       <div className={styles.eventsGrid}>
         {events.map((event) => (
-          <div key={event.id} className={styles.eventCard}>
+          <div
+            key={event.id}
+            className={styles.eventCard}
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              if (event.detailUrl) {
+                window.location.href = event.detailUrl;
+              }
+            }}
+          >
+
             <div
               className={styles.eventImage}
               style={{ backgroundImage: `url(${event.image})` }}
@@ -302,7 +315,8 @@ export const Events: React.FC<IEventsProps> = (props) => {
               )}
               <button
                 className={styles.registerButton}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setSelectedEventId(event.id);
                   setIsRegisterOpen(true);
                 }}
