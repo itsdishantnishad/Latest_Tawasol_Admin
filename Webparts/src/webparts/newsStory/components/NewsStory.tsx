@@ -127,8 +127,8 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
                 alt={news?.title ? String(news.title) : 'News banner'}
               />
 
-              {/* <div className={styles.topGradient} /> */}
-              {/* <div className={styles.bottomGradient} /> */}
+              <div className={styles.topGradient} />
+              <div className={styles.bottomGradient} />
 
               <div className={styles.sideNav}>
                 <button
