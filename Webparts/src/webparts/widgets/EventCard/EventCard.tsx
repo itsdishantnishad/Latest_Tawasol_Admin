@@ -86,24 +86,25 @@ const EventCard: React.FC<EventCardProps> = ({
                             </div>
                         ))}
                     </div>
-                    {creator.header && (
-                        <div className={styles.instructorRow}>
-                            <div className={styles.instructorAvatar}>
-                                {getInitials(creator.header)}
-                            </div>
-                            <div className={styles.instructorInfo}>
-                                <div className={styles.instructorName}>
-                                    {creator.header}
-                                </div>
-                                {creator.subHeader && (
-                                    <div className={styles.instructorTitle}>
-                                        {creator.subHeader}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                    
                     {onCtaClick && <div className={styles.mTop16}>
+                        {creator.header && (
+                            <div className={styles.instructorRow}>
+                                <div className={styles.instructorAvatar}>
+                                    {getInitials(creator.header)}
+                                </div>
+                                <div className={styles.instructorInfo}>
+                                    <div className={styles.instructorName}>
+                                        {creator.header}
+                                    </div>
+                                    {creator.subHeader && (
+                                        <div className={styles.instructorTitle}>
+                                            {creator.subHeader}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                         <PrimaryButton
                             fullWidth
                             label="Request for Approval"
