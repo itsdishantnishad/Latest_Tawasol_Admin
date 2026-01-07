@@ -65,30 +65,65 @@ const features: Feature[] = [
   },
   {
     id: "offers",
-    title: "Offers & Benefits",
+    title: "Offers",
     subtitle: "Exclusive perks just for you",
     backgroundImage: "url('../../Components/FeatureContent/assets/Offers.svg')",
   },
   {
     id: "training",
-    title: "Training",
+    title: "Trainings",
     subtitle: "Grow skills, unlock new doors",
     backgroundImage:
       "url('../../Components/FeatureContent/assets/Training.svg')",
   },
   {
     id: "gallery",
-    title: "DHRE Gallery",
+    title: "Gallery",
     subtitle: "Past events images and memories",
     backgroundImage:
       "url('../../Components/FeatureContent/assets/ImageGallery.svg')",
   },
   {
     id: "documents",
-    title: "Policies & Procedures",
+    title: "Procedures",
     subtitle: "All files in one place",
     backgroundImage:
       "url('../../Components/FeatureContent/assets/Documents.svg')",
+  },
+ {
+    id: "about_dhre",
+    title: "About DHRE",
+    subtitle: "Journey through DHRE",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/AboutDHRE.svg')",
+  },
+  {
+    id: "employee_events",
+    title: "Lets Celebrate",
+    subtitle: "Birthday, anniversary & new joiners",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/LetsCelebrate.svg')",
+  },
+  {
+    id: "meetings",
+    title: "Meetings",
+    subtitle: "Connect, discuss, move forward",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/Meeting.svg')",
+  },
+  {
+    id: "service_links",
+    title: "Links",
+    subtitle: "Quick access, zero hassle",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/Service-Links.svg')",
+  },
+  {
+    id: "forms",
+    title: "Forms",
+    subtitle: "All interactive forms In one place",
+    backgroundImage:
+      "url('../../Components/FeatureContent/assets/InteractiveForms.svg')",
   },
   {
     id: "events",
@@ -97,43 +132,8 @@ const features: Feature[] = [
     backgroundImage: "url('../../Components/FeatureContent/assets/Events.svg')",
   },
   {
-    id: "employee_events",
-    title: "Let’s Celebrate",
-    subtitle: "Birthday, anniversary & new joiners",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/LetsCelebrate.svg')",
-  },
-  {
-    id: "meetings",
-    title: "Meeting",
-    subtitle: "Connect, discuss, move forward",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/Meeting.svg')",
-  },
-  {
-    id: "service_links",
-    title: "Service Links",
-    subtitle: "Quick access, zero hassle",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/Service-Links.svg')",
-  },
-  {
-    id: "forms",
-    title: "Interactive Forms",
-    subtitle: "All interactive forms In one place",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/InteractiveForms.svg')",
-  },
-  {
-    id: "about_dhre",
-    title: "About DHRE",
-    subtitle: "Journey through DHRE",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/AboutDHRE.svg')",
-  },
-  {
     id: "tasks",
-    title: "Task",
+    title: "Tasks",
     subtitle: "Get things done with clarity",
     backgroundImage: "url('../../Components/FeatureContent/assets/Tasks.svg')",
   },
