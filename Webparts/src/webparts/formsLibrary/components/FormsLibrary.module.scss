@@ -97,12 +97,12 @@
   min-width: 24px;
 
   i {
-    font-size: 16px;
+    font-size: 18px;
   }
 }
 
 .listIcon { opacity: 1; }
-.gridIcon { opacity: 30%; }
+.gridIcon { opacity: 40%; }
 
 .deptBody {
   width: 748px;
@@ -129,38 +129,7 @@
   gap: 8px;
 }
 
-.selectAllCheckbox {
-  width: 18px;
-  height: 18px;
 
-  :global(.ms-Checkbox-checkbox) {
-    width: 18px;
-    height: 18px;
-    border: 1px solid #CCCACA;
-    background: #fff;
-    border-radius: 2px;
-    box-sizing: border-box;
-  }
-
-  :global(.ms-Checkbox.is-checked .ms-Checkbox-checkbox),
-  :global(.ms-Checkbox.is-indeterminate .ms-Checkbox-checkbox) {
-    border-color: #CCCACA !important;
-    background: #CCCACA !important;
-  }
-
-  :global(.ms-Checkbox.is-checked:hover .ms-Checkbox-checkbox),
-  :global(.ms-Checkbox.is-indeterminate:hover .ms-Checkbox-checkbox) {
-    border-color: #CCCACA !important;
-    background: #CCCACA !important;
-  }
-
-  :global(.ms-Checkbox.is-checked .ms-Checkbox-checkmark),
-  :global(.ms-Checkbox.is-indeterminate .ms-Checkbox-checkmark) {
-    color: #fff !important;
-    opacity: 1 !important;
-    font-size: 12px;
-  }
-}
 
 .selectAllText {
   font-size: 14px;
@@ -261,7 +230,7 @@
 
   :global(.ms-Checkbox.is-checked .ms-Checkbox-checkmark),
   :global(.ms-Checkbox.is-indeterminate .ms-Checkbox-checkmark) {
-    color: #fff !important;
+    color: black !important;
     opacity: 1 !important;
     font-size: 12px;
   }

@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
@@ -22,7 +21,6 @@ interface IFormItem {
   department: string;
   modified: string;
   modifiedBy: string;
-  isDigitalized: boolean;
   fileUrl: string;
   powerAppsUrl?: string;
 }
@@ -63,14 +61,45 @@ export default class FormsLibrary
     this._loadItems();
   }
 
+  // ------------------ TAXONOMY RESOLVER (LIBRARY SAFE) ------------------
+  private _resolveTaxonomyLabel(
+    value: any,
+    taxCatchAll?: any[]
+  ): string {
+    
+    if (taxCatchAll && taxCatchAll.length > 0) {
+      const term = taxCatchAll.find(
+        t => typeof t.Term === "string" && t.Term.trim().length > 0
+      );
+      if (term) {
+        return term.Term;
+      }
+    }
+    if (value?.Label) {
+      return value.Label;
+    }
+    if (typeof value === "string") {
+      return value
+        .replace(/^\d+;#/, "")
+        .split("|")[0]
+        .trim();
+    }
+
+    return "Other";
+  }
+ // --------------------------------------------------------------------
+
   private async _loadItems(): Promise<void> {
     try {
       const webUrl = this.props.context.pageContext.web.absoluteUrl;
       const listTitle = this.props.libraryTitle;
       const endpoint =
-        `${webUrl}/_api/web/lists/GetByTitle('${encodeURIComponent(listTitle)}')/items` +
-        `?$select=Id,Title,Department,Digitalized,PowerAppsFormURL,Modified,Editor/Title,FileRef,FileLeafRef` +
-        `&$expand=Editor&$top=200`;
+        `${webUrl}/_api/web/lists/GetByTitle('${encodeURIComponent(listTitle)}')/items?` +
+        `$select=Id,Title,` +
+        `TIRDepartment,` +
+        `TaxCatchAll/Term,TaxCatchAll/ID,` +
+        `TIRPowerAppLink,Modified,Editor/Title,FileRef,FileLeafRef` +
+        `&$expand=Editor,TaxCatchAll&$top=200`;
 
       const res: SPHttpClientResponse =
         await this.props.context.spHttpClient.get(
@@ -79,12 +108,15 @@ export default class FormsLibrary
         );
 
       const data = await res.json();
-      const allDepartments = ['Human Capital', 'Business Excellence', 'Contracts & Procurement'];
+
       const grouped: { [dept: string]: IFormItem[] } = {};
-      allDepartments.forEach(dept => (grouped[dept] = []));
 
       (data.value || []).forEach((i: any) => {
-        const dept: string = i.Department || 'Other';
+        const dept = this._resolveTaxonomyLabel(
+          i.TIRDepartment,
+          i.TaxCatchAll
+        );
+
         if (!grouped[dept]) grouped[dept] = [];
 
         grouped[dept].push({
@@ -93,14 +125,13 @@ export default class FormsLibrary
           department: dept,
           modified: new Date(i.Modified).toLocaleDateString(),
           modifiedBy: i.Editor?.Title || '',
-          isDigitalized: !!i.Digitalized,
           fileUrl: i.FileRef,
-          powerAppsUrl: i.PowerAppsFormURL?.Url || ''
+          powerAppsUrl: i.TIRPowerAppLink?.Url || ''
         });
       });
 
-      const expanded: { [dept: string]: boolean } = {};
-      const selectAll: { [dept: string]: boolean } = {};
+      const expanded: any = {};
+      const selectAll: any = {};
       Object.keys(grouped).forEach(d => {
         expanded[d] = false;
         selectAll[d] = false;
@@ -113,6 +144,7 @@ export default class FormsLibrary
         selectedItems: {},
         isLoading: false
       });
+
     } catch (e) {
       console.error('Error loading forms', e);
       this.setState({ isLoading: false });
@@ -120,38 +152,26 @@ export default class FormsLibrary
   }
 
   private _toggleDept = (dept: string): void => {
-    this.setState(prev => ({
-      expanded: {
-        ...prev.expanded,
-        [dept]: !prev.expanded[dept]
-      }
+    this.setState(p => ({
+      expanded: { ...p.expanded, [dept]: !p.expanded[dept] }
     }));
   };
 
   private _toggleSelectAll = (dept: string, checked?: boolean): void => {
-    const { grouped, selectAll, selectedItems } = this.state;
-    const items = grouped[dept] || [];
+    const items = this.state.grouped[dept] || [];
+    const selectedItems = { ...this.state.selectedItems };
+    const newVal = !!checked;
 
-    const newSelectAll = checked !== undefined ? checked : !selectAll[dept];
-
-    const newSelectedItems = { ...selectedItems };
-    items.forEach(item => {
-      newSelectedItems[item.id] = newSelectAll;
-    });
+    items.forEach(i => selectedItems[i.id] = newVal);
 
     this.setState({
-      selectAll: {
-        ...selectAll,
-        [dept]: newSelectAll
-      },
-      selectedItems: newSelectedItems
+      selectedItems,
+      selectAll: { ...this.state.selectAll, [dept]: newVal }
     });
   };
-
   private _toggleItemSelection = (itemId: number, dept: string, checked?: boolean): void => {
     const { grouped, selectedItems, selectAll } = this.state;
     const items = grouped[dept] || [];
-
     const newVal = checked !== undefined ? checked : !selectedItems[itemId];
 
     const newSelectedItems = {
@@ -164,10 +184,7 @@ export default class FormsLibrary
 
     this.setState({
       selectedItems: newSelectedItems,
-      selectAll: {
-        ...selectAll,
-        [dept]: allSelected
-      }
+      selectAll: { ...selectAll, [dept]: allSelected }
     });
   };
 
@@ -177,48 +194,39 @@ export default class FormsLibrary
 
   private _exportDeptToCsv = (dept: string): void => {
     const { grouped, selectedItems } = this.state;
-    const all = grouped[dept] || [];
+    const items = (grouped[dept] || []).filter(i => selectedItems[i.id]);
 
-    const items = all.filter(i => selectedItems[i.id]);
     if (!items.length) {
       alert('Please select at least one item to export.');
       return;
     }
 
-    const headers = ['Title', 'Department', 'Modified By', 'Modified'];
-    const rows = items.map(i => [
-      `"${(i.title || '').replace(/"/g, '""')}"`,
-      `"${i.department}"`,
-      `"${i.modifiedBy}"`,
-      `"${i.modified}"`
-    ]);
+    const csv =
+      'Title,Department,Modified By,Modified\n' +
+      items.map(i =>
+        `"${i.title.replace(/"/g, '""')}","${i.department}","${i.modifiedBy}","${i.modified}"`
+      ).join('\n');
 
-    const csv = headers.join(',') + '\r\n' + rows.map(r => r.join(',')).join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
     const a = document.createElement('a');
-    a.href = url;
+    a.href = URL.createObjectURL(blob);
     a.download = `${dept.replace(/\s+/g, '_')}_forms.csv`;
     a.click();
-    URL.revokeObjectURL(url);
   };
 
   private _openPowerApps = (item: IFormItem, e: React.MouseEvent<HTMLDivElement>): void => {
     e.stopPropagation();
-    const url = item.powerAppsUrl;
-    if (!url) {
+    if (!item.powerAppsUrl) {
       alert("PowerAppsFormURL is empty for this file.");
       return;
     }
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.open(item.powerAppsUrl, "_blank", "noopener,noreferrer");
   };
 
   public render(): React.ReactElement<IFormsLibraryProps> {
     const { grouped, isLoading } = this.state;
-    const orderedDeps = ['Human Capital', 'Business Excellence', 'Contracts & Procurement'];
+    const departments = Object.keys(grouped);
 
-    const departments = orderedDeps.filter(d => grouped[d] !== undefined);
     return (
       <div className={styles.formsLibraryRoot}>
         <div className={styles.leftPane}>
@@ -235,6 +243,7 @@ export default class FormsLibrary
   private _renderDeptSection(dept: string): JSX.Element {
     const { grouped, expanded, selectAll, selectedItems } = this.state;
     const items = grouped[dept] || [];
+
     const q = (this.props.searchText || "").toLowerCase().trim();
     const filteredItems = q
       ? items.filter(i =>
@@ -243,6 +252,7 @@ export default class FormsLibrary
           (i.department || "").toLowerCase().includes(q)
         )
       : items;
+
     let isOpen = !!expanded[dept];
     if (q) {
       isOpen = filteredItems.length > 0;
@@ -255,14 +265,23 @@ export default class FormsLibrary
           onClick={() => this._toggleDept(dept)}
         >
           <div className={styles.deptHeaderLeft}>
-            <img src={ARROW_ICON_URL} className={isOpen ? styles.arrowIconOpen : styles.arrowIconCollapsed} alt="Toggle" />
+            <img
+              src={ARROW_ICON_URL}
+              className={isOpen ? styles.arrowIconOpen : styles.arrowIconCollapsed}
+              alt="Toggle"
+            />
             <img src={FOLDER_ICON_URL} className={styles.folderIcon} alt="Folder" />
-            <Text variant="mediumPlus" className={styles.deptTitle}>  {dept} </Text>
+            <Text variant="mediumPlus" className={styles.deptTitle}>{dept}</Text>
           </div>
           <div className={styles.deptHeaderRight}>
-            <IconButton  className={styles.listIcon}  iconProps={{ iconName: 'BulletedList' }}  title="List view"  ariaLabel="List view"  />
-            <IconButton  className={styles.gridIcon}  title="Grid View"  ariaLabel="Grid View"  >
-              <img src={GRIDLINE_ICON_URL} alt="Grid View"  style={{ width: 16, height: 16 }} />
+            <IconButton
+              className={styles.listIcon}
+              iconProps={{ iconName: 'BulletedList' }}
+              title="List view"
+              ariaLabel="List view"
+            />
+            <IconButton className={styles.gridIcon} title="Grid View" ariaLabel="Grid View">
+              <img src={GRIDLINE_ICON_URL} alt="Grid View" style={{ width: 16, height: 16 }} />
             </IconButton>
           </div>
         </div>
@@ -271,41 +290,65 @@ export default class FormsLibrary
           <div className={styles.deptBody}>
             <div className={styles.controlRow}>
               <div className={styles.selectAllContainer}>
-                <Checkbox   checked={selectAll[dept] || false}   onChange={(_, checked) => this._toggleSelectAll(dept, !!checked)}  className={styles.selectAllCheckbox} />
+                <Checkbox
+                  checked={selectAll[dept] || false}
+                  onChange={(_, checked) => this._toggleSelectAll(dept, !!checked)}
+                  
+                />
                 <Text className={styles.selectAllText}>Select all</Text>
               </div>
 
-              <button  className={styles.exportButtonCustom}  onClick={() => this._exportDeptToCsv(dept)}  >
-                <img  src={EXPORT_ICON_URL}  alt="Export"  className={styles.exportIcon} />
-                <span>Export to CSV</span>
+              <button
+                className={styles.exportButtonCustom}
+                onClick={() => this._exportDeptToCsv(dept)}
+              >
+                <img src={EXPORT_ICON_URL} alt="Export" className={styles.exportIcon} />
+                <span>Export</span>
               </button>
             </div>
 
             <div className={styles.formsList}>
               {filteredItems.map(item => (
-                <div    key={item.id}  className={styles.formRow}  onClick={() => this._onRowClick(item)} >
+                <div
+                  key={item.id}
+                  className={styles.formRow}
+                  onClick={() => this._onRowClick(item)}
+                >
                   <div onClick={(e) => e.stopPropagation()}>
-                    <Checkbox checked={selectedItems[item.id] || false} onChange={(_, checked) =>    this._toggleItemSelection(item.id, dept, !!checked)  }
+                    <Checkbox
+                      checked={selectedItems[item.id] || false}
+                      onChange={(_, checked) =>
+                        this._toggleItemSelection(item.id, dept, !!checked)
+                      }
                       className={styles.formCheckbox}
                     />
                   </div>
+
                   <img src={PDF_ICON_URL} className={styles.pdfIcon} alt="PDF" />
+
                   <div className={styles.formRowContent}>
                     <Text className={styles.formTitle}>{item.title}</Text>
                     <Text className={styles.formMeta}>
                       Modified by {item.modifiedBy} · Modified on {item.modified}
                     </Text>
                   </div>
+
                   <div className={styles.formRowRight}>
-                    {item.isDigitalized && (
-                      <div  className={styles.digitalizedChip}  onClick={(e) => this._openPowerApps(item, e)}  role="button"  aria-label="Open Power Apps form" >
-                        <img  src={AIRPLAY_ICON_URL}  className={styles.airplayIcon}  alt="Digitalized"  />
-                        <span>Digitalized</span>
-                      </div>
-                    )}
+                    
+                      {item.powerAppsUrl && (
+                    <div
+                      className={styles.digitalizedChip}
+                      onClick={(e) => this._openPowerApps(item, e)}
+                    >
+                      <img src={AIRPLAY_ICON_URL} className={styles.airplayIcon} />
+                      <span>Digitalized</span>
+                    </div>
+                  )}
+                    
                   </div>
                 </div>
               ))}
+
               {!filteredItems.length && (
                 <Text className={styles.emptyText}>
                   {items.length
@@ -349,6 +392,3 @@ export default class FormsLibrary
     );
   }
 }
-
-
-
