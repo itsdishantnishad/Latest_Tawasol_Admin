@@ -42,7 +42,7 @@
 /* Title text */
 .title {
   color: #3A3B43;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   margin-bottom: 8px;
   line-height: 24px;
@@ -55,9 +55,10 @@
 .description {
   color: #3A3B43;
   font-family: Inter, sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 22px;
+  letter-spacing: -0.5px;
 }
 
 .description :global(*) {
