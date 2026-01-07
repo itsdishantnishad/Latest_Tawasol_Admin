@@ -280,7 +280,7 @@ export default class Beverages extends React.Component<
           <div className={`${styles.categoryBlock} ${styles.fullRow}`}>
             <div className={styles.imgWrap}>
               <img src={Ellipse_IMG} className={styles.ellipseImg} alt="" />
-              <img src={HOT_IMG} className={styles.hotImg} alt="Hot Beverages" />
+              <img src={HOT_IMG} className={`${styles.hotImg} ${styles.hotImg1}`} alt="Hot Beverages" />
             </div>
             <div>
               <Text className={styles.menuTitle}>Hot Beverages</Text>
@@ -300,30 +300,28 @@ export default class Beverages extends React.Component<
             </div>
           </div>
 
-          {/* MILK */}
-          <div className={`${styles.categoryBlock} ${styles.inlineRow}`}>
-            <div className={styles.imgWrap}>
-              <img src={Ellipse_IMG} className={styles.ellipseImg} alt="" />
-              <img src={MILK_IMG} className={styles.milkImg} alt="Milk Menu" />
-            </div>
-            <div>
-              <Text className={styles.menuTitle}>Milk Menu</Text>
-              {this.renderMenu(milk)}
-            </div>
-          </div>
-
           {/* COLD */}
           <div className={`${styles.categoryBlock} ${styles.fullRow}`}>
             <div className={styles.imgWrap}>
               <img src={Ellipse_IMG} className={styles.ellipseImg} alt="" />
-              <img src={COLD_IMG} className={styles.coldImg} alt="Cold Beverages" />
+              <img src={COLD_IMG} className={`${styles.coldImg} ${styles.coldImg1}`} alt="Cold Beverages" />
             </div>
             <div>
               <Text className={styles.menuTitle}>Cold Beverages</Text>
               {this.renderMenu(cold)}
             </div>
           </div>
-
+          {/* MILK */}
+          <div className={`${styles.categoryBlock} ${styles.inlineRow}`}>
+            <div className={styles.imgWrap}>
+              <img src={Ellipse_IMG} className={styles.ellipseImg} alt="" />
+              <img src={MILK_IMG} className={`${styles.milkImg} ${styles.milkImg1}`} alt="Milk Menu" />
+            </div>
+            <div>
+              <Text className={styles.menuTitle}>Milk Alternative</Text>
+              {this.renderMenu(milk)}
+            </div>
+          </div>
         </div>
       </div>
     );
