@@ -4,6 +4,7 @@
   display: flex;
   column-gap: 32px;
   padding: 16px;
+  bottom: 50px;
 }
 
 .leftPane {
@@ -113,7 +114,7 @@
 }
 
 .controlRow {
-  width: 100%;
+  width: 98%;
   height: 48px;
   display: flex;
   align-items: center;
@@ -122,7 +123,9 @@
   box-sizing: border-box;
   background-color: #ffffff;
 }
-
+.controlRow{
+  margin-left: 8px;
+}
 .selectAllContainer {
   display: flex;
   align-items: center;
@@ -206,34 +209,6 @@
   position: relative;
   top: 3px;
   left: 3px;
-
-  :global(.ms-Checkbox-checkbox) {
-    width: 18px;
-    height: 18px;
-    border: 1px solid #CCCACA;
-    background: #fff;
-    border-radius: 2px;
-    box-sizing: border-box;
-  }
-
-  :global(.ms-Checkbox.is-checked .ms-Checkbox-checkbox),
-  :global(.ms-Checkbox.is-indeterminate .ms-Checkbox-checkbox) {
-    border-color: #CCCACA !important;
-    background: #CCCACA !important;
-  }
-
-  :global(.ms-Checkbox.is-checked:hover .ms-Checkbox-checkbox),
-  :global(.ms-Checkbox.is-indeterminate:hover .ms-Checkbox-checkbox) {
-    border-color: #CCCACA !important;
-    background: #CCCACA !important;
-  }
-
-  :global(.ms-Checkbox.is-checked .ms-Checkbox-checkmark),
-  :global(.ms-Checkbox.is-indeterminate .ms-Checkbox-checkmark) {
-    color: black !important;
-    opacity: 1 !important;
-    font-size: 12px;
-  }
 }
 
 .pdfIcon {
@@ -393,8 +368,3 @@
   border-radius: 8px;  
   background-color: #ffffff;
 }
-
-
-
-
-
