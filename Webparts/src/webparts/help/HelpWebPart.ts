@@ -32,7 +32,7 @@ export default class HelpWebPart extends BaseClientSideWebPart<IHelpWebPartProps
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
         context: this.context,
-        listTitle: "Help Center List" 
+        listTitle: "Help Center" 
       }
     );
 

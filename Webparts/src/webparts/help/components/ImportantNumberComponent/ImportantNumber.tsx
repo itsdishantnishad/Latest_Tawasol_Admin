@@ -6,8 +6,8 @@ import { spfi, SPFx } from "@pnp/sp";
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
-const teamsIcon  =  require("../../assets/teamMeetingIcon.svg");
-const mapIcon  =  require("../../assets/mapIcon.svg");
+const teamsIcon = require("../../assets/teamMeetingIcon.svg");
+const mapIcon = require("../../assets/mapIcon.svg");
 const phoneIcon = require("../../assets/callIcon.svg");
 
 export interface IImportantNumberProps {
@@ -23,7 +23,6 @@ export interface IImportantNumberItem {
   phoneTel?: string;
   teamsUrl?: string;
   locationUrl?: string;
-  sortOrder: number;
 }
 
 interface IImportantNumberState {
@@ -36,7 +35,7 @@ export default class ImportantNumber
   extends React.Component<IImportantNumberProps, IImportantNumberState> {
 
   public static defaultProps: Partial<IImportantNumberProps> = {
-    listTitle: "Help Center List"
+    listTitle: "Help Center"
   };
 
   public constructor(props: IImportantNumberProps) {
@@ -64,10 +63,9 @@ export default class ImportantNumber
 
     const raw: any[] = await sp.web.lists
       .getByTitle(listTitle)
-      .items.select( "Id","Title","HCPhone","HCIsActive","HCCategory","HCTeamsUrl","HCLocationUrl","HCSortOrder")
-      .filter("HCIsActive eq 1")
-      .orderBy("HCCategory")
-      .orderBy("HCSortOrder")();
+      .items.select("Id", "Title", "TIRPhone", "TIRIsActive", "TIRHelpCenterCategory", "URL", "TIRLocationURL")
+      .filter("TIRIsActive eq 1")
+      .orderBy("TIRHelpCenterCategory")();
 
     const normalizeUrl = (field: any): string | undefined => {
       if (!field) return undefined;
@@ -84,19 +82,18 @@ export default class ImportantNumber
       return { display, tel };
     };
 
-    const items: IImportantNumberItem[] = raw.map((i) => {
-      const phone = normalizePhone(i.HCPhone);
-      return {
-        id: i.Id,
-        category: i.HCCategory,
-        title: i.Title,
-        phoneDisplay: phone.display,
-        phoneTel: phone.tel,
-        teamsUrl: normalizeUrl(i.HCTeamsUrl),
-        locationUrl: normalizeUrl(i.HCLocationUrl),
-        sortOrder: i.HCSortOrder || 0
-      };
-    });
+   const items: IImportantNumberItem[] = raw.map((i) => {
+  const phone = normalizePhone(i.TIRPhone); 
+  return {
+    id: i.Id,
+    category: i.TIRHelpCenterCategory,
+    title: i.Title,
+    phoneDisplay: phone.display,
+    phoneTel: phone.tel,
+    teamsUrl: normalizeUrl(i.URL), 
+    locationUrl: normalizeUrl(i.TIRLocationURL), 
+  };
+});
 
     const groupMap: { [cat: string]: IImportantNumberItem[] } = {};
     items.forEach((item) => {
@@ -106,39 +103,25 @@ export default class ImportantNumber
       groupMap[item.category].push(item);
     });
 
-    const categoryOrder = ["Nurse Locations", "Pantry", "Admin Hotline", "Office Locations" ];
+    const categoryOrder = ["Nurse Locations", "Pantry", "Admin Hotline", "Office Locations"];
 
     const seenCategories: string[] = [];
-    const orderedGroups: { category: string; items: IImportantNumberItem[] }[] =
-      [];
+    const orderedGroups: { category: string; items: IImportantNumberItem[] }[] = [];
 
+    // Add this code to populate orderedGroups:
     categoryOrder.forEach((cat) => {
       if (groupMap[cat]) {
+        orderedGroups.push({ category: cat, items: groupMap[cat] });
         seenCategories.push(cat);
-        orderedGroups.push({
-          category: cat,
-          items: groupMap[cat].sort(
-            (a, b) =>
-              a.sortOrder - b.sortOrder ||
-              a.title.localeCompare(b.title)
-          )
-        });
       }
     });
 
-    Object.keys(groupMap)
-      .filter((c) => seenCategories.indexOf(c) < 0)
-      .sort()
-      .forEach((cat) => {
-        orderedGroups.push({
-          category: cat,
-          items: groupMap[cat].sort(
-            (a, b) =>
-              a.sortOrder - b.sortOrder ||
-              a.title.localeCompare(b.title)
-          )
-        });
-      });
+    // Add remaining categories not in the predefined order
+    Object.keys(groupMap).forEach((cat) => {
+      if (!seenCategories.includes(cat)) {
+        orderedGroups.push({ category: cat, items: groupMap[cat] });
+      }
+    });
 
     this.setState({
       loading: false,
@@ -192,7 +175,7 @@ export default class ImportantNumber
         <div className={styles.rowRight}>
           {item.teamsUrl && (
             <a href={item.teamsUrl} target="_blank" rel="noreferrer" className={styles.iconLink} aria-label="Teams meeting" >
-              <img src={teamsIcon} alt="Teams"className={styles.iconImage} />
+              <img src={teamsIcon} alt="Teams" className={styles.iconImage} />
             </a>
           )}
 
@@ -204,7 +187,7 @@ export default class ImportantNumber
 
           {item.phoneDisplay && (
             <a className={styles.phoneLink} href={item.phoneTel ? `tel:${item.phoneTel}` : undefined} >
-              <img src={phoneIcon} alt="Phone" className={styles.iconImage}/>
+              <img src={phoneIcon} alt="Phone" className={styles.iconImage} />
               <span className={styles.phoneText}>{item.phoneDisplay}</span>
             </a>
           )}
