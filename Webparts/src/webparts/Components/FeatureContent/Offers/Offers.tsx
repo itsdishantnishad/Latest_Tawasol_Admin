@@ -5,9 +5,9 @@ import ShuffledCards from "../../../widgets/ShuffledCards/ShuffledCards";
 import ConditionalLink from "../../ConditionalLink/ConditionalLink";
 import PrimaryButton from "../../PrimaryButton/PrimaryButton";
 
-const EmployeePrivilegesIcon = require("../assets/EP.png");
-const MedicalInsuranceIcon = require("../assets/MedicalInsurance.png");
-const EmployeeOffersIcon = require("../assets/EmployeeOffers.png");
+const EmployeePrivilegesIcon = require("../assets/Employee-Privileges.png");
+const MedicalInsuranceIcon = require("../assets/Medical-Insurance.png");
+const EmployeeOffersIcon = require("../assets/Employee-Offers.png");
 
 export interface IOffer {
   id: string;

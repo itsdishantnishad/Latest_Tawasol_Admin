@@ -3,6 +3,7 @@
   display: grid;
   grid-template-columns: repeat(13, 110px);
   justify-content: center;
+  zoom: 1.2;
 }
 
 .card {
@@ -10,7 +11,8 @@
   height: 150px;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 15px 7.933px 18.247px -7.933px rgba(0, 0, 0, 0.2);
+  // box-shadow: 15px 7.933px 18.247px -7.933px rgba(0, 0, 0, 0.2);
+  box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
   cursor: pointer;
   background-color: #ebb885;
   background-repeat: no-repeat;
@@ -24,7 +26,7 @@
 }
 
 .cardSelected {
-  z-index: 1;
+  z-index: 9 !important;
   outline: 6px solid #dc6408;
   box-shadow: 0 11.202px 22.403px 0 #e38e32;
   scale: 1.1;
@@ -60,22 +62,27 @@
 
 .eventsCard {
   background-image: url("../../Components/FeatureContent/assets/Events.svg");
+  z-index: 2;
 }
 
 .celebrateCard {
   background-image: url("../../Components/FeatureContent/assets/LetsCelebrate.svg");
+  z-index: 7;
 }
 
 .meetingCard {
   background-image: url("../../Components/FeatureContent/assets/Meeting.svg");
+  z-index: 6;
 }
 
 .serviceLinksCard {
   background-image: url("../../Components/FeatureContent/assets/Service-Links.svg");
+  z-index: 4;
 }
 
 .interactiveFormsCard {
   background-image: url("../../Components/FeatureContent/assets/InteractiveForms.svg");
+  z-index: 3;
 }
 
 .offersCard {
@@ -92,6 +99,7 @@
 
 .tasksCard {
   background-image: url("../../Components/FeatureContent/assets/Tasks.svg");
+  z-index: 1;
 }
 
 .beverageCard {

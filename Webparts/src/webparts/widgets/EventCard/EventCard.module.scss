@@ -29,8 +29,12 @@
   font-family: "Inter", sans-serif;
   font-weight: 500;
   font-size: 12px;
-  line-height: 18px;
+  line-height: 16px;
   color: #3a3b43;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  display: -webkit-box;
 }
 
 .instructorTitle {
@@ -43,10 +47,18 @@
 }
 
 .card {
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   background-color: #ffffff;
-  border: 1px solid #f0edeb;
+  // border: 1px solid #f0edeb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+  }
 }
 
 .imageContainer {
@@ -117,7 +129,7 @@
 }
 
 .body {
-  padding: 16px;
+  padding: 20px;
   position: relative;
   min-height: 180px;
   display: flex;

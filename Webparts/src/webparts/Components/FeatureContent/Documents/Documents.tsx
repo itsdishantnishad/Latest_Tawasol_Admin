@@ -4,10 +4,10 @@ import ShuffledCards from '../../../widgets/ShuffledCards/ShuffledCards';
 import ConditionalLink from '../../ConditionalLink/ConditionalLink';
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
 
-const ProjectDevelopmentIcon = require("../assets/001.png");
-const CommercialIcon = require("../assets/002.png");
-const ProjectDeliveryIcon = require("../assets/003.png");
-const ProjectSecurityIcon = require("../assets/004.png");
+const ProjectDevelopmentIcon = require("../assets/Project-Development.png");
+const CommercialIcon = require("../assets/Commercial.png");
+const ProjectDeliveryIcon = require("../assets/Project-Delivery.png");
+const ProjectSecurityIcon = require("../assets/Project-Security.png");
 
 export interface IDocument {
   id: string;
