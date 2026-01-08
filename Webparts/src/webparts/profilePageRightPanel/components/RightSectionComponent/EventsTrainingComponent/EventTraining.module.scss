@@ -1,13 +1,5 @@
-.metaBlock {
-  width: 376px;
-  display: grid;
-  grid-template-rows: auto auto auto;
-  row-gap: 8px;
-}
-
 .categoryLabel {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 500;
   font-size: 12px;
   line-height: 18px;
@@ -17,13 +9,13 @@
 }
 
 .eventTitle {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 600;
   font-size: 16px;
   line-height: 24px;
   color: #000000;
 }
+
 .card {
   width: 100%;
   max-width: 424px;
@@ -57,8 +49,7 @@
 }
 
 .upcomingText {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
@@ -95,7 +86,6 @@
   font-weight: 600;
   font-size: 16px;
   line-height: 20px;
-  letter-spacing: 0px;
   color: #3a3b43;
   cursor: pointer;
 }
@@ -166,29 +156,12 @@
 }
 
 .registerText {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 500;
   font-size: 12px;
   line-height: 16px;
   color: #ffffff;
   white-space: nowrap;
-}
-
-.metaBlock {
-  width: 376px;
-  display: grid;
-  grid-template-rows: auto auto auto;
-  row-gap: 8px;
-}
-
-.eventTitle {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    sans-serif;
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 24px;
-  color: #000000;
 }
 
 .dateTimeRow {
@@ -211,8 +184,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 400;
   font-size: 14px;
   line-height: 22px;
@@ -227,8 +199,7 @@
 }
 
 .locationText {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    sans-serif;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 400;
   font-size: 14px;
   line-height: 22px;
@@ -250,8 +221,7 @@
   }
 
   .segmentWrap,
-  .eventCard,
-  .metaBlock {
+  .eventCard {
     width: 100%;
   }
 

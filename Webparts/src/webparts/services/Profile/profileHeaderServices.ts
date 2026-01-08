@@ -3,28 +3,26 @@ import "@pnp/sp/profiles";
 import "@pnp/sp/files";
 import "@pnp/sp/folders";
 import type { MSGraphClientV3 } from "@microsoft/sp-http";
+import type { WebPartContext } from "@microsoft/sp-webpart-base";
 
 /**
  * GRAPH HELPERS
+ * ✅ FIX: SPFx typings require getClient("3") (no-arg call will fail TS2554)
  */
-const getGraphClient = async (context: any): Promise<MSGraphClientV3 | null> => {
+const getGraphClient = async (context: WebPartContext): Promise<MSGraphClientV3 | null> => {
   const factory = context?.msGraphClientFactory;
   if (!factory?.getClient) return null;
 
   try {
-    // Most SPFx projects support v3 via "3"
     return (await factory.getClient("3")) as MSGraphClientV3;
-  } catch {
-    try {
-      return (await factory.getClient()) as MSGraphClientV3;
-    } catch {
-      return null;
-    }
+  } catch (e) {
+    console.log("[profileHeaderServices] Graph client failed:", e);
+    return null;
   }
 };
 
 export const fetchGraphMeInfo = async (
-  context: any
+  context: WebPartContext
 ): Promise<{ fullName: string; designation: string; department: string } | null> => {
   const client = await getGraphClient(context);
   if (!client) return null;
@@ -32,9 +30,9 @@ export const fetchGraphMeInfo = async (
   try {
     const me = await client.api("/me").select("displayName,jobTitle,department").get();
     return {
-      fullName: (me?.displayName || "").toString().trim(),
-      designation: (me?.jobTitle || "").toString().trim(),
-      department: (me?.department || "").toString().trim(),
+      fullName: String(me?.displayName || "").trim(),
+      designation: String(me?.jobTitle || "").trim(),
+      department: String(me?.department || "").trim(),
     };
   } catch (e) {
     console.log("[profileHeaderServices] Graph /me failed:", e);
@@ -42,24 +40,16 @@ export const fetchGraphMeInfo = async (
   }
 };
 
-/**
- *  Highest quality photo from Graph.
- * NOTE: Your typings reject responseType("blob") and responseType("arraybuffer")
- * So we cast to any to keep SPFx compile happy.
- */
-export const fetchGraphMyPhotoBlob = async (context: any): Promise<Blob | null> => {
+export const fetchGraphMyPhotoBlob = async (context: WebPartContext): Promise<Blob | null> => {
   const client = await getGraphClient(context);
   if (!client) return null;
 
   try {
-    // Cast fixes: Argument of type '"arraybuffer"' is not assignable to parameter of type 'ResponseType'
     const ab: ArrayBuffer = await (client.api("/me/photo/$value") as any)
       .responseType("arraybuffer")
       .get();
 
     if (!ab || !ab.byteLength) return null;
-
-    // Usually JPEG; even if not, browser still renders in most cases
     return new Blob([ab], { type: "image/jpeg" });
   } catch (e) {
     console.log("[profileHeaderServices] Graph photo failed:", e);
@@ -76,32 +66,26 @@ export const fetchUserProfilePicture = async (): Promise<string | null> => {
     const profile: any = await sp.profiles.myProperties();
 
     const fromTopLevel = profile?.PictureUrl || profile?.PictureURL;
-    const fromProps =
-      profile?.UserProfileProperties?.find((p: any) => p.Key === "PictureURL")?.Value;
+    const fromProps = profile?.UserProfileProperties?.find((p: any) => p.Key === "PictureURL")?.Value;
 
-    const pictureUrl = fromTopLevel || fromProps || null;
-    return pictureUrl;
+    return (fromTopLevel || fromProps || null) as string | null;
   } catch (error) {
-    console.error("Failed to fetch profile picture:", error);
+    console.error("[profileHeaderServices] Failed to fetch profile picture:", error);
     return null;
   }
 };
 
-export const fetchCurrentUserInfo = async (): Promise<{
-  fullName: string;
-  department: string;
-} | null> => {
+export const fetchCurrentUserInfo = async (): Promise<{ fullName: string; department: string } | null> => {
   try {
     const sp = getSP();
     const profile: any = await sp.profiles.myProperties();
 
     const fullName = profile?.DisplayName || profile?.AccountName || "";
-    const department =
-      profile?.UserProfileProperties?.find((p: any) => p.Key === "Department")?.Value || "";
+    const department = profile?.UserProfileProperties?.find((p: any) => p.Key === "Department")?.Value || "";
 
     return { fullName, department };
   } catch (error) {
-    console.error("Failed to fetch user info:", error);
+    console.error("[profileHeaderServices] Failed to fetch user info:", error);
     return null;
   }
 };
@@ -119,7 +103,7 @@ export const getSiteUrl = async (): Promise<string> => {
     const current = new URL(window.location.href);
     return current.pathname.replace(/\/SitePages\/.*/i, "");
   } catch (error) {
-    console.error("Failed to fetch site URL:", error);
+    console.error("[profileHeaderServices] Failed to fetch site URL:", error);
     return "";
   }
 };
@@ -142,7 +126,7 @@ export const uploadProfilePicture = async (file: File, siteUrl: string): Promise
 
     return `${folderServerRelativePath}/${fileName}`;
   } catch (error) {
-    console.error("Failed to upload profile picture:", error);
+    console.error("[profileHeaderServices] Failed to upload profile picture:", error);
     throw error;
   }
 };
@@ -152,33 +136,28 @@ export const updateUserProfilePicture = async (photoUrl: string): Promise<void> 
     const absoluteUrl =
       (window as any)?._spPageContextInfo?.webAbsoluteUrl ?? document.location.origin;
 
-    const response = await fetch(
-      `${absoluteUrl}/_api/SP.UserProfiles.PeopleManager/SetMyProfilePicture`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json;odata=verbose",
-          Accept: "application/json;odata=verbose",
-          "X-RequestDigest":
-            (document.getElementById("__REQUESTDIGEST") as HTMLInputElement)?.value || "",
-        },
-        body: JSON.stringify({ imageUrl: photoUrl }),
-      }
-    );
+    const response = await fetch(`${absoluteUrl}/_api/SP.UserProfiles.PeopleManager/SetMyProfilePicture`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json;odata=verbose",
+        Accept: "application/json;odata=verbose",
+        "X-RequestDigest": (document.getElementById("__REQUESTDIGEST") as HTMLInputElement)?.value || "",
+      },
+      body: JSON.stringify({ imageUrl: photoUrl }),
+    });
 
     if (!response.ok) throw new Error("Failed to update profile picture");
   } catch (error) {
-    console.error("Failed to update profile picture:", error);
+    console.error("[profileHeaderServices] Failed to update profile picture:", error);
     throw error;
   }
 };
 
-export const copyProfileToClipboard = async (fullName: string, department: string): Promise<void> => {
-  await navigator.clipboard.writeText(`${fullName}\n${department}`);
+export const copyProfileToClipboard = async (fullName: string, subtitle: string): Promise<void> => {
+  await navigator.clipboard.writeText(`${fullName}\n${subtitle}`);
 };
 
 export type SelectedBadge = { name: string; imageUrl: string };
-
 const SELECTED_BADGE_STORAGE_KEY = "tawasol_selected_badge";
 
 export const saveSelectedBadge = (badge: SelectedBadge | null): void => {

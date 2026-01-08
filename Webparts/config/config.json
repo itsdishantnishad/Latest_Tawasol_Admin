@@ -265,6 +265,22 @@
           "manifest": "./src/webparts/letsMeetGallery/LetsMeetGalleryWebPart.manifest.json"
         }
       ]
+    },
+    "profile-page-header-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/profilePageHeader/ProfilePageHeaderWebPart.js",
+          "manifest": "./src/webparts/profilePageHeader/ProfilePageHeaderWebPart.manifest.json"
+        }
+      ]
+    },
+    "profile-page-right-panel-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/profilePageRightPanel/ProfilePageRightPanelWebPart.js",
+          "manifest": "./src/webparts/profilePageRightPanel/ProfilePageRightPanelWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -301,6 +317,8 @@
     "FormsLibraryWebPartStrings": "lib/webparts/formsLibrary/loc/{locale}.js",
     "OtherUpcomingEventsWebPartStrings": "lib/webparts/otherUpcomingEvents/loc/{locale}.js",
     "LetsMeetGalleryWebPartStrings": "lib/webparts/letsMeetGallery/loc/{locale}.js",
-    "LetsMeetDetailWebPartStrings": "lib/webparts/letsMeetDetail/loc/{locale}.js"
+    "LetsMeetDetailWebPartStrings": "lib/webparts/letsMeetDetail/loc/{locale}.js",
+    "ProfilePageHeaderWebPartStrings": "lib/webparts/profilePageHeader/loc/{locale}.js",
+    "ProfilePageRightPanelWebPartStrings": "lib/webparts/profilePageRightPanel/loc/{locale}.js"
   }
 }

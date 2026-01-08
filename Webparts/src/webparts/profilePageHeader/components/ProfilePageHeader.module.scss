@@ -1,21 +1,18 @@
-/* ProfileHeader.module.scss */
-/* ✅ Merged: keeps your full-bleed SharePoint canvas fixes + keeps all incoming styles
-   ✅ NO Tahweel relation (pure styling)
-   ✅ Also includes missing pieces for TSX: avatarBadgeFallback + badgePlaceholder + badgeItem hover/click feel
-*/
+/* ProfilePageHeader.module.scss */
+/* ✅ Same as ProfileHeader.module.scss (only renamed file) */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
 @font-face {
   font-family: "Instrument Serif Regular";
   src: local("Instrument Serif Regular"),
-    url("../../../assets/fonts/instrumentserif-regular.woff") format("woff");
+    url("../../assets/fonts/instrumentserif-regular.woff") format("woff");
 }
 
 @font-face {
   font-family: "Instrument Serif Italic";
   src: local("Instrument Serif Italic"),
-    url("../../../assets/fonts/instrumentserif-italic.woff") format("woff");
+    url("../../assets/fonts/instrumentserif-italic.woff") format("woff");
 }
 
 /* =========================
@@ -33,10 +30,9 @@
 :global(#spPageCanvasContent) {
   margin-top: 0 !important;
   padding-top: 0 !important;
-  overflow-x: visible !important; /* allow full-bleed element to extend */
+  overflow-x: visible !important;
 }
 
-/* ✅ Remove left/right padding only for the FIRST row containers. */
 :global(#spPageCanvasContent .CanvasZoneRow:first-child),
 :global(#spPageCanvasContent .CanvasZoneRow:first-child .CanvasSection),
 :global(#spPageCanvasContent .CanvasZoneRow:first-child .ControlZone),
@@ -58,38 +54,16 @@
    ✅ HERO FULL WIDTH (LEFT+RIGHT) + ✅ ZERO GAP FROM TOP
    ========================================================= */
 .headerWrap {
-  /* ✅ Full-bleed technique */
-  width: 100%;
-  min-width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-
-  /* ✅ Stick to global header (remove top gap) */
-  margin-top: -48px;
-
-  /* ✅ Bigger header */
-  min-height: 320px;
   padding: 44px 56px;
-
-  /* background image comes from TSX inline style */
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-
   box-sizing: border-box;
   border-radius: 0;
   overflow: hidden;
-  position: relative; /* needed for absolute corners + copy pill */
+  position: relative;
 }
 
-/* =========================================================
-   Decorative corners
-   ========================================================= */
 .cornerLeft {
   position: absolute;
   width: 569px;
@@ -124,23 +98,18 @@
   mix-blend-mode: multiply;
 }
 
-/* Ensure actual content stays above corners */
 .identityCard,
 .flexCol {
   position: relative;
   z-index: 1;
 }
 
-/* =========================================================
-   Actions + Copy pill
-   ========================================================= */
 .actions {
   align-self: flex-start;
   position: relative;
   margin-left: auto;
 }
 
-/* Floating "Profile Copied" pill */
 .copyPill {
   position: absolute;
   top: 44px;
@@ -225,9 +194,6 @@
   margin-left: 20px;
 }
 
-/* =========================================================
-   Identity (avatar + name)
-   ========================================================= */
 .identityCard {
   width: 100%;
   max-width: 780px;
@@ -251,8 +217,6 @@
   width: 150px;
   height: 150px;
   flex-shrink: 0;
-
-  /* from your current file (kept) */
   margin-top: 120px;
 }
 
@@ -299,9 +263,6 @@
 .nameRow {
   display: flex;
   align-items: baseline;
-
-  /* incoming had gap: 8px, current had 10px + margin-top:110px.
-     Keeping your current values since they match your adjusted layout. */
   gap: 10px;
   margin-top: 110px;
 }
@@ -335,54 +296,6 @@
   text-overflow: ellipsis;
 }
 
-/* =========================================================
-   Stats (currently commented in TSX)
-   ========================================================= */
-.statsRow {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 88px;
-  column-gap: 8px;
-  align-items: center;
-  justify-content: end;
-  width: 100%;
-  max-width: 376px;
-  min-height: 62px;
-  margin-top: auto;
-}
-
-.statBox {
-  width: 88px;
-  height: 62px;
-  background: #ffffff;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
-}
-
-.statNumber {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  color: #da291c;
-  line-height: 20px;
-  margin-bottom: 2px;
-}
-
-.statLabel {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  color: #3a3b43;
-  line-height: 16px;
-}
-
-/* =========================================================
-   Kebab menu
-   ========================================================= */
 .kebabWrapper {
   position: relative;
   display: inline-block;
@@ -430,9 +343,6 @@
   color: #101820;
 }
 
-/* =========================================================
-   Badges
-   ========================================================= */
 .badgesRow {
   display: flex;
   gap: 14px;
@@ -447,11 +357,7 @@
   flex-direction: column;
   gap: 6px;
   align-items: center;
-
-  /* from your current file (kept) */
   margin-top: 160px;
-
-  /* TSX has role="button" */
   cursor: pointer;
   user-select: none;
 
@@ -501,9 +407,6 @@
   white-space: nowrap;
 }
 
-/* =========================================================
-   Error message
-   ========================================================= */
 .errorMessage {
   display: flex;
   align-items: center;
@@ -535,9 +438,6 @@
   }
 }
 
-/* =========================================================
-   Responsive
-   ========================================================= */
 @media (max-width: 768px) {
   .headerWrap {
     min-height: 260px;
@@ -559,15 +459,15 @@
   .avatarWrap {
     width: 96px;
     height: 96px;
-    margin-top: 0; /* ✅ avoids pushing avatar down on mobile */
+    margin-top: 0;
   }
 
   .nameRow {
-    margin-top: 0; /* ✅ avoid extra blank space on mobile */
+    margin-top: 0;
   }
 
   .badgeItem {
-    margin-top: 0; /* ✅ avoid extra blank space on mobile */
+    margin-top: 0;
   }
 }
 

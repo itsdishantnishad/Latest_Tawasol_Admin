@@ -1,9 +1,9 @@
-// ProfileHeaderComp.tsx
-// ✅ Graph-only version (Tahweel removed completely)
-// ✅ Keeps: Graph info + HQ photo, SharePoint fallbacks, background SiteAssets+packaged fallback, badges, copy profile, upload photo, cleanup.
-
 import * as React from "react";
 import { Text, Spinner, SpinnerSize } from "@fluentui/react";
+
+import styles from "./ProfilePageHeader.module.scss";
+import { IBadgeItem, IProfilePageHeaderProps } from "./IProfilePageHeaderProps";
+
 import {
   fetchUserProfilePicture,
   fetchCurrentUserInfo,
@@ -15,35 +15,16 @@ import {
   copyProfileToClipboard,
   saveSelectedBadge,
   loadSelectedBadge,
-} from "../services/profileHeaderServices";
-import styles from "./ProfileHeader.module.scss";
+} from "../../services/Profile/profileHeaderServices";
 
-const ProfileIcon_URL = require("../../assets/profileCircleImg.svg");
+const ProfileIcon_URL: string = require("../assets/profileCircleImg.svg");
 
-// File name (SiteAssets)
+// Background in SiteAssets
 const PROFILE_HEADER_BG_FILE_NAME = "Gradient.svg";
+// Packaged fallback background
+const ProfileHeaderBgAsset: string = require("../assets/Gradient.svg");
 
-// Packaged fallback
-const ProfileHeaderBgAsset: string = require("../../assets/Gradient.svg");
-
-type StatItem = { label: string; value: number };
-type BadgeItem = { name: string; imageUrl: string };
-
-export interface IProfileHeaderProps {
-  context: any;
-
-  photoUrl?: string;
-  fullName?: string;
-  department?: string;
-
-  stats: StatItem[];
-  actionNavigateUrl?: string;
-
-  badges?: BadgeItem[];
-  selectedBadge?: BadgeItem | null;
-}
-
-interface IProfileHeaderState {
+interface IProfilePageHeaderState {
   currentPhoto: string;
 
   fullName: string;
@@ -56,36 +37,26 @@ interface IProfileHeaderState {
   siteUrl: string;
   error: string | null;
 
-  badgeImageErrors: { [key: string]: boolean };
-  selectedBadge: BadgeItem | null;
+  badgeImageErrors: { [badgeName: string]: boolean };
+  selectedBadge: IBadgeItem | null;
 }
 
-export default class ProfileHeader extends React.Component<IProfileHeaderProps, IProfileHeaderState> {
+export default class ProfilePageHeader extends React.Component<IProfilePageHeaderProps, IProfilePageHeaderState> {
   private menuRef: React.RefObject<HTMLDivElement>;
+  private fileInputRef: React.RefObject<HTMLInputElement>;
   private feedbackTimeout: number | undefined;
 
   private graphPhotoObjectUrl: string | null = null;
 
-  public static defaultProps: Partial<IProfileHeaderProps> = {
-    stats: [
-      // ✅ only comment (remove nahi)
-      // { label: "Posts", value: 3 },
-      // { label: "Followers", value: 21 },
-      // { label: "Following", value: 20 },
-      // { label: "Praises", value: 5 },
-    ],
-    actionNavigateUrl: "/sites/Tawasol",
-  };
-
-  constructor(props: IProfileHeaderProps) {
+  constructor(props: IProfilePageHeaderProps) {
     super(props);
 
     this.state = {
       currentPhoto: "",
 
-      fullName: props.fullName || "",
+      fullName: (props.fullName || "").trim(),
       designation: "",
-      department: props.department || "",
+      department: (props.department || "").trim(),
 
       showMenu: false,
       copyFeedback: false,
@@ -98,6 +69,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     };
 
     this.menuRef = React.createRef();
+    this.fileInputRef = React.createRef();
   }
 
   public componentDidMount(): void {
@@ -107,16 +79,16 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
   public componentWillUnmount(): void {
     document.removeEventListener("click", this.handleOutsideClick);
-    if (this.feedbackTimeout) window.clearTimeout(this.feedbackTimeout);
+
+    if (this.feedbackTimeout) {
+      window.clearTimeout(this.feedbackTimeout);
+      this.feedbackTimeout = undefined;
+    }
 
     if (this.graphPhotoObjectUrl) {
       URL.revokeObjectURL(this.graphPhotoObjectUrl);
       this.graphPhotoObjectUrl = null;
     }
-  }
-
-  private getUserEmailFromContext(): string {
-    return (this.props.context?.pageContext?.user?.email || "").trim();
   }
 
   private upgradeSharePointPhotoToLarge(url: string): string {
@@ -128,7 +100,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
   private setGraphPhotoFromBlob(blob: Blob | null): string {
     if (!blob || !blob.size) return "";
 
-    // revoke previous object url to avoid leaks
     if (this.graphPhotoObjectUrl) {
       URL.revokeObjectURL(this.graphPhotoObjectUrl);
       this.graphPhotoObjectUrl = null;
@@ -139,22 +110,18 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     return url;
   }
 
-  // ✅ Header background (SiteAssets + packaged assets fallback)
   private getHeaderBgStyle = (): React.CSSProperties => {
-    const webUrl = (this.props.context?.pageContext?.web?.absoluteUrl || this.state.siteUrl || "").trim();
-
+    const webAbsoluteUrl = (this.props.context?.pageContext?.web?.absoluteUrl || "").trim();
     const file = encodeURIComponent(PROFILE_HEADER_BG_FILE_NAME);
-    const siteAssetsUrl = webUrl ? `${webUrl}/SiteAssets/${file}` : "";
+    const siteAssetsUrl = webAbsoluteUrl ? `${webAbsoluteUrl}/SiteAssets/${file}` : "";
 
-    // ✅ Multiple backgrounds:
-    // 1) SiteAssets file (if exists)
-    // 2) Packaged asset (always available once bundled)
-    // 3) Fallback gradient (if svg blocked)
     const layers: string[] = [];
 
+    // SiteAssets first (if present)
     if (siteAssetsUrl) layers.push(`url("${siteAssetsUrl}")`);
+    // Packaged fallback
     if (ProfileHeaderBgAsset) layers.push(`url("${ProfileHeaderBgAsset}")`);
-
+    // Gradient fallback
     layers.push(`linear-gradient(90deg,#fbd8c7 0%,#fee2cf 35%,#ffd6b6 68%,#ffe4d1 100%)`);
 
     return {
@@ -174,13 +141,10 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       const savedBadge = loadSelectedBadge();
       if (savedBadge) this.setState({ selectedBadge: savedBadge });
 
-      // (optional) context email, helpful for logs/future
-      this.getUserEmailFromContext();
-
       // ----------------------------
       // 1) Graph info + HQ photo (preferred)
       // ----------------------------
-      let graphInfo: any = null;
+      let graphInfo: { fullName: string; designation: string; department: string } | null = null;
       try {
         graphInfo = await fetchGraphMeInfo(this.props.context);
       } catch {
@@ -214,26 +178,20 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       }
 
       // ----------------------------
-      // Final merge priority (Graph > SPInfo > props/state)
+      // Final merge priority (Graph > SPInfo > existing)
       // ----------------------------
-      const gName =
-        (graphInfo?.displayName ||
-          graphInfo?.fullName ||
-          `${graphInfo?.givenName || ""} ${graphInfo?.surname || ""}` ||
-          "").trim();
-
-      const gDesig = (graphInfo?.jobTitle || graphInfo?.designation || "").trim();
-      const gDept = (graphInfo?.department || "").trim();
-
       const finalFullName =
-        gName || (spInfo?.fullName || "").trim() || (this.state.fullName || "").trim();
+        (graphInfo?.fullName || "").trim() ||
+        (spInfo?.fullName || "").trim() ||
+        (this.state.fullName || "").trim();
 
-      const finalDesignation = gDesig;
+      const finalDesignation = (graphInfo?.designation || "").trim();
 
       const finalDepartment =
-        gDept || (spInfo?.department || "").trim() || (this.state.department || "").trim();
+        (graphInfo?.department || "").trim() ||
+        (spInfo?.department || "").trim() ||
+        (this.state.department || "").trim();
 
-      // Photo preference: Graph HQ > SharePoint photo
       const finalPhoto = (graphPhotoUrl || "").trim() || (spPhotoUrl || "").trim();
 
       this.setState({
@@ -262,7 +220,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
 
   private openFileDialog = (): void => {
     this.setState({ showMenu: false });
-    document.getElementById("profile-upload-input")?.click();
+    if (this.fileInputRef.current) this.fileInputRef.current.click();
   };
 
   private handleProfileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
@@ -272,7 +230,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     try {
       const { siteUrl } = this.state;
 
-      // ✅ instant preview
+      // instant preview
       const reader = new FileReader();
       reader.onload = (event) => {
         const photoData = event.target?.result as string;
@@ -280,14 +238,14 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
       };
       reader.readAsDataURL(file);
 
-      // ✅ upload to SharePoint + update user profile picture
+      // upload to SharePoint + update user profile picture
       const uploadedUrl = await uploadProfilePicture(file, siteUrl);
       if (uploadedUrl) {
         await updateUserProfilePicture(uploadedUrl);
         this.setState({ error: null });
       }
     } catch (error: any) {
-      this.setState({ error: error.message || "Failed to upload profile picture" });
+      this.setState({ error: error?.message || "Failed to upload profile picture" });
     }
 
     e.target.value = "";
@@ -311,13 +269,12 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
   };
 
   private handleBadgeImageError = (badgeName: string): void => {
-    console.warn(`[ProfileHeader] Badge image failed: ${badgeName}`);
     this.setState((prev) => ({
       badgeImageErrors: { ...prev.badgeImageErrors, [badgeName]: true },
     }));
   };
 
-  private handleSelectBadge = (badge: BadgeItem): void => {
+  private handleSelectBadge = (badge: IBadgeItem): void => {
     this.setState((prev) => {
       const isSame = prev.selectedBadge?.name === badge.name;
       const next = isSame ? null : badge;
@@ -398,9 +355,10 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
     );
   }
 
-  public render(): React.ReactElement {
-    const { badges } = this.props;
-    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors } = this.state;
+  public render(): React.ReactElement<IProfilePageHeaderProps> {
+    const badges = this.props.badges || [];
+    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors } =
+      this.state;
 
     const subtitle = (designation || "").trim() || (department || "").trim() || "—";
 
@@ -502,7 +460,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
             </div>
 
             <input
-              id="profile-upload-input"
+              ref={this.fileInputRef}
               type="file"
               accept="image/*"
               style={{ display: "none" }}
@@ -517,7 +475,7 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
             </div>
           )}
 
-          {badges && badges.length > 0 ? (
+          {badges.length > 0 ? (
             <div className={styles.badgesRow} aria-label="Badges">
               {badges.map((b, i) => (
                 <div
@@ -543,13 +501,6 @@ export default class ProfileHeader extends React.Component<IProfileHeaderProps, 
               ))}
             </div>
           ) : null}
-
-          {/* ✅ ONLY COMMENT (remove nahi) */}
-          {/*
-          <div className={styles.statsRow} role="region" aria-label="Profile stats">
-            {stats.slice(0, 4).map(this.renderStat)}
-          </div>
-          */}
         </div>
       </div>
     );
