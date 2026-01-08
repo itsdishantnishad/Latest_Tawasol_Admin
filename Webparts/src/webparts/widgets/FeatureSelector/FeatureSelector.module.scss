@@ -12,7 +12,6 @@
   border-radius: 8px;
   overflow: hidden;
   // box-shadow: 15px 7.933px 18.247px -7.933px rgba(0, 0, 0, 0.2);
-  box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
   cursor: pointer;
   background-color: #ebb885;
   background-repeat: no-repeat;
@@ -54,54 +53,66 @@
 
 .galleryCard {
   background-image: url("../../Components/FeatureContent/assets/ImageGallery.png");
+  box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
 }
 
 .documentsCard {
   background-image: url("../../Components/FeatureContent/assets/Documents.png");
+  box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
 }
 
 .eventsCard {
   background-image: url("../../Components/FeatureContent/assets/Events.png");
+  box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 2;
 }
 
 .celebrateCard {
   background-image: url("../../Components/FeatureContent/assets/LetsCelebrate.png");
+  box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
   z-index: 7;
 }
 
 .meetingCard {
   background-image: url("../../Components/FeatureContent/assets/Meeting.png");
+  box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 6;
 }
 
 .serviceLinksCard {
   background-image: url("../../Components/FeatureContent/assets/Service-Links.png");
+  box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 4;
 }
 
 .interactiveFormsCard {
   background-image: url("../../Components/FeatureContent/assets/InteractiveForms.png");
+  box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 3;
 }
 
 .offersCard {
   background-image: url("../../Components/FeatureContent/assets/Offers.png");
+  box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
 }
 
 .trainingCard {
   background-image: url("../../Components/FeatureContent/assets/Training.png");
+  box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
 }
 
 .aboutDhreCard {
   background-image: url("../../Components/FeatureContent/assets/AboutDHRE.png");
+  box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
 }
 
 .tasksCard {
   background-image: url("../../Components/FeatureContent/assets/Tasks.png");
+  box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 1;
 }
 
 .beverageCard {
-  background-image: url("../../Components/FeatureContent/assets/Services.svg");
+  background-image: url("../../Components/FeatureContent/assets/Services.png");
+  box-shadow: -14.98px 0px 18.14px -7.89px #00000040;
 }
