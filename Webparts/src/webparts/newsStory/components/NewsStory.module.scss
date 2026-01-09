@@ -33,7 +33,7 @@
   /* ✅ Dots centered + tighter gap */
   :global(.slick-dots) {
     position: absolute !important;
-    bottom: 16px;
+    bottom: -11px;
     left: 50%;
     transform: translateX(-50%);
     width: auto;
@@ -135,7 +135,7 @@
   position: absolute;
   right: 0;
   z-index: 5;
-  margin-bottom: 24px;
+  margin-bottom: -15px;
 }
 
 .captionTitle {
