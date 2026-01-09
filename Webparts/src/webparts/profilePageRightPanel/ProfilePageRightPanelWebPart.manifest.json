@@ -22,7 +22,8 @@
     "description": { "default": "Profile_Page_Right_Panel description" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "description": "Profile_Page_Right_Panel"
+      "description": "Profile_Page_Right_Panel",
+      "hrLetterHeroUrl": ""
     }
   }]
 }

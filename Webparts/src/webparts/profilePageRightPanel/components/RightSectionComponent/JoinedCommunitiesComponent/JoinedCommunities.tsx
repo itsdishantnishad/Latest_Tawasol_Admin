@@ -34,7 +34,7 @@ export default class JoinedCommunitiesCard
             >
               <span className={styles.rowText} title={name}>{name}</span>
 
-              {/* ✅ Use SVG from assets */}
+              {/*  Use SVG from assets */}
               <img src={ArrowIcon} className={styles.chev} alt="" />
             </button>
           ))}

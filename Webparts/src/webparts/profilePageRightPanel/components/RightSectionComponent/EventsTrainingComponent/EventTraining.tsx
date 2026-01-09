@@ -185,11 +185,11 @@ export default class UpcomingEventsCard extends React.Component<IUpcomingEventsC
         )}
 
         {!loading && !error && tab === "events" && (!effectiveEvents || effectiveEvents.length === 0) && (
-          <div style={{ fontSize: 12, marginTop: 8 }}>No upcoming events.</div>
+          <div className={styles.noEvent}>No upcoming events.</div>
         )}
 
         {!loading && !error && tab === "training" && (!effectiveTraining || effectiveTraining.length === 0) && (
-          <div style={{ fontSize: 12, marginTop: 8 }}>No upcoming trainings.</div>
+          <div className={styles.noEvent}>No upcoming trainings.</div>
         )}
       </section>
     );

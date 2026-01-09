@@ -57,7 +57,7 @@
 }
 
 .segmentWrap {
-  width: 376px;
+  // width: 376px;
   height: 52px;
   border-radius: 360px;
   border: 1px solid #fbbf7f;
@@ -212,6 +212,12 @@
   height: 16px;
   display: inline-block;
   flex-shrink: 0;
+}
+
+.noEvent {
+  font-size: 12;
+  align-self: center;
+  justify-self: center;
 }
 
 @media (max-width: 480px) {

@@ -1,35 +1,45 @@
 import * as React from "react";
 import styles from "./ApplyLeave.module.scss";
-import { TahweelService, TahweelEmployeeLeaveBalance } from "../../../../services/Integration/TahweelService";
+import {
+  TahweelService,
+  TahweelEmployeeLeaveBalance,
+} from "../../../../services/Integration/TahweelService";
 
 export interface IApplyLeaveCardProps {
   periodText?: string;
-  onApply?: () => void;
+  applyUrl?: string;
   context: any;
 }
 
 export interface IApplyLeaveCardState {
   loading: boolean;
-
-  // what we show in the big value area
   displayValue: string;
   isMessage: boolean;
-
-  // what we show below "Leave Balance"
   periodText: string;
-
-  // for debugging / optional display later
   error: string;
 }
 
 const EMPTY_TEXT = "—";
 
 const monthMap: { [k: string]: number } = {
-  JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
-  JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11,
+  JAN: 0,
+  FEB: 1,
+  MAR: 2,
+  APR: 3,
+  MAY: 4,
+  JUN: 5,
+  JUL: 6,
+  AUG: 7,
+  SEP: 8,
+  OCT: 9,
+  NOV: 10,
+  DEC: 11,
 };
 
-export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps, IApplyLeaveCardState> {
+export default class ApplyLeaveCard extends React.Component<
+  IApplyLeaveCardProps,
+  IApplyLeaveCardState
+> {
   private tahweelService: TahweelService;
 
   constructor(props: IApplyLeaveCardProps) {
@@ -43,7 +53,9 @@ export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps
       error: "",
     };
 
-    this.tahweelService = new TahweelService({ httpClient: this.props.context.httpClient });
+    this.tahweelService = new TahweelService({
+      httpClient: this.props.context.httpClient,
+    });
   }
 
   public async componentDidMount(): Promise<void> {
@@ -113,10 +125,9 @@ export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps
         return;
       }
 
-      const res: TahweelEmployeeLeaveBalance = await this.tahweelService.fetchEmployeeLeaveBalanceByEmail(email);
+      const res: TahweelEmployeeLeaveBalance =
+        await this.tahweelService.fetchEmployeeLeaveBalanceByEmail(email);
 
-      // - if no PERSON_NUMBER -> "Employee Number Not Present"
-      // - else if no balance -> "No Balance Found"
       if (!res.hasPersonNumber) {
         this.setState({
           loading: false,
@@ -158,8 +169,10 @@ export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps
   }
 
   public render(): React.ReactElement<IApplyLeaveCardProps> {
-    const { onApply } = this.props;
+    const { applyUrl } = this.props;
     const { loading, displayValue, isMessage, periodText } = this.state;
+
+    const isDisabled = loading || !applyUrl;
 
     return (
       <div className={styles.card}>
@@ -170,25 +183,35 @@ export default class ApplyLeaveCard extends React.Component<IApplyLeaveCardProps
         </p>
 
         <div className={styles.balanceBox} aria-busy={loading}>
-          <div className={`${styles.balanceNumber} ${isMessage ? styles.balanceNumberMessage : ""}`}>
-            {loading ? EMPTY_TEXT : (displayValue || EMPTY_TEXT)}
+          <div
+            className={`${styles.balanceNumber} ${
+              isMessage ? styles.balanceNumberMessage : ""
+            }`}
+          >
+            {loading ? EMPTY_TEXT : displayValue || EMPTY_TEXT}
           </div>
 
           <div className={styles.balanceLabel}>Leave Balance</div>
 
           <div className={styles.balancePeriod}>
-            {loading ? EMPTY_TEXT : (periodText || EMPTY_TEXT)}
+            {loading ? EMPTY_TEXT : periodText || EMPTY_TEXT}
           </div>
         </div>
 
-        <button
-          type="button"
-          className={styles.cta}
-          onClick={onApply}
-          disabled={loading}
+        {/*  CTA opens in new tab */}
+        <a
+          className={`${styles.cta} ${isDisabled ? styles.isDisabled : ""}`}
+          href={applyUrl || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-interception="off"
+          aria-disabled={isDisabled}
+          onClick={(e) => {
+            if (isDisabled) e.preventDefault();
+          }}
         >
           <span className={styles.ctaText}>Apply Leave</span>
-        </button>
+        </a>
       </div>
     );
   }
