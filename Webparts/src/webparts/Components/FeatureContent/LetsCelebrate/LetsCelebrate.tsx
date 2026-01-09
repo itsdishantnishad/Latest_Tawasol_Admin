@@ -23,6 +23,7 @@ export interface ICelebration {
   image?: string;
   description?: string;
   contact?: string;
+  email?: string
 }
 
 export interface ILetsCelebrateProps {
@@ -165,6 +166,21 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const [errorBirthdays, setErrorBirthdays] = React.useState<string | null>(null);
   const [errorAnniversaries, setErrorAnniversaries] = React.useState<string | null>(null);
 
+  const openTeamsChat = (email?: string) => {
+    const e = (email || "").trim();
+    if (!e) return;
+    window.open(
+      `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(e)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
+
+  const isChatEnabledTab =
+    activeTab === "newJoiners" || activeTab === "birthdays" || activeTab === "anniversaries";
+
+
+
   React.useEffect(() => {
     let mounted = true;
 
@@ -183,6 +199,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
             image: (item.UserPicture || item.image || "").toString(),
             description: (item.TIRDescription || "").toString(),
             contact: (item.TIRContact || "").toString(),
+            email: (item.TIRUserEmail || "").toString()
           }));
 
           if (mounted) setSpNewJoiners(mappedData);
@@ -260,6 +277,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
             name: normalizeFullName(r.fullName),
             type: "birthday",
             image: (r.imageDataUrl || r.imageUrl || "").toString().trim(),
+            email: (r.email || "").toString().trim()
           }));
 
           if (mounted) setApiBirthdays(mapped);
@@ -289,6 +307,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
             name: normalizeFullName(r.fullName),
             type: "anniversary",
             image: (r.imageDataUrl || r.imageUrl || "").toString().trim(),
+            email: (r.email || "").toString().trim()
           }));
 
           if (mounted) setApiAnniversaries(mapped);
@@ -617,6 +636,20 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                         key={item.id}
                         className={styles.profileCard}
                         style={getOuterCirclePosition(index)}
+                        onClick={isChatEnabledTab ? () => openTeamsChat(item.email) : undefined}
+
+                        role={isChatEnabledTab ? "button" : undefined}
+
+                        tabIndex={isChatEnabledTab ? 0 : -1}
+
+                        onKeyDown={
+                          isChatEnabledTab
+                            ? (e) => {
+                              if (e.key === "Enter" || e.key === " ") openTeamsChat(item.email);
+                            }
+                            : undefined
+                        }
+
                       >
                         <div className={styles.profileImageWrapper}>
                           <img
@@ -641,6 +674,20 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                           key={item.id}
                           className={styles.profileCard}
                           style={getInnerCirclePosition(index)}
+                          onClick={isChatEnabledTab ? () => openTeamsChat(item.email) : undefined}
+
+                          role={isChatEnabledTab ? "button" : undefined}
+
+                          tabIndex={isChatEnabledTab ? 0 : -1}
+
+                          onKeyDown={
+                            isChatEnabledTab
+                              ? (e) => {
+                                if (e.key === "Enter" || e.key === " ") openTeamsChat(item.email);
+                              }
+                              : undefined
+                          }
+
                         >
                           <div className={styles.profileImageWrapper}>
                             <img
@@ -655,9 +702,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                             />
                           </div>
                           <div className={styles.profileName}>{item.name}</div>
-                          <div className={styles.HoverText}>
-                            Wish {item.name} to their onboarding
-                          </div>
+                          <div className={styles.HoverText}>Wish {item.name} to their onboarding</div>
                         </div>
                       ))}
 
@@ -676,6 +721,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                       </div>
                     </div>
                   </div>
+
 
                   <div className={styles.bottomSection}>
                     {totalPages > 1 && (
