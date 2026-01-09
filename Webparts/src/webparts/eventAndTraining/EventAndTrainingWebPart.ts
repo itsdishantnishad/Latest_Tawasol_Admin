@@ -51,7 +51,7 @@ export default class EventAndTrainingWebPart extends BaseClientSideWebPart<IEven
     this.EventItem = await this.spService.getAllEvents();
      const graph = await this.context.msGraphClientFactory.getClient("3");
     const provider = new GraphMeetingsProvider(graph);
-    this._meetings = await provider.getUpcoming(7, 20);
+    this._meetings = await provider.getUpcoming(7, 50);
     this.render();
   }
  
