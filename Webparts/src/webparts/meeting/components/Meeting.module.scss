@@ -1,8 +1,8 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
 .meetingSection {
-  padding: 40px 0 0;
-  max-width: 1320px;
+  // padding: 40px 0 0;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -68,98 +68,102 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 257px);
-  column-gap: 24px;
-  row-gap: 24px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
   justify-content: center;
 }
 
-@media (max-width: 1200px) { .grid { grid-template-columns: repeat(3, 257px); } }
-@media (max-width: 930px)  { .grid { grid-template-columns: repeat(2, 257px); } }
-@media (max-width: 640px)  { .grid { grid-template-columns: repeat(1, 257px); } }
+@media (max-width: 1200px) { .grid {   grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 930px)  { .grid {   grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .grid {   grid-template-columns: repeat(1, 1fr); } }
 
 .card {
-  width: 257px;
-  height: 330px;
-  border-radius: 12.06px;
-  border: 0.86px solid #E5E8EB;
+  // width: 257px;
+  min-height: 280px;
+  border-radius: 12px;
+  // border: 0.86px solid #E5E8EB;
   background: #FFFFFF;
   box-shadow:
     0 10px 24px rgba(16, 24, 32, 0.05),
     0  2px  6px rgba(16, 24, 32, 0.06);
   backdrop-filter: blur(27.57px);
-  padding: 8px 8px 12px;
+  padding: 8px 8px 20px 8px;
   position: relative;
   display: flex;
   flex-direction: column;
 }
 
-.card > .row,
-.card > .timeLine { margin-top: 0; }
+// .card > .row,
+// .card > .timeLine { margin-top: 0; }
 
-.card > .row:nth-child(2) {
-  position: absolute;
-  top: 110px;
-  left: 0; right: 0;
-}
+// .card > .row:nth-child(2) {
+//   position: absolute;
+//   top: 110px;
+//   left: 0; right: 0;
+// }
 
-.card > .timeLine {
-  position: absolute;
-  top: 136px;
-  left: 0; right: 0;
-  padding-left: 36px;
-}
+// .card > .timeLine {
+//   position: absolute;
+//   top: 136px;
+//   left: 0; right: 0;
+//   padding-left: 36px;
+// }
 
-.card > .row:nth-child(4) {
-  position: absolute;
-  top: 174px;
-  left: 0; right: 0;
-}
+// .card > .row:nth-child(4) {
+//   position: absolute;
+//   top: 174px;
+//   left: 0; right: 0;
+// }
 
-.card > .row:nth-child(5) {
-  position: absolute;
-  top: 214px;
-  left: 0; right: 0;
-}
+// .card > .row:nth-child(5) {
+//   position: absolute;
+//   top: 214px;
+//   left: 0; right: 0;
+// }
 
-.card > .joinBtn{
-  top:276px;
-}
+// .card > .joinBtn{
+//   top:276px;
+// }
 
 .titleTile {
   width: 100%;
   height: 85px;
   border-radius: 8px;
-  background: radial-gradient(circle at top, #DDA160 0%, #FFDBB4 100%);
-  border: 1px solid #F0BB82;
+  // background: radial-gradient(circle at top, #DDA160 0%, #FFDBB4 100%);
+  background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #DDA160 0%, #FFDBB4 100%);
+  // border: 1px solid #F0BB82;
   box-shadow: 0px -2px 4px 0px #FED3A4 inset;
   padding: 8px 10px;
   box-sizing: border-box;
   overflow: hidden;
   display: flex;
   align-items: flex-start;
-  margin: 0;
+  margin-bottom: 16px;
 }
 
 
 .titleText {
-  font-family: 'Inter', Segoe UI, Arial, sans-serif;
-  font-weight: 600;
-  font-style: normal;
-  font-size: 16.05px;
-  line-height: 24.07px;
-  letter-spacing: 0px;
   color: #101820;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 24px;
 }
 
 .row {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
+  // margin-top: 8px;
+}
+
+.card > .row:nth-child(3){
+  margin-top: 12px;
+}
+
+.card > .row:nth-child(4){
+  margin-top: 16px;
 }
 
 .rowText {
@@ -204,8 +208,8 @@
   width: 24px;
   height: 24px;
   flex: 0 0 24px;
-  margin-left: 8px;
-  margin-right: 4px;
+  // margin-left: 8px;
+  // margin-right: 4px;
   display: inline-block;
   opacity: 1;
 }
@@ -231,13 +235,13 @@
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
-  margin-left: 8px;
+  // margin-left: 8px;
 }
 
 .avatarIcon {
   font-size: 20px;
   color: #444;
-  margin-left: 8px;
+  // margin-left: 8px;
 }
 
 .joinBtn {

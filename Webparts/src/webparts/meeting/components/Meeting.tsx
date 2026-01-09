@@ -80,13 +80,18 @@ export default class Meeting extends React.Component<MeetingProps> {
         </div>
 
         <div className={styles.row}>
-          <img src={ClockIcon} className={styles.iconClock} alt="" aria-hidden="true" />
-          <div className={styles.metaLine}>{this.fmtDate(m.start)}</div>
+          <div>
+            <img src={ClockIcon} className={styles.iconClock} alt="" aria-hidden="true" />
+          </div>
+          <div>
+            <div className={styles.metaLine}>{this.fmtDate(m.start)}</div>
+            <div className={styles.timeText}>{this.fmtTimeRange(m.start, m.end)}</div>
+          </div>
         </div>
 
-        <div className={styles.timeLine}>
+        {/* <div className={styles.timeLine}>
           <div className={styles.timeText}>{this.fmtTimeRange(m.start, m.end)}</div>
-        </div>
+        </div> */}
 
         <div className={styles.row}>
           <img src={LocationIcon} className={styles.iconLocation} alt="" aria-hidden="true" />
