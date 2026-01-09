@@ -12,7 +12,7 @@ export const IDS = {
     brand: 'tir-brand',
     search: 'tir-search',
     bell: 'tir-bell',
-    avatar: 'tir-avatar' 
+    avatar: 'tir-avatar'
   }
 } as const;
 
@@ -30,7 +30,8 @@ export const URL_PATHS = {
   trainings: '/SitePages/EventAndTraining.aspx',
   events:    '/SitePages/EventAndTraining.aspx',
   aboutDHRE: '/SitePages/About-DHRE.aspx',
-  profile:   '/SitePages/Profile.aspx'
+  profile:   '/SitePages/Profile.aspx',
+  help:      '/SitePages/Help-Center.aspx'
 } as const;
 
 export type ResolvedUrls = {
@@ -44,6 +45,7 @@ export type ResolvedUrls = {
   events: string;
   aboutDHRE: string;
   profile: string;
+  help: string;
 };
 
 /** Join base + path without double slashes (ES5-safe, no startsWith). */
@@ -70,7 +72,8 @@ export function resolveUrls(baseWebUrl: string): ResolvedUrls {
     trainings: joinUrl(root, URL_PATHS.trainings),
     events:    joinUrl(root, URL_PATHS.events),
     aboutDHRE: joinUrl(root, URL_PATHS.aboutDHRE),
-    profile:   joinUrl(root, URL_PATHS.profile)
+    profile:   joinUrl(root, URL_PATHS.profile),
+    help:      joinUrl(root, URL_PATHS.help)
   };
 }
 
