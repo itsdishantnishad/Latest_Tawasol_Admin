@@ -11,12 +11,8 @@ interface Card {
 }
 
 type Pose = { r: number; y: number; z: number };
-
-//  Easy to tune later (Figma-style fan row)
 const getFanPoses = (count: number): Pose[] => {
   if (count <= 0) return [];
-
-  // nice presets for 1..5 (most common)
   switch (count) {
     case 1:
       return [{ r: -5, y: 0, z: 0 }];
@@ -79,34 +75,34 @@ const ShuffledCards: React.FC<{ cards: Card[] }> = ({ cards }) => {
     const isScrollableDesktop = !isMweb && cards.length > 5;
 
       return (
-    <div className={`${styles.wrapper} ${isScrollableDesktop ? styles.scrollable : ""}`}>
-      {cards.map((card, index) => {
-        const pose = poses[index] || { r: 0, y: 0, z: index + 1 };
+        <div className={`${styles.wrapper} ${isScrollableDesktop ? styles.scrollable : ""}`}>
+            {cards.map((card, index) => {
+                const pose = poses[index] || { r: 0, y: 0 };
 
-        // Mobile: no rotation/offset (clean horizontal scroll)
-        const r = isMweb ? 0 : pose.r;
-        const y = isMweb ? 0 : pose.y;
+                // highest zIndex first, descending
+                const zIndex = cards.length - index;
 
-        return (
-          <ConditionalLink key={card.id || index} to={card.url}>
-            <div
-              className={styles.body}
-              style={{
-                ["--r" as any]: `${r}deg`,
-                ["--y" as any]: `${y}px`,
-                zIndex: pose.z,
-                ...(card.backgroundImage && { backgroundImage: `url(${card.backgroundImage})` }),
-              }}
-            >
-              {/* keep if needed later */}
-              {/* <h3 className={styles.header}>{card.header}</h3> */}
-              {/* {card.subHeader && <p className={styles.subHeader}>{card.subHeader}</p>} */}
-            </div>
-          </ConditionalLink>
-        );
-      })}
-    </div>
-  );
+                const r = isMweb ? 0 : pose.r;
+                const y = isMweb ? 0 : pose.y;
+
+                return (
+                    <ConditionalLink key={card.id || index} to={card.url}>
+                    <div
+                        className={styles.body}
+                        style={{
+                        ["--r" as any]: `${r}deg`,
+                        ["--y" as any]: `${y}px`,
+                        zIndex,
+                        ...(card.backgroundImage && {
+                            backgroundImage: `url(${card.backgroundImage})`,
+                        }),
+                        }}
+                    />
+                    </ConditionalLink>
+                );
+            })}
+        </div>
+    );
 };
 
 export default ShuffledCards;
