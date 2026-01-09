@@ -8,7 +8,7 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import * as strings from 'LetsCelebrateWebPartStrings';
 import LetsCelebrate from './components/LetsCelebrate';
 import { ILetsCelebrateProps } from './components/ILetsCelebrateProps';
-import { setupSP } from '../profile/components/services/spSetup';
+import { setupSP } from '../services/Profile/spSetup';
 export interface ILetsCelebrateWebPartProps {
 
 }

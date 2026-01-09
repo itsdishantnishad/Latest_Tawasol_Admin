@@ -318,7 +318,7 @@ export default class Beverages extends React.Component<
               <img src={MILK_IMG} className={`${styles.milkImg} ${styles.milkImg1}`} alt="Milk Menu" />
             </div>
             <div>
-              <Text className={styles.menuTitle}>Milk Alternative</Text>
+              <Text className={styles.menuTitle}>Milk Alternatives</Text>
               {this.renderMenu(milk)}
             </div>
           </div>

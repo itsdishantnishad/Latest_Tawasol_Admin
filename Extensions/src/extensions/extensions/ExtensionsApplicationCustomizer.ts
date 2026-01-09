@@ -17,7 +17,7 @@ import { NotificationService } from './services/notificationService';
 import { FooterService } from './services/FooterService';
 import { AmplitudeService } from './services/AmplitudeService';
 import Onbo from './components/Onbo';
-import { IOnboConfig } from './components/Onbo';
+// import { IOnboConfig } from './components/Onbo';
 import { HideSocialBarService } from './services/HideSocialBarService';
 
 export interface IExtensionsApplicationCustomizerProperties {
@@ -544,24 +544,29 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     this.hideVivaEngageViewAll();
     this.hideVivaEngageConversationsText();
 
+    // ✅ EXISTING (keep same behavior for other urls)
     const urls = resolveUrls(this.webUrl);
+
+    // ✅ NEW: resolve Help URL using site absolute url (tenant + site dynamic)
+    const siteBaseUrl = this.context.pageContext.site.absoluteUrl || this.webUrl;
+    const siteUrls = resolveUrls(siteBaseUrl);
 
     // Onboarding
     // Onboarding
-try {
-  const state = await Onbo.loadStateFromList(this.context);
-  if (!state.hasSeen && state.URL) {
-    const cfg: IOnboConfig = { 
-      homeUrl: urls.home, 
-      URL: state.URL,
-      title: state.title   // ✅ FIX
-    };
-    this.onboarding = new Onbo(this.context, cfg);
-    this.onboarding.render();
-  }
-} catch (err) {
-  console.error('Onboarding load failed', err);
-}
+// try {
+//   const state = await Onbo.loadStateFromList(this.context);
+//   if (!state.hasSeen && state.URL) {
+//     const cfg: IOnboConfig = { 
+//       homeUrl: urls.home, 
+//       URL: state.URL,
+//       title: state.title   // ✅ FIX
+//     };
+//     this.onboarding = new Onbo(this.context, cfg);
+//     this.onboarding.render();
+//   }
+// } catch (err) {
+//   console.error('Onboarding load failed', err);
+// }
 
 
     // Services
@@ -586,6 +591,10 @@ try {
       () => void this.handleBellClick(),
       (input) => this.wireSearch(input),
       urls.profile,
+
+      // ✅ NEW: Help Center uses tenant+site dynamic base
+      siteUrls.help,
+
       this.context.msGraphClientFactory,
       this.context.pageContext.user.displayName
     );
@@ -821,37 +830,44 @@ try {
 
   /* find conversation id */
   private hideVivaEngageConversationsText(): void {
-    const hideConversations = () => {
-      const allElements = document.querySelectorAll('*');
 
-      allElements.forEach((element) => {
-        const text = element.textContent?.trim();
+    const isHomePage = (): boolean => {
+      const path = (window.location.pathname || "").toLowerCase();
 
-        if (text === 'Conversations' && !element.classList.contains('hideConversations')) {
-          (element as HTMLElement).style.display = 'none';
-          (element as HTMLElement).style.visibility = 'hidden';
-          element.classList.add('hideConversations');
-        }
-      });
-
-      const observer = new MutationObserver(() => {
-        const elements = document.querySelectorAll('*:not(.hideConversations)');
-        elements.forEach((element) => {
-          const text = element.textContent?.trim();
-          if (text === 'Conversations') {
-            (element as HTMLElement).style.display = 'none';
-            (element as HTMLElement).style.visibility = 'hidden';
-            element.classList.add('hideConversations');
-          }
-        });
-      });
-
-      observer.observe(document.body, { childList: true, subtree: true });
+      // Covers:
+      // /sites/site
+      // /sites/site/
+      // /sites/site/default.aspx
+      return (
+        path === this.context.pageContext.web.serverRelativeUrl.toLowerCase() ||
+        path === this.context.pageContext.web.serverRelativeUrl.toLowerCase() + "/" ||
+        path.endsWith("/default.aspx")
+      );
     };
 
-    hideConversations();
+    const hide = () => {
+      if (!isHomePage()) return;
 
-    setInterval(hideConversations, 3000);
+      const titles = document.querySelectorAll(
+        'span[data-automation-id="webPartTitleReadMode"]'
+      );
+
+      titles.forEach((el) => {
+        if (el.textContent?.trim() !== "Conversations") return;
+
+        const webPartRoot = el.closest('[class^="webpartTitle"]');
+        if (!webPartRoot) return;
+
+        (el as HTMLElement).style.setProperty("display", "none", "important");
+        (el as HTMLElement).style.setProperty("visibility", "hidden", "important");
+        el.classList.add("hideConversations");
+      });
+    };
+
+    hide();
+
+    // Handle modern page navigation + async renders
+    const observer = new MutationObserver(() => hide());
+    observer.observe(document.body, { childList: true, subtree: true });
   }
-
 }
