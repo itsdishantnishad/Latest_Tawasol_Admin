@@ -390,7 +390,7 @@ export default class MeetingWebPart extends BaseClientSideWebPart<IMeetingProps>
                 }),
                 PropertyPaneSlider('refreshMins', {
                   label: 'Refresh every (mins)',
-                  min: 10,
+                  min: 3,
                   max: 30
                 }),
                 PropertyPaneToggle('demoMode', {

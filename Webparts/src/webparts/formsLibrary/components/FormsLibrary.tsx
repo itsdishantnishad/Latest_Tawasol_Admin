@@ -1,18 +1,14 @@
 import * as React from 'react';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
-import {
-  Text,
-  IconButton,
-  Checkbox
-} from '@fluentui/react';
+import { Text, IconButton, Checkbox } from '@fluentui/react';
 
 import styles from './FormsLibrary.module.scss';
 
 export interface IFormsLibraryProps {
   context: WebPartContext;
   libraryTitle: string;
-  searchText?: string; 
+  searchText?: string;
 }
 
 interface IFormItem {
@@ -32,6 +28,7 @@ interface IFormsLibraryState {
   selectedItems: { [id: number]: boolean };
   isLoading: boolean;
   selectedItem?: IFormItem;
+  viewMode: { [dept: string]: 'list' | 'grid' };
 }
 
 const ARROW_ICON_URL = require("../assets/ArrowDown.svg");
@@ -42,8 +39,7 @@ const EXPORT_ICON_URL = require("../assets/exportToCSVIcon.svg");
 const GROUP_ICON_URL = require("../assets/GroupIcon.svg");
 const AIRPLAY_ICON_URL = require("../assets/airplayIcon.svg");
 
-export default class FormsLibrary
-  extends React.Component<IFormsLibraryProps, IFormsLibraryState> {
+export default class FormsLibrary extends React.Component<IFormsLibraryProps, IFormsLibraryState> {
 
   constructor(props: IFormsLibraryProps) {
     super(props);
@@ -53,7 +49,8 @@ export default class FormsLibrary
       selectAll: {},
       selectedItems: {},
       isLoading: true,
-      selectedItem: undefined
+      selectedItem: undefined,
+      viewMode: {}
     };
   }
 
@@ -61,12 +58,22 @@ export default class FormsLibrary
     this._loadItems();
   }
 
+  private _setViewMode = (dept: string, mode: 'list' | 'grid'): void => {
+    this.setState(p => ({
+      viewMode: { ...p.viewMode, [dept]: mode }
+    }));
+  };
+
+  private _formatModifiedDate(value: string): string {
+    const dt = new Date(value);
+    return dt
+      .toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2-digit' })
+      .replace(', ', ',');
+  }
+
   // ------------------ TAXONOMY RESOLVER (LIBRARY SAFE) ------------------
-  private _resolveTaxonomyLabel(
-    value: any,
-    taxCatchAll?: any[]
-  ): string {
-    
+  private _resolveTaxonomyLabel(value: any, taxCatchAll?: any[]): string {
+
     if (taxCatchAll && taxCatchAll.length > 0) {
       const term = taxCatchAll.find(
         t => typeof t.Term === "string" && t.Term.trim().length > 0
@@ -87,7 +94,7 @@ export default class FormsLibrary
 
     return "Other";
   }
- // --------------------------------------------------------------------
+  // --------------------------------------------------------------------
 
   private async _loadItems(): Promise<void> {
     try {
@@ -123,7 +130,7 @@ export default class FormsLibrary
           id: i.Id,
           title: i.Title || i.FileLeafRef,
           department: dept,
-          modified: new Date(i.Modified).toLocaleDateString(),
+          modified: this._formatModifiedDate(i.Modified),
           modifiedBy: i.Editor?.Title || '',
           fileUrl: i.FileRef,
           powerAppsUrl: i.TIRPowerAppLink?.Url || ''
@@ -132,15 +139,19 @@ export default class FormsLibrary
 
       const expanded: any = {};
       const selectAll: any = {};
+      const viewMode: any = {};
+
       Object.keys(grouped).forEach(d => {
         expanded[d] = false;
         selectAll[d] = false;
+        viewMode[d] = 'list';
       });
 
       this.setState({
         grouped,
         expanded,
         selectAll,
+        viewMode,
         selectedItems: {},
         isLoading: false
       });
@@ -169,6 +180,7 @@ export default class FormsLibrary
       selectAll: { ...this.state.selectAll, [dept]: newVal }
     });
   };
+
   private _toggleItemSelection = (itemId: number, dept: string, checked?: boolean): void => {
     const { grouped, selectedItems, selectAll } = this.state;
     const items = grouped[dept] || [];
@@ -241,16 +253,19 @@ export default class FormsLibrary
   }
 
   private _renderDeptSection(dept: string): JSX.Element {
-    const { grouped, expanded, selectAll, selectedItems } = this.state;
+    // ✅ FIX: include viewMode from state (this was causing error)
+    const { grouped, expanded, selectAll, selectedItems, viewMode } = this.state;
+
+    const isGrid = viewMode[dept] === 'grid';
     const items = grouped[dept] || [];
 
     const q = (this.props.searchText || "").toLowerCase().trim();
     const filteredItems = q
       ? items.filter(i =>
-          (i.title || "").toLowerCase().includes(q) ||
-          (i.modifiedBy || "").toLowerCase().includes(q) ||
-          (i.department || "").toLowerCase().includes(q)
-        )
+        (i.title || "").toLowerCase().includes(q) ||
+        (i.modifiedBy || "").toLowerCase().includes(q) ||
+        (i.department || "").toLowerCase().includes(q)
+      )
       : items;
 
     let isOpen = !!expanded[dept];
@@ -273,14 +288,25 @@ export default class FormsLibrary
             <img src={FOLDER_ICON_URL} className={styles.folderIcon} alt="Folder" />
             <Text variant="mediumPlus" className={styles.deptTitle}>{dept}</Text>
           </div>
+
+          {/* ✅ FIX: close header right properly + stopPropagation so header doesn't toggle */}
           <div className={styles.deptHeaderRight}>
             <IconButton
               className={styles.listIcon}
               iconProps={{ iconName: 'BulletedList' }}
               title="List view"
               ariaLabel="List view"
+              onClick={(e) => { e.stopPropagation(); this._setViewMode(dept, 'list'); }}
+              style={{ opacity: isGrid ? 0.4 : 1 }}
             />
-            <IconButton className={styles.gridIcon} title="Grid View" ariaLabel="Grid View">
+
+            <IconButton
+              className={styles.gridIcon}
+              title="Grid View"
+              ariaLabel="Grid View"
+              onClick={(e) => { e.stopPropagation(); this._setViewMode(dept, 'grid'); }}
+              style={{ opacity: isGrid ? 1 : 0.4 }}
+            >
               <img src={GRIDLINE_ICON_URL} alt="Grid View" style={{ width: 16, height: 16 }} />
             </IconButton>
           </div>
@@ -293,7 +319,6 @@ export default class FormsLibrary
                 <Checkbox
                   checked={selectAll[dept] || false}
                   onChange={(_, checked) => this._toggleSelectAll(dept, !!checked)}
-                  
                 />
                 <Text className={styles.selectAllText}>Select all</Text>
               </div>
@@ -307,47 +332,85 @@ export default class FormsLibrary
               </button>
             </div>
 
-            <div className={styles.formsList}>
-              {filteredItems.map(item => (
-                <div
-                  key={item.id}
-                  className={styles.formRow}
-                  onClick={() => this._onRowClick(item)}
-                >
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <Checkbox
-                      checked={selectedItems[item.id] || false}
-                      onChange={(_, checked) =>
-                        this._toggleItemSelection(item.id, dept, !!checked)
-                      }
-                      className={styles.formCheckbox}
-                    />
-                  </div>
+            <div className={isGrid ? styles.formsGrid : styles.formsList}>
+              {filteredItems.map(item =>
+                isGrid ? (
+                  <div
+                    key={item.id}
+                    className={styles.formCard}
+                    onClick={() => this._onRowClick(item)}
+                  >
+                    <div className={styles.formCardTop}>
+                      <img src={PDF_ICON_URL} className={styles.cardFileIcon} alt="PDF" />
 
-                  <img src={PDF_ICON_URL} className={styles.pdfIcon} alt="PDF" />
-
-                  <div className={styles.formRowContent}>
-                    <Text className={styles.formTitle}>{item.title}</Text>
-                    <Text className={styles.formMeta}>
-                      Modified by {item.modifiedBy} · Modified on {item.modified}
-                    </Text>
-                  </div>
-
-                  <div className={styles.formRowRight}>
-                    
-                      {item.powerAppsUrl && (
-                    <div
-                      className={styles.digitalizedChip}
-                      onClick={(e) => this._openPowerApps(item, e)}
-                    >
-                      <img src={AIRPLAY_ICON_URL} className={styles.airplayIcon} />
-                      <span>Digitalized</span>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selectedItems[item.id] || false}
+                          onChange={(_, checked) => {
+                            this._toggleItemSelection(item.id, dept, !!checked);
+                            this._onRowClick(item);
+                          }}
+                        />
+                      </div>
                     </div>
-                  )}
-                    
+
+                    <div className={styles.cardTitleWrap}>
+                      <Text className={styles.cardTitle} title={item.title}>{item.title}</Text>
+                    </div>
+                    <Text className={styles.cardMeta}>
+                      {item.modifiedBy} · {item.modified}
+                    </Text>
+
+                    {item.powerAppsUrl && (
+                      <div
+                        className={styles.digitalizedChip}
+                        onClick={(e) => this._openPowerApps(item, e)}
+                      >
+                        <img src={AIRPLAY_ICON_URL} className={styles.airplayIcon} />
+                        <span>Digitalized</span>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                ) : (
+                  <div
+                    key={item.id}
+                    className={styles.formRow}
+                    onClick={() => this._onRowClick(item)}
+                  >
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={selectedItems[item.id] || false}
+                        onChange={(_, checked) => {
+                          this._toggleItemSelection(item.id, dept, !!checked);
+                          this._onRowClick(item);
+                        }}
+                        className={styles.formCheckbox}
+                      />
+                    </div>
+
+                    <img src={PDF_ICON_URL} className={styles.pdfIcon} alt="PDF" />
+
+                    <div className={styles.formRowContent}>
+                      <Text className={styles.formTitle}>{item.title}</Text>
+                      <Text className={styles.formMeta}>
+                        Modified by {item.modifiedBy} · Modified on {item.modified}
+                      </Text>
+                    </div>
+
+                    <div className={styles.formRowRight}>
+                      {item.powerAppsUrl && (
+                        <div
+                          className={styles.digitalizedChip}
+                          onClick={(e) => this._openPowerApps(item, e)}
+                        >
+                          <img src={AIRPLAY_ICON_URL} className={styles.airplayIcon} />
+                          <span>Digitalized</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
 
               {!filteredItems.length && (
                 <Text className={styles.emptyText}>
