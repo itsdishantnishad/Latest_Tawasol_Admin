@@ -1,5 +1,4 @@
 
-
 import * as React from "react";
 import styles from "./Faqs.module.scss";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
@@ -36,7 +35,7 @@ interface IFaqsState {
 
 export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
   public static defaultProps: Partial<IFaqsProps> = {
-    listTitle: "FAQs List"
+    listTitle: "FAQs"
   };
 
   public constructor(props: IFaqsProps) {
@@ -60,21 +59,21 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
         .getByTitle(listTitle)
         .items.select(
           "Id",
-          "Title",
-          "Answers",     
-          "QuestionsAR", 
-          "AnswersAR",   
-          "FAQsCategories"
+          "TIRQuestion",
+          "TIRAnswer",     
+          "TIRQuestionArabic", 
+          "TIRAnswerArabic",   
+          "TIRFAQCategories"
         )
         .orderBy("ID")();
 
       const items: IFaqItem[] = raw.map((i) => ({
         id: i.Id,
-        category: i.FAQsCategories || "Human Capital",
-        questionEn: i.Title || "",
-        answerEn: i.Answers || "",
-        questionAr: i.QuestionsAR || "",
-        answerAr: i.AnswersAR || ""
+        category: i.TIRFAQCategories || "",
+        questionEn: i.TIRQuestion || "",
+        answerEn: i.TIRAnswer || "",
+        questionAr: i.TIRAnswerArabic || "",
+        answerAr: i.TIRFAQCategories || ""
       }));
 
       const firstInCategory = items.find(

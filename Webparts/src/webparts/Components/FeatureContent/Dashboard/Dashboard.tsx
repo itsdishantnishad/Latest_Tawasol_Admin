@@ -1,3 +1,5 @@
+
+
 import * as React from 'react';
 import styles from './Dashboard.module.scss';
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
@@ -29,28 +31,28 @@ const defaultDashboards: IDashboard[] = [
         header: 'Customer Footfall',
         subHeader: 'Analyzes customer traffic patterns to improve staffing, inventory, and marketing strategies.',
         image: { url: dashboardImageOne, alt: "Customer Footfall" },
-        url: '#'
+        url: 'SitePages/Dashboards.aspx'
     },
     {
         id: '2',
         header: 'Sales Lead Disqualification',
         subHeader: 'Analyzes reasons for lead disqualification to enhance sales strategies.',
         image: { url: dashboardImageTwo, alt: "Sales Lead Disqualification" },
-        url: '#'
+        url: 'SitePages/Dashboards.aspx'
     },
     {
         id: '3',
         header: 'CXI Score Dashboard',
         subHeader: 'Analyzes customer experience feedback to identify improvement areas and enhance satisfaction.',
         image: { url: dashboardImageThree, alt: "CXI Score Dashboard" },
-        url: '#'
+        url: 'SitePages/Dashboards.aspx'
     },
     {
         id: '4',
         header: 'DHRE Sales Report',
         subHeader: 'Access sales data and performance metrics to drive informed decision making.',
         image: { url: dashboardImageFour, alt: "DHRE Sales Report" },
-        url: '#'
+        url: 'SitePages/Dashboards.aspx'
     },
 ];
 
@@ -91,7 +93,6 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
         const configured = (props.seeAllURL || "").trim();
 
         // If nothing configured, default to a page in the current site:
-        //   /sites/ThisSite/SitePages/Lets-Celebrate.aspx
         const raw = configured || "SitePages/Dashboards.aspx";
 
         // Absolute URL from anywhere -> keep its path but move to current tenant
@@ -112,6 +113,29 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
         // Web-relative (SitePages/Page.aspx)
         return `${webUrl}/${raw}`;
     }, [props.seeAllURL, webUrl, origin]);
+
+    // Helper function to resolve card URLs the same way as viewAllHref
+    const resolveCardUrl = React.useCallback((url: string) => {
+        const raw = url.trim();
+
+        // Absolute URL
+        if (/^https?:\/\//i.test(raw)) {
+            try {
+                const parsed = new URL(raw);
+                return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+            } catch {
+                return raw;
+            }
+        }
+
+        // Root-relative
+        if (raw.startsWith("/")) {
+            return `${origin}${raw}`;
+        }
+
+        // Web-relative
+        return `${webUrl}/${raw}`;
+    }, [webUrl, origin]);
     // --- END ---
 
 
@@ -120,7 +144,13 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
             <div className={styles.dashboardGrid} >
                 {
                     dashboards.map((dashboard) => (
-                        <DashboardCard key={dashboard.id} image={dashboard.image} header={dashboard.header} subHeader={dashboard.subHeader} targetUrl={dashboard.url} />
+                        <DashboardCard 
+                            key={dashboard.id} 
+                            image={dashboard.image} 
+                            header={dashboard.header} 
+                            subHeader={dashboard.subHeader} 
+                            targetUrl={resolveCardUrl(dashboard.url)} 
+                        />
                     ))
                 }
             </div >
@@ -134,4 +164,3 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
 };
 
 export default Dashboard;
-
