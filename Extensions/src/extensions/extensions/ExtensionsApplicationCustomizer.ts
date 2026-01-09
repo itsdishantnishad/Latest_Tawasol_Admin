@@ -17,7 +17,7 @@ import { NotificationService } from './services/notificationService';
 import { FooterService } from './services/FooterService';
 import { AmplitudeService } from './services/AmplitudeService';
 import Onbo from './components/Onbo';
-import { IOnboConfig } from './components/Onbo';
+// import { IOnboConfig } from './components/Onbo';
 import { HideSocialBarService } from './services/HideSocialBarService';
 
 export interface IExtensionsApplicationCustomizerProperties {
@@ -544,24 +544,29 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     this.hideVivaEngageViewAll();
     this.hideVivaEngageConversationsText();
 
+    // ✅ EXISTING (keep same behavior for other urls)
     const urls = resolveUrls(this.webUrl);
+
+    // ✅ NEW: resolve Help URL using site absolute url (tenant + site dynamic)
+    const siteBaseUrl = this.context.pageContext.site.absoluteUrl || this.webUrl;
+    const siteUrls = resolveUrls(siteBaseUrl);
 
     // Onboarding
     // Onboarding
-try {
-  const state = await Onbo.loadStateFromList(this.context);
-  if (!state.hasSeen && state.URL) {
-    const cfg: IOnboConfig = { 
-      homeUrl: urls.home, 
-      URL: state.URL,
-      title: state.title   // ✅ FIX
-    };
-    this.onboarding = new Onbo(this.context, cfg);
-    this.onboarding.render();
-  }
-} catch (err) {
-  console.error('Onboarding load failed', err);
-}
+// try {
+//   const state = await Onbo.loadStateFromList(this.context);
+//   if (!state.hasSeen && state.URL) {
+//     const cfg: IOnboConfig = { 
+//       homeUrl: urls.home, 
+//       URL: state.URL,
+//       title: state.title   // ✅ FIX
+//     };
+//     this.onboarding = new Onbo(this.context, cfg);
+//     this.onboarding.render();
+//   }
+// } catch (err) {
+//   console.error('Onboarding load failed', err);
+// }
 
 
     // Services
@@ -586,6 +591,10 @@ try {
       () => void this.handleBellClick(),
       (input) => this.wireSearch(input),
       urls.profile,
+
+      // ✅ NEW: Help Center uses tenant+site dynamic base
+      siteUrls.help,
+
       this.context.msGraphClientFactory,
       this.context.pageContext.user.displayName
     );
