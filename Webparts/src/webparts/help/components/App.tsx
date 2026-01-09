@@ -34,7 +34,7 @@ export default class App extends React.Component<IHelpProps, IAppState> {
         {active === "Important Numbers" && (
           <ImportantNumber
             context={context}
-            listTitle="Help Center List"
+            listTitle="Help Center"
           />
         )}
         {active === "FAQs" && <Faqs context={context} />}
