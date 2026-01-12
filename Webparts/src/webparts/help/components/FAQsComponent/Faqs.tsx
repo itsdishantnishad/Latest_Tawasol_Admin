@@ -72,8 +72,8 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
         category: i.TIRFAQCategories || "",
         questionEn: i.TIRQuestion || "",
         answerEn: i.TIRAnswer || "",
-        questionAr: i.TIRAnswerArabic || "",
-        answerAr: i.TIRFAQCategories || ""
+        questionAr: i.TIRQuestionArabic || "",   
+        answerAr: i.TIRAnswerArabic || ""
       }));
 
       const firstInCategory = items.find(
