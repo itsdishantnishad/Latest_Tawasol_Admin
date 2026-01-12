@@ -490,7 +490,7 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
   public async onInit(): Promise<void> {
     if (!this.shouldRender()) return;
 
-    // 👉 Hide SharePoint app bar (left)
+    // Hide SharePoint app bar (left)
     this.hideAppBar();
 
 
@@ -527,10 +527,10 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     });
 
     this.hideSocialBar.apply();
-    // 👉 Hide top command bar & edit buttons from users who are not in permission list
+    // Hide top command bar & edit buttons from users who are not in permission list
     // await this.hideTopBarForNonAdmins();
 
-    // ✅ Amplitude (moved to AmplitudeService.ts)
+    // Amplitude (moved to AmplitudeService.ts)
     this.amplitude = new AmplitudeService({
       apiKey: AMPLITUDE_API_KEY,
       secretKey: AMPLITUDE_SECRET_KEY // provided for future backend usage
@@ -544,10 +544,10 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     this.hideVivaEngageViewAll();
     this.hideVivaEngageConversationsText();
 
-    // ✅ EXISTING (keep same behavior for other urls)
+    // EXISTING (keep same behavior for other urls)
     const urls = resolveUrls(this.webUrl);
 
-    // ✅ NEW: resolve Help URL using site absolute url (tenant + site dynamic)
+    // NEW: resolve Help URL using site absolute url (tenant + site dynamic)
     const siteBaseUrl = this.context.pageContext.site.absoluteUrl || this.webUrl;
     const siteUrls = resolveUrls(siteBaseUrl);
 
@@ -559,7 +559,7 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
 //     const cfg: IOnboConfig = { 
 //       homeUrl: urls.home, 
 //       URL: state.URL,
-//       title: state.title   // ✅ FIX
+//       title: state.title   // FIX
 //     };
 //     this.onboarding = new Onbo(this.context, cfg);
 //     this.onboarding.render();
@@ -592,7 +592,7 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
       (input) => this.wireSearch(input),
       urls.profile,
 
-      // ✅ NEW: Help Center uses tenant+site dynamic base
+      // NEW: Help Center uses tenant+site dynamic base
       siteUrls.help,
 
       this.context.msGraphClientFactory,
