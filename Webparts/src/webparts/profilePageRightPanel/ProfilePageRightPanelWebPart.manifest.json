@@ -3,7 +3,6 @@
   "id": "c0727850-b356-49b7-ade0-30adf50530da",
   "alias": "ProfilePageRightPanelWebPart",
   "componentType": "WebPart",
-  "supportsFullBleed": true,
 
   "version": "*",
   "manifestVersion": 2,
