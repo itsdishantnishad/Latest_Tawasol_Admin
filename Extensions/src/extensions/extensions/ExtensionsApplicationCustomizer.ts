@@ -488,7 +488,7 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
   // }
   
   public async onInit(): Promise<void> {
-    
+
     console.log(">>> ExtensionsApplicationCustomizer LOADED <<<", window.location.href);
     if (!this.shouldRender()) return;
 
@@ -554,69 +554,23 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     const siteUrls = resolveUrls(siteBaseUrl);
 
     // Onboarding
-// try {
-//   const { OnboardingService } = await import("./services/OnboardingService");
-//   const svc = new OnboardingService(this.context);
-
-//   const state = await svc.loadState();
-//   if (!state.hasSeen && state.URL) {
-//     const cfg: IOnboConfig = {
-//       homeUrl: urls.home,
-//       URL: state.URL,
-//       title: state.title
-//     };
-//     this.onboarding = new Onbo(this.context, cfg);
-//     this.onboarding.render();
-//   }
-// } catch (err) {
-//   console.error("Onboarding load failed", err);
-// }
-
-
-
-// ===================== Onboarding (DEBUG) =====================
 try {
-  console.log("[Onboarding] init start");
-  console.log("[Onboarding] page url:", window.location.href);
-  console.log("[Onboarding] user:", {
-    email: this.context.pageContext.user.email,
-    loginName: this.context.pageContext.user.loginName,
-    displayName: this.context.pageContext.user.displayName
-  });
+  const { OnboardingService } = await import("./services/OnboardingService");
+  const svc = new OnboardingService(this.context);
 
-  const svc = new (await import("./services/OnboardingService")).OnboardingService(this.context);
-
-  console.log("[Onboarding] calling loadState()");
   const state = await svc.loadState();
-  console.log("[Onboarding] loadState result:", state);
-
-  if (!state.URL) {
-    console.warn("[Onboarding] URL missing from config. Onboarding will not render.");
-  }
-
-  if (state.hasSeen) {
-    console.log("[Onboarding] hasSeen=true (list/local). Not rendering onboarding.");
-  } else if (state.URL) {
+  if (!state.hasSeen && state.URL) {
     const cfg: IOnboConfig = {
       homeUrl: urls.home,
       URL: state.URL,
       title: state.title
     };
-
-    console.log("[Onboarding] creating Onbo with cfg:", cfg);
     this.onboarding = new Onbo(this.context, cfg);
-
-    console.log("[Onboarding] calling render()");
     this.onboarding.render();
-    console.log("[Onboarding] render() called");
-  } else {
-    console.warn("[Onboarding] state.hasSeen=false but no URL => nothing to show.");
   }
 } catch (err) {
-  console.error("[Onboarding] FAILED in ApplicationCustomizer onboarding block:", err);
+  console.error("Onboarding load failed", err);
 }
-
-
 
 
     // Services
