@@ -44,6 +44,10 @@
   line-height: 16px;
   color: #6c6c6c;
   margin-top: 2px;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  display: -webkit-box;
 }
 
 .card {
