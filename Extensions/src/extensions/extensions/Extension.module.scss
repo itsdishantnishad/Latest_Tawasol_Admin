@@ -671,6 +671,98 @@
   font-weight: 500;
 }
 
+/* ==================== Onboarding (NEW - from Onbo.ts) ======================= */
+
+.onboardingBackdrop {
+  position: fixed;
+  inset: 0;
+  background: #FFF4EA;
+  overflow-y: auto;
+  z-index: 999999;
+}
+
+.onboardingWrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 80px 40px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+.onboardingHeader {
+  text-align: center;
+}
+
+.onboardingTitle {
+  margin: 0 0 10px;
+  font-size: 34px;
+  line-height: 42px;
+  font-weight: 700;
+  color: #111;
+}
+
+.onboardingSubtitle {
+  margin: 0 0 22px;
+  font-size: 15px;
+  line-height: 24px;
+  color: #626262;
+}
+
+.onboardingVideoFrame {
+  position: relative;
+  height: 520px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.onboardingVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.onboardingVideoOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.onboardingPlayImg {
+  width: 84px;
+  height: 84px;
+}
+
+.onboardingCaption {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  font-weight: 500;
+  color: #fff;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
+  align-items: center;
+}
+
+.onboardingFooter {
+  margin-top: 40px;
+}
+
+.onboardingPrimaryButton {
+  padding: 12px 32px;
+  border-radius: 999px;
+  background: #1F2D3A;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
 /* ===================== RESPONSIVE ===================== */
 
 @media (max-width: 1200px) {
@@ -707,6 +799,9 @@
   .TIRSearch { width: 300px; }
   .TIRFloatingNav { width: 360px; bottom: 120px; }
   .TIRSuggestHost { width: 420px; }
+  .onboardingWrapper { padding: 56px 18px; }
+  .onboardingVideoFrame { height: 360px; }
+  .onboardingTitle { font-size: 26px; line-height: 34px; }
 }
 
 @media (max-width: 576px) {
