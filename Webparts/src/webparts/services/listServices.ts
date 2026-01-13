@@ -40,6 +40,7 @@ export enum ContentTypeId {
   NEWS_STORY = "0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E",
   TRAINING = "0x0101009D1CB255DA76424F860D91F20E6C411800B721B228147AA74E9D35C742E0E4560C",
   EVENT = "0x0101009D1CB255DA76424F860D91F20E6C41180091B43BD03BCDD947979C2884C4C8FF39",
+  LETSCONNECT = "0x0101009D1CB255DA76424F860D91F20E6C4118002B6231845DC1944FBF97864C855DA046",
 }
 
 /** ===== Types ===== */
@@ -110,6 +111,15 @@ export type AnnouncementBannerListItem = {
   startIso?: string;
   endIso?: string;
   isActive: boolean;
+};
+
+export type UrlFieldValue = { Url?: string; Description?: string };
+
+export type LetsMeetPageItem = {
+  id: number;
+  title: string;
+  pageUrl: string;  
+  youtubeUrl: string;
 };
 
 export class listServices {
@@ -573,6 +583,47 @@ export class listServices {
     } catch (error) {
       return Promise.reject(error);
     }
+  }
+
+ // ===== Lets Meet (Site Pages) =====
+
+  private readUrlField(val?: UrlFieldValue | string): string {
+    if (!val) return "";
+    if (typeof val === "string") return val.trim();
+    return (val.Url || "").trim();
+  }
+
+  private escOData(val: string): string {
+    return (val || "").replace(/'/g, "''");
+  }
+
+  public async getLetsMeetPagesFromSitePages(
+    sitePagesListTitle: string,
+    contentTypeId: string,
+    top: number = 12
+  ): Promise<LetsMeetPageItem[]> {
+    const listTitle = sitePagesListTitle || "Site Pages";
+    const ctId = contentTypeId;
+
+    const rows: any[] = await this.sp.web.lists
+      .getByTitle(listTitle)
+      .items.select("Id", "Title", "FileRef", "URL", "TIRSortOrder", "Modified", "ContentTypeId")
+      .filter(`startswith(ContentTypeId,'${this.escOData(ctId)}')`)
+      .orderBy("TIRSortOrder", true)
+      .orderBy("Modified", false)
+      .top(top)();
+
+    return (rows || []).map((r: any) => {
+      const pageUrl = this.toAbsoluteUrl(r?.FileRef || "");
+      const youtubeUrl = this.readUrlField(r?.URL);
+
+      return {
+        id: Number(r?.Id) || 0,
+        title: r?.Title || "",
+        pageUrl,
+        youtubeUrl,
+      } as LetsMeetPageItem;
+    });
   }
 
   /** ===== Simple list-based loaders (Apps, Joiners, Portfolio, Values) ===== */

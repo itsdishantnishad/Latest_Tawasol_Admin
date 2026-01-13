@@ -17,7 +17,7 @@ import { NotificationService } from './services/notificationService';
 import { FooterService } from './services/FooterService';
 import { AmplitudeService } from './services/AmplitudeService';
 import Onbo from './components/Onbo';
-// import { IOnboConfig } from './components/Onbo';
+import { IOnboConfig } from './components/Onbo';
 import { HideSocialBarService } from './services/HideSocialBarService';
 
 export interface IExtensionsApplicationCustomizerProperties {
@@ -486,8 +486,10 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
   //     hideFn();
   //   }
   // }
-
+  
   public async onInit(): Promise<void> {
+
+    console.log(">>> ExtensionsApplicationCustomizer LOADED <<<", window.location.href);
     if (!this.shouldRender()) return;
 
     // Hide SharePoint app bar (left)
@@ -552,21 +554,23 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     const siteUrls = resolveUrls(siteBaseUrl);
 
     // Onboarding
-    // Onboarding
-// try {
-//   const state = await Onbo.loadStateFromList(this.context);
-//   if (!state.hasSeen && state.URL) {
-//     const cfg: IOnboConfig = { 
-//       homeUrl: urls.home, 
-//       URL: state.URL,
-//       title: state.title   // FIX
-//     };
-//     this.onboarding = new Onbo(this.context, cfg);
-//     this.onboarding.render();
-//   }
-// } catch (err) {
-//   console.error('Onboarding load failed', err);
-// }
+try {
+  const { OnboardingService } = await import("./services/OnboardingService");
+  const svc = new OnboardingService(this.context);
+
+  const state = await svc.loadState();
+  if (!state.hasSeen && state.URL) {
+    const cfg: IOnboConfig = {
+      homeUrl: urls.home,
+      URL: state.URL,
+      title: state.title
+    };
+    this.onboarding = new Onbo(this.context, cfg);
+    this.onboarding.render();
+  }
+} catch (err) {
+  console.error("Onboarding load failed", err);
+}
 
 
     // Services

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 .headerWrap {
   margin-bottom: 18px;
 }
@@ -28,6 +30,19 @@
 .titleMeet {
   color: #000;
   font-style: normal;
+}
+.cardWrap {
+  width: 424px;
+}
+
+/* Title under each video */
+.cardTitle {
+  margin-top: 10px;
+  font-size: 14px;
+  font-family: 'Inter';
+  line-height: 1.3;
+  color: #3A3B43;
+  font-weight: 600;
 }
 
 .arrowIcon {
@@ -115,6 +130,10 @@
 @media (max-width: 480px) {
   .grid {
     grid-template-columns: 1fr;
+  }
+
+  .cardWrap {
+    width: 100%;
   }
 
   .card {
