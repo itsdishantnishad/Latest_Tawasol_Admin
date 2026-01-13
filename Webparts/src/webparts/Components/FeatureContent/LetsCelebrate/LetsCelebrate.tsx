@@ -461,19 +461,19 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
       ? `Loading ${emptyLabel}...`
       : `No ${emptyLabel} to celebrate right now`;
 
-  
- const getHoverMessage = (name: string): string => {
-  switch (activeTab) {
-    case "birthdays":
-      return `Wish ${name} to their birthday`;
-    case "anniversaries":
-      return `Wish ${name} to their anniversary`;
-    case "newJoiners":
-      return `Wish ${name} to their onboarding`;
-    default:
-      return `Wish ${name}`;
-  }
-};
+
+  const getHoverMessage = (name: string): string => {
+    switch (activeTab) {
+      case "birthdays":
+        return `Wish ${name} to their birthday`;
+      case "anniversaries":
+        return `Wish ${name} to their anniversary`;
+      case "newJoiners":
+        return `Wish ${name} to their onboarding`;
+      default:
+        return `Wish ${name}`;
+    }
+  };
 
   return (
     <div className={styles.celebrateContainer}>
@@ -678,7 +678,9 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                           />
                         </div>
                         <div className={styles.profileName}>{item.name}</div>
-                        <div className={styles.HoverText}>Wish {item.name} to their onboarding</div>
+                        <div className={styles.HoverText}>
+                          {getHoverMessage(item.name)}
+                        </div>
                       </div>
                     ))}
 
@@ -716,7 +718,9 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                             />
                           </div>
                           <div className={styles.profileName}>{item.name}</div>
+                          <div className={styles.HoverText}>
                           {getHoverMessage(item.name)}
+                          </div>
                         </div>
                       ))}
 
