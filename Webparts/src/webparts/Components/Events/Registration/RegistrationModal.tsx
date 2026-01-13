@@ -183,7 +183,17 @@ const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
       containerClassName={styles.modalContainer}
     >
       <div className={styles.content}>
-          <h2 className={styles.title}>Event Registration</h2>
+          <div className={styles.header}>
+            <h2 className={styles.title}>Event Registration</h2>
+            
+              <IconButton
+                iconProps={{ iconName: 'Cancel' }}
+                ariaLabel="Close"
+                className={styles.closeButton}
+                onClick={handleDismiss}
+                disabled={isSubmitting}
+              />
+          </div>
           {submitMessage && (
             <MessageBar
               messageBarType={submitMessage.type}
