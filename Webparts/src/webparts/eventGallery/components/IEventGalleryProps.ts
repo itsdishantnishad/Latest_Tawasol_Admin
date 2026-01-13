@@ -1,9 +1,3 @@
-// export interface IEventGalleryProps {
-//   context: any;
-//   EventItem?: any;
-// }
-
-
 import type { WebPartContext } from "@microsoft/sp-webpart-base";
 
 export interface IEventGalleryProps {
