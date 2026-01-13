@@ -554,23 +554,34 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     const siteUrls = resolveUrls(siteBaseUrl);
 
     // Onboarding
-try {
-  const { OnboardingService } = await import("./services/OnboardingService");
-  const svc = new OnboardingService(this.context);
+    try {
+      const qs = new URLSearchParams(window.location.search);
+      const forceOnboarding =
+        qs.get("onboarding") === "1" ||
+        window.location.href.toLowerCase().includes("onboarding=1");
 
-  const state = await svc.loadState();
-  if (!state.hasSeen && state.URL) {
-    const cfg: IOnboConfig = {
-      homeUrl: urls.home,
-      URL: state.URL,
-      title: state.title
-    };
-    this.onboarding = new Onbo(this.context, cfg);
-    this.onboarding.render();
-  }
-} catch (err) {
-  console.error("Onboarding load failed", err);
-}
+      const { OnboardingService } = await import("./services/OnboardingService");
+      const svc = new OnboardingService(this.context);
+
+      const state = await svc.loadState();
+
+      // force means ignore hasSeen
+      const shouldShow = forceOnboarding ? true : (!state.hasSeen && !!state.URL);
+
+      if (shouldShow && state.URL) {
+        const cfg: IOnboConfig = {
+          homeUrl: urls.home,
+          URL: state.URL,
+          title: state.title
+        };
+
+        this.onboarding?.dispose();
+        this.onboarding = new Onbo(this.context, cfg);
+        this.onboarding.render();
+      }
+    } catch (err) {
+      console.error("Onboarding load failed", err);
+    }
 
 
     // Services

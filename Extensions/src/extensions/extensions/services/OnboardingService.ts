@@ -9,7 +9,6 @@ export interface IOnboardingState {
 
 export class OnboardingService {
   private static readonly LIST_TITLE = "Onboarding";
-
   private readonly _ctx: ApplicationCustomizerContext;
 
   public constructor(ctx: ApplicationCustomizerContext) {
@@ -74,23 +73,31 @@ export class OnboardingService {
     return { ...cfg, hasSeen: seen };
   }
 
-  /** Reads onboarding Title+URL from list top 1 item */
-  public async getConfig(): Promise<{ URL: string; title: string }> {
-    const api =
-      `${this.webUrl}/_api/web/lists/GetByTitle('${OnboardingService.LIST_TITLE}')/items` +
-      `?$select=Title,URL&$top=1`;
+ public async getConfig(): Promise<{ URL: string; title: string }> {
+  // NOTE:
+  // We intentionally DO NOT use $filter on URL fields because SharePoint often returns 400.
+  // Instead: fetch recent items and pick the first row that contains URL.Url.
 
-    const res = await this._ctx.spHttpClient.get(api, SPHttpClient.configurations.v1);
-    if (!res.ok) return { URL: "", title: "" };
+  const api =
+    `${this.webUrl}/_api/web/lists/GetByTitle('${OnboardingService.LIST_TITLE}')/items` +
+    `?$select=Title,URL,Modified` +
+    `&$orderby=Modified desc` +
+    `&$top=25`; // keep small
 
-    const json = await res.json();
-    const item = json?.value?.[0];
+  const res = await this._ctx.spHttpClient.get(api, SPHttpClient.configurations.v1);
+  if (!res.ok) return { URL: "", title: "" };
 
-    return {
-      title: String(item?.Title || ""),
-      URL: String(item?.URL?.Url || "")
-    };
-  }
+  const json = await res.json();
+  const items: any[] = Array.isArray(json?.value) ? json.value : [];
+
+  // pick the first item which has a real hyperlink
+  const cfgItem = items.find(i => i?.URL?.Url);
+
+  return {
+    title: String(cfgItem?.Title || ""),
+    URL: String(cfgItem?.URL?.Url || "")
+  };
+}
 
   /** Checks if current user exists in list by email/userKey */
   public async hasUserSeenInList(): Promise<boolean> {
