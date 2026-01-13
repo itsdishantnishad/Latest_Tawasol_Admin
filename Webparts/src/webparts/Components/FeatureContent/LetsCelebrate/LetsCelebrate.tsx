@@ -166,15 +166,39 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const [errorBirthdays, setErrorBirthdays] = React.useState<string | null>(null);
   const [errorAnniversaries, setErrorAnniversaries] = React.useState<string | null>(null);
 
-  const openTeamsChat = (email?: string) => {
+  // const openTeamsChat = (email?: string) => {
+  //   const e = (email || "").trim();
+  //   if (!e) return;
+  //   window.open(
+  //     `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(e)}`,
+  //     "_blank",
+  //     "noopener,noreferrer"
+  //   );
+  // };
+
+  const openTeamsChat = (email?: string, name?: string) => {
     const e = (email || "").trim();
     if (!e) return;
+
+    const message = getChatMessage(name || "");
+
+    console.log(
+      "Teams URL:",
+      `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(
+        e
+      )}&message=${encodeURIComponent(message)}`
+    );
+
+
     window.open(
-      `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(e)}`,
+      `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(
+        e
+      )}&message=${encodeURIComponent(message)}`,
       "_blank",
       "noopener,noreferrer"
     );
   };
+
 
   const isChatEnabledTab =
     activeTab === "newJoiners" || activeTab === "birthdays" || activeTab === "anniversaries";
@@ -465,15 +489,29 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const getHoverMessage = (name: string): string => {
     switch (activeTab) {
       case "birthdays":
-        return `Wish ${name} to their birthday`;
+        return `Wish ${name} Happy Birthday!`;
       case "anniversaries":
-        return `Wish ${name} to their anniversary`;
+        return `Congratulate ${name} on this milestone!`;
       case "newJoiners":
-        return `Wish ${name} to their onboarding`;
+        return `Welcome ${name} to the team!`;
       default:
         return `Wish ${name}`;
     }
   };
+
+  const getChatMessage = (name: string): string => {
+  switch (activeTab) {
+    case "birthdays":
+      return `Wish you a very Happy Birthday!`;
+    case "anniversaries":
+      return `Congratulations on this milestone!`;
+    case "newJoiners":
+      return `Welcome to the team!`;
+    default:
+      return `Hello ${name}!`;
+  }
+};
+
 
   return (
     <div className={styles.celebrateContainer}>
@@ -650,7 +688,12 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                         key={item.id}
                         className={styles.profileCard}
                         style={getOuterCirclePosition(index)}
-                        onClick={isChatEnabledTab ? () => openTeamsChat(item.email) : undefined}
+                        onClick={
+                          isChatEnabledTab
+                            ? () => openTeamsChat(item.email, item.name)
+                            : undefined
+                        }
+
 
                         role={isChatEnabledTab ? "button" : undefined}
 
@@ -659,7 +702,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                         onKeyDown={
                           isChatEnabledTab
                             ? (e) => {
-                              if (e.key === "Enter" || e.key === " ") openTeamsChat(item.email);
+                              if (e.key === "Enter" || e.key === " ")
+                                openTeamsChat(item.email, item.name);
                             }
                             : undefined
                         }
@@ -690,7 +734,12 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                           key={item.id}
                           className={styles.profileCard}
                           style={getInnerCirclePosition(index)}
-                          onClick={isChatEnabledTab ? () => openTeamsChat(item.email) : undefined}
+                          onClick={
+                            isChatEnabledTab
+                              ? () => openTeamsChat(item.email, item.name)
+                              : undefined
+                          }
+
 
                           role={isChatEnabledTab ? "button" : undefined}
 
@@ -699,7 +748,9 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                           onKeyDown={
                             isChatEnabledTab
                               ? (e) => {
-                                if (e.key === "Enter" || e.key === " ") openTeamsChat(item.email);
+                                if (e.key === "Enter" || e.key === " ")
+                                  openTeamsChat(item.email, item.name);
+
                               }
                               : undefined
                           }
@@ -719,7 +770,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                           </div>
                           <div className={styles.profileName}>{item.name}</div>
                           <div className={styles.HoverText}>
-                          {getHoverMessage(item.name)}
+                            {getHoverMessage(item.name)}
                           </div>
                         </div>
                       ))}
