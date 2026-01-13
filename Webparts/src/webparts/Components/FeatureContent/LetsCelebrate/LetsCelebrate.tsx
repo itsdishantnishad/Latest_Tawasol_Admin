@@ -120,7 +120,7 @@ const normalizeFullName = (raw: string): string => {
   return v.replace(/\s+/g, " ");
 };
 
-// ✅ Image/Hyperlink column URL extractor (object/string/JSON-string safe)
+// Image/Hyperlink column URL extractor (object/string/JSON-string safe)
 const extractUrl = (value: any): string => {
   if (!value) return "";
 
@@ -233,7 +233,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
         }
       })();
 
-      // ✅ Achievements (SP) - "User Achievements" list
+      // Achievements (SP) - "User Achievements" list
       const achievementsP = (async () => {
         setLoadingAchievements(true);
         setErrorAchievements(null);
@@ -355,7 +355,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     };
   }, [props.context]);
 
-  // ✅ No dummy fallback now
+  // No dummy fallback now
   const celebrations = {
     birthdays: props.celebrations?.birthdays ?? apiBirthdays,
     anniversaries: props.celebrations?.anniversaries ?? apiAnniversaries,
@@ -388,7 +388,7 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
 
   const currentCelebrations: ICelebration[] = (celebrations as any)[activeTab] ?? [];
 
-  // ✅ Wheel displays max 4 per page (matches UI positions)
+  // Wheel displays max 4 per page (matches UI positions)
   // Sort achievements by latest first, keep others as-is
   const sortedCelebrations = activeTab === "Achievements"
     ? [...currentCelebrations].sort((a, b) => parseInt(b.id) - parseInt(a.id))

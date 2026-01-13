@@ -494,7 +494,22 @@ export class TahweelService {
       }),
     };
 
-    const response: HttpClientResponse = await this.httpClient.post(requestUrl, HttpClient.configurations.v1, options);
+    let response: HttpClientResponse;
+
+    try {
+      response = await this.httpClient.post(requestUrl, HttpClient.configurations.v1, options);
+    } catch (e: any) {
+      const msg = (e?.message || "").toString();
+
+      // This is the exact case you are seeing
+      if (msg.toLowerCase().includes("failed to fetch")) {
+        throw new Error(
+          `Tahweel API call blocked/failed (likely CORS). Allow origin: ${window.location.origin} in Azure CORS. URL: ${requestUrl}`
+        );
+      }
+
+      throw new Error(`Tahweel API network error: ${msg || "Unknown error"}. URL: ${requestUrl}`);
+    }
 
     if (!response.ok) {
       const t = await response.text().catch(() => "");
