@@ -1,10 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: local('Instrument Serif Regular'), url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: local('Instrument Serif Italic'), url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
+
 .wrapper {
   background: #FFF4EA;
   padding: 80px 52px;
 }
 
 .title {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Regular';
   font-size: 42px;
   font-weight: 400;
   letter-spacing: 1px;
@@ -13,8 +26,8 @@
   text-align: center;
 }
 
-.teamWord { font-style: italic; color: #DA291C; }
-.orgWord  { font-style: normal; color: #000; }
+.teamWord { font-family: 'Instrument Serif Italic'; color: #DA291C; }
+.orgWord  { color: #000; }
 
 .state,
 .error {
