@@ -225,7 +225,7 @@ export default class TeamOrganisationStructure extends React.Component<
       >
         <div className={styles.photoWrap}>
           {member.photoUrl ? (
-            <img className={styles.photo} src={member.photoUrl} alt={member.name} />
+            <img className={styles.photo} src={member.photoUrl} alt={member.name} loading="lazy"/>
           ) : (
             <div className={styles.photoFallback} aria-label="No image" />
           )}

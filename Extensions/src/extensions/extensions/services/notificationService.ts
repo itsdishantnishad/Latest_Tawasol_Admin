@@ -1,26 +1,21 @@
 // src/extensions/extensions/services/notificationService.ts
 
-import { SPHttpClient } from '@microsoft/sp-http';
-import { NotifKind } from '../shared/constants';
+import { SPHttpClient } from "@microsoft/sp-http";
+import { NotifKind } from "../shared/constants";
 
 export interface INotificationItem {
   id: number;
   title: string;
-  /** Plain-text description (RTE stripped) */
   description: string;
-  /** Alias used by the UI */
   text: string;
   url: string;
   pageId: number | null;
   pageType: string;
   created: Date;
-  /** Whether this item is new compared to the user's last seen time */
   isNew: boolean;
-  /** Kind used for icon rendering */
   kind: NotifKind;
 }
 
-/** Backwards compatibility alias if you used this type elsewhere */
 export type ITirNotification = INotificationItem;
 
 export interface IUserStatus {
@@ -39,9 +34,16 @@ interface IRawNotifItem {
   Created?: string;
 }
 
-const NOTIF_LIST_TITLE = 'Notification Center';
-const STATUS_LIST_TITLE = 'User Notification Status';
-const STATUS_FALLBACK_DATE = '2000-01-01T00:00:00Z';
+interface IRawStatusItem {
+  Id: number;
+  TIRLastSeen?: string; // <-- your DateTime internal name
+  TIRUserID?: string;   // <-- your text internal name
+  TIRUserId?: number;   // <-- person field id accessor
+}
+
+const NOTIF_LIST_TITLE = "Notification Center";
+const STATUS_LIST_TITLE = "User Notification Status";
+const STATUS_FALLBACK_DATE = "2000-01-01T00:00:00Z";
 const SERVER_FETCH_LIMIT = 100;
 
 export class NotificationService {
@@ -56,59 +58,67 @@ export class NotificationService {
     private readonly userDisplayName: string
   ) {}
 
-  /** Load or create the per-user status row (LastSeenAt). */
+  /** Load or create the per-user status row (TIRLastSeen). */
   public async getUserStatus(): Promise<IUserStatus> {
     if (this.status) return this.status;
 
     const baseUrl = `${this.webUrl}/_api/web/lists/GetByTitle('${STATUS_LIST_TITLE}')/items`;
-    const safeLogin = this.userLogin.replace(/'/g, "''");
+
+    // Prefer Person field matching (TIRUser), fallback to text match (TIRUserID)
+    const userId = await this.getCurrentUserId().catch(() => undefined);
+    const userKey = (this.userEmail || this.userLogin || "").trim();
+    const safeUserKey = userKey.replace(/'/g, "''");
+
+    const filters: string[] = [];
+    if (userId) filters.push(`TIRUserId eq ${userId}`);
+    if (userKey) filters.push(`TIRUserID eq '${safeUserKey}'`);
+
+    // If for some reason both are empty, do not break OData
+    const filterClause = filters.length ? `&$filter=${filters.join(" or ")}` : "";
+
     const url =
-      `${baseUrl}?$select=Id,TIRLastSeenAt` +
-      `&$filter=TIRUserLogin eq '${safeLogin}'` +
+      `${baseUrl}?$select=Id,TIRLastSeen,TIRUserID,TIRUserId` +
+      `${filterClause}` +
       `&$orderby=Id desc&$top=1`;
 
     const resp = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
     const json = await resp.json();
 
-    if (json.value && json.value.length) {
-      const row = json.value[0];
-      const lastSeenRaw: string = row.TIRLastSeenAt || STATUS_FALLBACK_DATE;
+    const rows: IRawStatusItem[] = json?.value || [];
+    if (rows.length) {
+      const row = rows[0];
+      const lastSeenRaw: string = row.TIRLastSeen || STATUS_FALLBACK_DATE;
       const lastSeenAt = new Date(lastSeenRaw);
       this.status = { itemId: row.Id, lastSeenAt };
       return this.status;
     }
 
-    // No row yet – create one with a very old LastSeenAt
-    const userId = await this.getCurrentUserId().catch(() => undefined);
-
+    // No row yet – create one with a very old last-seen date
     const body: any = {
       Title: this.userDisplayName || this.userEmail || this.userLogin,
-      TIRUserLogin: this.userLogin,
-      TIRLastSeenAt: STATUS_FALLBACK_DATE
+      TIRUserID: userKey || this.userLogin,      // <-- text column
+      TIRLastSeen: STATUS_FALLBACK_DATE          // <-- DateTime column
     };
 
-    // Fill TIRUser (Person) if we managed to resolve current user id
+    // Fill Person field (TIRUser) if we have userId
     if (userId) {
-      body.TIRUserId = userId;
+      body.TIRUserId = userId;                  // <-- Person field set via <InternalName>Id
     }
 
-    const createResp = await this.spHttpClient.post(
-      baseUrl,
-      SPHttpClient.configurations.v1,
-      {
-        headers: {
-          Accept: 'application/json;odata=nometadata',
-          'Content-type': 'application/json;odata=nometadata'
-        },
-        body: JSON.stringify(body)
-      }
-    );
+    const createResp = await this.spHttpClient.post(baseUrl, SPHttpClient.configurations.v1, {
+      headers: {
+        Accept: "application/json;odata=nometadata",
+        "Content-type": "application/json;odata=nometadata"
+      },
+      body: JSON.stringify(body)
+    });
 
     const created = await createResp.json();
     const status: IUserStatus = {
       itemId: created.Id,
       lastSeenAt: new Date(STATUS_FALLBACK_DATE)
     };
+
     this.status = status;
     return status;
   }
@@ -127,71 +137,53 @@ export class NotificationService {
     const resp = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
     const json = await resp.json();
 
-    const rows: IRawNotifItem[] = json.value || [];
+    const rows: IRawNotifItem[] = json?.value || [];
     const lastSeenAt = status.lastSeenAt;
 
     return rows.map((r) => {
       const created = r.Created ? new Date(r.Created) : new Date();
-      const descHtml = r.TIRDescription || '';
-      const desc = descHtml.replace(/<[^>]+>/g, '').trim(); // strip RTE markup
+      const descHtml = r.TIRDescription || "";
+      const desc = descHtml.replace(/<[^>]+>/g, "").trim();
 
       const urlVal =
-        typeof r.URL === 'string'
+        typeof r.URL === "string"
           ? r.URL
-          : r.URL && typeof r.URL.Url === 'string'
-          ? r.URL.Url
-          : '';
+          : r.URL && typeof (r.URL as any).Url === "string"
+          ? (r.URL as any).Url
+          : "";
 
-      const pageType = r.TIRPageType || '';
-
+      const pageType = r.TIRPageType || "";
       const kind = this.mapPageTypeToKind(pageType);
 
-      const item: INotificationItem = {
+      return {
         id: r.Id,
-        title: r.Title || '',
+        title: r.Title || "",
         description: desc,
         text: desc,
         url: urlVal,
-        pageId: typeof r.TIRPageID === 'number' ? r.TIRPageID : null,
+        pageId: typeof r.TIRPageID === "number" ? r.TIRPageID : null,
         pageType,
         created,
         isNew: created > lastSeenAt,
         kind
       };
-
-      return item;
     });
   }
 
-  /** Map page type / custom type to a NotifKind for icon selection. */
   private mapPageTypeToKind(pageType: string): NotifKind {
-    const pt = (pageType || '').toLowerCase();
-
-    if (pt.indexOf('news') >= 0) {
-      return 'megaphone';
-    }
-    if (pt.indexOf('event') >= 0) {
-      return 'party';
-    }
-    if (pt.indexOf('training') >= 0) {
-      return 'check';
-    }
-
-    // default icon
-    return 'info';
+    const pt = (pageType || "").toLowerCase();
+    if (pt.indexOf("news") >= 0) return "megaphone";
+    if (pt.indexOf("event") >= 0) return "party";
+    if (pt.indexOf("training") >= 0) return "check";
+    return "info";
   }
 
-  /** Mark *all* notifications as read – set LastSeenAt = now. */
   public async markAllRead(): Promise<void> {
     const now = new Date();
     const status = await this.getUserStatus();
     await this.updateStatus(status.itemId, now);
   }
 
-  /**
-   * Mark all notifications up to a specific Created date as read.
-   * Used when user opens a single notification.
-   */
   public async markSeenUpTo(created: Date): Promise<void> {
     const status = await this.getUserStatus();
     if (created <= status.lastSeenAt) return;
@@ -202,7 +194,6 @@ export class NotificationService {
 
   private async getCurrentUserId(): Promise<number> {
     if (this.currentUserId) return this.currentUserId;
-
     const url = `${this.webUrl}/_api/web/currentuser?$select=Id`;
     const resp = await this.spHttpClient.get(url, SPHttpClient.configurations.v1);
     const json = await resp.json();
@@ -213,22 +204,18 @@ export class NotificationService {
   private async updateStatus(itemId: number, newDate: Date): Promise<void> {
     const url = `${this.webUrl}/_api/web/lists/GetByTitle('${STATUS_LIST_TITLE}')/items(${itemId})`;
 
-    await this.spHttpClient.post(
-      url,
-      SPHttpClient.configurations.v1,
-      {
-        headers: {
-          Accept: 'application/json;odata=nometadata',
-          'Content-type': 'application/json;odata=nometadata',
-          'IF-MATCH': '*',
-          'X-HTTP-Method': 'MERGE'
-        },
-        body: JSON.stringify({ TIRLastSeenAt: newDate.toISOString() })
-      }
-    );
+    await this.spHttpClient.post(url, SPHttpClient.configurations.v1, {
+      headers: {
+        Accept: "application/json;odata=nometadata",
+        "Content-type": "application/json;odata=nometadata",
+        "IF-MATCH": "*",
+        "X-HTTP-Method": "MERGE"
+      },
+      body: JSON.stringify({
+        TIRLastSeen: newDate.toISOString() // <-- your DateTime internal name
+      })
+    });
 
-    if (this.status) {
-      this.status.lastSeenAt = newDate;
-    }
+    if (this.status) this.status.lastSeenAt = newDate;
   }
 }
