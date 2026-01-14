@@ -1,7 +1,6 @@
-// @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap");
 .wrapper {
   background: #FFF4EA;
-  padding: 80px 76px;
+  padding: 80px 52px;
 }
 
 .title {
@@ -28,18 +27,23 @@
 .topCardWrap {
   display: flex;
   justify-content: center;
-  margin: 0px 0 60px
+  margin: 0 auto 28px;
+  max-width: 1320px;
 }
 
 .row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: clamp(14px, 1.5vw, 18px);
-  margin-bottom: 52px;
+  grid-template-columns: repeat(5, 244px);
+  gap: 24px;
+  justify-content: center;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto 32px;
 
-  @media (max-width: 1200px) { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 640px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 1300px) { grid-template-columns: repeat(4, 244px); }
+  @media (max-width: 1050px) { grid-template-columns: repeat(3, 244px); }
+  @media (max-width: 820px)  { grid-template-columns: repeat(2, 244px); }
+  @media (max-width: 540px)  { grid-template-columns: 1fr; }
 }
 
 .card {
@@ -51,6 +55,7 @@
   flex-direction: column;
   background: transparent;
   overflow: hidden;
+  width: 244px;
 }
 
 .card:hover,
@@ -59,8 +64,8 @@
 }
 
 .cardLg {
-  // width: clamp(280px, 32vw, 420px);
-  margin: 0 auto;
+  width: 288px;
+  max-width: 90vw;
   text-align: center;
 }
 
@@ -75,28 +80,41 @@
 
 .photoWrap {
   width: 100%;
-  margin-bottom: 0;
-  line-height: 0;
+  aspect-ratio: 4 / 5;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f3f3;
 }
+
 .photo {
   width: 100%;
-  height: auto;        
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
   display: block;
-  object-fit: contain;
 }
+
+.cardLg .photo {
+  object-fit: cover;
+  object-position: center;
+}
+
 
 .photoFallback {
   width: 100%;
-  height: 220px;
   background: #f3f3f3;
+}
+
+.cardLg .photoFallback {
+  aspect-ratio: 1 / 1;
 }
 
 .accent {
   background: #da291c;
   border-radius: 50px;
   height: 2.5px;
-  margin: 24px 0 20px;
-  width: 50%;
+  width: 72px;
+  margin: 16px 0 12px;
 }
 .accentCenter { margin-left: auto; margin-right: auto; }
 
@@ -104,7 +122,7 @@
   color: #000;
   font-size: 24px;
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   line-height: 32px;
   font-family: "Inter", sans-serif;
 }
@@ -118,10 +136,11 @@
 }
 
 .deptBand {
-  margin: 14px 0 26px;
+  margin: 14px auto 26px;
   padding: 22px 10px 6px;
   position: relative;
   border-radius: 12px;
+  max-width: 1320px;
 }
 
 .deptTitle {
@@ -151,6 +170,7 @@
   opacity: 0.6;
   border-radius: 1px;
 }
+
 .stub {
   position: absolute;
   top: 0;
@@ -163,12 +183,12 @@
 .deptGrid {
   display: grid;
   grid-template-columns: repeat(7, minmax(140px, 1fr));
-  gap: clamp(10px, 1.4vw, 16px);
+  gap: 16px;
   justify-items: center;
 
   @media (max-width: 1200px) { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 640px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 900px)  { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 640px)  { grid-template-columns: repeat(2, 1fr); }
 }
 
 .deptBox {
@@ -200,17 +220,15 @@
   display: block;
 }
 
-/* ✅ IMPORTANT: box + bullets wrapper */
 .deptCol {
   width: 168px;
   max-width: 168px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  min-width: 0; /* ✅ allow wrapping */
+  min-width: 0;
 }
 
-/* ✅ Bullet pointers */
 .deptList {
   margin: 14px 0 0;
   padding-left: 18px;
@@ -218,13 +236,10 @@
 
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-size: 14px;
-
-  /* ✅ FIX: was 11px causing overlap */
   line-height: 20px;
 
   color: #000;
 
-  /* ✅ safe wrapping */
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -232,23 +247,17 @@
 
 .deptList li {
   margin: 0 0 8px;
-  line-height: 20px; /* ✅ ensure li also keeps proper spacing */
+  line-height: 20px;
 }
 
 @media (max-width: 768px) {
   .wrapper { padding: 32px 16px 40px; border-radius: 8px; }
   .title { font-size: 32px; margin-bottom: 22px; }
-  .card { max-width: 260px; }
-  .cardLg { width: 100%; max-width: 260px; }
   .name { font-size: 20px; line-height: 28px; }
   .role { font-size: 14px; line-height: 22px; }
-  .deptBand { margin: 12px 0 22px; padding-top: 18px; }
+  .deptBand { margin: 12px auto 22px; padding-top: 18px; }
 }
 
-@media (max-width: 480px) {
-  .row { grid-template-columns: 1fr; }
-  .wrapper { padding: 28px 12px 32px; border-radius: 0; }
+@media (max-width: 540px) {
   .card, .cardLg { width: 100%; max-width: 280px; margin-left: auto; margin-right: auto; }
-  .title { font-size: 28px; }
-  .deptGrid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
 }
