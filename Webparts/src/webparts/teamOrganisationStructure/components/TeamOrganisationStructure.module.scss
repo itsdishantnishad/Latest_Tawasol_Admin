@@ -47,6 +47,10 @@
   position: relative;
   border-radius: 12px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  overflow: hidden;
 }
 
 .card:hover,
@@ -55,7 +59,7 @@
 }
 
 .cardLg {
-  width: 230px;
+  // width: clamp(280px, 32vw, 420px);
   margin: 0 auto;
   text-align: center;
 }
@@ -69,9 +73,23 @@
   box-shadow: inset 0 4px 4px 0 #FED3A4;
 }
 
-.photoWrap { width: 100%; margin-bottom: 0; }
-.photo { width: 100%; object-fit: cover; display: block; }
-.photoFallback { width: 100%; height: 100%; }
+.photoWrap {
+  width: 100%;
+  margin-bottom: 0;
+  line-height: 0;
+}
+.photo {
+  width: 100%;
+  height: auto;        
+  display: block;
+  object-fit: contain;
+}
+
+.photoFallback {
+  width: 100%;
+  height: 220px;
+  background: #f3f3f3;
+}
 
 .accent {
   background: #da291c;

@@ -168,6 +168,28 @@ export class listServices {
     return (tmp.textContent || tmp.innerText || "").replace(/\s+/g, " ").trim();
   }
 
+  private normalizePhotoUrl(raw?: string): string | undefined {
+    const val = (raw || "").trim();
+    if (!val) return undefined;
+
+    // If stored URL is a SPO thumbnail/transform link, try to use the underlying docid (original)
+    try {
+      const base = this.context.pageContext.web.absoluteUrl;
+      const u = new URL(val, base);
+
+      const isThumb = u.pathname.includes("/transform/thumbnail");
+      if (isThumb) {
+        const docid = u.searchParams.get("docid");
+        if (docid) return decodeURIComponent(docid);
+      }
+    } catch {
+      // ignore and return original
+    }
+
+    return val;
+  }
+
+
   // UPDATED helper: strip HTML BUT keep line breaks (for bullet pointers)
   private static toPlainTextWithLines(raw?: string): string {
     if (!raw) return "";
@@ -738,8 +760,8 @@ export class listServices {
 
     const mapped: OrgMember[] = rows.map((it: any) => {
       const ph = it?.TIRUserPicture;
-      const photoUrl = typeof ph === "string" ? ph : ph?.Url || undefined;
-
+      const rawUrl = typeof ph === "string" ? ph : ph?.Url || "";
+      const photoUrl = this.normalizePhotoUrl(rawUrl);
       const userField = it?.TIRUser || {};
       const userTitle = (userField?.Title || "").trim();
 
