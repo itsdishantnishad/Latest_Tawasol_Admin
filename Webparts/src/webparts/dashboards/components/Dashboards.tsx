@@ -5,7 +5,7 @@ import { listServices, DashboardCategory, DashboardItem } from '../../services/l
 import { ListName } from '../../services/Constants';
 import { breadcrumbBeforeBackArrowSVG } from '../../assets/constants';
 
-// ⬇️ NEW: global breadcrumbs (single .ts utility component)
+// global breadcrumbs (single .ts utility component)
 import GlobalBreadcrumbs from '../../assets/GlobalBreadcrumbs';
 
 
@@ -115,7 +115,7 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
 
     return (
       <div className={styles.topBar}>
-        {/* ⬅️ EXISTING BACK BUTTON WITH ICON — kept exactly as-is */}
+        {/* EXISTING BACK BUTTON WITH ICON — kept exactly as-is */}
         {/* <button className={styles.backBtn} onClick={this.onBackToMaster} aria-label="Back" title="Back">
           <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }} />
           <span>Back</span>
@@ -123,7 +123,7 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
 
         <span className={styles.divider}>|</span> */}
 
-        {/* ⬇️ REPLACED Fluent UI Breadcrumb with GlobalBreadcrumbs */}
+        {/* REPLACED Fluent UI Breadcrumb with GlobalBreadcrumbs */}
         <GlobalBreadcrumbs
           sectionLabel="Home"
           currentLabel="Dashboards"
