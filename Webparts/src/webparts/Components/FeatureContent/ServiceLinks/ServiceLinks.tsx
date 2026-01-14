@@ -211,7 +211,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
 
   const showAppsLinksDialog = (): void => setIsHidden(false);
   const hideAppsAndLinks = (): void => setIsHidden(true);
-
+  const showNavButtons = totalPages > 1;
   return (
     <div className={styles.serviceLinksContainer}>
       <AppsAndLinks
@@ -243,7 +243,9 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
       </div>
 
       <div className={styles.wheelWrapper}>
-        <button className={styles.navButton} onClick={handlePrev} disabled={totalPages <= 1}>
+        {/* prev button */}
+        {showNavButtons && (
+          <button className={styles.navButton} onClick={handlePrev}>
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
             <path
               d="M15 18L9 12L15 6"
@@ -254,6 +256,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
             />
           </svg>
         </button>
+        )}
 
         <div className={styles.circleContainer}>
           <div className={styles.outerCircle}>
@@ -304,8 +307,9 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
             </div>
           </div>
         </div>
-
-        <button className={styles.navButton} onClick={handleNext} disabled={totalPages <= 1}>
+       {/* {next button} */}
+        {showNavButtons &&(
+          <button className={styles.navButton} onClick={handleNext}>
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
             <path
               d="M9 18L15 12L9 6"
@@ -316,6 +320,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
             />
           </svg>
         </button>
+        )}
       </div>
 
       <div className={styles.commonButtonArea}>
