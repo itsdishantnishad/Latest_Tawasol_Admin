@@ -13,65 +13,61 @@ const localizer = momentLocalizer(moment);
 
 interface Props {
   events: any[];
-  context?: any;
+  context?: any; 
   from?: string;
 }
 
-const CalendarViewComponent: React.FC<Props> = ({ events, context , from }) => {
+const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
+  console.log(events)
   const [selectedEvent, setSelectedEvent] = React.useState<any>(null);
-const calendarEvents = events.map((e: any) => {
-    const startDateStr = e.eventStartDate?.split("\n\n")[1]?.trim();
-    const endDateStr = e.eventEndDate?.split("\n\n")[1]?.trim();
-    
-    // Parse as UTC but convert to local date without timezone shift
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(endDateStr);
-    
-    // Create dates in local timezone with the same values
-    const localStart = new Date(
-      startDate.getUTCFullYear(),
-      startDate.getUTCMonth(),
-      startDate.getUTCDate(),
-      startDate.getUTCHours(),
-      startDate.getUTCMinutes()
-    );
-    
-    const localEnd = new Date(
-      endDate.getUTCFullYear(),
-      endDate.getUTCMonth(),
-      endDate.getUTCDate(),
-      endDate.getUTCHours(),
-      endDate.getUTCMinutes()
-    );
-    
-    return {
-      ...e,
-      title: e.title,
-      start: localStart,
-      end: localEnd,
-    };
-  });
 
-  // Function to determine event color based on type
+  // ========== CHANGE #1: Update date parsing logic ==========
+  const calendarEvents = events
+    .filter((e: any) => e.date)
+    .map((e: any) => {
+      let startDate;
+
+      // Handle date object {day, date, month}
+      if (typeof e.date === 'object' && e.date.date && e.date.month) {
+        const dateStr = `${e.date.date} ${e.date.month} 2026`;
+        startDate = new Date(dateStr);
+      } else {
+        startDate = new Date(e.date);
+      }
+
+      const endDate = e.endDate ? new Date(e.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000);
+
+      if (isNaN(startDate.getTime())) {
+        console.warn('Invalid date format:', e.date);
+        return null;
+      }
+
+      return {
+        ...e,
+        title: e.title,
+        start: startDate,
+        end: endDate,
+        ID: e.id,
+        Eventtype: "Teams"
+      };
+    })
+    .filter((e: any) => e !== null);
+
+  // ========== CHANGE #2: Add Custom Event Component ==========
+  const EventComponent = ({ event }: any) => (
+    <div className={styles.eventTitle}>
+      {event.title}
+    </div>
+  );
+
+  // ========== CHANGE #3: Update eventStyleGetter ==========
   const eventStyleGetter = (event: any) => {
-    let backgroundColor = '#0E6187'; // Default color for Events
-    
-    if (event.Eventtype === "Teams") {
-      backgroundColor = '#4C8AE0';
-    } else if (event.Eventtype === "Trainings") {
-      backgroundColor = '#4BB86C';
-    }
-    
     return {
       style: {
-        backgroundColor: backgroundColor,
-        borderRadius: '4px',
-        opacity: 0.9,
-        color: 'white',
-        border: '0px',
+        backgroundColor: 'transparent',
+        border: 'none',
         display: 'block',
-        fontSize: '12px',
-        fontWeight: '500'
+        padding: '0px'
       }
     };
   };
@@ -80,40 +76,40 @@ const calendarEvents = events.map((e: any) => {
     <>
       <div style={{ padding: "20px" }}>
         {/* Legend */}
-        {from === "All" && <div style={{ 
-          display: 'flex', 
-          gap: '24px', 
+        {from === "All" && <div style={{
+          display: 'flex',
+          gap: '24px',
           marginBottom: '16px',
           alignItems: 'center',
           flexWrap: 'wrap',
           justifyContent: 'flex-end'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ 
-              width: '16px', 
-              height: '16px', 
-              backgroundColor: '#0E6187', 
-              borderRadius: '3px' 
+            <div style={{
+              width: '16px',
+              height: '16px',
+              backgroundColor: '#0E6187',
+              borderRadius: '3px'
             }} />
             <span style={{ fontSize: '14px', color: '#333' }}>Events</span>
           </div>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ 
-              width: '16px', 
-              height: '16px', 
-              backgroundColor: '#4BB86C', 
-              borderRadius: '3px' 
+            <div style={{
+              width: '16px',
+              height: '16px',
+              backgroundColor: '#4BB86C',
+              borderRadius: '3px'
             }} />
             <span style={{ fontSize: '14px', color: '#333' }}>Trainings</span>
           </div>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ 
-              width: '16px', 
-              height: '16px', 
-              backgroundColor: '#4C8AE0', 
-              borderRadius: '3px' 
+            <div style={{
+              width: '16px',
+              height: '16px',
+              backgroundColor: '#4C8AE0',
+              borderRadius: '3px'
             }} />
             <span style={{ fontSize: '14px', color: '#333' }}>Teams Meeting</span>
           </div>
@@ -121,23 +117,23 @@ const calendarEvents = events.map((e: any) => {
 
         {/* Calendar */}
         <div style={{ height: "600px" }}>
+          {/* ========== CHANGE #4: Add components prop with EventComponent ========== */}
           <Calendar
             localizer={localizer}
             events={calendarEvents}
             startAccessor="start"
             endAccessor="end"
-            onSelectEvent={(event: any) => 
-              setSelectedEvent(events.find((ev: any) => 
-                ev.ID === event.ID && ev.Eventtype === event.Eventtype
-              ))
+            onSelectEvent={(event: any) =>
+              setSelectedEvent(events.find((ev: any) => ev.id === event.ID))
             }
             eventPropGetter={eventStyleGetter}
+            components={{ event: EventComponent }}
             views={['month', 'week', 'day', 'agenda']}
             defaultView="month"
           />
         </div>
       </div>
-      
+
       <Modal
         isOpen={!!selectedEvent}
         onDismiss={() => setSelectedEvent(null)}
@@ -146,7 +142,7 @@ const calendarEvents = events.map((e: any) => {
         {selectedEvent && (
           <div className={`eventModalBody ${styles.eventModalBody}`}>
             <h2 style={{ marginBottom: 10 }}>{selectedEvent.title}</h2>
-            {selectedEvent.Eventtype === "Teams" ? (
+            {selectedEvent.meetingType === "Microsoft Teams Meeting" ? (
               <MeetingCard
                 event={selectedEvent}
                 onJoinClick={() => alert("Joining Meeting...")}
