@@ -223,7 +223,7 @@ export default class TeamOrganisationStructure extends React.Component<
           .filter(Boolean)
           .join(" ")}
       >
-        <div className={styles.photoWrap}>
+        <div className={[styles.photoWrap, isRoot ? styles.photoWrapLg : ""].filter(Boolean).join(" ")}>
           {member.photoUrl ? (
             <img className={styles.photo} src={member.photoUrl} alt={member.name} loading="lazy"/>
           ) : (
