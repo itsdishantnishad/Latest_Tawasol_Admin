@@ -249,11 +249,28 @@ export class listServices {
     return lines.join("\n");
   }
 
-  private toAbsoluteUrl(serverRelative: string): string {
-    const web = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
-    if (!serverRelative) return web;
-    if (serverRelative.startsWith("http")) return serverRelative;
-    return `${web}${serverRelative.startsWith("/") ? "" : "/"}${serverRelative}`;
+  private toAbsoluteUrl(path: string): string {
+    const webAbs = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+    const val = (path || "").trim();
+
+    if (!val) return webAbs;
+
+    // already absolute
+    if (/^https?:\/\//i.test(val)) return val;
+
+    const origin = new URL(webAbs).origin;
+
+    // server-relative (starts with /sites/..., /teams/..., /_layouts/...)
+    if (val.startsWith("/")) {
+      return `${origin}${val}`;
+    }
+
+    // web-relative (SitePages/..., Shared%20Documents/..., etc.)
+    if (val.startsWith("./")) {
+      return `${webAbs}/${val.substring(2)}`;
+    }
+
+    return `${webAbs}/${val}`;
   }
 
   /** Convert SharePoint ISO (UTC or with offset) into local ISO string. */
