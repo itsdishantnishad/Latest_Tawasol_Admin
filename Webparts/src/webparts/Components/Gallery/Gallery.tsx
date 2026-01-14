@@ -56,7 +56,7 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
 
     // If nothing configured, default to a page in the current site:
     //   /sites/ThisSite/SitePages/Image-Gallery.aspx
-    const raw = configured || 'SitePages/Image-Gallery.aspx';
+    const raw = configured || 'SitePages/DHRE-Gallery.aspx';
 
     // Absolute URL -> keep path, move to current tenant origin
     if (/^https?:\/\//i.test(raw)) {

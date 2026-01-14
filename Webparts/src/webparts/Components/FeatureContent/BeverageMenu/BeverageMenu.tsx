@@ -37,7 +37,7 @@ const BeverageMenu: React.FC<IBeverageMenuProps> = (props) => {
 
   const viewAllHref = React.useMemo(() => {
     const configured = (props.seeAllURL || "").trim();
-    const raw = configured || "SitePages/Beverage-Menu.aspx";
+    const raw = configured || "SitePages/Beverages.aspx";
 
     if (/^https?:\/\//i.test(raw)) {
       try {

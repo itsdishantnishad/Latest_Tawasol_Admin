@@ -63,7 +63,7 @@ export const Documents: React.FC<IDocumentsProps> = (props) => {
     const configured = (props.seeAllURL || "").trim();
 
     // Default fallback page inside same site
-    const raw = configured || "SitePages/PoliciesAndProcedures.aspx";
+    const raw = configured || "SitePages/Policies-and-Procedures.aspx";
 
     // Absolute URL → keep path, enforce same tenant
     if (/^https?:\/\//i.test(raw)) {
