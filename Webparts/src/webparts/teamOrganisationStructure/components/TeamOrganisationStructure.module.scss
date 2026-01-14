@@ -64,7 +64,7 @@
 }
 
 .cardLg {
-  width: 288px;
+  width: 244px;
   max-width: 90vw;
   text-align: center;
 }
@@ -76,6 +76,7 @@
     linear-gradient(#FFF4EA, #FFF4EA) padding-box,
     linear-gradient(180deg, #DDA160 0%, #FFDBB4 100%) border-box;
   box-shadow: inset 0 4px 4px 0 #FED3A4;
+  padding: 5px 3px;
 }
 
 .photoWrap {
