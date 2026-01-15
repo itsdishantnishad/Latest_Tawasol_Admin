@@ -18,17 +18,31 @@
   overflow: hidden;
 }
 
+// .TIRHdrWrap {
+//   width: 100%;
+//   margin: 0 auto;
+//   display: grid;
+//   grid-template-columns: 1fr auto 1fr;
+//   align-items: center;
+//   gap: 16px;
+//   height: 100%;
+//   padding: 0 8px;
+//   box-sizing: border-box;
+//   position: relative;
+// }
+
 .TIRHdrWrap {
   width: 100%;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+ // grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 16px;
   height: 100%;
   padding: 0 8px;
   box-sizing: border-box;
   position: relative;
+  justify-content: space-between;
 }
 
 .TIRBrand {
