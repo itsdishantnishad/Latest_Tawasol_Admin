@@ -3,7 +3,7 @@
 /* ===== Container ===== */
 .wrapper { padding: 0; position: relative; max-width: 520px; }
 
-/* Header row  */
+/* ✅ Header row: title left, button right */
 .headerRow{
   display:flex;
   align-items:center;
@@ -40,6 +40,22 @@
 .viewAllBtn:focus {
   outline: 2px solid rgba(32,45,57,.35);
   outline-offset: 2px;
+}
+
+/* ✅ "No page found" pill */
+.viewAllMissing{
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  border: 2px dashed rgba(32,45,57,.35);
+  border-radius: 16px;
+  padding: 4px 15px;
+  color: rgba(0,0,0,.55);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+  line-height: 1;
+  user-select:none;
 }
 
 /* Grid */
