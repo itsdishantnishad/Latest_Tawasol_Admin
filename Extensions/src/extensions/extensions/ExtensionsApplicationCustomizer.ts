@@ -635,7 +635,8 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     // Breadcrumb initialization
   await this.renderBreadcrumbIfNeededSafe();
   this.context.application.navigatedEvent.add(this, this.onNavigated);
-  setTimeout(() => void this.renderBreadcrumbIfNeededSafe(), 800);
+  setTimeout((): void => { void this.renderBreadcrumbIfNeededSafe(); }, 800);
+
 
     // Observe DOM changes for re-rendering
     this.context.application.navigatedEvent.add(this, () => {
