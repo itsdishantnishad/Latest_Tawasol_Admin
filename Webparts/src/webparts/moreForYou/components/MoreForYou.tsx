@@ -20,7 +20,7 @@ import {
 export interface IMoreForYouState {
   relatedNews: any[];
   animate: boolean;
-  currentDepartment?: string; // ✅ keep for future dept targeting
+  currentDepartment?: string;
 }
 
 // Helper: convert SVG string → data URI so we can use as background-image
@@ -43,7 +43,7 @@ const departmentIconSrcByKey: Record<string, string> = {
   procurement_admin: svgToDataUri(ProcurementSVG), // alias
 };
 
-// 🔗 Resolve target URL
+// 🔗 Resolve target URL (for each card)
 const resolveTargetUrl = (news: any): string | undefined => {
   if (news.path && String(news.path).trim()) {
     return String(news.path);
@@ -62,6 +62,24 @@ const resolveTargetUrl = (news: any): string | undefined => {
   }
 
   return undefined;
+};
+
+// 🔗 Resolve "View All" URL from Property Pane
+const resolveViewAllUrl = (raw?: string): string | undefined => {
+  const v = (raw || "").trim();
+  if (!v) return undefined;
+
+  // Absolute http(s)
+  if (/^https?:\/\//i.test(v)) return v;
+
+  // Common "www." input
+  if (/^www\./i.test(v)) return `https://${v}`;
+
+  // Site-relative
+  if (v.startsWith("/")) return v;
+
+  // SharePoint relative like "SitePages/News.aspx"
+  return v;
 };
 
 const MAX_CARDS = 4;
@@ -83,7 +101,7 @@ export default class MoreForYou extends React.Component<
 
   public async componentDidMount(): Promise<void> {
     try {
-      // ✅ REQUIRED (ONLY THIS IS UNCOMMENTED NOW): fetch list items
+      // REQUIRED (ONLY THIS IS UNCOMMENTED NOW): fetch list items
       const listItems = await this.spService.getNewsStory(10);
 
       this.setState({
@@ -92,7 +110,7 @@ export default class MoreForYou extends React.Component<
       });
 
       // =========================================================
-      // ❌ FUTURE: Target same department (KEEP COMMENTED FOR NOW)
+      // FUTURE: Target same department (KEEP COMMENTED FOR NOW)
       // =========================================================
       // const [currentItems, listItems] = await Promise.all([
       //   this.spService.getNewsStorybyID(),
@@ -142,7 +160,7 @@ export default class MoreForYou extends React.Component<
         }
 
         // =========================================================
-        // ❌ FUTURE: Target same department (KEEP COMMENTED FOR NOW)
+        // FUTURE: Target same department (KEEP COMMENTED FOR NOW)
         // =========================================================
         // const currentDeptNorm = normalize(this.state.currentDepartment);
         // const newsDeptNorm = normalize(news.department);
@@ -162,14 +180,48 @@ export default class MoreForYou extends React.Component<
         // // If we don't know current dept, don't include this item
         // return false;
 
-        // ✅ CURRENT BEHAVIOR: show all (except current page), must have URL
+        // CURRENT BEHAVIOR: show all (except current page), must have URL
         return true;
       })
       .slice(0, MAX_CARDS);
 
+    const viewAllHref = resolveViewAllUrl(this.props.viewAllUrl);
+
+    // Optional: open external in new tab (safe)
+    let viewAllTarget: "_self" | "_blank" = "_self";
+    let viewAllRel: string | undefined;
+
+    if (viewAllHref) {
+      try {
+        const u = new URL(viewAllHref, window.location.origin);
+        const isExternal = u.origin !== window.location.origin;
+        if (isExternal) {
+          viewAllTarget = "_blank";
+          viewAllRel = "noopener noreferrer";
+        }
+      } catch {
+        // ignore
+      }
+    }
+
     return (
       <div className={styles.wrapper}>
-        <h3 className={styles.heading}>More for you</h3>
+        <div className={styles.headerRow}>
+          <h3 className={styles.heading}>More for you</h3>
+
+          {viewAllHref && (
+            <a
+              href={viewAllHref}
+              className={styles.viewAllBtn}
+              aria-label="View all"
+              title="View all"
+              target={viewAllTarget}
+              rel={viewAllRel}
+            >
+              View All
+            </a>
+          )}
+        </div>
 
         <div className={`${styles.grid} ${animate ? styles.animateIn : ""}`}>
           {visibleNews.map((news: any, index: number) => {
