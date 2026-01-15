@@ -112,7 +112,7 @@ export default class ImportantNumber extends React.Component<IImportantNumberPro
       groupMap[item.category].push(item);
     });
 
-    const categoryOrder = ["Nurse Locations", "Pantry", "Admin Hotline", "Office Locations"];
+    const categoryOrder = ["Nurse Locations", "Pantry","Office Locations","Admin Hotline"];
 
     const seenCategories: string[] = [];
     const orderedGroups: { category: string; items: IImportantNumberItem[] }[] = [];
