@@ -7,66 +7,28 @@ import {
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
-
 import * as strings from 'MoreForYouWebPartStrings';
 import MoreForYou from './components/MoreForYou';
 import { IMoreForYouProps } from './components/IMoreForYouProps';
 
 export interface IMoreForYouWebPartProps {
   description: string;
+  viewAllUrl: string; 
 }
 
 export default class MoreForYouWebPart extends BaseClientSideWebPart<IMoreForYouWebPartProps> {
-
-
 
   public render(): void {
     const element: React.ReactElement<IMoreForYouProps> = React.createElement(
       MoreForYou,
       {
-      context: this.context
+        context: this.context,
+        viewAllUrl: this.properties.viewAllUrl
       }
     );
 
     ReactDom.render(element, this.domElement);
   }
-
-  protected onInit(): Promise<void> {
-    return this._getEnvironmentMessage().then(message => {
-      
-    });
-  }
-
-
-
-  private _getEnvironmentMessage(): Promise<string> {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
-          let environmentMessage: string = '';
-          switch (context.app.host.name) {
-            case 'Office': // running in Office
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
-              break;
-            case 'Outlook': // running in Outlook
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
-              break;
-            case 'Teams': // running in Teams
-            case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
-              break;
-            default:
-              environmentMessage = strings.UnknownEnvironment;
-          }
-
-          return environmentMessage;
-        });
-    }
-
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
-  }
-
-  
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
@@ -89,6 +51,10 @@ export default class MoreForYouWebPart extends BaseClientSideWebPart<IMoreForYou
               groupFields: [
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
+                }),
+                PropertyPaneTextField('viewAllUrl', {
+                  label: 'View All URL',
+                  placeholder: 'e.g. /sites/Portal/SitePages/News.aspx or https://...'
                 })
               ]
             }

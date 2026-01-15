@@ -69,11 +69,15 @@ export class Header {
             <img src="${brandIcon}" alt="Tawasol" class="${styles.TIRBrandLogo}" />
           </div>
 
-          <div class="${styles.TIRSearch}">
-            <span class="${styles.TIRSearchIcon}">${Icons.search}</span>
-            <input id="${IDS.elems.search}" class="${styles.TIRSearchInput}" type="text"
-              placeholder="Search" autocomplete="off" aria-label="Search" />
-          </div>
+           <!-- commented Global Search
+
+         <div class="${styles.TIRSearch}">
+         <span class="${styles.TIRSearchIcon}">${Icons.search}</span>
+         <input id="${IDS.elems.search}" class="${styles.TIRSearchInput}" type="text"
+         placeholder="Search" autocomplete="off" aria-label="Search" />
+         </div>
+         
+          -->
 
           <div class="${styles.TIRRight}">
             <button id="tir-help" class="${styles.TIRIconBtn}" title="Help" aria-label="Help">
@@ -129,5 +133,5 @@ export class Header {
     if (img) this.photoService.cleanup(img);
 
     document.getElementById(IDS.hosts.header)?.remove();
-  } 
+  }
 }
