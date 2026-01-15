@@ -31,7 +31,7 @@ export interface IRegistrationData {
   name: string;
   division: string;
   department: string;
-  joining: 'Yes' | 'No';
+  joining: 'Yes' | 'No' | '';
 }
 
 const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
@@ -39,7 +39,7 @@ const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
     name: '',
     division: '',
     department: '',
-    joining: 'Yes'
+    joining: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -152,7 +152,7 @@ const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
 
       // Reset & close after 2 seconds
       setTimeout(() => {
-        setFormData({ name: '', division: '', department: '', joining: 'Yes' });
+        setFormData({ name: '', division: '', department: '', joining: '' });
         setSubmitMessage(null);
         props.onDismiss();
       }, 2000);
@@ -248,8 +248,8 @@ const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
             <label className={styles.label}>4. Are you joining us?</label>
             <ChoiceGroup
               options={joiningOptions}
-              selectedKey={formData.joining}
-              onChange={(e, option) => setFormData({ ...formData, joining: option?.key as 'Yes' | 'No' || 'Yes' })}
+              selectedKey={formData.joining || undefined}
+              onChange={(e, option) => setFormData({ ...formData, joining: (option?.key as 'Yes' | 'No') ?? '' })}
               className={styles.choiceGroup}
               disabled={isSubmitting}
             />
