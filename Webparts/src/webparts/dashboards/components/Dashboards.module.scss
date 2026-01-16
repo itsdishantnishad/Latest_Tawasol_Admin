@@ -140,8 +140,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 38px;
   max-width: 100%;
 }
 
@@ -157,14 +157,15 @@
 .cardMedia {
   position: relative;
   width: 100%;
-  margin-bottom: 20px;
+  height: 250px;
+  // margin-bottom: 20px;
   border-radius: 10px;
   overflow: hidden;
   background: transparent;
 
-  @supports (aspect-ratio: 16 / 9) {
-    aspect-ratio: 16 / 9;
-  }
+  // @supports (aspect-ratio: 16 / 9) {
+  //   aspect-ratio: 16 / 9;
+  // }
 
   @supports not (aspect-ratio: 16 / 9) {
     height: 0;
@@ -214,6 +215,10 @@
   max-width: 65%;
   margin: 0 auto;
   letter-spacing: -0.5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ===== Detail ===== */

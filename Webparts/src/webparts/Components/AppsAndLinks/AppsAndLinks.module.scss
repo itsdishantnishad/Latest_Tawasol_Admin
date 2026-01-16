@@ -7,6 +7,7 @@
     font-weight: 500 !important;
     color: #000000 !important;
     font-family: 'Inter', sans-serif !important;
+    height: 0;
   }
 
   .container {
@@ -22,7 +23,7 @@
   padding: 6px;
   border-radius: 25px;
   width: fit-content;
-  margin: 0 auto 24px;
+  margin: -24px auto 24px;
   border: 1px solid #FBBF7F;
 }
 
@@ -73,7 +74,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background-color: #ffffff66;
+  // background-color: #ffffff66;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,8 +87,8 @@
 }
 
 .appIcon {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
 }
 
