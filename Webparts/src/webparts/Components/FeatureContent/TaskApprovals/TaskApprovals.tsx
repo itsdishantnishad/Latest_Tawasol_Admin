@@ -8,14 +8,22 @@ import CategoryView, { ICategoryItem } from "../CategoryView/CategoryView";
 import TableView, { TableColumn } from "../../../widgets/TableView/TableView";
 import Tag from "../../Tag/Tag";
 
-import { TahweelSVG, SalesforceSVG, ServiceNowSVG, VIEW_DETAILS_EXTERNAL_LINK_SVG } from "../../../assets/constants";
+import {
+  TahweelSVG,
+  SalesforceSVG,
+  ServiceNowSVG,
+  VIEW_DETAILS_EXTERNAL_LINK_SVG,
+  PRIORITY_SORT_DOWN_SVG,
+  PRIORITY_SORT_UP_SVG,
+} from "../../../assets/constants";
 
 import { SfApprovalService, SFApproval } from "../../../services/Integration/SalesForce";
 import { ServiceNowApprovalService, ServiceNowApproval } from "../../../services/Integration/ServiceNow";
 import { TahweelService, TahweelApproval } from "../../../services/Integration/TahweelService";
-const TaskApprovalPlaceholderIcon: string = require("../images/taskApprovalPlaceholderIcon.svg");
-type SystemKey = "Tahweel" | "Salesforce" | "ServiceNow";
 
+const TaskApprovalPlaceholderIcon: string = require("../images/taskApprovalPlaceholderIcon.svg");
+
+type SystemKey = "Tahweel" | "Salesforce" | "ServiceNow";
 const DEFAULT_ACTIVE_TAB: SystemKey = "Tahweel";
 
 type TaskRow = {
@@ -85,10 +93,8 @@ const getInitials = (name: string): string => {
   return (first + last).toUpperCase();
 };
 
-//  SPFx-safe replacement for Promise.allSettled
-type Settled<T> =
-  | { status: "fulfilled"; value: T }
-  | { status: "rejected"; reason: any };
+// SPFx-safe replacement for Promise.allSettled
+type Settled<T> = { status: "fulfilled"; value: T } | { status: "rejected"; reason: any };
 
 const settle = async <T,>(p: Promise<T>): Promise<Settled<T>> => {
   try {
@@ -102,6 +108,9 @@ const settle = async <T,>(p: Promise<T>): Promise<Settled<T>> => {
 const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
   const [activeCategoryIndex, setActiveCategoryIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Priority sort dir (desc = High->Low, asc = Low->High)
+  const [prioritySortDir, setPrioritySortDir] = useState<"desc" | "asc">("desc");
 
   const [counts, setCounts] = useState<Record<SystemKey, number>>({
     Tahweel: 0,
@@ -148,11 +157,6 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
   const activeRows = rowsBySystem[activeSystem] || [];
   const activeError = errorBySystem[activeSystem];
   const activeCount = counts[activeSystem] || 0;
-  // Add these console logs temporarily
-  console.log('Active System:', activeSystem);
-  console.log('Active Count:', activeCount);
-  console.log('Active Rows:', activeRows);
-  console.log('Active Error:', activeError);
 
   useEffect(() => {
     let cancelled = false;
@@ -171,7 +175,6 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
 
       setIsLoading(true);
       setErrorBySystem({});
-      console.log('Starting fetch for user:', userEmail);
 
       const sfPromise = sfService.fetchApprovalsByEmail(userEmail);
       const snPromise = snService.fetchApprovalsByEmail(userEmail);
@@ -180,12 +183,7 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
         return tahweelService.fetchTahweelApprovalsForWidget(personNumber, TOP_ROWS);
       })();
 
-      //  no allSettled, SPFx safe
-      const [sfRes, snRes, tahRes] = await Promise.all([
-        settle(sfPromise),
-        settle(snPromise),
-        settle(tahPromise),
-      ]);
+      const [sfRes, snRes, tahRes] = await Promise.all([settle(sfPromise), settle(snPromise), settle(tahPromise)]);
 
       if (cancelled) return;
 
@@ -276,6 +274,35 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
     setActiveCategoryIndex(index);
   };
 
+  // --- Priority sorting ---
+  const togglePrioritySort = (): void => {
+    setPrioritySortDir((prev) => (prev === "desc" ? "asc" : "desc"));
+  };
+
+  const getPriorityRank = (p: string): number => {
+    const v = (normalizePriorityLabel(p) || "").toLowerCase();
+    if (v === "high") return 3;
+    if (v === "medium") return 2;
+    if (v === "low") return 1;
+    return 0;
+  };
+
+  const sortedActiveRows = useMemo(() => {
+    const dir = prioritySortDir;
+
+    // stable sort
+    return (activeRows || [])
+      .map((r, i) => ({ r, i }))
+      .sort((a, b) => {
+        const ra = getPriorityRank(a.r.priority);
+        const rb = getPriorityRank(b.r.priority);
+
+        if (ra !== rb) return dir === "desc" ? rb - ra : ra - rb;
+        return a.i - b.i;
+      })
+      .map((x) => x.r);
+  }, [activeRows, prioritySortDir]);
+
   // --- View All URL ---
   const webUrl: string = props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
   const origin: string = new URL(webUrl).origin;
@@ -297,12 +324,34 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
     return `${webUrl}/${raw}`;
   }, [props.seeAllURL, webUrl, origin]);
 
+  const priorityHeader = (
+    <button
+      type="button"
+      className={styles.priorityHeaderBtn}
+      onClick={togglePrioritySort}
+      title={prioritySortDir === "desc" ? "Sort: Low to High" : "Sort: High to Low"}
+      aria-label={prioritySortDir === "desc" ? "Sort Priority Low to High" : "Sort Priority High to Low"}
+    >
+      <span>Priority</span>
+      <span
+        className={styles.priorityHeaderIcon}
+        aria-hidden="true"
+        dangerouslySetInnerHTML={{
+          __html: prioritySortDir === "desc" ? PRIORITY_SORT_DOWN_SVG : PRIORITY_SORT_UP_SVG,
+        }}
+      />
+    </button>
+  );
+
   const tableColumns: TableColumn<TaskRow>[] = [
     { columnKey: "workflowNumber", label: "Workflow No." },
     { columnKey: "taskTitle", label: "Task Title" },
+
+    // IMPORTANT:
+    // If TableColumn.label is typed as string in your TableView, change it to React.ReactNode in TableView.
     {
       columnKey: "priority",
-      label: "Priority",
+      label: (priorityHeader as unknown) as any,
       renderCell: (row) => {
         const label = row.priority || EMPTY_CELL_TEXT;
         return (
@@ -354,7 +403,7 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
           EMPTY_CELL_TEXT
         );
       },
-    }
+    },
   ];
 
   return (
@@ -368,7 +417,7 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
           <>
             {activeError ? (
               <div className={styles.errormessage}>Error: {activeError}</div>
-            ) : activeRows.length === 0 && activeCount === 0 ? (
+            ) : sortedActiveRows.length === 0 && activeCount === 0 ? (
               <div style={{ textAlign: "center", padding: "34px 12px" }}>
                 <img
                   src={TaskApprovalPlaceholderIcon}
@@ -388,7 +437,7 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
               </div>
             ) : (
               <TableView
-                data={activeRows}
+                data={sortedActiveRows}
                 columns={tableColumns}
                 getRowKey={(row) => (row.workitemId || row.workflowNumber) as string}
                 ariaLabel="Task Approvals Table"
@@ -399,13 +448,12 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
       </div>
 
       <div className={styles.buttonContainer}>
-        {(activeRows.length > 0 || activeCount > 0) && (
+        {(sortedActiveRows.length > 0 || activeCount > 0) && (
           <a href={viewAllHref} className={styles.viewAllButton}>
             View All
           </a>
         )}
       </div>
-
     </div>
   );
 };

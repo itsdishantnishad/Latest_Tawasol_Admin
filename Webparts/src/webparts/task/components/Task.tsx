@@ -1,5 +1,3 @@
-// adds paging + future totalCount support
-
 import * as React from "react";
 import styles from "./Task.module.scss";
 import type { ITaskProps } from "./ITaskProps";
@@ -18,12 +16,21 @@ import {
 import Tag from "../../Components/Tag/Tag";
 import NavSegment, { SystemFilterOption } from "./taskNavBtnComp";
 
-import { TahweelSVG, SalesforceSVG, ServiceNowSVG, VIEW_DETAILS_EXTERNAL_LINK_SVG } from "../../assets/constants";
+import {
+  TahweelSVG,
+  SalesforceSVG,
+  ServiceNowSVG,
+  VIEW_DETAILS_EXTERNAL_LINK_SVG,
+  PRIORITY_SORT_DOWN_SVG,
+  PRIORITY_SORT_UP_SVG,
+} from "../../assets/constants";
 
 import { SfApprovalService, SFApproval } from "../../services/Integration/SalesForce";
 import { ServiceNowApprovalService, ServiceNowApproval } from "../../services/Integration/ServiceNow";
 import { TahweelService, TahweelApproval } from "../../services/Integration/TahweelService";
-const TaskApprovalPlaceholderIcon: string = require("../../Components/../Components/FeatureContent/images/taskApprovalPlaceholderIcon.svg")
+
+const TaskApprovalPlaceholderIcon: string = require("../../Components/../Components/FeatureContent/images/taskApprovalPlaceholderIcon.svg");
+
 type TaskRowItem = {
   workflowNumber: string;
   taskTitle: string;
@@ -43,7 +50,10 @@ export interface ITaskState {
   data: Record<SystemFilterOption, TaskRowItem[]>;
   loaded: Record<SystemFilterOption, boolean>;
 
-  //  for high volumes (UI performance) + future backend paging support
+  // Priority sort toggle (desc: High->Low, asc: Low->High)
+  prioritySortDir: "desc" | "asc";
+
+  // for high volumes (UI performance) + future backend paging support
   visibleCountByTab: Record<SystemFilterOption, number>;
   totalCountByTab: Record<SystemFilterOption, number>;
 }
@@ -54,7 +64,7 @@ const TABLE_COLUMN_COUNT = 6;
 const DATE_LOCALE = "en-GB";
 const DATE_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short", year: "numeric" };
 
-//  high-volume: render only N rows initially, allow Load More
+// high-volume: render only N rows initially, allow Load More
 const PAGE_SIZE = 20;
 
 const SYSTEM_TAB_DEFINITIONS = [
@@ -117,6 +127,14 @@ const formatDateForDisplay = (value: string): string => {
   return d.toLocaleDateString(DATE_LOCALE, DATE_DISPLAY_FORMAT);
 };
 
+// Handles "1 - High" or "High"
+const normalizePriorityLabel = (priority: string): string => {
+  const p = (priority || "").toString().trim();
+  if (!p) return "";
+  const match = p.match(/^\s*\d+\s*-\s*(.+)\s*$/);
+  return match && match[1] ? match[1].trim() : p;
+};
+
 export default class Task extends React.Component<ITaskProps, ITaskState> {
   private readonly salesforceService: SfApprovalService;
   private readonly serviceNowService: ServiceNowApprovalService;
@@ -143,14 +161,16 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
         ServiceNow: false,
       },
 
-      //  paging defaults
+      prioritySortDir: "desc",
+
+      // paging defaults
       visibleCountByTab: {
         Tahweel: PAGE_SIZE,
         Salesforce: PAGE_SIZE,
         ServiceNow: PAGE_SIZE,
       },
 
-      //  counts: future-ready for backend totalCount
+      // counts: future-ready for backend totalCount
       totalCountByTab: {
         Tahweel: 0,
         Salesforce: 0,
@@ -164,7 +184,6 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
   }
 
   public async componentDidMount(): Promise<void> {
-    //  keep your existing behavior: load only default tab on mount (Salesforce)
     await this.loadTabData(this.state.selectedTabValue);
   }
 
@@ -179,7 +198,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     return {
       workflowNumber: item.workflowNumber || EMPTY_CELL_TEXT,
       taskTitle: item.taskTitle || EMPTY_CELL_TEXT,
-      priority: item.priority || EMPTY_CELL_TEXT,
+      priority: item.priority || "",
       dueDate: item.dueDate || "",
       requestorName: item.requestorName || EMPTY_CELL_TEXT,
       workitemId: item.workitemId || item.workflowNumber || "",
@@ -192,7 +211,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     return {
       workflowNumber: item.workflowNumber || EMPTY_CELL_TEXT,
       taskTitle: item.taskTitle || EMPTY_CELL_TEXT,
-      priority: item.priority || EMPTY_CELL_TEXT,
+      priority: item.priority || "",
       dueDate: item.dueDate || "",
       requestorName: item.requestorName || EMPTY_CELL_TEXT,
       workitemId: item.workitemId || item.workflowNumber || "",
@@ -205,7 +224,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     return {
       workflowNumber: item.workflowNumber || EMPTY_CELL_TEXT,
       taskTitle: item.taskTitle || EMPTY_CELL_TEXT,
-      priority: item.priority || EMPTY_CELL_TEXT,
+      priority: item.priority || "",
       dueDate: item.dueDate || "",
       requestorName: item.requestorName || EMPTY_CELL_TEXT,
       workitemId: item.workitemId || item.workflowNumber || "",
@@ -227,10 +246,6 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
       if (tab === "Salesforce") {
         const res = await this.salesforceService.fetchApprovalsByEmail(userEmail);
         rows = (res?.approvals || []).map((x) => this.mapSalesforceApprovalToRow(x));
-
-        // Future-ready (if backend returns totalCount later)
-        // const totalCount = (res as any)?.totalCount ?? rows.length;
-        // this.setState(prev => ({ totalCountByTab: { ...prev.totalCountByTab, Salesforce: totalCount } }));
       } else if (tab === "ServiceNow") {
         const res = await this.serviceNowService.fetchApprovalsByEmail(userEmail);
         rows = (res?.approvals || []).map((x) => this.mapServiceNowApprovalToRow(x));
@@ -244,7 +259,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
 
       if (seq !== this._loadSequence) return;
 
-      const totalCount = rows.length; //  for now
+      const totalCount = rows.length;
       const initialVisible = Math.min(this.state.visibleCountByTab[tab] || PAGE_SIZE, totalCount || 0);
 
       this.setState((prev) => ({
@@ -252,7 +267,6 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
         data: { ...prev.data, [tab]: rows },
         loaded: { ...prev.loaded, [tab]: true },
 
-        //  update counts & paging state
         totalCountByTab: { ...prev.totalCountByTab, [tab]: totalCount },
         visibleCountByTab: { ...prev.visibleCountByTab, [tab]: initialVisible || PAGE_SIZE },
       }));
@@ -271,7 +285,6 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
 
     this.setState({ selectedTabValue: value, errorMessage: undefined });
 
-    //  lazy load on click (Tahweel/ServiceNow)
     await this.loadTabData(value);
   };
 
@@ -289,18 +302,48 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     });
   };
 
+  // ===== Priority sort =====
+  private togglePrioritySort = (): void => {
+    this.setState((prev) => ({
+      prioritySortDir: prev.prioritySortDir === "desc" ? "asc" : "desc",
+    }));
+  };
+
+  private getPriorityRank(priority: string): number {
+    const p = normalizePriorityLabel(priority).toLowerCase();
+    if (p === "high") return 3;
+    if (p === "medium") return 2;
+    if (p === "low") return 1;
+    return 0;
+  }
+
+  private sortRowsByPriority(rows: TaskRowItem[], dir: "desc" | "asc"): TaskRowItem[] {
+    // stable sort
+    return rows
+      .map((r, i) => ({ r, i }))
+      .sort((a, b) => {
+        const ra = this.getPriorityRank(a.r.priority);
+        const rb = this.getPriorityRank(b.r.priority);
+
+        if (ra !== rb) return dir === "desc" ? rb - ra : ra - rb;
+        return a.i - b.i;
+      })
+      .map((x) => x.r);
+  }
+
   public render(): React.ReactElement<ITaskProps> {
-    const { selectedTabValue, isLoading, errorMessage, data, visibleCountByTab, totalCountByTab } = this.state;
+    const { selectedTabValue, isLoading, errorMessage, data, visibleCountByTab, totalCountByTab, prioritySortDir } = this.state;
 
     const activeRows: TaskRowItem[] = data[selectedTabValue];
     const visibleCount = Math.max(0, visibleCountByTab[selectedTabValue] || PAGE_SIZE);
-    const activeRowsToRender = activeRows.slice(0, visibleCount);
-    const showPlaceholder = !isLoading && !errorMessage && activeRows.length === 0;
 
+    const sortedActiveRows = this.sortRowsByPriority(activeRows, prioritySortDir);
+    const activeRowsToRender = sortedActiveRows.slice(0, visibleCount);
+
+    const showPlaceholder = !isLoading && !errorMessage && activeRows.length === 0;
 
     const systemTabs = SYSTEM_TAB_DEFINITIONS.map((t) => ({
       ...t,
-      //  show true total when backend supports it; for now it becomes rows.length after loading that tab
       count: (totalCountByTab[t.key] ?? data[t.key].length) || 0,
     }));
 
@@ -308,13 +351,13 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
       selectedTabValue === "ServiceNow"
         ? SERVICENOW_TABLE_COLUMNS
         : selectedTabValue === "Tahweel"
-          ? TAHWEEL_TABLE_COLUMNS
-          : SALESFORCE_TABLE_COLUMNS;
+        ? TAHWEEL_TABLE_COLUMNS
+        : SALESFORCE_TABLE_COLUMNS;
 
     const actionLinkLabel = "View Details";
 
     const renderTaskRow = (task: TaskRowItem): JSX.Element => {
-      const priorityLabel = task.priority || EMPTY_CELL_TEXT;
+      const priorityLabel = normalizePriorityLabel(task.priority) || EMPTY_CELL_TEXT;
 
       return (
         <TableRow key={(task.workitemId || task.workflowNumber) + ""}>
@@ -366,10 +409,8 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
       );
     };
 
-    const totalForActiveTab =
-      (totalCountByTab[selectedTabValue] ?? activeRows.length) || activeRows.length;
-
-    const canLoadMore = !isLoading && activeRows.length > 0 && visibleCount < activeRows.length;
+    const totalForActiveTab = (totalCountByTab[selectedTabValue] ?? activeRows.length) || activeRows.length;
+    const canLoadMore = !isLoading && sortedActiveRows.length > 0 && visibleCount < sortedActiveRows.length;
 
     return (
       <div className={styles.main}>
@@ -391,7 +432,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
                     maxWidth: 340,
                     width: "162px",
                     height: "80px",
-                    display:"block",
+                    display: "block",
                     margin: "0 auto 10px",
                   }}
                 />
@@ -404,9 +445,31 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
               <Table className={styles.table} aria-label="Task Approvals Table">
                 <TableHeader className={styles.tableHeader}>
                   <TableRow>
-                    {activeTableColumns.map((column) => (
-                      <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>
-                    ))}
+                    {activeTableColumns.map((column) => {
+                      if (column.columnKey === "priority") {
+                        const isDesc = prioritySortDir === "desc";
+                        return (
+                          <TableHeaderCell key={column.columnKey}>
+                            <button
+                              type="button"
+                              className={styles.priorityHeaderBtn}
+                              onClick={this.togglePrioritySort}
+                              title={isDesc ? "Sort: Low to High" : "Sort: High to Low"}
+                              aria-label={isDesc ? "Sort Priority Low to High" : "Sort Priority High to Low"}
+                            >
+                              <span>Priority</span>
+                              <span
+                                className={styles.priorityHeaderIcon}
+                                aria-hidden="true"
+                                dangerouslySetInnerHTML={{ __html: isDesc ? PRIORITY_SORT_DOWN_SVG : PRIORITY_SORT_UP_SVG }}
+                              />
+                            </button>
+                          </TableHeaderCell>
+                        );
+                      }
+
+                      return <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>;
+                    })}
                   </TableRow>
                 </TableHeader>
 
@@ -433,8 +496,8 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
                             <TableCellLayout>
                               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                                 <span>
-                                  Showing {Math.min(visibleCount, activeRows.length)} of {activeRows.length}
-                                  {totalForActiveTab !== activeRows.length ? ` (Total: ${totalForActiveTab})` : ""}
+                                  Showing {Math.min(visibleCount, sortedActiveRows.length)} of {sortedActiveRows.length}
+                                  {totalForActiveTab !== sortedActiveRows.length ? ` (Total: ${totalForActiveTab})` : ""}
                                 </span>
 
                                 <Button appearance="secondary" onClick={this.handleLoadMore}>
@@ -453,7 +516,6 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
 
             {errorMessage && <div className={styles.errormessage}>Error : {errorMessage}</div>}
           </div>
-
         </div>
       </div>
     );

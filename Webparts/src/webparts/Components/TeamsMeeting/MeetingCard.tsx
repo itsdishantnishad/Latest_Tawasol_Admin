@@ -2,7 +2,8 @@ import React from 'react';
 import styles from "./TeamsComponent.module.scss";
 
 const outlookIcon: string = require("../../assets/outlook-icon.svg");
-const TeamsIcon: string = require("../../assets/TeamsIcon.png");
+// const TeamsIcon: string = require("../../assets/TeamsIcon.png");
+const teamsImage: string = require("../../assets/microsoft-teams-image.svg");
 
 const getOrganizerAvatar = (event: any): string => {
   return event.avatarUrl || event.organizer?.avatarUrl || "https://i.pravatar.cc/150?img=1";
@@ -23,7 +24,7 @@ const MeetingCard = ({ event, onJoinClick }: any) => {
       </div> */}
 
       <div className={styles.imageSection}>
-        <svg
+        {/* <svg
           xmlns="http://www.w3.org/2000/svg"
           xmlnsXlink="http://www.w3.org/1999/xlink"
           width="250"
@@ -59,7 +60,8 @@ const MeetingCard = ({ event, onJoinClick }: any) => {
               preserveAspectRatio="none"
               xlinkHref={TeamsIcon} />
           </defs>
-        </svg>
+        </svg> */}
+        <img src={teamsImage} alt="" />
       </div>
 
       <div className={styles.contentWrapper}>
