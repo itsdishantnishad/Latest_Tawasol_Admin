@@ -179,3 +179,26 @@
   text-align: center;
   color: #A7A7A7;
 }
+
+.priorityHeaderBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.priorityHeaderIcon {
+  display: inline-flex;
+  line-height: 0;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+}
