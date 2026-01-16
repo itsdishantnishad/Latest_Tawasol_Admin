@@ -519,7 +519,8 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
         "SitePages/Help-Center.aspx",
         "SitePages/Offers-&-Benifits.aspx",
         "SitePages/Policies-and-Procedures.aspx",
-        "SitePages/Beverages.aspx"
+        "SitePages/Beverages.aspx",
+        "SitePages/Dashboards.aspx"
       ],
 
       // VICE_VERSA
