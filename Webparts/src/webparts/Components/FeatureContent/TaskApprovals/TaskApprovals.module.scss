@@ -63,15 +63,34 @@
 
 /* Action link */
 .viewDetailsLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px; /* space between text & icon */
   font-family: Inter, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #101820;
-  text-decoration: underline;
+  color: #da291c;
+  text-decoration: none;
   cursor: pointer;
 
   &:hover {
-    opacity: 0.85;
+    text-decoration: underline;
+    opacity: 0.9;
+  }
+}
+
+.viewDetailsText {
+  line-height: 1;
+}
+
+.viewDetailsIcon {
+  display: inline-flex;
+  line-height: 0;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    display: block;
   }
 }
 

@@ -8,7 +8,7 @@ import CategoryView, { ICategoryItem } from "../CategoryView/CategoryView";
 import TableView, { TableColumn } from "../../../widgets/TableView/TableView";
 import Tag from "../../Tag/Tag";
 
-import { TahweelSVG, SalesforceSVG, ServiceNowSVG } from "../../../assets/constants";
+import { TahweelSVG, SalesforceSVG, ServiceNowSVG, VIEW_DETAILS_EXTERNAL_LINK_SVG } from "../../../assets/constants";
 
 import { SfApprovalService, SFApproval } from "../../../services/Integration/SalesForce";
 import { ServiceNowApprovalService, ServiceNowApproval } from "../../../services/Integration/ServiceNow";
@@ -16,7 +16,7 @@ import { TahweelService, TahweelApproval } from "../../../services/Integration/T
 
 type SystemKey = "Tahweel" | "Salesforce" | "ServiceNow";
 
-const DEFAULT_ACTIVE_TAB: SystemKey = "Salesforce";
+const DEFAULT_ACTIVE_TAB: SystemKey = "Tahweel";
 
 type TaskRow = {
   workitemId: string;
@@ -326,16 +326,28 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
       columnKey: "action",
       label: "Action",
       renderCell: (row) => {
-        const label = row.originSystem === "Salesforce" ? "View Details" : "Open";
+        const label = "View Details";
+
         return row.redirectURL ? (
-          <a href={row.redirectURL} target="_blank" rel="noreferrer" className={styles.viewDetailsLink}>
-            {label}
+          <a
+            href={row.redirectURL}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.viewDetailsLink}
+            aria-label="View Details (opens in new tab)"
+          >
+            <span className={styles.viewDetailsText}>{label}</span>
+            <span
+              className={styles.viewDetailsIcon}
+              aria-hidden="true"
+              dangerouslySetInnerHTML={{ __html: VIEW_DETAILS_EXTERNAL_LINK_SVG }}
+            />
           </a>
         ) : (
           EMPTY_CELL_TEXT
         );
       },
-    },
+    }
   ];
 
   return (

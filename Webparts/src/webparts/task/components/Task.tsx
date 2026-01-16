@@ -18,7 +18,7 @@ import {
 import Tag from "../../Components/Tag/Tag";
 import NavSegment, { SystemFilterOption } from "./taskNavBtnComp";
 
-import { TahweelSVG, SalesforceSVG, ServiceNowSVG } from "../../assets/constants";
+import { TahweelSVG, SalesforceSVG, ServiceNowSVG, VIEW_DETAILS_EXTERNAL_LINK_SVG } from "../../assets/constants";
 
 import { SfApprovalService, SFApproval } from "../../services/Integration/SalesForce";
 import { ServiceNowApprovalService, ServiceNowApproval } from "../../services/Integration/ServiceNow";
@@ -128,7 +128,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     super(props);
 
     this.state = {
-      selectedTabValue: "Salesforce",
+      selectedTabValue: "Tahweel",
       isLoading: false,
       errorMessage: undefined,
 
@@ -309,8 +309,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
         ? TAHWEEL_TABLE_COLUMNS
         : SALESFORCE_TABLE_COLUMNS;
 
-    const actionLinkLabel =
-      selectedTabValue === "ServiceNow" || selectedTabValue === "Tahweel" ? "Open" : "View Details";
+    const actionLinkLabel = "View Details";
 
     const renderTaskRow = (task: TaskRowItem): JSX.Element => {
       const priorityLabel = task.priority || EMPTY_CELL_TEXT;
@@ -343,8 +342,19 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
 
           <TableCell>
             {task.redirectURL ? (
-              <a href={task.redirectURL} target="_blank" rel="noreferrer" className={styles.viewDetailsLink}>
-                {actionLinkLabel}
+              <a
+                href={task.redirectURL}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.viewDetailsLink}
+                aria-label="View Details (opens in new tab)"
+              >
+                <span className={styles.viewDetailsText}>{actionLinkLabel}</span>
+                <span
+                  className={styles.viewDetailsIcon}
+                  aria-hidden="true"
+                  dangerouslySetInnerHTML={{ __html: VIEW_DETAILS_EXTERNAL_LINK_SVG }}
+                />
               </a>
             ) : (
               EMPTY_CELL_TEXT

@@ -121,10 +121,31 @@
   color: #da291c; /* Tawasol red */
   text-decoration: none;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px; // space between text and icon
+  color: #da291c;
+  text-decoration: none;
+  font-weight: 600;
 }
 
 .viewDetailsLink:hover {
   text-decoration: underline;
+}
+
+.viewDetailsText {
+  line-height: 1;
+}
+
+.viewDetailsIcon {
+  display: inline-flex;
+  line-height: 0;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
 }
 
 .viewDetailsDisabled {
