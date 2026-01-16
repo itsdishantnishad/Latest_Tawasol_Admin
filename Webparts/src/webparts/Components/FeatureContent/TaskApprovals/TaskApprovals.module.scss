@@ -105,3 +105,26 @@
   align-items: center;
   justify-content: center;
 }
+
+
+
+.emptyStateTitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0px;
+  text-align: center;
+  color: #3A3B43;
+  margin-bottom: 6px;
+}
+
+.emptyStateDescription {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.5px;
+  text-align: center;
+  color: #A7A7A7;
+}
