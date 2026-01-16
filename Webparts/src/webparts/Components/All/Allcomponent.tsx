@@ -181,7 +181,7 @@ const AllComponents: React.FC<Props> = ({
                 <Trainingcard key={event.id} {...event} context={context}/>
               ))}
 
-              <h5>Meetings</h5>
+              <h5>Teams Meetings</h5>
               {filteredMeetings.map((event: any) => (
                 <MeetingCard
                   key={event.id}

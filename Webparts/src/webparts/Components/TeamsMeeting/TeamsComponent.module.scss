@@ -88,6 +88,7 @@
 .imageSection {
   flex-shrink: 0;
   position: relative;
+  width: 250px;
 
   svg {
     border-radius: 10px;
@@ -95,6 +96,10 @@
     object-fit: cover;
     width: 250px;
     object-position: center top;
+  }
+
+  img{
+    width: 100%
   }
 }
 
