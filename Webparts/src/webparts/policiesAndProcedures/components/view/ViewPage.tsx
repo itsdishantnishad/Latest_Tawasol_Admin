@@ -12,6 +12,8 @@ import {
   PoliciesAndProceduresSharePointProvider
 } from './ViewPageDataProvider';
 
+import { listServices } from '../../../services/listServices';
+
 export interface IPoliciesAndProceduresViewProps {
   context: WebPartContext;
   functionDisplayName: string;
@@ -32,6 +34,9 @@ type IPoliciesAndProceduresViewState = {
 
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
   folderViewMode: Record<string, FolderViewMode>;
+
+  // favourites (key = serverRelativeUrl lower)
+  favouriteIndex: Record<string, number>;
 };
 
 export default class PoliciesAndProceduresView extends React.Component<
@@ -43,10 +48,16 @@ export default class PoliciesAndProceduresView extends React.Component<
   constructor(props: IPoliciesAndProceduresViewProps) {
     super(props);
 
+    // IMPORTANT: remove wrong hardcoded '/sites/Intranet/DMS'
+    // fallback is computed from current web (same as Landing.tsx logic)
+    const siteRel = props.context.pageContext.web.serverRelativeUrl || "";
+    const base = siteRel === "/" ? "" : siteRel;
+    const computedFallbackRoot = encodeURI(`${base}/GRC framework Documents`);
+
     this.dataProvider = props.useSharePointProvider
       ? new PoliciesAndProceduresSharePointProvider(
           props.context,
-          props.dmsLibraryRoot || '/sites/Intranet/DMS'
+          props.dmsLibraryRoot || computedFallbackRoot
         )
       : new PoliciesAndProceduresDummyProvider();
 
@@ -56,17 +67,25 @@ export default class PoliciesAndProceduresView extends React.Component<
         { key: 'bread-function', text: props.functionDisplayName, isCurrentItem: true }
       ],
       currentItems: [],
-      selectedItem: undefined, // ✅ do not auto preview
+      selectedItem: undefined, // do not auto preview
       expandedFolderId: undefined,
       expandedChildren: {},
-      folderViewMode: {}
+      folderViewMode: {},
+      favouriteIndex: {}
     };
   }
 
   public async componentDidMount(): Promise<void> {
-    const rootItems = await this.dataProvider.getRootItems(this.props.functionDisplayName);
+    const svc = new listServices(this.props.context);
+
+    const [rootItems, favouriteIndex] = await Promise.all([
+      this.dataProvider.getRootItems(this.props.functionDisplayName),
+      svc.getFavouriteIndex("Document Favourites") // expects serverRelativeUrl lower keys
+    ]);
+
     this.setState({
-      currentItems: rootItems
+      currentItems: rootItems,
+      favouriteIndex
       // keep selectedItem undefined until user selects file
     });
   }
@@ -75,9 +94,30 @@ export default class PoliciesAndProceduresView extends React.Component<
     this.setState({ selectedItem: fileItem });
   };
 
-  // ✅ NEW: clear preview when unselect happens
+  // clear preview when unselect happens
   private handleClearPreview = (): void => {
     this.setState({ selectedItem: undefined });
+  };
+
+  private handleToggleFavourite = async (file: IPoliciesAndProceduresItem): Promise<void> => {
+    try {
+      if (!file?.serverRelativeUrl) return;
+
+      const svc = new listServices(this.props.context);
+
+      const webAbs = this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+      const origin = new URL(webAbs).origin;
+      const absoluteFileUrl = `${origin}${file.serverRelativeUrl}`;
+
+      await svc.toggleFavourite(absoluteFileUrl, file.name, "Document Favourites");
+
+      const favouriteIndex = await svc.getFavouriteIndex("Document Favourites");
+      this.setState({ favouriteIndex });
+    } catch (err) {
+      // do not break UI
+      // eslint-disable-next-line no-console
+      console.error("toggle favourite failed", err);
+    }
   };
 
   private handleToggleFolder = async (folderItem: IPoliciesAndProceduresItem): Promise<void> => {
@@ -133,7 +173,7 @@ export default class PoliciesAndProceduresView extends React.Component<
   }
 
   public render(): React.ReactElement<IPoliciesAndProceduresViewProps> {
-    const { currentItems, selectedItem, expandedFolderId, expandedChildren, folderViewMode } = this.state;
+    const { currentItems, selectedItem, expandedFolderId, expandedChildren, folderViewMode, favouriteIndex } = this.state;
 
     return (
       <section>
@@ -151,6 +191,10 @@ export default class PoliciesAndProceduresView extends React.Component<
               expandedChildren={expandedChildren}
               onSwitchFolderView={this.handleSwitchFolderView}
               getFolderViewMode={(fid) => folderViewMode[fid] || 'list'}
+
+              // favourites wiring (this was missing)
+              favouriteIndex={favouriteIndex}
+              onToggleFavourite={this.handleToggleFavourite}
             />
           </div>
 
