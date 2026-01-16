@@ -286,7 +286,7 @@ export class AllTrainingCard extends React.Component<
     }
 
     return {
-      text: isSubmitting ? "Submitting..." : "Request for Approval",
+      text: isSubmitting ? "Submitting..." : "Join",
       onClick: this.handleRequestApproval,
       disabled: isSubmitting,
       className: styles.requestButton,

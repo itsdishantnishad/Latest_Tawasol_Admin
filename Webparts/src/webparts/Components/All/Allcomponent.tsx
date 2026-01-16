@@ -181,7 +181,7 @@ const AllComponents: React.FC<Props> = ({
                 <Trainingcard key={event.id} {...event} context={context}/>
               ))}
 
-              <h5>Meetings</h5>
+              <h5>Teams Meetings</h5>
               {filteredMeetings.map((event: any) => (
                 <MeetingCard
                   key={event.id}
@@ -191,7 +191,7 @@ const AllComponents: React.FC<Props> = ({
               ))}
             </div>
 
-            <div className={styles.previousEventsContainer}>
+            {/* <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>
                 {previousEvents.length > 0 ? (
@@ -209,7 +209,7 @@ const AllComponents: React.FC<Props> = ({
                   <p>No previous events found.</p>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
           
           {/* <div className={styles.eventsContainer}>

@@ -218,7 +218,7 @@ const EventCard: React.FC<EventCardProps> = ({
                     handleRegisterClick();
                   }}
                 >
-                  Register
+                  View Details
                 </button>
               )}
             </div>

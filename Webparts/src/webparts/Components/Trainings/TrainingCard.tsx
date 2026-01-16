@@ -264,7 +264,7 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
     }
 
     return {
-      text: isSubmitting ? "Submitting..." : "Request for Approval",
+      text: isSubmitting ? "Submitting..." : "Join",
       onClick: this.handleRequestApproval,
       disabled: isSubmitting,
       className: styles.requestButton
@@ -358,8 +358,9 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
               <div className={styles.errorMessage}>{errorMessage}</div>
             )}
 
-            <button
-              className={`${styles.actionButton} ${btn.className || ""}`}
+            <div className={styles.actionSection}>
+              <button
+              className={styles.actionButton}
               onClick={btn.onClick}
               disabled={btn.disabled}
             >
@@ -368,6 +369,7 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
               )}
               {btn.text}
             </button>
+            </div>
           </div>
         </div>
       </a>
