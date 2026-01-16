@@ -148,7 +148,7 @@ const extractUrl = (value: any): string => {
 export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const [activeTab, setActiveTab] = React.useState<
     "birthdays" | "anniversaries" | "newJoiners" | "Achievements"
-  >("newJoiners");
+  >("birthdays");
 
   const [currentPage, setCurrentPage] = React.useState(0);
 
