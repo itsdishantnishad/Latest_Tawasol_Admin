@@ -14,7 +14,7 @@ export interface IServiceLink {
   name: string;
   icon: string;
   url: string;
-  position?: Position; // optional — we compute layout per page
+  position?: Position;
   relativeTo?: "outer" | "inner";
   category?: "quick" | "app" | "custom";
 }
@@ -209,6 +209,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
     fetchData();
   }, [props.context, userEmail]);
 
+  // open/close popup
   const showAppsLinksDialog = (): void => setIsHidden(false);
   const hideAppsAndLinks = (): void => setIsHidden(true);
   const showNavButtons = totalPages > 1;
@@ -219,6 +220,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
         hideAppsAndLinks={hideAppsAndLinks}
         isHidden={isHidden}
         context={props.context}
+        initialTab={activeTab} // NEW: open popup on the same tab
       />
 
       <div className={styles.tabContainer}>

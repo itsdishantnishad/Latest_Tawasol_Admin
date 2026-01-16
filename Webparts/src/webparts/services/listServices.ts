@@ -118,7 +118,7 @@ export type UrlFieldValue = { Url?: string; Description?: string };
 export type LetsMeetPageItem = {
   id: number;
   title: string;
-  pageUrl: string;  
+  pageUrl: string;
   youtubeUrl: string;
 };
 
@@ -188,7 +188,6 @@ export class listServices {
 
     return val;
   }
-
 
   // UPDATED helper: strip HTML BUT keep line breaks (for bullet pointers)
   private static toPlainTextWithLines(raw?: string): string {
@@ -624,7 +623,7 @@ export class listServices {
     }
   }
 
- // ===== Lets Meet (Site Pages) =====
+  // ===== Lets Meet (Site Pages) =====
 
   private readUrlField(val?: UrlFieldValue | string): string {
     if (!val) return "";
@@ -708,7 +707,7 @@ export class listServices {
   public async getNewJoiners(listName: string): Promise<any[]> {
     const results = await this.sp.web.lists
       .getByTitle(listName)
-      .items.select("Title", "TIRSortOrder", "TIRDesignation", "TIRUserPicture", "TIRDescription","TIRUserEmail")
+      .items.select("Title", "TIRSortOrder", "TIRDesignation", "TIRUserPicture", "TIRDescription", "TIRUserEmail")
       .orderBy("TIRSortOrder", false)();
 
     return results.map((item: any) => ({
@@ -717,7 +716,7 @@ export class listServices {
       Designation: item.TIRDesignation,
       UserPicture: item.TIRUserPicture ? item.TIRUserPicture.Url : "#",
       Description: item.TIRDescription,
-      TIRUserEmail: item.TIRUserEmail
+      TIRUserEmail: item.TIRUserEmail,
     }));
   }
 
@@ -996,7 +995,9 @@ export class listServices {
   /** ===== Boards: Recently Updated / Most Used ===== */
 
   public async getRecentlyUpdatedDocuments(dmsLibraryRoot: string, rowLimit: number = 6): Promise<DocumentSummary[]> {
-    const rootRel = (dmsLibraryRoot || "/sites/Intranet/DMS").replace(/\/$/, "");
+    const rootRel = (dmsLibraryRoot || "").replace(/\/$/, "");
+    if (!rootRel) return [];
+
     const rootAbs = this.toAbsoluteUrl(rootRel);
 
     const query: ISearchQuery = {
@@ -1060,6 +1061,150 @@ export class listServices {
       [];
 
     return listServices.mapSearchRowsToDocs(rows);
+  }
+
+  // Policies and Procedures Document Library
+  public async getMostUsedDocumentsInLibrary(dmsLibraryRoot: string, rowLimit: number = 6): Promise<DocumentSummary[]> {
+    const rootRel = (dmsLibraryRoot || "").replace(/\/$/, "");
+    if (!rootRel) return [];
+
+    const rootAbs = this.toAbsoluteUrl(rootRel);
+
+    const query: ISearchQuery = {
+      Querytext: `Path:"${rootAbs}" IsDocument:True`,
+      RowLimit: rowLimit,
+      TrimDuplicates: true,
+      SelectProperties: [
+        "WorkId",
+        "Title",
+        "Path",
+        "FileType",
+        "Filename",
+        "ViewsLifeTime",
+        "LastModifiedTime",
+        "TIRDepartmentOWSTEXT",
+        "TIRTagOWSTEXT",
+        "DepartmentOWSTEXT",
+        "Department",
+        "ContentType",
+      ],
+      SortList: [{ Property: "ViewsLifeTime", Direction: 1 }],
+    };
+
+    const res: any = await this.sp.search(query);
+    const rows =
+      res?.RawSearchResults?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
+      res?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
+      res?.PrimarySearchResultsTable?.Rows ||
+      [];
+
+    return listServices.mapSearchRowsToDocs(rows);
+  }
+
+  private readHyperlink(val: any): string {
+    if (!val) return "";
+    if (typeof val === "string") return val.trim();
+    return (val.Url || val.url || "").trim();
+  }
+
+private readTaxonomyLabel(val: any): string {
+  if (!val) return "";
+  if (typeof val === "string") {
+    // sometimes "Label|TermGuid" or just "Label"
+    return String(val).split("|")[0].trim();
+  }
+  if (Array.isArray(val)) {
+    return val
+      .map((v) => (v?.Label ? String(v.Label) : String(v?.label || "")))
+      .filter(Boolean)
+      .join(", ");
+  }
+  if (val?.Label) return String(val.Label);
+  return "";
+}
+
+  private guessExt(name?: string, url?: string): string {
+    const pick = (s?: string) => {
+      const t = (s || "").toLowerCase();
+      const m = t.match(/\.([0-9a-z]+)(?:$|\?)/i);
+      return (m?.[1] || "").toLowerCase();
+    };
+    return pick(name) || pick(url) || "";
+  }
+
+  public async getUserFavouriteDocuments(
+    favouritesListTitle: string = "Document Favourites", 
+    rowLimit: number = 3
+  ): Promise<DocumentSummary[]> {
+    let userId: number | undefined = (this.context.pageContext as any)?.legacyPageContext?.userId;
+    if (!userId) {
+      const me: any = await this.sp.web.currentUser();
+      userId = Number(me?.Id) || 0;
+    }
+
+    const tryFetch = async (deptInternal?: string) => {
+      const selectFields: string[] = [
+        "Id",
+        "Title",
+        "TIRFileUrl",
+        "TIRTags",
+        "TIRIsActive",
+        "Modified",
+        "AuthorId",
+      ];
+      if (deptInternal) selectFields.push(deptInternal);
+
+      const fetchLimit = Math.max(rowLimit * 5, rowLimit);
+
+      return await this.sp.web.lists
+        .getByTitle(favouritesListTitle)
+        .items.select(...selectFields)
+        .filter(`AuthorId eq ${userId}`) // ✅ threshold-safe (Created By indexed)
+        .orderBy("Modified", false)
+        .top(fetchLimit)();
+    };
+
+    let rows: any[] = [];
+    let deptInternalUsed: string | undefined;
+
+    // Department column internal name can vary
+    try {
+      deptInternalUsed = "Department_x0020_Name";
+      rows = await tryFetch(deptInternalUsed);
+    } catch {
+      try {
+        deptInternalUsed = "DepartmentName";
+        rows = await tryFetch(deptInternalUsed);
+      } catch {
+        deptInternalUsed = undefined;
+        rows = await tryFetch(undefined);
+      }
+    }
+
+    const mapped: DocumentSummary[] = (rows || [])
+      // keep true/empty; hide only explicit false
+      .filter((r) => r?.TIRIsActive !== false)
+      .map((r: any) => {
+        const url = this.readHyperlink(r?.TIRFileUrl);
+
+        const name =
+          r?.Title ||
+          (url ? decodeURIComponent(url.split("/").pop() || "Document") : "Document");
+
+        const deptVal = deptInternalUsed ? r?.[deptInternalUsed] : undefined;
+
+        return {
+          id: String(r?.Id ?? ""),
+          name,
+          url,
+          ext: this.guessExt(name, url), // ✅ no extra column needed
+          tag: this.readTaxonomyLabel(r?.TIRTags),
+          dept: this.readTaxonomyLabel(deptVal),
+        } as DocumentSummary;
+      })
+      .slice(0, rowLimit);
+
+    return mapped;
   }
 
   /** ===== Announcement Banner (time-window & timezone aware) ===== */

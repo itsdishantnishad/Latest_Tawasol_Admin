@@ -28,7 +28,7 @@ export let ICON_WORD: string;
 export let ICON_ZIP: string;
 export let ICON_ARROW_UP: string;
 export let ICON_ARROW_DOWN: string;
-
+export let ICON_HEART: string;
 export let REAL_PDF_URL: string;
 
 /**
@@ -61,7 +61,7 @@ export function initUrlConstants(context: WebPartContext): void {
   ICON_ZIP               = `${PP_VIEW_ICONS_BASE}/Zip%20Icon.svg`;
   ICON_ARROW_UP          = `${PP_VIEW_ICONS_BASE}/Folder%20Arrow%20Icon%20Up.svg`;
   ICON_ARROW_DOWN        = `${PP_VIEW_ICONS_BASE}/Folder%20Arrow%20Icon%20Down.svg`;
-
+  ICON_HEART = `${PP_VIEW_ICONS_BASE}/heart.svg`;
   REAL_PDF_URL = `${PP_VIEW_ICONS_BASE}/Major%20Project%20File.pdf`;
 }
 

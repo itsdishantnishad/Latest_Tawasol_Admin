@@ -1,13 +1,10 @@
-
-
-
 import * as React from 'react';
 import { Checkbox, IconButton } from '@fluentui/react';
 import styles from './ViewPage.module.scss';
 import {
   ICON_DOC_FOLDER_GRID, ICON_DOC_FOLDER_LIST, ICON_EXPORT_TO_CSV, ICON_FOLDER,
   ICON_JPG, ICON_PDF, ICON_POWERPOINT, ICON_TEXT, ICON_WORD, ICON_ZIP,
-  ICON_ARROW_UP, ICON_ARROW_DOWN, ICON_TAG
+  ICON_ARROW_UP, ICON_ARROW_DOWN, ICON_TAG, ICON_HEART
 } from '../../../assets/constants';
 
 export type IPoliciesAndProceduresItem = {
@@ -28,15 +25,16 @@ export interface IPoliciesAndProceduresListProps {
   activeId?: string;
 
   onOpenFile: (fileItem: IPoliciesAndProceduresItem) => void;
+  onClearPreview?: () => void; // ✅ NEW
   onToggleFolder: (folderItem: IPoliciesAndProceduresItem) => void;
-
-  // ✅ single expand id (matches your ViewPage.tsx)
   expandedFolderId?: string;
 
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
 
   onSwitchFolderView: (folderId: string, mode: 'list' | 'grid') => void;
   getFolderViewMode: (folderId: string) => 'list' | 'grid';
+  favouriteIndex?: Record<string, number>; // key=serverRelativeUrl lower
+  onToggleFavourite?: (file: IPoliciesAndProceduresItem) => void;
 }
 
 type State = {
@@ -87,6 +85,13 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
     }
   };
 
+  private favKey = (it: IPoliciesAndProceduresItem) => (it.serverRelativeUrl || '').toLowerCase();
+
+  private isFavourited = (it: IPoliciesAndProceduresItem) => {
+    const k = this.favKey(it);
+    return !!k && !!this.props.favouriteIndex?.[k];
+  };
+
   // ---------- CSV export (selected rows only) ----------
   private exportSelectedToCsv = (selected: IPoliciesAndProceduresItem[], e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -114,6 +119,27 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
     <img className={styles.typeIcon} src={this.getIconUrl(listItem)} alt="" />
   );
 
+  private renderFavBtn = (it: IPoliciesAndProceduresItem) => {
+    if (it.isFolder) return null;
+    if (!it.serverRelativeUrl) return null;
+
+    const on = this.isFavourited(it);
+    return (
+      <button
+        type="button"
+        title={on ? "Remove from favourites" : "Add to favourites"}
+        onClick={(e) => { e.stopPropagation(); this.props.onToggleFavourite?.(it); }}
+        style={{ background: "transparent", border: "none", cursor: "pointer", padding: 4 }}
+      >
+        <img
+          src={ICON_HEART}
+          alt=""
+          style={{ width: 18, height: 18, opacity: on ? 1 : 0.35 }}
+        />
+      </button>
+    );
+  };
+
   private renderFileRow = (listItem: IPoliciesAndProceduresItem, isActive: boolean, folderId?: string): React.ReactNode => {
     const checked = this.isSelected(listItem.id, folderId);
 
@@ -126,19 +152,23 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
               e?.stopPropagation();
               this.toggleOne(listItem.id, folderId);
               if (isChecked) {
-                this.props.onOpenFile(listItem);
+                this.props.onOpenFile(listItem); // ✅ preview only on select
+              } else {
+                if (this.props.activeId === listItem.id) {
+                  this.props.onClearPreview?.(); // ✅ clear preview when unselect active
+                }
               }
             }}
           />
         </div>
 
-        {/* ONLY icon/name click opens preview */}
+        {/* icon button (NO preview open on click) */}
         <div>
           <button
             type="button"
             className={styles.openBtn}
-            aria-label={`Open ${listItem.name}`}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
+            aria-label={listItem.name}
+            onClick={(e) => { e.stopPropagation(); }}
           >
             {this.renderTypeIcon(listItem)}
           </button>
@@ -148,7 +178,7 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
           <button
             type="button"
             className={`${styles.nameStrong} ${styles.openBtn}`}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
+            onClick={(e) => { e.stopPropagation(); }}
           >
             {listItem.name}
           </button>
@@ -169,6 +199,11 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
         </div>
 
         <div className={styles.cellDept}>{listItem.department || ''}</div>
+
+        {/* ✅ Heart only when selected */}
+        <div>
+          {checked ? this.renderFavBtn(listItem) : null}
+        </div>
       </div>
     );
   };
@@ -182,18 +217,25 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
           <button
             type="button"
             className={styles.openBtn}
-            aria-label={`Open ${listItem.name}`}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
+            aria-label={listItem.name}
+            onClick={(e) => { e.stopPropagation(); }}
           >
             {this.renderTypeIcon(listItem)}
           </button>
         </div>
 
+        {/* ✅ Heart only when selected */}
+        {checked && (
+          <div style={{ position: "absolute", top: 8, right: 8 }}>
+            {this.renderFavBtn(listItem)}
+          </div>
+        )}
+
         <div className={styles.cardTitle}>
           <button
             type="button"
             className={styles.openBtn}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
+            onClick={(e) => { e.stopPropagation(); }}
           >
             {listItem.name}
           </button>
@@ -220,7 +262,11 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
             e?.stopPropagation();
             this.toggleOne(listItem.id, folderId);
             if (isChecked) {
-              this.props.onOpenFile(listItem);
+              this.props.onOpenFile(listItem); // ✅ preview only on select
+            } else {
+              if (this.props.activeId === listItem.id) {
+                this.props.onClearPreview?.(); // ✅ clear preview when unselect active
+              }
             }
           }}
           styles={{ root: { position: 'absolute', top: 8, left: 8 } }}

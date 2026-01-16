@@ -1,5 +1,3 @@
-
-
 import * as React from 'react';
 import { SearchBox } from '@fluentui/react';
 import styles from './PoliciesAndProcedures.module.scss';
@@ -80,10 +78,12 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
     this.setState({ activeFunctionName: undefined });
 
   private getDmsLibraryRoot(): string {
-    // ✅ your library is: /sites/TawasolBETA/GRC framework Documents
-    const siteRel = this.props.context.pageContext.web.serverRelativeUrl || '';
-    const base = siteRel === '/' ? '' : siteRel;
-    return `${base}/GRC framework Documents`;
+    // your library is: /sites/TawasolBETA/GRC framework Documents
+    const siteRel = this.props.context.pageContext.web.serverRelativeUrl || "";
+    const base = siteRel === "/" ? "" : siteRel;
+
+    // encode spaces => %20 (required for search Path matching)
+    return encodeURI(`${base}/GRC framework Documents`);
   }
 
   public render(): React.ReactElement<ILandingProps> {
@@ -127,7 +127,7 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
           onOpenFunctionView={this.showFunctionDetailView}
         />
 
-        <Boards context={this.props.context} />
+        <Boards context={this.props.context} dmsLibraryRoot={this.getDmsLibraryRoot()}/>
       </div>
     );
   }

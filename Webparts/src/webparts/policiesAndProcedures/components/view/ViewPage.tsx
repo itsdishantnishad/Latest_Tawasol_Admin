@@ -1,5 +1,3 @@
-
-
 import * as React from 'react';
 import { Breadcrumb, IBreadcrumbItem } from '@fluentui/react';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
@@ -69,12 +67,17 @@ export default class PoliciesAndProceduresView extends React.Component<
     const rootItems = await this.dataProvider.getRootItems(this.props.functionDisplayName);
     this.setState({
       currentItems: rootItems
-      // keep selectedItem undefined until user clicks file
+      // keep selectedItem undefined until user selects file
     });
   }
 
   private handleOpenFile = (fileItem: IPoliciesAndProceduresItem): void => {
     this.setState({ selectedItem: fileItem });
+  };
+
+  // ✅ NEW: clear preview when unselect happens
+  private handleClearPreview = (): void => {
+    this.setState({ selectedItem: undefined });
   };
 
   private handleToggleFolder = async (folderItem: IPoliciesAndProceduresItem): Promise<void> => {
@@ -142,8 +145,9 @@ export default class PoliciesAndProceduresView extends React.Component<
               items={currentItems}
               activeId={selectedItem?.id}
               onOpenFile={this.handleOpenFile}
+              onClearPreview={this.handleClearPreview}
               onToggleFolder={this.handleToggleFolder}
-              expandedFolderId={expandedFolderId}       
+              expandedFolderId={expandedFolderId}
               expandedChildren={expandedChildren}
               onSwitchFolderView={this.handleSwitchFolderView}
               getFolderViewMode={(fid) => folderViewMode[fid] || 'list'}
