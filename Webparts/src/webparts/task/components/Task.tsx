@@ -135,6 +135,16 @@ const normalizePriorityLabel = (priority: string): string => {
   return match && match[1] ? match[1].trim() : p;
 };
 
+// Initials helper (for Requested By avatar)
+const getInitials = (name: string): string => {
+  const n = (name || "").trim();
+  if (!n) return "?";
+  const parts = n.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0] || "?";
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] : "";
+  return (first + last).toUpperCase();
+};
+
 export default class Task extends React.Component<ITaskProps, ITaskState> {
   private readonly salesforceService: SfApprovalService;
   private readonly serviceNowService: ServiceNowApprovalService;
@@ -188,8 +198,8 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
   }
 
   private getUserEmailOrThrow(): string {
-    const userEmail = (this.props.userEmail || "").trim();
-    // const userEmail = ("mohamed.thahir-c@dhre.ae").trim();
+    // const userEmail = (this.props.userEmail || "").trim();
+    const userEmail = ("mohamed.thahir-c@dhre.ae").trim();
     if (!userEmail) throw new Error("User email is required.");
     return userEmail;
   }
@@ -284,7 +294,6 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     if (value === this.state.selectedTabValue) return;
 
     this.setState({ selectedTabValue: value, errorMessage: undefined });
-
     await this.loadTabData(value);
   };
 
@@ -332,7 +341,8 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
   }
 
   public render(): React.ReactElement<ITaskProps> {
-    const { selectedTabValue, isLoading, errorMessage, data, visibleCountByTab, totalCountByTab, prioritySortDir } = this.state;
+    const { selectedTabValue, isLoading, errorMessage, data, visibleCountByTab, totalCountByTab, prioritySortDir } =
+      this.state;
 
     const activeRows: TaskRowItem[] = data[selectedTabValue];
     const visibleCount = Math.max(0, visibleCountByTab[selectedTabValue] || PAGE_SIZE);
@@ -382,7 +392,10 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
           <TableCell>{formatDateForDisplay(task.dueDate)}</TableCell>
 
           <TableCell>
-            <TableCellLayout>{task.requestorName || EMPTY_CELL_TEXT}</TableCellLayout>
+            <div className={styles.requestorWrapper}>
+              <div className={styles.avatarCircle}>{getInitials(task.requestorName)}</div>
+              <span className={styles.requestorName}>{task.requestorName || EMPTY_CELL_TEXT}</span>
+            </div>
           </TableCell>
 
           <TableCell>
@@ -461,7 +474,9 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
                               <span
                                 className={styles.priorityHeaderIcon}
                                 aria-hidden="true"
-                                dangerouslySetInnerHTML={{ __html: isDesc ? PRIORITY_SORT_DOWN_SVG : PRIORITY_SORT_UP_SVG }}
+                                dangerouslySetInnerHTML={{
+                                  __html: isDesc ? PRIORITY_SORT_DOWN_SVG : PRIORITY_SORT_UP_SVG,
+                                }}
                               />
                             </button>
                           </TableHeaderCell>
