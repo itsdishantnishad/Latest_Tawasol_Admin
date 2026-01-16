@@ -209,12 +209,17 @@
 }
 
 .cardTitle {
-  font-size: 18px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--ink);
   line-height: 1.25;
 }
-
+.cardTitle1{
+  font-size: 16px !important;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+}
 .cardTitleRed {
   color: var(--accent);
 }
@@ -223,7 +228,7 @@
 .cardSubtitle {
   margin-top: 8px;
   color: var(--muted);
-  font-size: 13.5px;
+  font-size: 16px;
 }
 
 /* privilege image heights to make cards different */
@@ -296,7 +301,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #111;
+  color: #DA291C;
   /* black text */
   text-decoration: none;
   font-weight: 700;
@@ -306,33 +311,53 @@
   text-decoration: underline;
 }
 
-.globe {
-  width: 16px;
-  height: 16px;
-  display: inline-block;
-  border-radius: 50%;
-  border: 2px solid #111;
-  /* black ring */
-  position: relative;
+.globeIcon{
+width: 6.6666669845581055;
+height: 16.66666603088379;
+top: 1.66px;
+left: 6.67px;
+opacity: 1;
+border-width: 1.5px;
 }
+.globeIconBlack{
+  color: #0d1115;
+}
+// .globeIcon1{
+//   width: 6.6666669845581055;
+// height: 16.66666603088379;
+// top: 1.66px;
+// left: 6.67px;
+// opacity: 1;
+// border-width: 1.5px;
 
-.globe::before,
-.globe::after {
-  content: "";
-  position: absolute;
-  inset: 3px 6px;
-  border: 1px solid #111;
-  border-radius: 50%;
-  /* black latitude */
-}
+// }
+// .globe {
+//   width: 16px;
+//   height: 16px;
+//   display: inline-block;
+//   border-radius: 50%;
+//   border: 2px solid #af0505;
+//   /* black ring */
+//   position: relative;
+// }
 
-.globe::after {
-  inset: 7px 2px;
-  border-radius: 0;
-  border: none;
-  border-top: 1px solid #111;
-  /* black longitude */
-}
+// .globe::before,
+// .globe::after {
+//   content: "";
+//   position: absolute;
+//   inset: 3px 6px;
+//   border: 1px solid #d70707;
+//   border-radius: 50%;
+//   /* black latitude */
+// }
+
+// .globe::after {
+//   inset: 7px 2px;
+//   border-radius: 0;
+//   border: none;
+//   border-top: 1px solid #ac1111;
+//   /* black longitude */
+// }
 
 /* CTA (if needed elsewhere) */
 .ctaRow {
@@ -515,3 +540,10 @@
     opacity: .6
   }
 }
+
+
+
+
+
+
+

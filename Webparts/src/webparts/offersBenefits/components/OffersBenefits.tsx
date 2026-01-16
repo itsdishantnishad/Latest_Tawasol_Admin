@@ -2,7 +2,8 @@ import * as React from 'react';
 import styles from './OffersBenefits.module.scss';
 import { PayloadModel, AnyCard } from './types';
 import { fetchJson, readPlaceholder } from './Api';
-
+const GlobeIcon: string = require("../assets/globe.png")
+const GlobeIcon1: string = require("../assets/globeblack.png")
 export interface IOffersBenefitsProps {
   mode: 'placeholder' | 'api';
   api: { baseUrl: string; medicalPath: string; privilegesPath: string };
@@ -11,7 +12,7 @@ export interface IOffersBenefitsProps {
   maxItems: number;
 
   sectionTitleMedical: string;
-  
+
   sectionTitlePrivileges: string;
 
   /** Optional: builds the "Home" link in breadcrumb */
@@ -113,7 +114,8 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
           {img && <img className={topRow ? styles.imgTop : styles.imgBot} src={img} alt={(card as any).title || 'image'} />}
           {(card as any).title?.trim() && (
             <div className={styles.cardPad}>
-              <div className={styles.cardTitle}>{(card as any).title}</div>
+              <div className={`${styles.cardTitle1}`}
+              >{(card as any).title}</div>
             </div>
           )}
         </div>
@@ -124,7 +126,7 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
       const title = (card as any).title as string;
       const accents: string[] = (card as any).accentWords || [];
 
-     
+
       const isImportance =
         /The\s+Importance\s+of\s+Staying\s+Fit\s+and\s+Active\s+for\s+Productivity/i.test(title);
       const accentTitle: boolean = Boolean((card as any).accentTitle) || isImportance;
@@ -147,10 +149,10 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
             <div className={`${styles.cardTitle} ${accentTitle ? styles.cardTitleRed : ''}`}>
               {accents.length
                 ? parts.map((p, pi) =>
-                    accents.some(a => a.toLowerCase() === p.toLowerCase())
-                      ? <span key={pi} style={{ color: 'var(--accent)' }}>{p}</span>
-                      : <span key={pi}>{p}</span>
-                  )
+                  accents.some(a => a.toLowerCase() === p.toLowerCase())
+                    ? <span key={pi} style={{ color: 'var(--accent)' }}>{p}</span>
+                    : <span key={pi}>{p}</span>
+                )
                 : title}
             </div>
 
@@ -159,7 +161,8 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
             {showSite && (
               <div className={styles.siteRow}>
                 <a className={styles.siteLink} href={(card as any).ctaUrl} target="_blank" rel="noreferrer">
-                  <span className={styles.globe} aria-hidden="true" />
+                  <img src={GlobeIcon} className={styles.globeIcon} />
+
                   {(card as any).ctaText || (card as any).ctaUrl}
                 </a>
               </div>
@@ -233,7 +236,7 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
       const whText = (wh?.value || '').trim();
       const whParts = whText.split(/\s*\((.*)\)\s*$/);
       const whMain = whParts[0] || '';
-      const whTz   = whParts[1] ? `(${whParts[1]})` : '';
+      const whTz = whParts[1] ? `(${whParts[1]})` : '';
 
       return (
         <div key={i} className={`${styles.card} ${styles.col4}`}>
@@ -295,8 +298,8 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
             )}
             {b.websiteUrl && (
               <div className={styles.promoSite}>
-                <a className={styles.siteLink} href={b.websiteUrl} target="_blank" rel="noreferrer">
-                  <span className={styles.globe} aria-hidden="true" />
+                <a className={`${styles.siteLink} ${styles.globeIconBlack}`} href={b.websiteUrl} target="_blank" rel="noreferrer">
+                  <img src={GlobeIcon1} className={`${styles.globeIcon}`} />
                   {b.websiteText || b.websiteUrl}
                 </a>
               </div>
@@ -355,15 +358,15 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
             <>
               {isPriv
                 ? Array.from({ length: 4 }).map((_, i: number) => (
-                    <div key={i} className={`${styles.card} ${this.privItems[i]}`}>
-                      <div className={styles.skel} style={{ height: i <= 1 ? 'var(--priv-top-h)' : 'var(--priv-bot-h)' }} />
-                    </div>
-                  ))
+                  <div key={i} className={`${styles.card} ${this.privItems[i]}`}>
+                    <div className={styles.skel} style={{ height: i <= 1 ? 'var(--priv-top-h)' : 'var(--priv-bot-h)' }} />
+                  </div>
+                ))
                 : Array.from({ length: 3 }).map((_, i: number) => (
-                    <div key={i} className={`${styles.card} ${styles.col4}`}>
-                      <div className={styles.skel} style={{ height: 220, margin: 16 }} />
-                    </div>
-                  ))}
+                  <div key={i} className={`${styles.card} ${styles.col4}`}>
+                    <div className={styles.skel} style={{ height: 220, margin: 16 }} />
+                  </div>
+                ))}
             </>
           )}
 
@@ -377,3 +380,14 @@ export default class OffersBenefits extends React.Component<IOffersBenefitsProps
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
