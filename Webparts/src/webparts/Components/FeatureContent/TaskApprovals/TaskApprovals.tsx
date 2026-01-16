@@ -8,15 +8,15 @@ import CategoryView, { ICategoryItem } from "../CategoryView/CategoryView";
 import TableView, { TableColumn } from "../../../widgets/TableView/TableView";
 import Tag from "../../Tag/Tag";
 
-import { TahweelSVG, SalesforceSVG, ServiceNowSVG } from "../../../assets/constants";
+import { TahweelSVG, SalesforceSVG, ServiceNowSVG, VIEW_DETAILS_EXTERNAL_LINK_SVG } from "../../../assets/constants";
 
 import { SfApprovalService, SFApproval } from "../../../services/Integration/SalesForce";
 import { ServiceNowApprovalService, ServiceNowApproval } from "../../../services/Integration/ServiceNow";
 import { TahweelService, TahweelApproval } from "../../../services/Integration/TahweelService";
-
+const TaskApprovalPlaceholderIcon: string = require("../images/taskApprovalPlaceholderIcon.svg");
 type SystemKey = "Tahweel" | "Salesforce" | "ServiceNow";
 
-const DEFAULT_ACTIVE_TAB: SystemKey = "Salesforce";
+const DEFAULT_ACTIVE_TAB: SystemKey = "Tahweel";
 
 type TaskRow = {
   workitemId: string;
@@ -138,7 +138,7 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
     ],
     [counts]
   );
-  
+
   useEffect(() => {
     setActiveCategoryIndex(getDefaultIndex(categories, DEFAULT_ACTIVE_TAB));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -147,6 +147,12 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
   const activeSystem: SystemKey = (categories[activeCategoryIndex]?.id as SystemKey) || "Salesforce";
   const activeRows = rowsBySystem[activeSystem] || [];
   const activeError = errorBySystem[activeSystem];
+  const activeCount = counts[activeSystem] || 0;
+  // Add these console logs temporarily
+  console.log('Active System:', activeSystem);
+  console.log('Active Count:', activeCount);
+  console.log('Active Rows:', activeRows);
+  console.log('Active Error:', activeError);
 
   useEffect(() => {
     let cancelled = false;
@@ -165,6 +171,7 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
 
       setIsLoading(true);
       setErrorBySystem({});
+      console.log('Starting fetch for user:', userEmail);
 
       const sfPromise = sfService.fetchApprovalsByEmail(userEmail);
       const snPromise = snService.fetchApprovalsByEmail(userEmail);
@@ -326,16 +333,28 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
       columnKey: "action",
       label: "Action",
       renderCell: (row) => {
-        const label = row.originSystem === "Salesforce" ? "View Details" : "Open";
+        const label = "View Details";
+
         return row.redirectURL ? (
-          <a href={row.redirectURL} target="_blank" rel="noreferrer" className={styles.viewDetailsLink}>
-            {label}
+          <a
+            href={row.redirectURL}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.viewDetailsLink}
+            aria-label="View Details (opens in new tab)"
+          >
+            <span className={styles.viewDetailsText}>{label}</span>
+            <span
+              className={styles.viewDetailsIcon}
+              aria-hidden="true"
+              dangerouslySetInnerHTML={{ __html: VIEW_DETAILS_EXTERNAL_LINK_SVG }}
+            />
           </a>
         ) : (
           EMPTY_CELL_TEXT
         );
       },
-    },
+    }
   ];
 
   return (
@@ -347,27 +366,46 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
           <div className={styles.loadingMessage}>Loading approvals...</div>
         ) : (
           <>
-            <TableView
-              data={activeRows}
-              columns={tableColumns}
-              getRowKey={(row) => (row.workitemId || row.workflowNumber) as string}
-              ariaLabel="Task Approvals Table"
-            />
-
-            {activeError && <div className={styles.errormessage}>Error: {activeError}</div>}
-
-            {!activeError && !isLoading && activeRows.length === 0 && (
-              <div className={styles.emptyMessage}>No approvals found</div>
+            {activeError ? (
+              <div className={styles.errormessage}>Error: {activeError}</div>
+            ) : activeRows.length === 0 && activeCount === 0 ? (
+              <div style={{ textAlign: "center", padding: "34px 12px" }}>
+                <img
+                  src={TaskApprovalPlaceholderIcon}
+                  alt="No tasks"
+                  style={{
+                    maxWidth: 340,
+                    width: "162px",
+                    height: "80px",
+                    display: "block",
+                    margin: "0 auto 10px",
+                  }}
+                />
+                <div className={styles.emptyStateTitle}>You have no new tasks</div>
+                <div className={styles.emptyStateDescription}>
+                  Any assigned tasks will appear here as soon as they&apos;re available.
+                </div>
+              </div>
+            ) : (
+              <TableView
+                data={activeRows}
+                columns={tableColumns}
+                getRowKey={(row) => (row.workitemId || row.workflowNumber) as string}
+                ariaLabel="Task Approvals Table"
+              />
             )}
           </>
         )}
       </div>
 
       <div className={styles.buttonContainer}>
-        <a href={viewAllHref} className={styles.viewAllButton}>
-          View All
-        </a>
+        {(activeRows.length > 0 || activeCount > 0) && (
+          <a href={viewAllHref} className={styles.viewAllButton}>
+            View All
+          </a>
+        )}
       </div>
+
     </div>
   );
 };

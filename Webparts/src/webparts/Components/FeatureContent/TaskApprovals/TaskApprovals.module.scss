@@ -63,15 +63,34 @@
 
 /* Action link */
 .viewDetailsLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px; /* space between text & icon */
   font-family: Inter, sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #101820;
-  text-decoration: underline;
+  color: #da291c;
+  text-decoration: none;
   cursor: pointer;
 
   &:hover {
-    opacity: 0.85;
+    text-decoration: underline;
+    opacity: 0.9;
+  }
+}
+
+.viewDetailsText {
+  line-height: 1;
+}
+
+.viewDetailsIcon {
+  display: inline-flex;
+  line-height: 0;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    display: block;
   }
 }
 
@@ -104,4 +123,27 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+
+
+.emptyStateTitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0px;
+  text-align: center;
+  color: #3A3B43;
+  margin-bottom: 6px;
+}
+
+.emptyStateDescription {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.5px;
+  text-align: center;
+  color: #A7A7A7;
 }

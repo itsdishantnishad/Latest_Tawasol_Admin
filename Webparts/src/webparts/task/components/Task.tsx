@@ -18,12 +18,12 @@ import {
 import Tag from "../../Components/Tag/Tag";
 import NavSegment, { SystemFilterOption } from "./taskNavBtnComp";
 
-import { TahweelSVG, SalesforceSVG, ServiceNowSVG } from "../../assets/constants";
+import { TahweelSVG, SalesforceSVG, ServiceNowSVG, VIEW_DETAILS_EXTERNAL_LINK_SVG } from "../../assets/constants";
 
 import { SfApprovalService, SFApproval } from "../../services/Integration/SalesForce";
 import { ServiceNowApprovalService, ServiceNowApproval } from "../../services/Integration/ServiceNow";
 import { TahweelService, TahweelApproval } from "../../services/Integration/TahweelService";
-
+const TaskApprovalPlaceholderIcon: string = require("../../Components/../Components/FeatureContent/images/taskApprovalPlaceholderIcon.svg")
 type TaskRowItem = {
   workflowNumber: string;
   taskTitle: string;
@@ -128,7 +128,7 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     super(props);
 
     this.state = {
-      selectedTabValue: "Salesforce",
+      selectedTabValue: "Tahweel",
       isLoading: false,
       errorMessage: undefined,
 
@@ -295,6 +295,8 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
     const activeRows: TaskRowItem[] = data[selectedTabValue];
     const visibleCount = Math.max(0, visibleCountByTab[selectedTabValue] || PAGE_SIZE);
     const activeRowsToRender = activeRows.slice(0, visibleCount);
+    const showPlaceholder = !isLoading && !errorMessage && activeRows.length === 0;
+
 
     const systemTabs = SYSTEM_TAB_DEFINITIONS.map((t) => ({
       ...t,
@@ -306,11 +308,10 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
       selectedTabValue === "ServiceNow"
         ? SERVICENOW_TABLE_COLUMNS
         : selectedTabValue === "Tahweel"
-        ? TAHWEEL_TABLE_COLUMNS
-        : SALESFORCE_TABLE_COLUMNS;
+          ? TAHWEEL_TABLE_COLUMNS
+          : SALESFORCE_TABLE_COLUMNS;
 
-    const actionLinkLabel =
-      selectedTabValue === "ServiceNow" || selectedTabValue === "Tahweel" ? "Open" : "View Details";
+    const actionLinkLabel = "View Details";
 
     const renderTaskRow = (task: TaskRowItem): JSX.Element => {
       const priorityLabel = task.priority || EMPTY_CELL_TEXT;
@@ -343,8 +344,19 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
 
           <TableCell>
             {task.redirectURL ? (
-              <a href={task.redirectURL} target="_blank" rel="noreferrer" className={styles.viewDetailsLink}>
-                {actionLinkLabel}
+              <a
+                href={task.redirectURL}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.viewDetailsLink}
+                aria-label="View Details (opens in new tab)"
+              >
+                <span className={styles.viewDetailsText}>{actionLinkLabel}</span>
+                <span
+                  className={styles.viewDetailsIcon}
+                  aria-hidden="true"
+                  dangerouslySetInnerHTML={{ __html: VIEW_DETAILS_EXTERNAL_LINK_SVG }}
+                />
               </a>
             ) : (
               EMPTY_CELL_TEXT
@@ -370,58 +382,78 @@ export default class Task extends React.Component<ITaskProps, ITaskState> {
           <NavSegment value={selectedTabValue} onChange={this.handleTabChange} tabs={systemTabs} />
 
           <div className={styles.tableWrapper}>
-            <Table className={styles.table} aria-label="Task Approvals Table">
-              <TableHeader className={styles.tableHeader}>
-                <TableRow>
-                  {activeTableColumns.map((column) => (
-                    <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>
-                  ))}
-                </TableRow>
-              </TableHeader>
-
-              <TableBody className={styles.tableBody}>
-                {isLoading ? (
+            {showPlaceholder ? (
+              <div>
+                <img
+                  src={TaskApprovalPlaceholderIcon}
+                  alt="No tasks"
+                  style={{
+                    maxWidth: 340,
+                    width: "162px",
+                    height: "80px",
+                    display:"block",
+                    margin: "0 auto 10px",
+                  }}
+                />
+                <div className={styles.emptyStateTitle}>You have no new tasks</div>
+                <div className={styles.emptyStateDescription}>
+                  Any assigned tasks will appear here as soon as they&apos;re available.
+                </div>
+              </div>
+            ) : (
+              <Table className={styles.table} aria-label="Task Approvals Table">
+                <TableHeader className={styles.tableHeader}>
                   <TableRow>
-                    <TableCell colSpan={TABLE_COLUMN_COUNT}>
-                      <TableCellLayout>Loading approvals...</TableCellLayout>
-                    </TableCell>
+                    {activeTableColumns.map((column) => (
+                      <TableHeaderCell key={column.columnKey}>{column.label}</TableHeaderCell>
+                    ))}
                   </TableRow>
-                ) : activeRowsToRender.length > 0 ? (
-                  <>
-                    {activeRowsToRender.map(renderTaskRow)}
+                </TableHeader>
 
-                    {/*  Load More row (client-side paging / render protection) */}
-                    {canLoadMore && (
-                      <TableRow>
-                        <TableCell colSpan={TABLE_COLUMN_COUNT}>
-                          <TableCellLayout>
-                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                              <span>
-                                Showing {Math.min(visibleCount, activeRows.length)} of {activeRows.length}
-                                {totalForActiveTab !== activeRows.length ? ` (Total: ${totalForActiveTab})` : ""}
-                              </span>
+                <TableBody className={styles.tableBody}>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={TABLE_COLUMN_COUNT}>
+                        <TableCellLayout>Loading approvals...</TableCellLayout>
+                      </TableCell>
+                    </TableRow>
+                  ) : errorMessage ? (
+                    <TableRow>
+                      <TableCell colSpan={TABLE_COLUMN_COUNT}>
+                        <TableCellLayout>Error: {errorMessage}</TableCellLayout>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    <>
+                      {activeRowsToRender.map(renderTaskRow)}
 
-                              <Button appearance="secondary" onClick={this.handleLoadMore}>
-                                Load more
-                              </Button>
-                            </div>
-                          </TableCellLayout>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </>
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={TABLE_COLUMN_COUNT}>
-                      <TableCellLayout>No approvals found</TableCellLayout>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                      {canLoadMore && (
+                        <TableRow>
+                          <TableCell colSpan={TABLE_COLUMN_COUNT}>
+                            <TableCellLayout>
+                              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                                <span>
+                                  Showing {Math.min(visibleCount, activeRows.length)} of {activeRows.length}
+                                  {totalForActiveTab !== activeRows.length ? ` (Total: ${totalForActiveTab})` : ""}
+                                </span>
+
+                                <Button appearance="secondary" onClick={this.handleLoadMore}>
+                                  Load more
+                                </Button>
+                              </div>
+                            </TableCellLayout>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+            )}
 
             {errorMessage && <div className={styles.errormessage}>Error : {errorMessage}</div>}
           </div>
+
         </div>
       </div>
     );
