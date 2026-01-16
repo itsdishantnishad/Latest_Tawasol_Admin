@@ -1133,7 +1133,7 @@ private readTaxonomyLabel(val: any): string {
   }
 
   public async getUserFavouriteDocuments(
-    favouritesListTitle: string = "Document Favourites", 
+    favouritesListTitle: string = "Document Favourites",
     rowLimit: number = 3
   ): Promise<DocumentSummary[]> {
     let userId: number | undefined = (this.context.pageContext as any)?.legacyPageContext?.userId;
@@ -1142,47 +1142,38 @@ private readTaxonomyLabel(val: any): string {
       userId = Number(me?.Id) || 0;
     }
 
-    const tryFetch = async (deptInternal?: string) => {
-      const selectFields: string[] = [
-        "Id",
-        "Title",
-        "TIRFileUrl",
-        "TIRTags",
-        "TIRIsActive",
-        "Modified",
-        "AuthorId",
-      ];
-      if (deptInternal) selectFields.push(deptInternal);
+    const baseSelect: string[] = [
+      "Id",
+      "Title",
+      "TIRFileUrl",
+      "TIRTags",
+      "TIRIsActive",
+      "Modified",
+      "AuthorId",
+      "TIRDepartment",
+    ];
 
-      const fetchLimit = Math.max(rowLimit * 5, rowLimit);
-
-      return await this.sp.web.lists
-        .getByTitle(favouritesListTitle)
-        .items.select(...selectFields)
-        .filter(`AuthorId eq ${userId}`) // ✅ threshold-safe (Created By indexed)
-        .orderBy("Modified", false)
-        .top(fetchLimit)();
-    };
+    const fetchLimit = Math.max(rowLimit * 5, rowLimit);
 
     let rows: any[] = [];
-    let deptInternalUsed: string | undefined;
-
-    // Department column internal name can vary
     try {
-      deptInternalUsed = "Department_x0020_Name";
-      rows = await tryFetch(deptInternalUsed);
+      rows = await this.sp.web.lists
+        .getByTitle(favouritesListTitle)
+        .items.select(...baseSelect)
+        .filter(`AuthorId eq ${userId}`)  
+        .orderBy("Modified", false)
+        .top(fetchLimit)();
     } catch {
-      try {
-        deptInternalUsed = "DepartmentName";
-        rows = await tryFetch(deptInternalUsed);
-      } catch {
-        deptInternalUsed = undefined;
-        rows = await tryFetch(undefined);
-      }
+      const fallbackSelect = baseSelect.filter(x => x !== "TIRDepartment");
+      rows = await this.sp.web.lists
+        .getByTitle(favouritesListTitle)
+        .items.select(...fallbackSelect)
+        .filter(`AuthorId eq ${userId}`)
+        .orderBy("Modified", false)
+        .top(fetchLimit)();
     }
 
     const mapped: DocumentSummary[] = (rows || [])
-      // keep true/empty; hide only explicit false
       .filter((r) => r?.TIRIsActive !== false)
       .map((r: any) => {
         const url = this.readHyperlink(r?.TIRFileUrl);
@@ -1191,20 +1182,104 @@ private readTaxonomyLabel(val: any): string {
           r?.Title ||
           (url ? decodeURIComponent(url.split("/").pop() || "Document") : "Document");
 
-        const deptVal = deptInternalUsed ? r?.[deptInternalUsed] : undefined;
-
         return {
           id: String(r?.Id ?? ""),
           name,
           url,
-          ext: this.guessExt(name, url), // ✅ no extra column needed
+          ext: this.guessExt(name, url),
           tag: this.readTaxonomyLabel(r?.TIRTags),
-          dept: this.readTaxonomyLabel(deptVal),
+          dept: this.readTaxonomyLabel(r?.TIRDepartment), 
         } as DocumentSummary;
       })
       .slice(0, rowLimit);
 
     return mapped;
+  }
+
+  public async getFavouriteIndex(
+    favouritesListTitle: string = "Document Favourites"
+  ): Promise<Record<string, number>> {
+    let userId: number | undefined = (this.context.pageContext as any)?.legacyPageContext?.userId;
+    if (!userId) {
+      const me: any = await this.sp.web.currentUser();
+      userId = Number(me?.Id) || 0;
+    }
+
+    const rows = await this.sp.web.lists
+      .getByTitle(favouritesListTitle)
+      .items.select("Id", "TIRFileUrl", "TIRIsActive", "AuthorId")
+      .filter(`AuthorId eq ${userId}`)
+      .top(5000)();
+
+    const map: Record<string, number> = {};
+    (rows || []).forEach((r: any) => {
+      if (r?.TIRIsActive === false) return;
+      const url = this.readHyperlink(r?.TIRFileUrl);
+      if (!url) return;
+
+      // normalize: strip ?/# then make server-relative (matches UI keys)
+      const clean = String(url).split(/[?#]/)[0];
+      const rel = listServices.convertToRelativeUrl(clean).toLowerCase();
+
+      map[rel] = Number(r?.Id);
+    });
+
+    return map;
+  }
+
+  public async toggleFavourite(
+    fileUrl: string,
+    title?: string,
+    tags?: any,
+    department?: any,
+    favouritesListTitle: string = "Document Favourites"
+  ): Promise<void> {
+    const urlNorm = (fileUrl || "").trim();
+    if (!urlNorm) return;
+
+    // normalize: strip ?/# then compare using server-relative lowercase keys
+    const cleanInput = urlNorm.split(/[?#]/)[0];
+    const key = listServices.convertToRelativeUrl(cleanInput).toLowerCase();
+
+    let userId: number | undefined = (this.context.pageContext as any)?.legacyPageContext?.userId;
+    if (!userId) {
+      const me: any = await this.sp.web.currentUser();
+      userId = Number(me?.Id) || 0;
+    }
+
+    const rows = await this.sp.web.lists
+      .getByTitle(favouritesListTitle)
+      .items.select("Id", "TIRFileUrl", "TIRIsActive", "AuthorId")
+      .filter(`AuthorId eq ${userId}`)
+      .top(5000)();
+
+    const existing = (rows || []).find((r: any) => {
+      const u = this.readHyperlink(r?.TIRFileUrl);
+      if (!u) return false;
+      const clean = String(u).split(/[?#]/)[0];
+      const rel = listServices.convertToRelativeUrl(clean).toLowerCase();
+      return rel === key;
+    });
+
+    const list = this.sp.web.lists.getByTitle(favouritesListTitle);
+
+    if (existing) {
+      const isActive = existing?.TIRIsActive !== false;
+
+      await list.items.getById(existing.Id).update({
+        TIRIsActive: !isActive,
+      });
+      return;
+    }
+
+    const abs = this.toAbsoluteUrl(key);
+    const fileName = decodeURIComponent(key.split("/").pop() || "Document");
+
+    await list.items.add({
+      Title: title || fileName,
+      TIRFileUrl: { Url: abs, Description: "" },
+      TIRIsActive: true,
+    });
   }
 
   /** ===== Announcement Banner (time-window & timezone aware) ===== */
