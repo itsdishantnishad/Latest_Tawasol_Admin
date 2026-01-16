@@ -11,7 +11,8 @@
 }
 
 .eventsContainer {
-  margin-top: 24px;
+  margin-top: 32px;
+  margin-bottom: 32px;
 }
 
 .eventsWrapper {
@@ -24,7 +25,7 @@
     font-size: 18px;
     font-weight: 500;
     line-height: 24px;
-    margin-bottom: 24px;
+    margin-bottom: 0;
     margin-top: 0;
   }
   @media (max-width: 1200px) {
