@@ -1,3 +1,5 @@
+// ViewPageList.tsx
+
 import * as React from 'react';
 import { Checkbox, IconButton } from '@fluentui/react';
 import styles from './ViewPage.module.scss';
@@ -25,8 +27,10 @@ export interface IPoliciesAndProceduresListProps {
   activeId?: string;
 
   onOpenFile: (fileItem: IPoliciesAndProceduresItem) => void;
-  onClearPreview?: () => void; // ✅ NEW
+  onClearPreview?: () => void;
   onToggleFolder: (folderItem: IPoliciesAndProceduresItem) => void;
+
+  // kept (no breaking change) but NOT used for expand anymore
   expandedFolderId?: string;
 
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
@@ -40,10 +44,13 @@ export interface IPoliciesAndProceduresListProps {
 type State = {
   /** selected file ids per scope (folderId or 'root') */
   selectedIds: Record<string, Set<string>>;
+
+  /** NEW: allow multi folder expand (keeps parent open) */
+  expandedFolderIds: Set<string>;
 };
 
 export default class PoliciesAndProceduresList extends React.Component<IPoliciesAndProceduresListProps, State> {
-  state: State = { selectedIds: {} };
+  state: State = { selectedIds: {}, expandedFolderIds: new Set() };
 
   // ---------- selection helpers ----------
   private getKeyForScope = (folderId?: string) => folderId || 'root';
@@ -57,7 +64,7 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
       const next = new Set(prev.selectedIds[key] ?? []);
       if (checked) ids.forEach(i => next.add(i));
       else ids.forEach(i => next.delete(i));
-      return { selectedIds: { ...prev.selectedIds, [key]: next } };
+      return { ...prev, selectedIds: { ...prev.selectedIds, [key]: next } };
     });
   };
 
@@ -66,7 +73,38 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
     this.setState(prev => {
       const next = new Set(prev.selectedIds[key] ?? []);
       next.has(id) ? next.delete(id) : next.add(id);
-      return { selectedIds: { ...prev.selectedIds, [key]: next } };
+      return { ...prev, selectedIds: { ...prev.selectedIds, [key]: next } };
+    });
+  };
+
+  // ---------- folder expand helpers (multi expand) ----------
+  private isFolderExpanded = (folderId: string) => this.state.expandedFolderIds.has(folderId);
+
+  // FIX: broader event type (works for div)
+  private toggleFolderUi = async (folder: IPoliciesAndProceduresItem, e?: React.MouseEvent<HTMLElement>): Promise<void> => {
+    e?.stopPropagation();
+
+    const isOpen = this.isFolderExpanded(folder.id);
+
+    // collapse
+    if (isOpen) {
+      this.setState(prev => {
+        const next = new Set(prev.expandedFolderIds);
+        next.delete(folder.id);
+        return { ...prev, expandedFolderIds: next };
+      });
+      return;
+    }
+
+    // open: ensure children are loaded once
+    if (!this.props.expandedChildren[folder.id] && folder.serverRelativeUrl) {
+      await this.props.onToggleFolder(folder);
+    }
+
+    this.setState(prev => {
+      const next = new Set(prev.expandedFolderIds);
+      next.add(folder.id);
+      return { ...prev, expandedFolderIds: next };
     });
   };
 
@@ -152,17 +190,16 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
               e?.stopPropagation();
               this.toggleOne(listItem.id, folderId);
               if (isChecked) {
-                this.props.onOpenFile(listItem); // ✅ preview only on select
+                this.props.onOpenFile(listItem);
               } else {
                 if (this.props.activeId === listItem.id) {
-                  this.props.onClearPreview?.(); // ✅ clear preview when unselect active
+                  this.props.onClearPreview?.();
                 }
               }
             }}
           />
         </div>
 
-        {/* icon button (NO preview open on click) */}
         <div>
           <button
             type="button"
@@ -200,7 +237,6 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
 
         <div className={styles.cellDept}>{listItem.department || ''}</div>
 
-        {/* ✅ Heart only when selected */}
         <div>
           {checked ? this.renderFavBtn(listItem) : null}
         </div>
@@ -224,7 +260,6 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
           </button>
         </div>
 
-        {/* ✅ Heart only when selected */}
         {checked && (
           <div style={{ position: "absolute", top: 8, right: 8 }}>
             {this.renderFavBtn(listItem)}
@@ -262,10 +297,10 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
             e?.stopPropagation();
             this.toggleOne(listItem.id, folderId);
             if (isChecked) {
-              this.props.onOpenFile(listItem); // ✅ preview only on select
+              this.props.onOpenFile(listItem);
             } else {
               if (this.props.activeId === listItem.id) {
-                this.props.onClearPreview?.(); // ✅ clear preview when unselect active
+                this.props.onClearPreview?.();
               }
             }
           }}
@@ -275,11 +310,6 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
     );
   };
 
-  /**
-   *  Recursive renderer for folder children
-   * - Shows subfolders ALSO
-   * - Clicking folder loads children using parent handler (dataProvider)
-   */
   private renderFolderChildrenRecursive = (folderId: string): React.ReactNode => {
     const children = this.props.expandedChildren[folderId] || [];
     const folders = children.filter(x => x.isFolder);
@@ -287,10 +317,8 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
 
     return (
       <div>
-        {/* Subfolders */}
         {folders.map(sf => this.renderFolderBlock(sf, true))}
 
-        {/* Files */}
         {this.props.getFolderViewMode(folderId) === 'list' && (
           <div>
             {files.map(file => this.renderFileRow(file, this.props.activeId === file.id, folderId))}
@@ -307,9 +335,9 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
   };
 
   private renderFolderBlock = (folder: IPoliciesAndProceduresItem, isNested?: boolean): React.ReactNode => {
-    const { expandedFolderId, expandedChildren, getFolderViewMode } = this.props;
+    const { expandedChildren, getFolderViewMode } = this.props;
 
-    const isExpanded = expandedFolderId === folder.id;
+    const isExpanded = this.isFolderExpanded(folder.id);
     const mode = getFolderViewMode(folder.id);
 
     const children = expandedChildren[folder.id] || [];
@@ -322,11 +350,19 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
     return (
       <div key={folder.id} className={`${styles.folderBlock} ${isNested ? styles.folderNested : ''}`}>
 
-        <button
+        {/* FIX: div instead of button (prevents button-inside-button issue) */}
+        <div
           className={styles.folderHeader}
-          onClick={(e) => { e.stopPropagation(); this.props.onToggleFolder(folder); }}
+          role="button"
+          tabIndex={0}
           aria-expanded={isExpanded}
-          type="button"
+          onClick={(e) => void this.toggleFolderUi(folder, e)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              void this.toggleFolderUi(folder);
+            }
+          }}
         >
           <img src={isExpanded ? ICON_ARROW_UP : ICON_ARROW_DOWN} alt="" className={styles.typeIcon} />
           <span className={styles.folderIconWrap}>
@@ -350,7 +386,7 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
               onClick={(e) => { e.stopPropagation(); this.props.onSwitchFolderView(folder.id, 'grid'); }}
             />
           </div>
-        </button>
+        </div>
 
         {isExpanded && (
           <div className={styles.folderContent}>
@@ -382,7 +418,6 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
               )}
             </div>
 
-            {/* recursive children render (folders + files) */}
             {this.renderFolderChildrenRecursive(folder.id)}
           </div>
         )}
@@ -397,10 +432,7 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
 
     return (
       <div>
-        {/* Root folders */}
         {rootFolders.map(f => this.renderFolderBlock(f))}
-
-        {/* Root files */}
         {rootFiles.map(file => this.renderFileRow(file, this.props.activeId === file.id))}
       </div>
     );

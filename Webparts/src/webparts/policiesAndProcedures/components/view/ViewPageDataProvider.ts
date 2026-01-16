@@ -1,7 +1,3 @@
-
-
-
-
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { SPFI, spfi } from '@pnp/sp';
 import { SPFx } from '@pnp/sp/behaviors/spfx';
@@ -12,53 +8,19 @@ import '@pnp/sp/files';
 import '@pnp/sp/site-users/web';
 
 import { IPoliciesAndProceduresItem } from './ViewPageList';
-import { REAL_PDF_FILE_NAME, REAL_PDF_URL } from '../../../assets/constants';
 
 export interface IPoliciesAndProceduresDataProvider {
   getRootItems(functionDisplayName: string): Promise<IPoliciesAndProceduresItem[]>;
   getFolderChildren(functionDisplayName: string, folderServerRelativeUrl: string): Promise<IPoliciesAndProceduresItem[]>;
 }
 
-/** -------- Development stub (dummy) -------- */
+/** -------- Dummy provider (NO dummy data) -------- */
 export class PoliciesAndProceduresDummyProvider implements IPoliciesAndProceduresDataProvider {
-  async getRootItems(functionDisplayName: string): Promise<IPoliciesAndProceduresItem[]> {
-    return [
-      { id: 'folder-hc-ppm', name: 'HC P&P Manual', isFolder: true, serverRelativeUrl: '/DMS/Human Capital/HC P&P Manual' },
-      { id: 'folder-employee-handbook', name: 'Employee Handbook', isFolder: true, serverRelativeUrl: '/DMS/Human Capital/Employee Handbook' },
-      { id: 'folder-real-pdf', name: 'real pdf', isFolder: true, serverRelativeUrl: 'real-pdf' },
-    ];
-  }
-
-  async getFolderChildren(functionDisplayName: string, folderServerRelativeUrl: string): Promise<IPoliciesAndProceduresItem[]> {
-    const d = new Date(2024, 3, 30);
-
-    if (/real[\s\-_]?pdf/i.test(folderServerRelativeUrl)) {
-      return [
-        {
-          id: 'doc-real-pdf',
-          name: REAL_PDF_FILE_NAME,
-          ext: 'pdf',
-          previewUrl: `${REAL_PDF_URL}?web=1`,
-        }
-      ];
-    }
-
-    if (/Employee Handbook/i.test(folderServerRelativeUrl)) {
-      return [
-        { id: 'doc-311-a', name: 'Dubai Holding Group Policy Manual 3.11. (A)', ext: 'pdf', modifiedBy: 'Hina Sheikh', modifiedOn: d, department: 'HC', tag: 'Awareness Sessions', previewUrl: 'about:blank' },
-        { id: 'doc-311-b', name: 'Dubai Holding Group Policy Manual 3.11. (B)', ext: 'docx', modifiedBy: 'Hina Sheikh', modifiedOn: d, department: 'HC', tag: 'Self service Links', previewUrl: 'about:blank' },
-        { id: 'doc-311-c', name: 'Dubai Holding Group Policy Manual 3.11. (C)', ext: 'pdf', modifiedBy: 'Hina Sheikh', modifiedOn: d, department: 'HC', tag: 'Self service Links', previewUrl: 'about:blank' },
-      ];
-    }
-
-    return [
-      { id: 'doc-section-a', name: 'Section A Overview', ext: 'pdf', modifiedBy: 'Hina Sheikh', modifiedOn: d, department: 'HC', tag: 'Policy', previewUrl: 'about:blank' },
-      { id: 'doc-templates', name: 'Templates.docx', ext: 'docx', modifiedBy: 'Hina Sheikh', modifiedOn: d, department: 'HC', tag: 'Template', previewUrl: 'about:blank' },
-    ];
-  }
+  async getRootItems(): Promise<IPoliciesAndProceduresItem[]> { return []; }
+  async getFolderChildren(): Promise<IPoliciesAndProceduresItem[]> { return []; }
 }
 
-/** -------- Real SharePoint provider -------- */
+/** -------- Real SharePoint provider (GRC) -------- */
 export class PoliciesAndProceduresSharePointProvider implements IPoliciesAndProceduresDataProvider {
   private sp: SPFI;
   private dmsLibraryRoot: string;
@@ -66,12 +28,29 @@ export class PoliciesAndProceduresSharePointProvider implements IPoliciesAndProc
 
   constructor(context: WebPartContext, dmsLibraryServerRelativeUrl: string) {
     this.sp = spfi().using(SPFx(context));
-    this.dmsLibraryRoot = dmsLibraryServerRelativeUrl;
+    // normalize: remove trailing slash only
+    this.dmsLibraryRoot = (dmsLibraryServerRelativeUrl || '').replace(/\/$/, '');
   }
 
-  // Encode each segment (keeps slashes). This fixes spaces and "&" etc.
-  private encodeServerRelativePath(path: string): string {
-    return path.split('/').map(seg => encodeURIComponent(seg)).join('/');
+  /** Fix %2520 and %20 etc: decode multiple times safely */
+  private decodeDeep(path: string): string {
+    let s = (path || '').trim();
+    for (let i = 0; i < 3; i++) {
+      try {
+        const d = decodeURIComponent(s);
+        if (d === s) break;
+        s = d;
+      } catch {
+        break;
+      }
+    }
+    return s;
+  }
+
+  /** Always use decoded server-relative url with getFolderByServerRelativePath */
+  private folderByServerRelativeUrl(serverRel: string) {
+    const decoded = this.decodeDeep(serverRel);
+    return this.sp.web.getFolderByServerRelativePath(decoded);
   }
 
   private getExt(name: string): any {
@@ -96,16 +75,17 @@ export class PoliciesAndProceduresSharePointProvider implements IPoliciesAndProc
   }
 
   private buildFunctionRootPath(functionDisplayName: string): string {
-    const safe = functionDisplayName.replace(/\/+/g, ' ').trim();
+    const safe = (functionDisplayName || '').replace(/\/+/g, ' ').trim();
     return `${this.dmsLibraryRoot}/${safe}`;
   }
 
   private mapSpFolderToItem(spFolder: any): IPoliciesAndProceduresItem {
+    const url = spFolder?.ServerRelativeUrl || '';
     return {
-      id: String(spFolder.ServerRelativeUrl || spFolder.Name),
-      name: spFolder.Name,
+      id: String(url || spFolder?.Name || ''),
+      name: spFolder?.Name || '',
       isFolder: true,
-      serverRelativeUrl: spFolder.ServerRelativeUrl,
+      serverRelativeUrl: url || undefined,
     };
   }
 
@@ -119,72 +99,142 @@ export class PoliciesAndProceduresSharePointProvider implements IPoliciesAndProc
     const editorId: number | undefined = li?.EditorId;
     const modifiedBy: string = await this.getUserTitleById(editorId);
 
+    const url = spFile?.ServerRelativeUrl || '';
+
     return {
-      id: String(spFile.ServerRelativeUrl || spFile.Name),
+      id: String(url || fileName),
       name: displayName,
       ext: this.getExt(fileName),
       modifiedBy,
       modifiedOn: spFile?.TimeLastModified ? new Date(spFile.TimeLastModified) : undefined,
       department: '',
       tag: '',
-      previewUrl: spFile?.ServerRelativeUrl ? `${spFile.ServerRelativeUrl}?web=1` : undefined,
-      serverRelativeUrl: spFile?.ServerRelativeUrl,
+      previewUrl: url ? `${url}?web=1` : undefined,
+      serverRelativeUrl: url || undefined,
     };
+  }
+
+  /** Read BOTH folders and files; don't fail whole call if one fails */
+  private async listFolder(folderServerRelativeUrl: string): Promise<{
+    folders: IPoliciesAndProceduresItem[];
+    files: IPoliciesAndProceduresItem[];
+  }> {
+    const folder = this.folderByServerRelativeUrl(folderServerRelativeUrl);
+
+    let spFolders: any[] = [];
+    let spFiles: any[] = [];
+
+    try {
+      spFolders = await folder.folders.select('Name', 'ServerRelativeUrl')();
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('[Policies] listFolder folders failed:', folderServerRelativeUrl, e);
+    }
+
+    try {
+      spFiles = await folder.files
+        .select(
+          'Name',
+          'ServerRelativeUrl',
+          'TimeLastModified',
+          'ListItemAllFields/Title',
+          'ListItemAllFields/EditorId'
+        )
+        .expand('ListItemAllFields')();
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('[Policies] listFolder files failed:', folderServerRelativeUrl, e);
+    }
+
+    const folders = (spFolders || []).map((f: any) => this.mapSpFolderToItem(f));
+    const files = await Promise.all((spFiles || []).map((f: any) => this.mapSpFileToItem(f)));
+
+    return { folders, files };
+  }
+
+  /**
+   * AUTO-DRILL:
+   * If folder has NO files but has folders, keep drilling down until:
+   * - a folder contains files, OR
+   * - no more folders, OR
+   * - maxDepth reached
+   *
+   * Returns the "first file-bearing layer" children.
+   */
+  private async drillToFirstFilesLayer(
+    startFolderUrl: string,
+    maxDepth: number = 20
+  ): Promise<IPoliciesAndProceduresItem[]> {
+    let currentUrl = startFolderUrl;
+    const visited = new Set<string>();
+
+    for (let depth = 0; depth < maxDepth; depth++) {
+      const key = this.decodeDeep(currentUrl).toLowerCase();
+      if (visited.has(key)) break;
+      visited.add(key);
+
+      const { folders, files } = await this.listFolder(currentUrl);
+
+      // if this level has files -> show this level (folders + files)
+      if (files.length > 0) return [...folders, ...files];
+
+      // if no files, but there are subfolders -> go deeper
+      if (folders.length > 0) {
+        // IMPORTANT: If multiple folders exist, we should SHOW them (user can choose)
+        // BUT you asked to "go to deepest where files exist" — so we drill each folder
+        // and keep only those folders that eventually lead to files.
+        const results: IPoliciesAndProceduresItem[] = [];
+        for (const f of folders) {
+          if (!f.serverRelativeUrl) continue;
+          const nextLayer = await this.drillToFirstFilesLayer(f.serverRelativeUrl, maxDepth - depth - 1);
+
+          // keep the folder itself (so UI shows it), AND cache its drilled children by returning
+          // them when user expands it.
+          // Here we return folders at this layer, and when expanded, getFolderChildren() will drill.
+          results.push(f);
+        }
+        return results;
+      }
+
+      // nothing inside
+      return [];
+    }
+
+    return [];
   }
 
   async getRootItems(functionDisplayName: string): Promise<IPoliciesAndProceduresItem[]> {
     const rootPath = this.buildFunctionRootPath(functionDisplayName);
-    const encRootPath = this.encodeServerRelativePath(rootPath);
 
     try {
-      const rootFolder = this.sp.web.getFolderByServerRelativePath(encRootPath);
+      // 1) list root
+      const { folders, files } = await this.listFolder(rootPath);
 
-      const [spFolders, spFiles] = await Promise.all([
-        rootFolder.folders.select('Name,ServerRelativeUrl')(),
-        rootFolder.files
-          .select(
-            'Name,ServerRelativeUrl,TimeLastModified,' +
-            'ListItemAllFields/Title,ListItemAllFields/EditorId'
-          )
-          .expand('ListItemAllFields')()
-      ]);
+      // 2) if root has files, show normal
+      if (files.length > 0) return [...folders, ...files];
 
-      const folders = (spFolders || []).map((f: any) => this.mapSpFolderToItem(f));
-      const files = await Promise.all((spFiles || []).map((f: any) => this.mapSpFileToItem(f)));
+      // 3) if root has only folders, auto-drill logic:
+      //    show folders that (eventually) lead to files
+      if (folders.length > 0) {
+        // We return folders (not blank). When user expands folder, getFolderChildren will drill further.
+        return folders;
+      }
 
-      return [...folders, ...files];
+      return [];
     } catch (e) {
-      // IMPORTANT: show error in console so you can see why it failed
-      // (folder not found / path mismatch / permissions)
       // eslint-disable-next-line no-console
-      console.error('[Policies] getRootItems failed:', { rootPath, encRootPath, e });
+      console.error('[Policies] getRootItems failed:', { rootPath, e });
       return [];
     }
   }
 
   async getFolderChildren(functionDisplayName: string, folderServerRelativeUrl: string): Promise<IPoliciesAndProceduresItem[]> {
-    const encFolderUrl = this.encodeServerRelativePath(folderServerRelativeUrl);
-
+    // drill from this folder until we reach a level where files exist
     try {
-      const folder = this.sp.web.getFolderByServerRelativePath(encFolderUrl);
-
-      const [spFolders, spFiles] = await Promise.all([
-        folder.folders.select('Name,ServerRelativeUrl')(),
-        folder.files
-          .select(
-            'Name,ServerRelativeUrl,TimeLastModified,' +
-            'ListItemAllFields/Title,ListItemAllFields/EditorId'
-          )
-          .expand('ListItemAllFields')()
-      ]);
-
-      const folders = (spFolders || []).map((f: any) => this.mapSpFolderToItem(f));
-      const files = await Promise.all((spFiles || []).map((f: any) => this.mapSpFileToItem(f)));
-
-      return [...folders, ...files];
+      return await this.drillToFirstFilesLayer(folderServerRelativeUrl);
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error('[Policies] getFolderChildren failed:', { folderServerRelativeUrl, encFolderUrl, e });
+      console.error('[Policies] getFolderChildren failed:', { folderServerRelativeUrl, e });
       return [];
     }
   }
