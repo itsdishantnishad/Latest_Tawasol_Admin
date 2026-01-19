@@ -38,7 +38,7 @@ export class Notifications {
     this.callbacks = callbacks || {};
     this.items = notifications.map(n => ({
       ...n,
-      unread: n.created > lastSeen
+      unread: !!n.isNew   // <-- changed
     }));
     this.notifyUnread();
   }
