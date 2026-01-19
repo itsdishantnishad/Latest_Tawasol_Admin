@@ -77,6 +77,13 @@ export class GlobalBreadcrumbs {
             || p.endsWith("/sitepages/tirhelpcenter.aspx");
     }
 
+    private isTasksPage(): boolean {
+        let p = window.location.pathname || "";
+        try { p = decodeURIComponent(p); } catch { }
+        p = p.toLowerCase();
+        return p.endsWith("/sitepages/tasks.aspx") || p.endsWith("/sitepages/taskapproval.aspx");
+    }
+
 
     private getModernPageTitle(): string {
         const h1 =
@@ -281,7 +288,7 @@ export class GlobalBreadcrumbs {
         }
 
         const info = await this.getCurrentSitePageInfo();
-        let section = "Pages";
+        let section = this.isTasksPage() ? "Home" : "Pages";
         const title = info.title || this.getModernPageTitle();
 
         if (info.isNews) section = "News Story";
