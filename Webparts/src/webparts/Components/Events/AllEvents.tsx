@@ -14,30 +14,40 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
   const now = new Date();
   const sitepageurl = `${props?.context?.pageContext?.web?.absoluteUrl}/SitePages/`;
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
-
-  // NEW: show only 3 by default
   const [showAllPrevious, setShowAllPrevious] = React.useState(false);
 
   const parsedEvents = React.useMemo(() => {
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
     return (props.AllEventItems || []).map((item: any) => {
       const startDateStr = item.eventStartDate?.split("\n")[0]?.trim();
-      const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim();
+      const endDateStr = item.eventEndDate?.split("\n")[0]?.trim();
 
-      const eventStart = startDateStr ? new Date(startDateStr) : null;
-      const eventEnd   = endDateStr ? new Date(endDateStr) : null;
+      const eventStart: Date | null = startDateStr ? new Date(startDateStr) : null;
+      const eventEnd: Date | null = endDateStr ? new Date(endDateStr) : null;
 
       const location = item.location?.split("\n")[0]?.trim() || "";
-      let time = "Not specified";
 
+      let time = "Not specified";
       if (eventStart && eventEnd) {
         const formatTime = (date: Date) =>
-          date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+          date.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          });
 
         time = `${formatTime(eventStart)} - ${formatTime(eventEnd)}`;
       }
+      const cardDate =
+        eventStart
+          ? eventStart.toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+          : "";
 
       return {
         ...item,
@@ -48,6 +58,7 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
         time,
         location,
         eventDateTime: eventStart,
+        cardDate,
         category: item.category,
         imageUrl: item.newsImage || "",
         isregistered: !!item.isRegistered,
@@ -58,25 +69,18 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
   const upcomingEvents = parsedEvents.filter((e: any) => e.eventDateTime && e.eventDateTime > now);
 
   const previousEvents = parsedEvents.filter((e: any) => e.eventDateTime && e.eventDateTime < now);
-
-  // NEW: sort previous events (latest past first)
   const previousEventsSorted = React.useMemo(() => {
     return [...previousEvents].sort(
-      (a: any, b: any) =>
-        (b.eventDateTime?.getTime?.() || 0) - (a.eventDateTime?.getTime?.() || 0)
+      (a: any, b: any) => (b.eventDateTime?.getTime?.() || 0) - (a.eventDateTime?.getTime?.() || 0)
     );
   }, [previousEvents]);
 
-  // NEW: show only 3 unless View All clicked
-  const previousEventsToRender = showAllPrevious
-    ? previousEventsSorted
-    : previousEventsSorted.slice(0, 3);
+  const previousEventsToRender = showAllPrevious ? previousEventsSorted : previousEventsSorted.slice(0, 3);
 
   const myEvents = parsedEvents.filter((e: any) => e.isregistered);
 
   return (
     <>
-      {/* Tabs */}
       <div className={styles.tabContainer}>
         <div className={styles.tabContainerInner}>
           <button
@@ -108,7 +112,6 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
             </div>
 
             <div className={styles.previousEventsContainer}>
-              {/* NEW: header row with View All button */}
               <div className={styles.previousHeaderRow}>
                 <h2 className={styles.heading}>Previous Events</h2>
 
@@ -130,7 +133,7 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
                     <PreviousEventCard
                       key={index}
                       title={event.title}
-                      date={`${event.day}, ${event.date} ${event.month}`}
+                      date={event.cardDate}
                       imageUrl={event.imageUrl}
                       imageCount={0}
                       pageUrl={event?.pageUrl}
