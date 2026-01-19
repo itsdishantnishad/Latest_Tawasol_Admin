@@ -659,17 +659,22 @@ private async renderBreadcrumbIfNeeded(): Promise<void> {
     try {
       const status = await this.notifService.getUserStatus();
       const items = await this.notifService.getLatest(MAX_NOTIFS);
-      const unread = items.filter(n => n.created > status.lastSeenAt).length;
+
+      // IMPORTANT: isNew now means "unread"
+      const unread = items.filter(n => n.isNew).length;
       this.updateNotifBadge(unread);
 
       this.notifications = new Notifications(items, status.lastSeenAt, {
         onUnreadChange: (count) => this.updateNotifBadge(count),
+
         onMarkAllRead: async () => {
           await this.notifService.markAllRead();
           this.updateNotifBadge(0);
         },
+
+        // IMPORTANT: per item read (NOT markSeenUpTo)
         onItemOpen: async (item) => {
-          if (item.created) await this.notifService.markSeenUpTo(item.created);
+          await this.notifService.markItemRead(item.id);
         }
       });
     } catch { /* ignore */ }

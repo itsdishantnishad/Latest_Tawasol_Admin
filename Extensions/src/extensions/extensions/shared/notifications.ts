@@ -11,8 +11,8 @@ interface INotifView extends INotificationItem {
 
 interface INotificationCallbacks {
   onUnreadChange?: (count: number) => void;
-  onMarkAllRead?: () => void;
-  onItemOpen?: (item: INotifView) => void;
+  onMarkAllRead?: () => Promise<void> | void;
+  onItemOpen?: (item: INotifView) => Promise<void> | void;
 }
 
 export class Notifications {
@@ -22,6 +22,8 @@ export class Notifications {
   private visibleCount = 10;
   private readonly step = 10;
   private sectionsHost?: HTMLDivElement;
+  private _savingAll: boolean = false;
+  private _savingItem: boolean = false;
 
   private escHandler = (e: KeyboardEvent) => {
     if (e.key === 'Escape') this.close();
@@ -86,12 +88,22 @@ export class Notifications {
     });
 
     const markAll = header.querySelector(`.${styles.TIRMarkAllChk}`) as HTMLInputElement;
-    markAll.addEventListener('change', () => {
-      if (markAll.checked) {
+    markAll.addEventListener('change', async () => {
+      if (!markAll.checked) return;
+
+      if (this._savingAll) return;
+      this._savingAll = true;
+      markAll.disabled = true;
+
+      try {
+        await this.callbacks.onMarkAllRead?.(); // wait for SharePoint save
+
         this.items = this.items.map(n => ({ ...n, unread: false }));
         this.notifyUnread();
         this.render();
-        if (this.callbacks.onMarkAllRead) this.callbacks.onMarkAllRead();
+      } finally {
+        markAll.disabled = false;
+        this._savingAll = false;
       }
     });
 
@@ -211,18 +223,32 @@ export class Notifications {
       row.appendChild(body);
       row.appendChild(right);
 
-      row.addEventListener('click', () => {
-        if (n.unread) {
-          n.unread = false;
-          this.notifyUnread();
-          this.render();
+      row.addEventListener('click', async () => {
+        if (this._savingItem) return;
+
+        const targetUrl = (n.url || '').trim();
+        if (!targetUrl) {
+          console.warn('Notification URL is empty for item:', n.id, n.title);
+          return;
         }
-        if (this.callbacks.onItemOpen) {
-          this.callbacks.onItemOpen(n);
+
+        if (n.unread && this.callbacks.onItemOpen) {
+          this._savingItem = true;
+          try {
+            await this.callbacks.onItemOpen(n); // try to save
+            n.unread = false;
+            this.notifyUnread();
+            this.render();
+          } catch (err) {
+            console.warn('markSeen failed, navigating anyway:', err);
+            // IMPORTANT: still navigate
+          } finally {
+            this._savingItem = false;
+          }
         }
-        if (n.url) {
-          window.location.href = n.url;
-        }
+
+        this.close(); // optional but nice
+        window.location.assign(targetUrl);
       });
 
       list.appendChild(row);
