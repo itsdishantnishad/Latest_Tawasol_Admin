@@ -5,7 +5,7 @@ import PreviousEventCard from "./PreviousCard/PreviousEvents";
 import CalendarViewComponent from "./Calendarview/CalendarView";
 
 export interface IAlleventsProps {
-  AllEventItems:any;
+  AllEventItems: any;
   context?: any;
   viewtype?: string;
 }
@@ -15,68 +15,80 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
   const sitepageurl = `${props?.context?.pageContext?.web?.absoluteUrl}/SitePages/`;
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
 
+  // NEW: show only 3 by default
+  const [showAllPrevious, setShowAllPrevious] = React.useState(false);
+
   const parsedEvents = React.useMemo(() => {
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    return (props.AllEventItems || []).map((item: any) => {
+      const startDateStr = item.eventStartDate?.split("\n")[0]?.trim();
+      const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim();
 
-  return (props.AllEventItems || []).map((item: any) => {
+      const eventStart = startDateStr ? new Date(startDateStr) : null;
+      const eventEnd   = endDateStr ? new Date(endDateStr) : null;
 
-    // Always use FIRST LINE → accurate, same as UI
-    const startDateStr = item.eventStartDate?.split("\n")[0]?.trim();
-    const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim();
+      const location = item.location?.split("\n")[0]?.trim() || "";
+      let time = "Not specified";
 
-    // Parse EXACTLY as SharePoint stored it
-    const eventStart = startDateStr ? new Date(startDateStr) : null;
-    const eventEnd   = endDateStr ? new Date(endDateStr) : null;
+      if (eventStart && eventEnd) {
+        const formatTime = (date: Date) =>
+          date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
 
-    // FIX location duplication
-    const location = item.location?.split("\n")[0]?.trim() || "";
+        time = `${formatTime(eventStart)} - ${formatTime(eventEnd)}`;
+      }
 
-    let time = "Not specified";
+      return {
+        ...item,
+        date: eventStart ? String(eventStart.getDate()).padStart(2, "0") : "",
+        month: eventStart ? months[eventStart.getMonth()] : "",
+        day: eventStart ? days[eventStart.getDay()] : "",
+        title: item.title || "Untitled Event",
+        time,
+        location,
+        eventDateTime: eventStart,
+        category: item.category,
+        imageUrl: item.newsImage || "",
+        isregistered: !!item.isRegistered,
+      };
+    });
+  }, [props.AllEventItems]);
 
-    if (eventStart && eventEnd) {
-      const formatTime = (date: Date) =>
-        date.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true
-        });
+  const upcomingEvents = parsedEvents.filter((e: any) => e.eventDateTime && e.eventDateTime > now);
 
-      time = `${formatTime(eventStart)} - ${formatTime(eventEnd)}`;
-    }
+  const previousEvents = parsedEvents.filter((e: any) => e.eventDateTime && e.eventDateTime < now);
 
-    return {
-      ...item,
-      date: eventStart ? String(eventStart.getDate()).padStart(2, "0") : "",
-      month: eventStart ? months[eventStart.getMonth()] : "",
-      day: eventStart ? days[eventStart.getDay()] : "",
-      title: item.title || "Untitled Event",
-      time,
-      location,
-      eventDateTime: eventStart,
-      category:item.category,
-      imageUrl: item.newsImage || "",
-      isregistered: !!item.isRegistered,
-    };
-  });
-}, [props.AllEventItems]);
+  // NEW: sort previous events (latest past first)
+  const previousEventsSorted = React.useMemo(() => {
+    return [...previousEvents].sort(
+      (a: any, b: any) =>
+        (b.eventDateTime?.getTime?.() || 0) - (a.eventDateTime?.getTime?.() || 0)
+    );
+  }, [previousEvents]);
 
+  // NEW: show only 3 unless View All clicked
+  const previousEventsToRender = showAllPrevious
+    ? previousEventsSorted
+    : previousEventsSorted.slice(0, 3);
 
-
-  const upcomingEvents = parsedEvents.filter((e:any) => e.eventDateTime && e.eventDateTime > now);
-  const previousEvents = parsedEvents.filter((e:any) => e.eventDateTime && e.eventDateTime < now);
-  const myEvents = parsedEvents.filter((e:any) => e.isregistered);
+  const myEvents = parsedEvents.filter((e: any) => e.isregistered);
 
   return (
     <>
       {/* Tabs */}
       <div className={styles.tabContainer}>
         <div className={styles.tabContainerInner}>
-          <button className={`${styles.tabButton} ${activeTab === "all" ? styles.activeTab : ""}`} onClick={() => setActiveTab("all")}>
+          <button
+            className={`${styles.tabButton} ${activeTab === "all" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("all")}
+          >
             All Events
           </button>
-          <button className={`${styles.tabButton} ${activeTab === "my" ? styles.activeTab : ""}`} onClick={() => setActiveTab("my")}>
+          <button
+            className={`${styles.tabButton} ${activeTab === "my" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("my")}
+          >
             My Events
           </button>
         </div>
@@ -87,7 +99,7 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
           <div className={styles.eventsContainer}>
             <div className={styles.eventsWrapper}>
               {upcomingEvents.length > 0 ? (
-                upcomingEvents.map((event:any, index:any) => (
+                upcomingEvents.map((event: any, index: any) => (
                   <EventCard key={index} {...event} context={props.context} />
                 ))
               ) : (
@@ -96,11 +108,33 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
             </div>
 
             <div className={styles.previousEventsContainer}>
-              <h2 className={styles.heading}>Previous Events</h2>
+              {/* NEW: header row with View All button */}
+              <div className={styles.previousHeaderRow}>
+                <h2 className={styles.heading}>Previous Events</h2>
+
+                {!showAllPrevious && previousEventsSorted.length > 3 && (
+                  <button
+                    type="button"
+                    className={styles.viewAllButton}
+                    onClick={() => setShowAllPrevious(true)}
+                    aria-label="View all previous events"
+                  >
+                    View All
+                  </button>
+                )}
+              </div>
+
               <div className={styles.gridLayout}>
-                {previousEvents.length > 0 ? (
-                  previousEvents.map((event:any, index:any) => (
-                    <PreviousEventCard key={index} title={event.title} date={`${event.day}, ${event.date} ${event.month}`} imageUrl={event.imageUrl} imageCount={0} pageUrl={event?.pageUrl}/>
+                {previousEventsToRender.length > 0 ? (
+                  previousEventsToRender.map((event: any, index: any) => (
+                    <PreviousEventCard
+                      key={index}
+                      title={event.title}
+                      date={`${event.day}, ${event.date} ${event.month}`}
+                      imageUrl={event.imageUrl}
+                      imageCount={0}
+                      pageUrl={event?.pageUrl}
+                    />
                   ))
                 ) : (
                   <p>No previous events found.</p>
@@ -109,15 +143,13 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
             </div>
           </div>
         ) : (
-          <CalendarViewComponent events={parsedEvents} context={props.context}/>
+          <CalendarViewComponent events={parsedEvents} context={props.context} />
         )
       ) : (
         <div className={styles.eventsContainer}>
           <div className={styles.eventsWrapper}>
             {myEvents.length > 0 ? (
-              myEvents.map((event:any, index:any) => (
-                <EventCard key={index} {...event} />
-              ))
+              myEvents.map((event: any, index: any) => <EventCard key={index} {...event} />)
             ) : (
               <p>You haven’t registered for any events yet.</p>
             )}
