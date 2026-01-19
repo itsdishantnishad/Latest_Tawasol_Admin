@@ -77,6 +77,15 @@ export class GlobalBreadcrumbs {
             || p.endsWith("/sitepages/tirhelpcenter.aspx");
     }
 
+    private isOfferBenefitsPage(): boolean {
+        let p = window.location.pathname || "";
+        try { p = decodeURIComponent(p); } catch { }
+        p = p.toLowerCase();
+
+        return p.endsWith("/sitepages/offers-&-benifits.aspx");
+    }
+
+
     private isTasksPage(): boolean {
         let p = window.location.pathname || "";
         try { p = decodeURIComponent(p); } catch { }
@@ -283,6 +292,10 @@ export class GlobalBreadcrumbs {
             return;
         }
         if (this.isHelpCenterPage()) {
+            this.unmount();
+            return;
+        }
+        if (this.isOfferBenefitsPage()) {
             this.unmount();
             return;
         }
