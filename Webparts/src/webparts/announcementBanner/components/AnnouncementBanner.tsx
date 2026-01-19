@@ -17,7 +17,7 @@ export default class AnnouncementBannerComponent
   private sharePointService: listServices;
   private currentUserStorageKey: string;
   private localStorageAcknowledgedKey: string;
-  private animationDurationMs = 900; // keep in sync with CSS @keyframes timing
+  // private animationDurationMs = 900; 
 
   constructor(props: IAnnouncementBannerComponentProps) {
     super(props);
@@ -57,11 +57,11 @@ export default class AnnouncementBannerComponent
     }
   }
 
-  private writeAcknowledgedMap(map: Record<number, boolean>): void {
-    try {
-      window.localStorage.setItem(this.localStorageAcknowledgedKey, JSON.stringify(map));
-    } catch { /* ignore */ }
-  }
+  // private writeAcknowledgedMap(map: Record<number, boolean>): void {
+  //   try {
+  //     window.localStorage.setItem(this.localStorageAcknowledgedKey, JSON.stringify(map));
+  //   } catch { /* ignore */ }
+  // }
 
   // ---------- Data ----------
   private async loadActiveAnnouncements(): Promise<void> {
@@ -79,21 +79,21 @@ export default class AnnouncementBannerComponent
   }
 
   // ---------- UX: Noted -> CSS 👍 pop -> persist + keep banner with static 👍 ----------
-  private handleNotedClick = (itemId: number): void => {
-    const acknowledgedNext = { ...this.state.acknowledgedItemMap, [itemId]: true };
-    this.writeAcknowledgedMap(acknowledgedNext);
+  // private handleNotedClick = (itemId: number): void => {
+  //   const acknowledgedNext = { ...this.state.acknowledgedItemMap, [itemId]: true };
+  //   this.writeAcknowledgedMap(acknowledgedNext);
 
-    this.setState({
-      acknowledgedItemMap: acknowledgedNext,
-      acknowledgingItemId: itemId,
-      isShowingThumbsUpAnimation: true
-    });
+  //   this.setState({
+  //     acknowledgedItemMap: acknowledgedNext,
+  //     acknowledgingItemId: itemId,
+  //     isShowingThumbsUpAnimation: true
+  //   });
 
-    window.setTimeout(() => {
-      this.setState({ isShowingThumbsUpAnimation: false });
-      // keep acknowledgedItemMap[itemId] = true so after refresh we still show static 👍
-    }, this.animationDurationMs);
-  };
+  //   window.setTimeout(() => {
+  //     this.setState({ isShowingThumbsUpAnimation: false });
+  //     // keep acknowledgedItemMap[itemId] = true so after refresh we still show static 👍
+  //   }, this.animationDurationMs);
+  // };
 
   // Icon comes from TIRIconURL; fallback only when empty
   private renderLeadIcon(item: AnnouncementBannerListItem): React.ReactNode {
@@ -108,9 +108,9 @@ export default class AnnouncementBannerComponent
       isLoading,
       errorMessage,
       activeItems,
-      acknowledgedItemMap,
-      acknowledgingItemId,
-      isShowingThumbsUpAnimation
+      // acknowledgedItemMap,
+      // acknowledgingItemId,
+      // isShowingThumbsUpAnimation
     } = this.state;
 
     if (isLoading || errorMessage) return null;
@@ -119,8 +119,8 @@ export default class AnnouncementBannerComponent
     const firstActiveItem: AnnouncementBannerListItem | undefined = activeItems[0];
     if (!firstActiveItem) return null;
 
-    const isAcknowledgedByUser = !!acknowledgedItemMap[firstActiveItem.id];
-    const isAnimatingThisItem = isShowingThumbsUpAnimation && acknowledgingItemId === firstActiveItem.id;
+    // const isAcknowledgedByUser = !!acknowledgedItemMap[firstActiveItem.id];
+    // const isAnimatingThisItem = isShowingThumbsUpAnimation && acknowledgingItemId === firstActiveItem.id;
 
     return (
       <div className={styles.wrap} role="region" aria-label="Announcement">
@@ -138,22 +138,22 @@ export default class AnnouncementBannerComponent
 
           <div className={styles.actionCol}>
             {/* When clicked: animate 👍 once */}
-            {isAnimatingThisItem && (
+            {/* {isAnimatingThisItem && (
               <div className={styles.thumbsUpAnimation} aria-hidden="true">👍</div>
-            )}
+            )} */}
 
             {/* After acknowledged: persistent 👍 */}
-            {!isAnimatingThisItem && isAcknowledgedByUser && (
+            {/* {!isAnimatingThisItem && isAcknowledgedByUser && (
               <div className={styles.thumbsUpStatic} title="Acknowledged">👍</div>
-            )}
+            )} */}
 
             {/* Before acknowledged: show Noted button */}
-            {!isAnimatingThisItem && !isAcknowledgedByUser && (
+            {/* {!isAnimatingThisItem && !isAcknowledgedByUser && (
               <PrimaryButton
                 text="Noted 🤞🏻"
                 onClick={() => this.handleNotedClick(firstActiveItem.id)}
               />
-            )}
+            )} */}
           </div>
         </div>
       </div>
