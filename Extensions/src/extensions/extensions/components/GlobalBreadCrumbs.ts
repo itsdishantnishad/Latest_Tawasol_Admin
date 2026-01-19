@@ -9,7 +9,7 @@ export class GlobalBreadcrumbs {
     private _breadcrumbStylesInjected = false;
 
     private readonly _breadcrumbCSS = `
-.__gbc_row{display:inline-flex;align-items:center;gap:20px;height:22px;margin-bottom:20px;}
+.__gbc_row{display:inline-flex;align-items:center;gap:20px;height:22px;margin-bottom:0px;}
 .__gbc_back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;font-family:Inter,Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;letter-spacing:0;color:#000;font-weight:400;}
 .__gbc_back:hover{opacity:.7;}
 .__gbc_back svg{width:18px;height:18px;display:block}
@@ -137,7 +137,7 @@ export class GlobalBreadcrumbs {
             boxSizing: "border-box",
             width: "100%",
             maxWidth: "none",
-            margin: "20px 0",
+            margin: "20px 0 0",
             padding: "0 60px",
             background: "transparent"
         });
