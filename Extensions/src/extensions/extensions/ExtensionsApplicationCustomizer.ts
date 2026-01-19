@@ -644,7 +644,7 @@ export default class ExtensionsApplicationCustomizer
   // setTimeout((): void => { void this.renderBreadcrumbIfNeededSafe(); }, 800);
     
 
-  // Breadcrumb initialization 
+  // Breadcrumb initialization (moved to component)
 this.breadcrumbs = new GlobalBreadcrumbs(this.context);
 this.breadcrumbs.init();
 
@@ -652,7 +652,7 @@ this.context.application.navigatedEvent.add(this, () => {
   this.breadcrumbs?.onNavigated();
 });
 
-
+// optional: keep your 800ms safety retry
 setTimeout((): void => {
   this.breadcrumbs?.onNavigated();
 }, 800);
