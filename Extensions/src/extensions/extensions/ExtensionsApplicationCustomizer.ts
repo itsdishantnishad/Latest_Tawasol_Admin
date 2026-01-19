@@ -20,7 +20,7 @@ import Onbo from './components/Onbo';
 import { IOnboConfig } from './components/Onbo';
 import { HideSocialBarService } from './services/HideSocialBarService';
 import { GlobalBreadcrumbs } from './components/GlobalBreadCrumbs';
-
+import { PageMetaRelative } from './components/PageMetaRelative';
 export interface IExtensionsApplicationCustomizerProperties {
   testMessage: string;
 }
@@ -77,259 +77,260 @@ export default class ExtensionsApplicationCustomizer
   // breadcrumbs
   private breadcrumbs?: GlobalBreadcrumbs;
 
+  private pageMeta?: PageMetaRelative;
 
 
-// // =========================================================
-// // Global BREADCRUMB IMPLEMENTATION - PRODUCTION READY
+  // // =========================================================
+  // // Global BREADCRUMB IMPLEMENTATION - PRODUCTION READY
 
-// private _breadcrumbHostId = "tir-global-breadcrumb-host";
-// private _breadcrumbStylesInjected = false;
+  // private _breadcrumbHostId = "tir-global-breadcrumb-host";
+  // private _breadcrumbStylesInjected = false;
 
-// private readonly _breadcrumbCSS = `
-// .__gbc_row{display:inline-flex;align-items:center;gap:20px;height:22px;margin-bottom:20px;}
-// .__gbc_back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;font-family:Inter,Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;letter-spacing:0;color:#000;font-weight:400;}
-// .__gbc_back:hover{opacity:.7;}
-// .__gbc_back svg{width:18px;height:18px;display:block}
-// .__gbc_divider{width:1px;height:16px;background:rgba(58,59,67,.35)}
-// .__gbc_wrap{display:inline-flex;align-items:center;gap:10px;height:22px;font-family:Inter,Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;letter-spacing:0;color:#3A3B43;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
-// .__gbc_link{color:#A7A7A7;font-weight:400;text-decoration:none;cursor:pointer;font-size:14px;line-height:22px;}
-// .__gbc_link:hover{text-decoration:underline}
-// .__gbc_sep{color:#B9BCC3;opacity:1;margin:0 2px;user-select:none}
-// .__gbc_current{color:#3A3B43;font-weight:500;font-size:14px;line-height:22px;font-family:Inter,sans-serif;}
-// `;
+  // private readonly _breadcrumbCSS = `
+  // .__gbc_row{display:inline-flex;align-items:center;gap:20px;height:22px;margin-bottom:20px;}
+  // .__gbc_back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;font-family:Inter,Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;letter-spacing:0;color:#000;font-weight:400;}
+  // .__gbc_back:hover{opacity:.7;}
+  // .__gbc_back svg{width:18px;height:18px;display:block}
+  // .__gbc_divider{width:1px;height:16px;background:rgba(58,59,67,.35)}
+  // .__gbc_wrap{display:inline-flex;align-items:center;gap:10px;height:22px;font-family:Inter,Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;letter-spacing:0;color:#3A3B43;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+  // .__gbc_link{color:#A7A7A7;font-weight:400;text-decoration:none;cursor:pointer;font-size:14px;line-height:22px;}
+  // .__gbc_link:hover{text-decoration:underline}
+  // .__gbc_sep{color:#B9BCC3;opacity:1;margin:0 2px;user-select:none}
+  // .__gbc_current{color:#3A3B43;font-weight:500;font-size:14px;line-height:22px;font-family:Inter,sans-serif;}
+  // `;
 
-// private readonly _backSvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.25 19.25L7.75 12l6.5-7.25" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  // private readonly _backSvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.25 19.25L7.75 12l6.5-7.25" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
-// // Methods
-// private ensureBreadcrumbStyles(): void {
-//   if (this._breadcrumbStylesInjected) return;
-//   const s = document.createElement("style");
-//   s.setAttribute("data-global-breadcrumbs", "1");
-//   s.appendChild(document.createTextNode(this._breadcrumbCSS));
-//   document.head.appendChild(s);
-//   this._breadcrumbStylesInjected = true;
-// }
+  // // Methods
+  // private ensureBreadcrumbStyles(): void {
+  //   if (this._breadcrumbStylesInjected) return;
+  //   const s = document.createElement("style");
+  //   s.setAttribute("data-global-breadcrumbs", "1");
+  //   s.appendChild(document.createTextNode(this._breadcrumbCSS));
+  //   document.head.appendChild(s);
+  //   this._breadcrumbStylesInjected = true;
+  // }
 
-// private isSitePagesUrl(): boolean {
-//   return (window.location.pathname || "").toLowerCase().includes("/sitepages/");
-// }
+  // private isSitePagesUrl(): boolean {
+  //   return (window.location.pathname || "").toLowerCase().includes("/sitepages/");
+  // }
 
-// private isHomePage(): boolean {
-//   const p = (window.location.pathname || "").toLowerCase();
-//   return p.endsWith("/sitepages/home.aspx") || (!p.includes("/sitepages/") && p.endsWith("/"));
-// }
+  // private isHomePage(): boolean {
+  //   const p = (window.location.pathname || "").toLowerCase();
+  //   return p.endsWith("/sitepages/home.aspx") || (!p.includes("/sitepages/") && p.endsWith("/"));
+  // }
 
-// private getModernPageTitle(): string {
-//   const h1 = document.querySelector('h1[data-automation-id="pageHeaderTitle"]') ||
-//               document.querySelector("h1.od-TitleText") ||
-//               document.querySelector("h1");
-//   const t = (h1?.textContent || "").trim();
-//   if (t) return t;
+  // private getModernPageTitle(): string {
+  //   const h1 = document.querySelector('h1[data-automation-id="pageHeaderTitle"]') ||
+  //               document.querySelector("h1.od-TitleText") ||
+  //               document.querySelector("h1");
+  //   const t = (h1?.textContent || "").trim();
+  //   if (t) return t;
 
-//   const docTitle = (document.title || "").trim();
-//   return docTitle ? (docTitle.split(" - ")[0] || docTitle).trim() : "Details";
-// }
+  //   const docTitle = (document.title || "").trim();
+  //   return docTitle ? (docTitle.split(" - ")[0] || docTitle).trim() : "Details";
+  // }
 
-// private ensureBreadcrumbHost(): HTMLElement | null {
-//   let host = document.getElementById(this._breadcrumbHostId) as HTMLElement | null;
+  // private ensureBreadcrumbHost(): HTMLElement | null {
+  //   let host = document.getElementById(this._breadcrumbHostId) as HTMLElement | null;
 
-//   // Find suitable container with fallback strategies
-//   let container = document.querySelector('[data-automation-id="TitleRegion"]') as HTMLElement | null;
-  
-//   if (!container) {
-//     container = document.querySelector('[data-automation-id="contentScrollRegion"]') as HTMLElement | null;
-//   }
-//   if (!container) {
-//     container = document.querySelector('.CanvasZone') as HTMLElement | null;
-//   }
-//   if (!container) {
-//     container = document.querySelector('[data-automation-id="CanvasSection"]') as HTMLElement | null;
-//   }
-//   if (!container) {
-//     container = document.querySelector('main') as HTMLElement | null;
-//   }
-//   if (!container) {
-//     container = document.querySelector('[class*="Canvas"]') as HTMLElement | null;
-//   }
+  //   // Find suitable container with fallback strategies
+  //   let container = document.querySelector('[data-automation-id="TitleRegion"]') as HTMLElement | null;
 
-//   if (!container) return null;
+  //   if (!container) {
+  //     container = document.querySelector('[data-automation-id="contentScrollRegion"]') as HTMLElement | null;
+  //   }
+  //   if (!container) {
+  //     container = document.querySelector('.CanvasZone') as HTMLElement | null;
+  //   }
+  //   if (!container) {
+  //     container = document.querySelector('[data-automation-id="CanvasSection"]') as HTMLElement | null;
+  //   }
+  //   if (!container) {
+  //     container = document.querySelector('main') as HTMLElement | null;
+  //   }
+  //   if (!container) {
+  //     container = document.querySelector('[class*="Canvas"]') as HTMLElement | null;
+  //   }
 
-//   if (!host) {
-//     host = document.createElement("div");
-//     host.id = this._breadcrumbHostId;
-//   }
+  //   if (!container) return null;
 
-//   Object.assign(host.style, {
-//     display: "block",
-//     boxSizing: "border-box",
-//     width: "100%",
-//     maxWidth: "1200px",
-//     background: "transparent",
-//     padding: "0 32px",
-//     margin: "20px auto"
-//   });
+  //   if (!host) {
+  //     host = document.createElement("div");
+  //     host.id = this._breadcrumbHostId;
+  //   }
 
-//   if (host.parentElement !== container) {
-//     container.prepend(host);
-//   } else if (container.firstElementChild !== host) {
-//     container.prepend(host);
-//   }
-  
-//   return host;
-// }
+  //   Object.assign(host.style, {
+  //     display: "block",
+  //     boxSizing: "border-box",
+  //     width: "100%",
+  //     maxWidth: "1200px",
+  //     background: "transparent",
+  //     padding: "0 32px",
+  //     margin: "20px auto"
+  //   });
 
-// private unmountBreadcrumb(): void {
-//   const host = document.getElementById(this._breadcrumbHostId);
-//   if (host) {
-//     try { host.remove(); } catch { /* ignore */ }
-//   }
-// }
+  //   if (host.parentElement !== container) {
+  //     container.prepend(host);
+  //   } else if (container.firstElementChild !== host) {
+  //     container.prepend(host);
+  //   }
 
-// private goBack = (ev?: Event): void => {
-//   try { ev?.preventDefault(); } catch {}
-//   window.history.back();
-// };
+  //   return host;
+  // }
 
-// private onNavigated = (): void => {
-//   void this.renderBreadcrumbIfNeededSafe();
-// };
+  // private unmountBreadcrumb(): void {
+  //   const host = document.getElementById(this._breadcrumbHostId);
+  //   if (host) {
+  //     try { host.remove(); } catch { /* ignore */ }
+  //   }
+  // }
 
-// private async getCurrentSitePageInfo(): Promise<{ 
-//   title: string; 
-//   isNews: boolean;
-//   contentType?: string;
-// }> {
-//   try {
-//     const webUrl = (this.context?.pageContext?.web?.absoluteUrl || "").replace(/\/$/, "");
-//     let serverRel = window.location.pathname || "";
-//     try { serverRel = decodeURIComponent(serverRel); } catch {}
-//     serverRel = serverRel.replace(/'/g, "''");
+  // private goBack = (ev?: Event): void => {
+  //   try { ev?.preventDefault(); } catch {}
+  //   window.history.back();
+  // };
 
-//     if (!webUrl || !serverRel) return { title: "", isNews: false };
+  // private onNavigated = (): void => {
+  //   void this.renderBreadcrumbIfNeededSafe();
+  // };
 
-//     const api = `${webUrl}/_api/web/GetFileByServerRelativePath(decodedurl='${serverRel}')/ListItemAllFields?$select=Title,PromotedState,ContentType/Name&$expand=ContentType`;
+  // private async getCurrentSitePageInfo(): Promise<{ 
+  //   title: string; 
+  //   isNews: boolean;
+  //   contentType?: string;
+  // }> {
+  //   try {
+  //     const webUrl = (this.context?.pageContext?.web?.absoluteUrl || "").replace(/\/$/, "");
+  //     let serverRel = window.location.pathname || "";
+  //     try { serverRel = decodeURIComponent(serverRel); } catch {}
+  //     serverRel = serverRel.replace(/'/g, "''");
 
-//     const res = await this.context.spHttpClient.get(api, SPHttpClient.configurations.v1);
-//     if (!res.ok) return { title: "", isNews: false };
+  //     if (!webUrl || !serverRel) return { title: "", isNews: false };
 
-//     const data = (await res.json()) as any;
-//     const title = String(data?.Title || "").trim();
-//     const ctName = String(data?.ContentType?.Name || "").toLowerCase();
-//     const promoted = Number(data?.PromotedState);
+  //     const api = `${webUrl}/_api/web/GetFileByServerRelativePath(decodedurl='${serverRel}')/ListItemAllFields?$select=Title,PromotedState,ContentType/Name&$expand=ContentType`;
 
-//     return { 
-//       title, 
-//       isNews: promoted === 2 || ctName.includes("news"),
-//       contentType: data?.ContentType?.Name
-//     };
-//   } catch {
-//     return { title: "", isNews: false };
-//   }
-// }
+  //     const res = await this.context.spHttpClient.get(api, SPHttpClient.configurations.v1);
+  //     if (!res.ok) return { title: "", isNews: false };
 
-// private buildBreadcrumbContent(host: HTMLElement, section: string, current: string): void {
-//   host.innerHTML = "";
+  //     const data = (await res.json()) as any;
+  //     const title = String(data?.Title || "").trim();
+  //     const ctName = String(data?.ContentType?.Name || "").toLowerCase();
+  //     const promoted = Number(data?.PromotedState);
 
-//   const row = document.createElement("div");
-//   row.className = "__gbc_row";
+  //     return { 
+  //       title, 
+  //       isNews: promoted === 2 || ctName.includes("news"),
+  //       contentType: data?.ContentType?.Name
+  //     };
+  //   } catch {
+  //     return { title: "", isNews: false };
+  //   }
+  // }
 
-//   const backBtn = document.createElement("button");
-//   backBtn.className = "__gbc_back";
-//   backBtn.type = "button";
-//   backBtn.addEventListener("click", this.goBack);
+  // private buildBreadcrumbContent(host: HTMLElement, section: string, current: string): void {
+  //   host.innerHTML = "";
 
-//   const svgSpan = document.createElement("span");
-//   svgSpan.setAttribute("aria-hidden", "true");
-//   svgSpan.innerHTML = this._backSvg;
+  //   const row = document.createElement("div");
+  //   row.className = "__gbc_row";
 
-//   const backText = document.createElement("span");
-//   backText.textContent = "Back";
+  //   const backBtn = document.createElement("button");
+  //   backBtn.className = "__gbc_back";
+  //   backBtn.type = "button";
+  //   backBtn.addEventListener("click", this.goBack);
 
-//   backBtn.appendChild(svgSpan);
-//   backBtn.appendChild(backText);
+  //   const svgSpan = document.createElement("span");
+  //   svgSpan.setAttribute("aria-hidden", "true");
+  //   svgSpan.innerHTML = this._backSvg;
 
-//   const divider = document.createElement("span");
-//   divider.className = "__gbc_divider";
-//   divider.setAttribute("aria-hidden", "true");
+  //   const backText = document.createElement("span");
+  //   backText.textContent = "Back";
 
-//   const nav = document.createElement("nav");
-//   nav.className = "__gbc_wrap";
+  //   backBtn.appendChild(svgSpan);
+  //   backBtn.appendChild(backText);
 
-//   const sectionLink = document.createElement("a");
-//   sectionLink.href = "#";
-//   sectionLink.className = "__gbc_link";
-//   sectionLink.textContent = section;
-//   sectionLink.addEventListener("click", this.goBack);
+  //   const divider = document.createElement("span");
+  //   divider.className = "__gbc_divider";
+  //   divider.setAttribute("aria-hidden", "true");
 
-//   const sep = document.createElement("span");
-//   sep.className = "__gbc_sep";
-//   sep.textContent = "›";
+  //   const nav = document.createElement("nav");
+  //   nav.className = "__gbc_wrap";
 
-//   const currentSpan = document.createElement("span");
-//   currentSpan.className = "__gbc_current";
-//   currentSpan.textContent = current;
+  //   const sectionLink = document.createElement("a");
+  //   sectionLink.href = "#";
+  //   sectionLink.className = "__gbc_link";
+  //   sectionLink.textContent = section;
+  //   sectionLink.addEventListener("click", this.goBack);
 
-//   nav.appendChild(sectionLink);
-//   nav.appendChild(sep);
-//   nav.appendChild(currentSpan);
+  //   const sep = document.createElement("span");
+  //   sep.className = "__gbc_sep";
+  //   sep.textContent = "›";
 
-//   row.appendChild(backBtn);
-//   row.appendChild(divider);
-//   row.appendChild(nav);
+  //   const currentSpan = document.createElement("span");
+  //   currentSpan.className = "__gbc_current";
+  //   currentSpan.textContent = current;
 
-//   host.appendChild(row);
-// }
+  //   nav.appendChild(sectionLink);
+  //   nav.appendChild(sep);
+  //   nav.appendChild(currentSpan);
 
-// private renderBreadcrumbDom(section: string, current: string): void {
-//   this.ensureBreadcrumbStyles();
-//   const host = this.ensureBreadcrumbHost();
-  
-//   if (!host) {
-//     // Retry after DOM ready
-//     setTimeout(() => {
-//       const retryHost = this.ensureBreadcrumbHost();
-//       if (retryHost) {
-//         this.buildBreadcrumbContent(retryHost, section, current);
-//       }
-//     }, 500);
-//     return;
-//   }
+  //   row.appendChild(backBtn);
+  //   row.appendChild(divider);
+  //   row.appendChild(nav);
 
-//   this.buildBreadcrumbContent(host, section, current);
-// }
+  //   host.appendChild(row);
+  // }
 
-// private async renderBreadcrumbIfNeededSafe(): Promise<void> {
-//   try {
-//     await this.renderBreadcrumbIfNeeded();
-//   } catch (e) {
-//     // Silently fail - breadcrumb is non-critical
-//   }
-// }
+  // private renderBreadcrumbDom(section: string, current: string): void {
+  //   this.ensureBreadcrumbStyles();
+  //   const host = this.ensureBreadcrumbHost();
 
-// private async renderBreadcrumbIfNeeded(): Promise<void> {
-//   if (this.isHomePage() || !this.isSitePagesUrl()) {
-//     this.unmountBreadcrumb();
-//     return;
-//   }
-  
-//   const info = await this.getCurrentSitePageInfo();
-//   let section = "Pages";
-//   const title = info.title || this.getModernPageTitle();
+  //   if (!host) {
+  //     // Retry after DOM ready
+  //     setTimeout(() => {
+  //       const retryHost = this.ensureBreadcrumbHost();
+  //       if (retryHost) {
+  //         this.buildBreadcrumbContent(retryHost, section, current);
+  //       }
+  //     }, 500);
+  //     return;
+  //   }
 
-//   if (info.isNews) {
-//     section = "News Story";
-//   } else if (info.contentType) {
-//     // Use contentType from getCurrentSitePageInfo instead
-//     const ctName = info.contentType.toLowerCase();
-//     if (ctName.includes("event")) {
-//       section = "Events";
-//     } else if (ctName.includes("training")) {
-//       section = "Training";
-//     }
-//   }
-  
-//   this.renderBreadcrumbDom(section, title);
-// }
+  //   this.buildBreadcrumbContent(host, section, current);
+  // }
+
+  // private async renderBreadcrumbIfNeededSafe(): Promise<void> {
+  //   try {
+  //     await this.renderBreadcrumbIfNeeded();
+  //   } catch (e) {
+  //     // Silently fail - breadcrumb is non-critical
+  //   }
+  // }
+
+  // private async renderBreadcrumbIfNeeded(): Promise<void> {
+  //   if (this.isHomePage() || !this.isSitePagesUrl()) {
+  //     this.unmountBreadcrumb();
+  //     return;
+  //   }
+
+  //   const info = await this.getCurrentSitePageInfo();
+  //   let section = "Pages";
+  //   const title = info.title || this.getModernPageTitle();
+
+  //   if (info.isNews) {
+  //     section = "News Story";
+  //   } else if (info.contentType) {
+  //     // Use contentType from getCurrentSitePageInfo instead
+  //     const ctName = info.contentType.toLowerCase();
+  //     if (ctName.includes("event")) {
+  //       section = "Events";
+  //     } else if (ctName.includes("training")) {
+  //       section = "Training";
+  //     }
+  //   }
+
+  //   this.renderBreadcrumbDom(section, title);
+  // }
 
   private get webUrl(): string {
     return this.context.pageContext.web.absoluteUrl;
@@ -491,7 +492,7 @@ export default class ExtensionsApplicationCustomizer
   //     hideFn();
   //   }
   // }
-  
+
   public async onInit(): Promise<void> {
 
     console.log(">>> ExtensionsApplicationCustomizer LOADED <<<", window.location.href);
@@ -639,23 +640,27 @@ export default class ExtensionsApplicationCustomizer
     await this.refreshNavAndFooter();
 
     // Breadcrumb initialization
-  // await this.renderBreadcrumbIfNeededSafe();
-  // this.context.application.navigatedEvent.add(this, this.onNavigated);
-  // setTimeout((): void => { void this.renderBreadcrumbIfNeededSafe(); }, 800);
-    
+    // await this.renderBreadcrumbIfNeededSafe();
+    // this.context.application.navigatedEvent.add(this, this.onNavigated);
+    // setTimeout((): void => { void this.renderBreadcrumbIfNeededSafe(); }, 800);
 
-  // Breadcrumb initialization (moved to component)
-this.breadcrumbs = new GlobalBreadcrumbs(this.context);
-this.breadcrumbs.init();
 
-this.context.application.navigatedEvent.add(this, () => {
-  this.breadcrumbs?.onNavigated();
-});
+    // Breadcrumb initialization (moved to component)
+    this.breadcrumbs = new GlobalBreadcrumbs(this.context);
+    this.breadcrumbs.init();
 
-// optional: keep your 800ms safety retry
-setTimeout((): void => {
-  this.breadcrumbs?.onNavigated();
-}, 800);
+    this.context.application.navigatedEvent.add(this, () => {
+      this.breadcrumbs?.onNavigated();
+    });
+
+    // optional: keep your 800ms safety retry
+    setTimeout((): void => {
+      this.breadcrumbs?.onNavigated();
+    }, 800);
+
+    // news read date time
+    this.pageMeta = new PageMetaRelative(this.context);
+    this.pageMeta.init();
 
 
     // Observe DOM changes for re-rendering
@@ -664,6 +669,7 @@ setTimeout((): void => {
       window.setTimeout((): void => {
         this.hideSocialBar?.apply(); // re-apply on modern navigation
         void this.refreshNavAndFooter();
+        this.pageMeta?.onNavigated();
       }, 200);
     });
 
@@ -811,7 +817,7 @@ setTimeout((): void => {
     window.removeEventListener('scroll', this.updateSuggest, true);
     window.removeEventListener('resize', this.updateSuggest);
     this.onboarding?.dispose();
-    
+
     // try {
     // this.context.application.navigatedEvent.remove(this, this.onNavigated);
     // } catch {}
