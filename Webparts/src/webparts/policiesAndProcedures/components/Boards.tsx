@@ -285,7 +285,7 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
 
               return (
                 <li key={it.id} style={{ gridTemplateColumns: "12px auto 1fr auto" }}>
-                  <img src={icon} alt="" style={{ width: 18, height: 18, alignSelf: "center" }} />
+                  <img src={icon} alt="" style={{ width: 32, height: 32, alignSelf: "center" }} />
 
                   <div>
                     {this.renderName(it)}
