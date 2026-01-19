@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import EventCard from "../Events/EventCard";
 import Trainingcard from "../Trainings/TrainingCard";
@@ -5,6 +6,7 @@ import MeetingCard from "../TeamsMeeting/MeetingCard";
 import CalendarViewComponent from "../Events/Calendarview/CalendarView";
 import styles from "../Events/Allevents.module.scss";
 import PreviousEventCard from "../Events/PreviousCard/PreviousEvents";
+
 interface Props {
   filteredEvents: any[];
   filteredTrainings: any[];
@@ -22,8 +24,8 @@ const AllComponents: React.FC<Props> = ({
 }) => {
   const now = new Date();
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
-   const parsedEvents = React.useMemo(() => {
-  
+
+  const parsedEvents = React.useMemo(() => {
     const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
@@ -32,16 +34,16 @@ const AllComponents: React.FC<Props> = ({
       // Always use FIRST LINE → accurate, same as UI
       const startDateStr = item.eventStartDate?.split("\n")[0]?.trim();
       const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim();
-  
+
       // Parse EXACTLY as SharePoint stored it
       const eventStart = startDateStr ? new Date(startDateStr) : null;
       const eventEnd   = endDateStr ? new Date(endDateStr) : null;
-  
+
       // FIX location duplication
       const location = item.location?.split("\n")[0]?.trim() || "";
-  
+
       let time = "Not specified";
-  
+
       if (eventStart && eventEnd) {
         const formatTime = (date: Date) =>
           date.toLocaleTimeString("en-US", {
@@ -49,10 +51,10 @@ const AllComponents: React.FC<Props> = ({
             minute: "2-digit",
             hour12: true
           });
-  
+
         time = `${formatTime(eventStart)} - ${formatTime(eventEnd)}`;
       }
-  
+
       return {
         ...item,
         date: eventStart ? String(eventStart.getDate()).padStart(2, "0") : "",
@@ -62,86 +64,109 @@ const AllComponents: React.FC<Props> = ({
         time,
         location,
         eventDateTime: eventStart,
-        category:item.category,
+        category: item.category,
         imageUrl: item.newsImage || "",
         isregistered: !!item.isRegistered,
       };
     });
   }, [filteredEvents]);
- const mapSharePointTrainingsForAll = (data: any[]) => {
 
-  const deduped = Array.from(
-    new Map(data.map(i => [i.ListItemID || i.title, i])).values()
-  );
+  const mapSharePointTrainingsForAll = (data: any[]) => {
 
-  return deduped.map((item, index) => {
+    const deduped = Array.from(
+      new Map(data.map(i => [i.ListItemID || i.title, i])).values()
+    );
 
-    const startDateStr = item.eventStartDate?.split("\n")[0]?.trim() || "";
-    const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim() || "";
+    return deduped.map((item, index) => {
 
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(endDateStr);
+      const startDateStr = item.eventStartDate?.split("\n")[0]?.trim() || "";
+      const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim() || "";
 
-    const monthLabel = `${startDate.toLocaleString("default", {
-      month: "long",
-    })} ${startDate.getFullYear()}`;
+      const startDate = new Date(startDateStr);
+      const endDate = new Date(endDateStr);
 
-    const dateRange = `${startDate.getDate()}-${endDate.getDate()} ${startDate.toLocaleString(
-      "default",
-      { month: "short" }
-    )} ${startDate.getFullYear()}`;
+      const monthLabel = `${startDate.toLocaleString("default", {
+        month: "long",
+      })} ${startDate.getFullYear()}`;
 
-    const timeRange = `${startDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true
-    })} - ${endDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true
-    })}`;
+      const dateRange = `${startDate.getDate()}-${endDate.getDate()} ${startDate.toLocaleString(
+        "default",
+        { month: "short" }
+      )} ${startDate.getFullYear()}`;
 
-   // FIX location duplication
-    const location = item.location?.split("\n")[0]?.trim() || "";
+      const timeRange = `${startDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      })} - ${endDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      })}`;
 
-    return {
-      ...item,
-      id: index + 1,
-      imageUrl:
-        item.newsImage || "https://via.placeholder.com/400x200?text=No+Image",
-      category: "Classroom",
-      title: item.title || "Untitled Training",
-      date: dateRange,
-      duration: `${Math.ceil(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-      )} days`,
-      instructorName: item?.instructor?.name,
-      instructorTitle: item?.instructor?.role,
-      instructorImageUrl: `https://i.pravatar.cc/150?img=${(index % 6) + 1}`,
-      month: monthLabel,
-      isRegistered: !!item.joiningURL,
-      isMyTraining: !!item.joiningURL,
-      location: location,   // 🔥 FIXED
-      joinUrl: item.joiningURL || "#",
-      Eventtype: "Trainings",
-      startDate: startDateStr,
-      endDate: endDateStr,
-      subtitle: "",
-      time: timeRange,
-      trainingId:  item.ID ,
-    };
-  });
-};
+      // FIX location duplication
+      const location = item.location?.split("\n")[0]?.trim() || "";
 
+      // ✅ Minimal fix: instructor mapping (kept OUTSIDE return object)
+      const instructorObj = item?.instructor || item?.Instructor;
+
+      const instructorName =
+        item?.instructorName ||
+        instructorObj?.name ||
+        instructorObj?.Title ||   // SharePoint Person usually provides Title
+        "";
+
+      const instructorTitle =
+        item?.instructorTitle ||
+        instructorObj?.role ||
+        instructorObj?.JobTitle || // if available
+        "";
+
+      const instructorImageUrl =
+        item?.instructorImageUrl ||
+        instructorObj?.Picture ||  // if your API provides it
+        `https://i.pravatar.cc/150?img=${(index % 6) + 1}`;
+
+      return {
+        ...item,
+        id: index + 1,
+        imageUrl:
+          item.newsImage || "https://via.placeholder.com/400x200?text=No+Image",
+        category: "Classroom",
+        title: item.title || "Untitled Training",
+        date: dateRange,
+        duration: `${Math.ceil(
+          (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+        )} days`,
+
+        // ✅ pass these to TrainingCard (no other behavior change)
+        instructorName,
+        instructorTitle,
+        instructorImageUrl,
+
+        month: monthLabel,
+        isRegistered: !!item.joiningURL,
+        isMyTraining: !!item.joiningURL,
+        location: location,
+        joinUrl: item.joiningURL || "#",
+        Eventtype: "Trainings",
+        startDate: startDateStr,
+        endDate: endDateStr,
+        subtitle: "",
+        time: timeRange,
+        trainingId: item.ID,
+      };
+    });
+  };
 
   const mappedTrainings = mapSharePointTrainingsForAll(filteredTrainings);
   const Alldata = [...parsedEvents, ...mappedTrainings, ...filteredMeetings];
   const myEvents = parsedEvents.filter((e: any) => e.isregistered);
   const myTrainings = mappedTrainings.filter((t: any) => t.isMyTraining);
   const myAlldata = [...myEvents, ...myTrainings, ...filteredMeetings];
-  const previousEvents = parsedEvents.filter(
-    (e: any) => e.eventDateTime && e.eventDateTime < now
-  ).slice(0,3); // show only 6 previous events
+  const previousEvents = parsedEvents
+    .filter((e: any) => e.eventDateTime && e.eventDateTime < now)
+    .slice(0, 3);
 
   return (
     <>
@@ -165,23 +190,23 @@ const AllComponents: React.FC<Props> = ({
           </button>
         </div>
       </div>
+
       {activeTab === "all" ? (
-        // ------------ ALL DATA ------------
         viewMode === "list" ? (
           <>
             <div className={styles.eventsContainer}>
               <div className={styles.eventsWrapper}>
-              <h5>Events</h5>
-              {parsedEvents.map((event: any, index: any) => (
-                <EventCard key={index} {...event} context={context} />
-              ))}
+                <h5>Events</h5>
+                {parsedEvents.map((event: any, index: any) => (
+                  <EventCard key={index} {...event} context={context} />
+                ))}
 
-              <h5>Trainings</h5>
-              {mappedTrainings.map((event: any) => (
-                <Trainingcard key={event.id} {...event} context={context}/>
-              ))}
+                <h5>Trainings</h5>
+                {mappedTrainings.map((event: any) => (
+                  <Trainingcard key={event.id} {...event} context={context} />
+                ))}
 
-              <h5>Meetings</h5>
+              <h5>Teams Meetings</h5>
               {filteredMeetings.map((event: any) => (
                 <MeetingCard
                   key={event.id}
@@ -191,7 +216,7 @@ const AllComponents: React.FC<Props> = ({
               ))}
             </div>
 
-            <div className={styles.previousEventsContainer}>
+            {/* <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>
                 {previousEvents.length > 0 ? (
@@ -209,7 +234,7 @@ const AllComponents: React.FC<Props> = ({
                   <p>No previous events found.</p>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
           
           {/* <div className={styles.eventsContainer}>
@@ -240,7 +265,7 @@ const AllComponents: React.FC<Props> = ({
         ) : (
           <>
             <CalendarViewComponent events={Alldata} context={context} from="All" />
-            <div className={styles.previousEventsContainer}>
+            {/* <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>
                 {previousEvents.length > 0 ? (
@@ -258,11 +283,10 @@ const AllComponents: React.FC<Props> = ({
                   <p>No previous events found.</p>
                 )}
               </div>
-            </div>
+            </div> */}
           </>
         )
       ) : activeTab === "my" ? (
-        // ------------ MY DATA ------------
         viewMode === "list" ? (
           <>
             <div className={styles.eventsWrapper}>
@@ -285,8 +309,8 @@ const AllComponents: React.FC<Props> = ({
                 <MeetingCard key={meeting.id} event={meeting} />
               ))}
             </div>
-            
-            <div className={styles.previousEventsContainer}>
+
+            {/* <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>
                 {previousEvents.length > 0 ? (
@@ -304,12 +328,12 @@ const AllComponents: React.FC<Props> = ({
                   <p>No previous events found.</p>
                 )}
               </div>
-            </div>
+            </div> */}
           </>
         ) : (
           <>
             <CalendarViewComponent events={myAlldata} context={context} />
-            <div className={styles.previousEventsContainer}>
+            {/* <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>
                 {previousEvents.length > 0 ? (
@@ -327,7 +351,7 @@ const AllComponents: React.FC<Props> = ({
                   <p>No previous events found.</p>
                 )}
               </div>
-            </div>
+            </div> */}
           </>
         )
       ) : null}
@@ -336,3 +360,4 @@ const AllComponents: React.FC<Props> = ({
 };
 
 export default AllComponents;
+

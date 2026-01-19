@@ -3,8 +3,9 @@
 .formsLibraryRoot {
   display: flex;
   column-gap: 32px;
-  padding: 16px;
-  bottom: 50px;
+  padding: 0px 60px;
+  // bottom: 50px;
+  margin-top: 24px;
 }
 
 .leftPane {
@@ -12,10 +13,12 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
 }
 
 .rightPane {
-  width: 540px;
+  // width: 540px;
+  flex: 1;
   height: 552px;                 
   background-color: #FDECDB6B;   
   border: 1px solid #FDECDB;

@@ -183,21 +183,33 @@
 }
 // Add these to your TrainingCard.module.scss
 
-.actionButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.actionSection{
+    flex-shrink: 0;
+  .actionButton {
+    align-items: center;
+    background: radial-gradient(883.19% 262.8% at 112.5% -164.06%, #101820 0, #202d39 100%);
+    border: none;
+    border-radius: 167px;
+    box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    gap: 4px;
+    height: 48px;
+    justify-content: center;
+    line-height: 20px;
+    min-width: 143px;
+    padding: 0 12px;
+    text-decoration: none;
+    transition: all .3s ease;
+  
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   }
 }
 
@@ -252,4 +264,44 @@
   color: #d13438;
   font-size: 12px;
   margin-bottom: 8px;
+}
+.instructorRow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top: 8px;
+}
+
+.instructorAvatar{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.instructorAvatarFallback{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 600;
+  background: #e9eef6;
+}
+
+.instructorText{
+  display:flex;
+  flex-direction:column;
+  line-height: 1.2;
+}
+
+.instructorName{
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.instructorTitle{
+  font-size: 12px;
+  opacity: 0.7;
 }

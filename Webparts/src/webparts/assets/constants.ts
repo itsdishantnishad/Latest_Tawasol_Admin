@@ -316,3 +316,24 @@ export const ServiceNowSVG = `<svg width="52" height="52" viewBox="0 0 52 52" fi
 </defs>
 </svg>
 `;
+
+
+// View Details (external link) icon
+export const VIEW_DETAILS_EXTERNAL_LINK_SVG = `
+<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M14.249 5.25L14.249 0.75M14.249 0.75H9.74902M14.249 0.75L8.24902 6.75M5.99902 2.25H4.34902C3.08891 2.25 2.45885 2.25 1.97754 2.49524C1.55418 2.71095 1.20997 3.05516 0.994259 3.47852C0.749023 3.95982 0.749023 4.58988 0.749023 5.85V10.65C0.749023 11.9101 0.749023 12.5402 0.994259 13.0215C1.20997 13.4448 1.55418 13.789 1.97754 14.0048C2.45885 14.25 3.08891 14.25 4.34902 14.25H9.14902C10.4091 14.25 11.0392 14.25 11.5205 14.0048C11.9439 13.789 12.2881 13.4448 12.5038 13.0215C12.749 12.5402 12.749 11.9101 12.749 10.65V9"
+    stroke="#DA291C" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+export const PRIORITY_SORT_DOWN_SVG = `
+<svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 7.5L10 12.5L15 7.5" stroke="#101820" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+export const PRIORITY_SORT_UP_SVG = `
+<svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 12.5L10 7.5L15 12.5" stroke="#101820" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;

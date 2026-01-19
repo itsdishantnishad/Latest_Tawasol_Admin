@@ -56,13 +56,11 @@ export class FooterService {
           TIRIconURL: this.linkValue(it.TIRIconURL),
           TIRSortOrder: typeof it.TIRSortOrder === 'number' ? it.TIRSortOrder : 9999
         }))
-        .filter((l) => !!l.Title && !!l.URL);
+        // ✅ keep items even if URL is empty (copyright row)
+        .filter((l) => !!l.Title);
 
-      // Sort only main links by TIRSortOrder
-      links.sort(
-        (a, b) =>
-          a.TIRSortOrder - b.TIRSortOrder || a.Title.localeCompare(b.Title)
-      );
+      // sort by order
+      links.sort((a, b) => a.TIRSortOrder - b.TIRSortOrder || a.Title.localeCompare(b.Title));
 
       this.cache = links;
       return links;
@@ -70,24 +68,5 @@ export class FooterService {
       console.error('FooterService: Failed to load footer links', err);
       return [];
     }
-  }
-
-  // NEW: Helper to split main links vs social icons
-  public getMainAndSocialLinks(links: IFooterLink[]): {
-    main: IFooterLink[];
-    social: IFooterLink[];
-  } {
-    const main: IFooterLink[] = [];
-    const social: IFooterLink[] = [];
-
-    for (const link of links) {
-      if (link.TIRIconURL.trim() !== '') {
-        social.push(link);
-      } else {
-        main.push(link);
-      }
-    }
-
-    return { main, social };
   }
 }
