@@ -307,24 +307,38 @@
   background: #fff;
 }
 
-.boardTitle {
-  font-size: 18px;
-  font-weight: 500;
+/* Title row with icon */
+.boardTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 6px;
-  line-height: 24px;
-  color: #000000;
 }
 
+.boardTitleIcon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.boardTitleText {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #000;
+}
+
+/* list */
 .boardList {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
+/* only border/padding common on li */
 .boardList li {
-  gap: 8px;
   padding: 8px 0;
-  display: flex;
   border-top: 1px dashed var(--pp-border-dash);
 }
 
@@ -349,6 +363,58 @@
 .meta {
   color: var(--pp-text-muted);
   font-size: 12px;
+}
+
+.nameLink {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+/* Message row (error / empty) */
+.boardRowMessage {
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Document row layout */
+.boardRowDoc {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.boardItemIcon {
+  width: 32px;
+  height: 32px;
+  display: block;
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+/* category under name */
+.categoryRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.categoryIcon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.errorText {
+  color: #b00020;
 }
 
 /* --------------------------- Top bar (detail pages) --------------------------- */
