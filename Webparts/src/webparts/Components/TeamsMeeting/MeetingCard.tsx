@@ -4,7 +4,7 @@ import { Meeting } from '../../services/meetingServices/IMeetingProvider';
 const outlookIcon: string = require("../../assets/outlook-icon.svg");
 // const TeamsIcon: string = require("../../assets/TeamsIcon.png");
 const teamsImage: string = require("../../assets/microsoft-teams-image.svg");
-
+const teamsIcon: string = require("../../assets/teamsIcon.svg")
 const getOrganizerAvatar = (event: any): string => {
   return event.avatarUrl || event.organizer?.avatarUrl || "https://i.pravatar.cc/150?img=1";
 };
@@ -69,7 +69,10 @@ export const mapToCardItems = (rows: Meeting[]) =>
 
 // MeetingCard Component
 const MeetingCard = ({ event, onJoinClick }: any) => {
-  
+   console.log('MeetingCard received event:', event);
+  console.log('timeRange:', event.timeRange);
+  console.log('time:', event.time);
+  console.log('endTime:', event.endTime);
   return (
     <div className={styles.meetingCard}>
       <div className={styles.dateSection}>
@@ -155,7 +158,7 @@ const MeetingCard = ({ event, onJoinClick }: any) => {
             className={styles.registerButton}
             onClick={() => onJoinClick(event)}
           >
-            <img src={outlookIcon} alt="Outlook" />
+            <img src={teamsIcon} alt="TeamsIcon" />
             Join
           </button>
         </div>
