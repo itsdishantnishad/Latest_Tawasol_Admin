@@ -11,9 +11,7 @@ export const DEFAULT_BANNER_DESCRIPTION =
 export let SITE_BASE: string;
 export let SITE_ASSETS_BASE: string;
 export let PP_VIEW_ICONS_BASE: string;
-
 export let DEFAULT_BANNER_URL: string;
-
 export let ICON_DOC_FOLDER_GRID: string;
 export let ICON_DOC_FOLDER_LIST: string;
 export let ICON_EXPORT_TO_CSV: string;
@@ -30,6 +28,9 @@ export let ICON_ARROW_UP: string;
 export let ICON_ARROW_DOWN: string;
 export let ICON_HEART: string;
 export let REAL_PDF_URL: string;
+export let ICON_BOARD_RECENTLY_UPDATED: string;
+export let ICON_BOARD_MOST_USED: string;
+export let ICON_BOARD_FAVOURITES: string;
 
 /**
  * Call this once (e.g. in WebPart onInit) to populate all URL constants
@@ -63,6 +64,9 @@ export function initUrlConstants(context: WebPartContext): void {
   ICON_ARROW_DOWN        = `${PP_VIEW_ICONS_BASE}/Folder%20Arrow%20Icon%20Down.svg`;
   ICON_HEART = `${PP_VIEW_ICONS_BASE}/heart.svg`;
   REAL_PDF_URL = `${PP_VIEW_ICONS_BASE}/Major%20Project%20File.pdf`;
+  ICON_BOARD_RECENTLY_UPDATED = `${PP_VIEW_ICONS_BASE}/Recently_Update.svg`;
+  ICON_BOARD_MOST_USED        = `${PP_VIEW_ICONS_BASE}/Most_Used.svg`;
+  ICON_BOARD_FAVOURITES       = `${PP_VIEW_ICONS_BASE}/Favorite.svg`;
 }
 
 /** ====== Breadcrumb / Tasks SVGs you already had (kept as-is) ====== */
