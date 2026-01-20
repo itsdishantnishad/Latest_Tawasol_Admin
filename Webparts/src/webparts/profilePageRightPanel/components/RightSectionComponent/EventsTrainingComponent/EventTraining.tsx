@@ -32,6 +32,98 @@ interface IUpcomingEventsCardState {
   error?: string;
 }
 
+/** ---------- Formatting helpers (date + time) ---------- */
+const parseDateInput = (dateInput?: string | Date): Date | null => {
+  if (!dateInput) return null;
+
+  if (dateInput instanceof Date && !isNaN(dateInput.getTime())) return dateInput;
+
+  const raw = String(dateInput).trim();
+  if (!raw) return null;
+
+  // ISO / SharePoint style
+  const isoCandidate = new Date(raw);
+  if (!isNaN(isoCandidate.getTime())) return isoCandidate;
+
+  // DD/MM/YYYY (common in India)
+  const ddmmyyyy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (ddmmyyyy) {
+    const day = Number(ddmmyyyy[1]);
+    const month = Number(ddmmyyyy[2]);
+    const year = Number(ddmmyyyy[3]);
+    const date = new Date(year, month - 1, day);
+    return isNaN(date.getTime()) ? null : date;
+  }
+
+  return null;
+};
+
+const formatDisplayDate = (dateInput?: string | Date): string => {
+  const parsedDate = parseDateInput(dateInput);
+  if (!parsedDate) return (dateInput as any) || "-";
+
+  // "11 July 2024"
+  return parsedDate.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+};
+
+const formatTimeToken = (timeTokenRaw: string): string => {
+  const token = timeTokenRaw.trim();
+  if (!token) return "";
+
+  // 1) "9:00 AM" / "9 AM" / "9am"
+  const ampmMatch = token.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+  if (ampmMatch) {
+    const hour = Number(ampmMatch[1]);
+    const minutes = ampmMatch[2] ? ampmMatch[2] : "";
+    const ampm = ampmMatch[3].toUpperCase();
+
+    const showMinutes = minutes && minutes !== "00";
+    return showMinutes ? `${hour}:${minutes} ${ampm}` : `${hour} ${ampm}`;
+  }
+
+  // 2) "09:00" / "14:30" (24h)
+  const hhmmMatch = token.match(/^(\d{1,2}):(\d{2})$/);
+  if (hhmmMatch) {
+    const hour24 = Number(hhmmMatch[1]);
+    const minutes = hhmmMatch[2];
+
+    const ampm = hour24 >= 12 ? "PM" : "AM";
+    let hour12 = hour24 % 12;
+    if (hour12 === 0) hour12 = 12;
+
+    const showMinutes = minutes !== "00";
+    return showMinutes ? `${hour12}:${minutes} ${ampm}` : `${hour12} ${ampm}`;
+  }
+
+  // 3) fallback: keep as-is
+  return token;
+};
+
+const formatDisplayTimeRange = (timeInput?: string): string => {
+  const raw = (timeInput || "").trim();
+  if (!raw) return "-";
+
+  // support "-" or "–" or "to"
+  const parts =
+    raw.indexOf("–") > -1 ? raw.split("–") :
+    raw.indexOf("-") > -1 ? raw.split("-") :
+    raw.toLowerCase().indexOf(" to ") > -1 ? raw.toLowerCase().split(" to ") :
+    [raw];
+
+  const startToken = parts[0]?.trim() || "";
+  const endToken = parts[1]?.trim() || "";
+
+  const startFormatted = formatTimeToken(startToken);
+  const endFormatted = formatTimeToken(endToken);
+
+  if (startFormatted && endFormatted) return `${startFormatted} - ${endFormatted}`;
+  return startFormatted || raw;
+};
+
 export default class UpcomingEventsCard extends React.Component<
   IUpcomingEventsCardProps,
   IUpcomingEventsCardState
@@ -45,7 +137,7 @@ export default class UpcomingEventsCard extends React.Component<
       eventsData: [],
       trainingData: [],
       loading: true,
-      error: undefined,
+      error: undefined
     };
   }
 
@@ -120,7 +212,11 @@ export default class UpcomingEventsCard extends React.Component<
             <div className={styles.eventContent}>
               <div className={styles.imageRow}>
                 {currentEvent.eventImage && (
-                  <img className={styles.eventImage} src={currentEvent.eventImage} alt={currentEvent.eventTitle} />
+                  <img
+                    className={styles.eventImage}
+                    src={currentEvent.eventImage}
+                    alt={currentEvent.eventTitle}
+                  />
                 )}
                 {currentEvent.isRegistered && (
                   <div className={styles.registerPill}>
@@ -140,11 +236,15 @@ export default class UpcomingEventsCard extends React.Component<
               <div className={styles.dateTimeRow}>
                 <div className={styles.dateItem}>
                   <img src={DateCalendarIcon} className={styles.icon16} alt="" />
-                  <span className={styles.dateText}>{currentEvent.eventDate}</span>
+                  <span className={styles.dateText}>
+                    {formatDisplayDate(currentEvent.eventDate)}
+                  </span>
                 </div>
                 <div className={styles.timeItem}>
                   <img src={ClockIcon} className={styles.icon16} alt="" />
-                  <span className={styles.timeText}>{currentEvent.eventTime}</span>
+                  <span className={styles.timeText}>
+                    {formatDisplayTimeRange(currentEvent.eventTime)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -156,7 +256,11 @@ export default class UpcomingEventsCard extends React.Component<
             <div className={styles.eventContent}>
               <div className={styles.imageRow}>
                 {currentTraining.eventImage ? (
-                  <img className={styles.eventImage} src={currentTraining.eventImage} alt={currentTraining.eventTitle} />
+                  <img
+                    className={styles.eventImage}
+                    src={currentTraining.eventImage}
+                    alt={currentTraining.eventTitle}
+                  />
                 ) : (
                   <div className={styles.imagePlaceholder} />
                 )}
@@ -178,11 +282,15 @@ export default class UpcomingEventsCard extends React.Component<
               <div className={styles.dateTimeRow}>
                 <div className={styles.dateItem}>
                   <img src={DateCalendarIcon} className={styles.icon16} alt="" />
-                  <span className={styles.dateText}>{currentTraining.eventDate}</span>
+                  <span className={styles.dateText}>
+                    {formatDisplayDate(currentTraining.eventDate)}
+                  </span>
                 </div>
                 <div className={styles.timeItem}>
                   <img src={ClockIcon} className={styles.icon16} alt="" />
-                  <span className={styles.timeText}>{currentTraining.eventTime}</span>
+                  <span className={styles.timeText}>
+                    {formatDisplayTimeRange(currentTraining.eventTime)}
+                  </span>
                 </div>
               </div>
             </div>
