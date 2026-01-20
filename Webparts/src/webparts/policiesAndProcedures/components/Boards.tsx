@@ -2,7 +2,6 @@ import * as React from "react";
 import styles from "./PoliciesAndProcedures.module.scss";
 import { listServices, DocumentSummary } from "../../services/listServices";
 
-// same icon constants pattern as ViewPageList.tsx
 import {
   ICON_PDF,
   ICON_WORD,
@@ -10,6 +9,12 @@ import {
   ICON_TEXT,
   ICON_JPG,
   ICON_ZIP,
+  ICON_TAG,
+
+  // ✅ board heading icons
+  ICON_BOARD_RECENTLY_UPDATED,
+  ICON_BOARD_MOST_USED,
+  ICON_BOARD_FAVOURITES,
 } from "../../assets/constants";
 
 type BoardItem = DocumentSummary;
@@ -23,7 +28,7 @@ interface IBoardsProps {
   mostUsedCount?: number;
 
   favouritesCount?: number;
-  favouritesListTitle?: string; // default "Document Favorites"
+  favouritesListTitle?: string;
 }
 
 interface IBoardsState {
@@ -48,7 +53,6 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
 
   private _mounted: boolean = false;
 
-  // only show “real documents” (extra guard: prevents folders + aspx pages)
   private static readonly ALLOWED_EXT = new Set([
     "pdf",
     "doc",
@@ -109,20 +113,69 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
 
   private formatError(e: any): string {
     try {
-      // PnPjs often has e.data.responseBody JSON
       const body = e?.data?.responseBody;
       if (typeof body === "string" && body.trim().startsWith("{")) {
         const j = JSON.parse(body);
         const msg = j?.["odata.error"]?.message?.value || j?.error?.message;
         if (msg) return String(msg);
       }
-      // Sometimes already in message/value
       const msg = e?.message?.value || e?.message;
       if (msg) return String(msg);
     } catch {
       // ignore
     }
     return "Request failed. Check Network tab for details.";
+  }
+
+  private safeDecode(seg: string): string {
+    try {
+      return decodeURIComponent(seg);
+    } catch {
+      return seg;
+    }
+  }
+
+  // Category label (folder name just under the library root)
+  private getCategoryLabel(it: BoardItem): string {
+    const fallback = "Documents";
+    const url = (it.url || "").trim();
+    if (!url) return fallback;
+
+    const rootRel = (this.props.dmsLibraryRoot || "").trim().replace(/\/$/, "");
+    if (!rootRel) return fallback;
+
+    try {
+      const abs = /^https?:\/\//i.test(url)
+        ? url
+        : `${window.location.origin}${url.startsWith("/") ? url : `/${url}`}`;
+
+      const u = new URL(abs);
+
+      const pathParts = (u.pathname || "")
+        .split("/")
+        .filter(Boolean)
+        .map((p) => this.safeDecode(p));
+
+      const rootParts = rootRel
+        .split("/")
+        .filter(Boolean)
+        .map((p) => this.safeDecode(p));
+
+      const match = rootParts.every(
+        (rp, i) => (pathParts[i] || "").toLowerCase() === rp.toLowerCase()
+      );
+
+      if (!match) {
+        return pathParts.length >= 2 ? pathParts[pathParts.length - 2] : fallback;
+      }
+
+      const idxAfterRoot = rootParts.length;
+      if (idxAfterRoot >= pathParts.length - 1) return fallback;
+
+      return pathParts[idxAfterRoot] || fallback;
+    } catch {
+      return fallback;
+    }
   }
 
   public async componentDidMount(): Promise<void> {
@@ -153,7 +206,6 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
     const root = (this.props.dmsLibraryRoot || "").trim();
     const favList = (this.props.favouritesListTitle || "Document Favourites").trim();
 
-    // root is required (you said remove /sites/Intranet/DMS)
     if (!root) {
       if (this._mounted) {
         this.setState({
@@ -178,7 +230,6 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
     let mostUsedError: string | undefined;
     let favouritesError: string | undefined;
 
-    // no Promise.all — each board can fail independently (and show its own error)
     if (root) {
       try {
         recentRaw = await svc.getRecentlyUpdatedDocuments(root, recentlyCount);
@@ -225,12 +276,11 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
     if (it.url) {
       return (
         <a
-          className={styles.name}
+          className={`${styles.name} ${styles.nameLink}`}
           href={it.url}
           target="_blank"
           rel="noreferrer noopener"
           title={name}
-          style={{ color: "inherit", textDecoration: "none" }}
           onClick={(e) => e.stopPropagation()}
         >
           {name}
@@ -246,32 +296,32 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
 
   private renderDocBoard(
     title: string,
+    headerIcon: string,
     items: BoardItem[],
     emptyText: string,
     errorText?: string
   ): React.ReactElement {
     const { loading } = this.state;
-
-    // loading => keep empty list (no placeholders)
     const rows = loading ? [] : items;
 
     return (
       <div className={styles.board}>
-        <div className={styles.boardTitle}>{title}</div>
+        <div className={styles.boardTitleRow}>
+          <img src={headerIcon} alt="" className={styles.boardTitleIcon} />
+          <span className={styles.boardTitleText}>{title}</span>
+        </div>
 
         <ul className={styles.boardList}>
           {!loading && !!errorText && (
-            <li style={{ gridTemplateColumns: "12px 1fr auto" }}>
+            <li className={styles.boardRowMessage}>
               <span className={styles.dot} />
-              <span className={styles.meta} style={{ color: "#b00020" }}>
-                {errorText}
-              </span>
+              <span className={`${styles.meta} ${styles.errorText}`}>{errorText}</span>
               <span />
             </li>
           )}
 
           {!loading && !errorText && rows.length === 0 && (
-            <li style={{ gridTemplateColumns: "12px 1fr auto" }}>
+            <li className={styles.boardRowMessage}>
               <span className={styles.dot} />
               <span className={styles.meta}>{emptyText}</span>
               <span />
@@ -282,14 +332,19 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
             rows.map((it: BoardItem) => {
               const ext = this.getExt(it);
               const icon = this.getIconUrl(ext);
+              const category = this.getCategoryLabel(it);
 
               return (
-                <li key={it.id} style={{ gridTemplateColumns: "12px auto 1fr auto" }}>
-                  <img src={icon} alt="" style={{ width: 32, height: 32, alignSelf: "center" }} />
+                <li key={it.id} className={styles.boardRowDoc}>
+                  <img src={icon} alt="" className={styles.boardItemIcon} />
 
                   <div>
                     {this.renderName(it)}
-                    <div className={styles.meta}>{it.tag || "Documents"}</div>
+
+                    <div className={styles.categoryRow}>
+                      <img src={ICON_TAG} alt="" className={styles.categoryIcon} />
+                      <span className={styles.meta}>{category}</span>
+                    </div>
                   </div>
 
                   <span className={styles.meta}>{it.dept || ""}</span>
@@ -306,9 +361,9 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
 
     return (
       <div className={styles.boards}>
-        {this.renderDocBoard("Recently Updated", recently, "No documents found", recentlyError)}
-        {this.renderDocBoard("Most Used in DHRE", mostUsed, "No documents found", mostUsedError)}
-        {this.renderDocBoard("Favourites", favourites, "No favourites found", favouritesError)}
+        {this.renderDocBoard("Recently Updated", ICON_BOARD_RECENTLY_UPDATED, recently, "No documents found", recentlyError)}
+        {this.renderDocBoard("Most Used in DHRE", ICON_BOARD_MOST_USED, mostUsed, "No documents found", mostUsedError)}
+        {this.renderDocBoard("Favourites", ICON_BOARD_FAVOURITES, favourites, "No favourites found", favouritesError)}
       </div>
     );
   }
