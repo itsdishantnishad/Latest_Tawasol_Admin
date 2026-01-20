@@ -6,6 +6,11 @@
   border-radius: 8px;
   background: linear-gradient(89.65deg, #FEF1DB 7.61%, #FDEBD2 47.34%, #F9E3C7 95.71%);
   width: 500px;
+  // overflow: hidden;
+  :global(.ms-Modal-scrollableContent){
+    overflow-y: hidden;
+    max-height: max-content;
+  }
 }
 
 .header {
