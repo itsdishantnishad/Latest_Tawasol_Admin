@@ -26,18 +26,18 @@ const AllComponents: React.FC<Props> = ({
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
 
   const parsedEvents = React.useMemo(() => {
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
     return (filteredEvents || []).map((item: any) => {
 
       // Always use FIRST LINE → accurate, same as UI
       const startDateStr = item.eventStartDate?.split("\n")[0]?.trim();
-      const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim();
+      const endDateStr = item.eventEndDate?.split("\n")[0]?.trim();
 
       // Parse EXACTLY as SharePoint stored it
       const eventStart = startDateStr ? new Date(startDateStr) : null;
-      const eventEnd   = endDateStr ? new Date(endDateStr) : null;
+      const eventEnd = endDateStr ? new Date(endDateStr) : null;
 
       // FIX location duplication
       const location = item.location?.split("\n")[0]?.trim() || "";
@@ -80,7 +80,7 @@ const AllComponents: React.FC<Props> = ({
     return deduped.map((item, index) => {
 
       const startDateStr = item.eventStartDate?.split("\n")[0]?.trim() || "";
-      const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim() || "";
+      const endDateStr = item.eventEndDate?.split("\n")[0]?.trim() || "";
 
       const startDate = new Date(startDateStr);
       const endDate = new Date(endDateStr);
@@ -173,17 +173,15 @@ const AllComponents: React.FC<Props> = ({
       <div className={styles.tabContainer}>
         <div className={styles.tabContainerInner}>
           <button
-            className={`${styles.tabButton} ${
-              activeTab === "all" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === "all" ? styles.activeTab : ""
+              }`}
             onClick={() => setActiveTab("all")}
           >
             All Events & Trainings
           </button>
           <button
-            className={`${styles.tabButton} ${
-              activeTab === "my" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === "my" ? styles.activeTab : ""
+              }`}
             onClick={() => setActiveTab("my")}
           >
             My Events & Trainings
@@ -202,21 +200,30 @@ const AllComponents: React.FC<Props> = ({
                 ))}
 
                 <h5>Trainings</h5>
-                {mappedTrainings.map((event: any) => (
-                  <Trainingcard key={event.id} {...event} context={context} />
-                ))}
+                {mappedTrainings.length === 0 ? (
+                  <div className={styles.emptyState}>No Trainings found.</div>
+                ) : (
+                  mappedTrainings.map((event: any) => (
+                    <Trainingcard key={event.id} {...event} context={context} />
+                  ))
+                )}
 
-              <h5>Teams Meetings</h5>
-              {filteredMeetings.map((event: any) => (
-                <MeetingCard
-                  key={event.id}
-                  event={event}
-                  onJoinClick={() => alert("Joining Meeting...")}
-                />
-              ))}
-            </div>
+                <h5>Teams Meetings</h5>
+                {filteredMeetings.length === 0 ? (
+                  <div className={styles.emptyState}>No Meeting is Scheduled for you</div>
+                ) : (
+                  filteredMeetings.map((event: any) => (
+                    <MeetingCard
+                      key={event.id}
+                      event={event}
+                      onJoinClick={() => alert("Joining Meeting...")}
+                    />
+                  ))
+                )}
 
-            {/* <div className={styles.previousEventsContainer}>
+              </div>
+
+              {/* <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>
               <div className={styles.gridLayout}>
                 {previousEvents.length > 0 ? (
@@ -235,9 +242,9 @@ const AllComponents: React.FC<Props> = ({
                 )}
               </div>
             </div> */}
-          </div>
-          
-          {/* <div className={styles.eventsContainer}>
+            </div>
+
+            {/* <div className={styles.eventsContainer}>
             <div className={styles.eventsWrapper}>
               {upcomingEvents.length > 0 ? (
                 upcomingEvents.map((event:any, index:any) => (
@@ -290,17 +297,28 @@ const AllComponents: React.FC<Props> = ({
         viewMode === "list" ? (
           <>
             <div className={styles.eventsWrapper}>
-              <h5>My Events</h5>
-              {myEvents.map((event: any) => (
-                <EventCard key={event.id} {...event} context={context} />
-              ))}
-            </div>
+              <div className={styles.eventsWrapper}>
+                <h5>My Trainings</h5>
+                {myTrainings.length === 0 ? (
+                  <div className={styles.emptyState}>You havn't registered for any Training</div>
+                ) : (
+                  myTrainings.map((training: any) => (
+                    <Trainingcard key={training.id} {...training} context={context} />
+                  ))
+                )}
+              </div>
 
-            <div className={styles.eventsWrapper}>
-              <h5>My Trainings</h5>
-              {myTrainings.map((training: any) => (
-                <Trainingcard key={training.id} {...training} context={context} />
-              ))}
+              <div className={styles.eventsWrapper}>
+                <h5>My Meetings</h5>
+                {filteredMeetings.length === 0 ? (
+                  <div className={styles.emptyState}>No Meeting is Scheduled for you</div>
+                ) : (
+                  filteredMeetings.map((meeting: any) => (
+                    <MeetingCard key={meeting.id} event={meeting} />
+                  ))
+                )}
+              </div>
+
             </div>
 
             <div className={styles.eventsWrapper}>

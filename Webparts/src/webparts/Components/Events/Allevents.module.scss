@@ -262,6 +262,21 @@
   }
 }
 
+.emptyState{
+  width: 100%;
+  padding: 20px 16px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  color: #3A3B43;
+  background: #fff;
+  border: 1px dashed rgba(58,59,67,.25);
+  border-radius: 8px;
+  margin: 10px 0 18px;
+}
+
+
 // Responsive design
 @media (max-width: 1024px) {
   .eventCard {

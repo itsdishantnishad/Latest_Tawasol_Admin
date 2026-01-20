@@ -4,7 +4,7 @@ import { Meeting } from '../../services/meetingServices/IMeetingProvider';
 const outlookIcon: string = require("../../assets/outlook-icon.svg");
 // const TeamsIcon: string = require("../../assets/TeamsIcon.png");
 const teamsImage: string = require("../../assets/microsoft-teams-image.svg");
-const teamsIcon: string = require("../../assets/teamsIcon.svg")
+const teamsIcon: string = require("../../assets/TeamsIcon.svg")
 const getOrganizerAvatar = (event: any): string => {
   return event.avatarUrl || event.organizer?.avatarUrl || "https://i.pravatar.cc/150?img=1";
 };
