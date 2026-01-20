@@ -13,11 +13,8 @@ export interface IRightSectionProps {
   stickyTop?: number;
   eventsTrainingTab?: "events" | "training";
   context: WebPartContext;
-
-  //  ADD THIS (your error is because this was missing)
+  eventsTrainingViewAllUrl?: string;
   applyLeaveUrl?: string;
-
-  // already present
   hrLetterUrl?: string;
   hrLetterHeroUrl?: string;
 }
@@ -28,42 +25,44 @@ export default class RightSection extends React.Component<IRightSectionProps> {
     stickyTop: 16,
   };
 
-  public render(): React.ReactElement<IRightSectionProps> {
-    const {
-      className,
-      sticky,
-      stickyTop,
-      context,
-      eventsTrainingTab,
-      applyLeaveUrl,
-      hrLetterUrl,
-      hrLetterHeroUrl,
-    } = this.props;
+public render(): React.ReactElement<IRightSectionProps> {
+  const {
+    className,
+    sticky,
+    stickyTop,
+    context,
+    eventsTrainingTab,
+    eventsTrainingViewAllUrl, // ✅ ADD THIS
+    applyLeaveUrl,
+    hrLetterUrl,
+    hrLetterHeroUrl,
+  } = this.props;
 
-    return (
-      <aside
-        className={[
-          styles.rightWrap,
-          sticky ? styles.isSticky : "",
-          className || "",
-        ].join(" ")}
-        style={sticky ? { top: stickyTop } : undefined}
-        aria-label="Sidebar"
-      >
-        {/* Events / Training */}
-        <div className={styles.block}>
-          <UpcomingEventsCard currentTab={eventsTrainingTab} context={context} />
-        </div>
+  return (
+    <aside
+      className={[
+        styles.rightWrap,
+        sticky ? styles.isSticky : "",
+        className || "",
+      ].join(" ")}
+      style={sticky ? { top: stickyTop } : undefined}
+      aria-label="Sidebar"
+    >
+      <div className={styles.block}>
+        <UpcomingEventsCard
+          currentTab={eventsTrainingTab}
+          context={context}
+          viewAllUrl={eventsTrainingViewAllUrl}
+        />
+      </div>
 
-        {/* Apply for Leave */}
-        <div className={styles.block}>
-          <ApplyLeaveCard context={context} applyUrl={applyLeaveUrl} />
-        </div>
+      <div className={styles.block}>
+        <ApplyLeaveCard context={context} applyUrl={applyLeaveUrl} />
+      </div>
 
-        {/* HR Letters */}
-        <div className={styles.block}>
-          <HrLettersCard requestUrl={hrLetterUrl} heroUrl={hrLetterHeroUrl} />
-        </div>
+      <div className={styles.block}>
+        <HrLettersCard requestUrl={hrLetterUrl} heroUrl={hrLetterHeroUrl} />
+      </div>
 
         {/* Joined Communities */}
         {/* <div className={styles.block}>

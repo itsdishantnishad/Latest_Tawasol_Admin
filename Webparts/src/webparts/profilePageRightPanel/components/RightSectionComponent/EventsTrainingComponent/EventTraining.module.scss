@@ -215,15 +215,53 @@
 }
 
 .noEvent {
-  font-size: 12;
+  font-size: 12px;
   align-self: center;
   justify-self: center;
+}
+
+.cta {
+  width: 309px;
+  height: 40px;
+  border-radius: 167px;
+  border: 1.5px solid #C5B9AC;
+  background: #FFFFFF;
+  padding: 0 12px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-width: 240px;
+  transition: background-color 0.1s ease-in-out;
+}
+
+.cta:hover {
+  background-color: #FEEAD6;
+}
+
+.cta[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ctaText {
+  white-space: nowrap;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  color: #000000;
 }
 
 @media (max-width: 480px) {
   .card {
     padding: 16px;
     min-height: 420px;
+  }
+
+  .cta {
+    width: 100%;
   }
 
   .segmentWrap,
