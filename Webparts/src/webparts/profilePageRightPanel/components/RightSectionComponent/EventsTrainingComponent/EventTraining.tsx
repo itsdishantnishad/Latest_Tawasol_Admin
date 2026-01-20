@@ -19,6 +19,7 @@ export interface IUpcomingEventsCardProps {
   trainingData?: IEventData[];
   currentTab?: TabKey;
   context: WebPartContext;
+  viewAllUrl?: string;
 }
 
 interface IUpcomingEventsCardState {
@@ -31,7 +32,10 @@ interface IUpcomingEventsCardState {
   error?: string;
 }
 
-export default class UpcomingEventsCard extends React.Component<IUpcomingEventsCardProps, IUpcomingEventsCardState> {
+export default class UpcomingEventsCard extends React.Component<
+  IUpcomingEventsCardProps,
+  IUpcomingEventsCardState
+> {
   constructor(props: IUpcomingEventsCardProps) {
     super(props);
     this.state = {
@@ -70,6 +74,7 @@ export default class UpcomingEventsCard extends React.Component<IUpcomingEventsC
 
   public render(): React.ReactElement<IUpcomingEventsCardProps> {
     const { tab, currentEventIndex, currentTrainingIndex, loading, error } = this.state;
+    const { viewAllUrl } = this.props;
 
     const effectiveEvents = this.props.eventsData || this.state.eventsData;
     const effectiveTraining = this.props.trainingData || this.state.trainingData;
@@ -78,11 +83,11 @@ export default class UpcomingEventsCard extends React.Component<IUpcomingEventsC
     const currentTraining = effectiveTraining[currentTrainingIndex];
 
     return (
-      <section className={styles.card} aria-label="Upcoming Events and Training">
+      <section className={styles.card} aria-label="My Events & Trainings">
         <div className={styles.headerRow}>
           <div className={styles.headerLeft}>
             <img src={CalendarIcon} className={styles.icon24} alt="" />
-            <span className={styles.upcomingText}>Upcoming Events & Trainings</span>
+            <span className={styles.upcomingText}>My Events & Trainings</span>
           </div>
         </div>
 
@@ -191,6 +196,21 @@ export default class UpcomingEventsCard extends React.Component<IUpcomingEventsC
         {!loading && !error && tab === "training" && (!effectiveTraining || effectiveTraining.length === 0) && (
           <div className={styles.noEvent}>No upcoming trainings.</div>
         )}
+
+        {/* CTA */}
+        <a
+          className={styles.cta}
+          href={viewAllUrl || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-interception="off"
+          aria-disabled={!viewAllUrl}
+          onClick={(e) => {
+            if (!viewAllUrl) e.preventDefault();
+          }}
+        >
+          <span className={styles.ctaText}>View All</span>
+        </a>
       </section>
     );
   }

@@ -16,16 +16,12 @@ import { IProfilePageRightPanelProps } from "./components/IProfilePageRightPanel
 
 export interface IProfilePageRightPanelWebPartProps {
   description: string;
-
   applyLeaveUrl?: string;
   hrLetterUrl?: string;
-
-  //  NEW: HR letter hero image URL from property pane
   hrLetterHeroUrl?: string;
-
+  eventsTrainingViewAllUrl?: string;
   sticky?: boolean;
   stickyTop?: string;
-
   eventsTrainingTab?: "events" | "training";
 }
 
@@ -36,16 +32,12 @@ export default class ProfilePageRightPanelWebPart extends BaseClientSideWebPart<
     const element: React.ReactElement<IProfilePageRightPanelProps> =
       React.createElement(ProfilePageRightPanel, {
         context: this.context,
-
         applyLeaveUrl: (this.properties.applyLeaveUrl || "").trim(),
         hrLetterUrl: (this.properties.hrLetterUrl || "").trim(),
-
-        //  NEW: if empty string, pass undefined so HRLetter defaultProps stays working
         hrLetterHeroUrl: this._sanitizeUrl(this.properties.hrLetterHeroUrl),
-
-        sticky: this.properties.sticky !== false, // default true
+        eventsTrainingViewAllUrl: (this.properties.eventsTrainingViewAllUrl || "").trim(), // NEW
+        sticky: this.properties.sticky !== false,
         stickyTop: stickyTopNum,
-
         eventsTrainingTab: this.properties.eventsTrainingTab || "events",
       });
 
@@ -57,13 +49,11 @@ export default class ProfilePageRightPanelWebPart extends BaseClientSideWebPart<
     return isNaN(n) ? fallback : n;
   }
 
-  //  NEW: keep defaultProps working by returning undefined when blank
   private _sanitizeUrl(value?: string): string | undefined {
     const v = (value || "").trim();
     return v ? v : undefined;
   }
 
-  //  NEW: simple validation (optional but useful)
   private _validateImageUrl = (value: string): string => {
     const v = (value || "").trim();
     if (!v) return "";
@@ -97,11 +87,11 @@ export default class ProfilePageRightPanelWebPart extends BaseClientSideWebPart<
                 PropertyPaneTextField("description", {
                   label: strings.DescriptionFieldLabel,
                 }),
-
+                PropertyPaneTextField("eventsTrainingViewAllUrl", {
+                  label: "Events/Training View All URL",
+                }),
                 PropertyPaneTextField("applyLeaveUrl", { label: "Apply Leave URL" }),
                 PropertyPaneTextField("hrLetterUrl", { label: "HR Letter URL" }),
-
-                //  NEW: property pane field
                 PropertyPaneTextField("hrLetterHeroUrl", {
                   label: "HR Letter Hero Image URL",
                   placeholder: "https://.../SiteAssets/HR-Letter-Image.svg",

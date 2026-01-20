@@ -10,8 +10,6 @@ import {
   ICON_JPG,
   ICON_ZIP,
   ICON_TAG,
-
-  // ✅ board heading icons
   ICON_BOARD_RECENTLY_UPDATED,
   ICON_BOARD_MOST_USED,
   ICON_BOARD_FAVOURITES,

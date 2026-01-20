@@ -14,6 +14,7 @@ export default class ProfilePageRightPanel extends React.Component<IProfilePageR
       applyLeaveUrl,
       hrLetterUrl,
       hrLetterHeroUrl,
+      eventsTrainingViewAllUrl,
     } = this.props;
 
     return (
@@ -24,12 +25,10 @@ export default class ProfilePageRightPanel extends React.Component<IProfilePageR
           stickyTop={stickyTop}
           eventsTrainingTab={eventsTrainingTab}
           className={className}
-
-          // ✅ THIS was missing before
           applyLeaveUrl={applyLeaveUrl}
-
           hrLetterUrl={hrLetterUrl}
           hrLetterHeroUrl={hrLetterHeroUrl}
+          eventsTrainingViewAllUrl={eventsTrainingViewAllUrl}
         />
       </div>
     );
