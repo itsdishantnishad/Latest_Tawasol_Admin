@@ -68,9 +68,9 @@ export const LearningLinks: React.FC<ILearningLinksProps> = ({
                 )}
               </div>
 
-              <div className={styles.linkTitle}>
+              {/* <div className={styles.linkTitle}>
                 <h3>{link.title}</h3>
-              </div>
+              </div> */}
             </div>
           );
         })}

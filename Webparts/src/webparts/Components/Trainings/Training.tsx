@@ -29,7 +29,7 @@ const learningLinks: ILearningLink[] = [
   {
     id: 1,
     title: "STRYVE By LinkedIn Learning",
-    logo: require("../../assets/stryve.png"),
+    logo: require("../../assets/stryve.svg"),
     logoAlt: "STRYVE",
     url: "https://www.stryve.com/",
     backgroundColor: "#FDECDC",
@@ -37,7 +37,7 @@ const learningLinks: ILearningLink[] = [
   {
     id: 2,
     title: "eCornell by DHRE",
-    logo: require("../../assets/ecornell.png"),
+    logo: require("../../assets/ecornell.svg"),
     logoAlt: "eCornell",
     url: "https://ecornell.cornell.edu/",
     backgroundColor: "#FDECDC",
@@ -45,7 +45,7 @@ const learningLinks: ILearningLink[] = [
   {
     id: 3,
     title: "LMS by DHRE",
-    logo: require("../../assets/LMS.png"),
+    logo: require("../../assets/lms.svg"),
     logoAlt: "LMS by DHRE",
     url: "https://www.simplilearn.com/learning-management-system-basics-article",
     backgroundColor: "#FDECDC",
@@ -56,21 +56,21 @@ const learningContentLinks = [
   {
     id: 1,
     title: "DHRE Unconscious Bias",
-    logo: require("../../assets/learningconcious.png"),
+    logo: require("../../assets/learningconcious.svg"),
     logoAlt: "Bias",
     url: "#",
   },
   {
     id: 2,
     title: "DHRE Effective Time Management",
-    logo: require("../../assets/effectivemanagement.png"),
+    logo: require("../../assets/effectivemanagement.svg"),
     logoAlt: "Time",
     url: "#",
   },
   {
     id: 3,
     title: "DHRE Priority Matrix Job Aid",
-    logo: require("../../assets/priorityjob.png"),
+    logo: require("../../assets/priorityjob.svg"),
     logoAlt: "Matrix",
     url: "#",
   },
