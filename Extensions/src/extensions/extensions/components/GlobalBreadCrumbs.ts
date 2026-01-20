@@ -295,13 +295,13 @@ export class GlobalBreadcrumbs {
             this.unmount();
             return;
         }
-        if (this.isOfferBenefitsPage()) {
-            this.unmount();
-            return;
-        }
+        // if (this.isOfferBenefitsPage()) {
+        //     this.unmount();
+        //     return;
+        // }
 
         const info = await this.getCurrentSitePageInfo();
-        let section = this.isTasksPage() ? "Home" : "Pages";
+       let section = (this.isTasksPage() || this.isOfferBenefitsPage()) ? "Home" : "Pages";
         const title = info.title || this.getModernPageTitle();
 
         if (info.isNews) section = "News Story";

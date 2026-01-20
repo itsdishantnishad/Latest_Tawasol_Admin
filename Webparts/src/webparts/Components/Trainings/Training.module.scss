@@ -46,20 +46,13 @@
 }
 
 .cardsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); // 4 columns for desktop to match image
-  gap: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   margin-top: 22px;
   padding: 20px 0;
-
-  @media (max-width: 1024px) and (min-width: 769px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
 }
+
 
 /* Learning Links + Content Section */
 .learningSection {
