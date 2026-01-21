@@ -101,7 +101,13 @@ export class GlobalBreadcrumbs {
         p = p.toLowerCase();
         return p.endsWith("/sitepages/tasks.aspx") || p.endsWith("/sitepages/taskapproval.aspx");
     }
-
+    private isPolicyProcedurePage(): boolean {
+        let p = window.location.pathname || "";
+        try { p = decodeURIComponent(p); } catch { }
+        p = p.toLowerCase();
+        return p.endsWith("/sitepages/policies-and-procedures.aspx");
+    }
+    
 
     private getModernPageTitle(): string {
         const h1 =
@@ -304,10 +310,10 @@ export class GlobalBreadcrumbs {
             this.unmount();
             return;
         }
-        // if (this.isOfferBenefitsPage()) {
-        //     this.unmount();
-        //     return;
-        // }
+        if (this.isPolicyProcedurePage()) {
+            this.unmount();
+            return;
+        }
 
         const info = await this.getCurrentSitePageInfo();
        let section = (this.isTasksPage() || this.isOfferBenefitsPage() || this.isBeverageMenuPage()) ? "Home" : "Pages";

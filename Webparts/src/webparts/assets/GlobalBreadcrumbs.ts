@@ -65,7 +65,7 @@ function detectLabels(): S {
   const map: Array<{match:RegExp; sect:string; current?:string|((p:string)=>string)}>= [
     { match:/news/,            sect:'News',                 current:'News Details' },
     { match:/event/,           sect:'Events',               current:'Event Details' },
-    { match:/offer/,           sect:'Offers',               current:'Offer Details' },
+    { match:/offer/,           sect:'Home',               current:'Offer & Benefits' },
     { match:/train/,           sect:'Trainings',            current:'Training Details' },
     { match:/task/,            sect:'Task',                 current:'Task Details' },
     { match:/(policy|procedure)/, sect:'Policies & procedures',
