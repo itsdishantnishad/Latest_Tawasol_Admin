@@ -31,6 +31,8 @@ export let REAL_PDF_URL: string;
 export let ICON_BOARD_RECENTLY_UPDATED: string;
 export let ICON_BOARD_MOST_USED: string;
 export let ICON_BOARD_FAVOURITES: string;
+export let ICON_HEART_SAVED: string; 
+export let ICON_DOWNLOAD: string; 
 
 /**
  * Call this once (e.g. in WebPart onInit) to populate all URL constants
@@ -67,6 +69,8 @@ export function initUrlConstants(context: WebPartContext): void {
   ICON_BOARD_RECENTLY_UPDATED = `${PP_VIEW_ICONS_BASE}/Recently_Update.svg`;
   ICON_BOARD_MOST_USED        = `${PP_VIEW_ICONS_BASE}/Most_Used.svg`;
   ICON_BOARD_FAVOURITES       = `${PP_VIEW_ICONS_BASE}/Favorite.svg`;
+  ICON_HEART_SAVED = `${PP_VIEW_ICONS_BASE}/heart_Saved.svg`;
+  ICON_DOWNLOAD     = `${PP_VIEW_ICONS_BASE}/Download_Icon.svg`;
 }
 
 /** ====== Breadcrumb / Tasks SVGs you already had (kept as-is) ====== */
