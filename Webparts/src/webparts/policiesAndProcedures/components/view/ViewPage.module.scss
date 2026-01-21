@@ -2,9 +2,9 @@
 .wrap {
   display: grid;
   grid-template-columns: 1fr 620px;
-  gap: 14px;
+  gap: 39px;
   align-items: stretch; /* keep */
-  padding: 20px 60px;
+  padding: 20px 46px;
 }
 
 .left {
@@ -210,10 +210,10 @@
 .folderHeader {
   width: 100%;
   display: grid;
-  grid-template-columns: 24px 28px 1fr auto;
-  gap: 8px;
+  grid-template-columns: 24px 50px 1fr auto;
+  gap: 2px;
   align-items: center;
-  padding: 8px 16px;
+  padding: 8px 4px;
   background: #FDECDB;
   border: 0;
   border-radius: 8px;
