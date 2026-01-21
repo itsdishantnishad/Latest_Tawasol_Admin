@@ -41,13 +41,35 @@ export default class ViewPageListServices {
     }
   }
 
-  /** Convert server-relative URL to absolute URL */
+  /** Convert server-relative URL to absolute URL (same origin) */
   private toAbsUrl(urlOrRel: string): string {
     if (!urlOrRel) return "";
     if (/^https?:\/\//i.test(urlOrRel)) return urlOrRel;
 
     const rel = urlOrRel.startsWith("/") ? urlOrRel : `/${urlOrRel}`;
     return `${window.location.origin}${rel}`;
+  }
+
+  /**
+   * Extract site-relative base like:
+   *  - "" (root site)
+   *  - "/sites/IntranetRevampTawasol"
+   *  - "/teams/SomeTeam"
+   */
+  private getSiteRelBaseFromPath(pathname: string): string {
+    const p = (pathname || "").trim();
+    const m = p.match(/^\/(sites|teams)\/[^/]+/i);
+    return m ? m[0] : "";
+  }
+
+  /**
+   * Build correct download.aspx base:
+   *  - If file is under /sites/SiteName/... then use origin + /sites/SiteName
+   *  - If under root site, use origin only
+   */
+  private getDownloadBase(origin: string, pathname: string): string {
+    const siteRel = this.getSiteRelBaseFromPath(pathname);
+    return `${origin}${siteRel}`;
   }
 
   /**
@@ -129,7 +151,9 @@ export default class ViewPageListServices {
 
   /**
    * SharePoint OOTB download link (download.aspx)
-   * Uses serverRelativeUrl when possible (most reliable)
+   * IMPORTANT:
+   * - For /sites/SiteName/... files, download.aspx must be under the SAME site collection:
+   *   https://tenant.sharepoint.com/sites/SiteName/_layouts/15/download.aspx?SourceUrl=<serverRelativeUrl>
    */
   public getDownloadUrl(item: IPoliciesAndProceduresItem): string | null {
     if (item.isFolder) return null;
@@ -138,27 +162,32 @@ export default class ViewPageListServices {
     const url = (rel || item.previewUrl || "").trim();
     if (!url) return null;
 
-    const origin = window.location.origin;
-
-    // Prefer server-relative SourceUrl
+    // Prefer serverRelativeUrl (best + stable)
     if (rel) {
-      return `${origin}/_layouts/15/download.aspx?SourceUrl=${encodeURIComponent(rel)}`;
+      const base = this.getDownloadBase(window.location.origin, rel);
+      return `${base}/_layouts/15/download.aspx?SourceUrl=${encodeURIComponent(rel)}`;
     }
 
-    // Fallback for absolute urls
+    // Fallback: previewUrl could be absolute
     const abs = this.toAbsUrl(url);
     try {
       const u = new URL(abs);
-      return `${u.origin}/_layouts/15/download.aspx?SourceUrl=${encodeURIComponent(u.pathname)}`;
+      const base = this.getDownloadBase(u.origin, u.pathname);
+      // SourceUrl expects a server-relative path
+      return `${base}/_layouts/15/download.aspx?SourceUrl=${encodeURIComponent(u.pathname)}`;
     } catch {
-      return `${origin}/_layouts/15/download.aspx?SourceUrl=${encodeURIComponent(url)}`;
+      const base = this.getDownloadBase(window.location.origin, url);
+      return `${base}/_layouts/15/download.aspx?SourceUrl=${encodeURIComponent(url)}`;
     }
   }
 
   /**
    * Export selected items to CSV (client-side)
    */
-  public exportSelectedToCsv(selectedItems: IPoliciesAndProceduresItem[], fileName = "documents.csv"): void {
+  public exportSelectedToCsv(
+    selectedItems: IPoliciesAndProceduresItem[],
+    fileName = "documents.csv"
+  ): void {
     if (!selectedItems?.length) return;
 
     const header = ["Name", "Type", "Modified by", "Modified on", "Tag", "Department"];
