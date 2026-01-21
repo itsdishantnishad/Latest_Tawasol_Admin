@@ -129,9 +129,11 @@ export default class PoliciesAndProceduresList extends React.Component<
     const checked = this.isSelected(item.id, folderId);
     const meta = this._utils.getRowMeta(item, this.props.favouriteIndex);
 
+    const showActions = !item.isFolder && !!item.serverRelativeUrl;
+
     return (
       <div key={item.id} className={`${styles.row} ${isActive ? styles.rowActive : ""}`}>
-        <div>
+        <div className={styles.cellCheck}>
           <Checkbox
             checked={checked}
             onChange={(ev, isChecked) => {
@@ -142,16 +144,23 @@ export default class PoliciesAndProceduresList extends React.Component<
             }}
           />
         </div>
-        <div>
-          <button type="button" className={styles.openBtn} aria-label={item.name} onClick={e => e.stopPropagation()}>
+
+        <div className={styles.cellType}>
+          <button
+            type="button"
+            className={styles.openBtn}
+            aria-label={item.name}
+            onClick={(e) => e.stopPropagation()}
+          >
             <img className={styles.typeIcon} src={meta.fileIcon} alt="" />
           </button>
         </div>
+
         <div className={styles.cellName}>
           <button
             type="button"
             className={`${styles.nameStrong} ${styles.openBtn}`}
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             {item.name}
           </button>
@@ -162,45 +171,47 @@ export default class PoliciesAndProceduresList extends React.Component<
           </div>
         </div>
 
-        {/* Category (same green icon as Boards.tsx) */}
-        <div>
-          <span className={styles.tagPill}>
-            <img src={ICON_TAG} alt="" className={styles.tagIcon} />
-            {meta.categoryLabel}
+        {/* Category (Figma style) */}
+        <div className={styles.cellCategory}>
+          <span className={styles.categoryInline} title={meta.categoryLabel}>
+            <img src={ICON_TAG} alt="" className={styles.categoryIcon} />
+            <span className={styles.categoryText}>{meta.categoryLabel}</span>
           </span>
         </div>
 
-        <div className={styles.cellDept}>{item.department || ""}</div>
+        {/* Right side: dept (only if present) + icons */}
+        <div className={styles.cellRight}>
+          {!!item.department && <span className={styles.cellDept}>{item.department}</span>}
 
-        {/* Actions: Favourite + Download */}
-        <div>
-          {!item.isFolder && !!item.serverRelativeUrl && (
-            <button
-              type="button"
-              className={styles.favBtn}
-              title={meta.isFavourite ? "Remove from favourites" : "Add to favourites"}
-              onClick={e => {
-                e.stopPropagation();
-                this.props.onToggleFavourite?.(item);
-              }}
-            >
-              <img
-                src={meta.isFavourite ? ICON_HEART_SAVED : ICON_HEART}
-                alt=""
-                className={styles.favIcon}
-              />
-            </button>
-          )}
+          {showActions && (
+            <div className={styles.cellActions}>
+              <button
+                type="button"
+                className={styles.favBtn}
+                title={meta.isFavourite ? "Remove from favourites" : "Add to favourites"}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.props.onToggleFavourite?.(item);
+                }}
+              >
+                <img
+                  src={meta.isFavourite ? ICON_HEART_SAVED : ICON_HEART}
+                  alt=""
+                  className={styles.favIcon}
+                />
+              </button>
 
-          {!item.isFolder && !!meta.downloadUrl && (
-            <a
-              className={styles.favBtn}
-              href={meta.downloadUrl}
-              title="Download"
-              onClick={e => e.stopPropagation()}
-            >
-              <img src={ICON_DOWNLOAD} alt="" className={styles.favIcon} />
-            </a>
+              {!!meta.downloadUrl && (
+                <a
+                  className={styles.downloadBtn}
+                  href={meta.downloadUrl}
+                  title="Download"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img src={ICON_DOWNLOAD} alt="" className={styles.downloadIcon} />
+                </a>
+              )}
+            </div>
           )}
         </div>
       </div>

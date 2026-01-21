@@ -85,64 +85,102 @@
 .fileIcon[data-ext="pptx"] { background: #ffe6bf; }
 .folderIcon { background: #FAD08C; }
 
-/* ================= Root file rows (no thead) ================= */
+/* ================= Root file rows (Figma aligned) ================= */
 .row {
   display: grid;
-  grid-template-columns: 32px 36px 1fr 40px 80px 60px; 
-  gap: 8px;
+  grid-template-columns: 32px 36px 1fr 110px auto; 
+  gap: 16px;
   padding: 12px 8px;
   align-items: start;
+  border-top: 1px dashed var(--pp-border-dash);
 }
 .row:first-child { border-top: none; }
 .rowActive { background: #fff9f3; }
 
-.cellCategory { padding-top: 2px; }
+.cellCheck,
+.cellType,
+.cellName,
+.cellCategory,
+.cellRight {
+  padding-top: 2px; /* same top alignment for all cells */
+}
 
+.cellCheck { display: flex; align-items: flex-start; }
+.cellType  { display: flex; align-items: flex-start; }
+
+.cellName {
+  max-width: 420px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Category = inline icon + text (NOT pill) */
+.cellCategory { min-width: 0; }
 .categoryInline {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
-
 .categoryIcon {
   width: 18px;
   height: 18px;
   display: block;
   object-fit: contain;
 }
+.categoryText {
+  color: #6C6C6C;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right side: Dept + actions */
+.cellRight {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 18px; /* space between dept and icons */
+}
+
+.cellDept {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  color: #6C6C6C;
+  white-space: nowrap;
+}
 
 .cellActions {
-  padding-top: 2px;
-  justify-self: end;
   display: inline-flex;
   align-items: center;
   gap: 14px;
 }
 
-.cellCheck,
-.cellType,
-.cellTag,
-.cellDept,
-.cellFav {
-  padding-top: 2px;
+/* ================= Actions icons ================= */
+.favBtn,
+.downloadBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
-.cellFav {
-  justify-self: end;
+.favIcon,
+.downloadIcon {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
-.cellType .typeIcon {
-  width: 22px;
-  height: 22px;
-}
-
-.cellName     { max-width: 420px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cellDept     {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 22px;
-  color: #6C6C6C;
-}
 /* ================= Type icons ================= */
 .typeIcon {
   display: block;     
@@ -161,40 +199,6 @@
   line-height: 16px;
 }
 .tagIcon {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-/* ================= Favourite (Heart) ================= */
-.favBtn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.favIcon {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-/* ================= Download icons ================= */
-.downloadBtn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-}
-
-.downloadIcon {
   width: 18px;
   height: 18px;
   display: block;
