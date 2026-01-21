@@ -85,6 +85,15 @@ export class GlobalBreadcrumbs {
         return p.endsWith("/sitepages/offers-&-benifits.aspx");
     }
 
+    private isBeverageMenuPage(): boolean {
+        let p = window.location.pathname || "";
+        try { p = decodeURIComponent(p); } catch { }
+        p = p.toLowerCase();
+
+        return p.endsWith("/sitepages/beverages.aspx");
+    }
+
+
 
     private isTasksPage(): boolean {
         let p = window.location.pathname || "";
@@ -301,8 +310,12 @@ export class GlobalBreadcrumbs {
         // }
 
         const info = await this.getCurrentSitePageInfo();
-       let section = (this.isTasksPage() || this.isOfferBenefitsPage()) ? "Home" : "Pages";
-        const title = info.title || this.getModernPageTitle();
+       let section = (this.isTasksPage() || this.isOfferBenefitsPage() || this.isBeverageMenuPage()) ? "Home" : "Pages";
+        let title = info.title || this.getModernPageTitle();
+
+        if (this.isBeverageMenuPage()) {
+             title = "BeverageMenu"; 
+         }
 
         if (info.isNews) section = "News Story";
         else if (info.contentType) {
