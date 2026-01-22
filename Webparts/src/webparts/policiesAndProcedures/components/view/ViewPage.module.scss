@@ -32,6 +32,7 @@
     font-size: 14px;
     font-weight: 400;
     font-family: 'Inter', sans-serif;
+    cursor: pointer;
   }
 }
 
@@ -284,6 +285,23 @@
 
 .actionBarRight span {
   display: block;
+}
+
+/* ================= Action bar ================= */
+
+.topBar{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.searchSlot{
+  margin-left: auto;
+  width: 320px; /* tweak as per figma */
+}
+
+.searchBox{
+  width: 100%;
 }
 
 /* ================= Grid cards overlays (remove inline styles) ================= */

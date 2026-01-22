@@ -6,6 +6,8 @@ import ViewPageListServices from "../../../services/PoliciesAndProcedures/ViewPa
 import type { FavouriteIndex, IPoliciesAndProceduresItem } from "../../../services/PoliciesAndProcedures/ViewPageListTypes";
 export type { IPoliciesAndProceduresItem } from "../../../services/PoliciesAndProcedures/ViewPageListTypes";
 
+import PoliciesSearchService from "../../../services/PoliciesAndProcedures/PoliciesSearchService";
+
 import {
   ICON_DOC_FOLDER_GRID,
   ICON_DOC_FOLDER_LIST,
@@ -24,13 +26,19 @@ export interface IPoliciesAndProceduresListProps {
   activeId?: string;
   onOpenFile: (fileItem: IPoliciesAndProceduresItem) => void;
   onClearPreview?: () => void;
-  onToggleFolder: (folderItem: IPoliciesAndProceduresItem) => void;
+
+  // NOTE: parent is async - keep it compatible
+  onToggleFolder: (folderItem: IPoliciesAndProceduresItem) => Promise<void> | void;
+
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
   onSwitchFolderView: (folderId: string, mode: "list" | "grid") => void;
   getFolderViewMode: (folderId: string) => "list" | "grid";
   favouriteIndex?: FavouriteIndex;
   onToggleFavourite?: (file: IPoliciesAndProceduresItem) => void;
   dmsLibraryRoot?: string;
+
+  searchText?: string;
+  autoExpandFolderIds?: string[];
 }
 
 type State = {
@@ -49,6 +57,49 @@ export default class PoliciesAndProceduresList extends React.Component<
 
   private readonly _utils = new ViewPageListServices();
   private _lastRoot?: string;
+
+  private get query(): string {
+    return (this.props.searchText || "").trim();
+  }
+
+  // normalized forced expand keys (works for encoded/decoded)
+  private get forcedExpandKeys(): Set<string> {
+    return new Set((this.props.autoExpandFolderIds || []).map(PoliciesSearchService.toKey));
+  }
+
+  private isForced(folderId: string): boolean {
+    return this.forcedExpandKeys.has(PoliciesSearchService.toKey(folderId));
+  }
+
+  public componentDidUpdate(prevProps: IPoliciesAndProceduresListProps): void {
+    const q = this.query;
+    const prevQ = (prevProps.searchText || "").trim();
+
+    const autoChanged =
+      (prevProps.autoExpandFolderIds || []).join("|") !== (this.props.autoExpandFolderIds || []).join("|");
+
+    if (q && (q !== prevQ || autoChanged)) {
+      void this.ensureAutoExpanded();
+    }
+  }
+
+  private async ensureAutoExpanded(): Promise<void> {
+    const ids = this.props.autoExpandFolderIds || [];
+    if (!ids.length) return;
+
+    // Mark expanded in UI state
+    this.setState(prev => {
+      const next = new Set(prev.expandedFolderIds);
+      ids.forEach(id => next.add(id));
+      return { ...prev, expandedFolderIds: next };
+    });
+
+    // Ensure children loaded
+    for (const id of ids) {
+      const stub: IPoliciesAndProceduresItem = { id, name: "", isFolder: true, serverRelativeUrl: id };
+      await this.props.onToggleFolder(stub);
+    }
+  }
 
   // ---------- selection helpers ----------
   private getScopeKey = (folderId?: string) => folderId || "root";
@@ -124,6 +175,41 @@ export default class PoliciesAndProceduresList extends React.Component<
     }
   };
 
+  // ---------- search helpers ----------
+  private itemMatches = (it: IPoliciesAndProceduresItem, q: string): boolean => {
+    if (!q) return true;
+    return (
+      PoliciesSearchService.matches(it.name || "", q) ||
+      PoliciesSearchService.matches(it.tag || "", q) ||
+      PoliciesSearchService.matches(it.department || "", q)
+    );
+  };
+
+  private folderHasMatch = (folderId: string, q: string, visited = new Set<string>()): boolean => {
+    if (!q) return true;
+    const key = PoliciesSearchService.toKey(folderId);
+    if (visited.has(key)) return false;
+    visited.add(key);
+
+    // Find the real expandedChildren key even if encoding differs
+    const kidsKey =
+      Object.keys(this.props.expandedChildren).find(k => PoliciesSearchService.toKey(k) === key) || folderId;
+
+    const kids = this.props.expandedChildren[kidsKey] || [];
+    for (const c of kids) {
+      if (this.itemMatches(c, q)) return true;
+      if (c.isFolder && this.folderHasMatch(c.id, q, visited)) return true;
+    }
+    return false;
+  };
+
+  private shouldShowFolder = (folder: IPoliciesAndProceduresItem, q: string): boolean => {
+    if (!q) return true;
+    if (this.isForced(folder.id)) return true;
+    if (this.itemMatches(folder, q)) return true;
+    return this.folderHasMatch(folder.id, q);
+  };
+
   // ---------- list row ----------
   private renderFileRow = (item: IPoliciesAndProceduresItem, isActive: boolean, folderId?: string) => {
     const checked = this.isSelected(item.id, folderId);
@@ -171,7 +257,6 @@ export default class PoliciesAndProceduresList extends React.Component<
           </div>
         </div>
 
-        {/* Category (Figma style) */}
         <div className={styles.cellCategory}>
           <span className={styles.categoryInline} title={meta.categoryLabel}>
             <img src={ICON_TAG} alt="" className={styles.categoryIcon} />
@@ -179,7 +264,6 @@ export default class PoliciesAndProceduresList extends React.Component<
           </span>
         </div>
 
-        {/* Right side: dept (only if present) + icons */}
         <div className={styles.cellRight}>
           {!!item.department && <span className={styles.cellDept}>{item.department}</span>}
 
@@ -231,7 +315,6 @@ export default class PoliciesAndProceduresList extends React.Component<
           </button>
         </div>
 
-        {/* keep existing wrapper (no new SCSS class like cardCategoryRow) */}
         <div className={styles.cardFavWrap}>
           {!item.isFolder && !!item.serverRelativeUrl && (
             <button
@@ -269,7 +352,6 @@ export default class PoliciesAndProceduresList extends React.Component<
           <span className={styles.meta}>{item.modifiedOn ? item.modifiedOn.toLocaleDateString() : "-"}</span>
         </div>
 
-        {/* Category shown using existing tag pill style */}
         <div>
           <span className={styles.tagPill}>
             <img src={ICON_TAG} alt="" className={styles.tagIcon} />
@@ -297,9 +379,21 @@ export default class PoliciesAndProceduresList extends React.Component<
   };
 
   private renderFolderChildrenRecursive = (folderId: string): React.ReactNode => {
-    const children = this.props.expandedChildren[folderId] || [];
-    const folders = children.filter(c => c.isFolder);
-    const files = children.filter(c => !c.isFolder);
+    const q = this.query;
+
+    const folderKey = PoliciesSearchService.toKey(folderId);
+    const realKey =
+      Object.keys(this.props.expandedChildren).find(k => PoliciesSearchService.toKey(k) === folderKey) || folderId;
+
+    const children = this.props.expandedChildren[realKey] || [];
+
+    const folders = children
+      .filter(c => c.isFolder)
+      .filter(f => this.shouldShowFolder(f, q));
+
+    const files = children
+      .filter(c => !c.isFolder)
+      .filter(f => this.itemMatches(f, q));
 
     return (
       <div>
@@ -311,7 +405,7 @@ export default class PoliciesAndProceduresList extends React.Component<
 
         {this.props.getFolderViewMode(folderId) === "grid" && (
           <div className={styles.gridBody}>
-            {files.map(f => this.renderGridCard(f, this.props.activeId === f.id, folderId))}
+            {files.map(f => this.renderGridCard(f, this.props.activeId === f.id, folderId)) }
           </div>
         )}
       </div>
@@ -319,10 +413,24 @@ export default class PoliciesAndProceduresList extends React.Component<
   };
 
   private renderFolderBlock = (folder: IPoliciesAndProceduresItem, nested?: boolean): React.ReactNode => {
-    const isExpanded = this.isFolderExpanded(folder.id);
+    const q = this.query;
+    if (!this.shouldShowFolder(folder, q)) return null;
+
+    const mustExpand = !!q && this.isForced(folder.id);
+    const isExpanded = mustExpand || this.isFolderExpanded(folder.id);
+
     const viewMode = this.props.getFolderViewMode(folder.id);
-    const children = this.props.expandedChildren[folder.id] || [];
-    const files = children.filter(c => !c.isFolder);
+
+    const folderKey = PoliciesSearchService.toKey(folder.id);
+    const realKey =
+      Object.keys(this.props.expandedChildren).find(k => PoliciesSearchService.toKey(k) === folderKey) || folder.id;
+
+    const children = this.props.expandedChildren[realKey] || [];
+
+    const files = children
+      .filter(c => !c.isFolder)
+      .filter(f => this.itemMatches(f, q));
+
     const allIds = files.map(f => f.id);
     const selectedFiles = files.filter(f => this.isSelected(f.id, folder.id));
     const isAllSelected = allIds.length > 0 && allIds.every(id => this.isSelected(id, folder.id));
@@ -398,7 +506,7 @@ export default class PoliciesAndProceduresList extends React.Component<
                   }}
                 >
                   <img src={ICON_EXPORT_TO_CSV} alt="" className={styles.typeIcon} />
-                  <span>Export to CSV</span>
+                  <span>Export</span>
                 </div>
               )}
             </div>
@@ -411,15 +519,16 @@ export default class PoliciesAndProceduresList extends React.Component<
   };
 
   public render(): React.ReactElement<IPoliciesAndProceduresListProps> {
-    // Sync library root without lifecycle methods (keeps file smaller)
     const root = (this.props.dmsLibraryRoot || "").trim();
     if (root !== (this._lastRoot || "")) {
       this._lastRoot = root;
       this._utils.setLibraryRoot(root);
     }
 
-    const rootFolders = this.props.items.filter(i => i.isFolder);
-    const rootFiles = this.props.items.filter(i => !i.isFolder);
+    const q = this.query;
+
+    const rootFolders = this.props.items.filter(i => i.isFolder).filter(f => this.shouldShowFolder(f, q));
+    const rootFiles = this.props.items.filter(i => !i.isFolder).filter(f => this.itemMatches(f, q));
 
     return (
       <div>

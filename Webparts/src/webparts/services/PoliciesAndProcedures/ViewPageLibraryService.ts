@@ -7,7 +7,7 @@ import '@pnp/sp/folders';
 import '@pnp/sp/files';
 import '@pnp/sp/site-users/web';
 
-import { IPoliciesAndProceduresItem } from './ViewPageList';
+import { IPoliciesAndProceduresItem } from '../../policiesAndProcedures/components/view/ViewPageList';
 
 export interface IPoliciesAndProceduresDataProvider {
   getRootItems(functionDisplayName: string): Promise<IPoliciesAndProceduresItem[]>;

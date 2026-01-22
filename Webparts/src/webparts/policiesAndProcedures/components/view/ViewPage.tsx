@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Breadcrumb, IBreadcrumbItem } from "@fluentui/react";
+import { Breadcrumb, IBreadcrumbItem, SearchBox } from "@fluentui/react";
 import type { WebPartContext } from "@microsoft/sp-webpart-base";
 import view from "./ViewPage.module.scss";
 import { breadcrumbBeforeBackArrowSVG } from "../../../assets/constants";
@@ -10,9 +10,10 @@ import {
   IPoliciesAndProceduresDataProvider,
   PoliciesAndProceduresDummyProvider,
   PoliciesAndProceduresSharePointProvider
-} from "./ViewPageDataProvider";
+} from "../../../services/PoliciesAndProcedures/ViewPageLibraryService";
 
 import { listServices } from "../../../services/listServices";
+import PoliciesSearchService from "../../../services/PoliciesAndProcedures/PoliciesSearchService";
 
 export interface IPoliciesAndProceduresViewProps {
   context: WebPartContext;
@@ -31,6 +32,9 @@ type IPoliciesAndProceduresViewState = {
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
   folderViewMode: Record<string, FolderViewMode>;
   favouriteIndex: Record<string, number>;
+
+  searchText: string;
+  autoExpandFolderIds: string[];
 };
 
 export default class PoliciesAndProceduresView extends React.Component<
@@ -40,15 +44,23 @@ export default class PoliciesAndProceduresView extends React.Component<
   private dataProvider: IPoliciesAndProceduresDataProvider;
   private readonly _libraryRoot: string;
 
+  private readonly _searchSvc: PoliciesSearchService;
+  private _searchTimer?: number;
+  private _searchNonce: number = 0;
+
   constructor(props: IPoliciesAndProceduresViewProps) {
     super(props);
+
     const siteRel = props.context.pageContext.web.serverRelativeUrl || "";
     const base = siteRel === "/" ? "" : siteRel;
     const computedFallbackRoot = encodeURI(`${base}/GRC framework Documents`);
     this._libraryRoot = (props.dmsLibraryRoot || computedFallbackRoot).trim();
+
     this.dataProvider = props.useSharePointProvider
       ? new PoliciesAndProceduresSharePointProvider(props.context, this._libraryRoot)
       : new PoliciesAndProceduresDummyProvider();
+
+    this._searchSvc = new PoliciesSearchService(props.context);
 
     this.state = {
       breadcrumbs: [
@@ -59,7 +71,10 @@ export default class PoliciesAndProceduresView extends React.Component<
       selectedItem: undefined,
       expandedChildren: {},
       folderViewMode: {},
-      favouriteIndex: {}
+      favouriteIndex: {},
+
+      searchText: "",
+      autoExpandFolderIds: []
     };
   }
 
@@ -76,6 +91,11 @@ export default class PoliciesAndProceduresView extends React.Component<
     });
   }
 
+  public componentWillUnmount(): void {
+    if (this._searchTimer) window.clearTimeout(this._searchTimer);
+    this._searchNonce++;
+  }
+
   private handleOpenFile = (fileItem: IPoliciesAndProceduresItem): void => {
     this.setState({ selectedItem: fileItem });
   };
@@ -90,7 +110,7 @@ export default class PoliciesAndProceduresView extends React.Component<
       const svc = new listServices(this.props.context);
       const webAbs = this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
       const origin = new URL(webAbs).origin;
-      const absoluteFileUrl = `${origin}${file.serverRelativeUrl}`;
+      const absoluteFileUrl = `${origin}${encodeURI(file.serverRelativeUrl)}`;
       await svc.toggleFavourite(absoluteFileUrl, file.name, "Document Favourites");
 
       const favouriteIndex = await svc.getFavouriteIndex("Document Favourites");
@@ -101,21 +121,26 @@ export default class PoliciesAndProceduresView extends React.Component<
     }
   };
 
-  /**
-   * IMPORTANT: Multi-expand is controlled by ViewPageList.tsx.
-   * Parent only ensures children are loaded once per folderId.
-   */
   private handleEnsureFolderChildren = async (folderItem: IPoliciesAndProceduresItem): Promise<void> => {
     if (!folderItem?.id) return;
-    if (this.state.expandedChildren[folderItem.id]) return; // already loaded
-    if (!folderItem.serverRelativeUrl) return;
+
+    // IMPORTANT: normalize key match (encoded/decoded)
+    const folderKey = PoliciesSearchService.toKey(folderItem.id);
+
+    // already loaded?
+    const existingKey = Object.keys(this.state.expandedChildren).find(k => PoliciesSearchService.toKey(k) === folderKey);
+    if (existingKey && this.state.expandedChildren[existingKey]) return;
+
+    const serverRel = folderItem.serverRelativeUrl || folderItem.id;
+    if (!serverRel) return;
 
     try {
       const children = await this.dataProvider.getFolderChildren(
         this.props.functionDisplayName,
-        folderItem.serverRelativeUrl
+        serverRel
       );
 
+      // store using the ORIGINAL id string we received (so ViewPageList keys match)
       this.setState(prev => ({
         expandedChildren: { ...prev.expandedChildren, [folderItem.id]: children }
       }));
@@ -128,6 +153,83 @@ export default class PoliciesAndProceduresView extends React.Component<
   private handleSwitchFolderView = (folderId: string, mode: FolderViewMode): void => {
     this.setState(prev => ({ folderViewMode: { ...prev.folderViewMode, [folderId]: mode } }));
   };
+
+  // ---------------- SEARCH ----------------
+  private onSearchChange = (_?: any, value?: string): void => {
+    const v = value ?? "";
+    this.setState({ searchText: v });
+
+    if (this._searchTimer) window.clearTimeout(this._searchTimer);
+
+    const q = v.trim();
+    if (!q) {
+      this._searchNonce++;
+      this.setState({ autoExpandFolderIds: [] });
+      return;
+    }
+
+    this._searchTimer = window.setTimeout(() => {
+      void this.runDeepSearch(q);
+    }, 250);
+  };
+
+  private async runDeepSearch(query: string): Promise<void> {
+    const nonce = ++this._searchNonce;
+
+    try {
+      const hits = await this._searchSvc.searchFilesInFunction(
+        this._libraryRoot,
+        this.props.functionDisplayName,
+        query,
+        100
+      );
+
+      if (nonce !== this._searchNonce) return;
+
+      const fnRootRel = PoliciesSearchService.buildFunctionRootRel(
+        this._libraryRoot,
+        this.props.functionDisplayName
+      );
+
+      // Deduplicate folders by normalized key, but keep display id string (decoded)
+      const folderByKey = new Map<string, string>();
+
+      for (const f of hits) {
+        const fileRel = (f.serverRelativeUrl || "").trim();
+        if (!fileRel) continue;
+
+        const chain = PoliciesSearchService.getFolderChainFromFile(fileRel, fnRootRel);
+        for (const id of chain) {
+          folderByKey.set(PoliciesSearchService.toKey(id), id);
+        }
+      }
+
+      const ordered = Array.from(folderByKey.values()).sort((a, b) => a.length - b.length);
+
+      // Load children in chain order so nested folders exist in UI
+      for (const folderRel of ordered) {
+        if (nonce !== this._searchNonce) return;
+
+        const stubFolder: IPoliciesAndProceduresItem = {
+          id: folderRel,
+          name: "",
+          isFolder: true,
+          serverRelativeUrl: folderRel
+        };
+
+        await this.handleEnsureFolderChildren(stubFolder);
+      }
+
+      if (nonce !== this._searchNonce) return;
+
+      this.setState({ autoExpandFolderIds: ordered });
+    } catch (e) {
+      if (nonce !== this._searchNonce) return;
+      // eslint-disable-next-line no-console
+      console.error("deep search failed", e);
+      this.setState({ autoExpandFolderIds: [] });
+    }
+  }
 
   private renderTopBar(): React.ReactNode {
     return (
@@ -142,13 +244,30 @@ export default class PoliciesAndProceduresView extends React.Component<
         </p>
         <p>|</p>
         <Breadcrumb items={this.state.breadcrumbs} className={view.breadStyle} />
-        <div className={view.searchSlot} />
+
+        <div className={view.searchSlot}>
+          <SearchBox
+            className={view.searchBox}
+            placeholder="Search Documents"
+            value={this.state.searchText}
+            onChange={this.onSearchChange}
+            onClear={() => this.onSearchChange(undefined, "")}
+          />
+        </div>
       </div>
     );
   }
 
   public render(): React.ReactElement<IPoliciesAndProceduresViewProps> {
-    const { currentItems, selectedItem, expandedChildren, folderViewMode, favouriteIndex } = this.state;
+    const {
+      currentItems,
+      selectedItem,
+      expandedChildren,
+      folderViewMode,
+      favouriteIndex,
+      searchText,
+      autoExpandFolderIds
+    } = this.state;
 
     return (
       <section>
@@ -168,6 +287,8 @@ export default class PoliciesAndProceduresView extends React.Component<
               favouriteIndex={favouriteIndex}
               onToggleFavourite={this.handleToggleFavourite}
               dmsLibraryRoot={this._libraryRoot}
+              searchText={searchText}
+              autoExpandFolderIds={autoExpandFolderIds}
             />
           </div>
 
