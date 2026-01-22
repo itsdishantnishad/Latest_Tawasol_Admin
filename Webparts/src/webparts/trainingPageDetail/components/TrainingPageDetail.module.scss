@@ -2,6 +2,7 @@
   background: #fff;
   border-radius: 16px;
   padding: 24px;
+  font-family: 'Inter', sans-serif;
 }
 
 .tag {
@@ -19,7 +20,37 @@
   margin-block: 16px;
 }
 
-.details p {
+.details {
+  .organizerRow {
+    display: flex;
+    gap: 10px;
+
+    .organizerAvatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50px;
+    }
+
+    .organizerText {
+      .organizerName {
+        font-size: 16px;
+        line-height: 24px;
+        font-weight: 500;
+        color: #000;
+      }
+
+      .organizerDesignation {
+        font-size: 14px;
+        line-height: 22px;
+        font-weight: 400;
+        letter-spacing: -0.5px;
+        color: #6C6C6C;
+      }
+    }
+  }
+}
+
+p {
   color: #3a3b43;
   font-size: 16px;
   font-weight: 400;
@@ -27,13 +58,13 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-}
 
-.details p span{
-  width: 20px;
-  height: 20px;
-  display: flex;
-  color: #6C6C6C;
+  span {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    color: #6C6C6C;
+  }
 }
 
 .speaker {
@@ -70,6 +101,7 @@
   line-height: 20px;
   width: -webkit-fill-available;
 }
+
 .joinButton {
   background-color: #28a745 !important; // Green for join
 }
@@ -95,6 +127,7 @@
   background-color: #f8d7da;
   border-radius: 4px;
 }
+
 .pastTrainingButton {
   background-color: #f3f3f3;
   color: #888;
