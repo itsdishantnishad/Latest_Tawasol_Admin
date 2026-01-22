@@ -2,6 +2,7 @@ import * as React from "react";
 import styles from "./OffersBenefits.module.scss";
 import { PayloadModel, AnyCard } from "./types";
 import { fetchJson, readPlaceholder } from "./Api";
+import GlobalBreadcrumbs, { GlobalBreadcrumbsProps } from "../../assets/GlobalBreadcrumbs";
 
 const GlobeIcon: string = require("../assets/globe.png");
 const GlobeIcon1: string = require("../assets/globeblack.png");
@@ -373,6 +374,11 @@ export default class OffersBenefits extends React.Component<
                 </div>
               )}
 
+              {/* {horizontal line} */}
+              <div className={styles.line}>
+                    <hr></hr>
+              </div>
+
               {/* divider removed permanently */}
 
               <div className={styles.medWorkTitle}>Working Hours</div>
@@ -455,6 +461,10 @@ export default class OffersBenefits extends React.Component<
         {/* ✅ NEW: container fixes centering + 100% zoom cut */}
         <div className={styles.container}>
           {/* Tabs */}
+          <div className={styles.segRow}>
+         <div className={styles.breadPosition}>
+           <GlobalBreadcrumbs/>
+         </div>
           <div className={styles.segWrap}>
             <div className={styles.seg}>
               <button
@@ -472,6 +482,8 @@ export default class OffersBenefits extends React.Component<
                 Employee Privileges
               </button>
             </div>
+          </div>
+         
           </div>
 
           {!!sectionTitle && <div className={styles.sectionTitle}>{sectionTitle}</div>}
