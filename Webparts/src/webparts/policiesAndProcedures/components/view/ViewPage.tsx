@@ -122,7 +122,7 @@ export default class PoliciesAndProceduresView extends React.Component<
         try { rel = decodeURI(rel); } catch {}
         const favKey = listServices.convertToRelativeUrl(`${siteOrigin}${encodeURI(file.serverRelativeUrl)}`).toLowerCase();
 
-      // ✅ optimistic UI toggle
+      // optimistic UI toggle
       this.setState((prev) => {
         const next = { ...prev.favouriteIndex };
         if (typeof next[favKey] !== "undefined") delete next[favKey];
@@ -133,7 +133,7 @@ export default class PoliciesAndProceduresView extends React.Component<
       const absoluteFileUrl = `${siteOrigin}${encodeURI(file.serverRelativeUrl)}`;
       await listService.toggleFavourite(absoluteFileUrl, file.name, undefined, undefined, "Document Favourites");
 
-      // ✅ final truth from server
+      // final truth from server
       const updatedFavouriteIndex = await listService.getFavouriteIndex("Document Favourites");
       this.setState({ favouriteIndex: updatedFavouriteIndex });
     } catch (error) {
