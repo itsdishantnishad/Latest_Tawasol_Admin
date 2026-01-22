@@ -127,7 +127,7 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
           onOpenFunctionView={this.showFunctionDetailView}
         />
 
-        <Boards context={this.props.context} dmsLibraryRoot={this.getDmsLibraryRoot()}/>
+        <Boards context={this.props.context} favouritesCount={10} dmsLibraryRoot={this.getDmsLibraryRoot()}/>
       </div>
     );
   }

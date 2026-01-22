@@ -189,6 +189,48 @@ export class listServices {
     return val;
   }
 
+  private normalizeFavouriteKey(url?: string): string {
+    const raw = (url || "").trim();
+    if (!raw) return "";
+
+    const webAbs = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+    const origin = new URL(webAbs).origin;
+
+    try {
+      // Build absolute URL safely
+      const abs = /^https?:\/\//i.test(raw)
+        ? raw
+        : `${origin}${raw.startsWith("/") ? "" : "/"}${raw}`;
+
+      const u = new URL(abs);
+
+      // remove any encoding differences (spaces vs %20 etc.)
+      let path = u.pathname || "";
+      try { path = decodeURI(path); } catch { /* ignore */ }
+
+      // standardize slashes + case
+      path = path.replace(/\/{2,}/g, "/").trim();
+      return path.toLowerCase(); // server-relative key (matches getFavouriteIndex usage)
+    } catch {
+      // fallback
+      const clean = raw.split(/[?#]/)[0];
+      return listServices.convertToRelativeUrl(clean).toLowerCase();
+    }
+  }
+
+/** Build a clean absolute URL to store in TIRFileUrl */
+private toStoredAbsoluteUrl(serverRelPath: string): string {
+  const webAbs = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+  const origin = new URL(webAbs).origin;
+
+  let rel = serverRelPath || "";
+  try { rel = decodeURI(rel); } catch { /* ignore */ }
+  rel = rel.startsWith("/") ? rel : `/${rel}`;
+
+  // store encoded absolute (safe for spaces etc.)
+  return `${origin}${encodeURI(rel)}`;
+}
+
   // UPDATED helper: strip HTML BUT keep line breaks (for bullet pointers)
   private static toPlainTextWithLines(raw?: string): string {
     if (!raw) return "";
@@ -1199,6 +1241,7 @@ private readTaxonomyLabel(val: any): string {
   public async getFavouriteIndex(
     favouritesListTitle: string = "Document Favourites"
   ): Promise<Record<string, number>> {
+
     let userId: number | undefined = (this.context.pageContext as any)?.legacyPageContext?.userId;
     if (!userId) {
       const me: any = await this.sp.web.currentUser();
@@ -1214,14 +1257,12 @@ private readTaxonomyLabel(val: any): string {
     const map: Record<string, number> = {};
     (rows || []).forEach((r: any) => {
       if (r?.TIRIsActive === false) return;
+
       const url = this.readHyperlink(r?.TIRFileUrl);
-      if (!url) return;
+      const key = this.normalizeFavouriteKey(url);
+      if (!key) return;
 
-      // normalize: strip ?/# then make server-relative (matches UI keys)
-      const clean = String(url).split(/[?#]/)[0];
-      const rel = listServices.convertToRelativeUrl(clean).toLowerCase();
-
-      map[rel] = Number(r?.Id);
+      map[key] = Number(r?.Id);
     });
 
     return map;
@@ -1230,16 +1271,12 @@ private readTaxonomyLabel(val: any): string {
   public async toggleFavourite(
     fileUrl: string,
     title?: string,
-    tags?: any,
-    department?: any,
+    _tags?: any,
+    _department?: any,
     favouritesListTitle: string = "Document Favourites"
   ): Promise<void> {
-    const urlNorm = (fileUrl || "").trim();
-    if (!urlNorm) return;
-
-    // normalize: strip ?/# then compare using server-relative lowercase keys
-    const cleanInput = urlNorm.split(/[?#]/)[0];
-    const key = listServices.convertToRelativeUrl(cleanInput).toLowerCase();
+    const input = (fileUrl || "").trim();
+    if (!input) return;
 
     let userId: number | undefined = (this.context.pageContext as any)?.legacyPageContext?.userId;
     if (!userId) {
@@ -1247,41 +1284,79 @@ private readTaxonomyLabel(val: any): string {
       userId = Number(me?.Id) || 0;
     }
 
-    const rows = await this.sp.web.lists
-      .getByTitle(favouritesListTitle)
-      .items.select("Id", "TIRFileUrl", "TIRIsActive", "AuthorId")
-      .filter(`AuthorId eq ${userId}`)
-      .top(5000)();
-
-    const existing = (rows || []).find((r: any) => {
-      const u = this.readHyperlink(r?.TIRFileUrl);
-      if (!u) return false;
-      const clean = String(u).split(/[?#]/)[0];
-      const rel = listServices.convertToRelativeUrl(clean).toLowerCase();
-      return rel === key;
-    });
-
     const list = this.sp.web.lists.getByTitle(favouritesListTitle);
 
-    if (existing) {
-      const isActive = existing?.TIRIsActive !== false;
+    const rows = await list.items
+      .select("Id", "TIRFileUrl", "TIRIsActive", "AuthorId", "Modified")
+      .filter(`AuthorId eq ${userId}`)
+      .orderBy("Modified", false)
+      .top(5000)();
 
-      await list.items.getById(existing.Id).update({
-        TIRIsActive: !isActive,
-      });
-      return;
+    const targetKey = this.normalizeFavouriteKey(input);
+
+    const matches = (rows || []).filter((r: any) => {
+      const u = this.readHyperlink(r?.TIRFileUrl);
+      return this.normalizeFavouriteKey(u) === targetKey;
+    });
+
+    // ========= IF EXISTS =========
+    if (matches.length) {
+      const anyActive = matches.some((m: any) => m?.TIRIsActive !== false);
+
+      // ---- REMOVE favourite (PRIMARY = HARD DELETE) ----
+      if (anyActive) {
+        try {
+          // delete all duplicates (active + inactive)
+          await Promise.all(matches.map((m: any) => list.items.getById(m.Id).delete()));
+          return;
+        } catch (err) {
+          // fallback: soft delete if user can't delete
+          await Promise.all(
+            matches.map((m: any) =>
+              list.items.getById(m.Id).update({ TIRIsActive: false })
+            )
+          );
+          return;
+        }
+      }
+
+      // ---- ADD favourite again (reactivate newest + cleanup duplicates) ----
+      const [keep, ...rest] = matches;
+
+      try {
+        await list.items.getById(keep.Id).update({ TIRIsActive: true });
+
+        // cleanup old duplicates (try delete, fallback set inactive)
+        await Promise.all(
+          rest.map(async (m: any) => {
+            try {
+              await list.items.getById(m.Id).delete();
+            } catch {
+              await list.items.getById(m.Id).update({ TIRIsActive: false });
+            }
+          })
+        );
+
+        return;
+      } catch {
+        // if reactivate fails, fall through to add fresh row
+      }
     }
 
-    const abs = this.toAbsoluteUrl(key);
-    const fileName = decodeURIComponent(key.split("/").pop() || "Document");
+    // ========= ADD NEW =========
+    const serverRelKey = targetKey; // already server-relative lowercased
+    const absToStore = this.toStoredAbsoluteUrl(serverRelKey);
+
+    const fileName =
+      (title || "").trim() ||
+      decodeURIComponent(serverRelKey.split("/").pop() || "Document");
 
     await list.items.add({
-      Title: title || fileName,
-      TIRFileUrl: { Url: abs, Description: "" },
+      Title: fileName,
+      TIRFileUrl: { Url: absToStore, Description: "" },
       TIRIsActive: true,
     });
   }
-
   /** ===== Announcement Banner (time-window & timezone aware) ===== */
   public async getActiveAnnouncementBannersByListTitle(
     listTitle: string,

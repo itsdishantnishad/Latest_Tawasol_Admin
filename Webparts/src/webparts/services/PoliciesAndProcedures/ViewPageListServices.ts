@@ -92,17 +92,63 @@ export default class ViewPageListServices {
    * Favourite key normalized for lookup
    */
   public getFavouriteKey(item: IPoliciesAndProceduresItem): string {
-    return (item.serverRelativeUrl || "").toLowerCase();
+    const rel = (item.serverRelativeUrl || "").trim();
+
+    // match how favourites are saved: origin + encodeURI(serverRelativeUrl)
+    if (rel) {
+      const absEncoded = `${window.location.origin}${encodeURI(rel)}`;
+      return absEncoded.toLowerCase();
+    }
+
+    // fallback to previewUrl if serverRelativeUrl missing
+    const abs = (item.previewUrl || "").trim();
+    return abs ? abs.toLowerCase() : "";
   }
 
   /**
    * Favourite check (handles index=0 case correctly)
    */
   public isFavourited(item: IPoliciesAndProceduresItem, favouriteIndex?: FavouriteIndex): boolean {
-    const key = this.getFavouriteKey(item);
-    if (!key) return false;
-    const idx = favouriteIndex?.[key];
-    return typeof idx !== "undefined";
+    if (!favouriteIndex) return false;
+
+    const relRaw = (item.serverRelativeUrl || "").trim();
+    const prevRaw = (item.previewUrl || "").trim();
+
+    const keys: string[] = [];
+
+    const push = (v?: string) => {
+      const k = (v || "").trim().toLowerCase();
+      if (k) keys.push(k);
+    };
+
+    // server-relative variants
+    if (relRaw) {
+      push(relRaw);
+      push(encodeURI(relRaw));
+
+      try { push(decodeURI(relRaw)); } catch {}
+      try { push(decodeURI(encodeURI(relRaw))); } catch {}
+
+      // absolute variants (this is what you save!)
+      push(`${window.location.origin}${relRaw}`);
+      push(`${window.location.origin}${encodeURI(relRaw)}`);
+    }
+
+    // previewUrl variants (fallback)
+    if (prevRaw) {
+      push(prevRaw);
+      try {
+        const u = new URL(/^https?:\/\//i.test(prevRaw) ? prevRaw : `${window.location.origin}${prevRaw.startsWith("/") ? "" : "/"}${prevRaw}`);
+        push(u.href);
+        push(u.pathname);
+        push(encodeURI(u.pathname));
+        push(`${u.origin}${encodeURI(u.pathname)}`);
+      } catch {}
+    }
+
+    // unique check
+    const unique = Array.from(new Set(keys));
+    return unique.some((k) => typeof favouriteIndex[k] !== "undefined");
   }
 
   /**

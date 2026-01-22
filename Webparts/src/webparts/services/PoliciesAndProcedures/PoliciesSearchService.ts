@@ -1,142 +1,124 @@
-// PoliciesSearchService.ts
-// Centralized search logic used by Tiles + ViewPage deep file search + auto-expand.
-// KEY FIXES:
-// 1) Use POST _api/search/postquery (stable) instead of long GET query URL.
-// 2) Normalize IDs so encoded (%20) and decoded (spaces) always match.
-// 3) Return serverRelativeUrl in the SAME "display" format that your provider/UI uses.
-
 import type { WebPartContext } from "@microsoft/sp-webpart-base";
 import { SPHttpClient, ISPHttpClientOptions } from "@microsoft/sp-http";
 import type { IPoliciesAndProceduresItem } from "./ViewPageListTypes";
 
 type SearchHit = {
-  serverRelativeUrl: string; // normalized "display" server-relative
+  serverRelativeUrl: string;
   name: string;
   ext?: string;
   modifiedOn?: Date;
 };
 
+type SearchResultPage = {
+  items: IPoliciesAndProceduresItem[];
+  totalCount: number;
+  nextStartRow?: number;
+};
+
 export default class PoliciesSearchService {
   private readonly _ctx?: WebPartContext;
 
-  constructor(ctx?: WebPartContext) {
-    this._ctx = ctx;
+  constructor(context?: WebPartContext) {
+    this._ctx = context;
   }
 
-  // ---------------- Shared text match (Tiles + local filters) ----------------
   public static matches(text: string, query: string): boolean {
-    const q = (query || "").trim().toLowerCase();
-    if (!q) return true;
-    return (text || "").toLowerCase().includes(q);
+    const normalizedQuery = (query || "").trim().toLowerCase();
+    if (!normalizedQuery) return true;
+    return (text || "").toLowerCase().includes(normalizedQuery);
   }
 
-  /** Normalized KEY for comparisons (case-insensitive + decodeDeep) */
   public static toKey(pathOrId: string): string {
     return PoliciesSearchService.normalizeServerRelDisplay(pathOrId).toLowerCase();
   }
 
-  // ---------------- URL helpers ----------------
-  /** decode multiple times safely (handles %2520 etc.) */
-  private static decodeDeep(s: string): string {
-    let v = (s || "").trim();
-    for (let i = 0; i < 3; i++) {
+  private static decodeDeep(input: string): string {
+    let currentValue = (input || "").trim();
+    for (let attemptIndex = 0; attemptIndex < 3; attemptIndex++) {
       try {
-        const d = decodeURIComponent(v);
-        if (d === v) break;
-        v = d;
+        const decodedValue = decodeURIComponent(currentValue);
+        if (decodedValue === currentValue) break;
+        currentValue = decodedValue;
       } catch {
         break;
       }
     }
-    return v;
+    return currentValue;
   }
 
-  /**
-   * Normalize any URL/path to a "display" server-relative path:
-   * - accepts absolute or server-relative
-   * - strips query/hash
-   * - decodes segments (so %20 => space, %26 => &)
-   * Output matches what your provider returns in screenshots:
-   *   /sites/.../GRC framework Documents/Commercial/Commercial strategy & Customer Experience
-   */
-  public static normalizeServerRelDisplay(pathOrAbs: string): string {
-    let raw = (pathOrAbs || "").trim();
-    if (!raw) return "";
+  public static normalizeServerRelDisplay(pathOrAbsoluteUrl: string): string {
+    let rawValue = (pathOrAbsoluteUrl || "").trim();
+    if (!rawValue) return "";
 
-    // if absolute -> take pathname
-    if (/^https?:\/\//i.test(raw)) {
+    if (/^https?:\/\//i.test(rawValue)) {
       try {
-        raw = new URL(raw).pathname || raw;
+        rawValue = new URL(rawValue).pathname || rawValue;
       } catch {
-        // keep raw
+        // keep rawValue
       }
     }
 
-    // strip query/hash
-    raw = raw.split("?")[0].split("#")[0];
+    rawValue = rawValue.split("?")[0].split("#")[0];
+    if (!rawValue.startsWith("/")) rawValue = `/${rawValue}`;
 
-    // ensure leading slash
-    if (!raw.startsWith("/")) raw = `/${raw}`;
-
-    const parts = raw
+    const pathSegments = rawValue
       .split("/")
       .filter(Boolean)
-      .map((seg) => PoliciesSearchService.decodeDeep(seg));
+      .map((segment) => PoliciesSearchService.decodeDeep(segment));
 
-    return "/" + parts.join("/");
+    return "/" + pathSegments.join("/");
   }
 
-  /** Build absolute URL for KQL Path filter (must be URL-safe => encodeURI) */
-  private static toAbsForKql(origin: string, serverRelDisplay: string): string {
-    const rel = serverRelDisplay.startsWith("/") ? serverRelDisplay : `/${serverRelDisplay}`;
-    return `${origin}${encodeURI(rel)}`;
+  private static encodeServerRelForUrl(serverRelativeDisplayPath: string): string {
+    const trimmedPath = (serverRelativeDisplayPath || "").trim();
+    if (!trimmedPath) return "";
+    const encodedSegments = trimmedPath.split("/").filter(Boolean).map(encodeURIComponent);
+    return "/" + encodedSegments.join("/");
   }
 
-  // ---------------- Function root + folder chain (AUTO EXPAND) ----------------
+  private static toAbsoluteForKql(origin: string, serverRelativeDisplayPath: string): string {
+    const encodedServerRelative = PoliciesSearchService.encodeServerRelForUrl(serverRelativeDisplayPath);
+    return `${origin}${encodedServerRelative}`;
+  }
+
   public static buildFunctionRootRel(libraryRootServerRelative: string, functionDisplayName: string): string {
-    const root = (libraryRootServerRelative || "").trim().replace(/\/$/, "");
-    const safeFn = (functionDisplayName || "").replace(/\/+/g, " ").trim();
-    return PoliciesSearchService.normalizeServerRelDisplay(`${root}/${safeFn}`);
+    const normalizedLibraryRoot = (libraryRootServerRelative || "").trim().replace(/\/$/, "");
+    const safeFunctionName = (functionDisplayName || "").replace(/\/+/g, " ").trim();
+    return PoliciesSearchService.normalizeServerRelDisplay(`${normalizedLibraryRoot}/${safeFunctionName}`);
   }
 
-  /**
-   * Given a FILE serverRelativeUrl, return the folder chain server-relative URLs (DISPLAY)
-   * under the function root. Returned IDs will match folder.id from your provider/UI.
-   */
   public static getFolderChainFromFile(fileServerRelativeUrl: string, functionRootRel: string): string[] {
-    const fileNorm = PoliciesSearchService.normalizeServerRelDisplay(fileServerRelativeUrl);
-    const rootNorm = PoliciesSearchService.normalizeServerRelDisplay(functionRootRel);
+    const normalizedFilePath = PoliciesSearchService.normalizeServerRelDisplay(fileServerRelativeUrl);
+    const normalizedFunctionRoot = PoliciesSearchService.normalizeServerRelDisplay(functionRootRel);
 
-    if (!fileNorm || !rootNorm) return [];
+    if (!normalizedFilePath || !normalizedFunctionRoot) return [];
 
-    const fileParts = fileNorm.split("/").filter(Boolean);
-    const rootParts = rootNorm.split("/").filter(Boolean);
+    const fileSegments = normalizedFilePath.split("/").filter(Boolean);
+    const rootSegments = normalizedFunctionRoot.split("/").filter(Boolean);
 
-    // prefix check (case-insensitive)
-    for (let i = 0; i < rootParts.length; i++) {
-      if ((fileParts[i] || "").toLowerCase() !== rootParts[i].toLowerCase()) return [];
+    for (let segmentIndex = 0; segmentIndex < rootSegments.length; segmentIndex++) {
+      if ((fileSegments[segmentIndex] || "").toLowerCase() !== rootSegments[segmentIndex].toLowerCase()) {
+        return [];
+      }
     }
 
-    // after root, before filename
-    if (fileParts.length <= rootParts.length + 1) return [];
+    if (fileSegments.length <= rootSegments.length + 1) return [];
 
-    const folderParts = fileParts.slice(rootParts.length, fileParts.length - 1);
+    const folderSegments = fileSegments.slice(rootSegments.length, fileSegments.length - 1);
 
-    const chain: string[] = [];
-    const currentParts = [...rootParts];
+    const folderChain: string[] = [];
+    const currentSegments = [...rootSegments];
 
-    for (const seg of folderParts) {
-      currentParts.push(seg);
-      chain.push("/" + currentParts.join("/"));
+    for (const folderSegment of folderSegments) {
+      currentSegments.push(folderSegment);
+      folderChain.push("/" + currentSegments.join("/"));
     }
 
-    return chain;
+    return folderChain;
   }
 
-  // ---------------- SharePoint Search (deep file search) ----------------
-  private escapeKqlValue(v: string): string {
-    // simple safe token cleaning
-    return (v || "")
+  private escapeKqlValue(value: string): string {
+    return (value || "")
       .replace(/["']/g, "")
       .replace(/[<>]/g, " ")
       .trim();
@@ -146,131 +128,179 @@ export default class PoliciesSearchService {
     const tokens = (query || "")
       .trim()
       .split(/\s+/)
-      .map((t) => this.escapeKqlValue(t))
+      .map((token) => this.escapeKqlValue(token))
       .filter(Boolean);
 
     if (!tokens.length) return "";
-
-    // (Filename:"emp*" OR Title:"emp*") AND ...
-    return tokens.map((t) => `(Filename:"${t}*" OR Title:"${t}*")`).join(" AND ");
+    return tokens.map((token) => `(Filename:"${token}*" OR Title:"${token}*")`).join(" AND ");
   }
 
-  /**
-   * Deep search inside the selected function folder using SharePoint Search API.
-   * Returns FILE items only (not folders).
-   */
-  public async searchFilesInFunction(
-    libraryRootServerRelative: string,
-    functionDisplayName: string,
-    query: string,
-    rowLimit: number = 50
-  ): Promise<IPoliciesAndProceduresItem[]> {
-    if (!this._ctx) return [];
+  private extractRows(searchJson: any): any[] {
+    return (
+      searchJson?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ??
+      searchJson?.d?.postquery?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ??
+      searchJson?.d?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ??
+      []
+    );
+  }
 
-    const q = (query || "").trim();
-    if (!q) return [];
-
-    const webAbs = (this._ctx.pageContext.web.absoluteUrl || "").replace(/\/$/, "");
-    const origin = new URL(webAbs).origin;
-
-    // DISPLAY root (matches provider IDs)
-    const functionRootRel = PoliciesSearchService.buildFunctionRootRel(libraryRootServerRelative, functionDisplayName);
-
-    // ABS for KQL Path restriction (URL-safe)
-    const functionRootAbsForKql = PoliciesSearchService.toAbsForKql(origin, functionRootRel);
-
-    const textKql = this.buildFilenameTitleKql(q);
-    if (!textKql) return [];
-
-    // Path filter works as "under this path" in SharePoint search
-    const kql = `IsDocument:1 AND Path:"${functionRootAbsForKql}" AND (${textKql})`;
-
-    const selectProps = ["Title", "Path", "Filename", "FileExtension", "LastModifiedTime"];
-
-    // ---- POST _api/search/postquery (fixes your 400) ----
-    const endpoint = `${webAbs}/_api/search/postquery`;
-
-    const body = JSON.stringify({
-      request: {
-        __metadata: { type: "Microsoft.Office.Server.Search.REST.SearchRequest" },
-        Querytext: kql,
-        RowLimit: rowLimit,
-        TrimDuplicates: false,
-        SelectProperties: { results: selectProps }
-      }
-    });
-
-    const options: ISPHttpClientOptions = {
-      headers: {
-        accept: "application/json;odata=verbose",
-        "content-type": "application/json;odata=verbose"
-      },
-      body
+  private mapRowsToHits(rows: any[]): SearchHit[] {
+    const getCellValue = (row: any, cellKey: string): string => {
+      const cells: any[] = row?.Cells ?? [];
+      const matchingCell = cells.find((cell) => (cell?.Key || "").toLowerCase() === cellKey.toLowerCase());
+      return (matchingCell?.Value ?? "").toString();
     };
 
-    let json: any;
-    try {
-      const res = await this._ctx.spHttpClient.post(endpoint, SPHttpClient.configurations.v1, options);
-      if (!res.ok) return [];
-      json = await res.json();
-    } catch {
-      return [];
-    }
+    return rows
+      .map((row) => {
+        const absolutePath = getCellValue(row, "Path");
+        if (!absolutePath) return null;
 
-    // ---- response shape variations ----
-    const rows: any[] =
-      json?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ??
-      json?.d?.postquery?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ??
-      json?.d?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ??
-      [];
-
-    const getCell = (r: any, key: string): string => {
-      const cells: any[] = r?.Cells ?? [];
-      const found = cells.find((c) => (c?.Key || "").toLowerCase() === key.toLowerCase());
-      return (found?.Value ?? "").toString();
-    };
-
-    const hits: SearchHit[] = rows
-      .map((r) => {
-        const pathAbs = getCell(r, "Path"); // absolute
-        if (!pathAbs) return null;
-
-        let pathname = "";
+        let encodedPathname = "";
         try {
-          pathname = new URL(pathAbs).pathname; // encoded
+          encodedPathname = new URL(absolutePath).pathname;
         } catch {
           return null;
         }
 
-        const filename = getCell(r, "Filename");
-        const title = getCell(r, "Title");
-        const name = (title || filename || "").trim() || "Document";
+        const filename = getCellValue(row, "Filename");
+        const title = getCellValue(row, "Title");
+        const displayName = (title || filename || "").trim() || "Document";
 
-        const ext = (getCell(r, "FileExtension") || "").toLowerCase();
-        const lastMod = getCell(r, "LastModifiedTime");
-        const modifiedOn = lastMod ? new Date(lastMod) : undefined;
+        const extension = (getCellValue(row, "FileExtension") || "").toLowerCase();
+        const lastModifiedText = getCellValue(row, "LastModifiedTime");
+        const modifiedDate = lastModifiedText ? new Date(lastModifiedText) : undefined;
 
-        // IMPORTANT: convert to DISPLAY server-relative (decodes %20 -> spaces)
-        const serverRelativeUrl = PoliciesSearchService.normalizeServerRelDisplay(pathname);
-
-        return { serverRelativeUrl, name, ext, modifiedOn } as SearchHit;
+        const serverRelativeUrl = PoliciesSearchService.normalizeServerRelDisplay(encodedPathname);
+        return { serverRelativeUrl, name: displayName, ext: extension, modifiedOn: modifiedDate } as SearchHit;
       })
       .filter(Boolean) as SearchHit[];
+  }
 
-    // Deduplicate by normalized key
-    const byKey = new Map<string, SearchHit>();
-    for (const h of hits) {
-      byKey.set(PoliciesSearchService.toKey(h.serverRelativeUrl), h);
+  private hitsToItems(searchHits: SearchHit[]): IPoliciesAndProceduresItem[] {
+    const uniqueHitByKey = new Map<string, SearchHit>();
+    for (const searchHit of searchHits) {
+      uniqueHitByKey.set(PoliciesSearchService.toKey(searchHit.serverRelativeUrl), searchHit);
     }
 
-    return Array.from(byKey.values()).map((h) => ({
-      id: h.serverRelativeUrl,
-      name: h.name,
-      isFolder: false,
-      ext: h.ext as any,
-      modifiedOn: h.modifiedOn,
-      previewUrl: `${encodeURI(h.serverRelativeUrl)}?web=1`,
-      serverRelativeUrl: h.serverRelativeUrl
-    }));
+    return Array.from(uniqueHitByKey.values()).map((searchHit) => {
+      const encodedServerRelative = PoliciesSearchService.encodeServerRelForUrl(searchHit.serverRelativeUrl);
+      return {
+        id: searchHit.serverRelativeUrl,
+        name: searchHit.name,
+        isFolder: false,
+        ext: searchHit.ext as any,
+        modifiedOn: searchHit.modifiedOn,
+        previewUrl: `${encodedServerRelative}?web=1`,
+        serverRelativeUrl: searchHit.serverRelativeUrl
+      };
+    });
+  }
+
+  private buildNoMetadataOptions(
+    kqlQueryText: string,
+    rowLimit: number,
+    startRow: number = 0,
+    selectProperties: string[]
+  ): ISPHttpClientOptions {
+    return {
+      headers: {
+        "Accept": "application/json;odata=nometadata",
+        "Content-Type": "application/json;odata=nometadata",
+        "odata-version": ""
+      },
+      body: JSON.stringify({
+        request: {
+          Querytext: kqlQueryText,
+          RowLimit: rowLimit,
+          StartRow: startRow,
+          TrimDuplicates: false,
+          ClientType: "ContentSearchRegular",
+          SelectProperties: selectProperties
+        }
+      })
+    };
+  }
+
+  public async searchFilesInFunctionPaged(
+    libraryRootServerRelative: string,
+    functionDisplayName: string,
+    query: string,
+    options: {
+      pageSize?: number;
+      startRow?: number;
+      maxTotal?: number;  // New: optional cap on total items to fetch
+    } = {}
+  ): Promise<SearchResultPage> {
+    if (!this._ctx) return { items: [], totalCount: 0 };
+
+    const { pageSize = 500, startRow = 0, maxTotal = 2000 } = options;
+    const trimmedQuery = (query || "").trim();
+    if (!trimmedQuery) return { items: [], totalCount: 0 };
+
+    const webAbsoluteUrl = this._ctx.pageContext.web.absoluteUrl.replace(/\/$/, "");
+    const origin = new URL(webAbsoluteUrl).origin;
+
+    const functionRootServerRelative = PoliciesSearchService.buildFunctionRootRel(
+      libraryRootServerRelative,
+      functionDisplayName
+    );
+
+    const functionRootAbsoluteForKql = PoliciesSearchService.toAbsoluteForKql(origin, functionRootServerRelative);
+
+    const filenameTitleKql = this.buildFilenameTitleKql(trimmedQuery);
+    if (!filenameTitleKql) return { items: [], totalCount: 0 };
+
+    const kqlQueryText = `IsDocument:1 AND Path:"${functionRootAbsoluteForKql}/*" AND (${filenameTitleKql})`;
+
+    const searchEndpointUrl = `${webAbsoluteUrl}/_api/search/postquery`;
+
+    const requestOptions = this.buildNoMetadataOptions(kqlQueryText, pageSize, startRow, ["Title", "Path", "Filename", "FileExtension", "LastModifiedTime"]);
+
+    try {
+      const response = await this._ctx.spHttpClient.post(
+        searchEndpointUrl,
+        SPHttpClient.configurations.v1,
+        requestOptions
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("[PoliciesSearch] Search failed", response.status, errorText);
+        return { items: [], totalCount: 0 };
+      }
+
+      const searchJson = await response.json();
+      const rows = this.extractRows(searchJson);
+
+      const total = Math.min(searchJson?.PrimaryQueryResult?.RelevantResults?.TotalRows ?? 0, maxTotal);
+      const searchHits = this.mapRowsToHits(rows);
+      const items = this.hitsToItems(searchHits);
+
+      return {
+        items,
+        totalCount: total,
+        nextStartRow: (total > startRow + pageSize) ? startRow + pageSize : undefined
+      };
+    } catch (error) {
+      console.error("[PoliciesSearch] Search error:", error);
+      return { items: [], totalCount: 0 };
+    }
+  }
+
+  // Legacy method - wraps paged to fetch first page only
+  public async searchFilesInFunction(
+    libraryRootServerRelative: string,
+    functionDisplayName: string,
+    query: string,
+    rowLimit: number = 500
+  ): Promise<IPoliciesAndProceduresItem[]> {
+    const result = await this.searchFilesInFunctionPaged(
+      libraryRootServerRelative,
+      functionDisplayName,
+      query,
+      { pageSize: rowLimit }
+    );
+    return result.items;
   }
 }
