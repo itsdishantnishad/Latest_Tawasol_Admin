@@ -155,24 +155,31 @@ export default class LetsMeetDetail extends React.Component<
                 onClick={() => this.handleOpenPage(item.pageUrl)}
                 title={item.title}
               >
-                <img
-                  className={styles.episodeImg}
-                  src={item.thumbHQ}
-                  alt={item.title}
-                  onError={(ev) =>
-                    LetsMeetActionService.handleThumbnailFallback(ev, item.thumbHQ)
-                  }
-                />
+                {/* ✅ NEW: wrap image + overlay so only this area is clipped */}
+                <div className={styles.episodeMedia}>
+                  <img
+                    className={styles.episodeImg}
+                    src={item.thumbHQ}
+                    alt={item.title}
+                    onError={(ev) =>
+                      LetsMeetActionService.handleThumbnailFallback(ev, item.thumbHQ)
+                    }
+                  />
 
-                <div className={styles.episodeOverlay}>
-                  <div className={styles.episodeTitle}>{item.title}</div>
-                  <span className={styles.playBtnSmall} aria-hidden="true">
-                    <span className={styles.playTriangleSmall} />
-                  </span>
+                  <div className={styles.episodeOverlay}>
+                    {/* ❌ remove title from overlay */}
+                    <span className={styles.playBtnSmall} aria-hidden="true">
+                      <span className={styles.playTriangleSmall} />
+                    </span>
+                  </div>
                 </div>
+
+                {/* ✅ NEW: title below the card */}
+                <div className={styles.episodeTitleBelow}>{item.title}</div>
               </div>
             ))}
           </div>
+
         </div>
       </section>
     );
