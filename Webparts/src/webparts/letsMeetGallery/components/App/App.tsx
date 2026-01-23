@@ -25,7 +25,7 @@ const App: React.FC<IAppProps> = (props) => {
       {React.createElement(CardTitlegallery as any, { title: "Let's Meet" })}
 
      
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+      <div style={{ display: "flex", justifyContent: "center" }}>
         <NavSegment
           labels={TABS as any}
           value={tab as any}

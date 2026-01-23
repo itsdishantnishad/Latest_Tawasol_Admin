@@ -26,7 +26,7 @@ const App: React.FC<IAppProps> = (props) => {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 12 }}>
+      <div style={{ display: "flex", justifyContent: "center" }}>
         <NavSegment
           labels={TABS}
           value={tab}
