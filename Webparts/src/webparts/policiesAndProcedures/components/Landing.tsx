@@ -119,7 +119,7 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
         />
 
         <div className={styles.homeTopRow}>
-          <div className={styles.sectionHeading} style={{ marginTop: 12 }}>Support Function</div>
+          <div className={styles.sectionHeading}>Support Function</div>
         </div>
         
         <Tiles
