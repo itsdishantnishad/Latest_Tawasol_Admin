@@ -1,5 +1,3 @@
-// src/webparts/featureWheel/FeatureWheelWebPart.ts
-
 import * as React from "react";
 import * as ReactDom from "react-dom";
 import { Version } from "@microsoft/sp-core-library";
@@ -28,7 +26,7 @@ export interface IFeatureWheelWebPartProps {
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
-  // ✅ TIMER: delay mounting whole webpart
+  // TIMER: delay mounting whole webpart
   private _renderTimerId?: number;
 
   public render(): void {
@@ -38,7 +36,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
       this._renderTimerId = undefined;
     }
 
-    // ✅ delay the whole ReactDom.render
+    // delay the whole ReactDom.render
     this._renderTimerId = window.setTimeout(() => {
       const element: React.ReactElement<IFeatureWheelProps> = React.createElement(
         FeatureWheel,
@@ -59,7 +57,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
       );
 
       ReactDom.render(element, this.domElement);
-    }, 500); // ✅ 5 seconds (change if needed)
+    }, 500);
   }
 
   protected onInit(): Promise<void> {
@@ -107,7 +105,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
   }
 
   protected onDispose(): void {
-    // ✅ clear pending timer to avoid rendering after dispose
+    // clear pending timer to avoid rendering after dispose
     if (this._renderTimerId) {
       window.clearTimeout(this._renderTimerId);
       this._renderTimerId = undefined;
