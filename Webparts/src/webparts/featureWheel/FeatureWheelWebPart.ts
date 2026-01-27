@@ -1,5 +1,3 @@
-// src/webparts/featureWheel/FeatureWheelWebPart.ts
-
 import * as React from "react";
 import * as ReactDom from "react-dom";
 import { Version } from "@microsoft/sp-core-library";
@@ -28,26 +26,38 @@ export interface IFeatureWheelWebPartProps {
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
-  public render(): void {
-    const element: React.ReactElement<IFeatureWheelProps> = React.createElement(
-      FeatureWheel,
-      {
-        letsCelebrate: this.properties.letsCelebrate,
-        trainingAndDevelopment: this.properties.trainingAndDevelopment,
-        upcomingEvents: this.properties.upcomingEvents,
-        getOffersAndDiscounts: this.properties.getOffersAndDiscounts,
-        imageGallery: this.properties.imageGallery,
-        documents: this.properties.documents,
-        meeting: this.properties.meeting,
-        interactiveForms: this.properties.interactiveForms,
-        dashboard: this.properties.dashboard,
-        beverageMenu: this.properties.beverageMenu,
-        taskApprovals: this.properties.taskApprovals,
-        context: this.context,
-      }
-    );
+  // TIMER: delay mounting whole webpart
+  private _renderTimerId?: number;
 
-    ReactDom.render(element, this.domElement);
+  public render(): void {
+    // clear any pending render (important when properties change / re-render)
+    if (this._renderTimerId) {
+      window.clearTimeout(this._renderTimerId);
+      this._renderTimerId = undefined;
+    }
+
+    // delay the whole ReactDom.render
+    this._renderTimerId = window.setTimeout(() => {
+      const element: React.ReactElement<IFeatureWheelProps> = React.createElement(
+        FeatureWheel,
+        {
+          letsCelebrate: this.properties.letsCelebrate,
+          trainingAndDevelopment: this.properties.trainingAndDevelopment,
+          upcomingEvents: this.properties.upcomingEvents,
+          getOffersAndDiscounts: this.properties.getOffersAndDiscounts,
+          imageGallery: this.properties.imageGallery,
+          documents: this.properties.documents,
+          meeting: this.properties.meeting,
+          interactiveForms: this.properties.interactiveForms,
+          dashboard: this.properties.dashboard,
+          beverageMenu: this.properties.beverageMenu,
+          taskApprovals: this.properties.taskApprovals,
+          context: this.context,
+        }
+      );
+
+      ReactDom.render(element, this.domElement);
+    }, 1100);
   }
 
   protected onInit(): Promise<void> {
@@ -95,6 +105,12 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
   }
 
   protected onDispose(): void {
+    // clear pending timer to avoid rendering after dispose
+    if (this._renderTimerId) {
+      window.clearTimeout(this._renderTimerId);
+      this._renderTimerId = undefined;
+    }
+
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 

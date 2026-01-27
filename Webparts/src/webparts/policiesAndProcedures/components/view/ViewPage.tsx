@@ -116,15 +116,36 @@ export default class PoliciesAndProceduresView extends React.Component<
 
       const webAbsoluteUrl = this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
       const siteOrigin = new URL(webAbsoluteUrl).origin;
+
+      // this is the SAME key format used while saving
+      let rel = (file.serverRelativeUrl || "").trim();
+        try { rel = decodeURI(rel); } catch {}
+        const favKey = listServices.convertToRelativeUrl(`${siteOrigin}${encodeURI(file.serverRelativeUrl)}`).toLowerCase();
+
+      // optimistic UI toggle
+      this.setState((prev) => {
+        const next = { ...prev.favouriteIndex };
+        if (typeof next[favKey] !== "undefined") delete next[favKey];
+        else next[favKey] = 1; // any number is fine for UI presence
+        return { favouriteIndex: next };
+      });
+
       const absoluteFileUrl = `${siteOrigin}${encodeURI(file.serverRelativeUrl)}`;
+      await listService.toggleFavourite(absoluteFileUrl, file.name, undefined, undefined, "Document Favourites");
 
-      await listService.toggleFavourite(absoluteFileUrl, file.name, "Document Favourites");
-
+      // final truth from server
       const updatedFavouriteIndex = await listService.getFavouriteIndex("Document Favourites");
       this.setState({ favouriteIndex: updatedFavouriteIndex });
     } catch (error) {
+      // if something fails, re-sync from server
       // eslint-disable-next-line no-console
       console.error("toggle favourite failed", error);
+
+      try {
+        const listService = new listServices(this.props.context);
+        const updatedFavouriteIndex = await listService.getFavouriteIndex("Document Favourites");
+        this.setState({ favouriteIndex: updatedFavouriteIndex });
+      } catch {}
     }
   };
 

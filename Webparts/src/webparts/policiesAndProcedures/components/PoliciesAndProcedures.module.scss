@@ -51,9 +51,9 @@
 
 /* ------------------------------------ Page ------------------------------------ */
 .page {
-  background-color: #fef7f0;
+  background-color: #FFF4EA;
   font-family: Inter, sans-serif;
-  padding: 22px 60px;
+  padding: 0px 60px;
   zoom: 0.8;
 
   @media (max-width: 990px) {
@@ -106,7 +106,7 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  margin-bottom: 24px;
+  margin-bottom: 30px;
 
   @media (max-width: 991px) {
     display: block;
@@ -118,7 +118,7 @@
   font-size: 20px;
   font-weight: 500;
   line-height: 28px;
-  margin: 30px 0 20px;
+  margin: 0;
 }
 
 .searchHome {

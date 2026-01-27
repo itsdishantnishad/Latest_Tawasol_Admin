@@ -85,7 +85,7 @@
   }
 }
 
-/* ✅ KEY FIX: remove Fluent margin from SAME element
+/* KEY FIX: remove Fluent margin from SAME element
    (element has class="ms-Breadcrumb breadStyle_xxx root-241") */
 .breadStyle:global(.ms-Breadcrumb) {
   margin: 0 !important;

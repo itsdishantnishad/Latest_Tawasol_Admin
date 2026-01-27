@@ -224,7 +224,7 @@ export default class PoliciesAndProceduresList extends React.Component<
   private shouldShowFolder = (folder: IPoliciesAndProceduresItem, searchText: string): boolean => {
     if (!searchText) return true;
 
-    // ✅ KEY FIX:
+    // KEY FIX:
     // While search is still running or failed, never hide folders (prevents UI going blank)
     const currentSearchState = this.props.searchState || "idle";
     if (currentSearchState !== "done") return true;

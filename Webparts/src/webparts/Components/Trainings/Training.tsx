@@ -31,7 +31,7 @@ const learningLinks: ILearningLink[] = [
     title: "STRYVE By LinkedIn Learning",
     logo: require("../../assets/stryve.svg"),
     logoAlt: "STRYVE",
-    url: "https://www.stryve.com/",
+    url: "https://www.linkedin.com/company/stryvelearning/?utm_source=chatgpt.com",
     backgroundColor: "#FDECDC",
   },
   {
@@ -39,7 +39,7 @@ const learningLinks: ILearningLink[] = [
     title: "eCornell by DHRE",
     logo: require("../../assets/ecornell.svg"),
     logoAlt: "eCornell",
-    url: "https://ecornell.cornell.edu/",
+    url: "https://auth.ecornell.com/cas/login?service=https%3A%2F%2Flms.ecornell.com%2Flogin%2Fcas#entry-37079268",
     backgroundColor: "#FDECDC",
   },
   {
@@ -47,7 +47,7 @@ const learningLinks: ILearningLink[] = [
     title: "LMS by DHRE",
     logo: require("../../assets/lms.svg"),
     logoAlt: "LMS by DHRE",
-    url: "https://www.simplilearn.com/learning-management-system-basics-article",
+    url: "https://esbe.fa.em8.oraclecloud.com/fscmUI/redwood/learner/learn/learn-enrollment-details?launchedFrom=myLearnExperience&learnerRecordId=300001155944032&persona=ORA_LEARNER",
     backgroundColor: "#FDECDC",
   },
 ];
@@ -58,21 +58,21 @@ const learningContentLinks = [
     title: "DHRE Unconscious Bias",
     logo: require("../../assets/learningconcious.svg"),
     logoAlt: "Bias",
-    url: "#",
+    url: "https://esbe.fa.em8.oraclecloud.com/fscmUI/redwood/learner/learn/learn-landing?tab=myLearnExperience&pagesUseSessionStoredFilters=learning-landing",
   },
   {
     id: 2,
     title: "DHRE Effective Time Management",
     logo: require("../../assets/effectivemanagement.svg"),
     logoAlt: "Time",
-    url: "#",
+    url: "https://esbe.fa.em8.oraclecloud.com/fscmUI/redwood/learner/learn/learn-landing?tab=myLearnExperience&pagesUseSessionStoredFilters=learning-landing",
   },
   {
     id: 3,
     title: "DHRE Priority Matrix Job Aid",
     logo: require("../../assets/priorityjob.svg"),
     logoAlt: "Matrix",
-    url: "#",
+    url: "https://esbe.fa.em8.oraclecloud.com/fscmUI/redwood/learner/learn/learn-landing?tab=myLearnExperience&pagesUseSessionStoredFilters=learning-landing",
   },
 ];
 

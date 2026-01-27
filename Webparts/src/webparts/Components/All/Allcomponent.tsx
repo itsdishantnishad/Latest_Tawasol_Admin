@@ -297,36 +297,32 @@ const AllComponents: React.FC<Props> = ({
         viewMode === "list" ? (
           <>
             <div className={styles.eventsWrapper}>
-              <div className={styles.eventsWrapper}>
-                <h5>My Trainings</h5>
-                {myTrainings.length === 0 ? (
-                  <div className={styles.emptyState}>You havn't registered for any Training</div>
-                ) : (
-                  myTrainings.map((training: any) => (
-                    <Trainingcard key={training.id} {...training} context={context} />
-                  ))
-                )}
-              </div>
+              <h5>My Trainings</h5>
+              {myTrainings.length === 0 ? (
+                <div className={styles.emptyState}>You havn't registered for any Training</div>
+              ) : (
+                myTrainings.map((training: any) => (
+                  <Trainingcard key={training.id} {...training} context={context} />
+                ))
+              )}
 
-              <div className={styles.eventsWrapper}>
-                <h5>My Meetings</h5>
-                {filteredMeetings.length === 0 ? (
-                  <div className={styles.emptyState}>No Meeting is Scheduled for you</div>
-                ) : (
-                  filteredMeetings.map((meeting: any) => (
-                    <MeetingCard key={meeting.id} event={meeting} />
-                  ))
-                )}
-              </div>
+              <h5>My Meetings</h5>
+              {filteredMeetings.length === 0 ? (
+                <div className={styles.emptyState}>No Meeting is Scheduled for you</div>
+              ) : (
+                filteredMeetings.map((meeting: any) => (
+                  <MeetingCard key={meeting.id} event={meeting} />
+                ))
+              )}
 
             </div>
 
-            <div className={styles.eventsWrapper}>
+            {/* <div className={styles.eventsWrapper}>
               <h5>My Meetings</h5>
               {filteredMeetings.map((meeting: any) => (
                 <MeetingCard key={meeting.id} event={meeting} />
               ))}
-            </div>
+            </div> */}
 
             {/* <div className={styles.previousEventsContainer}>
               <h2 className={styles.heading}>Previous Events</h2>

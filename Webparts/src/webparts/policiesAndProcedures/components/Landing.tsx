@@ -118,7 +118,10 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
           onOpenFunctionView={this.showFunctionDetailView}
         />
 
-        <div className={styles.sectionHeading} style={{ marginTop: 12 }}>Support Function</div>
+        <div className={styles.homeTopRow}>
+          <div className={styles.sectionHeading}>Support Function</div>
+        </div>
+        
         <Tiles
           variant="support"
           categories={[]}
@@ -127,7 +130,7 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
           onOpenFunctionView={this.showFunctionDetailView}
         />
 
-        <Boards context={this.props.context} dmsLibraryRoot={this.getDmsLibraryRoot()}/>
+        <Boards context={this.props.context} favouritesCount={10} dmsLibraryRoot={this.getDmsLibraryRoot()}/>
       </div>
     );
   }

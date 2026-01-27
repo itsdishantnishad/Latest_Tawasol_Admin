@@ -526,7 +526,8 @@ export default class ExtensionsApplicationCustomizer
         "SitePages/Offers-&-Benifits.aspx",
         "SitePages/Policies-and-Procedures.aspx",
         "SitePages/Beverages.aspx",
-        "SitePages/Dashboards.aspx"
+        "SitePages/Dashboards.aspx",
+        "SitePages/Interactive-Forms.aspx"
       ],
 
       // VICE_VERSA

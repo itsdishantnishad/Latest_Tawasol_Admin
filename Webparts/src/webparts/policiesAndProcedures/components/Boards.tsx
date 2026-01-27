@@ -181,7 +181,7 @@ export default class Boards extends React.Component<IBoardsProps, IBoardsState> 
 
     const recentlyCount: number = this.props.recentlyCount ?? 5;
     const mostUsedCount: number = this.props.mostUsedCount ?? 5;
-    const favouritesCount: number = this.props.favouritesCount ?? 3;
+    const favouritesCount: number = this.props.favouritesCount ?? 5;
 
     const useSP: boolean =
       (this.props.useSharePointProvider ?? !!this.props.context) && !!this.props.context;
