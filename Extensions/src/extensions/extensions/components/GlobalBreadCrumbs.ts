@@ -314,6 +314,10 @@ export class GlobalBreadcrumbs {
             this.unmount();
             return;
         }
+        if(this.isOfferBenefitsPage()){
+            this.unmount()
+            return;
+        }
 
         const info = await this.getCurrentSitePageInfo();
        let section = (this.isTasksPage() || this.isOfferBenefitsPage() || this.isBeverageMenuPage()) ? "Home" : "Pages";
