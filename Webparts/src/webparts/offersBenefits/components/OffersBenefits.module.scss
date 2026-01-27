@@ -518,42 +518,48 @@
 }
 
 /* privilege text card */
-.privTextCard { background: #f9ede3; }
-.privTextPad { padding: 22px; height: 100%; }
+.privTextCard { background: #ffe8d1; }
+.privTextPad { padding: 26.5px; height: 100%; }
 
-.privLogoRow { margin-bottom: 12px; }
-.privLogo { height: 24px; width: auto; display: block; }
+.privLogoRow { margin-bottom: 24px; }
+.privLogo { height: 47px; width: 208.37px; display: block; }
 
 /* Title base BLACK */
 .privTitleBase { margin: 0; color: var(--ink); }
-.privTitleRed { color: var(--accent); }
-.privAccentWord { color: var(--accent); font-weight: 900; }
+.privTitleRed { color: var(--accent); margin-top: 20px; }
+.privAccentWord { color: var(--accent); font-weight: 600; }
 
-.privTopLeftTitle { font-size: 28px; font-weight: 900; line-height: 1.2; }
-.privBottomRightTitle { font-size: 20px; font-weight: 900; line-height: 1.2; }
+.privTopLeftTitle { font-size: 28px; font-weight: 600; line-height: 36px;  }
+.privBottomRightTitle { font-size: 20px; font-weight: 600; line-height: 28px; }
 .privTitleAny { font-size: 24px; font-weight: 900; }
 
-.privSubBase { margin-top: 10px; color: #555; line-height: 1.5; }
-.privTopLeftSub { font-size: 14px; }
-.privBottomRightSub { font-size: 14px; }
+.privSubBase { margin-top: 25px; color: #555; line-height: 1.5; }
+.privTopLeftSub { font-size: 16px; }
+.privBottomRightSub { font-size: 16px; font-weight: 400; font:"Inter"; line-height: 24px; }
 .privSubAny { font-size: 14px; }
 
-.privSiteRow { margin-top: 12px; }
+.privSiteRow { margin-top: 45px; }
 .privSiteLink {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   color: var(--accent);
   text-decoration: none;
-  font-weight: 900;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  font-style: "Regular";
 }
 .privSiteLink:hover { text-decoration: underline; }
 .privGlobeIcon { width: 16px; height: 16px; display: block; }
 
 .privBulletHeading {
-  margin-top: 14px;
-  font-weight: 900;
+  margin-top: 28px;
+  font-weight: 600;
+ font-family: "Inter";
   color: var(--ink);
+  font-size: 18px;
+  font-style: "semi Bold";
 }
 
 .privBullets {
@@ -568,7 +574,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   column-gap: 24px;
-  row-gap: 8px;
+  row-gap: 20px;
 }
 .privBulletsTwoCol li {
   list-style: none;
