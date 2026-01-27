@@ -33,10 +33,11 @@
 
 /* ✅ NEW: the only place we keep horizontal padding + centering */
 .container {
-  width: 100%;
-  max-width: 1320px;
   margin: 0 auto;
-  padding: 0 clamp(12px, 3vw, 60px);
+  /* max-width: 1320px; */
+  /* padding: 0 clamp(12px, 3vw, 60px); */
+  width: 100%;
+  padding: 0px 60px;
 }
 
 /* keep for typings */
@@ -47,7 +48,7 @@
 .segWrap {
   display: flex;
   justify-content: center;
-  padding-top: 18px;
+  padding-top: 0px;
 }
 
 .seg {
@@ -106,7 +107,7 @@
 
 /* ================= Layout wrapper ================= */
 .grid {
-  margin-top: 18px;
+  margin-top: 30px;
   width: 100%;
   display: flex;
   flex-direction: column;
