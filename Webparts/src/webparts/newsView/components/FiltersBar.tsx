@@ -81,12 +81,12 @@ export default class FiltersBar extends React.Component<IFiltersBarProps> {
             onChange={this.handleDepartmentChange}
             ariaLabel="Filter by department"
           />
-          <SearchBox
+          {/* <SearchBox
             placeholder="Search News"
             value={searchQuery}
             onChange={this.handleSearchChange}
             ariaLabel="Search news"
-          />
+          /> */}
         </div>
 
         <div className={styles.zoneToggle}>
