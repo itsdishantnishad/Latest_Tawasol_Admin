@@ -20,7 +20,7 @@ export class FloatingNav {
   private footerMO?: MutationObserver;
 
   // tighter gap above footer
-  private readonly gapAboveFooterPx = 8;
+ // private readonly gapAboveFooterPx = 8;
 
   private handleScrollOrResize = () => this.scheduleRecompute();
 
@@ -136,7 +136,7 @@ export class FloatingNav {
       this.footerEl = this.resolveFooterElement();
       this.installObservers();
       this.ensureListeners();
-      this.recomputeLift();
+     // this.recomputeLift();
       return;
     }
 
@@ -161,7 +161,7 @@ export class FloatingNav {
     this.footerEl = this.resolveFooterElement();
     this.installObservers();
     this.ensureListeners();
-    this.recomputeLift();
+   // this.recomputeLift();
   }
 
   public dispose(): void {
@@ -240,34 +240,34 @@ export class FloatingNav {
 
   private scheduleRecompute(): void {
     if (this.rAF) cancelAnimationFrame(this.rAF);
-    this.rAF = requestAnimationFrame(() => this.recomputeLift());
+   // this.rAF = requestAnimationFrame(() => this.recomputeLift());
   }
 
   /**
    * Lift ONLY when footer would collide with nav (not when footer becomes visible).
    */
-  private recomputeLift(): void {
-    if (!this.floatingNavigationElement) return;
+  // private recomputeLift(): void {
+  //   if (!this.floatingNavigationElement) return;
 
-    let raise = 0;
+  //   let raise = 0;
 
-    if (this.footerEl) {
-      const footerRect = this.footerEl.getBoundingClientRect();
-      const vh = window.innerHeight || document.documentElement.clientHeight;
+  //   if (this.footerEl) {
+  //     const footerRect = this.footerEl.getBoundingClientRect();
+  //     const vh = window.innerHeight || document.documentElement.clientHeight;
 
-      const cs = window.getComputedStyle(this.floatingNavigationElement);
-      const bottomRaw = cs.bottom || "0";
-      const bottom = parseFloat(bottomRaw);
-      const bottomPx = Number.isFinite(bottom) ? bottom : 0;
+  //     const cs = window.getComputedStyle(this.floatingNavigationElement);
+  //     const bottomRaw = cs.bottom || "0";
+  //     const bottom = parseFloat(bottomRaw);
+  //     const bottomPx = Number.isFinite(bottom) ? bottom : 0;
 
-      const navBottomY = vh - bottomPx; // baseline nav bottom line at raise=0
+  //     const navBottomY = vh - bottomPx; // baseline nav bottom line at raise=0
 
-      const needed = (navBottomY + this.gapAboveFooterPx) - footerRect.top;
-      if (needed > 0) raise = needed;
-    }
+  //     const needed = (navBottomY + this.gapAboveFooterPx) - footerRect.top;
+  //     if (needed > 0) raise = needed;
+  //   }
 
-    this.floatingNavigationElement.style.setProperty("--float-raise", `${Math.ceil(raise)}px`);
-  }
+  //   this.floatingNavigationElement.style.setProperty("--float-raise", `${Math.ceil(raise)}px`);
+  // }
 
   private resolveFooterElement(): HTMLElement | null {
     return (

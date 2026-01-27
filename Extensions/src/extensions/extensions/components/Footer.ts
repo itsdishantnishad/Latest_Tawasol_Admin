@@ -73,24 +73,25 @@ export class Footer {
 
     const footerHtml = `
       <footer class="${styles.TIRFooter}">
-        <h2 class="${styles.TIRFooterLogo}">Tawasol</h2>
+     <!--
+    <h2 class="${styles.TIRFooterLogo}">Tawasol</h2>
 
-        <nav class="${styles.TIRFooterNav}">
-          ${buckets.main
-            .map((l) => {
-              const href = this.safeUrl(l.URL);
-              if (!href) return '';
-              return `
-                <a href="${href}" class="${styles.TIRFooterLink}">
-                  ${this.escapeHtml(l.Title)}
-                </a>
-              `;
-            })
-            .join('')}
-        </nav>
-
+    <nav class="${styles.TIRFooterNav}">
+      ${buckets.main
+        .map((l) => {
+          const href = this.safeUrl(l.URL);
+          if (!href) return '';
+          return `
+            <a href="${href}" class="${styles.TIRFooterLink}">
+              ${this.escapeHtml(l.Title)}
+            </a>
+          `;
+        })
+        .join('')}
+    </nav>
+    
         <hr class="${styles.TIRFooterLine}" />
-
+       -->
         <div class="${styles.TIRFooterBottom}">
           <div class="${styles.TIRFooterBottomLeft}"></div>
 
