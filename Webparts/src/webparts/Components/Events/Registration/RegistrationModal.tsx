@@ -272,7 +272,7 @@ const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
             value={formData.name}
             onChange={(e, newValue) => setFormData({ ...formData, name: newValue || "" })}
             className={styles.textField}
-            required
+            // required
             disabled={isSubmitting}
           />
         </div>
@@ -287,7 +287,7 @@ const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
               setFormData({ ...formData, division: (option?.key as string) || "" })
             }
             className={styles.dropdown}
-            required
+            // required
             disabled={isSubmitting}
           />
         </div>
@@ -302,7 +302,7 @@ const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
               setFormData({ ...formData, department: (option?.key as string) || "" })
             }
             className={styles.dropdown}
-            required
+            // required
             disabled={isSubmitting}
           />
         </div>
