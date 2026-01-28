@@ -7,6 +7,17 @@ import "@pnp/sp/items";
 
 const outlookIcon: string = require("../../assets/outlook-icon.svg");
 
+function normalizeApprovalStatus(v: any): "none" | "pending" | "approved" | "rejected" {
+  const raw = String(v ?? "").trim().toLowerCase();
+  if (!raw) return "none";
+  if (raw.includes("approve")) return "approved";
+  if (raw.includes("reject")) return "rejected";
+  if (raw.includes("pend")) return "pending";
+  // default: treat unknown as pending (safer than enabling join)
+  return "pending";
+}
+
+
 export interface IAllTrainingCardProps {
   imageUrl: string;
   category: string;
@@ -68,7 +79,16 @@ export class AllTrainingCard extends React.Component<
       return;
     }
 
-    const currentUserId = context.pageContext.legacyPageContext.userId;
+    let currentUserId: number = (context?.pageContext as any)?.legacyPageContext?.userId || 0;
+
+    if (!currentUserId) {
+      try {
+        const me: any = await this.sp.web.currentUser.select("Id")();
+        currentUserId = Number(me?.Id || 0);
+      } catch {
+        // ignore
+      }
+    }
 
     try {
       const existingItems = await this.sp.web.lists
@@ -87,11 +107,11 @@ export class AllTrainingCard extends React.Component<
           registeredItem.TIRApproval ||
           registeredItem.TIRApprovalChoice ||
           "Pending";
-        const status = approvalValue.toLowerCase();
+        const status = normalizeApprovalStatus(approvalValue);
 
         this.setState({
           approvalStatus: status,
-          registeredItemId: registeredItem.Id,
+          registeredItemId: registeredItem?.Id ?? null,
           isEventCompleted: completed,
           isLoading: false,
         });
@@ -123,7 +143,16 @@ export class AllTrainingCard extends React.Component<
       return;
     }
 
-    const currentUserId = context.pageContext.legacyPageContext.userId;
+    let currentUserId: number = (context?.pageContext as any)?.legacyPageContext?.userId || 0;
+
+    if (!currentUserId) {
+      try {
+        const me: any = await this.sp.web.currentUser.select("Id")();
+        currentUserId = Number(me?.Id || 0);
+      } catch {
+        // ignore
+      }
+    }
     this.setState({ isSubmitting: true, errorMessage: "" });
 
     try {
@@ -140,12 +169,12 @@ export class AllTrainingCard extends React.Component<
           existingItem.TIRApproval ||
           existingItem.TIRApprovalChoice ||
           "Pending";
-        const status = approvalValue.toLowerCase();
+        const status = normalizeApprovalStatus(approvalValue);
 
         this.setState({
           isSubmitting: false,
           approvalStatus: status,
-          registeredItemId: existingItem.Id,
+          registeredItemId: existingItem?.Id ?? null,
           errorMessage: "",
         });
         return;
@@ -189,6 +218,11 @@ export class AllTrainingCard extends React.Component<
 
     const { registeredItemId } = this.state;
     const { context } = this.props;
+
+    if (!registeredItemId) {
+      alert("Registration not found yet.");
+      return;
+    }
 
     window.location.href = `${context.pageContext.web.absoluteUrl}/SitePages/TrainingFeedback.aspx?registrationId=${registeredItemId}`;
   };

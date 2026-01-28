@@ -528,7 +528,7 @@ private toStoredAbsoluteUrl(serverRelPath: string): string {
         Querytext: "*",
         RowLimit: 1,
         TrimDuplicates: false,
-        SelectProperties: ["Id", "Title", "TIREventEndDate", "TIREventStartDate", "TIRLocation", "TIREventCategory", "URL"],
+        SelectProperties: ["Id", "ListItemID", "Title", "TIREventEndDate", "TIREventStartDate", "TIRLocation", "TIREventCategory", "URL"],
         QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
         HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
         EnableInterleaving: true,
@@ -536,7 +536,7 @@ private toStoredAbsoluteUrl(serverRelPath: string): string {
 
       return results.PrimarySearchResults.map((item: any) => {
         return {
-          ID: item.Id,
+          ID: Number(item.ListItemID || item.ListItemId || item.Id) || 0,
           title: item.Title,
           eventEndDate: item.TIREventEndDate,
           eventStartDate: item.TIREventStartDate,
@@ -608,6 +608,7 @@ private toStoredAbsoluteUrl(serverRelPath: string): string {
         TrimDuplicates: false,
         SelectProperties: [
           "Id",
+          "ListItemID",
           "Title",
           "TIREventEndDate",
           "TIREventStartDate",
@@ -649,7 +650,7 @@ private toStoredAbsoluteUrl(serverRelPath: string): string {
         }
 
         return {
-          ID: item.Id,
+          ID: Number(item.ListItemID || item.ListItemId || item.Id) || 0,
           title: item.Title,
           eventEndDate: item.TIREventEndDate,
           eventStartDate: item.TIREventStartDate,

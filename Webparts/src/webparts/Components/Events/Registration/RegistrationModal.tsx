@@ -123,6 +123,10 @@ const EventRegistration: React.FC<IEventRegistrationProps> = (props) => {
       setSubmitMessage({ type: MessageBarType.error, text: "Please select a department" });
       return false;
     }
+    if (!formData.joining) {
+      setSubmitMessage({ type: MessageBarType.error, text: "Please select whether you will join" });
+      return false;
+    }
     return true;
   };
 

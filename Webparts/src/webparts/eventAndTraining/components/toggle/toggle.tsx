@@ -1,3 +1,399 @@
+// import * as React from "react";
+// import styles from "./EventsTrainingsToggle.module.scss";
+
+// import Trainingmodule from "../../../Components/Trainings/Training";
+// import Allevents from "../../../Components/Events/AllEvents";
+// import AllMeetings from "../../../Components/TeamsMeeting/TeamsComponent";
+// import AllComponents from "../../../Components/All/Allcomponent";
+
+// import { mapGraphMeetingToUI } from "../../../services/meetingServices/mapGraphMeetingToUI";
+// import NavTabs from "../../../Components/NavTabs/NavTabs";
+// import { EventsTrainingsTabKey } from "../../../Components/NavTabs/eventsTrainingsTabs";
+
+// // ✅ Only for My Events in All tab (no change in listServices.ts)
+// import { spfi, SPFx } from "@pnp/sp";
+// import "@pnp/sp/webs";
+// import "@pnp/sp/lists";
+// import "@pnp/sp/items";
+
+// export interface IEventsTrainingsToggleProps {
+//   onTabChange?: (tab: EventsTrainingsTabKey) => void;
+//   onSearchChange?: (text: string) => void;
+//   Trainingdata?: any[];
+//   Eventdata?: any[];
+//   MeetingsData?: any[];
+//   context?: any;
+// }
+
+// /* =========================================================
+//    Helper: get initial tab from URL
+// ========================================================= */
+// const getInitialTab = (): EventsTrainingsTabKey => {
+//   if (typeof window === "undefined") {
+//     return EventsTrainingsTabKey.All;
+//   }
+
+//   const tab = new URLSearchParams(window.location.search)
+//     .get("tab")
+//     ?.toLowerCase();
+
+//   switch (tab) {
+//     case EventsTrainingsTabKey.Events:
+//       return EventsTrainingsTabKey.Events;
+//     case EventsTrainingsTabKey.Trainings:
+//       return EventsTrainingsTabKey.Trainings;
+//     case EventsTrainingsTabKey.Meetings:
+//       return EventsTrainingsTabKey.Meetings;
+//     default:
+//       return EventsTrainingsTabKey.All;
+//   }
+// };
+
+// const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = (props) => {
+//   const {
+//     Trainingdata = [],
+//     Eventdata = [],
+//     MeetingsData = [],
+//     context,
+//     onTabChange,
+//     onSearchChange,
+//   } = props;
+
+//   /* =========================================================
+//      Meetings mapping (UNCHANGED)
+//   ========================================================= */
+//   const mappedMeetings = React.useMemo(
+//     () => (MeetingsData || []).map(mapGraphMeetingToUI),
+//     [MeetingsData]
+//   );
+
+//   /* =========================================================
+//      State
+//   ========================================================= */
+//   const [activeTab, setActiveTab] =
+//     React.useState<EventsTrainingsTabKey>(getInitialTab);
+
+//   const [viewMode, setViewMode] =
+//     React.useState<"list" | "calendar">("list");
+
+//   const [searchText, setSearchText] = React.useState("");
+
+//   /* =========================================================
+//      ✅ My Events support (ONLY for All tab -> My Events & Trainings)
+//      Reads "Registered User Event" list for current user and extracts Event IDs.
+//      (No dependency on listServices.ts)
+//   ========================================================= */
+//   const [myEventIds, setMyEventIds] = React.useState<Set<number>>(new Set());
+
+//   const parseNumericIds = (text: any): number[] => {
+//     const raw = String(text || "");
+//     const matches = raw.match(/\d+/g);
+//     if (!matches) return [];
+//     const nums = matches.map((m) => Number(m)).filter((n) => !Number.isNaN(n));
+//     return nums;
+//   };
+
+//   React.useEffect(() => {
+//     let cancelled = false;
+
+//     const loadMyRegisteredEventIds = async () => {
+//       try {
+//         if (!context) return;
+
+//         const sp = spfi().using(SPFx(context));
+
+//         let userId: number | undefined = (context.pageContext as any)
+//           ?.legacyPageContext?.userId;
+
+//         if (!userId) {
+//           const me: any = await sp.web.currentUser();
+//           userId = Number(me?.Id) || 0;
+//         }
+//         if (!userId) return;
+
+//         // MUST match the list name used in your Events page registration
+//         const list = sp.web.lists.getByTitle("Registered User Event");
+
+//         const rows: any[] = await list.items
+//           .select("Title", "AuthorId")
+//           .filter(`AuthorId eq ${userId}`)
+//           .top(5000)();
+
+//         const ids: number[] = [];
+//         for (const r of rows || []) {
+//           ids.push(...parseNumericIds(r?.Title));
+//         }
+
+//         if (!cancelled) setMyEventIds(new Set(ids));
+//       } catch (e) {
+//         if (!cancelled) setMyEventIds(new Set());
+//       }
+//     };
+
+//     void loadMyRegisteredEventIds();
+
+//     return () => {
+//       cancelled = true;
+//     };
+//   }, [context]);
+
+//   /* =========================================================
+//      Tabs config for NavTabs
+//   ========================================================= */
+//   const tabs = [
+//     { key: EventsTrainingsTabKey.All, label: "All" },
+//     { key: EventsTrainingsTabKey.Events, label: "Events" },
+//     { key: EventsTrainingsTabKey.Trainings, label: "Trainings" },
+//     { key: EventsTrainingsTabKey.Meetings, label: "Meetings" },
+//   ];
+
+//   /* =========================================================
+//      Tab change handler (GLOBAL + URL SYNC)
+//   ========================================================= */
+//   const handleTabChange = (tab: EventsTrainingsTabKey) => {
+//     setActiveTab(tab);
+//     setSearchText("");
+//     onTabChange?.(tab);
+
+//     // Sync tab to URL
+//     const url = new URL(window.location.href);
+//     url.searchParams.set("tab", tab);
+//     window.history.replaceState({}, "", url.toString());
+//   };
+
+//   /* =========================================================
+//      Search handler (UNCHANGED)
+//   ========================================================= */
+//   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const value = e.target.value;
+//     setSearchText(value);
+//     onSearchChange?.(value);
+//   };
+
+//   /* =========================================================
+//      Filtering logic (UNCHANGED)
+//   ========================================================= */
+//   const filteredEvents = React.useMemo(() => {
+//     let list = [...(Eventdata || [])];
+
+//     if (searchText) {
+//       const s = searchText.toLowerCase();
+//       list = list.filter((i) => i.title?.toLowerCase().includes(s));
+//     }
+
+//     return list;
+//   }, [Eventdata, searchText]);
+
+//   const filteredTrainings = React.useMemo(() => {
+//     let list = [...(Trainingdata || [])];
+
+//     if (searchText) {
+//       const s = searchText.toLowerCase();
+//       list = list.filter((i) => i.title?.toLowerCase().includes(s));
+//     }
+
+//     return list;
+//   }, [Trainingdata, searchText]);
+
+//   /* =========================================================
+//      ✅ Enriched events for All tab
+//      This makes AllComponents able to show Events in:
+//      "My Events & Trainings" section.
+//   ========================================================= */
+//   const filteredEventsForAllTab = React.useMemo(() => {
+//     const ids = myEventIds;
+
+//     return (filteredEvents || []).map((e: any) => {
+//       const idNum = Number(e?.ID ?? e?.Id ?? e?.id ?? 0);
+//       const isReg = idNum ? ids.has(idNum) : false;
+
+//       return {
+//         ...e,
+//         // both names to be safe with existing component logic
+//         isregistered: isReg,
+//         isRegistered: isReg,
+//         status: isReg ? "Registered" : (e?.status || "Upcoming"),
+//         Eventtype: e?.Eventtype || "Events",
+//       };
+//     });
+//   }, [filteredEvents, myEventIds]);
+
+//   /* =========================================================
+//      Render
+//   ========================================================= */
+//   return (
+//     <div className={styles.paddingSection}>
+//       {/* ------------------ TOP BAR ------------------ */}
+//       <div className={styles.topWrapper}>
+//         {/* Tabs (NavTabs – NEW, GLOBAL) */}
+//         <NavTabs tabs={tabs} value={activeTab} onChange={handleTabChange} />
+
+//         {/* View toggle (SVGs KEPT AS-IS) */}
+//         <div className={styles.viewToggleWrapper}>
+//           <div className={styles.viewToggle}>
+//             {/* Calendar View */}
+//             <button
+//               className={`${styles.viewBtn} ${
+//                 viewMode === "calendar" ? styles.viewActive : ""
+//               }`}
+//               onClick={() => setViewMode("calendar")}
+//               aria-pressed={viewMode === "calendar"}
+//             >
+//               <svg
+//                 width="24"
+//                 height="24"
+//                 viewBox="0 0 24 24"
+//                 fill="none"
+//                 xmlns="http://www.w3.org/2000/svg"
+//               >
+//                 <path
+//                   d="M8 5.75C7.59 5.75 7.25 5.41 7.25 5V2C7.25 1.59 7.59 1.25 8 1.25C8.41 1.25 8.75 1.59 8.75 2V5C8.75 5.41 8.41 5.75 8 5.75Z"
+//                   fill="#101820"
+//                 />
+//                 <path
+//                   d="M16 5.75C15.59 5.75 15.25 5.41 15.25 5V2C15.25 1.59 15.59 1.25 16 1.25C16.41 1.25 16.75 1.59 16.75 2V5C16.75 5.41 16.41 5.75 16 5.75Z"
+//                   fill="#101820"
+//                 />
+//                 <path
+//                   d="M20.5 9.83984H3.5C3.09 9.83984 2.75 9.49984 2.75 9.08984C2.75 8.67984 3.09 8.33984 3.5 8.33984H20.5C20.91 8.33984 21.25 8.67984 21.25 9.08984C21.25 9.49984 20.91 9.83984 20.5 9.83984Z"
+//                   fill="#101820"
+//                 />
+//                 <path
+//                   d="M16 22.75H8C4.35 22.75 2.25 20.65 2.25 17V8.5C2.25 4.85 4.35 2.75 8 2.75H16C19.65 2.75 21.75 4.85 21.75 8.5V17C21.75 20.65 19.65 22.75 16 22.75ZM8 4.25C5.14 4.25 3.75 5.64 3.75 8.5V17C3.75 19.86 5.14 21.25 8 21.25H16C18.86 21.25 20.25 19.86 20.25 17V8.5C20.25 5.64 18.86 4.25 16 4.25H8Z"
+//                   fill="#101820"
+//                 />
+//                 <path
+//                   d="M8.5 14.5C8.37 14.5 8.24 14.47 8.12 14.42C8 14.37 7.89001 14.3 7.79001 14.21C7.70001 14.11 7.62999 14 7.57999 13.88C7.52999 13.76 7.5 13.63 7.5 13.5C7.5 13.24 7.61001 12.98 7.79001 12.79C7.89001 12.7 8 12.63 8.12 12.58C8.3 12.5 8.50001 12.48 8.70001 12.52C8.76001 12.53 8.82 12.55 8.88 12.58C8.94 12.6 9 12.63 9.06 12.67C9.11 12.71 9.15999 12.75 9.20999 12.79C9.24999 12.84 9.29999 12.89 9.32999 12.94C9.36999 13 9.40001 13.06 9.42001 13.12C9.45001 13.18 9.47001 13.24 9.48001 13.3C9.49001 13.37 9.5 13.43 9.5 13.5C9.5 13.76 9.38999 14.02 9.20999 14.21C9.01999 14.39 8.76 14.5 8.5 14.5Z"
+//                   fill="#101820"
+//                 />
+//                 <path
+//                   d="M12 14.5008C11.74 14.5008 11.48 14.3908 11.29 14.2108C11.25 14.1608 11.21 14.1108 11.17 14.0608C11.13 14.0008 11.1 13.9409 11.08 13.8809C11.05 13.8209 11.03 13.7609 11.02 13.7009C11.01 13.6309 11 13.5708 11 13.5008C11 13.3708 11.03 13.2408 11.08 13.1208C11.13 13.0008 11.2 12.8909 11.29 12.7909C11.57 12.5109 12.02 12.4208 12.38 12.5808C12.51 12.6308 12.61 12.7009 12.71 12.7909C12.89 12.9809 13 13.2408 13 13.5008C13 13.5708 12.99 13.6309 12.98 13.7009C12.97 13.7609 12.95 13.8209 12.92 13.8809C12.9 13.9409 12.87 14.0008 12.83 14.0608C12.79 14.1108 12.75 14.1608 12.71 14.2108C12.61 14.3008 12.51 14.3709 12.38 14.4209C12.26 14.4709 12.13 14.5008 12 14.5008Z"
+//                   fill="#101820"
+//                 />
+//                 <path
+//                   d="M8.5 18.0008C8.37 18.0008 8.24 17.9709 8.12 17.9209C8 17.8709 7.89001 17.8008 7.79001 17.7108C7.70001 17.6108 7.62999 17.5109 7.57999 17.3809C7.52999 17.2609 7.5 17.1308 7.5 17.0008C7.5 16.7408 7.61001 16.4809 7.79001 16.2909C7.89001 16.2009 8 16.1308 8.12 16.0808C8.49 15.9208 8.92999 16.0109 9.20999 16.2909C9.24999 16.3409 9.29999 16.3909 9.32999 16.4409C9.36999 16.5009 9.40001 16.5608 9.42001 16.6208C9.45001 16.6808 9.47001 16.7408 9.48001 16.8108C9.49001 16.8708 9.5 16.9408 9.5 17.0008C9.5 17.2608 9.38999 17.5208 9.20999 17.7108C9.01999 17.8908 8.76 18.0008 8.5 18.0008Z"
+//                   fill="#101820"
+//                 />
+//               </svg>
+//             </button>
+
+//             {/* List View */}
+//             <button
+//               className={`${styles.viewBtn} ${
+//                 viewMode === "list" ? styles.viewActive : ""
+//               }`}
+//               onClick={() => setViewMode("list")}
+//               aria-pressed={viewMode === "list"}
+//             >
+//               <svg
+//                 xmlns="http://www.w3.org/2000/svg"
+//                 width="40"
+//                 height="40"
+//                 viewBox="0 0 40 40"
+//                 fill="none"
+//               >
+//                 <path
+//                   d="M12.5 26.6641H27.5"
+//                   stroke="black"
+//                   strokeWidth="1.5"
+//                   strokeLinecap="round"
+//                   strokeLinejoin="round"
+//                 />
+//                 <path
+//                   d="M12.5 15H27.5"
+//                   stroke="black"
+//                   strokeWidth="1.5"
+//                   strokeLinecap="round"
+//                   strokeLinejoin="round"
+//                 />
+//               </svg>
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* ------------------ CONTENT ------------------ */}
+//       {activeTab === EventsTrainingsTabKey.Events ? (
+//         <Allevents
+//           AllEventItems={filteredEvents}
+//           context={context}
+//           viewtype={viewMode}
+//         />
+//       ) : activeTab === EventsTrainingsTabKey.Meetings ? (
+//         mappedMeetings.length === 0 ? (
+//           <div className={styles.emptyState}>No Meeting is Scheduled for you</div>
+//         ) : (
+//           <AllMeetings
+//             meetingsData={mappedMeetings}
+//             context={context}
+//             viewtype={viewMode}
+//           />
+//         )
+//       ) : activeTab === EventsTrainingsTabKey.All ? (
+//         <AllComponents
+//           // ✅ changed ONLY here (for My Events & Trainings to include Events)
+//           filteredEvents={filteredEventsForAllTab}
+//           filteredMeetings={mappedMeetings}
+//           filteredTrainings={filteredTrainings}
+//           context={context}
+//           viewMode={viewMode}
+//         />
+//       ) : filteredTrainings.length === 0 ? (
+//         <div className={styles.emptyState}>You havn't registered for any Training</div>
+//       ) : (
+//         <Trainingmodule
+//           AllTrainingdata={filteredTrainings}
+//           context={context}
+//           viewtype={viewMode}
+//         />
+//       )}
+//     </div>
+//   );
+// };
+
+// export default EventsTrainingsToggle;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// FIXED VERSION - toggle.tsx
+// This version addresses the Events not showing issue in the All tab
+
 import * as React from "react";
 import styles from "./EventsTrainingsToggle.module.scss";
 
@@ -9,6 +405,7 @@ import AllComponents from "../../../Components/All/Allcomponent";
 import { mapGraphMeetingToUI } from "../../../services/meetingServices/mapGraphMeetingToUI";
 import NavTabs from "../../../Components/NavTabs/NavTabs";
 import { EventsTrainingsTabKey } from "../../../Components/NavTabs/eventsTrainingsTabs";
+import { SPHttpClient } from "@microsoft/sp-http";
 
 export interface IEventsTrainingsToggleProps {
   onTabChange?: (tab: EventsTrainingsTabKey) => void;
@@ -19,9 +416,6 @@ export interface IEventsTrainingsToggleProps {
   context?: any;
 }
 
-/* =========================================================
-   Helper: get initial tab from URL
-========================================================= */
 const getInitialTab = (): EventsTrainingsTabKey => {
   if (typeof window === "undefined") {
     return EventsTrainingsTabKey.All;
@@ -43,6 +437,58 @@ const getInitialTab = (): EventsTrainingsTabKey => {
   }
 };
 
+// ✅ FIX: Helper to ensure dates exist for CalendarView
+const normalizeEventForCalendar = (event: any, _isRegistered: boolean): any => {
+  if (!event) return null;
+
+  // Extract dates from various possible field names
+  const startRaw =
+    event?.start ??
+    event?.startDate ??
+    event?.eventStartDate ??
+    event?.TIREventStartDate ??
+    event?.eventDateTime;
+
+  const endRaw =
+    event?.end ??
+    event?.endDate ??
+    event?.eventEndDate ??
+    event?.TIREventEndDate;
+
+  // Parse dates
+  const parseDate = (v: any): Date | null => {
+    if (!v) return null;
+    if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+
+    if (typeof v === "object" && v?.dateTime) {
+      const d = new Date(String(v.dateTime));
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    const raw = String(v).split("\n")[0].trim();
+    if (!raw) return null;
+
+    const d = new Date(raw);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
+  const start = parseDate(startRaw);
+  const end = parseDate(endRaw);
+
+  // If no valid dates, return null (will be filtered out)
+  if (!start || !end) {
+    console.warn("Event missing valid dates:", event);
+    return null;
+  }
+
+  return {
+    ...event,
+    start,
+    end,
+    Eventtype: event?.Eventtype || "Events",
+  };
+};
+
 const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = (props) => {
   const {
     Trainingdata = [],
@@ -53,17 +499,23 @@ const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = (props) => 
     onSearchChange,
   } = props;
 
-  /* =========================================================
-     Meetings mapping (UNCHANGED)
-  ========================================================= */
+  // ✅ DEBUG: Log incoming data
+  React.useEffect(() => {
+    console.log("=== EventsTrainingsToggle Data ===");
+    console.log("Eventdata count:", Eventdata?.length || 0);
+    console.log("Trainingdata count:", Trainingdata?.length || 0);
+    console.log("MeetingsData count:", MeetingsData?.length || 0);
+    
+    if (Eventdata?.length > 0) {
+      console.log("First Event sample:", Eventdata[0]);
+    }
+  }, [Eventdata, Trainingdata, MeetingsData]);
+
   const mappedMeetings = React.useMemo(
-    () => MeetingsData.map(mapGraphMeetingToUI),
+    () => (MeetingsData || []).map(mapGraphMeetingToUI),
     [MeetingsData]
   );
 
-  /* =========================================================
-     State
-  ========================================================= */
   const [activeTab, setActiveTab] =
     React.useState<EventsTrainingsTabKey>(getInitialTab);
 
@@ -72,9 +524,174 @@ const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = (props) => 
 
   const [searchText, setSearchText] = React.useState("");
 
-  /* =========================================================
-     Tabs config for NavTabs
-  ========================================================= */
+  // ✅ FIX: Registration IDs as Set<string> for fast lookup
+  const [myRegisteredEventIds, setMyRegisteredEventIds] = React.useState<Set<string>>(new Set());
+
+  // ✅ FIX: Fetch user's registered event IDs
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        if (!context) {
+          console.warn("No context available for registration check");
+          if (!cancelled) setMyRegisteredEventIds(new Set());
+          return;
+        }
+
+        // 1) Get userId
+        let userId: number | undefined =
+          (context.pageContext as any)?.legacyPageContext?.userId;
+
+        if (!userId) {
+          const meUrl = `${context.pageContext.web.absoluteUrl}/_api/web/currentuser?$select=Id`;
+          const meRes = await context.spHttpClient.get(meUrl, SPHttpClient.configurations.v1);
+          if (!meRes.ok) {
+            console.warn("Failed to get current user");
+            if (!cancelled) setMyRegisteredEventIds(new Set());
+            return;
+          }
+          const me = await meRes.json();
+          userId = Number(me?.Id) || 0;
+        }
+
+        if (!userId) {
+          console.warn("No userId found");
+          if (!cancelled) setMyRegisteredEventIds(new Set());
+          return;
+        }
+
+        console.log("Current userId:", userId);
+
+        // 2) Read registration list
+        const listTitle = "Registered User Event";
+        
+        // ✅ FIX: Try multiple field names for Event ID
+        const url =
+          `${context.pageContext.web.absoluteUrl}` +
+          `/_api/web/lists/getbytitle('${encodeURIComponent(listTitle)}')/items` +
+          `?$top=5000&$select=Id,Title,TIREventId,EventId,TIRUserId,AuthorId`;
+
+        const resp = await context.spHttpClient.get(url, SPHttpClient.configurations.v1);
+        if (!resp.ok) {
+          console.error("Failed to fetch registration list:", resp.status);
+          if (!cancelled) setMyRegisteredEventIds(new Set());
+          return;
+        }
+
+        const json = await resp.json();
+        const rows: any[] = Array.isArray(json?.value) ? json.value : [];
+
+        console.log(`Found ${rows.length} registration records`);
+
+        const set = new Set<string>();
+        for (const r of rows) {
+          // Check both TIRUserId and AuthorId
+          const uid = Number(r?.TIRUserId?.Id ?? r?.TIRUserId ?? r?.AuthorId ?? 0);
+          
+          if (uid !== userId) continue;
+
+          // ✅ FIX: Try multiple field names for Event ID
+          const evId = r?.TIREventId ?? r?.EventId ?? r?.Title;
+          const key = String(evId ?? "").trim();
+          
+          if (key) {
+            set.add(key);
+            console.log("Added registered event ID:", key);
+          }
+        }
+
+        console.log("Total registered event IDs:", set.size);
+        if (!cancelled) setMyRegisteredEventIds(set);
+        
+      } catch (err) {
+        console.error("Error fetching registrations:", err);
+        if (!cancelled) setMyRegisteredEventIds(new Set());
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [context]);
+
+  // ✅ FIX: Normalize events and add registration flags
+  const normalizedEvents = React.useMemo(() => {
+    const set = myRegisteredEventIds;
+
+    console.log("=== Normalizing Events ===");
+    console.log("Input Eventdata count:", Eventdata?.length || 0);
+    console.log("Registration IDs count:", set.size);
+
+    const normalized = (Eventdata || [])
+      .map((e: any) => {
+        // ✅ FIX: Try multiple ID field names
+        const idStr = String(
+          e?.ID ?? 
+          e?.Id ?? 
+          e?.id ?? 
+          e?.ListItemID ?? 
+          e?.ListItemId ?? 
+          ""
+        ).trim();
+        
+        const isReg = idStr ? set.has(idStr) : false;
+
+        if (isReg) {
+          console.log(`Event ${idStr} is registered`);
+        }
+
+        // Ensure start/end exist so CalendarView can render
+        return normalizeEventForCalendar(
+          {
+            ...e,
+            isRegistered: isReg,
+            isregistered: isReg,
+          },
+          isReg
+        );
+      })
+      .filter(Boolean);
+
+    console.log("Normalized events count:", normalized.length);
+    
+    // ✅ DEBUG: Log first normalized event
+    if (normalized.length > 0) {
+      console.log("First normalized event:", normalized[0]);
+    }
+
+    return normalized;
+  }, [Eventdata, myRegisteredEventIds]);
+
+  // ✅ FIX: Filtering logic with better logging
+  const filteredEvents = React.useMemo(() => {
+    let list = [...normalizedEvents];
+
+    console.log("=== Filtering Events ===");
+    console.log("Before filter:", list.length);
+    console.log("Search text:", searchText);
+
+    if (searchText) {
+      const q = searchText.toLowerCase();
+      list = list.filter((i) => (i?.title || "").toLowerCase().includes(q));
+      console.log("After search filter:", list.length);
+    }
+
+    return list;
+  }, [normalizedEvents, searchText]);
+
+  const filteredTrainings = React.useMemo(() => {
+    let list = [...Trainingdata];
+
+    if (searchText) {
+      const q = searchText.toLowerCase();
+      list = list.filter((i) => (i?.title || "").toLowerCase().includes(q));
+    }
+
+    return list;
+  }, [Trainingdata, searchText]);
+
   const tabs = [
     { key: EventsTrainingsTabKey.All, label: "All" },
     { key: EventsTrainingsTabKey.Events, label: "Events" },
@@ -82,77 +699,44 @@ const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = (props) => 
     { key: EventsTrainingsTabKey.Meetings, label: "Meetings" },
   ];
 
-  /* =========================================================
-     Tab change handler (GLOBAL + URL SYNC)
-  ========================================================= */
   const handleTabChange = (tab: EventsTrainingsTabKey) => {
+    console.log("Tab changed to:", tab);
     setActiveTab(tab);
     setSearchText("");
     onTabChange?.(tab);
 
-    // Sync tab to URL
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
     window.history.replaceState({}, "", url.toString());
   };
 
-  /* =========================================================
-     Search handler (UNCHANGED)
-  ========================================================= */
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchText(value);
     onSearchChange?.(value);
   };
 
-  /* =========================================================
-     Filtering logic (UNCHANGED)
-  ========================================================= */
-  const filteredEvents = React.useMemo(() => {
-    let list = [...Eventdata];
+  // ✅ DEBUG: Log when data changes
+  React.useEffect(() => {
+    console.log("=== Current State ===");
+    console.log("Active tab:", activeTab);
+    console.log("View mode:", viewMode);
+    console.log("Filtered events:", filteredEvents.length);
+    console.log("Filtered trainings:", filteredTrainings.length);
+    console.log("Mapped meetings:", mappedMeetings.length);
+  }, [activeTab, viewMode, filteredEvents, filteredTrainings, mappedMeetings]);
 
-    if (searchText) {
-      list = list.filter((i) =>
-        i.title?.toLowerCase().includes(searchText.toLowerCase())
-      );
-    }
-
-    return list;
-  }, [Eventdata, searchText]);
-
-  const filteredTrainings = React.useMemo(() => {
-    let list = [...Trainingdata];
-
-    if (searchText) {
-      list = list.filter((i) =>
-        i.title?.toLowerCase().includes(searchText.toLowerCase())
-      );
-    }
-
-    return list;
-  }, [Trainingdata, searchText]);
-
-  /* =========================================================
-     Render
-  ========================================================= */
   return (
     <div className={styles.paddingSection}>
-      {/* ------------------ TOP BAR ------------------ */}
+      {/* Top Bar */}
       <div className={styles.topWrapper}>
-        {/* Tabs (NavTabs – NEW, GLOBAL) */}
-        <NavTabs
-          tabs={tabs}
-          value={activeTab}
-          onChange={handleTabChange}
-        />
+        <NavTabs tabs={tabs} value={activeTab} onChange={handleTabChange} />
 
-        {/* View toggle (SVGs KEPT AS-IS) */}
         <div className={styles.viewToggleWrapper}>
           <div className={styles.viewToggle}>
-            {/* Calendar View */}
+            {/* Calendar View Button */}
             <button
-              className={`${styles.viewBtn} ${viewMode === "calendar" ? styles.viewActive : ""
-                }`}
+              className={`${styles.viewBtn} ${viewMode === "calendar" ? styles.viewActive : ""}`}
               onClick={() => setViewMode("calendar")}
               aria-pressed={viewMode === "calendar"}
             >
@@ -165,64 +749,33 @@ const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = (props) => 
                 <path d="M12 14.5008C11.74 14.5008 11.48 14.3908 11.29 14.2108C11.25 14.1608 11.21 14.1108 11.17 14.0608C11.13 14.0008 11.1 13.9409 11.08 13.8809C11.05 13.8209 11.03 13.7609 11.02 13.7009C11.01 13.6309 11 13.5708 11 13.5008C11 13.3708 11.03 13.2408 11.08 13.1208C11.13 13.0008 11.2 12.8909 11.29 12.7909C11.57 12.5109 12.02 12.4208 12.38 12.5808C12.51 12.6308 12.61 12.7009 12.71 12.7909C12.89 12.9809 13 13.2408 13 13.5008C13 13.5708 12.99 13.6309 12.98 13.7009C12.97 13.7609 12.95 13.8209 12.92 13.8809C12.9 13.9409 12.87 14.0008 12.83 14.0608C12.79 14.1108 12.75 14.1608 12.71 14.2108C12.61 14.3008 12.51 14.3709 12.38 14.4209C12.26 14.4709 12.13 14.5008 12 14.5008Z" fill="#101820" />
                 <path d="M8.5 18.0008C8.37 18.0008 8.24 17.9709 8.12 17.9209C8 17.8709 7.89001 17.8008 7.79001 17.7108C7.70001 17.6108 7.62999 17.5109 7.57999 17.3809C7.52999 17.2609 7.5 17.1308 7.5 17.0008C7.5 16.7408 7.61001 16.4809 7.79001 16.2909C7.89001 16.2009 8 16.1308 8.12 16.0808C8.49 15.9208 8.92999 16.0109 9.20999 16.2909C9.24999 16.3409 9.29999 16.3909 9.32999 16.4409C9.36999 16.5009 9.40001 16.5608 9.42001 16.6208C9.45001 16.6808 9.47001 16.7408 9.48001 16.8108C9.49001 16.8708 9.5 16.9408 9.5 17.0008C9.5 17.2608 9.38999 17.5208 9.20999 17.7108C9.01999 17.8908 8.76 18.0008 8.5 18.0008Z" fill="#101820" />
               </svg>
-
             </button>
 
-            {/* List View */}
+            {/* List View Button */}
             <button
-              className={`${styles.viewBtn} ${viewMode === "list" ? styles.viewActive : ""
-                }`}
+              className={`${styles.viewBtn} ${viewMode === "list" ? styles.viewActive : ""}`}
               onClick={() => setViewMode("list")}
               aria-pressed={viewMode === "list"}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="40"
-                height="40"
-                viewBox="0 0 40 40"
-                fill="none"
-              >
-                <path
-                  d="M12.5 26.6641H27.5"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12.5 15H27.5"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
+                <path d="M12.5 26.6641H27.5" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12.5 15H27.5" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
         </div>
       </div>
 
-      {/* ------------------ CONTENT ------------------ */}
+      {/* Content */}
       {activeTab === EventsTrainingsTabKey.Events ? (
-        <Allevents
-          AllEventItems={filteredEvents}
-          context={context}
-          viewtype={viewMode}
-        />
+        <Allevents AllEventItems={filteredEvents} context={context} viewtype={viewMode} />
       ) : activeTab === EventsTrainingsTabKey.Meetings ? (
         mappedMeetings.length === 0 ? (
-          <div className={styles.emptyState}>
-            No Meeting is Scheduled for you
-          </div>
+          <div className={styles.emptyState}>No Meeting is Scheduled for you</div>
         ) : (
-          <AllMeetings
-            meetingsData={mappedMeetings}
-            context={context}
-            viewtype={viewMode}
-          />
+          <AllMeetings meetingsData={mappedMeetings} context={context} viewtype={viewMode} />
         )
       ) : activeTab === EventsTrainingsTabKey.All ? (
-
         <AllComponents
           filteredEvents={filteredEvents}
           filteredMeetings={mappedMeetings}
@@ -230,20 +783,11 @@ const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = (props) => 
           context={context}
           viewMode={viewMode}
         />
+      ) : filteredTrainings.length === 0 ? (
+        <div className={styles.emptyState}>You haven't registered for any Training</div>
       ) : (
-        filteredTrainings.length === 0 ? (
-          <div className={styles.emptyState}>
-            You havn't registered for any Training
-          </div>
-        ) : (
-          <Trainingmodule
-            AllTrainingdata={filteredTrainings}
-            context={context}
-            viewtype={viewMode}
-          />
-        )
+        <Trainingmodule AllTrainingdata={filteredTrainings} context={context} viewtype={viewMode} />
       )}
-
     </div>
   );
 };
