@@ -78,10 +78,15 @@ export const Offers: React.FC<IOffersProps> = (props) => {
     return `${webUrl}/${raw}`;
   }, [props.seeAllURL, webUrl, origin]);
   // --- END ---
+ 
+  const cards = React.useMemo(
+    () => offers.map((c) => ({ ...c, url: viewAllHref })),
+    [offers, viewAllHref]
+  );
 
   return (
     <div>
-      <ShuffledCards cards={offers} />
+      <ShuffledCards cards={cards} />
 
       <div className={styles.ctaWrapper}>
         <ConditionalLink to={viewAllHref}>
