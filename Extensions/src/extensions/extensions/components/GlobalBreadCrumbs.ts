@@ -331,7 +331,7 @@ export class GlobalBreadcrumbs {
         else if (info.contentType) {
             const ct = info.contentType.toLowerCase();
             if (ct.includes("event")) section = "Events";
-            else if (ct.includes("training")) section = "Training";
+            else if (ct.includes("training")) section = "Trainings";
         }
 
         this.renderDom(section, title);
