@@ -32,7 +32,7 @@ export default class HelpWebPart extends BaseClientSideWebPart<IHelpWebPartProps
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
         context: this.context,
-        listTitle: "Help Center" 
+        listTitle: "Help Center"
       }
     );
 
@@ -112,6 +112,10 @@ export default class HelpWebPart extends BaseClientSideWebPart<IHelpWebPartProps
               groupFields: [
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
+                }),
+                PropertyPaneTextField('chatBotDeepLink', {
+                  label: 'Chatbot deep link',
+                  placeholder: 'Paste chatbot URL / deep link here'
                 })
               ]
             }

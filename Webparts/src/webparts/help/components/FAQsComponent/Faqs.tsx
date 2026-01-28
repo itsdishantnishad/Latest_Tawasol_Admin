@@ -7,9 +7,12 @@ import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
 
+const chatBotIcon: string = require("../../assets/ChatBot.svg");
+
 export interface IFaqsProps {
   context: WebPartContext;
   listTitle?: string;
+  chatBotDeepLink?: string;
 }
 
 interface IFaqItem {
@@ -37,6 +40,8 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
   public static defaultProps: Partial<IFaqsProps> = {
     listTitle: "FAQs"
   };
+private chatBotRef = React.createRef<HTMLAnchorElement>();
+private rafId: number | null = null;
 
   public constructor(props: IFaqsProps) {
     super(props);
@@ -51,6 +56,7 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
   }
 
   public async componentDidMount(): Promise<void> {
+     this.startFloatCheck();
     try {
       const sp = spfi().using(SPFx(this.props.context));
       const listTitle = this.props.listTitle as string;
@@ -93,6 +99,56 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
       });
     }
   }
+
+
+ public componentWillUnmount(): void {
+    this.stopFloatCheck();
+  }
+
+   // ========== FLOATING CHATBOT ==========
+  private startFloatCheck(): void {
+    this.checkFloatPosition();
+  }
+
+  private stopFloatCheck(): void {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+  }
+
+  private checkFloatPosition = (): void => {
+    const chatBot = this.chatBotRef.current;
+    if (!chatBot) {
+      this.rafId = requestAnimationFrame(this.checkFloatPosition);
+      return;
+    }
+
+    const footer = document.querySelector('[class*="TIRFooter"]') as HTMLElement;
+    if (!footer) {
+      chatBot.style.setProperty("--chatbot-raise", "0px");
+      this.rafId = requestAnimationFrame(this.checkFloatPosition);
+      return;
+    }
+
+    const chatBotRect = chatBot.getBoundingClientRect();
+    const footerRect = footer.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+
+    const chatBotBottom = chatBotRect.bottom;
+    const footerTop = footerRect.top;
+    const overlap = chatBotBottom - footerTop;
+
+    if (overlap > 0 && footerTop < viewportHeight) {
+      const raise = overlap + 70;
+      chatBot.style.setProperty("--chatbot-raise", `${raise}px`);
+    } else {
+      chatBot.style.setProperty("--chatbot-raise", "0px");
+    }
+
+    this.rafId = requestAnimationFrame(this.checkFloatPosition);
+  };
+
 
   private setCategory = (category: CategoryKey): void => {
     const { items } = this.state;
@@ -175,6 +231,20 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
         <div className={styles.faqList}>
           {items.map((item) => this.renderItem(item))}
         </div>
+          {/* ✅ CHATBOT FAB */}
+        <a
+          ref={this.chatBotRef}
+          className={styles.chatBotFab}
+          href={this.props.chatBotDeepLink || "#"}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Open chatbot"
+          onClick={(e) => {
+            if (!this.props.chatBotDeepLink) e.preventDefault();
+          }}
+        >
+          <img src={chatBotIcon} alt="Chatbot" />
+        </a>
       </div>
     );
   }
