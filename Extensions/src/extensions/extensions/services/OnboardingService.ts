@@ -73,16 +73,12 @@ export class OnboardingService {
     return { ...cfg, hasSeen: seen };
   }
 
- public async getConfig(): Promise<{ URL: string; title: string }> {
-  // NOTE:
-  // We intentionally DO NOT use $filter on URL fields because SharePoint often returns 400.
-  // Instead: fetch recent items and pick the first row that contains URL.Url.
-
+public async getConfig(): Promise<{ URL: string; title: string }> {
   const api =
     `${this.webUrl}/_api/web/lists/GetByTitle('${OnboardingService.LIST_TITLE}')/items` +
     `?$select=Title,URL,Modified` +
     `&$orderby=Modified desc` +
-    `&$top=25`; // keep small
+    `&$top=25`;
 
   const res = await this._ctx.spHttpClient.get(api, SPHttpClient.configurations.v1);
   if (!res.ok) return { URL: "", title: "" };
@@ -90,12 +86,19 @@ export class OnboardingService {
   const json = await res.json();
   const items: any[] = Array.isArray(json?.value) ? json.value : [];
 
-  // pick the first item which has a real hyperlink
-  const cfgItem = items.find(i => i?.URL?.Url);
+  const extractUrl = (v: any): string => {
+    if (!v) return "";
+    if (typeof v === "string") return v.trim();           
+    if (typeof v === "object") return String(v.Url || v.url || "").trim();
+    return "";
+  };
+
+  // Pick first item that has a usable URL
+  const cfgItem = items.find(i => !!extractUrl(i?.URL));
 
   return {
     title: String(cfgItem?.Title || ""),
-    URL: String(cfgItem?.URL?.Url || "")
+    URL: extractUrl(cfgItem?.URL)
   };
 }
 
