@@ -205,3 +205,28 @@
   color: #3a3b43;
 }
 
+/* ================= CHATBOT FAB  ================= */
+.chatBotFab{
+  --chatbot-base-bottom: 24px;
+  --chatbot-raise: 0px;
+
+  position: fixed !important;
+  width: 84.6796875px;
+  height: 75.92423248px;
+  opacity: 1;
+  right: 24px;
+  bottom: var(--chatbot-base-bottom);
+  cursor: pointer;
+  z-index: 9999;
+  pointer-events: auto;
+
+  transform: translateY(calc(-1 * var(--chatbot-raise)));
+  transition: transform .24s ease;
+  will-change: transform;
+}
+
+.chatBotFab img{
+  width: 100%;
+  height: 100%;
+  display: block;
+}

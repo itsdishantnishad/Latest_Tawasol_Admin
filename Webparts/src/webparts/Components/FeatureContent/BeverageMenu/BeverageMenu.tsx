@@ -56,9 +56,14 @@ const BeverageMenu: React.FC<IBeverageMenuProps> = (props) => {
   }, [props.seeAllURL, webUrl, origin]);
   // --- END ---
 
+  const cards = React.useMemo(
+    () => defaultBeverages.map((c) => ({ ...c, url: viewAllHref })),
+    [viewAllHref]
+  );
+
   return (
     <div>
-      <ShuffledCards cards={defaultBeverages} />
+      <ShuffledCards cards= {cards} />
 
       <div className={styles.ctaWrapper}>
         <ConditionalLink to={viewAllHref}>
