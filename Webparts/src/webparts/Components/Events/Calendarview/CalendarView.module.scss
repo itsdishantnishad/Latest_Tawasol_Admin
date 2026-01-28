@@ -1,18 +1,82 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
 .wrap {
   padding: 20px;
+
+  /* ✅ Fix: last week row getting hidden behind fixed bottom nav */
+  padding-bottom: calc(20px + var(--tawasol-calendar-safe-bottom, 110px));
 }
 
 .calendarHost {
-  height: 600px;
+  height: auto;
+  min-height: 600px;
   background: #fff4ea;
   border-radius: 16px;
-  padding: 12px;
   box-sizing: border-box;
+
+  /* =========================
+     Month cell scroll (hide scrollbar)
+     Fix: pills cut when too many events in a day
+     ========================= */
+  :global(.rbc-month-view) {
+    :global(.rbc-row-content) {
+      overflow: visible;
+    }
+
+    :global(.rbc-day-bg),
+    :global(.rbc-date-cell),
+    :global(.rbc-month-row),
+    :global(.rbc-row) {
+      overflow: visible;
+    }
+
+    :global(.rbc-row-segment) {
+      overflow: visible;
+    }
+
+    :global(.rbc-day-slot),
+    :global(.rbc-events-container),
+    :global(.rbc-row-content),
+    :global(.rbc-month-row),
+    :global(.rbc-row-bg),
+    :global(.rbc-row) {
+      overflow: visible;
+    }
+
+    :global(.rbc-month-row .rbc-row-content) {
+      overflow: visible;
+      pointer-events: none; /* allow scroll inside cells */
+    }
+
+    :global(.rbc-month-row .rbc-row-content > div) {
+      pointer-events: auto;
+      position: relative;
+
+      overflow-y: hidden; /* default hidden */
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+
+      /* Hide scrollbar */
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge legacy */
+    }
+
+    :global(.rbc-month-row .rbc-row-content > div:hover) {
+      overflow-y: auto; /* show on hover */
+    }
+
+    :global(.rbc-month-row .rbc-row-content > div::-webkit-scrollbar) {
+      width: 0;
+      height: 0;
+      display: none; /* Chrome/Safari */
+    }
+  }
 }
 
 /* Make react-big-calendar sit nicely on the tinted background */
 :global(.rbc-calendar) {
-  height: 100%;
+  height: auto !important;
+  min-height: 600px;
   background: transparent;
 }
 
@@ -26,18 +90,20 @@
 
 /* ✅ OUTSIDE padding around pill (wrapper) */
 :global(.rbc-event-content) {
-  padding: 2px 10px !important; /* outside spacing */
+  padding: 2px 10px !important;
   box-sizing: border-box;
 }
 
-/* Legend */
+/* =======================
+   Legend
+   ======================= */
 .legend {
   display: flex;
   gap: 24px;
-  margin-bottom: 16px;
   align-items: center;
   flex-wrap: wrap;
   justify-content: flex-end;
+  margin-bottom: 16px;
 }
 
 .legendItem {
@@ -58,16 +124,16 @@
 .swatchEvent {
   background: #0e6187;
 }
-
 .swatchTraining {
   background: #4bb86c;
 }
-
 .swatchTeams {
   background: #4c8ae0;
 }
 
-/* Modal */
+/* =======================
+   Modal
+   ======================= */
 .eventModalContainer {
   display: flex;
   justify-content: center;
@@ -91,7 +157,9 @@
   gap: 10px;
 }
 
-/* Event pill */
+/* =======================
+   Event pill
+   ======================= */
 .pill {
   width: 100%;
   padding: 2px 10px;
@@ -108,7 +176,7 @@
   display: flex;
   align-items: center;
   line-height: 22px;
-  font-family: Inter;
+  font-family: "Inter", sans-serif;
   margin: 0;
 }
 
@@ -122,7 +190,7 @@
   border-left-color: #4c8ae0;
 }
 
-/* ✅ Keep RBC event wrapper neutral so pill controls visuals */
+/* Keep RBC event wrapper neutral so pill controls visuals */
 :global(.rbc-month-view .rbc-event) {
   background: transparent !important;
   border: 0 !important;
@@ -130,7 +198,9 @@
   box-sizing: border-box;
 }
 
-/* ✅ Today red circle */
+/* =======================
+   Today red circle (date number)
+   ======================= */
 :global(.rbc-month-view .rbc-date-cell.rbc-now .rbc-button-link) {
   background: #da291c !important;
   color: #ffffff !important;
@@ -144,10 +214,6 @@
   line-height: 32px;
 }
 
-:global(.rbc-date-cell .rbc-now .rbc-current) {
-  padding: 5px !important;
-}
-
 /* Remove default today highlight background */
 :global(.rbc-day-bg.rbc-today) {
   background: transparent !important;
@@ -157,96 +223,165 @@
   background: transparent !important;
 }
 
+/* =======================
+   Figma-like Calendar Toolbar (NON-STICKY like before)
+   ======================= */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  background: transparent;
+  padding: 10px 6px 12px 6px;
+  min-height: 56px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Month and Year Typography (Figma) */
+.toolbarLabel {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: 0px;
+  color: #000000;
+  white-space: nowrap;
+
+  /* ✅ small top padding to avoid font crop */
+  padding-top: 2px;
+}
+
+.toolbarNav {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Arrow buttons (SVG only, no box) */
+.navArrowBtn {
+  width: 40px;
+  height: 40px;
+  padding: 0 !important;
+  margin: 0;
+
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.navArrowBtn:focus,
+.navArrowBtn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.navArrowSvg {
+  display: block;
+}
+
+/* Hide RBC view switch buttons (Month/Week/Day/Agenda) */
+:global(.rbc-toolbar .rbc-btn-group) {
+  display: none !important;
+}
+
+/* Reduce clutter on toolbar margins */
+:global(.rbc-toolbar) {
+  margin-bottom: 10px;
+  overflow: visible;
+}
+
+/* =======================
+   Week row padding (Mon/Tue/Wed...)
+   ======================= */
+:global(.rbc-month-header),
+:global(.rbc-time-header) {
+  background: #ffffff;
+}
+
+:global(.rbc-header) {
+  padding: 14px 10px !important;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #222;
+}
+
 /* =========================
-   Month cell scroll (hide scrollbar)
-   Fix: pills cut when too many events in a day
+   FINAL OVERRIDES (single source of truth)
    ========================= */
 
-.calendarHost {
-  :global(.rbc-month-view) {
-    :global(.rbc-row-content) {
-      /* keep row stable */
-      overflow: visible;
-    }
+/* Force remove box/border from toolbar buttons we own (Today/Month) */
+:global(.rbc-toolbar) button.todayBtn,
+:global(.rbc-toolbar) button.monthBtn {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  padding: 0 8px !important;
 
-    /* each day cell */
-    :global(.rbc-day-bg),
-    :global(.rbc-date-cell),
-    :global(.rbc-month-row),
-    :global(.rbc-row) {
-      overflow: visible;
-    }
+  font-family: "Inter", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  color: #000 !important;
 
-    /* This is the actual container holding events inside a day cell */
-    :global(.rbc-row-segment) {
-      overflow: visible;
-    }
+  appearance: none;
+  -webkit-appearance: none;
+}
 
-    /* Make the event area scrollable inside each day cell */
-    :global(.rbc-day-slot),
-    :global(.rbc-events-container),
-    :global(.rbc-row-content),
-    :global(.rbc-month-row),
-    :global(.rbc-row-bg),
-    :global(.rbc-row) {
-      overflow: visible;
-    }
+:global(.rbc-toolbar) button.todayBtn:focus,
+:global(.rbc-toolbar) button.todayBtn:focus-visible,
+:global(.rbc-toolbar) button.monthBtn:focus,
+:global(.rbc-toolbar) button.monthBtn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
 
-    /* The inner event container inside each day cell */
-    :global(.rbc-month-row .rbc-row-content) {
-      overflow: visible;
-    }
+/* Day number position + typography (Left + not too big) */
+:global(.rbc-month-view .rbc-date-cell) {
+  text-align: left !important;
+  padding: 6px 0 0 10px !important;
+}
 
-    /* KEY: Make each cell's content area scroll */
-    :global(.rbc-month-row .rbc-row-content .rbc-row) {
-      overflow: visible;
-    }
+:global(.rbc-month-view .rbc-date-cell .rbc-button-link) {
+  font-family: "Inter", sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  line-height: 20px !important;
+  letter-spacing: 0 !important;
+  color: #000 !important;
+}
 
-    /* Most reliable selector: the cell that contains events */
-    :global(.rbc-month-row .rbc-row-content .rbc-row .rbc-row-segment) {
-      overflow: visible;
-    }
+/* Keep today circle aligned after left-align */
+:global(.rbc-month-view .rbc-date-cell.rbc-now .rbc-button-link) {
+  margin-left: 0 !important;
+}
 
-    /* ✅ Final working approach: scroll the whole cell content area */
-    :global(.rbc-month-row .rbc-row-content) {
-      pointer-events: none; /* allow scroll inside cells */
-    }
-
-    /* restore pointer events for actual day cells */
-    :global(.rbc-month-row .rbc-row-content > div) {
-      pointer-events: auto;
-    }
-
-    /* Make the day cell scrollable (works on mouse + touch) */
-    :global(.rbc-month-row .rbc-row-content > div .rbc-row-segment),
-    :global(.rbc-month-row .rbc-row-content > div) {
-      position: relative;
-    }
-
-    /* ✅ This is the best practical hook: rbc-month-row -> rbc-row-content -> each day cell */
-    :global(.rbc-month-row .rbc-row-content > div) {
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-
-      /* Hide scrollbar */
-      scrollbar-width: none; /* Firefox */
-      -ms-overflow-style: none; /* IE/Edge legacy */
-    }
-
-    :global(.rbc-month-row .rbc-row-content > div::-webkit-scrollbar) {
-      width: 0;
-      height: 0;
-      display: none; /* Chrome/Safari */
-    }
-
-    /* Optional: only show scroll on hover (desktop) */
-    :global(.rbc-month-row .rbc-row-content > div) {
-      overflow-y: hidden;
-    }
-
-    :global(.rbc-month-row .rbc-row-content > div:hover) {
-      overflow-y: auto;
-    }
-  }
+/* Off-range day number (optional subtle) */
+:global(.rbc-month-view .rbc-date-cell.rbc-off-range .rbc-button-link) {
+  color: rgba(0, 0, 0, 0.35) !important;
 }

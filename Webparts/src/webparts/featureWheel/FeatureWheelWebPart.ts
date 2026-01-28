@@ -57,7 +57,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
       );
 
       ReactDom.render(element, this.domElement);
-    }, 1100);
+    }, 1500);
   }
 
   protected onInit(): Promise<void> {

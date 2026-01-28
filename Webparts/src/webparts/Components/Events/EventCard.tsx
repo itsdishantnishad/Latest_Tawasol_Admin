@@ -35,7 +35,9 @@ const EventCard: React.FC<EventCardProps> = (props) => {
     pageUrl,
   } = props;
 
-  const isRegistered = Boolean(props.isRegistered ?? props.isregistered ?? status === "Registered");
+  const isRegistered = Boolean(
+    props.isRegistered ?? props.isregistered ?? status === "Registered"
+  );
 
   const [countdown, setCountdown] = React.useState<string>("");
   const [isPastEvent, setIsPastEvent] = React.useState(false);
@@ -67,15 +69,12 @@ const EventCard: React.FC<EventCardProps> = (props) => {
 
       setIsPastEvent(false);
 
-      // countdown only needed for registered users
-      if (!isRegistered) {
-        setCountdown("");
-        return;
-      }
-
+      // ✅ Show countdown for upcoming events (Figma expectation for cards)
       const daysRemaining = diff / (1000 * 60 * 60 * 24);
       const days = Math.floor(daysRemaining);
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const hours = Math.floor(
+        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
@@ -89,7 +88,9 @@ const EventCard: React.FC<EventCardProps> = (props) => {
         );
       } else {
         setCountdown(
-          `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+          `${minutes.toString().padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}`
         );
       }
     };
@@ -97,7 +98,7 @@ const EventCard: React.FC<EventCardProps> = (props) => {
     calculate();
     const i = window.setInterval(calculate, 1000);
     return () => window.clearInterval(i);
-  }, [eventDateTime, isRegistered]);
+  }, [eventDateTime]);
 
   const openDetails = (e?: React.MouseEvent) => {
     if (e) {
@@ -121,7 +122,11 @@ const EventCard: React.FC<EventCardProps> = (props) => {
           <img src={imageUrl} alt={title} className={styles.eventImage} />
 
           {!isPastEvent && (
-            <span className={`${styles.statusBadge} ${isRegistered ? styles.registered : styles.upcoming}`}>
+            <span
+              className={`${styles.statusBadge} ${
+                isRegistered ? styles.registered : styles.upcoming
+              }`}
+            >
               {isRegistered ? "Registered" : "Upcoming"}
             </span>
           )}
@@ -142,18 +147,27 @@ const EventCard: React.FC<EventCardProps> = (props) => {
             </div>
           </div>
 
+          {/* ✅ Figma layout: View Details on top + Countdown below */}
           <div className={styles.actionSection}>
             {isPastEvent ? (
               <div className={styles.pastEventLabel}>Past event</div>
-            ) : isRegistered ? (
-              <div className={styles.countdownWrapper}>
-                <div className={styles.countdownLabel}>Event starts in</div>
-                <div className={styles.countdownTime}>{countdown}</div>
-              </div>
             ) : (
-              <button type="button" className={styles.registerButton} onClick={openDetails}>
-                View Details
-              </button>
+              <>
+                <button
+                  type="button"
+                  className={styles.registerButton}
+                  onClick={openDetails}
+                >
+                  View Details
+                </button>
+
+                {countdown ? (
+                  <div className={styles.countdownWrapper}>
+                    <span className={styles.countdownLabel}>Event starts in</span>
+                    <span className={styles.countdownTime}>{countdown}</span>
+                  </div>
+                ) : null}
+              </>
             )}
           </div>
         </div>
