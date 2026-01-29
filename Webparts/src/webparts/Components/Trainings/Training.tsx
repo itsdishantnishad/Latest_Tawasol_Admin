@@ -6,6 +6,11 @@ import Trainingcard from "./TrainingCard";
 import CalendarViewComponent from "../Events/Calendarview/CalendarView";
 import { MSGraphClientV3 } from "@microsoft/sp-http";
 
+import { spfi, SPFx, SPFI } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/lists";
+import "@pnp/sp/items";
+
 interface IAccordionState {
   [key: string]: boolean;
 }
@@ -109,6 +114,7 @@ type MappedTraining = {
 
   month: string;
 
+  // kept for backward-compat but not used for My-tab filtering anymore
   isMyTraining: boolean;
 
   location: string;
@@ -123,12 +129,13 @@ type MappedTraining = {
 
 const safeStr = (v: any): string => String(v ?? "").trim();
 
+const uniqNums = (arr: number[]): number[] => Array.from(new Set(arr));
+
 const mapSharePointTrainingsForAll = (data: any[]): MappedTraining[] => {
   const deduped = Array.from(
     new Map(
       (data || []).map((i: any) => {
-        const idKey =
-          i?.ID ?? i?.Id ?? i?.ListItemID ?? i?.ListItemId ?? i?.title;
+        const idKey = i?.ID ?? i?.Id ?? i?.ListItemID ?? i?.ListItemId ?? i?.title;
         return [String(idKey), i];
       })
     ).values()
@@ -136,10 +143,8 @@ const mapSharePointTrainingsForAll = (data: any[]): MappedTraining[] => {
 
   return deduped
     .map((item: any, index: number) => {
-      const startDateStr =
-        safeStr(item?.eventStartDate).split("\n")[0]?.trim() || "";
-      const endDateStr =
-        safeStr(item?.eventEndDate).split("\n")[0]?.trim() || "";
+      const startDateStr = safeStr(item?.eventStartDate).split("\n")[0]?.trim() || "";
+      const endDateStr = safeStr(item?.eventEndDate).split("\n")[0]?.trim() || "";
 
       if (!startDateStr || !endDateStr) return null;
 
@@ -148,14 +153,11 @@ const mapSharePointTrainingsForAll = (data: any[]): MappedTraining[] => {
 
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return null;
 
-      const monthLabel = `${startDate.toLocaleString("default", {
-        month: "long",
-      })} ${startDate.getFullYear()}`;
+      const monthLabel = `${startDate.toLocaleString("default", { month: "long" })} ${startDate.getFullYear()}`;
 
-      const dateRangeDisplay = `${startDate.getDate()}-${endDate.getDate()} ${startDate.toLocaleString(
-        "default",
-        { month: "short" }
-      )} ${startDate.getFullYear()}`;
+      const dateRangeDisplay = `${startDate.getDate()}-${endDate.getDate()} ${startDate.toLocaleString("default", {
+        month: "short",
+      })} ${startDate.getFullYear()}`;
 
       const timeRange = `${startDate.toLocaleTimeString([], {
         hour: "2-digit",
@@ -169,17 +171,10 @@ const mapSharePointTrainingsForAll = (data: any[]): MappedTraining[] => {
 
       const location = safeStr(item?.location).split("\n")[0]?.trim() || "";
 
-      const spIdRaw =
-        item?.ID ?? item?.Id ?? item?.ListItemID ?? item?.ListItemId;
+      const spIdRaw = item?.ID ?? item?.Id ?? item?.ListItemID ?? item?.ListItemId;
       const spId = Number(spIdRaw) || 0;
 
-      const meetingLink = safeStr(
-        item?.joiningURL ||
-          item?.joiningUrl ||
-          item?.meetingLink ||
-          item?.MeetingLink
-      );
-
+      const meetingLink = safeStr(item?.joiningURL || item?.joiningUrl || item?.meetingLink || item?.MeetingLink);
       const pageUrl = safeStr(item?.pageUrl) || "#";
 
       return {
@@ -187,38 +182,30 @@ const mapSharePointTrainingsForAll = (data: any[]): MappedTraining[] => {
         id: spId || index + 1,
         trainingId: spId || index + 1,
 
-        imageUrl:
-          item?.newsImage ||
-          "https://via.placeholder.com/400x200?text=No+Image",
+        imageUrl: item?.newsImage || "https://via.placeholder.com/400x200?text=No+Image",
         category: "Classroom",
         title: item?.title || "Untitled Training",
 
         dateRangeDisplay,
         timeRange,
-
-        // ✅ satisfy TrainingCardProps
-        time: timeRange,
+        time: timeRange, // ✅ satisfy TrainingCardProps
 
         startDate: startDateStr,
         endDate: endDateStr,
 
         duration: `${Math.max(
           1,
-          Math.ceil(
-            (endDate.getTime() - startDate.getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
+          Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
         )} days`,
 
         instructorName: item?.instructor?.name,
         instructorTitle: item?.instructor?.role,
         instructorEmail: item?.instructor?.email || item?.instructor?.id,
-        // instructorImageUrl will be populated from Microsoft Graph (or initials fallback)
         instructorImageUrl: undefined,
 
         month: monthLabel,
 
-        // NOTE: your existing logic
+        // ❌ OLD LOGIC (kept but NOT used for filtering My tab anymore)
         isMyTraining: !!meetingLink,
 
         location,
@@ -241,6 +228,72 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
     () => mapSharePointTrainingsForAll(props.AllTrainingdata || []),
     [props.AllTrainingdata]
   );
+
+  // ----------------------------
+  // PnP: Current user + Registered Training list filtering (FIX)
+  // ----------------------------
+  const sp: SPFI | null = React.useMemo(() => {
+    try {
+      return props.context ? spfi().using(SPFx(props.context)) : null;
+    } catch {
+      return null;
+    }
+  }, [props.context]);
+
+  const [myTrainingIds, setMyTrainingIds] = React.useState<number[]>([]);
+
+  const getCurrentUserId = React.useCallback(async (): Promise<number> => {
+    const legacyId = (props.context?.pageContext as any)?.legacyPageContext?.userId;
+    if (legacyId) return Number(legacyId);
+
+    if (sp) {
+      const me: any = await sp.web.currentUser.select("Id")();
+      return Number(me?.Id || 0);
+    }
+    return 0;
+  }, [props.context, sp]);
+
+  const loadMyTrainingIds = React.useCallback(async () => {
+    if (!sp || !props.context) {
+      setMyTrainingIds([]);
+      return;
+    }
+
+    try {
+      const userId = await getCurrentUserId();
+      if (!userId) {
+        setMyTrainingIds([]);
+        return;
+      }
+
+      const rows: any[] = await sp.web.lists
+        .getByTitle("Registered Training")
+        .items.select("Id", "AuthorId", "TIRTrainingID")
+        .filter(`AuthorId eq ${userId}`)
+        .top(5000)();
+
+      const ids = uniqNums(
+        (rows || [])
+          .map((r) => Number(r?.TIRTrainingID))
+          .filter((n) => Number.isFinite(n) && n > 0)
+      );
+
+      setMyTrainingIds(ids);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("loadMyTrainingIds failed", e);
+      setMyTrainingIds([]);
+    }
+  }, [sp, props.context, getCurrentUserId]);
+
+  React.useEffect(() => {
+    void loadMyTrainingIds();
+  }, [loadMyTrainingIds]);
+
+  const myTrainings = React.useMemo(() => {
+    if (!myTrainingIds.length) return [];
+    return mappedTrainings.filter((t) => myTrainingIds.includes(Number(t.trainingId)));
+  }, [mappedTrainings, myTrainingIds]);
 
   // ----------------------------
   // Graph: resolve instructor name + avatar (with initials fallback)
@@ -315,7 +368,6 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
       if (!missing.length) return;
 
       const graph: MSGraphClientV3 = await ctx.msGraphClientFactory.getClient("3");
-
       const updates: Record<string, PersonInfo> = {};
 
       for (const email of missing) {
@@ -324,7 +376,6 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
 
         let displayName = fallbackName;
 
-        // 1) Fetch display name from Graph (so it's the real user name)
         try {
           const user = await graph.api(`/users/${email}`).select("displayName").get();
           if (user?.displayName) displayName = user.displayName;
@@ -332,15 +383,11 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
           // ignore - keep fallback
         }
 
-        // 2) Fetch user photo, otherwise generate initials avatar (same logic as Meetings)
         let avatarUrl = "";
-
         try {
-          // ✅ Removed responseType("arraybuffer") to avoid TS2345 in some SPFx versions
           const photoResponse = await graph.api(`/users/${email}/photo/$value`).get();
 
           let blob: Blob;
-
           if (photoResponse instanceof ArrayBuffer) {
             blob = new Blob([photoResponse], { type: "image/jpeg" });
           } else if (photoResponse instanceof Blob) {
@@ -374,25 +421,19 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
       .filter(Boolean);
 
     if (!emails.length) return;
-
     void ensurePeopleFromGraph(emails);
   }, [mappedTrainings, ensurePeopleFromGraph]);
 
-  const [expandedMonths, setExpandedMonths] = React.useState<IAccordionState>(
-    () => {
-      const initialState: IAccordionState = {};
-      mappedTrainings.forEach((item) => {
-        initialState[item.month] = true;
-      });
-      return initialState;
-    }
-  );
+  const [expandedMonths, setExpandedMonths] = React.useState<IAccordionState>(() => {
+    const initialState: IAccordionState = {};
+    mappedTrainings.forEach((item) => {
+      initialState[item.month] = true;
+    });
+    return initialState;
+  });
 
   const groupedCourses = React.useMemo(() => {
-    const filteredData =
-      activeTab === "all"
-        ? mappedTrainings
-        : mappedTrainings.filter((c) => c.isMyTraining);
+    const filteredData = activeTab === "all" ? mappedTrainings : myTrainings;
 
     const groups: { [key: string]: MappedTraining[] } = {};
     filteredData.forEach((course) => {
@@ -401,7 +442,7 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
     });
 
     return groups;
-  }, [activeTab, mappedTrainings]);
+  }, [activeTab, mappedTrainings, myTrainings]);
 
   const toggleMonth = (month: string) => {
     setExpandedMonths((prev) => ({
@@ -416,17 +457,13 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
       <div className={styles.tabContainer}>
         <div className={styles.tabContainerInner}>
           <button
-            className={`${styles.tabButton} ${
-              activeTab === "all" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === "all" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("all")}
           >
             All Trainings
           </button>
           <button
-            className={`${styles.tabButton} ${
-              activeTab === "my" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === "my" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("my")}
           >
             My Trainings
@@ -446,9 +483,7 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
                 >
                   <h2 className={styles.monthTitle}>{month}</h2>
                   <svg
-                    className={`${styles.chevron} ${
-                      expandedMonths[month] ? styles.chevronUp : ""
-                    }`}
+                    className={`${styles.chevron} ${expandedMonths[month] ? styles.chevronUp : ""}`}
                     width="20"
                     height="20"
                     viewBox="0 0 20 20"
@@ -472,7 +507,6 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
                         imageUrl={course.imageUrl}
                         category={course.category}
                         title={course.title}
-                        // Card.tsx parses these with new Date()
                         date={course.startDate}
                         endDate={course.endDate}
                         duration={course.duration}
@@ -494,21 +528,19 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
             ))
           ) : (
             <div className={styles.myTrainingsGrid}>
-              {mappedTrainings
-                .filter((c) => c.isMyTraining)
-                .map((event) => (
-                  <Trainingcard
-                    key={event.trainingId || event.id}
-                    {...event}
-                    instructorName={personByEmail[event.instructorEmail || ""]?.name || event.instructorName}
-                    instructorImageUrl={
-                      personByEmail[event.instructorEmail || ""]?.avatarUrl ||
-                      (event.instructorName ? getDefaultAvatar(event.instructorName) : undefined)
-                    }
-                    time={event.time} // ✅ explicit safety
-                    context={props.context}
-                  />
-                ))}
+              {myTrainings.map((event) => (
+                <Trainingcard
+                  key={event.trainingId || event.id}
+                  {...event}
+                  instructorName={personByEmail[event.instructorEmail || ""]?.name || event.instructorName}
+                  instructorImageUrl={
+                    personByEmail[event.instructorEmail || ""]?.avatarUrl ||
+                    (event.instructorName ? getDefaultAvatar(event.instructorName) : undefined)
+                  }
+                  time={event.time}
+                  context={props.context}
+                />
+              ))}
             </div>
           )}
 
@@ -531,10 +563,7 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
           </div>
         </div>
       ) : (
-        <CalendarViewComponent
-          events={mappedTrainings as any}
-          context={props.context}
-        />
+        <CalendarViewComponent events={mappedTrainings as any} context={props.context} />
       )}
     </>
   );

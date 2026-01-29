@@ -145,13 +145,16 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
 
       const rows: any[] = await sp.web.lists
         .getByTitle("Registered User Event")
-        .items.select("Id", "AuthorId", "TIRRegisteredUsers")
+        .items.select("Id", "AuthorId", "TIRRegisteredUsers", "Modified")
         .filter(`AuthorId eq ${userId}`)
-        .top(1)();
+        .top(5000)();
 
-      const row = rows?.[0];
-      const ids = parseNumericIdList(row?.TIRRegisteredUsers);
-      setMyRegisteredIds(ids);
+      const all: number[] = [];
+      (rows || []).forEach((r) =>
+        all.push(...parseNumericIdList(r?.TIRRegisteredUsers))
+      );
+
+      setMyRegisteredIds(uniqNums(all));
     } catch (e) {
       console.error("loadMyRegisteredIds failed", e);
       setMyRegisteredIds([]);
@@ -217,7 +220,7 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
           time,
           location,
           eventDateTime: start,
-
+          eventEndDateTime: end,
           cardDate,
           category: item?.category,
           imageUrl: item?.newsImage || "",
@@ -230,12 +233,23 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
       .filter(Boolean);
   }, [props.AllEventItems, myRegisteredIds]);
 
-  const upcomingEvents = parsedEvents.filter(
-    (e: any) => e.eventDateTime && e.eventDateTime > now
-  );
-  const previousEvents = parsedEvents.filter(
-    (e: any) => e.eventDateTime && e.eventDateTime < now
-  );
+  const upcomingEvents = parsedEvents.filter((e: any) => {
+    const end = e?.eventEndDateTime ? new Date(e.eventEndDateTime) : null;
+    const start = e?.eventDateTime ? new Date(e.eventDateTime) : null;
+
+    if (end && !isNaN(end.getTime())) return end.getTime() >= now.getTime();
+    if (start && !isNaN(start.getTime())) return start.getTime() >= now.getTime();
+    return false;
+  });
+
+  const previousEvents = parsedEvents.filter((e: any) => {
+    const end = e?.eventEndDateTime ? new Date(e.eventEndDateTime) : null;
+    const start = e?.eventDateTime ? new Date(e.eventDateTime) : null;
+
+    if (end && !isNaN(end.getTime())) return end.getTime() < now.getTime();
+    if (start && !isNaN(start.getTime())) return start.getTime() < now.getTime();
+    return false;
+  });
 
   const previousEventsSorted = React.useMemo(() => {
     return [...previousEvents].sort(
