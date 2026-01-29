@@ -402,3 +402,61 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   Previous Events (Events tab) - UI fixes
+   - Show 3+ cards per row on wide screens (Figma-like 424px cards)
+   - Restore View All button pill style
+   ========================================================= */
+
+.viewAllButton{
+  align-items: center;
+  background: radial-gradient(883.19% 262.8% at 112.5% -164.06%, #101820 0, #202d39 100%);
+  border: none;
+  border-radius: 167px;
+  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, 0.51), inset 0 4px 4px 0 #768b9e;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  height: 36px;
+  line-height: 20px;
+  min-width: 110px;
+  padding: 0 12px;
+  justify-content: center;
+  transition: transform .2s ease, filter .2s ease;
+}
+
+.viewAllButton:hover{
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+
+.viewAllButton:active{
+  transform: translateY(0);
+}
+
+.gridLayout{
+  display: grid;
+  /* Each card ~424px (Figma). Auto-fit will create 3+ columns when space allows */
+  grid-template-columns: repeat(auto-fit,minmax(360px, 450px));
+  gap: 24px;
+  justify-content: start;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .gridLayout{
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .gridLayout{
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

@@ -73,34 +73,55 @@ export class OnboardingService {
     return { ...cfg, hasSeen: seen };
   }
 
-public async getConfig(): Promise<{ URL: string; title: string }> {
-  const api =
-    `${this.webUrl}/_api/web/lists/GetByTitle('${OnboardingService.LIST_TITLE}')/items` +
-    `?$select=Title,URL,Modified` +
-    `&$orderby=Modified desc` +
-    `&$top=25`;
+  public async getConfig(): Promise<{ URL: string; title: string }> {
+    const extractUrl = (v: any): string => {
+      if (!v) return "";
+      if (typeof v === "string") return v.trim();
+      if (typeof v === "object") return String(v.Url || v.url || "").trim();
+      return "";
+    };
 
-  const res = await this._ctx.spHttpClient.get(api, SPHttpClient.configurations.v1);
-  if (!res.ok) return { URL: "", title: "" };
+    // Attempt #1 (fast): fetch only items that have URL filled (config rows)
+    const api1 =
+      `${this.webUrl}/_api/web/lists/GetByTitle('${OnboardingService.LIST_TITLE}')/items` +
+      `?$select=Title,URL,Modified` +
+      `&$filter=(URL/Url ne null) and (URL/Url ne '')` +
+      `&$orderby=Modified desc` +
+      `&$top=1`;
 
-  const json = await res.json();
-  const items: any[] = Array.isArray(json?.value) ? json.value : [];
+    try {
+      const res1 = await this._ctx.spHttpClient.get(api1, SPHttpClient.configurations.v1);
+      if (res1.ok) {
+        const json1 = await res1.json();
+        const first = Array.isArray(json1?.value) ? json1.value[0] : undefined;
+        const url1 = extractUrl(first?.URL);
+        if (url1) {
+          return { title: String(first?.Title || ""), URL: url1 };
+        }
+      }
+    } catch {
+      // ignore; fallback below
+    }
 
-  const extractUrl = (v: any): string => {
-    if (!v) return "";
-    if (typeof v === "string") return v.trim();           
-    if (typeof v === "object") return String(v.Url || v.url || "").trim();
-    return "";
-  };
+    // Attempt #2 (robust fallback): read more items and pick the first item that has URL.
+    const api2 =
+      `${this.webUrl}/_api/web/lists/GetByTitle('${OnboardingService.LIST_TITLE}')/items` +
+      `?$select=Title,URL,Modified` +
+      `&$orderby=Modified desc` +
+      `&$top=5000`;
 
-  // Pick first item that has a usable URL
-  const cfgItem = items.find(i => !!extractUrl(i?.URL));
+    const res2 = await this._ctx.spHttpClient.get(api2, SPHttpClient.configurations.v1);
+    if (!res2.ok) return { URL: "", title: "" };
 
-  return {
-    title: String(cfgItem?.Title || ""),
-    URL: extractUrl(cfgItem?.URL)
-  };
-}
+    const json2 = await res2.json();
+    const items: any[] = Array.isArray(json2?.value) ? json2.value : [];
+
+    const cfgItem = items.find(i => !!extractUrl(i?.URL));
+    return {
+      title: String(cfgItem?.Title || ""),
+      URL: extractUrl(cfgItem?.URL)
+    };
+  }
 
   /** Checks if current user exists in list by email/userKey */
   public async hasUserSeenInList(): Promise<boolean> {

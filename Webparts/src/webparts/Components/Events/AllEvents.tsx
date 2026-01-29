@@ -163,12 +163,11 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
   }, [loadMyRegisteredIds]);
 
   const parsedEvents = React.useMemo(() => {
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
     return (props.AllEventItems || [])
       .map((item: any) => {
-        // ✅ IMPORTANT: pass full raw string; parseSPDate will pick ISO line if available
         const start = parseSPDate(item?.eventStartDate);
         const end = parseSPDate(item?.eventEndDate);
 
@@ -278,7 +277,8 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
 
       {activeTab === "all" ? (
         showCalendar ? (
-          <CalendarViewComponent events={parsedEvents} context={props.context} from="All" />
+          // ✅ Events tab: NO legend in calendar view
+          <CalendarViewComponent events={parsedEvents} context={props.context} from="Events" />
         ) : (
           <div className={styles.eventsContainer}>
             <div className={styles.eventsWrapper}>
@@ -327,7 +327,8 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
           </div>
         )
       ) : showCalendar ? (
-        <CalendarViewComponent events={myEvents} context={props.context} from="All" />
+        // ✅ Events tab (My Events): NO legend in calendar view
+        <CalendarViewComponent events={myEvents} context={props.context} from="Events" />
       ) : (
         <div className={styles.eventsContainer}>
           <div className={styles.eventsWrapper}>

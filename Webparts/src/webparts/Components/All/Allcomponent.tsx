@@ -7,7 +7,7 @@ import MeetingCard from "../TeamsMeeting/MeetingCard";
 import CalendarViewComponent from "../Events/Calendarview/CalendarView";
 
 import styles from "../Events/Allevents.module.scss";
-import { SPHttpClient } from "@microsoft/sp-http";
+import { SPHttpClient, MSGraphClientV3 } from "@microsoft/sp-http";
 
 interface IAllComponentProps {
   filteredEvents: any[];
@@ -79,139 +79,85 @@ const parseSPDate = (value: any): Date | null => {
     normalized,
     [
       moment.ISO_8601,
+      "M/D/YYYY h:mm A",
+      "M/D/YYYY h:mm:ss A",
+      "M/D/YYYY H:mm",
+      "M/D/YYYY",
       "DD/MM/YYYY",
       "DD/MM/YYYY HH:mm",
-      "DD/MM/YYYY HH:mm:ss",
-      "DD/MM/YYYY hh:mm A",
-      "MM/DD/YYYY",
-      "MM/DD/YYYY HH:mm",
-      "MM/DD/YYYY HH:mm:ss",
-      "MM/DD/YYYY hh:mm A",
-      "YYYY-MM-DD",
-      "YYYY-MM-DD HH:mm",
-      "YYYY-MM-DD HH:mm:ss",
     ],
-    false
+    true
   );
 
   return m.isValid() ? m.toDate() : null;
 };
 
-const pickId = (x: any): string =>
-  safeStr(
-    x?.trainingId ??
-      x?.meetingId ??
-      x?.iCalUId ??
-      x?.ID ??
-      x?.Id ??
-      x?.id ??
-      x?.ListItemID ??
-      x?.ListItemId ??
-      x?.listItemId ??
-      ""
-  ) || "";
-
 const fmtTime = (d: Date) =>
-  d.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+  d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
 
-const isNotNull = <T,>(x: T | null | undefined): x is T => !!x;
-const sortAsc = (a: { start: Date }, b: { start: Date }) =>
-  a.start.getTime() - b.start.getTime();
+const daysBetween = (start: Date, end: Date) => {
+  const ms = end.getTime() - start.getTime();
+  const days = Math.ceil(ms / (1000 * 60 * 60 * 24));
+  return Math.max(1, days);
+};
 
-/**
- * ✅ FIX: Registration flag normalizer
- * Handles boolean / number / string / and also status text
- */
 const normalizeIsRegistered = (item: any): boolean => {
-  const raw =
+  const v =
     item?.isRegistered ??
     item?.isregistered ??
     item?.IsRegistered ??
+    item?.Isregistered ??
+    item?.registered ??
     item?.Registered ??
-    item?.registered;
+    item?.isReg ??
+    item?.IsReg;
 
-  if (typeof raw === "boolean") return raw;
-  if (typeof raw === "number") return raw === 1;
+  if (typeof v === "boolean") return v;
 
-  if (typeof raw === "string") {
-    const s = raw.trim().toLowerCase();
-    if (["1", "true", "yes", "y"].includes(s)) return true;
-    if (["0", "false", "no", "n"].includes(s)) return false;
-  }
+  const s = String(v ?? "").trim().toLowerCase();
+  if (!s) return false;
 
-  const st = String(item?.status ?? item?.Status ?? "").trim().toLowerCase();
-  if (st.includes("register")) return true;
+  if (["true", "yes", "1", "registered"].includes(s)) return true;
 
   return false;
 };
 
-/** ✅ same helpers as AllEvents.tsx (your schema uses TIRRegisteredUsers) */
-const uniqNums = (arr: number[]) =>
-  Array.from(new Set(arr.filter((n) => Number.isFinite(n) && n > 0)));
+const isNotNull = <T,>(x: T | null | undefined): x is T => x !== null && x !== undefined;
 
-const parseNumericIdList = (raw: any): number[] => {
-  const text = String(raw || "");
-  const tokens = text
-    .split(/[,;\n\r]+/g)
-    .map((t) => t.trim())
-    .filter(Boolean);
+const mapTrainingForCard = (item: any, idx: number) => {
+  const idRaw = item?.ID ?? item?.Id ?? item?.ListItemID ?? item?.ListItemId ?? idx + 1;
+  const id = Number(idRaw) || idx + 1;
 
-  const ids = tokens
-    .filter((t) => /^\d+$/.test(t))
-    .map((t) => parseInt(t, 10));
-
-  return uniqNums(ids);
-};
-
-/** Ensure TrainingCard gets the fields it expects */
-const mapTrainingForCard = (item: any, index: number): any | null => {
   const startRaw =
-    item?.trainingStartDate ??
-    item?.startDate ??
-    item?.start ??
-    item?.eventStartDate ??
-    item?.TIRTrainingStartDate ??
-    item?.TIREventStartDate;
+    item?.eventStartDate ||
+    item?.EventStartDate ||
+    item?.startDate ||
+    item?.StartDate;
 
   const endRaw =
-    item?.trainingEndDate ??
-    item?.endDate ??
-    item?.end ??
-    item?.eventEndDate ??
-    item?.TIRTrainingEndDate ??
-    item?.TIREventEndDate;
+    item?.eventEndDate ||
+    item?.EventEndDate ||
+    item?.endDate ||
+    item?.EndDate;
 
-  const startParsed = parseSPDate(startRaw);
-  if (!startParsed) return null;
+  const start = parseSPDate(startRaw);
+  const end = parseSPDate(endRaw);
 
-  const endParsed = parseSPDate(endRaw) || startParsed;
+  if (!start || !end) return null;
 
-  const start: Date = startParsed;
-  const end: Date = endParsed;
+  const durationDays = daysBetween(start, end);
 
-  const spIdNum = Number(item?.ID ?? item?.Id ?? item?.id ?? 0) || 0;
-  const id = pickId(item) || String(spIdNum || index + 1);
+  const timeRange = `${fmtTime(start)} - ${fmtTime(end)}`;
 
   const meetingLink = safeStr(
     item?.joiningURL ||
       item?.joiningUrl ||
       item?.meetingLink ||
       item?.MeetingLink ||
-      item?.joinUrl
+      ""
   );
 
   const pageUrl = safeStr(item?.pageUrl || item?.Path || item?.path || "#");
-
-  const timeRange = `${fmtTime(start)} - ${fmtTime(end)}`;
-
-  const durationDays = Math.max(
-    1,
-    Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
-  );
 
   const isReg = normalizeIsRegistered(item) || !!meetingLink;
 
@@ -220,11 +166,10 @@ const mapTrainingForCard = (item: any, index: number): any | null => {
 
     id,
     ID: id,
-    trainingId: spIdNum || Number(id) || index + 1,
 
-    imageUrl: item?.newsImage || item?.imageUrl || "",
-    category: item?.category || item?.Category || "Training",
-    title: item?.title || item?.Title || "Training",
+    imageUrl: item?.newsImage || item?.imageUrl || item?.Image || "",
+    category: item?.category || item?.Category || "Classroom",
+    title: item?.title || item?.Title || "Untitled",
 
     timeRange,
     time: timeRange,
@@ -233,6 +178,29 @@ const mapTrainingForCard = (item: any, index: number): any | null => {
     endDate: safeStr(endRaw) || end.toISOString(),
 
     duration: `${durationDays} day${durationDays > 1 ? "s" : ""}`,
+
+    // Instructor (used by TrainingCard UI)
+    instructorName:
+      item?.instructor?.name ||
+      item?.instructorName ||
+      item?.InstructorName ||
+      item?.organizerName ||
+      item?.OrganizerName ||
+      "",
+    instructorTitle:
+      item?.instructor?.role || item?.instructorTitle || item?.InstructorTitle || "",
+    instructorEmail:
+      item?.instructor?.email ||
+      item?.instructorEmail ||
+      item?.InstructorEmail ||
+      item?.instructor?.id ||
+      item?.Instructor?.Email ||
+      item?.Instructor?.EMail ||
+      item?.Organizer?.Email ||
+      item?.Organizer?.EMail ||
+      item?.Author?.Email ||
+      item?.Author?.EMail ||
+      "",
 
     location: safeStr(item?.location),
     meetingLink,
@@ -248,6 +216,24 @@ const mapTrainingForCard = (item: any, index: number): any | null => {
   };
 };
 
+const parseNumericIdList = (raw: any): number[] => {
+  const s = String(raw ?? "").trim();
+  if (!s) return [];
+
+  const parts = s
+    .split(/[,;|\s]+/g)
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  const nums = parts
+    .map((p) => Number(p))
+    .filter((n) => Number.isFinite(n) && n > 0);
+
+  return Array.from(new Set(nums));
+};
+
+type PersonInfo = { name: string; avatarUrl: string };
+
 const Allcomponent: React.FC<IAllComponentProps> = ({
   filteredEvents = [],
   filteredTrainings = [],
@@ -257,6 +243,126 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
 }) => {
   const now = new Date();
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
+
+  // ----------------------------
+  // Graph: resolve instructor name + avatar (cache by email)
+  // ----------------------------
+  const [personByEmail, setPersonByEmail] = React.useState<Record<string, PersonInfo>>({});
+  const personCacheRef = React.useRef<Record<string, PersonInfo>>({});
+
+  const blobToDataUrl = React.useCallback((blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }, []);
+
+  const getDefaultAvatar = React.useCallback((nameOrEmail: string): string => {
+    const safe = String(nameOrEmail || "").trim() || "User";
+    const initials = safe
+      .split(" ")
+      .map((n) => n?.trim()?.[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+
+    const colors = [
+      "#0078D4",
+      "#00A4EF",
+      "#50E6FF",
+      "#8764B8",
+      "#881798",
+      "#E43BA6",
+      "#E74856",
+      "#F7630C",
+      "#FFB900",
+      "#00CC6A",
+    ];
+
+    const colorIndex =
+      safe.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+
+    const bgColor = colors[colorIndex];
+
+    const svg = `
+      <svg width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+        <rect width="48" height="48" fill="${bgColor}"/>
+        <text x="50%" y="50%"
+              text-anchor="middle"
+              dy=".35em"
+              font-family="Segoe UI, Arial, sans-serif"
+              font-size="20"
+              font-weight="600"
+              fill="white">
+          ${initials}
+        </text>
+      </svg>
+    `.trim();
+
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  }, []);
+
+  const ensurePeopleFromGraph = React.useCallback(
+    async (emails: string[]) => {
+      const ctx = context;
+      if (!ctx?.msGraphClientFactory) return;
+
+      const unique = Array.from(
+        new Set((emails || []).map((e) => String(e || "").trim()).filter(Boolean))
+      );
+      const missing = unique.filter((e) => !personCacheRef.current[e]);
+      if (!missing.length) return;
+
+      const graph: MSGraphClientV3 = await ctx.msGraphClientFactory.getClient("3");
+
+      const updates: Record<string, PersonInfo> = {};
+
+      for (const email of missing) {
+        let displayName = email;
+
+        // 1) display name
+        try {
+          const user = await graph.api(`/users/${email}`).select("displayName").get();
+          if (user?.displayName) displayName = user.displayName;
+        } catch {
+          // ignore
+        }
+
+        // 2) photo (fallback to initials)
+        let avatarUrl = "";
+        try {
+          const photoResponse = await graph.api(`/users/${email}/photo/$value`).get();
+
+          let blob: Blob;
+          if (photoResponse instanceof ArrayBuffer) {
+            blob = new Blob([photoResponse], { type: "image/jpeg" });
+          } else if (photoResponse instanceof Blob) {
+            blob = photoResponse;
+          } else {
+            throw new Error("Unexpected photo response type");
+          }
+
+          avatarUrl = await blobToDataUrl(blob);
+        } catch {
+          avatarUrl = getDefaultAvatar(displayName || email);
+        }
+
+        updates[email] = { name: displayName, avatarUrl };
+      }
+
+      if (Object.keys(updates).length) {
+        setPersonByEmail((prev) => {
+          const next = { ...prev, ...updates };
+          personCacheRef.current = next;
+          return next;
+        });
+      }
+    },
+    [context, blobToDataUrl, getDefaultAvatar]
+  );
 
   // ✅ FIX: Load registered Event IDs from "Registered User Event" → TIRRegisteredUsers (same as AllEvents.tsx)
   const [myRegisteredEventIds, setMyRegisteredEventIds] = React.useState<number[]>([]);
@@ -318,45 +424,25 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
     };
   }, [context]);
 
+  const sortAsc = React.useCallback((a: any, b: any) => {
+    const aT = a?.start?.getTime?.() ?? a?.eventDateTime?.getTime?.() ?? 0;
+    const bT = b?.start?.getTime?.() ?? b?.eventDateTime?.getTime?.() ?? 0;
+    return aT - bT;
+  }, []);
+
   const parsedEvents: any[] = React.useMemo(() => {
     return (filteredEvents || [])
       .map((item: any, idx: number) => {
-        const startRaw =
-          item?.eventStartDate ??
-          item?.TIREventStartDate ??
-          item?.startDate ??
-          item?.start ??
-          item?.eventDateTime;
+        const idRaw = item?.ID ?? item?.Id ?? item?.ListItemID ?? item?.ListItemId ?? idx + 1;
+        const id = Number(idRaw) || idx + 1;
 
-        const endRaw =
-          item?.eventEndDate ??
-          item?.TIREventEndDate ??
-          item?.endDate ??
-          item?.end;
+        const start = parseSPDate(item?.eventStartDate || item?.EventStartDate || item?.startDate || item?.StartDate);
+        const end = parseSPDate(item?.eventEndDate || item?.EventEndDate || item?.endDate || item?.EndDate);
 
-        const startParsed = parseSPDate(startRaw);
-        if (!startParsed) return null;
+        if (!start || !end) return null;
 
-        const endParsed = parseSPDate(endRaw) || startParsed;
+        const eventIdNum = Number(item?.eventId ?? item?.EventId ?? item?.ID ?? item?.Id);
 
-        const start: Date = startParsed;
-        const end: Date = endParsed;
-
-        const eventIdNum =
-          Number(
-            item?.ID ??
-              item?.Id ??
-              item?.id ??
-              item?.ListItemID ??
-              item?.ListItemId ??
-              0
-          ) || 0;
-
-        const id =
-          pickId(item) ||
-          String(eventIdNum || Number(item?.ID ?? item?.Id ?? item?.id ?? 0) || idx + 1);
-
-        // ✅ IMPORTANT FIX: registration based on TIRRegisteredUsers list
         const isReg =
           (eventIdNum ? myRegisteredEventIds.includes(eventIdNum) : false) ||
           normalizeIsRegistered(item);
@@ -399,6 +485,16 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
       .map((it: any, idx: number) => mapTrainingForCard(it, idx))
       .filter(isNotNull);
   }, [filteredTrainings]);
+
+  // Resolve instructor name/photo for trainings shown in All tab
+  React.useEffect(() => {
+    const emails = (parsedTrainings || [])
+      .map((t: any) => String(t?.instructorEmail || "").trim())
+      .filter(Boolean);
+
+    if (!emails.length) return;
+    void ensurePeopleFromGraph(emails);
+  }, [parsedTrainings, ensurePeopleFromGraph]);
 
   const meetings: any[] = React.useMemo(
     () => (filteredMeetings || []).slice(),
@@ -536,7 +632,21 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
             <div className={styles.eventsWrapper}>
               {allUpcomingTrainings.length > 0 ? (
                 allUpcomingTrainings.map((t, i) => (
-                  <Trainingcard key={t.id || i} {...(t as any)} context={context} />
+                  <Trainingcard
+                    key={t.id || i}
+                    {...(t as any)}
+                    instructorName={
+                      personByEmail[String((t as any)?.instructorEmail || "").trim()]?.name ||
+                      (t as any)?.instructorName
+                    }
+                    instructorImageUrl={
+                      personByEmail[String((t as any)?.instructorEmail || "").trim()]?.avatarUrl ||
+                      ((t as any)?.instructorName
+                        ? getDefaultAvatar((t as any)?.instructorName)
+                        : undefined)
+                    }
+                    context={context}
+                  />
                 ))
               ) : (
                 <div className={styles.emptyState}>No upcoming trainings found.</div>
@@ -574,7 +684,21 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
           <div className={styles.eventsWrapper}>
             {myUpcomingTrainings.length > 0 ? (
               myUpcomingTrainings.map((t, i) => (
-                <Trainingcard key={t.id || i} {...(t as any)} context={context} />
+                <Trainingcard
+                  key={t.id || i}
+                  {...(t as any)}
+                  instructorName={
+                    personByEmail[String((t as any)?.instructorEmail || "").trim()]?.name ||
+                    (t as any)?.instructorName
+                  }
+                  instructorImageUrl={
+                    personByEmail[String((t as any)?.instructorEmail || "").trim()]?.avatarUrl ||
+                    ((t as any)?.instructorName
+                      ? getDefaultAvatar((t as any)?.instructorName)
+                      : undefined)
+                  }
+                  context={context}
+                />
               ))
             ) : (
               <div className={styles.emptyState}>No registered upcoming trainings.</div>

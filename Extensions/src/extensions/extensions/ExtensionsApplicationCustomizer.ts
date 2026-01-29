@@ -578,6 +578,10 @@ export default class ExtensionsApplicationCustomizer
 
       const state = await svc.loadState();
 
+      if (forceOnboarding && !state.URL) {
+        console.warn("[Onboarding] Forced via ?onboarding=1 but onboarding URL not found in list response.");
+      }
+
       // force means ignore hasSeen
       const shouldShow = forceOnboarding ? true : (!state.hasSeen && !!state.URL);
 

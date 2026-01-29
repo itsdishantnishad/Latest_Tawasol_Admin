@@ -4,6 +4,7 @@ import { AllTrainingCard } from "./Card";
 import { LearningLinks } from "./Learningcard";
 import Trainingcard from "./TrainingCard";
 import CalendarViewComponent from "../Events/Calendarview/CalendarView";
+import { MSGraphClientV3 } from "@microsoft/sp-http";
 
 interface IAccordionState {
   [key: string]: boolean;
@@ -102,6 +103,9 @@ type MappedTraining = {
   instructorName?: string;
   instructorTitle?: string;
   instructorImageUrl?: string;
+
+  // Graph-backed person (from instructor email)
+  instructorEmail?: string;
 
   month: string;
 
@@ -208,7 +212,9 @@ const mapSharePointTrainingsForAll = (data: any[]): MappedTraining[] => {
 
         instructorName: item?.instructor?.name,
         instructorTitle: item?.instructor?.role,
-        instructorImageUrl: `https://i.pravatar.cc/150?img=${(index % 6) + 1}`,
+        instructorEmail: item?.instructor?.email || item?.instructor?.id,
+        // instructorImageUrl will be populated from Microsoft Graph (or initials fallback)
+        instructorImageUrl: undefined,
 
         month: monthLabel,
 
@@ -235,6 +241,142 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
     () => mapSharePointTrainingsForAll(props.AllTrainingdata || []),
     [props.AllTrainingdata]
   );
+
+  // ----------------------------
+  // Graph: resolve instructor name + avatar (with initials fallback)
+  // ----------------------------
+  type PersonInfo = { name: string; avatarUrl: string };
+
+  const [personByEmail, setPersonByEmail] = React.useState<Record<string, PersonInfo>>({});
+  const personCacheRef = React.useRef<Record<string, PersonInfo>>({});
+
+  const blobToDataUrl = React.useCallback((blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }, []);
+
+  const getDefaultAvatar = React.useCallback((nameOrEmail: string): string => {
+    const safe = String(nameOrEmail || "").trim() || "User";
+    const initials = safe
+      .split(" ")
+      .map((n) => n?.trim()?.[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+
+    const colors = [
+      "#0078D4",
+      "#00A4EF",
+      "#50E6FF",
+      "#8764B8",
+      "#881798",
+      "#E43BA6",
+      "#E74856",
+      "#F7630C",
+      "#FFB900",
+      "#00CC6A",
+    ];
+
+    const colorIndex =
+      safe.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+
+    const bgColor = colors[colorIndex];
+
+    const svg = `
+      <svg width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+        <rect width="48" height="48" fill="${bgColor}"/>
+        <text x="50%" y="50%"
+              text-anchor="middle"
+              dy=".35em"
+              font-family="Segoe UI, Arial, sans-serif"
+              font-size="20"
+              font-weight="600"
+              fill="white">
+          ${initials}
+        </text>
+      </svg>
+    `.trim();
+
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  }, []);
+
+  const ensurePeopleFromGraph = React.useCallback(
+    async (emails: string[]) => {
+      const ctx = props.context;
+      if (!ctx?.msGraphClientFactory) return;
+
+      const unique = Array.from(new Set((emails || []).filter(Boolean)));
+      const missing = unique.filter((e) => !personCacheRef.current[e]);
+      if (!missing.length) return;
+
+      const graph: MSGraphClientV3 = await ctx.msGraphClientFactory.getClient("3");
+
+      const updates: Record<string, PersonInfo> = {};
+
+      for (const email of missing) {
+        const fallbackName =
+          mappedTrainings.find((t) => t.instructorEmail === email)?.instructorName || email;
+
+        let displayName = fallbackName;
+
+        // 1) Fetch display name from Graph (so it's the real user name)
+        try {
+          const user = await graph.api(`/users/${email}`).select("displayName").get();
+          if (user?.displayName) displayName = user.displayName;
+        } catch {
+          // ignore - keep fallback
+        }
+
+        // 2) Fetch user photo, otherwise generate initials avatar (same logic as Meetings)
+        let avatarUrl = "";
+
+        try {
+          // ✅ Removed responseType("arraybuffer") to avoid TS2345 in some SPFx versions
+          const photoResponse = await graph.api(`/users/${email}/photo/$value`).get();
+
+          let blob: Blob;
+
+          if (photoResponse instanceof ArrayBuffer) {
+            blob = new Blob([photoResponse], { type: "image/jpeg" });
+          } else if (photoResponse instanceof Blob) {
+            blob = photoResponse;
+          } else {
+            throw new Error("Unexpected photo response type");
+          }
+
+          avatarUrl = await blobToDataUrl(blob);
+        } catch {
+          avatarUrl = getDefaultAvatar(displayName || email);
+        }
+
+        updates[email] = { name: displayName, avatarUrl };
+      }
+
+      if (Object.keys(updates).length) {
+        setPersonByEmail((prev) => {
+          const next = { ...prev, ...updates };
+          personCacheRef.current = next;
+          return next;
+        });
+      }
+    },
+    [props.context, mappedTrainings, blobToDataUrl, getDefaultAvatar]
+  );
+
+  React.useEffect(() => {
+    const emails = mappedTrainings
+      .map((t) => (t.instructorEmail || "").trim())
+      .filter(Boolean);
+
+    if (!emails.length) return;
+
+    void ensurePeopleFromGraph(emails);
+  }, [mappedTrainings, ensurePeopleFromGraph]);
 
   const [expandedMonths, setExpandedMonths] = React.useState<IAccordionState>(
     () => {
@@ -334,9 +476,12 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
                         date={course.startDate}
                         endDate={course.endDate}
                         duration={course.duration}
-                        instructorName={course.instructorName}
+                        instructorName={personByEmail[course.instructorEmail || ""]?.name || course.instructorName}
                         instructorTitle={course.instructorTitle}
-                        instructorImageUrl={course.instructorImageUrl}
+                        instructorImageUrl={
+                          personByEmail[course.instructorEmail || ""]?.avatarUrl ||
+                          (course.instructorName ? getDefaultAvatar(course.instructorName) : undefined)
+                        }
                         pageUrl={course.pageUrl}
                         context={props.context}
                         trainingId={course.trainingId}
@@ -355,6 +500,11 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
                   <Trainingcard
                     key={event.trainingId || event.id}
                     {...event}
+                    instructorName={personByEmail[event.instructorEmail || ""]?.name || event.instructorName}
+                    instructorImageUrl={
+                      personByEmail[event.instructorEmail || ""]?.avatarUrl ||
+                      (event.instructorName ? getDefaultAvatar(event.instructorName) : undefined)
+                    }
                     time={event.time} // ✅ explicit safety
                     context={props.context}
                   />
