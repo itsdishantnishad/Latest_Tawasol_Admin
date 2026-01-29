@@ -14,7 +14,7 @@ const localizer = momentLocalizer(moment);
 interface Props {
   events: any[];
   context?: any;
-  from?: string;
+  from?: string; // "All" | "My" | "Events" etc
 }
 
 type CalendarEvent = {
@@ -29,43 +29,132 @@ type CalendarEvent = {
   [key: string]: any;
 };
 
+/** ✅ Custom Toolbar (Figma-like) - UI only */
+const CustomToolbar: React.FC<any> = (toolbar) => {
+  const label = moment(toolbar?.date).format("MMMM YYYY");
+
+  const goPrev = () => toolbar.onNavigate("PREV");
+  const goNext = () => toolbar.onNavigate("NEXT");
+  const goToday = () => toolbar.onNavigate("TODAY");
+
+  const isMonth = String(toolbar?.view || "month").toLowerCase() === "month";
+  const goMonth = () => toolbar.onView("month"); // ✅ back to month (works after "+2 more")
+
+  return (
+    <div className={`rbc-toolbar ${styles.toolbar}`}>
+      <div className={styles.toolbarLeft}>
+        <div className={styles.toolbarLabel}>{label}</div>
+
+        <div className={styles.toolbarNav}>
+          <button
+            type="button"
+            className={styles.navArrowBtn}
+            onClick={goPrev}
+            aria-label="Previous"
+            title="Previous"
+          >
+            {/* LEFT ARROW SVG */}
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.navArrowSvg}>
+              <circle cx="20" cy="20" r="20" transform="matrix(-1 0 0 1 40 0)" fill="none"/>
+              <path d="M22.5742 13.2773C22.5384 13.2774 22.5078 13.291 22.4863 13.3125L17.0527 18.7451C16.7208 19.0771 16.5323 19.5255 16.5322 20C16.5322 20.4788 16.7157 20.9243 17.0498 21.252L17.0527 21.2549L22.4766 26.6777C22.5184 26.7159 22.5563 26.7255 22.5742 26.7256C22.5919 26.7256 22.6078 26.7222 22.6211 26.7168C22.6338 26.7116 22.6476 26.703 22.6621 26.6885C22.6836 26.667 22.6972 26.6363 22.6973 26.6006C22.6973 26.5647 22.6836 26.5332 22.6621 26.5117L17.2295 21.0791C16.6342 20.4838 16.6342 19.5171 17.2295 18.9219L22.6621 13.4883C22.6836 13.4668 22.6972 13.4362 22.6973 13.4004C22.6973 13.3645 22.6836 13.334 22.6621 13.3125C22.6406 13.291 22.6101 13.2773 22.5742 13.2773Z" fill="#3A3B43" stroke="#3A3B43"/>
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            className={styles.navArrowBtn}
+            onClick={goNext}
+            aria-label="Next"
+            title="Next"
+          >
+            {/* RIGHT ARROW SVG */}
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.navArrowSvg}>
+              <circle cx="20" cy="20" r="20" fill="none"/>
+              <path d="M17.4258 13.2773C17.4616 13.2774 17.4922 13.291 17.5137 13.3125L22.9473 18.7451C23.2792 19.0771 23.4677 19.5255 23.4678 20C23.4678 20.4788 23.2843 20.9243 22.9502 21.252L22.9473 21.2549L17.5234 26.6777C17.4816 26.7159 17.4437 26.7255 17.4258 26.7256C17.4081 26.7256 17.3922 26.7222 17.3789 26.7168C17.3662 26.7116 17.3524 26.703 17.3379 26.6885C17.3164 26.667 17.3028 26.6363 17.3027 26.6006C17.3027 26.5647 17.3164 26.5332 17.3379 26.5117L22.7705 21.0791C23.3658 20.4838 23.3658 19.5171 22.7705 18.9219L17.3379 13.4883C17.3164 13.4668 17.3028 13.4362 17.3027 13.4004C17.3027 13.3645 17.3164 13.334 17.3379 13.3125C17.3594 13.291 17.3899 13.2773 17.4258 13.2773Z" fill="#3A3B43" stroke="#3A3B43"/>
+            </svg>
+          </button>
+        </div>
+
+        <button type="button" className={styles.todayBtn} onClick={goToday} aria-label="Today" title="Today">
+          Today
+        </button>
+
+        {/* ✅ Show ONLY when user is not on month (fix for "+2 more" -> day view trap) */}
+        {!isMonth && (
+          <button type="button" className={styles.monthBtn} onClick={goMonth} aria-label="Month" title="Month">
+            Month
+          </button>
+        )}
+      </div>
+
+      <div className={styles.toolbarRight} />
+    </div>
+  );
+};
+
+/** Prefer ISO token if string contains "display\nISO" */
+const pickBestDateToken = (v: any): string => {
+  const s = String(v ?? "").trim();
+  if (!s) return "";
+
+  const parts = s
+    .split(/\n+/g)
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  const iso =
+    parts.find((p) => /^\d{4}-\d{2}-\d{2}T/.test(p)) ||
+    parts.find((p) => /\d{4}-\d{2}-\d{2}T/.test(p));
+
+  return iso || parts[0] || "";
+};
+
+/** Normalize ISO datetime without timezone -> treat as UTC by appending Z */
+const normalizeIsoToUtcIfNoZone = (raw: string): string => {
+  const s = (raw || "").trim();
+  if (!s) return s;
+
+  if (/[zZ]$/.test(s)) return s;
+  if (/[+-]\d{2}:?\d{2}$/.test(s)) return s;
+
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(s)) {
+    return `${s}Z`;
+  }
+
+  return s;
+};
+
 const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
   const [selectedEvent, setSelectedEvent] = React.useState<any>(null);
 
-  /**
-   * Parse various date inputs we receive across Events/Trainings/Meetings:
-   * - Date
-   * - ISO / SharePoint date string
-   * - Graph style { dateTime, timeZone }
-   */
   const parseDate = (v: any): Date | null => {
     if (!v) return null;
 
     if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
 
-    // Graph style { dateTime, timeZone }
     if (typeof v === "object") {
       const dt = (v as any)?.dateTime || (v as any)?.DateTime;
       if (dt) {
-        const dObj = new Date(String(dt));
+        const best = pickBestDateToken(dt);
+        const norm = normalizeIsoToUtcIfNoZone(best);
+        const dObj = new Date(norm);
         return isNaN(dObj.getTime()) ? null : dObj;
       }
     }
 
-    // epoch number
     if (typeof v === "number") {
       const dObj = new Date(v);
       return isNaN(dObj.getTime()) ? null : dObj;
     }
 
-    // string
-    const raw = String(v).split(/\n|;/)[0].trim();
-    if (!raw) return null;
+    const bestToken = pickBestDateToken(v);
+    if (!bestToken) return null;
+
+    const raw = normalizeIsoToUtcIfNoZone(bestToken);
 
     const d = new Date(raw);
     if (!isNaN(d.getTime())) return d;
 
-    // fallback for odd SharePoint formats
     const m = moment(
       raw,
       [
@@ -87,17 +176,6 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
     return m.isValid() ? m.toDate() : null;
   };
 
-  /**
-   * Meetings coming from mapGraphMeetingToUI are used by MeetingCard and often look like:
-   * {
-   *   id: "AAMk...",
-   *   date: { day: "Fri", date: "30", month: "Jan" }  // sometimes year missing
-   *   timeRange: "3:00 PM - 3:30 PM"  (or time: "3:00 PM")
-   *   meetingType: "Microsoft Teams Meeting"
-   * }
-   *
-   * Calendar needs real Date objects => derive start/end if missing.
-   */
   const deriveMeetingDateTime = (e: any): { start?: Date; end?: Date } => {
     const dateObj = e?.date;
 
@@ -114,7 +192,6 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
 
     const range = String(e?.timeRange || e?.time || "").trim();
 
-    // "3:00 PM - 3:30 PM"
     let startTime = "";
     let endTime = "";
 
@@ -131,12 +208,10 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
 
     const base = `${dayNum} ${monthStr} ${yearRaw}`;
 
-    // We'll try formats in order; whichever succeeds for start we reuse for end.
     const fmtMMM = "D MMM YYYY h:mm A";
     const fmtMMMM = "D MMMM YYYY h:mm A";
 
-    const tryParse = (text: string, fmt: string) =>
-      moment(text, fmt, false /* non-strict */);
+    const tryParse = (text: string, fmt: string) => moment(text, fmt, false);
 
     const startText = `${base} ${startTime}`;
 
@@ -181,7 +256,6 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
       const baseId = getBaseId(e);
       if (!baseId) return;
 
-      // Standard inputs across SP lists + our mapped data
       let startRaw =
         e.start ?? e.startDate ?? e.eventStartDate ?? e.TIREventStartDate;
       let endRaw = e.end ?? e.endDate ?? e.eventEndDate ?? e.TIREventEndDate;
@@ -189,7 +263,6 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
       let startDate = parseDate(startRaw);
       let endDate = parseDate(endRaw);
 
-      // ✅ If meeting object has no start/end, derive from date + timeRange/time
       if (!startDate || !endDate) {
         const derived = deriveMeetingDateTime(e);
         if (derived.start && derived.end) {
@@ -208,10 +281,8 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
 
       const startDay = mStart.clone().startOf("day");
       const endDayInclusive = mEnd.clone().startOf("day");
-
       const daySpan = endDayInclusive.diff(startDay, "days");
 
-      // Multi-day => 1 pill per day
       if (daySpan >= 1) {
         for (
           let d = startDay.clone();
@@ -258,11 +329,9 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
     ) {
       return `${styles.pill} ${styles.pillTeams}`;
     }
-
     if (t === "trainings" || t.includes("training")) {
       return `${styles.pill} ${styles.pillTraining}`;
     }
-
     return `${styles.pill} ${styles.pillEvent}`;
   };
 
@@ -288,10 +357,13 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
     setSelectedEvent(original || calEvent);
   };
 
+  // ✅ legend only for All/My sections (NOT events-only tab)
+  const showLegend = from === "All" || from === "My";
+
   return (
     <>
       <div className={styles.wrap}>
-        {from === "All" && (
+        {showLegend && (
           <div className={styles.legend}>
             <div className={styles.legendItem}>
               <span className={`${styles.swatch} ${styles.swatchEvent}`} />
@@ -316,8 +388,11 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
             endAccessor="end"
             onSelectEvent={handleSelect}
             eventPropGetter={eventStyleGetter}
-            components={{ event: EventComponent }}
-            views={["month", "week", "day", "agenda"]}
+            components={{
+              toolbar: CustomToolbar, // ✅ Figma toolbar
+              event: EventComponent,
+            }}
+            views={["month", "week", "day", "agenda"]} // functionality unchanged
             defaultView="month"
           />
         </div>
@@ -344,10 +419,7 @@ const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
             )}
 
             <div className={styles.modalActions}>
-              <DefaultButton
-                text="Close"
-                onClick={() => setSelectedEvent(null)}
-              />
+              <DefaultButton text="Close" onClick={() => setSelectedEvent(null)} />
             </div>
           </div>
         )}

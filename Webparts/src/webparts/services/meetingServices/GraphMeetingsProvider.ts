@@ -1,45 +1,44 @@
-import { IMeetingProvider, Meeting } from './IMeetingProvider';
-import { MSGraphClientV3 } from '@microsoft/sp-http';
+import { IMeetingProvider, Meeting } from "./IMeetingProvider";
+import { MSGraphClientV3 } from "@microsoft/sp-http";
 
 export class GraphMeetingsProvider implements IMeetingProvider {
-
   constructor(private graph: MSGraphClientV3, private groupId?: string) {}
 
   async getUpcoming(daysAhead: number, take: number): Promise<Meeting[]> {
-  const now = new Date();
-  const end = new Date();
-  end.setDate(now.getDate() + (daysAhead || 7));
+    const now = new Date();
+    const end = new Date();
+    end.setDate(now.getDate() + (daysAhead || 7));
 
-  const base = this.groupId
-    ? `/groups/${this.groupId}/calendarView`
-    : `/me/calendarView`;
-  let tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-  if (tz === "Asia/Calcutta") tz = "Asia/Kolkata";
-  let res: any;
-  try {
-    res = await this.graph
-      .api(base)
-      .query({
-        startDateTime: now.toISOString(),
-        endDateTime: end.toISOString()
-      })
-      .orderby("start/dateTime")
-      .top(take || 100)
-      .header("Prefer", `outlook.timezone="${tz}"`)
-      .get();
-  } catch (e) {
-    res = await this.graph
-      .api(base)
-      .query({
-        startDateTime: now.toISOString(),
-        endDateTime: end.toISOString()
-      })
-      .orderby("start/dateTime")
-      .top(take || 100)
-      .header('Prefer', 'outlook.timezone="UTC"')
-      .get();
-  }
-    // Process meetings with photo fetching
+    const base = this.groupId ? `/groups/${this.groupId}/calendarView` : `/me/calendarView`;
+
+    let tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    if (tz === "Asia/Calcutta") tz = "Asia/Kolkata";
+
+    let res: any;
+    try {
+      res = await this.graph
+        .api(base)
+        .query({
+          startDateTime: now.toISOString(),
+          endDateTime: end.toISOString(),
+        })
+        .orderby("start/dateTime")
+        .top(take || 100)
+        .header("Prefer", `outlook.timezone="${tz}"`)
+        .get();
+    } catch (e) {
+      res = await this.graph
+        .api(base)
+        .query({
+          startDateTime: now.toISOString(),
+          endDateTime: end.toISOString(),
+        })
+        .orderby("start/dateTime")
+        .top(take || 100)
+        .header('Prefer', 'outlook.timezone="UTC"')
+        .get();
+    }
+
     const meetings = await Promise.all(
       (res.value || [])
         .filter((e: any) => e.isOnlineMeeting)
@@ -50,25 +49,30 @@ export class GraphMeetingsProvider implements IMeetingProvider {
 
           if (email) {
             try {
+              // ✅ Removed responseType("arraybuffer") to avoid TS2345 in your SPFx version
               const photoResponse = await this.graph
                 .api(`/users/${email}/photo/$value`)
                 .get();
+
               let blob: Blob;
+
+              // Keep your original handling
               if (photoResponse instanceof ArrayBuffer) {
-                blob = new Blob([photoResponse], { type: 'image/jpeg' });
+                blob = new Blob([photoResponse], { type: "image/jpeg" });
               } else if (photoResponse instanceof Blob) {
                 blob = photoResponse;
               } else {
-                throw new Error('Unexpected response type');
+                throw new Error("Unexpected response type");
               }
-              
+
               avatarUrl = await this.blobToDataUrl(blob);
             } catch (error: any) {
+              // eslint-disable-next-line no-console
               console.log(`No photo for ${email}, using fallback avatar`);
               avatarUrl = this.getDefaultAvatar(name || email);
             }
           } else {
-            avatarUrl = this.getDefaultAvatar(name || 'Unknown');
+            avatarUrl = this.getDefaultAvatar(name || "Unknown");
           }
 
           return {
@@ -76,11 +80,11 @@ export class GraphMeetingsProvider implements IMeetingProvider {
             subject: e.subject,
             start: e.start?.dateTime,
             end: e.end?.dateTime,
-            location: e.location?.displayName || 'Microsoft Teams Meeting',
+            location: e.location?.displayName || "Microsoft Teams Meeting",
             description: e.bodyPreview,
             organizer: name,
             joinUrl: e.onlineMeeting?.joinUrl || e.webLink,
-            avatarUrl
+            avatarUrl,
           };
         })
     );
@@ -88,9 +92,7 @@ export class GraphMeetingsProvider implements IMeetingProvider {
     return meetings;
   }
 
-  /**
-   * Converts a Blob to a base64 data URL
-   */
+  /** Converts a Blob to a base64 data URL */
   private blobToDataUrl(blob: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -100,26 +102,33 @@ export class GraphMeetingsProvider implements IMeetingProvider {
     });
   }
 
-  
   private getDefaultAvatar(name: string): string {
-    
     const initials = name
-      .split(' ')
-      .map(n => n[0])
+      .split(" ")
+      .map((n) => n[0])
       .filter(Boolean)
       .slice(0, 2)
-      .join('')
+      .join("")
       .toUpperCase();
 
-    // Generate a color based on the name
-    const colors = ['#0078D4', '#00A4EF', '#50E6FF','#8764B8','#881798','#E43BA6','#E74856', 
-      '#F7630C', 
-      '#FFB900', 
-      '#00CC6A', 
+    const colors = [
+      "#0078D4",
+      "#00A4EF",
+      "#50E6FF",
+      "#8764B8",
+      "#881798",
+      "#E43BA6",
+      "#E74856",
+      "#F7630C",
+      "#FFB900",
+      "#00CC6A",
     ];
-    
-    const colorIndex = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+
+    const colorIndex =
+      name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+
     const bgColor = colors[colorIndex];
+
     const svg = `
       <svg width="48" height="48" xmlns="http://www.w3.org/2000/svg">
         <rect width="48" height="48" fill="${bgColor}"/>
@@ -135,7 +144,6 @@ export class GraphMeetingsProvider implements IMeetingProvider {
       </svg>
     `;
 
-    // Convert SVG to data URL
     return `data:image/svg+xml;base64,${btoa(svg)}`;
   }
 }
