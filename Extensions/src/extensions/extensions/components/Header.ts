@@ -79,6 +79,12 @@ export class Header {
          
           -->
 
+          <div class="${styles.TIRSearch}">
+         <span class="${styles.TIRSearchIcon}">${Icons.search}</span>
+         <input id="${IDS.elems.search}" class="${styles.TIRSearchInput}" type="text"
+         placeholder="Search" autocomplete="off" aria-label="Search" />
+         </div>
+
           <div class="${styles.TIRRight}">
             <button id="tir-help" class="${styles.TIRIconBtn}" title="Help" aria-label="Help">
               <img src="${helpIcon}" alt="Help"/>

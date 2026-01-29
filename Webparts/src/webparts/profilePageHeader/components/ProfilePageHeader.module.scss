@@ -53,16 +53,25 @@
 
 /* =========================================================
    ✅ HERO FULL WIDTH (LEFT+RIGHT) + ✅ ZERO GAP FROM TOP
+   + ✅ Background (merged here - duplicate removed)
    ========================================================= */
 .headerWrap {
   padding: 44px 56px;
   display: flex;
-  // align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
   border-radius: 0;
   overflow: hidden;
   position: relative;
+  width: 100%;
+
+  /* ✅ Background moved here (was duplicate .headerWrap block) */
+  background-image:
+    url("../assets/Gradient.svg"),
+    linear-gradient(90deg, #fbd8c7 0%, #fee2cf 35%, #ffd6b6 68%, #ffe4d1 100%);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .cornerLeft {
@@ -221,6 +230,14 @@
   margin-top: 120px;
 }
 
+/* ✅ Avatar loading state (no inline css) */
+.avatarLoading {
+  background: #f99999ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .avatarBadge {
   position: absolute;
   width: 38px;
@@ -332,6 +349,13 @@
   }
 }
 
+/* ✅ Disabled change-photo button when not self */
+.changePhotoBtnDisabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .changePhotoIcon {
   width: 24px;
   height: 24px;
@@ -353,12 +377,21 @@
   flex-wrap: wrap;
 }
 
+/* ✅ Badges row read-only (no inline css) */
+.badgesReadOnly {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.badgesReadOnly .badgeItem {
+  cursor: default !important;
+}
+
 .badgeItem {
   display: flex;
   flex-direction: column;
   gap: 6px;
   align-items: center;
-  // margin-top: 160px;
   cursor: pointer;
   user-select: none;
 
@@ -426,6 +459,11 @@
     margin-right: 8px;
     font-size: 16px;
   }
+}
+
+/* ✅ Hidden file input (remove inline style) */
+.hiddenInput {
+  display: none;
 }
 
 @keyframes slideIn {

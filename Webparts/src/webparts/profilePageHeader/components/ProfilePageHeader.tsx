@@ -22,11 +22,6 @@ import {
 
 const ProfileIcon_URL: string = require("../assets/profileCircleImg.svg");
 
-// Background in SiteAssets
-const PROFILE_HEADER_BG_FILE_NAME = "Gradient.svg";
-// Packaged fallback background
-const ProfileHeaderBgAsset: string = require("../assets/Gradient.svg");
-
 interface IProfilePageHeaderState {
   currentPhoto: string;
 
@@ -34,7 +29,6 @@ interface IProfilePageHeaderState {
   designation: string;
   department: string;
 
-  // ✅ new: all core fields from Graph (used only for copy)
   graphCore: GraphCoreUserFields | null;
 
   showMenu: boolean;
@@ -45,13 +39,16 @@ interface IProfilePageHeaderState {
 
   badgeImageErrors: { [badgeName: string]: boolean };
   selectedBadge: IBadgeItem | null;
+
+  isSelf: boolean;
+  targetUserKey: string;
+  targetAccountName: string;
 }
 
 export default class ProfilePageHeader extends React.Component<IProfilePageHeaderProps, IProfilePageHeaderState> {
   private menuRef: React.RefObject<HTMLDivElement>;
   private fileInputRef: React.RefObject<HTMLInputElement>;
   private feedbackTimeout: number | undefined;
-
   private graphPhotoObjectUrl: string | null = null;
 
   constructor(props: IProfilePageHeaderProps) {
@@ -59,7 +56,6 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
 
     this.state = {
       currentPhoto: "",
-
       fullName: (props.fullName || "").trim(),
       designation: "",
       department: (props.department || "").trim(),
@@ -74,6 +70,10 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
 
       badgeImageErrors: {},
       selectedBadge: props.selectedBadge ?? null,
+
+      isSelf: true,
+      targetUserKey: "",
+      targetAccountName: "",
     };
 
     this.menuRef = React.createRef();
@@ -99,9 +99,20 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
     }
   }
 
+  private getTargetFromUrl(): { userKey: string; accountname: string } {
+    try {
+      const params = new URLSearchParams(window.location.search || "");
+      const uid = (params.get("uid") || "").trim();
+      const accountname = (params.get("accountname") || "").trim();
+      const userKey = uid || accountname;
+      return { userKey, accountname };
+    } catch {
+      return { userKey: "", accountname: "" };
+    }
+  }
+
   private upgradeSharePointPhotoToLarge(url: string): string {
     if (!url) return "";
-    // typical: /_layouts/15/userphoto.aspx?size=S&accountname=...
     return url.replace(/([?&]size=)(S|M|L)/i, "$1L");
   }
 
@@ -118,83 +129,137 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
     return url;
   }
 
-  private getHeaderBgStyle = (): React.CSSProperties => {
-    const webAbsoluteUrl = (this.props.context?.pageContext?.web?.absoluteUrl || "").trim();
-    const file = encodeURIComponent(PROFILE_HEADER_BG_FILE_NAME);
-    const siteAssetsUrl = webAbsoluteUrl ? `${webAbsoluteUrl}/SiteAssets/${file}` : "";
+  /** ✅ Safe base64 for unicode text */
+  private toBase64Unicode(str: string): string {
+    try {
+      return btoa(unescape(encodeURIComponent(str)));
+    } catch {
+      return btoa(str);
+    }
+  }
 
-    const layers: string[] = [];
+  /**
+   * ✅ Initials avatar like your GraphMeetingsProvider.getDefaultAvatar()
+   * Returns data:image/svg+xml;base64,...
+   */
+  private getDefaultAvatar(name: string, size: number = 160): string {
+    const display = (name || "User").trim();
 
-    // SiteAssets first (if present)
-    if (siteAssetsUrl) layers.push(`url("${siteAssetsUrl}")`);
-    // Packaged fallback
-    if (ProfileHeaderBgAsset) layers.push(`url("${ProfileHeaderBgAsset}")`);
-    // Gradient fallback
-    layers.push(`linear-gradient(90deg,#fbd8c7 0%,#fee2cf 35%,#ffd6b6 68%,#ffe4d1 100%)`);
+    const initials = display
+      .split(" ")
+      .map((n) => (n ? n[0] : ""))
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
 
-    return {
-      backgroundImage: layers.join(", "),
-      backgroundRepeat: "no-repeat",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      width: "100%",
-    };
-  };
+    const colors = [
+      "#a6afed",
+      "#a9d3f2",
+      "#a1dee9",
+      "#e6edbf",
+      "#c6b1de",
+      "#f7c0e3",
+      "#eeacb2",
+      "#fdcfb4",
+      "#dfc98e",
+      "#9fd89f",
+    ];
+
+    const colorIndex =
+      display.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+
+    const bgColor = colors[colorIndex];
+
+    const fontSize = Math.max(18, Math.floor(size * 0.38));
+
+    const svg = `
+      <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${size}" height="${size}" rx="${Math.floor(size / 2)}" ry="${Math.floor(size / 2)}" fill="${bgColor}"/>
+        <text x="50%" y="50%"
+              text-anchor="middle"
+              dy=".35em"
+              font-family="Segoe UI, Arial, sans-serif"
+              font-size="${fontSize}"
+              font-weight="700"
+              fill="white">
+          ${initials || "U"}
+        </text>
+      </svg>
+    `;
+
+    return `data:image/svg+xml;base64,${this.toBase64Unicode(svg)}`;
+  }
 
   private initializeProfile = async (): Promise<void> => {
     try {
       const siteUrl = await getSiteUrl();
       this.setState({ siteUrl });
 
-      const savedBadge = loadSelectedBadge();
-      if (savedBadge) this.setState({ selectedBadge: savedBadge });
+      const { userKey, accountname } = this.getTargetFromUrl();
+      const isSelf = !userKey;
+
+      this.setState({
+        isSelf,
+        targetUserKey: userKey,
+        targetAccountName: accountname,
+      });
+
+      // Load badge preference only for self
+      if (isSelf) {
+        const savedBadge = loadSelectedBadge();
+        if (savedBadge) this.setState({ selectedBadge: savedBadge });
+      }
 
       // ----------------------------
       // 1) Graph info + HQ photo (preferred)
       // ----------------------------
       let graphInfo: { fullName: string; designation: string; department: string } | null = null;
-      try {
-        graphInfo = await fetchGraphMeInfo(this.props.context);
-      } catch {
-        // ignore
-      }
-
-      // ✅ Fetch all core user fields for clipboard copy
       let graphCore: GraphCoreUserFields | null = null;
+      let graphPhotoUrl = "";
+
       try {
-        graphCore = await fetchGraphCoreUserFields(this.props.context);
+        graphInfo = await fetchGraphMeInfo(this.props.context, userKey || undefined);
       } catch {
         // ignore
       }
 
-      let graphPhotoUrl = "";
       try {
-        const blob = await fetchGraphMyPhotoBlob(this.props.context);
+        graphCore = await fetchGraphCoreUserFields(this.props.context, userKey || undefined);
+      } catch {
+        // ignore
+      }
+
+      try {
+        const blob = await fetchGraphMyPhotoBlob(this.props.context, userKey || undefined);
         graphPhotoUrl = this.setGraphPhotoFromBlob(blob);
       } catch {
         // ignore
       }
 
       // ----------------------------
-      // 2) SharePoint photo + SP user info (fallbacks)
+      // 2) SharePoint fallbacks (SELF ONLY)
       // ----------------------------
       let spPhotoUrl = "";
-      try {
-        const photoUrl = await fetchUserProfilePicture();
-        if (photoUrl) spPhotoUrl = this.upgradeSharePointPhotoToLarge(photoUrl);
-      } catch {
-        // ignore
-      }
-
       let spInfo: { fullName: string; department: string } | null = null;
-      try {
-        spInfo = await fetchCurrentUserInfo();
-      } catch {
-        // ignore
+
+      if (isSelf) {
+        try {
+          const photoUrl = await fetchUserProfilePicture();
+          if (photoUrl) spPhotoUrl = this.upgradeSharePointPhotoToLarge(photoUrl);
+        } catch {
+          // ignore
+        }
+
+        try {
+          spInfo = await fetchCurrentUserInfo();
+        } catch {
+          // ignore
+        }
       }
 
       // ----------------------------
-      // Final merge priority (Graph > SPInfo > existing)
+      // Final merge (Graph > SPInfo > existing)
       // ----------------------------
       const finalFullName =
         (graphInfo?.fullName || "").trim() ||
@@ -208,7 +273,23 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
         (spInfo?.department || "").trim() ||
         (this.state.department || "").trim();
 
-      const finalPhoto = (graphPhotoUrl || "").trim() || (spPhotoUrl || "").trim();
+      // ✅ Photo priority:
+      // - Graph photo if present
+      // - If self: SP photo
+      // - Else: initials avatar (no more userphoto silhouette)
+      let finalPhoto = (graphPhotoUrl || "").trim();
+      if (!finalPhoto && isSelf) finalPhoto = (spPhotoUrl || "").trim();
+
+      if (!finalPhoto) {
+        // pick best name available for initials
+        const nameForInitials =
+          finalFullName ||
+          (graphCore?.displayName || "").trim() ||
+          (accountname || "").trim() ||
+          "User";
+
+        finalPhoto = this.getDefaultAvatar(nameForInitials, 180);
+      }
 
       this.setState({
         currentPhoto: finalPhoto,
@@ -244,6 +325,12 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!this.state.isSelf) {
+      this.setState({ error: "You can only change your own profile photo." });
+      e.target.value = "";
+      return;
+    }
+
     try {
       const { siteUrl } = this.state;
 
@@ -255,7 +342,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
       };
       reader.readAsDataURL(file);
 
-      // upload to SharePoint + update user profile picture
+      // upload to SharePoint + update user profile picture (self-only)
       const uploadedUrl = await uploadProfilePicture(file, siteUrl);
       if (uploadedUrl) {
         await updateUserProfilePicture(uploadedUrl);
@@ -268,7 +355,6 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
     e.target.value = "";
   };
 
-  // ✅ Updated copy handler: copies full professional block using graphCore
   private handleCopyProfile = async (): Promise<void> => {
     try {
       const { fullName, designation, department, graphCore } = this.state;
@@ -300,6 +386,8 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
   };
 
   private handleSelectBadge = (badge: IBadgeItem): void => {
+    if (!this.state.isSelf) return;
+
     this.setState((prev) => {
       const isSame = prev.selectedBadge?.name === badge.name;
       const next = isSame ? null : badge;
@@ -307,18 +395,6 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
       return { selectedBadge: next };
     });
   };
-
-  private getInitials(fullName: string): string {
-    const cleaned = (fullName || "").replace(/,/g, " ").trim().replace(/\s+/g, " ");
-    if (!cleaned) return "";
-
-    const parts = cleaned.split(" ").filter(Boolean);
-    if (!parts.length) return "";
-
-    const first = (parts[0] || "").charAt(0);
-    const last = (parts.length > 1 ? parts[parts.length - 1] : parts[0]).charAt(0);
-    return (first + last).toUpperCase();
-  }
 
   private renderName = (): React.ReactElement => {
     const name = (this.state.fullName || "").trim().replace(/,/g, " ").replace(/\s+/g, " ");
@@ -342,63 +418,35 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
   };
 
   private renderAvatarCore(): React.ReactElement {
-    const { isLoading, currentPhoto, fullName } = this.state;
+    const { isLoading, currentPhoto } = this.state;
 
     if (isLoading) {
       return (
-        <div
-          className={styles.avatar}
-          style={{ background: "#f99999ff", display: "flex", alignItems: "center", justifyContent: "center" }}
-        >
+        <div className={`${styles.avatar} ${styles.avatarLoading}`}>
           <Spinner size={SpinnerSize.large} />
         </div>
       );
     }
 
-    if (currentPhoto) {
-      return <img className={styles.avatar} src={currentPhoto} alt="Profile" />;
-    }
-
-    const initials = this.getInitials(fullName) || "—";
-    return (
-      <div
-        className={styles.avatar}
-        title={fullName}
-        aria-label="Profile initials"
-        style={{
-          background: "#d9d9d9",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: 700,
-          fontSize: 22,
-          color: "#333",
-        }}
-      >
-        {initials}
-      </div>
-    );
+    // currentPhoto will always exist (photo or initials avatar data URL)
+    return <img className={styles.avatar} src={currentPhoto} alt="Profile" />;
   }
 
   public render(): React.ReactElement<IProfilePageHeaderProps> {
     const badges = this.props.badges || [];
-    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors } =
+    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors, isSelf } =
       this.state;
 
     const subtitle = (designation || "").trim() || (department || "").trim() || "—";
 
     return (
-      <div className={styles.headerWrap} style={this.getHeaderBgStyle()}>
+      <div className={styles.headerWrap}>
         <div className={styles.identityCard}>
           <div className={styles.avatarWrap}>
             {this.renderAvatarCore()}
 
             {selectedBadge ? (
-              <div
-                className={styles.avatarBadge}
-                title={selectedBadge.name}
-                aria-label={`Selected badge: ${selectedBadge.name}`}
-              >
+              <div className={styles.avatarBadge} title={selectedBadge.name} aria-label={`Selected badge: ${selectedBadge.name}`}>
                 {badgeImageErrors[selectedBadge.name] ? (
                   <div className={styles.avatarBadgeFallback}>?</div>
                 ) : (
@@ -446,13 +494,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                <path
-                  d="M8.00391 12H16.0039"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <path d="M8.00391 12H16.0039" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
@@ -491,9 +533,18 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
 
               {showMenu && (
                 <div className={styles.dropdownMenu}>
-                  <button type="button" className={styles.changePhotoBtn} onClick={this.openFileDialog} role="menuitem">
+                  <button
+                    type="button"
+                    className={`${styles.changePhotoBtn} ${!isSelf ? styles.changePhotoBtnDisabled : ""}`}
+                    onClick={this.openFileDialog}
+                    role="menuitem"
+                    title={!isSelf ? "You can change only your own photo" : "Change Profile Photo"}
+                    aria-disabled={!isSelf}
+                  >
                     <img src={ProfileIcon_URL} className={styles.changePhotoIcon} alt="" />
-                    <span className={styles.changePhotoLabel}>Change Profile Photo</span>
+                    <span className={styles.changePhotoLabel}>
+                      {isSelf ? "Change Profile Photo" : "Change Profile Photo (Self only)"}
+                    </span>
                   </button>
                 </div>
               )}
@@ -503,7 +554,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
               ref={this.fileInputRef}
               type="file"
               accept="image/*"
-              style={{ display: "none" }}
+              className={styles.hiddenInput}
               onChange={this.handleProfileChange}
               aria-hidden="true"
             />
@@ -516,7 +567,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
           )}
 
           {badges.length > 0 ? (
-            <div className={styles.badgesRow} aria-label="Badges">
+            <div className={`${styles.badgesRow} ${!isSelf ? styles.badgesReadOnly : ""}`} aria-label="Badges">
               {badges.map((b, i) => (
                 <div
                   className={styles.badgeItem}
@@ -528,6 +579,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
                     if (e.key === "Enter" || e.key === " ") this.handleSelectBadge(b);
                   }}
                   aria-label={`Select badge ${b.name}`}
+                  title={!isSelf ? "Badges are editable only for your own profile" : ""}
                 >
                   {badgeImageErrors[b.name] ? (
                     <div className={styles.badgePlaceholder} title={`Failed to load: ${b.name}`}>
