@@ -4,6 +4,12 @@
   grid-template-columns: repeat(13, 110px);
   justify-content: center;
   zoom: 1.2;
+  @media(max-width: 1440px){
+    zoom: 1.1;
+  }
+  @media(max-width: 1366px){
+    zoom: 1;
+  }
 }
 
 .card {
