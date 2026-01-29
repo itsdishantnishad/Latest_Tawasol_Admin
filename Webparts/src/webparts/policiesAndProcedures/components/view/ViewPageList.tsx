@@ -52,6 +52,7 @@ type State = {
   expandedFolderIds: Set<string>;
 };
 
+
 export default class PoliciesAndProceduresList extends React.Component<
   IPoliciesAndProceduresListProps,
   State
@@ -66,6 +67,18 @@ export default class PoliciesAndProceduresList extends React.Component<
 
   private get searchTextTrimmed(): string {
     return (this.props.searchText || "").trim();
+  }
+
+   // Date Formating
+  private _formatModifiedDate(value: any): string {
+    const dt = value instanceof Date ? value : new Date(value);
+    if (isNaN(dt.getTime())) return "-";
+
+    return dt.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    });
   }
 
   // normalized forced expand keys (works for encoded/decoded)
@@ -277,7 +290,7 @@ export default class PoliciesAndProceduresList extends React.Component<
 
           <div className={styles.meta}>
             Modified by : {item.modifiedBy || "-"} &nbsp;•&nbsp;
-            Modified on : {item.modifiedOn ? item.modifiedOn.toLocaleDateString() : "-"}
+            Modified on : {item.modifiedOn ? this._formatModifiedDate(item.modifiedOn) : "-"}
           </div>
         </div>
 

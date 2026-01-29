@@ -65,11 +65,13 @@ export default class FormsLibrary extends React.Component<IFormsLibraryProps, IF
   };
 
   private _formatModifiedDate(value: string): string {
-    const dt = new Date(value);
-    return dt
-      .toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2-digit' })
-      .replace(', ', ',');
-  }
+  const dt = new Date(value);
+  return dt.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+}
 
   // ------------------ TAXONOMY RESOLVER (LIBRARY SAFE) ------------------
   private _resolveTaxonomyLabel(value: any, taxCatchAll?: any[]): string {
@@ -393,7 +395,7 @@ export default class FormsLibrary extends React.Component<IFormsLibraryProps, IF
                     <div className={styles.formRowContent}>
                       <Text className={styles.formTitle}>{item.title}</Text>
                       <Text className={styles.formMeta}>
-                        Modified by {item.modifiedBy} · Modified on {item.modified}
+                        Modified by {item.modifiedBy} · Modified on {item.modified}{" "}
                       </Text>
                     </div>
 
