@@ -8,11 +8,14 @@ import {
   fetchUserProfilePicture,
   fetchCurrentUserInfo,
   fetchGraphMeInfo,
+  fetchGraphCoreUserFields,
   fetchGraphMyPhotoBlob,
   getSiteUrl,
   uploadProfilePicture,
   updateUserProfilePicture,
-  copyProfileToClipboard,
+  copyTextToClipboard,
+  buildProfessionalProfileText,
+  type GraphCoreUserFields,
   saveSelectedBadge,
   loadSelectedBadge,
 } from "../../services/Profile/profileHeaderServices";
@@ -30,6 +33,9 @@ interface IProfilePageHeaderState {
   fullName: string;
   designation: string;
   department: string;
+
+  // ✅ new: all core fields from Graph (used only for copy)
+  graphCore: GraphCoreUserFields | null;
 
   showMenu: boolean;
   copyFeedback: boolean;
@@ -57,6 +63,8 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
       fullName: (props.fullName || "").trim(),
       designation: "",
       department: (props.department || "").trim(),
+
+      graphCore: null,
 
       showMenu: false,
       copyFeedback: false,
@@ -151,6 +159,14 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
         // ignore
       }
 
+      // ✅ Fetch all core user fields for clipboard copy
+      let graphCore: GraphCoreUserFields | null = null;
+      try {
+        graphCore = await fetchGraphCoreUserFields(this.props.context);
+      } catch {
+        // ignore
+      }
+
       let graphPhotoUrl = "";
       try {
         const blob = await fetchGraphMyPhotoBlob(this.props.context);
@@ -199,6 +215,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
         fullName: finalFullName,
         designation: finalDesignation,
         department: finalDepartment,
+        graphCore: graphCore,
         error: null,
       });
     } catch {
@@ -251,11 +268,19 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
     e.target.value = "";
   };
 
+  // ✅ Updated copy handler: copies full professional block using graphCore
   private handleCopyProfile = async (): Promise<void> => {
     try {
-      const { fullName, designation, department } = this.state;
-      const subtitle = (designation || "").trim() || (department || "").trim();
-      await copyProfileToClipboard(fullName, subtitle);
+      const { fullName, designation, department, graphCore } = this.state;
+
+      const text = buildProfessionalProfileText({
+        core: graphCore,
+        fallbackName: fullName,
+        fallbackDesignation: designation,
+        fallbackDepartment: department,
+      });
+
+      await copyTextToClipboard(text);
 
       this.setState({ copyFeedback: true });
 
@@ -369,7 +394,11 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
             {this.renderAvatarCore()}
 
             {selectedBadge ? (
-              <div className={styles.avatarBadge} title={selectedBadge.name} aria-label={`Selected badge: ${selectedBadge.name}`}>
+              <div
+                className={styles.avatarBadge}
+                title={selectedBadge.name}
+                aria-label={`Selected badge: ${selectedBadge.name}`}
+              >
                 {badgeImageErrors[selectedBadge.name] ? (
                   <div className={styles.avatarBadgeFallback}>?</div>
                 ) : (
@@ -417,7 +446,13 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                <path d="M8.00391 12H16.0039" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M8.00391 12H16.0039"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </button>
 
@@ -427,7 +462,12 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
                   !
                 </span>
                 <span className={styles.copyText}>Profile Copied</span>
-                <button type="button" className={styles.copyClose} aria-label="Close" onClick={() => this.setState({ copyFeedback: false })}>
+                <button
+                  type="button"
+                  className={styles.copyClose}
+                  aria-label="Close"
+                  onClick={() => this.setState({ copyFeedback: false })}
+                >
                   ×
                 </button>
               </div>
