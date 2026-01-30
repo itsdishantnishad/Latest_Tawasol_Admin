@@ -1,3 +1,5 @@
+// ProfilePageHeader.tsx
+
 import * as React from "react";
 import { Text, Spinner, SpinnerSize } from "@fluentui/react";
 
@@ -17,13 +19,27 @@ import {
   buildProfessionalProfileText,
   type GraphCoreUserFields,
   saveSelectedBadge,
-  loadSelectedBadge,
+  loadSelectedBadge
 } from "../../services/Profile/profileHeaderServices";
 
 const ProfileIcon_URL: string = require("../assets/profileCircleImg.svg");
 
+/** ---- ES2018 compatible settled wrapper (no Promise.allSettled) ---- */
+type SettledResult<T> =
+  | { status: "fulfilled"; value: T }
+  | { status: "rejected"; reason: any };
+
+function toSettled<T>(p: Promise<T>): Promise<SettledResult<T>> {
+  return p.then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason })
+  );
+}
+
 interface IProfilePageHeaderState {
   currentPhoto: string;
+  /** Shows an overlay spinner while the <img> is downloading/decoding */
+  isPhotoLoading: boolean;
 
   fullName: string;
   designation: string;
@@ -45,17 +61,30 @@ interface IProfilePageHeaderState {
   targetAccountName: string;
 }
 
-export default class ProfilePageHeader extends React.Component<IProfilePageHeaderProps, IProfilePageHeaderState> {
+// NOTE: fetchGraphMeInfo returns this shape in your project
+type GraphMeInfo =
+  | { fullName: string; designation: string; department: string }
+  | null;
+
+export default class ProfilePageHeader extends React.Component<
+  IProfilePageHeaderProps,
+  IProfilePageHeaderState
+> {
   private menuRef: React.RefObject<HTMLDivElement>;
   private fileInputRef: React.RefObject<HTMLInputElement>;
   private feedbackTimeout: number | undefined;
   private graphPhotoObjectUrl: string | null = null;
+
+  /** ✅ prevents infinite loader when src doesn't change (browser won't re-fire onLoad) */
+  private lastLoadedSrc: string = "";
 
   constructor(props: IProfilePageHeaderProps) {
     super(props);
 
     this.state = {
       currentPhoto: "",
+      isPhotoLoading: false,
+
       fullName: (props.fullName || "").trim(),
       designation: "",
       department: (props.department || "").trim(),
@@ -73,7 +102,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
 
       isSelf: true,
       targetUserKey: "",
-      targetAccountName: "",
+      targetAccountName: ""
     };
 
     this.menuRef = React.createRef();
@@ -116,6 +145,34 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
     return url.replace(/([?&]size=)(S|M|L)/i, "$1L");
   }
 
+  /**
+   * Fast SharePoint-renderable photo (browser can cache it).
+   * accountname can be UPN/email or login.
+   */
+  private buildSpUserPhotoUrl(
+    siteUrl: string,
+    accountname: string,
+    size: "S" | "M" | "L" = "L"
+  ): string {
+    const key = String(accountname || "").trim();
+    if (!key) return "";
+
+    const origin = window.location.origin;
+    const web = String(siteUrl || "").trim();
+    const base = web ? `${origin}${web.startsWith("/") ? web : `/${web}`}` : origin;
+
+    return `${base}/_layouts/15/userphoto.aspx?accountname=${encodeURIComponent(
+      key
+    )}&size=${size}`;
+  }
+
+  private extractAccountFromLogin(loginName: string): string {
+    const raw = String(loginName || "").trim();
+    if (!raw) return "";
+    const parts = raw.split("|").filter(Boolean);
+    return (parts[parts.length - 1] || raw).trim();
+  }
+
   private setGraphPhotoFromBlob(blob: Blob | null): string {
     if (!blob || !blob.size) return "";
 
@@ -129,7 +186,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
     return url;
   }
 
-  /** ✅ Safe base64 for unicode text */
+  /** Safe base64 for unicode text */
   private toBase64Unicode(str: string): string {
     try {
       return btoa(unescape(encodeURIComponent(str)));
@@ -138,10 +195,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
     }
   }
 
-  /**
-   * ✅ Initials avatar like your GraphMeetingsProvider.getDefaultAvatar()
-   * Returns data:image/svg+xml;base64,...
-   */
+  /** Initials avatar -> data:image/svg+xml;base64,... */
   private getDefaultAvatar(name: string, size: number = 160): string {
     const display = (name || "User").trim();
 
@@ -163,19 +217,22 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
       "#eeacb2",
       "#fdcfb4",
       "#dfc98e",
-      "#9fd89f",
+      "#9fd89f"
     ];
 
     const colorIndex =
-      display.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+      display
+        .split("")
+        .reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
 
     const bgColor = colors[colorIndex];
-
     const fontSize = Math.max(18, Math.floor(size * 0.38));
 
     const svg = `
       <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-        <rect width="${size}" height="${size}" rx="${Math.floor(size / 2)}" ry="${Math.floor(size / 2)}" fill="${bgColor}"/>
+        <rect width="${size}" height="${size}" rx="${Math.floor(
+      size / 2
+    )}" ry="${Math.floor(size / 2)}" fill="${bgColor}"/>
         <text x="50%" y="50%"
               text-anchor="middle"
               dy=".35em"
@@ -191,119 +248,191 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
     return `data:image/svg+xml;base64,${this.toBase64Unicode(svg)}`;
   }
 
+  private normalizeKey(v: string): string {
+    return (v || "").trim().toLowerCase();
+  }
+
   private initializeProfile = async (): Promise<void> => {
     try {
       const siteUrl = await getSiteUrl();
       this.setState({ siteUrl });
 
       const { userKey, accountname } = this.getTargetFromUrl();
-      const isSelf = !userKey;
+
+      const loginName = this.props?.context?.pageContext?.user?.loginName || "";
+      const ctxEmail = this.props?.context?.pageContext?.user?.email || "";
+      const derivedAccount =
+        accountname || ctxEmail || this.extractAccountFromLogin(loginName);
+
+      // Improved self detection
+      const isSelf =
+        !userKey ||
+        this.normalizeKey(userKey) === this.normalizeKey(derivedAccount) ||
+        this.normalizeKey(userKey) === this.normalizeKey(accountname);
+
+      // ✅ Instant render (NO email in name)
+      const initialDisplayName =
+        (this.props.fullName || "").trim() ||
+        (this.state.fullName || "").trim() ||
+        "Loading...";
+
+      // Avatar initials can still use email if name not available (fine)
+      const avatarSeed =
+        initialDisplayName === "Loading..." ? (derivedAccount || "User") : initialDisplayName;
+
+      const initialPhoto = this.getDefaultAvatar(avatarSeed, 180);
 
       this.setState({
         isSelf,
         targetUserKey: userKey,
-        targetAccountName: accountname,
+        targetAccountName: derivedAccount,
+        fullName: initialDisplayName,
+        currentPhoto: initialPhoto,
+        isLoading: false,
+        error: null
       });
 
-      // Load badge preference only for self
       if (isSelf) {
         const savedBadge = loadSelectedBadge();
         if (savedBadge) this.setState({ selectedBadge: savedBadge });
       }
 
-      // ----------------------------
-      // 1) Graph info + HQ photo (preferred)
-      // ----------------------------
-      let graphInfo: { fullName: string; designation: string; department: string } | null = null;
-      let graphCore: GraphCoreUserFields | null = null;
-      let graphPhotoUrl = "";
-
-      try {
-        graphInfo = await fetchGraphMeInfo(this.props.context, userKey || undefined);
-      } catch {
-        // ignore
+      // Fast path: SharePoint userphoto endpoint (loads quickly via browser cache)
+      if (derivedAccount) {
+        const spUserPhoto = this.buildSpUserPhotoUrl(siteUrl, derivedAccount, "L");
+        if (spUserPhoto) {
+          // show loader only if it's actually a new src
+          const shouldShow = spUserPhoto !== this.lastLoadedSrc;
+          this.setState({ currentPhoto: spUserPhoto, isPhotoLoading: shouldShow });
+        }
       }
 
-      try {
-        graphCore = await fetchGraphCoreUserFields(this.props.context, userKey || undefined);
-      } catch {
-        // ignore
-      }
+      // ---- 1) Graph (parallel) ----
+      const [graphInfoRes, graphCoreRes, graphPhotoRes] = (await Promise.all([
+        toSettled<GraphMeInfo>(fetchGraphMeInfo(this.props.context, userKey || undefined)),
+        toSettled<GraphCoreUserFields | null>(
+          fetchGraphCoreUserFields(this.props.context, userKey || undefined)
+        ),
+        toSettled<Blob | null>(fetchGraphMyPhotoBlob(this.props.context, userKey || undefined))
+      ])) as [
+        SettledResult<GraphMeInfo>,
+        SettledResult<GraphCoreUserFields | null>,
+        SettledResult<Blob | null>
+      ];
 
-      try {
-        const blob = await fetchGraphMyPhotoBlob(this.props.context, userKey || undefined);
-        graphPhotoUrl = this.setGraphPhotoFromBlob(blob);
-      } catch {
-        // ignore
-      }
+      const graphInfo = graphInfoRes.status === "fulfilled" ? graphInfoRes.value : null;
+      const graphCore = graphCoreRes.status === "fulfilled" ? graphCoreRes.value : null;
 
-      // ----------------------------
-      // 2) SharePoint fallbacks (SELF ONLY)
-      // ----------------------------
+      // ✅ Detect "no photo" confirmation from Graph
+      const graphNoPhotoConfirmed =
+        graphPhotoRes.status === "fulfilled" &&
+        (!graphPhotoRes.value || (graphPhotoRes.value as any).size === 0);
+
+      const graphPhotoUrl =
+        graphPhotoRes.status === "fulfilled"
+          ? this.setGraphPhotoFromBlob(graphPhotoRes.value)
+          : "";
+
+      // ---- 2) SharePoint fallbacks (SELF ONLY) ----
       let spPhotoUrl = "";
       let spInfo: { fullName: string; department: string } | null = null;
 
       if (isSelf) {
-        try {
-          const photoUrl = await fetchUserProfilePicture();
-          if (photoUrl) spPhotoUrl = this.upgradeSharePointPhotoToLarge(photoUrl);
-        } catch {
-          // ignore
-        }
+        const [spPhotoRes, spInfoRes] = (await Promise.all([
+          toSettled<string | null>(fetchUserProfilePicture()),
+          toSettled<{ fullName: string; department: string } | null>(fetchCurrentUserInfo())
+        ])) as [
+          SettledResult<string | null>,
+          SettledResult<{ fullName: string; department: string } | null>
+        ];
 
-        try {
-          spInfo = await fetchCurrentUserInfo();
-        } catch {
-          // ignore
-        }
+        const photoUrl = spPhotoRes.status === "fulfilled" ? spPhotoRes.value : null;
+        if (photoUrl) spPhotoUrl = this.upgradeSharePointPhotoToLarge(photoUrl);
+
+        spInfo = spInfoRes.status === "fulfilled" ? spInfoRes.value : null;
       }
 
-      // ----------------------------
-      // Final merge (Graph > SPInfo > existing)
-      // ----------------------------
+      const coreDisplayName =
+        graphCore && (graphCore as any).displayName ? String((graphCore as any).displayName).trim() : "";
+
+      // ---- Final merge ----
       const finalFullName =
         (graphInfo?.fullName || "").trim() ||
+        coreDisplayName ||
         (spInfo?.fullName || "").trim() ||
-        (this.state.fullName || "").trim();
+        (this.props.fullName || "").trim() ||
+        (this.state.fullName || "").trim() ||
+        "User";
 
       const finalDesignation = (graphInfo?.designation || "").trim();
-
       const finalDepartment =
         (graphInfo?.department || "").trim() ||
         (spInfo?.department || "").trim() ||
         (this.state.department || "").trim();
 
-      // ✅ Photo priority:
-      // - Graph photo if present
-      // - If self: SP photo
-      // - Else: initials avatar (no more userphoto silhouette)
+      // Photo priority:
+      // 1) Graph photo blob
+      // 2) If Graph confirmed no photo => initials (no SP silhouette)
+      // 3) If self => SP large photo
+      // 4) Else keep existing (sp userphoto fast path) if any
+      // 5) Else initials
       let finalPhoto = (graphPhotoUrl || "").trim();
-      if (!finalPhoto && isSelf) finalPhoto = (spPhotoUrl || "").trim();
+
+      if (!finalPhoto && graphNoPhotoConfirmed) {
+        finalPhoto = this.getDefaultAvatar(finalFullName || "User", 180);
+      }
+
+      if (!finalPhoto && isSelf) {
+        finalPhoto = (spPhotoUrl || "").trim();
+      }
 
       if (!finalPhoto) {
-        // pick best name available for initials
+        const existing = String(this.state.currentPhoto || "").trim();
+        // keep existing if it's not a data svg (e.g. sp userphoto url already set)
+        if (existing && !existing.startsWith("data:image")) finalPhoto = existing;
+      }
+
+      if (!finalPhoto) {
         const nameForInitials =
           finalFullName ||
-          (graphCore?.displayName || "").trim() ||
           (accountname || "").trim() ||
           "User";
-
         finalPhoto = this.getDefaultAvatar(nameForInitials, 180);
       }
 
+      // ✅ show loader only when src actually changed and it's a network image
+      const shouldShowLoader =
+        !!finalPhoto &&
+        !finalPhoto.startsWith("data:image") &&
+        !finalPhoto.startsWith("blob:") &&
+        finalPhoto !== this.lastLoadedSrc;
+
       this.setState({
         currentPhoto: finalPhoto,
+        isPhotoLoading: shouldShowLoader,
         fullName: finalFullName,
         designation: finalDesignation,
         department: finalDepartment,
         graphCore: graphCore,
-        error: null,
+        error: null
       });
     } catch {
       this.setState({ error: "Failed to load profile" });
-    } finally {
-      this.setState({ isLoading: false });
     }
+  };
+
+  private handleAvatarLoaded = (loadedSrc?: string): void => {
+    const src = loadedSrc || this.state.currentPhoto || "";
+    this.lastLoadedSrc = src;
+    if (this.state.isPhotoLoading) this.setState({ isPhotoLoading: false });
+  };
+
+  private handleAvatarError = (): void => {
+    const nameForInitials = (this.state.fullName || "User").trim() || "User";
+    const fallback = this.getDefaultAvatar(nameForInitials, 180);
+
+    this.lastLoadedSrc = fallback;
+    this.setState({ currentPhoto: fallback, isPhotoLoading: false });
   };
 
   private handleOutsideClick = (e: MouseEvent): void => {
@@ -338,11 +467,11 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
       const reader = new FileReader();
       reader.onload = (event) => {
         const photoData = event.target?.result as string;
-        this.setState({ currentPhoto: photoData });
+        this.lastLoadedSrc = photoData;
+        this.setState({ currentPhoto: photoData, isPhotoLoading: false });
       };
       reader.readAsDataURL(file);
 
-      // upload to SharePoint + update user profile picture (self-only)
       const uploadedUrl = await uploadProfilePicture(file, siteUrl);
       if (uploadedUrl) {
         await updateUserProfilePicture(uploadedUrl);
@@ -363,7 +492,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
         core: graphCore,
         fallbackName: fullName,
         fallbackDesignation: designation,
-        fallbackDepartment: department,
+        fallbackDepartment: department
       });
 
       await copyTextToClipboard(text);
@@ -381,7 +510,7 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
 
   private handleBadgeImageError = (badgeName: string): void => {
     this.setState((prev) => ({
-      badgeImageErrors: { ...prev.badgeImageErrors, [badgeName]: true },
+      badgeImageErrors: { ...prev.badgeImageErrors, [badgeName]: true }
     }));
   };
 
@@ -397,7 +526,10 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
   };
 
   private renderName = (): React.ReactElement => {
-    const name = (this.state.fullName || "").trim().replace(/,/g, " ").replace(/\s+/g, " ");
+    const name = (this.state.fullName || "")
+      .trim()
+      .replace(/,/g, " ")
+      .replace(/\s+/g, " ");
     const parts = name.split(" ").filter(Boolean);
     const first = parts[0] || "";
     const rest = parts.slice(1);
@@ -418,24 +550,43 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
   };
 
   private renderAvatarCore(): React.ReactElement {
-    const { isLoading, currentPhoto } = this.state;
+    const { currentPhoto, isPhotoLoading, fullName } = this.state;
+    const safePhoto = currentPhoto || this.getDefaultAvatar(fullName || "User", 180);
 
-    if (isLoading) {
-      return (
-        <div className={`${styles.avatar} ${styles.avatarLoading}`}>
-          <Spinner size={SpinnerSize.large} />
-        </div>
-      );
-    }
+    return (
+      <div className={styles.avatarHost}>
+        <img
+          className={styles.avatar}
+          src={safePhoto}
+          alt="Profile"
+          decoding="async"
+          loading="eager"
+          onLoad={() => this.handleAvatarLoaded(safePhoto)}
+          onError={this.handleAvatarError}
+        />
 
-    // currentPhoto will always exist (photo or initials avatar data URL)
-    return <img className={styles.avatar} src={currentPhoto} alt="Profile" />;
+        {isPhotoLoading ? (
+          <div className={styles.avatarOverlay} aria-label="Loading profile photo">
+            <Spinner size={SpinnerSize.medium} />
+          </div>
+        ) : null}
+      </div>
+    );
   }
 
   public render(): React.ReactElement<IProfilePageHeaderProps> {
     const badges = this.props.badges || [];
-    const { designation, department, showMenu, copyFeedback, error, isLoading, selectedBadge, badgeImageErrors, isSelf } =
-      this.state;
+    const {
+      designation,
+      department,
+      showMenu,
+      copyFeedback,
+      error,
+      isLoading,
+      selectedBadge,
+      badgeImageErrors,
+      isSelf
+    } = this.state;
 
     const subtitle = (designation || "").trim() || (department || "").trim() || "—";
 
@@ -446,7 +597,11 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
             {this.renderAvatarCore()}
 
             {selectedBadge ? (
-              <div className={styles.avatarBadge} title={selectedBadge.name} aria-label={`Selected badge: ${selectedBadge.name}`}>
+              <div
+                className={styles.avatarBadge}
+                title={selectedBadge.name}
+                aria-label={`Selected badge: ${selectedBadge.name}`}
+              >
                 {badgeImageErrors[selectedBadge.name] ? (
                   <div className={styles.avatarBadgeFallback}>?</div>
                 ) : (
@@ -494,7 +649,13 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                <path d="M8.00391 12H16.0039" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M8.00391 12H16.0039"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </button>
 
@@ -535,7 +696,9 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
                 <div className={styles.dropdownMenu}>
                   <button
                     type="button"
-                    className={`${styles.changePhotoBtn} ${!isSelf ? styles.changePhotoBtnDisabled : ""}`}
+                    className={`${styles.changePhotoBtn} ${
+                      !isSelf ? styles.changePhotoBtnDisabled : ""
+                    }`}
                     onClick={this.openFileDialog}
                     role="menuitem"
                     title={!isSelf ? "You can change only your own photo" : "Change Profile Photo"}
@@ -567,7 +730,10 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
           )}
 
           {badges.length > 0 ? (
-            <div className={`${styles.badgesRow} ${!isSelf ? styles.badgesReadOnly : ""}`} aria-label="Badges">
+            <div
+              className={`${styles.badgesRow} ${!isSelf ? styles.badgesReadOnly : ""}`}
+              aria-label="Badges"
+            >
               {badges.map((b, i) => (
                 <div
                   className={styles.badgeItem}
@@ -586,7 +752,12 @@ export default class ProfilePageHeader extends React.Component<IProfilePageHeade
                       ?
                     </div>
                   ) : (
-                    <img className={styles.badgeImg} src={b.imageUrl} alt={b.name} onError={() => this.handleBadgeImageError(b.name)} />
+                    <img
+                      className={styles.badgeImg}
+                      src={b.imageUrl}
+                      alt={b.name}
+                      onError={() => this.handleBadgeImageError(b.name)}
+                    />
                   )}
                   <div className={styles.badgeName}>{b.name}</div>
                 </div>
