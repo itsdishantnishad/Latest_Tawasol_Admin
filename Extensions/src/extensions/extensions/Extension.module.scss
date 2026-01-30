@@ -1,3 +1,54 @@
+/* ===================== GLOBAL FONTS ===================== */
+
+/* Load Inter (keep OUTSIDE :global) */
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+:global {
+  /* Instrument Serif */
+  @font-face {
+    font-family: "Instrument Serif";
+    src: url("./assets/fonts/instrumentserif-regular.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Instrument Serif";
+    src: url("./assets/fonts/instrumentserif-italic.woff") format("woff");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  /* ===================== OOTB TEXT WEBPART ONLY ===================== */
+  /* Body / descriptions => Inter (only inside Text WP) */
+  [data-automation-id="textBox"] {
+    font-family: "Inter" !important;
+  }
+
+  /* Titles (Headings) => Instrument Serif (only inside Text WP) */
+  [data-automation-id="textBox"] h1,
+  [data-automation-id="textBox"] h2,
+  [data-automation-id="textBox"] h3,
+  [data-automation-id="textBox"] h4,
+  [data-automation-id="textBox"] h5,
+  [data-automation-id="textBox"] h6 {
+    font-family: "Instrument Serif" !important;
+  }
+
+  /* Optional: Pull quote inside Text WP (if you use it) */
+  // [data-automation-id="textBox"] blockquote {
+  //   font-family: "Instrument Serif", "Inter", "Segoe UI", Arial, sans-serif !important;
+  // }
+
+  /* Don’t break Fluent UI icons */
+  .ms-Icon {
+    font-family: "FabricMDL2Icons" !important;
+  }
+}
+
+
 /* ===================== HEADER ===================== */
 
 .TIRHdr {
@@ -383,6 +434,8 @@
 .TIRSuggestList {
   display: flex;
   flex-direction: column;
+  max-height: 260px;   /* makes it compact like image 2 */
+  overflow: auto;
 }
 
 /* items sit on top of translucent host */
