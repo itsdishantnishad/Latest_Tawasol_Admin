@@ -1,0 +1,200 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+.card {
+  position: relative;
+  width: 312px;
+  height: 429px;
+  border-radius: 12px;
+  overflow: hidden;
+
+  background: #fff;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* [PROFILECARD] Background vectors */
+.vectorA {
+  position: absolute;
+  right: -60px;
+  top: 119px;
+  width: 471px;
+  height: 290px;
+  opacity: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.vectorB {
+  position: absolute;
+  left: -67px;
+  top: 80px;
+  width: 471px;
+  height: 400px;
+  opacity: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* [PROFILECARD] Top logo strip */
+.topLogoStrip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 312px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.dubaiicon {
+  width: 312px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* [PROFILECARD] Avatar */
+.avatarWrap {
+  position: absolute;
+  width: 92px;
+  height: 92px;
+  top: 92px;
+  left: 110.5px;
+  border-radius: 300px;
+  border: 2.5px solid #f0edeb;
+  background: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  border-radius: 300px;
+  object-fit: cover;
+}
+
+.avatarFallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 300px;
+  background: #d9d9d9;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* [PROFILECARD] Name */
+.name {
+  position: absolute;
+  top: 227px;
+  left: 31px;
+  width: 250px;
+  height: 24px;
+
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0;
+
+  color: #101820;
+  text-align: center;
+  z-index: 3;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* [PROFILECARD] Subtitle */
+.subtitle {
+  position: absolute;
+  top: 255px;
+  left: 31px;
+  width: 250px;
+
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 16px;
+  color: rgba(16, 24, 32, 0.65);
+
+  text-align: center;
+  z-index: 3;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* [PROFILECARD] QR outer box */
+.qrOuter {
+  position: absolute;
+  top: 266px;
+  left: 101px;
+  width: 110px;
+  height: 110px;
+
+  background: #fbe2c4;
+  border-radius: 10px;
+  padding: 6px;
+  box-sizing: border-box;
+  z-index: 3;
+}
+
+/* [PROFILECARD] QR inner white card */
+.qrInner {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.qrImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.qrFallback {
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  color: rgba(16, 24, 32, 0.55);
+  text-align: center;
+  padding: 8px;
+}
+
+/* [PROFILECARD] Employee ID */
+.empId {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  width: 100%;
+
+  text-align: center;
+  z-index: 3;
+
+  font-size: 12px;
+  line-height: 16px;
+  color: #101820;
+}
+
+.empLabel {
+  font-weight: 600;
+}
+
+.empValue {
+  font-weight: 600;
+}

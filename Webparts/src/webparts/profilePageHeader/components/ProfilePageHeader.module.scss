@@ -26,7 +26,6 @@
 
 /* =========================================================
    ✅ FORCE SharePoint FIRST ROW (where ProfileHeader sits)
-   to allow full-bleed (remove left/right canvas space + no clipping)
    ========================================================= */
 :global(#spPageCanvasContent) {
   margin-top: 0 !important;
@@ -46,57 +45,19 @@
   overflow: visible !important;
 }
 
-/* ✅ Safety: prevent horizontal scrollbar because of 100vw full-bleed */
 :global(body) {
   overflow-x: hidden !important;
 }
 
-/* =========================================================
-   ✅ HERO FULL WIDTH (LEFT+RIGHT) + ✅ ZERO GAP FROM TOP
-   ========================================================= */
+/* ========================================================= */
 .headerWrap {
   padding: 44px 56px;
   display: flex;
-  // align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
   border-radius: 0;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
-}
-
-.cornerLeft {
-  position: absolute;
-  width: 569px;
-  height: 569px;
-  top: -427px;
-  left: -317px;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(255, 135, 135, 0.55) 0%,
-    rgba(255, 135, 135, 0.4) 45%,
-    rgba(255, 135, 135, 0) 75%
-  );
-  mix-blend-mode: multiply;
-}
-
-.cornerRight {
-  position: absolute;
-  width: 351px;
-  height: 351px;
-  top: 48px;
-  left: 1097px;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(255, 166, 73, 0.5) 0%,
-    rgba(255, 166, 73, 0.35) 45%,
-    rgba(255, 166, 73, 0) 75%
-  );
-  mix-blend-mode: multiply;
 }
 
 .identityCard,
@@ -109,6 +70,8 @@
   align-self: flex-start;
   position: relative;
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
 }
 
 .copyPill {
@@ -358,7 +321,6 @@
   flex-direction: column;
   gap: 6px;
   align-items: center;
-  // margin-top: 160px;
   cursor: pointer;
   user-select: none;
 
@@ -490,4 +452,57 @@
     white-space: normal;
     height: auto;
   }
+}
+
+/* =========================================================
+   [PROFILECARD] ✅ NEW styles (icon + hover white + popover)
+   ========================================================= */
+
+.profileCardWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 12px; /* spacing before copy icon */
+}
+
+.profileCardBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #ffffff; /* ✅ hover white */
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.profileCardBtnActive {
+  background: #ffffff; /* ✅ active white */
+}
+
+.profileCardIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.profileCardPopover {
+  position: absolute;
+  top: 48px; /* below icon */
+  right: 0;
+  z-index: 9999;
 }
