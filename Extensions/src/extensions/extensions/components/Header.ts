@@ -20,9 +20,10 @@ export class Header {
     private readonly profileUrl: string,
     private readonly helpUrl: string,
     graphFactory?: MSGraphClientFactory,
-    private readonly userDisplayName: string = ""
+    private readonly userDisplayName: string = "",
+    sharedPhotoService?: PhotoService
   ) {
-    this.photoService = new PhotoService(webUrl, userUpn, graphFactory, userDisplayName);
+    this.photoService = sharedPhotoService ?? new PhotoService(webUrl, userUpn, graphFactory, userDisplayName);
   }
 
   private navigateToProfile = (): void => {
@@ -90,7 +91,7 @@ export class Header {
               <img src="${helpIcon}" alt="Help"/>
             </button>
 
-            <button id="${IDS.elems.bell}" class="${styles.TIRIconBtn} ${styles.TIRBadge}" data-count="4"
+            <button id="${IDS.elems.bell}" class="${styles.TIRIconBtn} ${styles.TIRBadge}" data-count="0"
               title="Notifications">
               <img src="${bellIcon}" alt="Notifications"/>
             </button>
@@ -118,7 +119,18 @@ export class Header {
       modernHost.parentElement.insertBefore(host, modernHost);
     }
 
-    document.getElementById(IDS.elems.brand)?.addEventListener("click", this.onBrandClick);
+    const brandEl = document.getElementById(IDS.elems.brand);
+    if (brandEl) {
+      brandEl.addEventListener("click", this.onBrandClick);
+      brandEl.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          this.onBrandClick();
+        }
+      });
+      // make it focusable for keyboard users
+      brandEl.setAttribute("tabindex", "0");
+    }
     document.getElementById(IDS.elems.bell)?.addEventListener("click", this.onBellClick);
 
     //  CHANGED: open Help Center (dynamic tenant+site, hard-coded page name)

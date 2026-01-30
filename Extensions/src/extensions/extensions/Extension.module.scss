@@ -1,3 +1,39 @@
+/* ===================== GLOBAL FONTS ===================== */
+:global {
+  /* Instrument Serif */
+  @font-face {
+    font-family: "Instrument Serif";
+    src: url("./assets/fonts/instrumentserif-regular.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Instrument Serif";
+    src: url("./assets/fonts/instrumentserif-italic.woff") format("woff");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  /* Apply to OOTB Text WebPart + Rich text rendering area */
+  .SPCanvas,
+  .CanvasZone,
+  .ControlZone,
+  [data-automation-id="CanvasZone"],
+  [data-automation-id="CanvasSection"],
+  [data-automation-id="textBox"],
+  .ql-editor {
+    font-family: "Instrument Serif", "Inter", "Segoe UI", Arial, sans-serif !important;
+  }
+
+  /* Don’t break Fluent UI icons */
+  .ms-Icon {
+    font-family: "FabricMDL2Icons" !important;
+  }
+}
+
 /* ===================== HEADER ===================== */
 
 .TIRHdr {
@@ -383,6 +419,8 @@
 .TIRSuggestList {
   display: flex;
   flex-direction: column;
+  max-height: 260px;   /* makes it compact like image 2 */
+  overflow: auto;
 }
 
 /* items sit on top of translucent host */

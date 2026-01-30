@@ -20,7 +20,9 @@ import Onbo from './components/Onbo';
 import { IOnboConfig } from './components/Onbo';
 import { HideSocialBarService } from './services/HideSocialBarService';
 import { GlobalBreadcrumbs } from './components/GlobalBreadCrumbs';
+import { PhotoService } from './shared/photoService';
 import { PageMetaRelative } from './components/PageMetaRelative';
+
 export interface IExtensionsApplicationCustomizerProperties {
   testMessage: string;
 }
@@ -59,6 +61,7 @@ export default class ExtensionsApplicationCustomizer
 
   // Onboarding instance
   private onboarding?: Onbo;
+  private photoService?: PhotoService;
 
   // Footer service
   private footerService!: FooterService;
@@ -73,12 +76,10 @@ export default class ExtensionsApplicationCustomizer
   // Hide Social Bar
   private hideSocialBar?: HideSocialBarService;
 
-
   // breadcrumbs
   private breadcrumbs?: GlobalBreadcrumbs;
 
   private pageMeta?: PageMetaRelative;
-
 
   // // =========================================================
   // // Global BREADCRUMB IMPLEMENTATION - PRODUCTION READY
@@ -195,8 +196,8 @@ export default class ExtensionsApplicationCustomizer
   //   void this.renderBreadcrumbIfNeededSafe();
   // };
 
-  // private async getCurrentSitePageInfo(): Promise<{ 
-  //   title: string; 
+  // private async getCurrentSitePageInfo(): Promise<{
+  //   title: string;
   //   isNews: boolean;
   //   contentType?: string;
   // }> {
@@ -218,8 +219,8 @@ export default class ExtensionsApplicationCustomizer
   //     const ctName = String(data?.ContentType?.Name || "").toLowerCase();
   //     const promoted = Number(data?.PromotedState);
 
-  //     return { 
-  //       title, 
+  //     return {
+  //       title,
   //       isNews: promoted === 2 || ctName.includes("news"),
   //       contentType: data?.ContentType?.Name
   //     };
@@ -501,7 +502,6 @@ export default class ExtensionsApplicationCustomizer
     // Hide SharePoint app bar (left)
     this.hideAppBar();
 
-
     // Hide Social Bar per page (Like/Comment/Views/Save)
     this.hideSocialBar = new HideSocialBarService({
       // Show ONLY comments (hide social bar + remove line)
@@ -600,16 +600,13 @@ export default class ExtensionsApplicationCustomizer
       console.error("Onboarding load failed", err);
     }
 
-
     // Services
+    const currentUpn = (this.userEmail || this.context.pageContext.user.loginName || '').toLowerCase();
     this.search = new SearchService(this.webUrl, this.context.msGraphClientFactory, this.context.spHttpClient as SPHttpClient);
     this.nav = new NavigationService(this.context.spHttpClient as SPHttpClient, this.webUrl);
     this.notifService = new NotificationService(
       this.context.spHttpClient as SPHttpClient,
-      this.webUrl,
-      this.context.pageContext.user.loginName,
-      this.context.pageContext.user.email || '',
-      this.context.pageContext.user.displayName
+      this.webUrl
     );
 
     // Footer Service - Initialize once
@@ -618,28 +615,59 @@ export default class ExtensionsApplicationCustomizer
     // Header
     this.header = new Header(
       this.webUrl,
-      this.userEmail,
-      () => (window.location.href = urls.home),
-      () => void this.handleBellClick(),
-      (input) => this.wireSearch(input),
-      urls.profile,
+      currentUpn,
+      () => { window.location.href = urls.home; },
+      () => { void this.handleBellClick(); },
+      (input: HTMLInputElement) => {
+        // NOTE: This block is ONLY for Search Suggestion + PhotoService wiring
+        // Create PhotoService once (shared by SuggestBox avatars)
+        if (!this.photoService) {
+          this.photoService = new PhotoService(
+            this.webUrl,
+            currentUpn,
+            this.context.msGraphClientFactory,
+            this.context.pageContext.user.displayName
+          );
+        }
 
-      // NEW: Help Center uses tenant+site dynamic base
-      siteUrls.help,
+        // Create SuggestBox once (uses shared PhotoService for people photos)
+        const headerWrapEl = document.querySelector(`.${styles.TIRHdrWrap}`) as HTMLElement | null;
+        if (headerWrapEl && !this.suggest) {
+          this.suggest = new SuggestBox(
+            headerWrapEl,
+            () => this.webUrl,
+            this.photoService
+          );
+        }
 
+        // Wire search ONLY after suggest is available
+        if (this.suggest) this.wireSearch(input);
+      },
+      `${this.webUrl.replace(/\/$/, '')}/SitePages/Profile.aspx`,
+      (siteUrls as any)?.help || `${siteBaseUrl.replace(/\/$/, '')}/SitePages/Help-Center.aspx`,
       this.context.msGraphClientFactory,
       this.context.pageContext.user.displayName
     );
     this.header.render(IDS.hosts.header);
 
+    // (Keep this block to preserve current behaviour, but remove duplicates + reuse the same PhotoService)
     const headerWrap = document.querySelector(`.${styles.TIRHdrWrap}`) as HTMLElement;
     if (headerWrap) {
+      // ✅ Single shared PhotoService for SuggestBox (meeting-style logic)
+      this.photoService = new PhotoService(
+        this.webUrl,
+        this.context.pageContext.user.email || this.context.pageContext.user.loginName,
+        this.context.msGraphClientFactory,
+        this.context.pageContext.user.displayName
+      );
+
       this.suggest = new SuggestBox(
         headerWrap,
         () => this.webUrl,
-        (upn?) => `${this.webUrl}/_layouts/15/userphoto.aspx?size=M&username=${encodeURIComponent(upn || '')}`
+        this.photoService
       );
     }
+
 
     // Initial render of footer and floating nav
     await this.refreshNavAndFooter();
@@ -648,7 +676,6 @@ export default class ExtensionsApplicationCustomizer
     // await this.renderBreadcrumbIfNeededSafe();
     // this.context.application.navigatedEvent.add(this, this.onNavigated);
     // setTimeout((): void => { void this.renderBreadcrumbIfNeededSafe(); }, 800);
-
 
     // Breadcrumb initialization (moved to component)
     this.breadcrumbs = new GlobalBreadcrumbs(this.context);
@@ -666,7 +693,6 @@ export default class ExtensionsApplicationCustomizer
     // news read date time
     this.pageMeta = new PageMetaRelative(this.context);
     this.pageMeta.init();
-
 
     // Observe DOM changes for re-rendering
     this.context.application.navigatedEvent.add(this, () => {
