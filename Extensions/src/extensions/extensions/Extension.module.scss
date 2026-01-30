@@ -1,4 +1,9 @@
 /* ===================== GLOBAL FONTS ===================== */
+/* ===================== GLOBAL FONTS ===================== */
+
+/* If you still want to load Inter from CSS instead of TS, keep this OUTSIDE :global */
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
 :global {
   /* Instrument Serif */
   @font-face {
@@ -17,15 +22,46 @@
     font-display: swap;
   }
 
-  /* Apply to OOTB Text WebPart + Rich text rendering area */
+  /* ===================== BODY / DESCRIPTIONS => Inter ===================== */
   .SPCanvas,
   .CanvasZone,
   .ControlZone,
   [data-automation-id="CanvasZone"],
   [data-automation-id="CanvasSection"],
   [data-automation-id="textBox"],
-  .ql-editor {
-    font-family: "Instrument Serif", "Inter", "Segoe UI", Arial, sans-serif !important;
+  .ql-editor,
+  .ck-content,
+  .ck-editor__editable,
+  .ck-editor__editable_inline {
+    font-family: "Inter" !important;
+  }
+
+  /* ===================== TITLES (Headings) => Instrument Serif ===================== */
+  .SPCanvas h1,
+  .SPCanvas h2,
+  .SPCanvas h3,
+  .SPCanvas h4,
+  .SPCanvas h5,
+  .SPCanvas h6,
+  [data-automation-id="textBox"] h1,
+  [data-automation-id="textBox"] h2,
+  [data-automation-id="textBox"] h3,
+  [data-automation-id="textBox"] h4,
+  [data-automation-id="textBox"] h5,
+  [data-automation-id="textBox"] h6,
+  .ql-editor h1,
+  .ql-editor h2,
+  .ql-editor h3,
+  .ql-editor h4,
+  .ql-editor h5,
+  .ql-editor h6,
+  .ck-content h1,
+  .ck-content h2,
+  .ck-content h3,
+  .ck-content h4,
+  .ck-content h5,
+  .ck-content h6 {
+    font-family: "Instrument Serif" !important;
   }
 
   /* Don’t break Fluent UI icons */
