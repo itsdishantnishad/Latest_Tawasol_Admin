@@ -259,7 +259,11 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
           <h3 className={styles.heading}>More for you</h3>
 
           {viewAllHref ? (
-            <a href={viewAllHref} className={styles.viewAllBtn} aria-label="View all" title="View all">
+            <a
+              href={viewAllHref}
+              className={styles.viewAllBtn}
+              aria-label="View all"
+            >
               View All
             </a>
           ) : viewAllNotFound ? (
@@ -296,12 +300,12 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
             const targetUrl = resolveTargetUrl(news)!;
 
             return (
-              <a
-                key={news.Id || targetUrl || news.title || index}
-                className={styles.card}
-                href={targetUrl}
-                title={news.title}
-              >
+                <a
+                  key={news.Id || targetUrl || news.title || index}
+                  className={styles.card}
+                  href={targetUrl}
+                  aria-label={news.title}   // keep accessibility
+                >
                 <div className={styles.imageWrap}>
                   <img src={news.newsImage} alt={news.title} loading="lazy" />
                   <div className={styles.fadeTop} />
@@ -309,16 +313,11 @@ export default class MoreForYou extends React.Component<IMoreForYouProps, IMoreF
                 </div>
 
                 <div className={styles.contentOverlay}>
-                  <span
-                    className={`${styles.badge} ${styles.categoryIcon}`}
-                    aria-label={news.newsType}
-                    title={news.newsType}
-                    style={
-                      categoryIconSrc
-                        ? { backgroundImage: `url("${categoryIconSrc}")` }
-                        : undefined
-                    }
-                  />
+                <span
+                  className={`${styles.badge} ${styles.categoryIcon}`}
+                  aria-label={news.newsType}
+                  style={categoryIconSrc ? { backgroundImage: `url("${categoryIconSrc}")` } : undefined}
+                />
 
                   <div className={styles.bottom}>
                     {showDepartment && news.department && (

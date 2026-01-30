@@ -251,16 +251,16 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
     const targetUrl = resolveTargetUrl(newsItem);
 
     return (
-      <a
-        key={newsItem.listItemId ?? targetUrl ?? newsItem.title}
-        className={sizeClassName}
-        href={targetUrl || "#"}
-        title={newsItem.title}
-        target="_blank"
-        rel="noopener noreferrer"
-        data-interception="off"
-        onClick={(event) => this.handleAnchorClick(event, targetUrl)}
-      >
+        <a
+          key={newsItem.listItemId ?? targetUrl ?? newsItem.title}
+          className={sizeClassName}
+          href={targetUrl || "#"}
+          aria-label={newsItem.title}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-interception="off"
+          onClick={(event) => this.handleAnchorClick(event, targetUrl)}
+        >
         <div className={styles.imagePaint} style={{ backgroundImage: `url("${previewImageSrc}")` }} />
         {categoryIconSrc && (
           <div className={styles.TIRCategoryIconGrid}>
@@ -269,7 +269,7 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
         )}
 
         {showPinnedPill && (
-          <span className={styles.pinPill} title="Pinned" aria-label="Pinned">
+          <span className={styles.pinPill} aria-label="Pinned">
             <Icon iconName="Pinned" className={styles.pinGlyph} />
             <span className={styles.pinText}>Pinned</span>
           </span>
@@ -316,7 +316,7 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
                   href={targetUrl || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title={newsItem.title}
+                  aria-label={newsItem.title}
                   data-interception="off"
                   onClick={(event) => this.handleAnchorClick(event, targetUrl)}
                 >
