@@ -6,7 +6,7 @@
 
   "version": "*",
   "manifestVersion": 2,
-
+  "supportsFullBleed": true,
   
  
   "requiresCustomScript": false,

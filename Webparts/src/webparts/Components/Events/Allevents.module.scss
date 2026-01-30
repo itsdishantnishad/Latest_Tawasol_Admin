@@ -45,7 +45,7 @@
   align-items: center;
   justify-content: center;
   width: 181px;
-  height: 104px;
+  height: 120px;
   background: #FFF4EA;
   border-radius: 8px;
   padding: 0;
@@ -198,7 +198,7 @@
     color: #fff;
     cursor: pointer;
     display: flex;
-    font-family: Inter, sans-serif;
+    font-family: Inter, sans-serif !important;
     font-size: 14px;
     font-weight: 600;
     gap: 4px;

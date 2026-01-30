@@ -1,5 +1,19 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
+.topWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.wrapOuter{
+  padding: 0 220px 60px;
+  margin-top: 32px;
+  font-family: 'Inter', sans-serif !important;
+}
+
 .letsCelebrate {
   overflow: hidden;
   padding: 1em;
