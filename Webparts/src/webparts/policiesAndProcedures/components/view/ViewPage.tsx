@@ -1,5 +1,12 @@
 import * as React from "react";
-import { Breadcrumb, IBreadcrumbItem, SearchBox } from "@fluentui/react";
+import {
+  Breadcrumb,
+  IBreadcrumbItem,
+  SearchBox,
+  MessageBar,
+  MessageBarType,
+  DefaultButton
+} from "@fluentui/react";
 import type { WebPartContext } from "@microsoft/sp-webpart-base";
 import view from "./ViewPage.module.scss";
 import { breadcrumbBeforeBackArrowSVG } from "../../../assets/constants";
@@ -14,6 +21,9 @@ import {
 
 import { listServices } from "../../../services/listServices";
 import PoliciesSearchService from "../../../services/PoliciesAndProcedures/PoliciesSearchService";
+
+// ✅ Shared shimmer wrapper
+import { LoadingBoundary } from "../../../Components/LoadingShimmer";
 
 export interface IPoliciesAndProceduresViewProps {
   context: WebPartContext;
@@ -37,6 +47,10 @@ type IPoliciesAndProceduresViewState = {
   searchText: string;
   autoExpandFolderIds: string[];
   searchState: SearchState;
+
+  // ✅ shimmer control for initial load
+  initialLoading: boolean;
+  initialError: string | null;
 };
 
 export default class PoliciesAndProceduresView extends React.Component<
@@ -77,23 +91,46 @@ export default class PoliciesAndProceduresView extends React.Component<
       searchResults: [],
       searchText: "",
       autoExpandFolderIds: [],
-      searchState: "idle"
+      searchState: "idle",
+
+      // ✅ initial shimmer state
+      initialLoading: true,
+      initialError: null
     };
   }
 
   public async componentDidMount(): Promise<void> {
-    const listService = new listServices(this.props.context);
-
-    const [rootItems, favouriteIndex] = await Promise.all([
-      this.dataProvider.getRootItems(this.props.functionDisplayName),
-      listService.getFavouriteIndex("Document Favourites")
-    ]);
-
-    this.setState({
-      currentItems: rootItems,
-      favouriteIndex
-    });
+    await this.loadInitial();
   }
+
+  private loadInitial = async (): Promise<void> => {
+    this.setState({ initialLoading: true, initialError: null });
+
+    try {
+      const listService = new listServices(this.props.context);
+
+      const [rootItems, favouriteIndex] = await Promise.all([
+        this.dataProvider.getRootItems(this.props.functionDisplayName),
+        listService.getFavouriteIndex("Document Favourites")
+      ]);
+
+      this.setState({
+        currentItems: rootItems,
+        favouriteIndex,
+        initialLoading: false
+      });
+    } catch (e: any) {
+      // eslint-disable-next-line no-console
+      console.error("ViewPage initial load failed:", e);
+
+      this.setState({
+        currentItems: [],
+        favouriteIndex: {},
+        initialLoading: false,
+        initialError: e?.message || "Failed to fetch"
+      });
+    }
+  };
 
   public componentWillUnmount(): void {
     if (this._searchTimerId) window.clearTimeout(this._searchTimerId);
@@ -117,27 +154,25 @@ export default class PoliciesAndProceduresView extends React.Component<
       const webAbsoluteUrl = this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
       const siteOrigin = new URL(webAbsoluteUrl).origin;
 
-      // this is the SAME key format used while saving
       let rel = (file.serverRelativeUrl || "").trim();
-        try { rel = decodeURI(rel); } catch {}
-        const favKey = listServices.convertToRelativeUrl(`${siteOrigin}${encodeURI(file.serverRelativeUrl)}`).toLowerCase();
+      try { rel = decodeURI(rel); } catch {}
+      const favKey = listServices
+        .convertToRelativeUrl(`${siteOrigin}${encodeURI(file.serverRelativeUrl)}`)
+        .toLowerCase();
 
-      // optimistic UI toggle
       this.setState((prev) => {
         const next = { ...prev.favouriteIndex };
         if (typeof next[favKey] !== "undefined") delete next[favKey];
-        else next[favKey] = 1; // any number is fine for UI presence
+        else next[favKey] = 1;
         return { favouriteIndex: next };
       });
 
       const absoluteFileUrl = `${siteOrigin}${encodeURI(file.serverRelativeUrl)}`;
       await listService.toggleFavourite(absoluteFileUrl, file.name, undefined, undefined, "Document Favourites");
 
-      // final truth from server
       const updatedFavouriteIndex = await listService.getFavouriteIndex("Document Favourites");
       this.setState({ favouriteIndex: updatedFavouriteIndex });
     } catch (error) {
-      // if something fails, re-sync from server
       // eslint-disable-next-line no-console
       console.error("toggle favourite failed", error);
 
@@ -323,40 +358,63 @@ export default class PoliciesAndProceduresView extends React.Component<
       favouriteIndex,
       searchText,
       autoExpandFolderIds,
-      searchState
+      searchState,
+      initialLoading,
+      initialError
     } = this.state;
+
+    const showShimmer = initialLoading || !!initialError;
 
     return (
       <section>
         {this.renderTopBar()}
 
-        <div className={view.wrap}>
-          <div className={view.left}>
-            <PoliciesandProceduresList
-              items={currentItems}
-              activeId={selectedItem?.id}
-              onOpenFile={this.handleOpenFile}
-              onClearPreview={this.handleClearPreview}
-              onToggleFolder={this.handleEnsureFolderChildren}
-              expandedChildren={expandedChildren}
-              onSwitchFolderView={this.handleSwitchFolderView}
-              getFolderViewMode={(folderId) => folderViewMode[folderId] || "list"}
-              favouriteIndex={favouriteIndex}
-              onToggleFavourite={this.handleToggleFavourite}
-              dmsLibraryRoot={this._libraryRoot}
-              searchText={searchText}
-              autoExpandFolderIds={autoExpandFolderIds}
-              searchState={searchState}
-            />
+        {/* Error bar */}
+        {initialError ? (
+          <div style={{ marginTop: 10 }}>
+            <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
+              {initialError}
+              <span style={{ marginLeft: 10 }}>
+                <DefaultButton text="Retry" onClick={this.loadInitial} />
+              </span>
+            </MessageBar>
           </div>
+        ) : null}
 
-          <div className={view.rightPane}>
-            <PoliciesandProceduresPreview
-              item={selectedItem}
-              categoryTitle={this.props.functionDisplayName}
-            />
-          </div>
-        </div>
+        {/* ✅ Shimmer wraps the whole view content */}
+        <LoadingBoundary loading={showShimmer} preset={"details" as any} count={1} ariaLabel="Loading documents">
+          {initialError && currentItems.length === 0 ? (
+            <div style={{ minHeight: 420 }} />
+          ) : (
+            <div className={view.wrap}>
+              <div className={view.left}>
+                <PoliciesandProceduresList
+                  items={currentItems}
+                  activeId={selectedItem?.id}
+                  onOpenFile={this.handleOpenFile}
+                  onClearPreview={this.handleClearPreview}
+                  onToggleFolder={this.handleEnsureFolderChildren}
+                  expandedChildren={expandedChildren}
+                  onSwitchFolderView={this.handleSwitchFolderView}
+                  getFolderViewMode={(folderId) => folderViewMode[folderId] || "list"}
+                  favouriteIndex={favouriteIndex}
+                  onToggleFavourite={this.handleToggleFavourite}
+                  dmsLibraryRoot={this._libraryRoot}
+                  searchText={searchText}
+                  autoExpandFolderIds={autoExpandFolderIds}
+                  searchState={searchState}
+                />
+              </div>
+
+              <div className={view.rightPane}>
+                <PoliciesandProceduresPreview
+                  item={selectedItem}
+                  categoryTitle={this.props.functionDisplayName}
+                />
+              </div>
+            </div>
+          )}
+        </LoadingBoundary>
       </section>
     );
   }

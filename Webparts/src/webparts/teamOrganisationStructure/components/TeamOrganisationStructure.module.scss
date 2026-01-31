@@ -31,9 +31,40 @@
 
 .state,
 .error {
-  text-align: center;
-  padding: 12px 0;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 0, 0, 0.06);
+  border: 1px solid rgba(255, 0, 0, 0.18);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
   font-size: 14px;
+}
+
+.retryBtn {
+  appearance: none;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+
+  transition: transform 0.08s ease, box-shadow 0.15s ease;
+}
+
+.retryBtn:hover {
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+}
+
+.retryBtn:active {
+  transform: scale(0.98);
 }
 .error { color: #DA291C; }
 
@@ -268,6 +299,147 @@
 .deptList li {
   margin: 0 0 10px;
   line-height: 22px;
+}
+
+/* ===========================
+   SHIMMER (Card-by-card)
+   =========================== */
+
+@keyframes tosShimmerMove {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+.shimmerContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding-top: 10px;
+}
+
+.shimmerRow {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.shimmerCard {
+  width: 100%;
+  max-width: 244px;
+  height: 320px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 18px 14px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.shimmerCardLg {
+  max-width: 244px;
+  height: 340px;
+}
+
+.shimmerAvatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 999px;
+  margin-top: 6px;
+
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.06) 25%,
+    rgba(0,0,0,0.12) 37%,
+    rgba(0,0,0,0.06) 63%
+  );
+  background-size: 400% 100%;
+  animation: tosShimmerMove 1.25s ease-in-out infinite;
+}
+
+.shimmerLine {
+  border-radius: 999px;
+  margin-top: 14px;
+
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.06) 25%,
+    rgba(0,0,0,0.12) 37%,
+    rgba(0,0,0,0.06) 63%
+  );
+  background-size: 400% 100%;
+  animation: tosShimmerMove 1.25s ease-in-out infinite;
+}
+
+.shimmerLineName { width: 70%; height: 14px; }
+.shimmerLineRole { width: 54%; height: 12px; margin-top: 10px; }
+
+/* Responsive: match your existing grid breakpoints */
+@media (max-width: 1300px) {
+  .shimmerRow { gap: 24px; }
+}
+@media (max-width: 540px) {
+  .shimmerCard { max-width: 280px; }
+  .shimmerCardLg { max-width: 320px; }
+}
+
+
+/* ===========================
+   DEPT SHIMMER
+   =========================== */
+
+.deptShimmerGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  justify-items: center;
+}
+
+.deptShimmerBox {
+  width: 100%;
+  min-height: 96px;
+  border-radius: 16px;
+
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.06) 25%,
+    rgba(0,0,0,0.12) 37%,
+    rgba(0,0,0,0.06) 63%
+  );
+  background-size: 400% 100%;
+  animation: tosShimmerMove 1.25s ease-in-out infinite;
+}
+
+@media (max-width: 900px) {
+  .deptShimmerGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .deptShimmerGrid { grid-template-columns: 1fr; }
+}
+
+
+/* ===========================
+   REMOVE INLINE LEFT% STUBS
+   =========================== */
+
+.stubRow {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  padding-left: 10%;
+  padding-right: 10%;
+  height: 10px;
 }
 
 @media (max-width: 768px) {
