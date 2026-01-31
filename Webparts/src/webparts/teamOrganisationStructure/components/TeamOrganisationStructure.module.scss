@@ -302,7 +302,7 @@
 }
 
 /* ===========================
-   SHIMMER (Card-by-card)
+   SHIMMER (Team Org)
    =========================== */
 
 @keyframes tosShimmerMove {
@@ -347,8 +347,20 @@
 }
 
 .shimmerCardLg {
-  max-width: 244px;
   height: 340px;
+}
+
+.shimmerAvatar,
+.shimmerLine,
+.deptShimmerBox {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.06) 25%,
+    rgba(0,0,0,0.12) 37%,
+    rgba(0,0,0,0.06) 63%
+  );
+  background-size: 400% 100%;
+  animation: tosShimmerMove 1.25s ease-in-out infinite;
 }
 
 .shimmerAvatar {
@@ -356,46 +368,27 @@
   height: 96px;
   border-radius: 999px;
   margin-top: 6px;
-
-  background: linear-gradient(
-    90deg,
-    rgba(0,0,0,0.06) 25%,
-    rgba(0,0,0,0.12) 37%,
-    rgba(0,0,0,0.06) 63%
-  );
-  background-size: 400% 100%;
-  animation: tosShimmerMove 1.25s ease-in-out infinite;
 }
 
 .shimmerLine {
   border-radius: 999px;
   margin-top: 14px;
-
-  background: linear-gradient(
-    90deg,
-    rgba(0,0,0,0.06) 25%,
-    rgba(0,0,0,0.12) 37%,
-    rgba(0,0,0,0.06) 63%
-  );
-  background-size: 400% 100%;
-  animation: tosShimmerMove 1.25s ease-in-out infinite;
 }
 
 .shimmerLineName { width: 70%; height: 14px; }
 .shimmerLineRole { width: 54%; height: 12px; margin-top: 10px; }
 
-/* Responsive: match your existing grid breakpoints */
 @media (max-width: 1300px) {
   .shimmerRow { gap: 24px; }
 }
+
 @media (max-width: 540px) {
   .shimmerCard { max-width: 280px; }
   .shimmerCardLg { max-width: 320px; }
 }
 
-
 /* ===========================
-   DEPT SHIMMER
+   Dept shimmer + stubRow helpers
    =========================== */
 
 .deptShimmerGrid {
@@ -410,36 +403,35 @@
   width: 100%;
   min-height: 96px;
   border-radius: 16px;
-
-  background: linear-gradient(
-    90deg,
-    rgba(0,0,0,0.06) 25%,
-    rgba(0,0,0,0.12) 37%,
-    rgba(0,0,0,0.06) 63%
-  );
-  background-size: 400% 100%;
-  animation: tosShimmerMove 1.25s ease-in-out infinite;
 }
 
 @media (max-width: 900px) {
   .deptShimmerGrid { grid-template-columns: repeat(2, 1fr); }
 }
+
 @media (max-width: 640px) {
   .deptShimmerGrid { grid-template-columns: 1fr; }
 }
 
-
-/* ===========================
-   REMOVE INLINE LEFT% STUBS
-   =========================== */
-
+/* ✅ No inline style: stubs distributed evenly using grid */
 .stubRow {
-  display: flex;
-  justify-content: space-between;
-  position: relative;
-  padding-left: 10%;
-  padding-right: 10%;
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 0;
   height: 10px;
+
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: start;
+}
+
+.stubGrid {
+  width: 1px;
+  height: 10px;
+  background: rgba(204, 202, 202, 0.8);
+  justify-self: center;
 }
 
 @media (max-width: 768px) {

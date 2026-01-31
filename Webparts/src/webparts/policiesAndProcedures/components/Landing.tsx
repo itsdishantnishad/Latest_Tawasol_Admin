@@ -1,18 +1,27 @@
-import * as React from 'react';
-import { SearchBox, MessageBar, MessageBarType, DefaultButton } from '@fluentui/react';
-import styles from './PoliciesAndProcedures.module.scss';
-import Tiles from './Tiles';
-import Boards from './Boards';
+import * as React from "react";
+import {
+  SearchBox,
+  MessageBar,
+  MessageBarType,
+  DefaultButton
+} from "@fluentui/react";
+import type { WebPartContext } from "@microsoft/sp-webpart-base";
 
-import PoliciesandProceduresView from './view/ViewPage';
-import { WebPartContext } from '@microsoft/sp-webpart-base';
-import { listServices, DocumentFunctionRow } from '../../services/listServices';
-import { ListName } from '../../services/Constants';
+import styles from "./PoliciesAndProcedures.module.scss";
+import Tiles from "./Tiles";
+import Boards from "./Boards";
+
+import PoliciesandProceduresView from "./view/ViewPage";
+import { listServices, DocumentFunctionRow } from "../../services/listServices";
+import { ListName } from "../../services/Constants";
 
 // ✅ Shared shimmer wrapper
-import { LoadingBoundary } from '../../Components/LoadingShimmer';
+import { LoadingBoundary } from "../../Components/LoadingShimmer";
 
-export interface ILandingProps { title: string; context: WebPartContext; }
+export interface ILandingProps {
+  title: string;
+  context: WebPartContext;
+}
 
 export interface FunctionCategory {
   key: string;
@@ -36,14 +45,14 @@ interface LandingViewState {
   supportFunctionCards: SupportDepartment[];
   activeFunctionName?: string;
 
-  // ✅ shimmer control
+  // ✅ shimmer + error
   loadingCards: boolean;
   errorCards: string | null;
 }
 
 export default class Landing extends React.Component<ILandingProps, LandingViewState> {
   public state: LandingViewState = {
-    searchText: '',
+    searchText: "",
     coreFunctionCards: [],
     supportFunctionCards: [],
     loadingCards: true,
@@ -51,7 +60,7 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
   };
 
   private handleSearchInputChange = (_?: any, newValue?: string): void =>
-    this.setState({ searchText: newValue || '' });
+    this.setState({ searchText: newValue || "" });
 
   public async componentDidMount(): Promise<void> {
     await this.loadCards();
@@ -63,11 +72,11 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
     try {
       const svc = new listServices(this.props.context);
       const functionDirectory: DocumentFunctionRow[] =
-        await svc.getDocumentFunctions(ListName.DOCUMENT_FUNCTION);
+        (await svc.getDocumentFunctions(ListName.DOCUMENT_FUNCTION)) || [];
 
       const coreFunctionCards: FunctionCategory[] = functionDirectory
-        .filter(row => (row.functionType || '').toLowerCase() === 'core function')
-        .map(row => ({
+        .filter((row) => (row.functionType || "").toLowerCase() === "core function")
+        .map((row) => ({
           key: String(row.id),
           title: row.title,
           imageSrc: row.iconUrl,
@@ -75,15 +84,19 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
         }));
 
       const supportFunctionCards: SupportDepartment[] = functionDirectory
-        .filter(row => (row.functionType || '').toLowerCase() === 'support function')
-        .map(row => ({
+        .filter((row) => (row.functionType || "").toLowerCase() === "support function")
+        .map((row) => ({
           key: String(row.id),
           title: row.title,
-          iconSrc: row.iconUrl || '',
+          iconSrc: row.iconUrl || "",
           href: row.targetUrl
         }));
 
-      this.setState({ coreFunctionCards, supportFunctionCards, loadingCards: false });
+      this.setState({
+        coreFunctionCards,
+        supportFunctionCards,
+        loadingCards: false
+      });
     } catch (e: any) {
       // eslint-disable-next-line no-console
       console.error("Landing cards fetch failed:", e);
@@ -101,8 +114,9 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
     this.setState({ activeFunctionName: functionDisplayName });
   };
 
-  private closeFunctionDetailView = (): void =>
+  private closeFunctionDetailView = (): void => {
     this.setState({ activeFunctionName: undefined });
+  };
 
   private getDmsLibraryRoot(): string {
     const siteRel = this.props.context.pageContext.web.serverRelativeUrl || "";
@@ -132,16 +146,16 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
       );
     }
 
-    const showShimmer = loadingCards || !!errorCards;
+    const coreLoading = loadingCards || (!!errorCards && coreFunctionCards.length === 0);
+    const supportLoading = loadingCards || (!!errorCards && supportFunctionCards.length === 0);
 
     return (
       <div className={styles.page}>
-        {/* Error bar (optional) */}
         {errorCards ? (
-          <div style={{ marginBottom: 10 }}>
+          <div className={styles.errorBarWrap}>
             <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
               {errorCards}
-              <span style={{ marginLeft: 10 }}>
+              <span className={styles.errorBarActions}>
                 <DefaultButton text="Retry" onClick={this.loadCards} />
               </span>
             </MessageBar>
@@ -155,36 +169,47 @@ export default class Landing extends React.Component<ILandingProps, LandingViewS
           </div>
         </div>
 
-        {/* ✅ Shimmer wraps the cards loader */}
-        <LoadingBoundary loading={showShimmer} preset={"card" as any} count={10} ariaLabel="Loading cards">
-          <>
-            <Tiles
-              variant="core"
-              categories={coreFunctionCards}
-              departments={[]}
-              searchText={searchText}
-              onOpenFunctionView={this.showFunctionDetailView}
-            />
-
-            <div className={styles.homeTopRow}>
-              <div className={styles.sectionHeading}>Support Function</div>
-            </div>
-
-            <Tiles
-              variant="support"
-              categories={[]}
-              departments={supportFunctionCards}
-              searchText={searchText}
-              onOpenFunctionView={this.showFunctionDetailView}
-            />
-
-            <Boards
-              context={this.props.context}
-              favouritesCount={10}
-              dmsLibraryRoot={this.getDmsLibraryRoot()}
-            />
-          </>
+        {/* ✅ Core cards shimmer */}
+        <LoadingBoundary
+          loading={coreLoading}
+          preset={"card" as any}
+          count={6}
+          ariaLabel="Loading core function cards"
+        >
+          <Tiles
+            variant="core"
+            categories={coreFunctionCards}
+            departments={[]}
+            searchText={searchText}
+            onOpenFunctionView={this.showFunctionDetailView}
+          />
         </LoadingBoundary>
+
+        <div className={styles.homeTopRow}>
+          <div className={styles.sectionHeading}>Support Function</div>
+        </div>
+
+        {/* ✅ Support cards shimmer */}
+        <LoadingBoundary
+          loading={supportLoading}
+          preset={"card" as any}
+          count={6}
+          ariaLabel="Loading support function cards"
+        >
+          <Tiles
+            variant="support"
+            categories={[]}
+            departments={supportFunctionCards}
+            searchText={searchText}
+            onOpenFunctionView={this.showFunctionDetailView}
+          />
+        </LoadingBoundary>
+
+        <Boards
+          context={this.props.context}
+          favouritesCount={10}
+          dmsLibraryRoot={this.getDmsLibraryRoot()}
+        />
       </div>
     );
   }

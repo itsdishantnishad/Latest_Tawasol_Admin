@@ -1,7 +1,11 @@
 import * as React from "react";
 import styles from "./TeamOrganisationStructure.module.scss";
 import { ITeamOrganisationStructureProps } from "./ITeamOrganisationStructureProps";
-import { listServices, OrgMember, OrgDepartment } from "../../services/listServices";
+import {
+  listServices,
+  OrgMember,
+  OrgDepartment,
+} from "../../services/listServices";
 import { ListName } from "../../services/Constants";
 
 export interface ITeamOrganisationStructureState {
@@ -19,9 +23,6 @@ export default class TeamOrganisationStructure extends React.Component<
   ITeamOrganisationStructureState
 > {
   private spService: listServices;
-
-  // ✅ Minimum shimmer time so UI looks smooth/clean
-  private readonly _minShimmerMs: number = 1200;
 
   constructor(props: ITeamOrganisationStructureProps) {
     super(props);
@@ -41,7 +42,9 @@ export default class TeamOrganisationStructure extends React.Component<
     await this.loadMembers();
   }
 
-  public async componentDidUpdate(prevProps: ITeamOrganisationStructureProps): Promise<void> {
+  public async componentDidUpdate(
+    prevProps: ITeamOrganisationStructureProps
+  ): Promise<void> {
     const prevTitle = (prevProps.listTitle || "").trim();
     const nextTitle = (this.props.listTitle || "").trim();
     if (prevTitle !== nextTitle) {
@@ -49,14 +52,7 @@ export default class TeamOrganisationStructure extends React.Component<
     }
   }
 
-  private async sleep(ms: number): Promise<void> {
-    if (ms <= 0) return;
-    await new Promise<void>((resolve) => window.setTimeout(resolve, ms));
-  }
-
   private async loadMembers(): Promise<void> {
-    const startedAt = Date.now();
-
     try {
       this.setState({
         loading: true,
@@ -67,18 +63,12 @@ export default class TeamOrganisationStructure extends React.Component<
         loadingDepts: false,
       });
 
-      const sourceList = this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
+      const sourceList =
+        this.props.listTitle?.trim() || ListName.ORGANISATION_STRUCTURE;
+
       const members = await this.spService.getOrganisationMembers(sourceList);
-
-      // ✅ enforce minimum shimmer time
-      const elapsed = Date.now() - startedAt;
-      await this.sleep(this._minShimmerMs - elapsed);
-
       this.setState({ items: members, loading: false });
     } catch (err: any) {
-      const elapsed = Date.now() - startedAt;
-      await this.sleep(this._minShimmerMs - elapsed);
-
       this.setState({
         error: err?.message || "Failed to load.",
         loading: false,
@@ -123,15 +113,12 @@ export default class TeamOrganisationStructure extends React.Component<
           return;
         }
 
-        const startedAt = Date.now();
-
         try {
-          const deptList = (this.props.deptListTitle || ListName.TEAM_ORG_DEPARTMENTS).trim();
-          const depts = await this.spService.getDepartmentsByMember(deptList, key);
+          const deptList = (
+            this.props.deptListTitle || ListName.TEAM_ORG_DEPARTMENTS
+          ).trim();
 
-          // ✅ min shimmer for dept load too (keeps UI consistent)
-          const elapsed = Date.now() - startedAt;
-          await this.sleep(this._minShimmerMs - elapsed);
+          const depts = await this.spService.getDepartmentsByMember(deptList, key);
 
           this.setState((current) =>
             current.selectedId === member.id
@@ -139,9 +126,6 @@ export default class TeamOrganisationStructure extends React.Component<
               : current
           );
         } catch {
-          const elapsed = Date.now() - startedAt;
-          await this.sleep(this._minShimmerMs - elapsed);
-
           this.setState((current) =>
             current.selectedId === member.id
               ? { ...current, departments: [], loadingDepts: false }
@@ -183,7 +167,10 @@ export default class TeamOrganisationStructure extends React.Component<
   // ✅ Card-by-card shimmer (clean UI)
   private renderCardsShimmer(): JSX.Element {
     const ShimmerCard = ({ large }: { large?: boolean }) => (
-      <div className={`${styles.shimmerCard} ${large ? styles.shimmerCardLg : ""}`} aria-hidden="true">
+      <div
+        className={`${styles.shimmerCard} ${large ? styles.shimmerCardLg : ""}`}
+        aria-hidden="true"
+      >
         <div className={styles.shimmerAvatar} />
         <div className={`${styles.shimmerLine} ${styles.shimmerLineName}`} />
         <div className={`${styles.shimmerLine} ${styles.shimmerLineRole}`} />
@@ -244,7 +231,6 @@ export default class TeamOrganisationStructure extends React.Component<
           <span className={styles.orgWord}>Organisation Structure</span>
         </h2>
 
-        {/* ✅ Shimmer (instead of Loading text) */}
         {loading && this.renderCardsShimmer()}
 
         {!loading && error && (
@@ -258,17 +244,22 @@ export default class TeamOrganisationStructure extends React.Component<
 
         {!loading && !error && (
           <>
-            {rootMember && <div className={styles.topCardWrap}>{this.renderCard(rootMember, true)}</div>}
+            {rootMember && (
+              <div className={styles.topCardWrap}>
+                {this.renderCard(rootMember, true)}
+              </div>
+            )}
 
             {orderedLevels.map((level) => (
               <React.Fragment key={level}>
                 <div className={styles.row}>
                   {membersByLevel[level].map((person) => (
-                    <React.Fragment key={person.id}>{this.renderCard(person, false)}</React.Fragment>
+                    <React.Fragment key={person.id}>
+                      {this.renderCard(person, false)}
+                    </React.Fragment>
                   ))}
                 </div>
 
-                {/* ✅ Dept shimmer while fetching */}
                 {selectedLevel === level && selectedId && loadingDepts
                   ? this.renderDepartmentsShimmer()
                   : selectedLevel === level
@@ -293,13 +284,26 @@ export default class TeamOrganisationStructure extends React.Component<
         aria-label={`Select ${member.name}`}
         onClick={() => this.onCardClick(member)}
         onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && this.onCardClick(member)}
-        className={[styles.card, isRoot ? styles.cardLg : "", isSelected ? styles.cardSelected : ""]
+        className={[
+          styles.card,
+          isRoot ? styles.cardLg : "",
+          isSelected ? styles.cardSelected : "",
+        ]
           .filter(Boolean)
           .join(" ")}
       >
-        <div className={[styles.photoWrap, isRoot ? styles.photoWrapLg : ""].filter(Boolean).join(" ")}>
+        <div
+          className={[styles.photoWrap, isRoot ? styles.photoWrapLg : ""]
+            .filter(Boolean)
+            .join(" ")}
+        >
           {member.photoUrl ? (
-            <img className={styles.photo} src={member.photoUrl} alt={member.name} loading="lazy" />
+            <img
+              className={styles.photo}
+              src={member.photoUrl}
+              alt={member.name}
+              loading="lazy"
+            />
           ) : (
             <div className={styles.photoFallback} aria-label="No image" />
           )}
@@ -319,16 +323,13 @@ export default class TeamOrganisationStructure extends React.Component<
       <div className={styles.deptBand}>
         <div className={styles.deptTitle}>DEPARTMENTS</div>
 
-        {/* ✅ no inline left% now */}
         <div className={styles.deptRail} aria-hidden="true">
           <div className={styles.stubRow}>
             {Array.from({ length: Math.max(departments.length, 1) }).map((_, i) => (
-              <span key={i} className={styles.stub} />
+              <span key={i} className={styles.stubGrid} />
             ))}
           </div>
         </div>
-
-        {loadingDepts && <div className={styles.state}>Loading departments…</div>}
 
         {!loadingDepts && (
           <div className={styles.deptGrid}>
