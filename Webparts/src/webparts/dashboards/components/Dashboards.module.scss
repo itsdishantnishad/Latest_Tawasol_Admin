@@ -44,7 +44,7 @@
 .layout {
   display: flex;
   padding: 0px 60px;
-  background-color: #fef7f0;
+  // background-color: #fef7f0;
   font-family: 'Inter', sans-serif;
 }
 
@@ -140,9 +140,10 @@
 
 .grid {
   display: grid;
+  gap: 30px;
   grid-template-columns: repeat(3, 1fr);
-  gap: 38px;
   max-width: 100%;
+  margin-bottom: 50px;
 }
 
 .card {
