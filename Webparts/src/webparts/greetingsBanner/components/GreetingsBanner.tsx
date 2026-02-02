@@ -47,11 +47,11 @@ export default class GreetingsBanner extends React.Component<IGreetingsBannerPro
           </div>
 
           {/* inline emoji at the end */}
-          <span
+          {/* <span
             className={styles.greetingsBannerEmoji}
             aria-hidden="true"
             dangerouslySetInnerHTML={{ __html: greetingSvgMarkup }}
-          />
+          /> */}
         </div>
 
         {/* keep for future use if you want a subline; currently not in Figma */}
