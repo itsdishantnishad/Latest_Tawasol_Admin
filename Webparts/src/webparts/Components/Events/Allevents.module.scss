@@ -45,7 +45,7 @@
   align-items: center;
   justify-content: center;
   width: 181px;
-  height: 120px;
+  height: 125px;
   background: #FFF4EA;
   border-radius: 8px;
   padding: 0;
@@ -69,11 +69,12 @@
 .imageSection {
   flex-shrink: 0;
   position: relative;
+  height: 125px;
 }
 
 .eventImage {
   border-radius: 10px;
-  height: 125px;
+  height: 100%;
   object-fit: cover;
   width: 250px;
   object-position: center top;
