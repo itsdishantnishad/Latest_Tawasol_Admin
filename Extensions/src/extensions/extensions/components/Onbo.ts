@@ -46,7 +46,7 @@ export default class Onbo {
     return `
       <div class="${styles.onboardingWrapper}">
         <div class="${styles.onboardingHeader}">
-          <h1 class="${styles.onboardingTitle}">Welcome to the All New Tawasol!</h1>
+          <h1 class="${styles.onboardingTitle}">Welcome to the All New <span>Tawasol!</span></h1>
           <p class="${styles.onboardingSubtitle}">Access company news, tasks, and support – all from one place.</p>
         </div>
 
