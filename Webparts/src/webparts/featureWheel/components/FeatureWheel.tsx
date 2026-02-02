@@ -4,23 +4,12 @@ import * as React from "react";
 import { useState } from "react";
 import type { IFeatureWheelProps } from "./IFeatureWheelProps";
 
-// import Wheel from "../../Components/Wheel/Wheel";
-import Gallery from "../../Components/Gallery/Gallery";
-import Documents from "../../Components/FeatureContent/Documents/Documents";
-import Events from "../../Components/FeatureContent/Events/Events";
-import LetsCelebrate from "../../Components/FeatureContent/LetsCelebrate/LetsCelebrate";
-import Meeting from "../../Components/FeatureContent/Meeting/Meeting";
-import ServiceLinks from "../../Components/FeatureContent/ServiceLinks/ServiceLinks";
-import Forms from "../../Components/FeatureContent/Forms/Forms";
-import Dashboard from "../../Components/FeatureContent/Dashboard/Dashboard";
-import Offers from "../../Components/FeatureContent/Offers/Offers";
-import Training from "../../Components/FeatureContent/Training/Training";
-import AboutDHRE from "../../Components/FeatureContent/AboutDHRE/AboutDHRE";
-import TaskApprovals from "../../Components/FeatureContent/TaskApprovals/TaskApprovals";
-import BeverageMenu from "../../Components/FeatureContent/BeverageMenu/BeverageMenu";
 import FeatureSelector from "../../widgets/FeatureSelector/FeatureSelector";
 import { EventsTrainingsTabKey } from "../../Components/NavTabs/eventsTrainingsTabs";
 import styles from "./FeatureWheel.module.scss";
+
+// Shared shimmer wrapper (Option 1)
+import { LoadingBoundary } from "../../Components/LoadingShimmer";
 
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
@@ -55,13 +44,30 @@ export interface Feature {
   backgroundImage: string;
 }
 
+/**
+ * ✅ Lazy load heavy feature modules so initial FeatureWheel load is faster,
+ * and show shimmer while a feature module loads.
+ */
+const Gallery = React.lazy(() => import("../../Components/Gallery/Gallery"));
+const Documents = React.lazy(() => import("../../Components/FeatureContent/Documents/Documents"));
+const Events = React.lazy(() => import("../../Components/FeatureContent/Events/Events"));
+const LetsCelebrate = React.lazy(() => import("../../Components/FeatureContent/LetsCelebrate/LetsCelebrate"));
+const Meeting = React.lazy(() => import("../../Components/FeatureContent/Meeting/Meeting"));
+const ServiceLinks = React.lazy(() => import("../../Components/FeatureContent/ServiceLinks/ServiceLinks"));
+const Forms = React.lazy(() => import("../../Components/FeatureContent/Forms/Forms"));
+const Dashboard = React.lazy(() => import("../../Components/FeatureContent/Dashboard/Dashboard"));
+const Offers = React.lazy(() => import("../../Components/FeatureContent/Offers/Offers"));
+const Training = React.lazy(() => import("../../Components/FeatureContent/Training/Training"));
+const AboutDHRE = React.lazy(() => import("../../Components/FeatureContent/AboutDHRE/AboutDHRE"));
+const TaskApprovals = React.lazy(() => import("../../Components/FeatureContent/TaskApprovals/TaskApprovals"));
+const BeverageMenu = React.lazy(() => import("../../Components/FeatureContent/BeverageMenu/BeverageMenu"));
+
 const features: Feature[] = [
   {
     id: "dashboard",
     title: "Dashboard",
     subtitle: "Track, analyze, optimize",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/Dashboard.svg')",
+    backgroundImage: "url('../../Components/FeatureContent/assets/Dashboard.svg')",
   },
   {
     id: "offers",
@@ -73,57 +79,49 @@ const features: Feature[] = [
     id: "training",
     title: "Trainings",
     subtitle: "Grow skills, unlock new doors",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/Training.svg')",
+    backgroundImage: "url('../../Components/FeatureContent/assets/Training.svg')",
   },
   {
     id: "gallery",
     title: "Gallery",
     subtitle: "Past events images and memories",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/ImageGallery.svg')",
+    backgroundImage: "url('../../Components/FeatureContent/assets/ImageGallery.svg')",
   },
   {
     id: "documents",
     title: "Procedures",
     subtitle: "All files in one place",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/Documents.svg')",
+    backgroundImage: "url('../../Components/FeatureContent/assets/Documents.svg')",
   },
- {
+  {
     id: "about_dhre",
     title: "About DHRE",
     subtitle: "Journey through DHRE",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/AboutDHRE.svg')",
+    backgroundImage: "url('../../Components/FeatureContent/assets/AboutDHRE.svg')",
   },
   {
     id: "employee_events",
     title: "Lets Celebrate",
     subtitle: "Birthday, anniversary & new joiners",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/LetsCelebrate.svg')",
+    backgroundImage: "url('../../Components/FeatureContent/assets/LetsCelebrate.svg')",
   },
   {
     id: "meetings",
     title: "Meetings",
     subtitle: "Connect, discuss, move forward",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/Meeting.svg')",
+    backgroundImage: "url('../../Components/FeatureContent/assets/Meeting.svg')",
   },
   {
     id: "service_links",
     title: "Links",
     subtitle: "Quick access, zero hassle",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/Service-Links.svg')",
+    backgroundImage: "url('../../Components/FeatureContent/assets/Service-Links.svg')",
   },
   {
     id: "forms",
     title: "Forms",
     subtitle: "All interactive forms In one place",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/InteractiveForms.svg')",
+    backgroundImage: "url('../../Components/FeatureContent/assets/InteractiveForms.svg')",
   },
   {
     id: "events",
@@ -141,15 +139,11 @@ const features: Feature[] = [
     id: "beverage_menu",
     title: "Services",
     subtitle: "Simplify your journey ahead",
-    backgroundImage:
-      "url('../../Components/FeatureContent/assets/Services.svg')",
+    backgroundImage: "url('../../Components/FeatureContent/assets/Services.svg')",
   },
 ];
 
-const featureTitleContent: Record<
-  string,
-  { header: string; subHeader: string }
-> = {
+const featureTitleContent: Record<string, { header: string; subHeader: string }> = {
   gallery: {
     header: "A Glimpse through our lens",
     subHeader: "Recent milestones and cherished memories we've Immortalised",
@@ -176,13 +170,11 @@ const featureTitleContent: Record<
   },
   forms: {
     header: "Interactive Forms",
-    subHeader:
-      "All your essential forms – legacy, claims, business excellence, and more",
+    subHeader: "All your essential forms – legacy, claims, business excellence, and more",
   },
   about_dhre: {
     header: "About DHRE",
-    subHeader:
-      "Dive deep into DHRE: Our departments, culture, and core values.",
+    subHeader: "Dive deep into DHRE: Our departments, culture, and core values.",
   },
   tasks: {
     header: "Task Approvals",
@@ -207,8 +199,7 @@ const featureTitleContent: Record<
 };
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
-  const [selectedFeature, setSelectedFeature] =
-    useState<string>("employee_events");
+  const [selectedFeature, setSelectedFeature] = useState<string>("employee_events");
 
   const handleViewAll = () => {
     console.log("View all clicked for:", selectedFeature);
@@ -266,28 +257,16 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         return <ServiceLinks context={props.context} />;
 
       case "forms":
-        return (
-          <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />
-        );
+        return <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />;
 
       case "about_dhre":
         return <AboutDHRE context={props.context} />;
 
       case "tasks":
-        return (
-          <TaskApprovals
-            context={props.context}
-            seeAllURL={props.taskApprovals}
-          />
-        );
+        return <TaskApprovals context={props.context} seeAllURL={props.taskApprovals} />;
 
       case "beverage_menu":
-        return (
-          <BeverageMenu
-            context={props.context}
-            seeAllURL={props.beverageMenu}
-          />
-        );
+        return <BeverageMenu context={props.context} seeAllURL={props.beverageMenu} />;
 
       case "dashboard":
         return (
@@ -322,6 +301,20 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
     }
   };
 
+  const title = featureTitleContent[selectedFeature] || {
+    header: "",
+    subHeader: "",
+  };
+
+  /**
+   * ✅ Shimmer fallback shown while lazy-loaded feature component bundle loads.
+   */
+  const shimmerFallback = (
+    <LoadingBoundary loading={true} preset="details" count={1} ariaLabel="Loading feature content">
+      <div />
+    </LoadingBoundary>
+  );
+
   return (
     <div className={styles.featureWheelContainer}>
       <div className={styles.headingSection}>
@@ -331,24 +324,18 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         <h6>Click to see all the menus under Tawasol</h6>
       </div>
 
-      {/* <section className={styles.wheelSection}>
-        <Wheel
-          selectedFeature={selectedFeature}
-          onFeatureSelect={setSelectedFeature}
-        />
-      </section> */}
       <FeatureSelector
         features={features}
         selectedFeature={selectedFeature}
         onFeatureSelect={setSelectedFeature}
       />
 
-      <FeatureTitle
-        header={featureTitleContent[selectedFeature].header}
-        subHeader={featureTitleContent[selectedFeature].subHeader}
-      />
+      <FeatureTitle header={title.header} subHeader={title.subHeader} />
 
-      {renderFeatureContent()}
+      {/* ✅ Same “structure and syntax”: Shimmer wrapper applied around content */}
+      <React.Suspense fallback={shimmerFallback}>
+        {renderFeatureContent()}
+      </React.Suspense>
     </div>
   );
 };

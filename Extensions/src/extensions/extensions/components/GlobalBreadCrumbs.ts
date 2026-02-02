@@ -9,16 +9,16 @@ export class GlobalBreadcrumbs {
     private _breadcrumbStylesInjected = false;
 
     private readonly _breadcrumbCSS = `
-.__gbc_row{display:inline-flex;align-items:center;gap:20px;height:22px;margin-bottom:0px;}
-.__gbc_back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;font-family:Inter,Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;letter-spacing:0;color:#000;font-weight:400;}
+.__gbc_row{display:inline-flex;align-items:center;gap:20px;height:22px;margin-bottom:0px; font-family:'Inter',sans-serif;}
+.__gbc_back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer; font-size:16px;line-height:24px;letter-spacing:0;color:#000;font-weight:400;}
 .__gbc_back:hover{opacity:.7;}
 .__gbc_back svg{width:18px;height:18px;display:block}
 .__gbc_divider{width:1px;height:16px;background:rgba(58,59,67,.35)}
-.__gbc_wrap{display:inline-flex;align-items:center;gap:10px;height:22px;font-family:Inter,Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;letter-spacing:0;color:#3A3B43;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+.__gbc_wrap{display:inline-flex;align-items:center;gap:10px;height:22px; font-size:14px;line-height:22px;letter-spacing:0;color:#3A3B43;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 .__gbc_link{color:#A7A7A7;font-weight:400;text-decoration:none;cursor:pointer;font-size:14px;line-height:22px;}
 .__gbc_link:hover{text-decoration:underline}
 .__gbc_sep{color:#B9BCC3;opacity:1;margin:0 2px;user-select:none}
-.__gbc_current{color:#3A3B43;font-weight:500;font-size:14px;line-height:22px;font-family:Inter,sans-serif;}
+.__gbc_current{color:#3A3B43;font-weight:500;font-size:14px;line-height:22px;}
 `;
 
     private readonly _backSvg =

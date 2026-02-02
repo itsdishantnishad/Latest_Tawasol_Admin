@@ -629,6 +629,18 @@
   background: #ffe6bf;
 }
 
+/* ================= Landing error bar ================= */
+
+.errorBarWrap {
+  margin-bottom: 10px;
+}
+
+.errorBarActions {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+
 /* --------------------------------- Responsive --------------------------------- */
 
 @media (max-width: 1600px) {

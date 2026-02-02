@@ -26,17 +26,23 @@ export interface IFeatureWheelWebPartProps {
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
-  // TIMER: delay mounting whole webpart
+  // Delay React render (ms)
+  private readonly _renderDelayMs: number = 1500;
+
+  // Timer handle
   private _renderTimerId?: number;
 
   public render(): void {
-    // clear any pending render (important when properties change / re-render)
+    // Clear pending timer (property changes / rerender)
     if (this._renderTimerId) {
       window.clearTimeout(this._renderTimerId);
       this._renderTimerId = undefined;
     }
 
-    // delay the whole ReactDom.render
+    // Show shimmer placeholder immediately (NOT spinner)
+    this._renderShimmerPlaceholder();
+
+    // Delay mounting React
     this._renderTimerId = window.setTimeout(() => {
       const element: React.ReactElement<IFeatureWheelProps> = React.createElement(
         FeatureWheel,
@@ -57,7 +63,67 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
       );
 
       ReactDom.render(element, this.domElement);
-    }, 1500);
+      this._renderTimerId = undefined;
+    }, this._renderDelayMs);
+  }
+
+  private _renderShimmerPlaceholder(): void {
+    // Unique scope per webpart instance to avoid CSS collisions
+    const scope = `fwShimmer_${(this.instanceId || "x").replace(/-/g, "")}`;
+
+    this.domElement.innerHTML = `
+      <div class="${scope}">
+        <div class="${scope}__row">
+          <div class="${scope}__block ${scope}__title"></div>
+          <div class="${scope}__block ${scope}__subTitle"></div>
+        </div>
+
+        <div class="${scope}__chips">
+          ${Array.from({ length: 10 })
+            .map(() => `<div class="${scope}__block ${scope}__chip"></div>`)
+            .join("")}
+        </div>
+
+        <div class="${scope}__content">
+          <div class="${scope}__block ${scope}__hero"></div>
+          <div class="${scope}__block ${scope}__line"></div>
+          <div class="${scope}__block ${scope}__line short"></div>
+          <div class="${scope}__block ${scope}__line"></div>
+        </div>
+      </div>
+
+      <style>
+        .${scope} { padding: 14px; box-sizing: border-box; }
+        .${scope}__row { margin-bottom: 14px; }
+        .${scope}__chips { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+        .${scope}__content { display: grid; gap: 12px; }
+
+        .${scope}__block {
+          border-radius: 10px;
+          background: linear-gradient(90deg,
+            rgba(0,0,0,0.06) 25%,
+            rgba(0,0,0,0.12) 37%,
+            rgba(0,0,0,0.06) 63%
+          );
+          background-size: 400% 100%;
+          animation: ${scope}__shimmer 1.2s ease-in-out infinite;
+        }
+
+        .${scope}__title { width: 55%; height: 22px; margin-bottom: 10px; border-radius: 12px; }
+        .${scope}__subTitle { width: 35%; height: 14px; border-radius: 10px; }
+
+        .${scope}__chip { width: 140px; height: 40px; border-radius: 14px; }
+
+        .${scope}__hero { width: 100%; height: 220px; border-radius: 16px; }
+        .${scope}__line { width: 100%; height: 14px; border-radius: 10px; }
+        .${scope}__line.short { width: 75%; }
+
+        @keyframes ${scope}__shimmer {
+          0% { background-position: 100% 0; }
+          100% { background-position: 0 0; }
+        }
+      </style>
+    `;
   }
 
   protected onInit(): Promise<void> {
@@ -92,7 +158,6 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
             default:
               environmentMessage = strings.UnknownEnvironment;
           }
-
           return environmentMessage;
         });
     }
@@ -105,13 +170,14 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
   }
 
   protected onDispose(): void {
-    // clear pending timer to avoid rendering after dispose
+    // Clear pending timer to avoid rendering after dispose
     if (this._renderTimerId) {
       window.clearTimeout(this._renderTimerId);
       this._renderTimerId = undefined;
     }
 
     ReactDom.unmountComponentAtNode(this.domElement);
+    this.domElement.innerHTML = "";
   }
 
   protected get dataVersion(): Version {
@@ -133,8 +199,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
                   label: "Please enter URL for 'Let's Celebrate' see all",
                 }),
                 PropertyPaneTextField("trainingAndDevelopment", {
-                  label:
-                    "Please enter URL for 'Training & Development' see all",
+                  label: "Please enter URL for 'Training & Development' see all",
                 }),
                 PropertyPaneTextField("upcomingEvents", {
                   label: "Please enter URL for 'Upcoming events' see all",

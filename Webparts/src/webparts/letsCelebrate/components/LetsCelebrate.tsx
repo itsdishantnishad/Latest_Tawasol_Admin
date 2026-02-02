@@ -1,5 +1,6 @@
 import * as React from 'react';
 import stylesNav from '../../Components/NavTabs/NavTabs.module.scss';
+import styles from './LetsCelebrate.module.scss';
 import type { ILetsCelebrateProps } from './ILetsCelebrateProps';
 import NewJoiner from './NewJoiner/NewJoiner';
 import Birthday from './Birthday/Birthday';
@@ -231,16 +232,17 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
       : (errorAnniversaries ? 'Failed to load anniversaries.' : 'No upcoming anniversaries.');
 
     return (
-      <div>
-        <NavTabs
-          tabs={tabs}
-          value={selectedTab}
-          onChange={this.handleTabChange}
-          className={stylesNav.navTabs}
-          tabClassName={stylesNav.tab}
-        />
-
-        <div>
+      <>
+        <div className={styles.topWrapper}>
+          <NavTabs
+            tabs={tabs}
+            value={selectedTab}
+            onChange={this.handleTabChange}
+            className={stylesNav.navTabs}
+            tabClassName={stylesNav.tab}
+          />
+        </div>
+        <div className={styles.wrapOuter}>
           {selectedTab === "birthdays" && (
             <Birthday
               items={birthdayItems}
@@ -269,7 +271,7 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
             <Achievements context={this.props.context} />
           )}
         </div>
-      </div>
+      </>
     );
   }
 }

@@ -1,5 +1,12 @@
 import * as React from "react";
-import { Breadcrumb, IBreadcrumbItem, SearchBox } from "@fluentui/react";
+import {
+  Breadcrumb,
+  IBreadcrumbItem,
+  SearchBox,
+  MessageBar,
+  MessageBarType,
+  DefaultButton
+} from "@fluentui/react";
 import type { WebPartContext } from "@microsoft/sp-webpart-base";
 import view from "./ViewPage.module.scss";
 import { breadcrumbBeforeBackArrowSVG } from "../../../assets/constants";
@@ -37,6 +44,10 @@ type IPoliciesAndProceduresViewState = {
   searchText: string;
   autoExpandFolderIds: string[];
   searchState: SearchState;
+
+  // ✅ initial shimmer control
+  initialLoading: boolean;
+  initialError: string | null;
 };
 
 export default class PoliciesAndProceduresView extends React.Component<
@@ -77,28 +88,50 @@ export default class PoliciesAndProceduresView extends React.Component<
       searchResults: [],
       searchText: "",
       autoExpandFolderIds: [],
-      searchState: "idle"
+      searchState: "idle",
+
+      initialLoading: true,
+      initialError: null
     };
   }
 
   public async componentDidMount(): Promise<void> {
-    const listService = new listServices(this.props.context);
-
-    const [rootItems, favouriteIndex] = await Promise.all([
-      this.dataProvider.getRootItems(this.props.functionDisplayName),
-      listService.getFavouriteIndex("Document Favourites")
-    ]);
-
-    this.setState({
-      currentItems: rootItems,
-      favouriteIndex
-    });
+    await this.loadInitial();
   }
 
   public componentWillUnmount(): void {
     if (this._searchTimerId) window.clearTimeout(this._searchTimerId);
     this._searchNonce++;
   }
+
+  private loadInitial = async (): Promise<void> => {
+    this.setState({ initialLoading: true, initialError: null });
+
+    try {
+      const listService = new listServices(this.props.context);
+
+      const [rootItems, favouriteIndex] = await Promise.all([
+        this.dataProvider.getRootItems(this.props.functionDisplayName),
+        listService.getFavouriteIndex("Document Favourites")
+      ]);
+
+      this.setState({
+        currentItems: rootItems,
+        favouriteIndex,
+        initialLoading: false
+      });
+    } catch (e: any) {
+      // eslint-disable-next-line no-console
+      console.error("ViewPage initial load failed:", e);
+
+      this.setState({
+        currentItems: [],
+        favouriteIndex: {},
+        initialLoading: false,
+        initialError: e?.message || "Failed to fetch"
+      });
+    }
+  };
 
   private handleOpenFile = (fileItem: IPoliciesAndProceduresItem): void => {
     this.setState({ selectedItem: fileItem });
@@ -119,8 +152,13 @@ export default class PoliciesAndProceduresView extends React.Component<
 
       // this is the SAME key format used while saving
       let rel = (file.serverRelativeUrl || "").trim();
-        try { rel = decodeURI(rel); } catch {}
-        const favKey = listServices.convertToRelativeUrl(`${siteOrigin}${encodeURI(file.serverRelativeUrl)}`).toLowerCase();
+      try {
+        rel = decodeURI(rel);
+      } catch {}
+
+      const favKey = listServices
+        .convertToRelativeUrl(`${siteOrigin}${encodeURI(file.serverRelativeUrl)}`)
+        .toLowerCase();
 
       // optimistic UI toggle
       this.setState((prev) => {
@@ -131,13 +169,18 @@ export default class PoliciesAndProceduresView extends React.Component<
       });
 
       const absoluteFileUrl = `${siteOrigin}${encodeURI(file.serverRelativeUrl)}`;
-      await listService.toggleFavourite(absoluteFileUrl, file.name, undefined, undefined, "Document Favourites");
+      await listService.toggleFavourite(
+        absoluteFileUrl,
+        file.name,
+        undefined,
+        undefined,
+        "Document Favourites"
+      );
 
       // final truth from server
       const updatedFavouriteIndex = await listService.getFavouriteIndex("Document Favourites");
       this.setState({ favouriteIndex: updatedFavouriteIndex });
     } catch (error) {
-      // if something fails, re-sync from server
       // eslint-disable-next-line no-console
       console.error("toggle favourite failed", error);
 
@@ -314,6 +357,49 @@ export default class PoliciesAndProceduresView extends React.Component<
     );
   }
 
+  private renderInitialShimmer(): React.ReactNode {
+    return (
+      <div className={view.initialShimmerWrap} aria-label="Loading documents">
+        <div className={view.initialShimmerGrid}>
+          {/* LEFT: list skeleton */}
+          <div className={view.shimmerPanel}>
+            <div className={view.shimmerPanelPad}>
+              <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerTitle}`} />
+              <div className={`${view.shimmerBlock} ${view.shimmerLineSm} ${view.shimmerSub} ${view.shimmerGapSm}`} />
+
+              <div className={`${view.shimmerList} ${view.shimmerGapMd}`}>
+                {Array.from({ length: 7 }).map((_, idx) => (
+                  <div key={idx} className={view.shimmerRow}>
+                    <div className={`${view.shimmerBlock} ${view.shimmerIcon}`} />
+                    <div>
+                      <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerTitle}`} />
+                      <div className={`${view.shimmerBlock} ${view.shimmerLineSm} ${view.shimmerSub} ${view.shimmerGapSm}`} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: preview skeleton */}
+          <div className={view.shimmerPanel}>
+            <div className={view.shimmerPanelPad}>
+              <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerPreviewHeader}`} />
+              <div className={`${view.shimmerPreviewLines} ${view.shimmerGapMd}`}>
+                <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerPreviewLineA}`} />
+                <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerPreviewLineB}`} />
+                <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerPreviewLineC}`} />
+                <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerPreviewLineD}`} />
+              </div>
+
+              <div className={`${view.shimmerBlock} ${view.shimmerPreviewFrame} ${view.shimmerGapMd}`} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   public render(): React.ReactElement<IPoliciesAndProceduresViewProps> {
     const {
       currentItems,
@@ -323,40 +409,59 @@ export default class PoliciesAndProceduresView extends React.Component<
       favouriteIndex,
       searchText,
       autoExpandFolderIds,
-      searchState
+      searchState,
+      initialLoading,
+      initialError
     } = this.state;
+
+    const showInitialShimmer = initialLoading || (!!initialError && currentItems.length === 0);
 
     return (
       <section>
         {this.renderTopBar()}
 
-        <div className={view.wrap}>
-          <div className={view.left}>
-            <PoliciesandProceduresList
-              items={currentItems}
-              activeId={selectedItem?.id}
-              onOpenFile={this.handleOpenFile}
-              onClearPreview={this.handleClearPreview}
-              onToggleFolder={this.handleEnsureFolderChildren}
-              expandedChildren={expandedChildren}
-              onSwitchFolderView={this.handleSwitchFolderView}
-              getFolderViewMode={(folderId) => folderViewMode[folderId] || "list"}
-              favouriteIndex={favouriteIndex}
-              onToggleFavourite={this.handleToggleFavourite}
-              dmsLibraryRoot={this._libraryRoot}
-              searchText={searchText}
-              autoExpandFolderIds={autoExpandFolderIds}
-              searchState={searchState}
-            />
+        {initialError ? (
+          <div className={view.initialErrorBar}>
+            <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
+              {initialError}
+              <span className={view.errorBarActions}>
+                <DefaultButton text="Retry" onClick={this.loadInitial} />
+              </span>
+            </MessageBar>
           </div>
+        ) : null}
 
-          <div className={view.rightPane}>
-            <PoliciesandProceduresPreview
-              item={selectedItem}
-              categoryTitle={this.props.functionDisplayName}
-            />
+        {showInitialShimmer ? (
+          this.renderInitialShimmer()
+        ) : (
+          <div className={view.wrap}>
+            <div className={view.left}>
+              <PoliciesandProceduresList
+                items={currentItems}
+                activeId={selectedItem?.id}
+                onOpenFile={this.handleOpenFile}
+                onClearPreview={this.handleClearPreview}
+                onToggleFolder={this.handleEnsureFolderChildren}
+                expandedChildren={expandedChildren}
+                onSwitchFolderView={this.handleSwitchFolderView}
+                getFolderViewMode={(folderId) => folderViewMode[folderId] || "list"}
+                favouriteIndex={favouriteIndex}
+                onToggleFavourite={this.handleToggleFavourite}
+                dmsLibraryRoot={this._libraryRoot}
+                searchText={searchText}
+                autoExpandFolderIds={autoExpandFolderIds}
+                searchState={searchState}
+              />
+            </div>
+
+            <div className={view.rightPane}>
+              <PoliciesandProceduresPreview
+                item={selectedItem}
+                categoryTitle={this.props.functionDisplayName}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </section>
     );
   }
