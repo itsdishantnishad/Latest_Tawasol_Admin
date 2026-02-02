@@ -1,5 +1,5 @@
 /* ProfilePageHeader.module.scss */
-/* ✅ UPDATED FULL FILE (conflict fixed) | NO DUPLICATES | NO CONFLICTS */
+/* ✅ UPDATED FULL FILE (NO DUPLICATES | NO CONFLICTS) */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
@@ -26,7 +26,6 @@
 
 /* =========================================================
    ✅ FORCE SharePoint FIRST ROW (where ProfileHeader sits)
-   to allow full-bleed (remove left/right canvas space + no clipping)
    ========================================================= */
 :global(#spPageCanvasContent) {
   margin-top: 0 !important;
@@ -46,14 +45,12 @@
   overflow: visible !important;
 }
 
-/* ✅ Safety: prevent horizontal scrollbar because of full-bleed */
 :global(body) {
   overflow-x: hidden !important;
 }
 
 /* =========================================================
-   ✅ HERO FULL WIDTH + ✅ ZERO GAP FROM TOP
-   + ✅ Background merged here
+   ✅ HERO FULL WIDTH
    ========================================================= */
 .headerWrap {
   padding: 44px 56px;
@@ -62,7 +59,6 @@
   box-sizing: border-box;
   border-radius: 0;
 
-  /* ✅ IMPORTANT: allow popups to show (no clipping) */
   overflow: visible;
 
   position: relative;
@@ -125,8 +121,6 @@
 
   display: inline-flex;
   align-items: center;
-
-  /* ✅ FIX: equal spacing between all icons */
   gap: 20px;
 }
 
@@ -210,7 +204,6 @@
   }
 }
 
-/* ✅ FIX: remove hardcoded margin so gap controls spacing */
 .kebabBtn {
   margin-left: 0;
 }
@@ -259,7 +252,6 @@
   pointer-events: none;
 }
 
-/* ✅ Avatar loading state */
 .avatarLoading {
   background: rgb(255, 244, 234);
   display: flex;
@@ -380,7 +372,6 @@
   }
 }
 
-/* ✅ Disabled change-photo button when not self */
 .changePhotoBtnDisabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -409,7 +400,6 @@
   flex-wrap: wrap;
 }
 
-/* ✅ Badges row read-only */
 .badgesReadOnly {
   opacity: 0.55;
   pointer-events: none;
@@ -494,7 +484,6 @@
   }
 }
 
-/* ✅ Hidden file input */
 .hiddenInput {
   display: none;
 }
@@ -560,6 +549,28 @@
   position: fixed;
   z-index: 100000;
   pointer-events: auto;
+}
+
+/* =========================================================
+   ✅ HIDE SharePoint WebPart Chrome Icons (🔗 + ⋮)
+   (These are not from your TSX, they are SharePoint chrome)
+   ========================================================= */
+:global(.tawasolHideWpChromeActions) {
+  /* Most common labels in modern SharePoint */
+  button[aria-label="Copy link"],
+  button[title="Copy link"],
+  button[aria-label="More options"],
+  button[title="More options"],
+  button[aria-label="Copy link to clipboard"],
+  button[title="Copy link to clipboard"] {
+    display: none !important;
+  }
+
+  /* Extra safety selectors (some tenants) */
+  [data-automation-id="copyLinkButton"],
+  [data-automation-id="moreOptionsButton"] {
+    display: none !important;
+  }
 }
 
 /* =========================================================
