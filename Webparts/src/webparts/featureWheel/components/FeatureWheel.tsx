@@ -1,7 +1,7 @@
 // src/webparts/featureWheel/components/FeatureWheel.tsx
 
 import * as React from "react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type { IFeatureWheelProps } from "./IFeatureWheelProps";
 
 import FeatureSelector from "../../widgets/FeatureSelector/FeatureSelector";
@@ -49,18 +49,40 @@ export interface Feature {
  * and show shimmer while a feature module loads.
  */
 const Gallery = React.lazy(() => import("../../Components/Gallery/Gallery"));
-const Documents = React.lazy(() => import("../../Components/FeatureContent/Documents/Documents"));
-const Events = React.lazy(() => import("../../Components/FeatureContent/Events/Events"));
-const LetsCelebrate = React.lazy(() => import("../../Components/FeatureContent/LetsCelebrate/LetsCelebrate"));
-const Meeting = React.lazy(() => import("../../Components/FeatureContent/Meeting/Meeting"));
-const ServiceLinks = React.lazy(() => import("../../Components/FeatureContent/ServiceLinks/ServiceLinks"));
+const Documents = React.lazy(
+  () => import("../../Components/FeatureContent/Documents/Documents")
+);
+const Events = React.lazy(
+  () => import("../../Components/FeatureContent/Events/Events")
+);
+const LetsCelebrate = React.lazy(
+  () => import("../../Components/FeatureContent/LetsCelebrate/LetsCelebrate")
+);
+const Meeting = React.lazy(
+  () => import("../../Components/FeatureContent/Meeting/Meeting")
+);
+const ServiceLinks = React.lazy(
+  () => import("../../Components/FeatureContent/ServiceLinks/ServiceLinks")
+);
 const Forms = React.lazy(() => import("../../Components/FeatureContent/Forms/Forms"));
-const Dashboard = React.lazy(() => import("../../Components/FeatureContent/Dashboard/Dashboard"));
-const Offers = React.lazy(() => import("../../Components/FeatureContent/Offers/Offers"));
-const Training = React.lazy(() => import("../../Components/FeatureContent/Training/Training"));
-const AboutDHRE = React.lazy(() => import("../../Components/FeatureContent/AboutDHRE/AboutDHRE"));
-const TaskApprovals = React.lazy(() => import("../../Components/FeatureContent/TaskApprovals/TaskApprovals"));
-const BeverageMenu = React.lazy(() => import("../../Components/FeatureContent/BeverageMenu/BeverageMenu"));
+const Dashboard = React.lazy(
+  () => import("../../Components/FeatureContent/Dashboard/Dashboard")
+);
+const Offers = React.lazy(
+  () => import("../../Components/FeatureContent/Offers/Offers")
+);
+const Training = React.lazy(
+  () => import("../../Components/FeatureContent/Training/Training")
+);
+const AboutDHRE = React.lazy(
+  () => import("../../Components/FeatureContent/AboutDHRE/AboutDHRE")
+);
+const TaskApprovals = React.lazy(
+  () => import("../../Components/FeatureContent/TaskApprovals/TaskApprovals")
+);
+const BeverageMenu = React.lazy(
+  () => import("../../Components/FeatureContent/BeverageMenu/BeverageMenu")
+);
 
 const features: Feature[] = [
   {
@@ -143,63 +165,68 @@ const features: Feature[] = [
   },
 ];
 
-const featureTitleContent: Record<string, { header: string; subHeader: string }> = {
-  gallery: {
-    header: "A Glimpse through our lens",
-    subHeader: "Recent milestones and cherished memories we've Immortalised",
-  },
-  documents: {
-    header: "Policies and Procedures",
-    subHeader: "Everything you need, neatly organized",
-  },
-  events: {
-    header: "Upcoming events",
-    subHeader: "Stay updated and never miss out on what’s happening",
-  },
-  employee_events: {
-    header: "Let’s Celebrate",
-    subHeader: "Wish your peers on their special day",
-  },
-  meetings: {
-    header: "See your Meetings Scheduled",
-    subHeader: "Connect, collaborate, and drive decisions together",
-  },
-  service_links: {
-    header: "Service Links",
-    subHeader: "Quickly access your most used service links",
-  },
-  forms: {
-    header: "Interactive Forms",
-    subHeader: "All your essential forms – legacy, claims, business excellence, and more",
-  },
-  about_dhre: {
-    header: "About DHRE",
-    subHeader: "Dive deep into DHRE: Our departments, culture, and core values.",
-  },
-  tasks: {
-    header: "Task Approvals",
-    subHeader: "Streamline your work to accomplish more, faster.",
-  },
-  beverage_menu: {
-    header: "Beverage Menu",
-    subHeader: "Find your favourite drink to fuel your day",
-  },
-  dashboard: {
-    header: "Dashboard",
-    subHeader: "Track everything at a glance – insights made simple!",
-  },
-  offers: {
-    header: "Offers & Benefits",
-    subHeader: "Save more with benefits designed for you",
-  },
-  training: {
-    header: "Enroll Yourself in Upcoming Trainings",
-    subHeader: "Grow your skills with tailored learning sessions",
-  },
-};
+const featureTitleContent: Record<string, { header: string; subHeader: string }> =
+  {
+    gallery: {
+      header: "A Glimpse through our lens",
+      subHeader: "Recent milestones and cherished memories we've Immortalised",
+    },
+    documents: {
+      header: "Policies and Procedures",
+      subHeader: "Everything you need, neatly organized",
+    },
+    events: {
+      header: "Upcoming events",
+      subHeader: "Stay updated and never miss out on what’s happening",
+    },
+    employee_events: {
+      header: "Let’s Celebrate",
+      subHeader: "Wish your peers on their special day",
+    },
+    meetings: {
+      header: "See your Meetings Scheduled",
+      subHeader: "Connect, collaborate, and drive decisions together",
+    },
+    service_links: {
+      header: "Service Links",
+      subHeader: "Quickly access your most used service links",
+    },
+    forms: {
+      header: "Interactive Forms",
+      subHeader: "All your essential forms – legacy, claims, business excellence, and more",
+    },
+    about_dhre: {
+      header: "About DHRE",
+      subHeader: "Dive deep into DHRE: Our departments, culture, and core values.",
+    },
+    tasks: {
+      header: "Task Approvals",
+      subHeader: "Streamline your work to accomplish more, faster.",
+    },
+    beverage_menu: {
+      header: "Beverage Menu",
+      subHeader: "Find your favourite drink to fuel your day",
+    },
+    dashboard: {
+      header: "Dashboard",
+      subHeader: "Track everything at a glance – insights made simple!",
+    },
+    offers: {
+      header: "Offers & Benefits",
+      subHeader: "Save more with benefits designed for you",
+    },
+    training: {
+      header: "Enroll Yourself in Upcoming Trainings",
+      subHeader: "Grow your skills with tailored learning sessions",
+    },
+  };
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
   const [selectedFeature, setSelectedFeature] = useState<string>("employee_events");
+
+  // If a lazy-loaded chunk fails during SPA navigation, this forces a retry/remount.
+  const [lazyRetryKey, setLazyRetryKey] = useState(0);
+  const retryLazy = useCallback(() => setLazyRetryKey((k) => k + 1), []);
 
   const handleViewAll = () => {
     console.log("View all clicked for:", selectedFeature);
@@ -209,20 +236,12 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
     switch (selectedFeature) {
       case "gallery":
         return (
-          <Gallery
-            context={props.context}
-            seeAllURL={props.imageGallery}
-            onViewAll={handleViewAll}
-          />
+          <Gallery context={props.context} seeAllURL={props.imageGallery} onViewAll={handleViewAll} />
         );
 
       case "documents":
         return (
-          <Documents
-            context={props.context}
-            seeAllURL={props.documents}
-            onViewAll={handleViewAll}
-          />
+          <Documents context={props.context} seeAllURL={props.documents} onViewAll={handleViewAll} />
         );
 
       case "events":
@@ -238,20 +257,11 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
 
       case "employee_events":
         return (
-          <LetsCelebrate
-            context={props.context}
-            seeAllURL={props.letsCelebrate}
-            onViewAll={handleViewAll}
-          />
+          <LetsCelebrate context={props.context} seeAllURL={props.letsCelebrate} onViewAll={handleViewAll} />
         );
 
       case "meetings":
-        return (
-          <Meeting
-            context={props.context}
-            seeAllURL={`${props.meeting}?tab=${EventsTrainingsTabKey.Meetings}`}
-          />
-        );
+        return <Meeting context={props.context} seeAllURL={`${props.meeting}?tab=${EventsTrainingsTabKey.Meetings}`} />;
 
       case "service_links":
         return <ServiceLinks context={props.context} />;
@@ -269,21 +279,11 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         return <BeverageMenu context={props.context} seeAllURL={props.beverageMenu} />;
 
       case "dashboard":
-        return (
-          <Dashboard
-            context={props.context}
-            seeAllURL={props.dashboard}
-            onViewAll={handleViewAll}
-          />
-        );
+        return <Dashboard context={props.context} seeAllURL={props.dashboard} onViewAll={handleViewAll} />;
 
       case "offers":
         return (
-          <Offers
-            context={props.context}
-            seeAllURL={props.getOffersAndDiscounts}
-            onViewAll={handleViewAll}
-          />
+          <Offers context={props.context} seeAllURL={props.getOffersAndDiscounts} onViewAll={handleViewAll} />
         );
 
       case "training":
@@ -301,10 +301,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
     }
   };
 
-  const title = featureTitleContent[selectedFeature] || {
-    header: "",
-    subHeader: "",
-  };
+  const title = featureTitleContent[selectedFeature] || { header: "", subHeader: "" };
 
   /**
    * ✅ Shimmer fallback shown while lazy-loaded feature component bundle loads.
@@ -324,20 +321,72 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         <h6>Click to see all the menus under Tawasol</h6>
       </div>
 
-      <FeatureSelector
-        features={features}
-        selectedFeature={selectedFeature}
-        onFeatureSelect={setSelectedFeature}
-      />
+      <FeatureSelector features={features} selectedFeature={selectedFeature} onFeatureSelect={setSelectedFeature} />
 
       <FeatureTitle header={title.header} subHeader={title.subHeader} />
 
-      {/* ✅ Same “structure and syntax”: Shimmer wrapper applied around content */}
-      <React.Suspense fallback={shimmerFallback}>
-        {renderFeatureContent()}
-      </React.Suspense>
+      {/* ✅ Prevent infinite shimmer if lazy chunk fails after SPA navigation */}
+      <LazyErrorBoundary onRetry={retryLazy}>
+        <React.Suspense key={lazyRetryKey} fallback={shimmerFallback}>
+          {renderFeatureContent()}
+        </React.Suspense>
+      </LazyErrorBoundary>
     </div>
   );
 };
+
+/**
+ * Catches React.lazy / dynamic import failures so we don't stay on shimmer forever.
+ */
+class LazyErrorBoundary extends React.Component<
+  { onRetry: () => void; children: React.ReactNode },
+  { hasError: boolean }
+> {
+  public state = { hasError: false };
+
+  public static getDerivedStateFromError(): { hasError: boolean } {
+    return { hasError: true };
+  }
+
+  public componentDidCatch(error: any): void {
+    // Typical error is: "Loading chunk X failed" after SPA navigation
+    // eslint-disable-next-line no-console
+    console.error("Lazy feature load failed:", error);
+  }
+
+  public render(): React.ReactNode {
+    if (!this.state.hasError) return this.props.children;
+
+    return (
+      <div style={{ padding: 12, border: "1px solid rgba(0,0,0,0.1)", borderRadius: 8 }}>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>This feature didn’t load.</div>
+        <div style={{ fontSize: 13, opacity: 0.75, marginBottom: 10 }}>
+          Sometimes SharePoint navigation without a full refresh can interrupt lazy loading.
+        </div>
+        <button
+          onClick={() => {
+            this.setState({ hasError: false });
+            this.props.onRetry();
+          }}
+          style={{ padding: "8px 12px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.2)", cursor: "pointer" }}
+        >
+          Retry
+        </button>
+        <button
+          onClick={() => window.location.reload()}
+          style={{
+            padding: "8px 12px",
+            borderRadius: 6,
+            border: "1px solid rgba(0,0,0,0.2)",
+            cursor: "pointer",
+            marginLeft: 8,
+          }}
+        >
+          Reload page
+        </button>
+      </div>
+    );
+  }
+}
 
 export default FeatureWheel;

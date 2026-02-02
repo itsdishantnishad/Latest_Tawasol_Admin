@@ -9,10 +9,6 @@ import {
   TahweelActiveEmployee,
 } from "../../../services/Integration/TahweelService";
 
-// Shimmer wrapper (Option 1 shared)
-import { LoadingBoundary } from "../../LoadingShimmer";
-import { MessageBar, MessageBarType, DefaultButton } from "@fluentui/react";
-
 const cakeImage: string = require("../images/Cake-1.svg");
 const newJoinerCenter: string = require("../images/Newjoiner.svg");
 const aniversaryImage: string = require("../images/aniversary.svg");
@@ -27,7 +23,7 @@ export interface ICelebration {
   image?: string;
   description?: string;
   contact?: string;
-  email?: string;
+  email?: string
 }
 
 export interface ILetsCelebrateProps {
@@ -131,10 +127,7 @@ const extractUrl = (value: any): string => {
   if (typeof value === "string") {
     const s = value.trim();
     if (!s) return "";
-    if (
-      (s.startsWith("{") && s.endsWith("}")) ||
-      (s.startsWith("[") && s.endsWith("]"))
-    ) {
+    if ((s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]"))) {
       try {
         const parsed = JSON.parse(s);
         return parsed?.Url || parsed?.url || parsed?.serverRelativeUrl || "";
@@ -162,11 +155,6 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   // SP - New Joiners + Achievements
   const [spNewJoiners, setSpNewJoiners] = React.useState<ICelebration[]>([]);
   const [spAchievements, setSpAchievements] = React.useState<ICelebration[]>([]);
-
-  // loading/errors for ALL tabs
-  const [loadingNewJoiners, setLoadingNewJoiners] = React.useState<boolean>(true);
-  const [errorNewJoiners, setErrorNewJoiners] = React.useState<string | null>(null);
-
   const [loadingAchievements, setLoadingAchievements] = React.useState<boolean>(true);
   const [errorAchievements, setErrorAchievements] = React.useState<string | null>(null);
 
@@ -178,11 +166,29 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   const [errorBirthdays, setErrorBirthdays] = React.useState<string | null>(null);
   const [errorAnniversaries, setErrorAnniversaries] = React.useState<string | null>(null);
 
+  // const openTeamsChat = (email?: string) => {
+  //   const e = (email || "").trim();
+  //   if (!e) return;
+  //   window.open(
+  //     `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(e)}`,
+  //     "_blank",
+  //     "noopener,noreferrer"
+  //   );
+  // };
+
   const openTeamsChat = (email?: string, name?: string) => {
     const e = (email || "").trim();
     if (!e) return;
 
     const message = getChatMessage(name || "");
+
+    console.log(
+      "Teams URL:",
+      `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(
+        e
+      )}&message=${encodeURIComponent(message)}`
+    );
+
 
     window.open(
       `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(
@@ -193,176 +199,161 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
     );
   };
 
+
   const isChatEnabledTab =
-    activeTab === "newJoiners" ||
-    activeTab === "birthdays" ||
-    activeTab === "anniversaries";
+    activeTab === "newJoiners" || activeTab === "birthdays" || activeTab === "anniversaries";
 
-  // Keep Tahweel service stable
-  const tahweelRef = React.useRef<TahweelService | null>(null);
-  React.useEffect(() => {
-    tahweelRef.current = new TahweelService({
-      httpClient: props.context.httpClient,
-    });
-  }, [props.context]);
 
-  // Individual loaders so we can "Retry" per tab
-  const loadNewJoiners = React.useCallback(async (mountedRef: { current: boolean }) => {
-    setLoadingNewJoiners(true);
-    setErrorNewJoiners(null);
-
-    try {
-      const spService = new listServices(props.context);
-      const data = await spService.getNewJoiners("New Joiner");
-
-      const mappedData: ICelebration[] = (data || []).map((item: any) => ({
-        id: (item.Id || item.ID || item.id || item.Title || "").toString(),
-        name: (item.Title || item.name || "").toString(),
-        department: (item.Department || item.department || "").toString(),
-        type: "newJoiner" as const,
-        image: (item.UserPicture || item.image || "").toString(),
-        description: (item.TIRDescription || "").toString(),
-        contact: (item.TIRContact || "").toString(),
-        email: (item.TIRUserEmail || "").toString(),
-      }));
-
-      if (mountedRef.current) setSpNewJoiners(mappedData);
-    } catch (e: any) {
-      console.error("Error fetching new joiners:", e);
-      if (mountedRef.current) {
-        setSpNewJoiners([]);
-        setErrorNewJoiners(e?.message || "Failed to load new joiners.");
-      }
-    } finally {
-      if (mountedRef.current) setLoadingNewJoiners(false);
-    }
-  }, [props.context]);
-
-  const loadAchievements = React.useCallback(async (mountedRef: { current: boolean }) => {
-    setLoadingAchievements(true);
-    setErrorAchievements(null);
-
-    try {
-      const sp = getSP(props.context);
-
-      const rows: any[] =
-        (await sp.web.lists
-          .getByTitle("User Achievements")
-          .items.select(
-            "Id",
-            "Title",
-            "TIRDesignation",
-            "TIRMonthOfAchievement",
-            "TIRUserPicture",
-            "TIRContact",
-            "TIRDescription"
-          )()) || [];
-
-      const mapped: ICelebration[] = rows
-        .map((it: any) => ({
-          id: (it.Id || it.ID || it.id || it.Title || "").toString(),
-          name: (it.Title || "").toString(),
-          department: (it.TIRDesignation || "").toString(),
-          date: (it.TIRMonthOfAchievement || "").toString(),
-          type: "Achievement" as const,
-          image: extractUrl(it.TIRUserPicture),
-          description: (it.TIRDescription || "").toString(),
-          contact: (it.TIRContact || "").toString(),
-        }))
-        .filter((x) => !!x.name);
-
-      if (mountedRef.current) setSpAchievements(mapped);
-    } catch (e: any) {
-      console.error("Error fetching achievements:", e);
-      if (mountedRef.current) {
-        setSpAchievements([]);
-        setErrorAchievements(e?.message || "Failed to load achievements.");
-      }
-    } finally {
-      if (mountedRef.current) setLoadingAchievements(false);
-    }
-  }, [props.context]);
-
-  const loadBirthdays = React.useCallback(async (mountedRef: { current: boolean }) => {
-    setLoadingBirthdays(true);
-    setErrorBirthdays(null);
-
-    try {
-      const tahweel = tahweelRef.current;
-      const rows: TahweelActiveEmployee[] =
-        (await tahweel?.fetchActiveEmployees({ DOB: "1", DOJ: "0" })) || [];
-
-      const todayRows = rows.filter((r) => isTodayFromRaw(r.dateOfBirth));
-      const picked = shuffle(todayRows).slice(0, 4);
-
-      const mapped: ICelebration[] = picked.map((r) => ({
-        id: (r.personNumber || r.fullName || "").toString().trim(),
-        name: normalizeFullName(r.fullName),
-        type: "birthday",
-        image: (r.imageDataUrl || r.imageUrl || "").toString().trim(),
-        email: (r.email || "").toString().trim(),
-      }));
-
-      if (mountedRef.current) setApiBirthdays(mapped);
-    } catch (e: any) {
-      console.error("Tahweel birthdays failed:", e);
-      if (mountedRef.current) {
-        setApiBirthdays([]);
-        setErrorBirthdays(e?.message || "Failed to load birthdays.");
-      }
-    } finally {
-      if (mountedRef.current) setLoadingBirthdays(false);
-    }
-  }, []);
-
-  const loadAnniversaries = React.useCallback(async (mountedRef: { current: boolean }) => {
-    setLoadingAnniversaries(true);
-    setErrorAnniversaries(null);
-
-    try {
-      const tahweel = tahweelRef.current;
-      const rows: TahweelActiveEmployee[] =
-        (await tahweel?.fetchActiveEmployees({ DOB: "0", DOJ: "1" })) || [];
-
-      const todayRows = rows.filter((r) => isTodayFromRaw(r.doj));
-      const picked = shuffle(todayRows).slice(0, 4);
-
-      const mapped: ICelebration[] = picked.map((r) => ({
-        id: (r.personNumber || r.fullName || "").toString().trim(),
-        name: normalizeFullName(r.fullName),
-        type: "anniversary",
-        image: (r.imageDataUrl || r.imageUrl || "").toString().trim(),
-        email: (r.email || "").toString().trim(),
-      }));
-
-      if (mountedRef.current) setApiAnniversaries(mapped);
-    } catch (e: any) {
-      console.error("Tahweel anniversaries failed:", e);
-      if (mountedRef.current) {
-        setApiAnniversaries([]);
-        setErrorAnniversaries(e?.message || "Failed to load anniversaries.");
-      }
-    } finally {
-      if (mountedRef.current) setLoadingAnniversaries(false);
-    }
-  }, []);
-
-  const loadAll = React.useCallback(async (mountedRef: { current: boolean }) => {
-    await Promise.all([
-      loadNewJoiners(mountedRef),
-      loadAchievements(mountedRef),
-      loadBirthdays(mountedRef),
-      loadAnniversaries(mountedRef),
-    ]);
-  }, [loadNewJoiners, loadAchievements, loadBirthdays, loadAnniversaries]);
 
   React.useEffect(() => {
-    const mountedRef = { current: true };
-    void loadAll(mountedRef);
-    return () => {
-      mountedRef.current = false;
+    let mounted = true;
+
+    const fetchAll = async () => {
+      // New Joiners (SP)
+      const newJoinersP = (async () => {
+        try {
+          const spService = new listServices(props.context);
+          const data = await spService.getNewJoiners("New Joiner");
+
+          const mappedData: ICelebration[] = (data || []).map((item: any) => ({
+            id: (item.Id || item.ID || item.id || item.Title || "").toString(),
+            name: (item.Title || item.name || "").toString(),
+            department: (item.Department || item.department || "").toString(),
+            type: "newJoiner" as const,
+            image: (item.UserPicture || item.image || "").toString(),
+            description: (item.TIRDescription || "").toString(),
+            contact: (item.TIRContact || "").toString(),
+            email: (item.TIRUserEmail || "").toString()
+          }));
+
+          if (mounted) setSpNewJoiners(mappedData);
+        } catch (error) {
+          console.error("Error fetching new joiners:", error);
+          if (mounted) setSpNewJoiners([]);
+        }
+      })();
+
+      // Achievements (SP) - "User Achievements" list
+      const achievementsP = (async () => {
+        setLoadingAchievements(true);
+        setErrorAchievements(null);
+
+        try {
+          const sp = getSP(props.context);
+
+          const rows: any[] =
+            (await sp.web.lists
+              .getByTitle("User Achievements")
+              .items.select(
+                "Id",
+                "Title",
+                "TIRDesignation",
+                "TIRMonthOfAchievement",
+                "TIRUserPicture",
+                "TIRContact",
+                "TIRDescription",
+              )()) || [];
+
+          const mapped: ICelebration[] = rows
+            .map((it: any) => ({
+              id: (it.Id || it.ID || it.id || it.Title || "").toString(),
+              name: (it.Title || "").toString(),
+              department: (it.TIRDesignation || "").toString(),
+              date: (it.TIRMonthOfAchievement || "").toString(),
+              type: "Achievement" as const,
+              image: extractUrl(it.TIRUserPicture),
+              description: (it.TIRDescription || "").toString(),
+              contact: (it.TIRContact || "").toString(),
+
+            }))
+            .filter((x) => !!x.name);
+
+          if (mounted) setSpAchievements(mapped);
+        } catch (e: any) {
+          console.error("Error fetching achievements:", e);
+          if (mounted) {
+            setSpAchievements([]);
+            setErrorAchievements(e?.message || "Failed to load achievements.");
+          }
+        } finally {
+          if (mounted) setLoadingAchievements(false);
+        }
+      })();
+
+
+      // Birthdays + Anniversaries (Tahweel)
+      const tahweel = new TahweelService({
+        httpClient: props.context.httpClient,
+      });
+
+      const birthdaysP = (async () => {
+        setLoadingBirthdays(true);
+        setErrorBirthdays(null);
+        try {
+          const rows: TahweelActiveEmployee[] =
+            (await tahweel.fetchActiveEmployees({ DOB: "1", DOJ: "0" })) || [];
+
+          const todayRows = rows.filter((r) => isTodayFromRaw(r.dateOfBirth));
+          const picked = shuffle(todayRows).slice(0, 4);
+
+          const mapped: ICelebration[] = picked.map((r) => ({
+            id: (r.personNumber || r.fullName || "").toString().trim(),
+            name: normalizeFullName(r.fullName),
+            type: "birthday",
+            image: (r.imageDataUrl || r.imageUrl || "").toString().trim(),
+            email: (r.email || "").toString().trim()
+          }));
+
+          if (mounted) setApiBirthdays(mapped);
+        } catch (e: any) {
+          console.error("Tahweel birthdays failed:", e);
+          if (mounted) {
+            setApiBirthdays([]);
+            setErrorBirthdays(e?.message || "Failed to load birthdays.");
+          }
+        } finally {
+          if (mounted) setLoadingBirthdays(false);
+        }
+      })();
+
+      const anniversariesP = (async () => {
+        setLoadingAnniversaries(true);
+        setErrorAnniversaries(null);
+        try {
+          const rows: TahweelActiveEmployee[] =
+            (await tahweel.fetchActiveEmployees({ DOB: "0", DOJ: "1" })) || [];
+
+          const todayRows = rows.filter((r) => isTodayFromRaw(r.doj));
+          const picked = shuffle(todayRows).slice(0, 4);
+
+          const mapped: ICelebration[] = picked.map((r) => ({
+            id: (r.personNumber || r.fullName || "").toString().trim(),
+            name: normalizeFullName(r.fullName),
+            type: "anniversary",
+            image: (r.imageDataUrl || r.imageUrl || "").toString().trim(),
+            email: (r.email || "").toString().trim()
+          }));
+
+          if (mounted) setApiAnniversaries(mapped);
+        } catch (e: any) {
+          console.error("Tahweel anniversaries failed:", e);
+          if (mounted) {
+            setApiAnniversaries([]);
+            setErrorAnniversaries(e?.message || "Failed to load anniversaries.");
+          }
+        } finally {
+          if (mounted) setLoadingAnniversaries(false);
+        }
+      })();
+
+      await Promise.all([newJoinersP, achievementsP, birthdaysP, anniversariesP]);
     };
-  }, [loadAll]);
+
+    fetchAll();
+    return () => {
+      mounted = false;
+    };
+  }, [props.context]);
 
   // No dummy fallback now
   const celebrations = {
@@ -397,11 +388,11 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
 
   const currentCelebrations: ICelebration[] = (celebrations as any)[activeTab] ?? [];
 
+  // Wheel displays max 4 per page (matches UI positions)
   // Sort achievements by latest first, keep others as-is
-  const sortedCelebrations =
-    activeTab === "Achievements"
-      ? [...currentCelebrations].sort((a, b) => parseInt(b.id) - parseInt(a.id))
-      : currentCelebrations;
+  const sortedCelebrations = activeTab === "Achievements"
+    ? [...currentCelebrations].sort((a, b) => parseInt(b.id) - parseInt(a.id))
+    : currentCelebrations;
 
   // Show 1 achievement per page, 4 for others
   const itemsPerPage = activeTab === "Achievements" ? 1 : 4;
@@ -472,42 +463,38 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   }, [props.seeAllURL, webUrl, origin]);
   // --- END ---
 
+  const handleViewAllClick = React.useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      props.onViewAll?.();
+      window.location.assign(viewAllHref);
+    },
+    [props, viewAllHref]
+  );
+
+
   const isLoadingActive =
     (activeTab === "birthdays" && loadingBirthdays) ||
     (activeTab === "anniversaries" && loadingAnniversaries) ||
-    (activeTab === "newJoiners" && loadingNewJoiners) ||
     (activeTab === "Achievements" && loadingAchievements);
 
   const activeError =
     activeTab === "birthdays"
       ? errorBirthdays
       : activeTab === "anniversaries"
-      ? errorAnniversaries
-      : activeTab === "newJoiners"
-      ? errorNewJoiners
-      : activeTab === "Achievements"
-      ? errorAchievements
-      : null;
-
-  const retryActiveTab = async (): Promise<void> => {
-    const mountedRef = { current: true };
-    try {
-      if (activeTab === "birthdays") await loadBirthdays(mountedRef);
-      else if (activeTab === "anniversaries") await loadAnniversaries(mountedRef);
-      else if (activeTab === "newJoiners") await loadNewJoiners(mountedRef);
-      else if (activeTab === "Achievements") await loadAchievements(mountedRef);
-    } finally {
-      mountedRef.current = false;
-    }
-  };
+        ? errorAnniversaries
+        : activeTab === "Achievements"
+          ? errorAchievements
+          : null;
 
   const emptyLabel = (tabs.find((t) => t.key === activeTab)?.label || "").toLowerCase();
 
-  // When failed + no cached data -> show shimmer instead of "Failed to fetch" text
-  const showShimmer = isLoadingActive || !!activeError;
+  const emptyMessage = activeError
+    ? activeError
+    : isLoadingActive
+      ? `Loading ${emptyLabel}...`
+      : `No ${emptyLabel} to celebrate right now`;
 
-  const emptyMessage =
-    activeError ? activeError : `No ${emptyLabel} to celebrate right now`;
 
   const getHoverMessage = (name: string): string => {
     switch (activeTab) {
@@ -523,20 +510,18 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
   };
 
   const getChatMessage = (name: string): string => {
-    switch (activeTab) {
-      case "birthdays":
-        return `Wish you a very Happy Birthday!`;
-      case "anniversaries":
-        return `Congratulations on this milestone!`;
-      case "newJoiners":
-        return `Welcome to the team!`;
-      default:
-        return `Hello ${name}!`;
-    }
-  };
+  switch (activeTab) {
+    case "birthdays":
+      return `Wish you a very Happy Birthday!`;
+    case "anniversaries":
+      return `Congratulations on this milestone!`;
+    case "newJoiners":
+      return `Welcome to the team!`;
+    default:
+      return `Hello ${name}!`;
+  }
+};
 
-  const shimmerPreset = activeTab === "Achievements" ? "details" : "details";
-  const shimmerCount = 1;
 
   return (
     <div className={styles.celebrateContainer}>
@@ -553,198 +538,238 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
         ))}
       </div>
 
-      {/* Error bar (shown for active tab), shimmer will show below */}
-      {activeError ? (
-        <div style={{ marginTop: 10 }}>
-          <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
-            {activeError}
-            <span style={{ marginLeft: 10 }}>
-              <DefaultButton text="Retry" onClick={retryActiveTab} />
-            </span>
-          </MessageBar>
-        </div>
-      ) : null}
+      {/* Content */}
 
       {/* Content */}
       <div className={styles.content}>
-        {/* Shimmer for ALL tabs (loading OR failed-with-no-data) */}
-        <LoadingBoundary
-          loading={showShimmer}
-          preset={shimmerPreset as any}
-          count={shimmerCount}
-          ariaLabel={`Loading ${emptyLabel}`}
-        >
-          {currentCelebrations.length > 0 ? (
-            <>
-              {activeTab === "Achievements" ? (
-                // Achievement Card Layout
-                <div className={styles.achievementWrapper}>
-                  <button
-                    className={styles.navButton}
-                    onClick={handlePrev}
-                    disabled={totalPages <= 1}
-                    style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
-                  >
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M15 18L9 12L15 6"
-                        stroke="currentColor"
-                        strokeWidth="1"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
+        {currentCelebrations.length > 0 ? (
+          <>
+            {activeTab === "Achievements" ? (
+              // Achievement Card Layout
+              <div className={styles.achievementWrapper}>
+                <button
+                  className={styles.navButton}
+                  onClick={handlePrev}
+                  disabled={totalPages <= 1}
+                  style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M15 18L9 12L15 6"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
 
-                  <div className={styles.achievementCardContainer}>
-                    <div className={styles.achievementCircleContainer}>
-                      <div className={styles.achievementOuterCircle}>
-                        <div className={styles.achievementInnerCircle} />
-                      </div>
-                    </div>
-
-                    {currentItems.map((item) => {
-                      const { first, last } = getNameParts(item.name);
-                      const imageUrl = item.image;
-                      const designation = item.department || "Team Member";
-                      const contact = item.contact || "";
-                      const description = item.description || "";
-
-                      return (
-                        <article key={item.id} className={styles.achievementCard}>
-                          <div className={styles.achievementImageWrapper}>
-                            {imageUrl ? (
-                              <img
-                                className={styles.achievementPhoto}
-                                src={imageUrl}
-                                alt={item.name || ""}
-                              />
-                            ) : (
-                              <div className={styles.achievementNoImage}>No Image</div>
-                            )}
-                          </div>
-
-                          <div className={styles.achievementContentWrapper}>
-                            <div className={styles.achievementHeaderRow}>
-                              <div className={styles.achievementNameSection}>
-                                <h2 className={styles.achievementName}>
-                                  <span className={styles.achievementFirstName}>{first}</span>
-                                  <span className={styles.achievementLastName}>{last}</span>
-                                </h2>
-                                <div className={styles.achievementRole}>{designation}</div>
-                              </div>
-
-                              <a
-                                className={styles.sayCongratulations}
-                                target="_blank"
-                                href={`https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(
-                                  contact
-                                )}&message=Congratulations`}
-                                rel="noreferrer"
-                              >
-                                <img
-                                  src={Congratulations_Icon}
-                                  alt=""
-                                  className={styles.congratulationsIcon}
-                                />
-                                <span>Say Congratulations</span>
-                              </a>
-                            </div>
-
-                            {!!description && (
-                              <p
-                                className={styles.achievementDescription}
-                                dangerouslySetInnerHTML={{ __html: description }}
-                              />
-                            )}
-
-                            {!!contact && (
-                              <p className={styles.achievementConnect}>Lets connect : {contact}</p>
-                            )}
-                          </div>
-                        </article>
-                      );
-                    })}
-
-                    {totalPages > 1 && (
-                      <div className={styles.achievementPagination}>
-                        {Array.from({ length: totalPages }).map((_, index) => (
-                          <button
-                            key={index}
-                            className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""}`}
-                            onClick={() => setCurrentPage(index)}
-                            aria-label={`Go to page ${index + 1}`}
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    <div className={styles.achievementButtonContainer}>
-                      <a href={viewAllHref} className={styles.viewAllButton}>
-                        View All
-                      </a>
+                <div className={styles.achievementCardContainer}>
+                  <div className={styles.achievementCircleContainer}>
+                    <div className={styles.achievementOuterCircle}>
+                      <div className={styles.achievementInnerCircle} />
                     </div>
                   </div>
 
-                  <button
-                    className={styles.navButton}
-                    onClick={handleNext}
-                    disabled={totalPages <= 1}
-                    style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
-                  >
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M9 18L15 12L9 6"
-                        stroke="currentColor"
-                        strokeWidth="1"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ) : (
-                // Wheel Layout for other tabs
-                <div className={styles.wheelWrapper}>
-                  <button
-                    className={styles.navButton}
-                    onClick={handlePrev}
-                    disabled={totalPages <= 1}
-                    style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
-                  >
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M15 18L9 12L15 6"
-                        stroke="currentColor"
-                        strokeWidth="1"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
+                  {currentItems.map((item) => {
+                    const { first, last } = getNameParts(item.name);
+                    const imageUrl = item.image;
+                    const designation = item.department || "Team Member";
+                    const contact = item.contact || "";
+                    const description = item.description || "";
 
-                  <div className={styles.circleContainer}>
-                    <div className={styles.outerCircle}>
-                      {currentItems.slice(0, 2).map((item, index) => (
+                    return (
+                      <article key={item.id} className={styles.achievementCard}>
+                        <div className={styles.achievementImageWrapper}>
+                          {imageUrl ? (
+                            <img
+                              className={styles.achievementPhoto}
+                              src={imageUrl}
+                              alt={item.name || ""}
+                            />
+                          ) : (
+                            <div className={styles.achievementNoImage}>No Image</div>
+                          )}
+                        </div>
+
+                        <div className={styles.achievementContentWrapper}>
+                          <div className={styles.achievementHeaderRow}>
+                            <div className={styles.achievementNameSection}>
+                              <h2 className={styles.achievementName}>
+                                <span className={styles.achievementFirstName}>{first}</span>
+                                <span className={styles.achievementLastName}>{last}</span>
+                              </h2>
+                              <div className={styles.achievementRole}>{designation}</div>
+                            </div>
+
+                            <a
+                              className={styles.sayCongratulations}
+                              target="_blank"
+                              href={`https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(
+                                contact
+                              )}&message=Congratulations`}
+                              rel="noreferrer"
+                            >
+                              <img
+                                src={Congratulations_Icon}
+                                alt=""
+                                className={styles.congratulationsIcon}
+                              />
+                              <span>Say Congratulations</span>
+                            </a>
+                          </div>
+
+                          {!!description && (
+                            <p
+                              className={styles.achievementDescription}
+                              dangerouslySetInnerHTML={{ __html: description }}
+                            />
+                          )}
+
+                          {!!contact && (
+                            <p className={styles.achievementConnect}>Lets connect : {contact}</p>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+
+                  {totalPages > 1 && (
+                    <div className={styles.achievementPagination}>
+                      {Array.from({ length: totalPages }).map((_, index) => (
+                        <button
+                          key={index}
+                          className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""}`}
+                          onClick={() => setCurrentPage(index)}
+                          aria-label={`Go to page ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  <div className={styles.achievementButtonContainer}>
+                    <a
+                      href={viewAllHref}
+                      className={styles.viewAllButton}
+                      data-interception="off"
+                      onClick={handleViewAllClick}
+                    >
+                      View All
+                    </a>
+                  </div>
+                </div>
+
+                <button
+                  className={styles.navButton}
+                  onClick={handleNext}
+                  disabled={totalPages <= 1}
+                  style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M9 18L15 12L9 6"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              // Wheel Layout for other tabs
+              <div className={styles.wheelWrapper}>
+                <button
+                  className={styles.navButton}
+                  onClick={handlePrev}
+                  disabled={totalPages <= 1}
+                  style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M15 18L9 12L15 6"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+
+                <div className={styles.circleContainer}>
+                  <div className={styles.outerCircle}>
+                    {currentItems.slice(0, 2).map((item, index) => (
+                      <div
+                        key={item.id}
+                        className={styles.profileCard}
+                        style={getOuterCirclePosition(index)}
+                        onClick={
+                          isChatEnabledTab
+                            ? () => openTeamsChat(item.email, item.name)
+                            : undefined
+                        }
+
+
+                        role={isChatEnabledTab ? "button" : undefined}
+
+                        tabIndex={isChatEnabledTab ? 0 : -1}
+
+                        onKeyDown={
+                          isChatEnabledTab
+                            ? (e) => {
+                              if (e.key === "Enter" || e.key === " ")
+                                openTeamsChat(item.email, item.name);
+                            }
+                            : undefined
+                        }
+
+                      >
+                        <div className={styles.profileImageWrapper}>
+                          <img
+                            src={
+                              item.image ||
+                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                item.name
+                              )}&background=ffecd1&color=333&size=200`
+                            }
+                            alt={item.name}
+                            className={styles.profileImage}
+                          />
+                        </div>
+                        <div className={styles.profileName}>{item.name}</div>
+                        <div className={styles.HoverText}>
+                          {getHoverMessage(item.name)}
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className={styles.innerCircle}>
+                      {currentItems.slice(2, 4).map((item, index) => (
                         <div
                           key={item.id}
                           className={styles.profileCard}
-                          style={getOuterCirclePosition(index)}
+                          style={getInnerCirclePosition(index)}
                           onClick={
                             isChatEnabledTab
                               ? () => openTeamsChat(item.email, item.name)
                               : undefined
                           }
+
+
                           role={isChatEnabledTab ? "button" : undefined}
+
                           tabIndex={isChatEnabledTab ? 0 : -1}
+
                           onKeyDown={
                             isChatEnabledTab
                               ? (e) => {
-                                  if (e.key === "Enter" || e.key === " ")
-                                    openTeamsChat(item.email, item.name);
-                                }
+                                if (e.key === "Enter" || e.key === " ")
+                                  openTeamsChat(item.email, item.name);
+
+                              }
                               : undefined
                           }
+
                         >
                           <div className={styles.profileImageWrapper}>
                             <img
@@ -759,118 +784,83 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
                             />
                           </div>
                           <div className={styles.profileName}>{item.name}</div>
-                          <div className={styles.HoverText}>{getHoverMessage(item.name)}</div>
+                          <div className={styles.HoverText}>
+                            {getHoverMessage(item.name)}
+                          </div>
                         </div>
                       ))}
 
-                      <div className={styles.innerCircle}>
-                        {currentItems.slice(2, 4).map((item, index) => (
-                          <div
-                            key={item.id}
-                            className={styles.profileCard}
-                            style={getInnerCirclePosition(index)}
-                            onClick={
-                              isChatEnabledTab
-                                ? () => openTeamsChat(item.email, item.name)
-                                : undefined
-                            }
-                            role={isChatEnabledTab ? "button" : undefined}
-                            tabIndex={isChatEnabledTab ? 0 : -1}
-                            onKeyDown={
-                              isChatEnabledTab
-                                ? (e) => {
-                                    if (e.key === "Enter" || e.key === " ")
-                                      openTeamsChat(item.email, item.name);
-                                  }
-                                : undefined
-                            }
-                          >
-                            <div className={styles.profileImageWrapper}>
-                              <img
-                                src={
-                                  item.image ||
-                                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                    item.name
-                                  )}&background=ffecd1&color=333&size=200`
-                                }
-                                alt={item.name}
-                                className={styles.profileImage}
-                              />
-                            </div>
-                            <div className={styles.profileName}>{item.name}</div>
-                            <div className={styles.HoverText}>{getHoverMessage(item.name)}</div>
-                          </div>
-                        ))}
-
-                        <div className={styles.centerIllustration}>
-                          <img
-                            src={
-                              activeTab === "newJoiners"
-                                ? newJoinerCenter
-                                : activeTab === "anniversaries"
+                      <div className={styles.centerIllustration}>
+                        <img
+                          src={
+                            activeTab === "newJoiners"
+                              ? newJoinerCenter
+                              : activeTab === "anniversaries"
                                 ? aniversaryImage
                                 : cakeImage
-                            }
-                            alt="Celebration"
-                            className={styles.illustrationImage}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={styles.bottomSection}>
-                      {totalPages > 1 && (
-                        <div className={styles.pagination}>
-                          {Array.from({ length: totalPages }).map((_, index) => (
-                            <button
-                              key={index}
-                              className={`${styles.dot} ${
-                                index === currentPage ? styles.activeDot : ""
-                              }`}
-                              onClick={() => setCurrentPage(index)}
-                              aria-label={`Go to page ${index + 1}`}
-                            />
-                          ))}
-                        </div>
-                      )}
-
-                      <div className={styles.buttonContainer}>
-                        <a href={viewAllHref} className={styles.viewAllButton}>
-                          View All
-                        </a>
+                          }
+                          alt="Celebration"
+                          className={styles.illustrationImage}
+                        />
                       </div>
                     </div>
                   </div>
 
-                  <button
-                    className={styles.navButton}
-                    onClick={handleNext}
-                    disabled={totalPages <= 1}
-                    style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
-                  >
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M9 18L15 12L9 6"
-                        stroke="currentColor"
-                        strokeWidth="1"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
+
+                  <div className={styles.bottomSection}>
+                    {totalPages > 1 && (
+                      <div className={styles.pagination}>
+                        {Array.from({ length: totalPages }).map((_, index) => (
+                          <button
+                            key={index}
+                            className={`${styles.dot} ${index === currentPage ? styles.activeDot : ""
+                              }`}
+                            onClick={() => setCurrentPage(index)}
+                            aria-label={`Go to page ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    <div className={styles.buttonContainer}>
+                      <a
+                        href={viewAllHref}
+                        className={styles.viewAllButton}
+                        data-interception="off"
+                        onClick={handleViewAllClick}
+                      >
+                        View All
+                      </a>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </>
-          ) : activeError ? (
-            // error already visible in MessageBar; keep space so shimmer can show
-            <div style={{ minHeight: 260 }} />
-          ) : (
-            <div className={styles.emptyState}>
-              <p>{emptyMessage}</p>
-            </div>
-          )}
-        </LoadingBoundary>
+
+                <button
+                  className={styles.navButton}
+                  onClick={handleNext}
+                  disabled={totalPages <= 1}
+                  style={{ visibility: totalPages <= 1 ? "hidden" : "visible" }}
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M9 18L15 12L9 6"
+                      stroke="currentColor"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className={styles.emptyState}>
+            <p>{emptyMessage}</p>
+          </div>
+        )}
       </div>
+
     </div>
   );
 };
