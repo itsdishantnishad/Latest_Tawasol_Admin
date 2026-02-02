@@ -29,8 +29,6 @@ interface IFormsLibraryState {
   isLoading: boolean;
   selectedItem?: IFormItem;
   viewMode: { [dept: string]: "list" | "grid" };
-
-  // ✅ same as ViewPage
   initialError: string | null;
 }
 
@@ -93,7 +91,7 @@ export default class FormsLibrary extends React.Component<IFormsLibraryProps, IF
   // --------------------------------------------------------------------
 
   private async _loadItems(): Promise<void> {
-    // ✅ same behavior as ViewPage: show shimmer while loading + clear error
+    // same behavior as ViewPage: show shimmer while loading + clear error
     this.setState({ isLoading: true, initialError: null });
 
     try {
@@ -242,7 +240,7 @@ export default class FormsLibrary extends React.Component<IFormsLibraryProps, IF
     window.open(item.powerAppsUrl, "_blank", "noopener,noreferrer");
   };
 
-  // ✅ SAME shimmer as ViewPage
+  // SAME shimmer as ViewPage
   private _renderInitialShimmer(): React.ReactNode {
     return (
       <div className={styles.initialShimmerWrap} aria-label="Loading forms">
