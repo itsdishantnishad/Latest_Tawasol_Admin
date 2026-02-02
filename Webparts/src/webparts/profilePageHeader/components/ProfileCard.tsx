@@ -10,10 +10,10 @@ export interface IProfileCardProps {
   qrCodeUrl?: string; // can be dataURL OR normal URL
 }
 
-// [PROFILECARD] ✅ Dubai logo (make sure the file name matches exactly in assets)
-const Dubaiicon_URL: string = require("../assets/Dubaiicon.png");
+// ✅ Dubai logo (make sure file exists in: src/webparts/profilePageHeader/assets/)
+const DubaiIcon_URL: string = require("../assets/Dubaiicon.png");
 
-// [PROFILECARD] ✅ Background vectors (make sure these exist in assets folder)
+// ✅ Background vectors
 const VectorA_URL: string = require("../assets/VectorA.png");
 const VectorB_URL: string = require("../assets/VectorB.png");
 
@@ -22,7 +22,7 @@ const getInitials = (name: string): string => {
   if (!cleaned) return "—";
   const parts = cleaned.split(" ").filter(Boolean);
   const first = (parts[0] || "").charAt(0);
-  const last = (parts.length > 1 ? parts[parts.length - 1] : parts[parts.length - 1]).charAt(0);
+  const last = (parts.length > 1 ? parts[parts.length - 1] : parts[0]).charAt(0);
   return (first + last).toUpperCase();
 };
 
@@ -41,16 +41,16 @@ const ProfileCard: React.FC<IProfileCardProps> = (props) => {
 
   return (
     <div className={styles.card} role="dialog" aria-label="Profile Card">
-      {/* [PROFILECARD] Background vectors */}
-      <img className={styles.vectorA} src={VectorA_URL} alt="" aria-hidden="true" />
-      <img className={styles.vectorB} src={VectorB_URL} alt="" aria-hidden="true" />
+      {/* ✅ SWAPPED: vectorA position will show VectorB image */}
+      <img className={styles.vectorA} src={VectorB_URL} alt="" aria-hidden="true" />
 
-      {/* [PROFILECARD] Top Dubai logo strip */}
+      {/* ✅ SWAPPED: vectorB position will show VectorA image */}
+      <img className={styles.vectorB} src={VectorA_URL} alt="" aria-hidden="true" />
+
       <div className={styles.topLogoStrip}>
-        <img className={styles.dubaiicon} src={Dubaiicon_URL} alt="Dubai Holding Real Estate" />
+        <img className={styles.dubaiicon} src={DubaiIcon_URL} alt="Dubai Holding Real Estate" />
       </div>
 
-      {/* [PROFILECARD] Avatar */}
       <div className={styles.avatarWrap} aria-label="User photo">
         {photoUrl ? (
           <img className={styles.avatarImg} src={photoUrl} alt={displayName} />
@@ -61,13 +61,9 @@ const ProfileCard: React.FC<IProfileCardProps> = (props) => {
         )}
       </div>
 
-      {/* [PROFILECARD] Name */}
       <div className={styles.name}>{displayName || "—"}</div>
-
-      {/* [PROFILECARD] Subtitle */}
       <div className={styles.subtitle}>{subtitle}</div>
 
-      {/* [PROFILECARD] QR Box */}
       <div className={styles.qrOuter}>
         <div className={styles.qrInner}>
           {qrCodeUrl ? (
@@ -78,7 +74,6 @@ const ProfileCard: React.FC<IProfileCardProps> = (props) => {
         </div>
       </div>
 
-      {/* [PROFILECARD] Employee ID */}
       <div className={styles.empId}>
         <span className={styles.empLabel}>Emp. ID :</span>{" "}
         <span className={styles.empValue}>{(employeeId || "—").trim() || "—"}</span>

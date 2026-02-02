@@ -1,5 +1,5 @@
 /* ProfilePageHeader.module.scss */
-/* ✅ Same as ProfileHeader.module.scss (only renamed file) */
+/* ✅ UPDATED FULL FILE (your full SCSS + portal fix) | NO DUPLICATES | NO CONFLICTS */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
@@ -26,6 +26,7 @@
 
 /* =========================================================
    ✅ FORCE SharePoint FIRST ROW (where ProfileHeader sits)
+   to allow full-bleed (remove left/right canvas space + no clipping)
    ========================================================= */
 :global(#spPageCanvasContent) {
   margin-top: 0 !important;
@@ -45,19 +46,69 @@
   overflow: visible !important;
 }
 
+/* ✅ Safety: prevent horizontal scrollbar because of full-bleed */
 :global(body) {
   overflow-x: hidden !important;
 }
 
-/* ========================================================= */
+/* =========================================================
+   ✅ HERO FULL WIDTH + ✅ ZERO GAP FROM TOP
+   + ✅ Background merged here (no duplicate .headerWrap blocks)
+   ========================================================= */
 .headerWrap {
   padding: 44px 56px;
   display: flex;
   justify-content: space-between;
   box-sizing: border-box;
   border-radius: 0;
+
+  /* ✅ IMPORTANT: allow popups to show (no clipping) */
   overflow: visible;
+
   position: relative;
+  width: 100%;
+
+  background-image:
+    url("../assets/Gradient.svg"),
+    linear-gradient(90deg, #fbd8c7 0%, #fee2cf 35%, #ffd6b6 68%, #ffe4d1 100%);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Optional decorative corners (used only if you render these divs in TSX) */
+.cornerLeft {
+  position: absolute;
+  width: 569px;
+  height: 569px;
+  top: -427px;
+  left: -317px;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 135, 135, 0.55) 0%,
+    rgba(255, 135, 135, 0.4) 45%,
+    rgba(255, 135, 135, 0) 75%
+  );
+  mix-blend-mode: multiply;
+}
+
+.cornerRight {
+  position: absolute;
+  width: 351px;
+  height: 351px;
+  top: 48px;
+  left: 1097px;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 166, 73, 0.5) 0%,
+    rgba(255, 166, 73, 0.35) 45%,
+    rgba(255, 166, 73, 0) 75%
+  );
+  mix-blend-mode: multiply;
 }
 
 .identityCard,
@@ -66,12 +117,18 @@
   z-index: 1;
 }
 
+/* ========================================================= */
 .actions {
   align-self: flex-start;
   position: relative;
   margin-left: auto;
+
+  /* ✅ keep icons in one row nicely */
   display: inline-flex;
   align-items: center;
+
+  /* ✅ FIX: make equal spacing between all icons */
+  gap: 20px;
 }
 
 .copyPill {
@@ -154,10 +211,12 @@
   }
 }
 
+/* ✅ FIX: remove hardcoded margin so gap controls spacing */
 .kebabBtn {
-  margin-left: 20px;
+  margin-left: 0;
 }
 
+/* ========================================================= */
 .identityCard {
   width: 100%;
   max-width: 780px;
@@ -182,6 +241,14 @@
   height: 150px;
   flex-shrink: 0;
   margin-top: 120px;
+}
+
+/* ✅ Avatar loading state (used by TSX: `${styles.avatar} ${styles.avatarLoading}`) */
+.avatarLoading {
+  background: #f99999ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .avatarBadge {
@@ -217,6 +284,7 @@
   color: #da291c;
 }
 
+/* ========================================================= */
 .metaCol {
   display: flex;
   flex-direction: column;
@@ -260,6 +328,7 @@
   text-overflow: ellipsis;
 }
 
+/* ========================================================= */
 .kebabWrapper {
   position: relative;
   display: inline-block;
@@ -295,6 +364,13 @@
   }
 }
 
+/* ✅ Disabled change-photo button when not self */
+.changePhotoBtnDisabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .changePhotoIcon {
   width: 24px;
   height: 24px;
@@ -307,6 +383,7 @@
   color: #101820;
 }
 
+/* ========================================================= */
 .badgesRow {
   display: flex;
   gap: 14px;
@@ -314,6 +391,16 @@
   justify-content: flex-end;
   margin-top: 14px;
   flex-wrap: wrap;
+}
+
+/* ✅ Badges row read-only */
+.badgesReadOnly {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.badgesReadOnly .badgeItem {
+  cursor: default !important;
 }
 
 .badgeItem {
@@ -370,6 +457,7 @@
   white-space: nowrap;
 }
 
+/* ========================================================= */
 .errorMessage {
   display: flex;
   align-items: center;
@@ -390,6 +478,11 @@
   }
 }
 
+/* ✅ Hidden file input (used by TSX: className={styles.hiddenInput}) */
+.hiddenInput {
+  display: none;
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -401,6 +494,73 @@
   }
 }
 
+/* =========================================================
+   [PROFILECARD] ✅ Button styles (keep)
+   ========================================================= */
+
+/* (Wrap kept for backward compatibility; TSX now uses just .profileCardBtn directly) */
+.profileCardWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  /* ✅ FIX: remove custom margin, gap will handle spacing */
+  margin-right: 0;
+}
+
+.profileCardBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #ffffff;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.profileCardBtnActive {
+  background: #ffffff;
+}
+
+.profileCardIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* ✅ OLD popover class (if anything still references it, keep but harmless) */
+.profileCardPopover {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  z-index: 9999;
+}
+
+/* ✅ NEW: Portal container (TSX uses styles.profileCardPortal) */
+.profileCardPortal {
+  position: fixed;
+  z-index: 100000;
+  pointer-events: auto;
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
 @media (max-width: 768px) {
   .headerWrap {
     min-height: 260px;
@@ -452,57 +612,4 @@
     white-space: normal;
     height: auto;
   }
-}
-
-/* =========================================================
-   [PROFILECARD] ✅ NEW styles (icon + hover white + popover)
-   ========================================================= */
-
-.profileCardWrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  margin-right: 12px; /* spacing before copy icon */
-}
-
-.profileCardBtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: #ffffff; /* ✅ hover white */
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-}
-
-.profileCardBtnActive {
-  background: #ffffff; /* ✅ active white */
-}
-
-.profileCardIcon {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-.profileCardPopover {
-  position: absolute;
-  top: 48px; /* below icon */
-  right: 0;
-  z-index: 9999;
 }

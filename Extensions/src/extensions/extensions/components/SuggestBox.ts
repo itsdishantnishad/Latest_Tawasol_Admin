@@ -1,88 +1,141 @@
-import styles from '../Extension.module.scss';
+import styles from "../Extension.module.scss";
+import { PhotoService } from "../shared/photoService";
 
 export interface SuggestItem {
   title: string;
   subtitle?: string;
   url: string;
   imageUrl?: string;
-  kind: 'person' | 'page' | 'doc';
+  kind: "person" | "page" | "doc";
 }
 
 export class SuggestBox {
   private host: HTMLDivElement | null = null;
   private activeIndex = -1;
 
+  private readonly onReposition = () => this.updatePosition();
+
   constructor(
     private readonly attachUnder: HTMLElement,
     private readonly getWebUrl: () => string,
-    private readonly photoSrcForPerson: (upn?: string) => string
+    private readonly photoService: PhotoService
   ) {}
+
+  private extractAccountNameFromUrl(url: string): string {
+    try {
+      const u = new URL(url, window.location.origin);
+      return (u.searchParams.get("accountname") || "").trim();
+    } catch {
+      const m = /[?&]accountname=([^&]+)/i.exec(url || "");
+      return m ? decodeURIComponent(m[1] || "").trim() : "";
+    }
+  }
+
+  private extractUsernameFromUserPhotoUrl(url: string): string {
+    try {
+      const u = new URL(url, window.location.origin);
+      return (u.searchParams.get("username") || "").trim();
+    } catch {
+      const m = /[?&]username=([^&]+)/i.exec(url || "");
+      return m ? decodeURIComponent(m[1] || "").trim() : "";
+    }
+  }
 
   close(): void {
     this.activeIndex = -1;
-    if (this.host) { this.host.remove(); this.host = null; }
+
+    window.removeEventListener("resize", this.onReposition);
+    window.removeEventListener("scroll", this.onReposition, true);
+
+    if (this.host) {
+      this.host.remove();
+      this.host = null;
+    }
   }
 
   open(query: string, items: SuggestItem[]): void {
     this.close();
 
-    const host = document.createElement('div');
+    const host = document.createElement("div");
     host.className = styles.TIRSuggestHost;
-    host.setAttribute('role', 'listbox');
+    host.setAttribute("role", "listbox");
     this.host = host;
 
-    const list = document.createElement('div');
+    const list = document.createElement("div");
     list.className = styles.TIRSuggestList;
 
     if (!items.length) {
-      const row = document.createElement('div');
+      const row = document.createElement("div");
       row.className = styles.TIRSuggestItem;
-      row.setAttribute('aria-disabled', 'true');
-      row.style.cursor = 'default';
+      row.setAttribute("aria-disabled", "true");
+      row.style.cursor = "default"; // optional (can remove if you want)
 
-      const textWrap = document.createElement('div');
-      const t1 = document.createElement('div'); t1.className = styles.TIRSuggestTitle; t1.textContent = `No results for “${query}”`;
-      const t2 = document.createElement('div'); t2.className = styles.TIRSuggestSub;   t2.textContent = 'Try a different keyword or check the spelling.';
-      textWrap.appendChild(t1); textWrap.appendChild(t2);
+      const thumb = document.createElement("div");
+      thumb.className = styles.TIRSuggestThumb;
 
-      // no decorative placeholder icon
-      row.appendChild(document.createElement('div'));
+      const textWrap = document.createElement("div");
+
+      const t1 = document.createElement("div");
+      t1.className = styles.TIRSuggestTitle;
+      t1.textContent = `No results for “${query}”`;
+
+      const t2 = document.createElement("div");
+      t2.className = styles.TIRSuggestSub;
+      t2.textContent = "Try a different keyword or check the spelling.";
+
+      textWrap.appendChild(t1);
+      textWrap.appendChild(t2);
+
+      row.appendChild(thumb);
       row.appendChild(textWrap);
       list.appendChild(row);
     } else {
       items.forEach((it, idx) => {
-        const row = document.createElement('div');
+        const row = document.createElement("div");
         row.className = styles.TIRSuggestItem;
-        row.setAttribute('role', 'option');
-        row.setAttribute('data-index', String(idx));
-        row.setAttribute('data-url', it.url);
-        row.setAttribute('data-kind', it.kind);
+        row.setAttribute("role", "option");
+        row.setAttribute("data-index", String(idx));
+        row.setAttribute("data-url", it.url);
+        row.setAttribute("data-kind", it.kind);
+        row.setAttribute("aria-selected", "false");
 
-        const thumb = document.createElement('div');
+        const thumb = document.createElement("div");
         thumb.className = styles.TIRSuggestThumb;
 
-        if (it.kind === 'person') {
-          const img = document.createElement('img');
-          img.src = it.imageUrl || this.photoSrcForPerson();
-          img.alt = '';
+        if (it.kind === "person") {
+          const img = document.createElement("img");
+          img.alt = "";
+
+          const upn =
+            this.extractAccountNameFromUrl(it.url) ||
+            this.extractUsernameFromUserPhotoUrl(it.imageUrl || "");
+
+          void this.photoService.setAvatar(img, "M", upn, it.title);
           thumb.appendChild(img);
         } else if (it.imageUrl) {
-          const img = document.createElement('img');
+          const img = document.createElement("img");
           img.src = it.imageUrl;
-          img.alt = '';
+          img.alt = "";
           thumb.appendChild(img);
         }
-        // else: no image block
 
-        const textWrap = document.createElement('div');
-        const t1 = document.createElement('div'); t1.className = styles.TIRSuggestTitle; t1.textContent = it.title;
-        const t2 = document.createElement('div'); t2.className = styles.TIRSuggestSub;   t2.textContent = it.subtitle || '';
-        textWrap.appendChild(t1); textWrap.appendChild(t2);
+        const textWrap = document.createElement("div");
+
+        const t1 = document.createElement("div");
+        t1.className = styles.TIRSuggestTitle;
+        t1.textContent = it.title;
+
+        const t2 = document.createElement("div");
+        t2.className = styles.TIRSuggestSub;
+        t2.textContent = it.subtitle || "";
+
+        textWrap.appendChild(t1);
+        textWrap.appendChild(t2);
 
         row.appendChild(thumb);
         row.appendChild(textWrap);
 
-        row.addEventListener('click', () => {
+        row.addEventListener("click", () => {
           if (it.url) window.location.href = it.url;
         });
 
@@ -90,55 +143,67 @@ export class SuggestBox {
       });
     }
 
-    const footer = document.createElement('div');
+    const footer = document.createElement("div");
     footer.className = styles.TIRSuggestFooter;
-    footer.textContent = items.length ? 'View all results' : `Search “${query}”`;
-    footer.addEventListener('click', () => {
-      const base = `${this.getWebUrl()}/_layouts/15/search.aspx`;
-      window.location.href = `${base}?q=${encodeURIComponent(query)}`;
+    footer.textContent = items.length ? "View all results" : `Search “${query}”`;
+
+    footer.addEventListener("click", () => {
+      const q = query.trim();
+      const base = this.getWebUrl().replace(/\/$/, "");
+      window.location.href = q
+        ? `${base}/_layouts/15/search.aspx?q=${encodeURIComponent(q)}`
+        : `${base}/_layouts/15/search.aspx`;
     });
 
     host.appendChild(list);
     host.appendChild(footer);
 
-    this.attachUnder.appendChild(host);
-    this.activeIndex = -1;
+    // ✅ IMPORTANT: attach under header wrapper (same stacking context as header)
+    // NOT document.body (SharePoint can have weird offsets)
+    this.attachUnder.parentElement?.appendChild(host);
+
     this.updatePosition();
+
+    window.addEventListener("resize", this.onReposition);
+    window.addEventListener("scroll", this.onReposition, true);
   }
 
+  // ✅ only set TOP (keep width/left/transform in SCSS)
   updatePosition(): void {
     if (!this.host) return;
-    const input = document.getElementById('tir-search') as HTMLElement | null;
-    if (!input) return;
-    const rect = input.getBoundingClientRect();
-    this.host.style.position = 'fixed';
-    this.host.style.left = '50%';
-    this.host.style.transform = 'translateX(-50%)';
-    this.host.style.top = `${Math.round(rect.bottom + 8)}px`;
+
+    const input = this.attachUnder.getBoundingClientRect();
+    const top = Math.round(input.bottom + 8);
+
+    this.host.style.top = `${top}px`;
   }
 
-  moveActive(action: 'up' | 'down' | 'enter'): boolean {
+  moveActive(direction: "down" | "up" | "enter"): boolean {
     if (!this.host) return false;
-    const rows = Array.prototype.slice.call(
-      this.host.querySelectorAll<HTMLElement>(`.${styles.TIRSuggestItem}[aria-disabled!="true"]`)
-    ) as HTMLElement[];
+
+    const rows = Array.from(
+      this.host.querySelectorAll<HTMLElement>(`.${styles.TIRSuggestItem}[data-url]`)
+    );
+
     if (!rows.length) return false;
 
-    if (action === 'enter') {
+    if (direction === "enter") {
       if (this.activeIndex < 0 || this.activeIndex >= rows.length) return false;
-      const url = rows[this.activeIndex].getAttribute('data-url') || '';
-      if (url) { window.location.href = url; return true; }
-      return false;
+      const url = rows[this.activeIndex].getAttribute("data-url") || "";
+      if (url) window.location.href = url;
+      return true;
     }
 
     if (this.activeIndex >= 0 && this.activeIndex < rows.length) {
-      rows[this.activeIndex].setAttribute('aria-selected', 'false');
+      rows[this.activeIndex].setAttribute("aria-selected", "false");
     }
-    if (action === 'down') this.activeIndex = (this.activeIndex + 1) % rows.length;
-    if (action === 'up')   this.activeIndex = (this.activeIndex - 1 + rows.length) % rows.length;
 
-    rows[this.activeIndex].setAttribute('aria-selected', 'true');
-    rows[this.activeIndex].scrollIntoView({ block: 'nearest' });
+    if (direction === "down") this.activeIndex = (this.activeIndex + 1) % rows.length;
+    if (direction === "up") this.activeIndex = (this.activeIndex - 1 + rows.length) % rows.length;
+
+    rows[this.activeIndex].setAttribute("aria-selected", "true");
+    rows[this.activeIndex].scrollIntoView({ block: "nearest" });
+
     return true;
   }
 }

@@ -6,37 +6,39 @@
   height: 429px;
   border-radius: 12px;
   overflow: hidden;
-
   background: #fff;
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
-
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
-/* [PROFILECARD] Background vectors */
-.vectorA {
-  position: absolute;
-  right: -60px;
-  top: 119px;
-  width: 471px;
-  height: 290px;
-  opacity: 1;
-  pointer-events: none;
-  user-select: none;
-}
-
+/* ✅ Vectors sit behind content but visible */
+.vectorA,
 .vectorB {
   position: absolute;
-  left: -67px;
-  top: 80px;
-  width: 471px;
-  height: 400px;
-  opacity: 1;
   pointer-events: none;
   user-select: none;
+  z-index: 1;
 }
 
-/* [PROFILECARD] Top logo strip */
+/* ✅ After swap: this position shows VectorB image (dark one on top) */
+.vectorA {
+  right: -20px;
+  top: -20px;
+  width: 500px;
+  height: auto;
+  opacity: 1;
+}
+
+/* ✅ After swap: this position shows VectorA image (dim one bottom) */
+.vectorB {
+  left: -0px;
+  bottom: -5px;
+//   width: 520px;
+  height: auto;
+  opacity: 1;
+}
+
+/* Top logo strip */
 .topLogoStrip {
   position: absolute;
   top: 0;
@@ -46,7 +48,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2;
+  z-index: 3;
 }
 
 .dubaiicon {
@@ -55,7 +57,7 @@
   object-fit: contain;
 }
 
-/* [PROFILECARD] Avatar */
+/* Avatar */
 .avatarWrap {
   position: absolute;
   width: 92px;
@@ -68,7 +70,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3;
+  z-index: 4;
 }
 
 .avatarImg {
@@ -91,70 +93,60 @@
   font-size: 18px;
 }
 
-/* [PROFILECARD] Name */
+/* Name */
 .name {
   position: absolute;
-  top: 227px;
+  top: 200px;
   left: 31px;
   width: 250px;
   height: 24px;
-
   font-weight: 600;
   font-size: 16px;
   line-height: 24px;
-  letter-spacing: 0;
-
   color: #101820;
   text-align: center;
-  z-index: 3;
-
+  z-index: 4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* [PROFILECARD] Subtitle */
+/* Subtitle */
 .subtitle {
   position: absolute;
   top: 255px;
   left: 31px;
   width: 250px;
-
   font-weight: 400;
   font-size: 11px;
   line-height: 16px;
   color: rgba(16, 24, 32, 0.65);
-
   text-align: center;
-  z-index: 3;
-
+  z-index: 4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* [PROFILECARD] QR outer box */
+/* QR outer box */
 .qrOuter {
   position: absolute;
   top: 266px;
   left: 101px;
   width: 110px;
   height: 110px;
-
   background: #fbe2c4;
   border-radius: 10px;
   padding: 6px;
   box-sizing: border-box;
-  z-index: 3;
+  z-index: 4;
 }
 
-/* [PROFILECARD] QR inner white card */
 .qrInner {
   width: 100%;
   height: 100%;
   background: #ffffff;
   border-radius: 8px;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -176,16 +168,14 @@
   padding: 8px;
 }
 
-/* [PROFILECARD] Employee ID */
+/* Employee ID */
 .empId {
   position: absolute;
   bottom: 16px;
   left: 0;
   width: 100%;
-
   text-align: center;
-  z-index: 3;
-
+  z-index: 4;
   font-size: 12px;
   line-height: 16px;
   color: #101820;

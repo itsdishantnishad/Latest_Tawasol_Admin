@@ -19,21 +19,17 @@ export interface ISuggestItem {
  * PROFILE PAGE CONFIG
  * ================================================
  *
- * Only change PROFILE_PAGE_NAME (and optionally PROFILE_PAGE_FOLDER).
- *
- * Example 1 – custom modern page in current site:
+ * Custom modern page in current site:
  *   PROFILE_PAGE_FOLDER = 'SitePages';
- *   PROFILE_PAGE_NAME   = 'profile-page.aspx';
- *   => https://<current-site>/SitePages/profile-page.aspx?accountname=<upn>
+ *   PROFILE_PAGE_NAME   = 'Profile.aspx';
+ *   => <site>/SitePages/Profile.aspx?uid=<id>&accountname=<upn>
  *
- * Example 2 – classic user profile page:
+ * Classic profile page (optional):
  *   USE_CLASSIC_PROFILE = true;
- *   => https://<current-site>/_layouts/15/userprofile.aspx?accountname=<upn>
+ *   => <site>/_layouts/15/userprofile.aspx?accountname=<upn>
  */
-const PROFILE_PAGE_FOLDER: string = 'SitePages';        // 'SitePages' or 'Pages' etc.
-const PROFILE_PAGE_NAME: string   = 'profile.aspx'; // only file name to change
-
-// Set this true if you want classic userprofile.aspx instead of custom page.
+const PROFILE_PAGE_FOLDER: string = 'SitePages';
+const PROFILE_PAGE_NAME: string = 'Profile.aspx';
 const USE_CLASSIC_PROFILE: boolean = false;
 
 export class SearchService {
@@ -57,31 +53,37 @@ export class SearchService {
   }
 
   /**
-   * Build the profile URL for a given user UPN/email.
-   * - Tenant + site come from this.webUrl (dynamic)
-   * - Only PROFILE_PAGE_NAME is edited manually
+   * Build the profile URL for a given user.
+   * Best practice: use AAD ObjectId (uid) + optional UPN for fallback.
    */
-  private buildPersonProfileUrl(upn: string): string {
-    if (!upn) return '#';
+  private buildPersonProfileUrl(args: { uid?: string; upn?: string }): string {
+    const uid = String(args?.uid || '').trim();
+    const upn = String(args?.upn || '').trim();
+
+    if (!uid && !upn) return '#';
 
     // Current web URL without trailing slash
     const baseWeb = this.webUrl.replace(/\/$/, '');
 
     if (USE_CLASSIC_PROFILE) {
-      // Classic profile page under _layouts
+      // Classic profile page under _layouts (supports accountname)
       const classicUrl = `${baseWeb}/_layouts/15/userprofile.aspx`;
+      const account = upn || uid; // fallback if UPN missing
       const sep = classicUrl.indexOf('?') >= 0 ? '&' : '?';
-      return `${classicUrl}${sep}accountname=${encodeURIComponent(upn)}`;
+      return `${classicUrl}${sep}accountname=${encodeURIComponent(account)}`;
     }
 
     // Custom modern page: <current-site>/<folder>/<page>.aspx
-    const folder = PROFILE_PAGE_FOLDER.replace(/^\/|\/$/g, ''); // no leading/trailing slash
-    const page   = PROFILE_PAGE_NAME.replace(/^\//, '');        // no leading slash
+    const folder = PROFILE_PAGE_FOLDER.replace(/^\/|\/$/g, '');
+    const page = PROFILE_PAGE_NAME.replace(/^\//, '');
 
     const pagePath = `${baseWeb}/${folder}/${page}`;
-    const sep = pagePath.indexOf('?') >= 0 ? '&' : '?';
 
-    return `${pagePath}${sep}accountname=${encodeURIComponent(upn)}`;
+    const qp: string[] = [];
+    if (uid) qp.push(`uid=${encodeURIComponent(uid)}`);
+    if (upn) qp.push(`accountname=${encodeURIComponent(upn)}`);
+
+    return `${pagePath}?${qp.join('&')}`;
   }
 
   // ------------------------------------------------------------------
@@ -89,13 +91,13 @@ export class SearchService {
   // ------------------------------------------------------------------
   /**
    * Uses Microsoft Graph directory search:
-   *   GET /users?$search="text"&$top=n&$count=true
+   *   GET /users?$search="displayName:term OR mail:term OR userPrincipalName:term"
    *
    * Returns:
    *  - title:     displayName
    *  - subtitle:  "jobTitle - department"
-   *  - imageUrl:  userphoto.aspx (built from UPN/mail)
-   *  - url:       profile page (custom or classic) via buildPersonProfileUrl
+   *  - imageUrl:  userphoto.aspx (UPN-based)
+   *  - url:       custom Profile.aspx?uid=<id>&accountname=<upn>
    */
   public async queryPeople(text: string, top: number): Promise<ISuggestItem[]> {
     const q = text.trim();
@@ -103,13 +105,11 @@ export class SearchService {
 
     try {
       const client = await this.getGraph();
-
-      // Strip quotes just in case
       const term = q.replace(/["']/g, '');
 
-      // Graph directory search requires property:value format
-      // Allowed props: displayName, mail, givenName, surname, userPrincipalName
-      const searchExpr = `"displayName:${term}"`;
+      // Better search coverage: name OR email OR UPN
+      const searchExpr =
+        `"displayName:${term}" OR "mail:${term}" OR "userPrincipalName:${term}"`;
 
       const res = await client
         .api('/users')
@@ -119,27 +119,31 @@ export class SearchService {
           $top: top,
           $count: 'true'
         })
+        .select('id,displayName,jobTitle,department,mail,userPrincipalName')
         .get();
 
       const users: any[] = res?.value || [];
 
+      const baseWeb = this.webUrl.replace(/\/$/, '');
       const items: ISuggestItem[] = users.map(u => {
         const displayName: string = u.displayName || '';
         const jobTitle: string = u.jobTitle || '';
         const dept: string = u.department || '';
+
+        // Prefer UPN for thumbnails and fallback
         const upn: string = u.userPrincipalName || u.mail || '';
+        const uid: string = u.id || '';
 
         const subtitleParts = [jobTitle, dept].filter(Boolean);
         const subtitle: string = subtitleParts.join(' - ') || upn || '';
 
-        const photoKey: string = upn || u.id || '';
-        const photoUrl: string = photoKey
-          ? `${this.webUrl}/_layouts/15/userphoto.aspx?size=M&username=${encodeURIComponent(
-              photoKey
-            )}`
+        // userphoto.aspx works best with accountname=<UPN>
+        const photoUrl: string = upn
+          ? `${baseWeb}/_layouts/15/userphoto.aspx?size=M&accountname=${encodeURIComponent(upn)}`
           : '';
 
-        const personUrl = this.buildPersonProfileUrl(upn);
+        // Build your custom profile page URL using uid + upn fallback
+        const personUrl = this.buildPersonProfileUrl({ uid, upn });
 
         return {
           title: displayName || upn || '(no name)',
@@ -152,7 +156,6 @@ export class SearchService {
 
       return items;
     } catch {
-      // console.error('[SearchService.queryPeople] Graph error', e);
       return [];
     }
   }
@@ -201,6 +204,7 @@ export class SearchService {
       url,
       SPHttpClient.configurations.v1
     );
+
     const json: any = await r.json();
     const rows: any[] =
       json?.PrimaryQueryResult?.RelevantResults?.Table?.Rows || [];
@@ -218,7 +222,6 @@ export class SearchService {
       const contentClass = (cells['contentclass'] || '').toLowerCase();
       const thumb = cells['PictureThumbnailURL'] || '';
       const contentType = cells['ContentType'] || '';
-
       const isPage =
         contentClass === 'sts_listitem_webpagelibrary' &&
         pathLower.includes('/sitepages/') &&
