@@ -19,87 +19,20 @@ export interface INewsStoryWebPartProps {
 }
 
 export default class NewsStoryWebPart extends BaseClientSideWebPart<INewsStoryWebPartProps> {
-  // ✅ Delay React render (ms)
-  private readonly _renderDelayMs: number = 1500;
-
-  // ✅ Timer handle
-  private _renderTimerId?: number;
 
   public render(): void {
-    // Clear any pending timer (important when properties change / re-render)
-    if (this._renderTimerId) {
-      window.clearTimeout(this._renderTimerId);
-      this._renderTimerId = undefined;
-    }
+    // ✅ FIX: Direct render - component manages its own loading state
+    // Removed delayed mounting and innerHTML shimmer that was causing race conditions
+    const element: React.ReactElement<INewsStoryProps> = React.createElement(
+      NewsStory,
+      {
+        interval: 500,
+        context: this.context,
+        maxItems: this.properties.maxItems || 3,
+      }
+    );
 
-    // ✅ Show shimmer placeholder immediately (NOT spinner)
-    this._renderShimmerPlaceholder();
-
-    // ✅ Delay mounting React
-    this._renderTimerId = window.setTimeout(() => {
-      const element: React.ReactElement<INewsStoryProps> = React.createElement(
-        NewsStory,
-        {
-          interval: 500, // existing behavior
-          context: this.context,
-          maxItems: this.properties.maxItems || 3,
-        }
-      );
-
-      ReactDom.render(element, this.domElement);
-      this._renderTimerId = undefined;
-    }, this._renderDelayMs);
-  }
-
-  private _renderShimmerPlaceholder(): void {
-    // Unique scope per webpart instance to avoid CSS collisions
-    const scope = `nsShimmer_${(this.instanceId || "x").replace(/-/g, "")}`;
-
-    this.domElement.innerHTML = `
-      <div class="${scope}">
-        <div class="${scope}__header">
-          <div class="${scope}__block ${scope}__title"></div>
-          <div class="${scope}__block ${scope}__subTitle"></div>
-        </div>
-
-        <div class="${scope}__hero ${scope}__block"></div>
-
-        <div class="${scope}__caption">
-          <div class="${scope}__block ${scope}__capLine"></div>
-          <div class="${scope}__block ${scope}__capLine short"></div>
-        </div>
-      </div>
-
-      <style>
-        .${scope} { padding: 12px; box-sizing: border-box; }
-
-        .${scope}__header { margin-bottom: 12px; }
-        .${scope}__hero { width: 100%; height: 240px; border-radius: 16px; margin-bottom: 14px; }
-        .${scope}__caption { display: grid; gap: 10px; }
-
-        .${scope}__block {
-          border-radius: 10px;
-          background: linear-gradient(90deg,
-            rgba(0,0,0,0.06) 25%,
-            rgba(0,0,0,0.12) 37%,
-            rgba(0,0,0,0.06) 63%
-          );
-          background-size: 400% 100%;
-          animation: ${scope}__shimmer 1.2s ease-in-out infinite;
-        }
-
-        .${scope}__title { width: 45%; height: 18px; margin-bottom: 10px; border-radius: 12px; }
-        .${scope}__subTitle { width: 30%; height: 12px; border-radius: 10px; }
-
-        .${scope}__capLine { width: 85%; height: 14px; border-radius: 10px; }
-        .${scope}__capLine.short { width: 60%; }
-
-        @keyframes ${scope}__shimmer {
-          0% { background-position: 100% 0; }
-          100% { background-position: 0 0; }
-        }
-      </style>
-    `;
+    ReactDom.render(element, this.domElement);
   }
 
   protected onInit(): Promise<void> {
@@ -155,14 +88,7 @@ export default class NewsStoryWebPart extends BaseClientSideWebPart<INewsStoryWe
   }
 
   protected onDispose(): void {
-    // ✅ clear pending timer to avoid rendering after dispose
-    if (this._renderTimerId) {
-      window.clearTimeout(this._renderTimerId);
-      this._renderTimerId = undefined;
-    }
-
     ReactDom.unmountComponentAtNode(this.domElement);
-    this.domElement.innerHTML = "";
   }
 
   protected get dataVersion(): Version {

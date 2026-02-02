@@ -6,19 +6,15 @@
 :global {
   /* Instrument Serif */
   @font-face {
-    font-family: "Instrument Serif";
-    src: url("./assets/fonts/instrumentserif-regular.woff") format("woff");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
+    // font-family: "Instrument Serif";
+    font-family: 'Instrument Serif Regular';
+    src: local('Instrument Serif Regular'), url('./assets/fonts/instrumentserif-regular.woff') format('woff');
   }
 
   @font-face {
-    font-family: "Instrument Serif";
-    src: url("./assets/fonts/instrumentserif-italic.woff") format("woff");
-    font-weight: 400;
-    font-style: italic;
-    font-display: swap;
+    // font-family: "Instrument Serif";
+    font-family: 'Instrument Serif Italic';
+    src: local('Instrument Serif Italic'), url('./assets/fonts/instrumentserif-italic.woff') format('woff');
   }
 
   /* ===================== OOTB TEXT WEBPART ONLY ===================== */
@@ -680,18 +676,24 @@
 }
 
 .onboardingTitle {
-  margin: 0 0 6px;
-  font-size: clamp(22px, 2.2vw, 34px);
-  line-height: clamp(28px, 2.6vw, 42px);
-  font-weight: 700;
-  color: #111;
+  margin: 0 0 8px;
+  font-size: 42px;
+  line-height: 100%;
+  color: #101820;
+  font-family: 'Instrument Serif Regular';
+  font-weight: 400;
+  span{
+    font-family: 'Instrument Serif Italic';
+    color: #DA291C;
+  }
 }
 
 .onboardingSubtitle {
+  color: #6C6C6C;
+  font-size: 16px;
+  line-height: 24px;
   margin: 0;
-  font-size: clamp(12px, 1.1vw, 15px);
-  line-height: clamp(18px, 1.6vw, 24px);
-  color: #626262;
+  font-weight: 400;
 }
 
 .onboardingVideoFrame {
@@ -755,13 +757,19 @@
 }
 
 .onboardingPrimaryButton {
-  padding: 12px 32px;
-  border-radius: 999px;
-  background: #1F2D3A;
-  color: #fff;
   border: none;
-  font-size: 16px;
+  border-radius: 999px;
   cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  padding: 0;
+  line-height: 20px;
+  font-weight: 600;
+  background: radial-gradient(circle at top left, #202d39 0, #101820 100%);
+  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
+  color: #fff;
+  min-width: 180px;
+  height: 48px;
 }
 
 /* ===================== RESPONSIVE (your existing + onboarding) ===================== */

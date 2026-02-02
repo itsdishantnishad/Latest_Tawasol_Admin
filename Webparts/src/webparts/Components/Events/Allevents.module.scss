@@ -45,7 +45,7 @@
   align-items: center;
   justify-content: center;
   width: 181px;
-  height: 120px;
+  height: 125px;
   background: #FFF4EA;
   border-radius: 8px;
   padding: 0;
@@ -69,11 +69,12 @@
 .imageSection {
   flex-shrink: 0;
   position: relative;
+  height: 125px;
 }
 
 .eventImage {
   border-radius: 10px;
-  height: 125px;
+  height: 100%;
   object-fit: cover;
   width: 250px;
   object-position: center top;
@@ -325,15 +326,15 @@
   border: 0;
   cursor: pointer;
   padding: 12px 0;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 24px;
   font-weight: 500;
-  color: #3A3B43;
+  color: #6c6c6c;
   position: relative;
 }
 
 .activeTab{
-  color: #101820;
+  color: #000;
   font-weight: 600;
 
   &::after{
