@@ -156,11 +156,11 @@ const Meeting: React.FC<IMeetingProps> = ({ context, seeAllURL }) => {
   }, [context]);
 
   if (loading) {
-    return <div className={styles.meetingContainer}>Loading meetings…</div>;
+    return <div className={styles.meetingContainerErr}>Loading meetings…</div>;
   }
 
   if (!items.length) {
-    return <div className={styles.meetingContainer}>No upcoming meetings</div>;
+    return <div className={styles.meetingContainerErr}>No upcoming meetings</div>;
   }
 
   return (

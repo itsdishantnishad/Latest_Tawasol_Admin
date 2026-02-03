@@ -250,12 +250,12 @@ export const Events: React.FC<IEventsProps> = (props) => {
   ]);
 
   if (loading) {
-    return <div className={styles.eventsContainer}>Loading events...</div>;
+    return <div className={styles.eventsContainerErr}>Loading events...</div>;
   }
 
   if (error) {
     return (
-      <div className={styles.eventsContainer}>
+      <div className={styles.eventsContainerErr}>
         <p style={{ color: 'red' }}>Error loading events: {error}</p>
       </div>
     );
