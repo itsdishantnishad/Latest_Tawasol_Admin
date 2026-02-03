@@ -16,6 +16,8 @@ export interface IAnnouncementBannerWebPartProps {
 export default class AnnouncementBannerWebPart
   extends BaseClientSideWebPart<IAnnouncementBannerWebPartProps> {
 
+  private _renderTimerId: number | undefined;
+
   public render(): void {
     const componentElement: React.ReactElement<IAnnouncementBannerComponentProps> =
       React.createElement(AnnouncementBannerComponent, {
@@ -23,10 +25,20 @@ export default class AnnouncementBannerWebPart
         listTitle: this.properties.listTitle || ListName.ANNOUNCEMENT_BANNER
       });
 
-    ReactDom.render(componentElement, this.domElement);
+    // 1 sec delay
+    if (this._renderTimerId) {
+      window.clearTimeout(this._renderTimerId);
+    }
+    this._renderTimerId = window.setTimeout(() => {
+      ReactDom.render(componentElement, this.domElement);
+    }, 1000);
   }
 
   protected onDispose(): void {
+    if (this._renderTimerId) {
+      window.clearTimeout(this._renderTimerId);
+      this._renderTimerId = undefined;
+    }
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
