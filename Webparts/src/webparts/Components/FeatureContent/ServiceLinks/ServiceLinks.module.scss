@@ -197,6 +197,13 @@
   border-radius: 40px;
 }
 
+.serviceIcon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  display: block;
+}
+
 @media (max-width: 768px) {
   .serviceLinksContainer {
     padding: 40px 16px;

@@ -83,15 +83,15 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
   const itemsPerPage = 7;
 
   //  Strong new-tab behavior for SharePoint (prevents interception + forces window.open)
-  const handleOpenNewTab = (e: React.MouseEvent<HTMLAnchorElement>, url?: string): void => {
-    const safeUrl = (url || "").trim();
-    if (!safeUrl || safeUrl === "#") {
+  const handleOpenNewTab = (e: React.MouseEvent<HTMLAnchorElement>, rawUrl?: string): void => {
+    const finalUrl = resolveUrl(rawUrl);
+    if (!finalUrl || finalUrl === "#") {
       e.preventDefault();
       return;
     }
 
     e.preventDefault(); // stop SharePoint SPA nav
-    window.open(safeUrl, "_blank", "noopener,noreferrer");
+    window.open(finalUrl, "_blank", "noopener,noreferrer");
   };
 
   // Transform API data into a flat list; position/relativeTo not relied on here.
@@ -120,11 +120,12 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
       });
     });
 
+    // ✅ Custom: prefer IconData (base64/data URL), fallback to IconURL
     customData.forEach((item, index) => {
       serviceLinks.push({
         id: `custom-${index}`,
         name: item.Title,
-        icon: item.IconURL || "#",
+        icon: item.IconData || item.IconURL || "#",
         url: item.URL,
         category: "custom",
       });
@@ -213,6 +214,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
   const showAppsLinksDialog = (): void => setIsHidden(false);
   const hideAppsAndLinks = (): void => setIsHidden(true);
   const showNavButtons = totalPages > 1;
+
   return (
     <div className={styles.serviceLinksContainer}>
       <AppsAndLinks
@@ -220,7 +222,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
         hideAppsAndLinks={hideAppsAndLinks}
         isHidden={isHidden}
         context={props.context}
-        initialTab={activeTab} // NEW: open popup on the same tab
+        initialTab={activeTab} // open popup on the same tab
       />
 
       <div className={styles.tabContainer}>
@@ -248,16 +250,16 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
         {/* prev button */}
         {showNavButtons && (
           <button className={styles.navButton} onClick={handlePrev}>
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M15 18L9 12L15 6"
-              stroke="currentColor"
-              strokeWidth="1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15 18L9 12L15 6"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         )}
 
         <div className={styles.circleContainer}>
@@ -277,7 +279,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
                   onClick={(e) => handleOpenNewTab(e, service.url)}
                 >
                   {service.icon && service.icon !== "#" && (
-                    <img src={service.icon} alt={service.name} width={64} height={64} />
+                    <img src={service.icon} alt={service.name} className={styles.serviceIcon} />
                   )}
                   <span className={styles.serviceName}>{service.name}</span>
                 </a>
@@ -300,7 +302,7 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
                     onClick={(e) => handleOpenNewTab(e, service.url)}
                   >
                     {service.icon && service.icon !== "#" && (
-                      <img src={service.icon} alt={service.name} width={64} height={64} />
+                      <img src={service.icon} alt={service.name} className={styles.serviceIcon} />
                     )}
                     <span className={styles.serviceName}>{service.name}</span>
                   </a>
@@ -309,19 +311,20 @@ export const ServiceLinks: React.FC<IServiceLinksProps> = (props) => {
             </div>
           </div>
         </div>
-       {/* {next button} */}
-        {showNavButtons &&(
+
+        {/* next button */}
+        {showNavButtons && (
           <button className={styles.navButton} onClick={handleNext}>
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M9 18L15 12L9 6"
-              stroke="currentColor"
-              strokeWidth="1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M9 18L15 12L9 6"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         )}
       </div>
 

@@ -11,6 +11,8 @@ import * as strings from "FeatureWheelWebPartStrings";
 import FeatureWheel from "./components/FeatureWheel";
 import { IFeatureWheelProps } from "./components/IFeatureWheelProps";
 
+import styles from "./FeatureWheelWebPart.module.scss";
+
 export interface IFeatureWheelWebPartProps {
   letsCelebrate: string;
   trainingAndDevelopment: string;
@@ -26,27 +28,26 @@ export interface IFeatureWheelWebPartProps {
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
-  // Delay React render (ms)
-  private readonly _renderDelayMs: number = 1500;
+  /** Delay React render in ms */
+  private readonly _renderDelayMilliseconds: number = 1500;
 
-  // Timer handle
-  private _renderTimerId?: number;
+  /** Store timer id so we can clear on re-render/dispose */
+  private _reactMountTimerId?: number;
 
   public render(): void {
-    // Clear pending timer (property changes / rerender)
-    if (this._renderTimerId) {
-      window.clearTimeout(this._renderTimerId);
-      this._renderTimerId = undefined;
+    // Clear pending timer on re-render (property changes / refresh)
+    if (this._reactMountTimerId) {
+      window.clearTimeout(this._reactMountTimerId);
+      this._reactMountTimerId = undefined;
     }
 
-    // Show shimmer placeholder immediately (NOT spinner)
-    this._renderShimmerPlaceholder();
+    // Show shimmer placeholder immediately
+    this._renderWheelShimmerPlaceholder();
 
-    // Delay mounting React
-    this._renderTimerId = window.setTimeout(() => {
-      const element: React.ReactElement<IFeatureWheelProps> = React.createElement(
-        FeatureWheel,
-        {
+    // Delay mounting React component
+    this._reactMountTimerId = window.setTimeout(() => {
+      const featureWheelElement: React.ReactElement<IFeatureWheelProps> =
+        React.createElement(FeatureWheel, {
           letsCelebrate: this.properties.letsCelebrate,
           trainingAndDevelopment: this.properties.trainingAndDevelopment,
           upcomingEvents: this.properties.upcomingEvents,
@@ -59,70 +60,93 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
           beverageMenu: this.properties.beverageMenu,
           taskApprovals: this.properties.taskApprovals,
           context: this.context,
-        }
-      );
+        });
 
-      ReactDom.render(element, this.domElement);
-      this._renderTimerId = undefined;
-    }, this._renderDelayMs);
+      ReactDom.render(featureWheelElement, this.domElement);
+      this._reactMountTimerId = undefined;
+    }, this._renderDelayMilliseconds);
   }
 
-  private _renderShimmerPlaceholder(): void {
-    // Unique scope per webpart instance to avoid CSS collisions
-    const scope = `fwShimmer_${(this.instanceId || "x").replace(/-/g, "")}`;
+  /**
+   * ✅ Wheel shimmer placeholder using the same "arc" concept as your Featured Wheel:
+   * - Tiles placed on an arc using X/Y (sin/cos)
+   * - Slight rotation per tile
+   * - Center tile appears larger (active tile feel)
+   *
+   * NOTE: Styling comes from FeatureWheelWebPart.module.scss (CSS Modules)
+   */
+  private _renderWheelShimmerPlaceholder(): void {
+    // IMPORTANT: explicit number type prevents TS literal narrowing (TS2367)
+    const wheelTileCount: number = 13;
+    const centerTileIndex: number = Math.floor(wheelTileCount / 2);
+
+    // Arc angles (tune if needed)
+    const wheelArcStartAngleDegrees: number = -40;
+    const wheelArcEndAngleDegrees: number = 40;
+
+    // Radius controls curve depth + spacing
+    const wheelArcRadiusPixels: number = 1100;
+
+    // Helper for degrees->radians
+    const degreesToRadians = (degrees: number): number =>
+      (degrees * Math.PI) / 180;
+
+    const wheelTilesHtml: string = Array.from({ length: wheelTileCount })
+      .map((_, tileIndex) => {
+        const normalizedTilePosition: number =
+          wheelTileCount === 1 ? 0 : tileIndex / (wheelTileCount - 1);
+
+        const tileAngleDegrees: number =
+          wheelArcStartAngleDegrees +
+          (wheelArcEndAngleDegrees - wheelArcStartAngleDegrees) *
+            normalizedTilePosition;
+
+        const tileAngleRadians: number = degreesToRadians(tileAngleDegrees);
+
+        // X positions across the arc
+        const tileOffsetXInPixels: number =
+          wheelArcRadiusPixels * Math.sin(tileAngleRadians);
+
+        // Y positions: center highest, sides lower
+        const tileOffsetYInPixels: number =
+          wheelArcRadiusPixels * (1 - Math.cos(tileAngleRadians));
+
+        // Slight rotation like real wheel cards
+        const tileRotationDegrees: number = tileAngleDegrees * 0.55;
+
+        // Center tile on top
+        const tileZIndex: number = 100 - Math.abs(tileIndex - centerTileIndex);
+
+        const isCenterTile: boolean = tileIndex === centerTileIndex;
+
+        const tileClassName: string = isCenterTile
+          ? `${styles.tile} ${styles.tileActive}`
+          : styles.tile;
+
+        return `
+          <div
+            class="${tileClassName}"
+            style="--tileX:${tileOffsetXInPixels}px; --tileY:${tileOffsetYInPixels}px; --tileRot:${tileRotationDegrees}deg; z-index:${tileZIndex};"
+          >
+            <div class="${styles.tileIcon}"></div>
+            <div class="${styles.tileTextLine}"></div>
+            <div class="${styles.tileTextLine} ${styles.tileTextLineShort}"></div>
+          </div>
+        `;
+      })
+      .join("");
 
     this.domElement.innerHTML = `
-      <div class="${scope}">
-        <div class="${scope}__row">
-          <div class="${scope}__block ${scope}__title"></div>
-          <div class="${scope}__block ${scope}__subTitle"></div>
+      <div class="${styles.shimmerRoot}">
+        <div class="${styles.topLines}">
+          <div class="${styles.shimmerBlock} ${styles.lineWide}"></div>
+          <div class="${styles.shimmerBlock} ${styles.lineMid}"></div>
         </div>
 
-        <div class="${scope}__chips">
-          ${Array.from({ length: 10 })
-            .map(() => `<div class="${scope}__block ${scope}__chip"></div>`)
-            .join("")}
-        </div>
-
-        <div class="${scope}__content">
-          <div class="${scope}__block ${scope}__hero"></div>
-          <div class="${scope}__block ${scope}__line"></div>
-          <div class="${scope}__block ${scope}__line short"></div>
-          <div class="${scope}__block ${scope}__line"></div>
+        <div class="${styles.wheel}">
+          ${wheelTilesHtml}
         </div>
       </div>
-
-      <style>
-        .${scope} { padding: 14px; box-sizing: border-box; }
-        .${scope}__row { margin-bottom: 14px; }
-        .${scope}__chips { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
-        .${scope}__content { display: grid; gap: 12px; }
-
-        .${scope}__block {
-          border-radius: 10px;
-          background: linear-gradient(90deg,
-            rgba(0,0,0,0.06) 25%,
-            rgba(0,0,0,0.12) 37%,
-            rgba(0,0,0,0.06) 63%
-          );
-          background-size: 400% 100%;
-          animation: ${scope}__shimmer 1.2s ease-in-out infinite;
-        }
-
-        .${scope}__title { width: 55%; height: 22px; margin-bottom: 10px; border-radius: 12px; }
-        .${scope}__subTitle { width: 35%; height: 14px; border-radius: 10px; }
-
-        .${scope}__chip { width: 140px; height: 40px; border-radius: 14px; }
-
-        .${scope}__hero { width: 100%; height: 220px; border-radius: 16px; }
-        .${scope}__line { width: 100%; height: 14px; border-radius: 10px; }
-        .${scope}__line.short { width: 75%; }
-
-        @keyframes ${scope}__shimmer {
-          0% { background-position: 100% 0; }
-          100% { background-position: 0 0; }
-        }
-      </style>
     `;
   }
 
@@ -170,10 +194,9 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
   }
 
   protected onDispose(): void {
-    // Clear pending timer to avoid rendering after dispose
-    if (this._renderTimerId) {
-      window.clearTimeout(this._renderTimerId);
-      this._renderTimerId = undefined;
+    if (this._reactMountTimerId) {
+      window.clearTimeout(this._reactMountTimerId);
+      this._reactMountTimerId = undefined;
     }
 
     ReactDom.unmountComponentAtNode(this.domElement);
@@ -199,7 +222,8 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
                   label: "Please enter URL for 'Let's Celebrate' see all",
                 }),
                 PropertyPaneTextField("trainingAndDevelopment", {
-                  label: "Please enter URL for 'Training & Development' see all",
+                  label:
+                    "Please enter URL for 'Training & Development' see all",
                 }),
                 PropertyPaneTextField("upcomingEvents", {
                   label: "Please enter URL for 'Upcoming events' see all",
