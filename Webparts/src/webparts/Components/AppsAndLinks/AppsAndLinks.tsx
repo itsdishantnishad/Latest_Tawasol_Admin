@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogType } from "@fluentui/react/lib/Dialog";
 const addLinkIcon: string = require("../../../webparts/assets/add-square.svg");
 const editIcon: string = require("../../../webparts/assets/editIcon.svg");
 const trashIcon: string = require("../../../webparts/assets/trashIcon.svg");
-
+const uploadIcon: string = require("../../../webparts/assets/upload.svg")
 import {
   IconButton,
   DefaultButton,
@@ -36,6 +36,7 @@ export interface IAppsAndLinksProps {
 interface ICustomLink {
   Title: string;
   URL: string;
+  IconData?: string;
 }
 
 interface IUserListItem {
@@ -60,6 +61,17 @@ const isValidURL = (urlString: string): boolean => {
   }
 };
 
+// ✅ helper
+
+const fileToDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+
+
 const AppsAndLinks = (props: IAppsAndLinksProps) => {
   const sp: SPFI = React.useMemo(
     () => spfi().using(SPFx(props.context)),
@@ -73,6 +85,10 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  //  Upload Image State 
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Input State
   const [linkTitle, setLinkTitle] = useState("");
@@ -93,14 +109,26 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
 
   const userEmail = props.context.pageContext.user.loginName;
 
-  const loadUserLinks = async () => {
+   const loadUserLinks = async () => {
     try {
       const items: IUserListItem[] = await spService.getCustomAppLinks(
         "Custom App Links",
         userEmail
       );
+
       if (items.length > 0 && items[0][APPLINK_COL]) {
-        setCustomLinks(JSON.parse(items[0][APPLINK_COL]));
+        const parsed = JSON.parse(items[0][APPLINK_COL] || "[]");
+
+        // ✅ safe normalize (older items won’t have IconData)
+        const normalized: ICustomLink[] = Array.isArray(parsed)
+          ? parsed.map((x: any) => ({
+              Title: x?.Title ?? "",
+              URL: x?.URL ?? "",
+              IconData: x?.IconData, // optional
+            }))
+          : [];
+
+        setCustomLinks(normalized);
       }
     } catch (err) {
       console.error("Error loading user links:", err);
@@ -161,6 +189,8 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     setLinkURL("");
     setTitleError("");
     setUrlError("");
+    setUploadedImage(null); // 
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const openAddForm = () => {
@@ -221,21 +251,38 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
   };
 
   const saveForm = async () => {
-    if (!validateForm()) {
-      return;
+    if (!validateForm()) return;
+
+    let iconData: string | undefined = undefined;
+
+    // ✅ if user uploaded image in this form session, convert to base64
+    if (uploadedImage) {
+      try {
+        iconData = await fileToDataUrl(uploadedImage);
+      } catch (e) {
+        console.error(e);
+        alert("Unable to read the selected image. Please try again.");
+        return;
+      }
     }
 
-    let updatedLinks = [...customLinks];
+    const updatedLinks = [...customLinks];
 
     if (isEditMode && editingIndex !== null) {
+      const existing = updatedLinks[editingIndex];
+
       updatedLinks[editingIndex] = {
         Title: linkTitle.trim(),
         URL: linkURL.trim(),
+
+        // ✅ keep old icon if user didn’t select a new one
+        IconData: iconData ?? existing.IconData,
       };
     } else {
       updatedLinks.push({
         Title: linkTitle.trim(),
         URL: linkURL.trim(),
+        IconData: iconData, // optional
       });
     }
 
@@ -245,18 +292,10 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     setIsFormOpen(false);
     resetFormState();
 
-    // Show success message
-    if (isEditMode) {
-      setSuccessMessage("Successfully updated 1 custom URL");
-    } else {
-      setSuccessMessage("Successfully added 1 custom URL");
-    }
+    setSuccessMessage(isEditMode ? "Successfully updated 1 custom URL" : "Successfully added 1 custom URL");
     setShowSuccessMessage(true);
 
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 3000);
+    setTimeout(() => setShowSuccessMessage(false), 3000);
   };
 
   const cancelForm = () => {
@@ -284,6 +323,26 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
 
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+
+  
+  // ✅ Upload handlers
+  const onClickUpload = () => fileInputRef.current?.click();
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) return;
+
+    // minimal guard: images only
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file only.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setUploadedImage(null);
+      return;
+    }
+
+    setUploadedImage(file);
+  };
 
   return (
     <Dialog
@@ -404,7 +463,13 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                       rel="noopener noreferrer"
                       className={styles.linkItem}
                     >
-                      <div className={styles.iconCircle}>🔗</div>
+                      <div className={styles.iconCircle}>
+                        {link.IconData ? (
+                          <img src={link.IconData} className={styles.appIcon} alt="" />
+                        ) : (
+                          "🔗"
+                        )}
+                      </div>
                       <div className={styles.linkTitle}>{link.Title}</div>
                     </a>
 
@@ -459,6 +524,24 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                           fieldGroup: { borderRadius: 8 },
                         }}
                       />
+                       {/* ✅ Upload Image Button */}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className={styles.hiddenFileInput}
+                        onChange={onFileChange}
+                      />
+
+                      <button
+                        type="button"
+                        className={styles.uploadBtn}
+                        onClick={onClickUpload}
+                      >
+                        <span>Upload Image</span>
+                        <img className={styles.uploadIcon} src={uploadIcon} alt="" />
+                      </button>
+                   
                     </div>
 
                     <div className={styles.formField}>
