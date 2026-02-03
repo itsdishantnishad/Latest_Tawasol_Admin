@@ -7,13 +7,9 @@ import { Dialog, DialogContent, DialogType } from "@fluentui/react/lib/Dialog";
 const addLinkIcon: string = require("../../../webparts/assets/add-square.svg");
 const editIcon: string = require("../../../webparts/assets/editIcon.svg");
 const trashIcon: string = require("../../../webparts/assets/trashIcon.svg");
+const uploadIcon: string = require("../../../webparts/assets/upload.svg");
 
-import {
-  IconButton,
-  DefaultButton,
-  PrimaryButton,
-} from "@fluentui/react/lib/Button";
-
+import { IconButton, DefaultButton, PrimaryButton } from "@fluentui/react/lib/Button";
 import { TextField } from "@fluentui/react/lib/TextField";
 
 import { SPFI, spfi, SPFx } from "@pnp/sp";
@@ -29,15 +25,15 @@ export interface IAppsAndLinksProps {
   hideAppsAndLinks: () => void;
   context: any;
 
-  //tab coming from ServiceLinks (quick/app/custom)
+  // tab coming from ServiceLinks (quick/app/custom)
   initialTab?: TabType;
 }
 
 interface ICustomLink {
   Title: string;
   URL: string;
-  IconData?: string;
-  IconURL?: string;
+  IconData?: string; // base64 data url (data:image/..;base64,...)
+  IconURL?: string;  // optional legacy
 }
 
 interface IUserListItem {
@@ -55,18 +51,23 @@ const APPLINK_COL = "TIRCustomLinkAttribute";
 const isValidURL = (urlString: string): boolean => {
   try {
     const url = new URL(urlString);
-    // Only allow http and https protocols
     return url.protocol === "http:" || url.protocol === "https:";
-  } catch (e) {
+  } catch {
     return false;
   }
 };
 
+// helper: file -> data URL
+const fileToDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+
 const AppsAndLinks = (props: IAppsAndLinksProps) => {
-  const sp: SPFI = React.useMemo(
-    () => spfi().using(SPFx(props.context)),
-    [props.context]
-  );
+  const sp: SPFI = React.useMemo(() => spfi().using(SPFx(props.context)), [props.context]);
 
   const [activeTab, setActiveTab] = useState<TabType>("quick");
   const [customLinks, setCustomLinks] = useState<ICustomLink[]>([]);
@@ -75,6 +76,10 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  // Upload state
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Input State
   const [linkTitle, setLinkTitle] = useState("");
@@ -97,12 +102,24 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
 
   const loadUserLinks = async () => {
     try {
-      const items: IUserListItem[] = await spService.getCustomAppLinks(
-        "Custom App Links",
-        userEmail
-      );
+      const items: IUserListItem[] = await spService.getCustomAppLinks("Custom App Links", userEmail);
+
       if (items.length > 0 && items[0][APPLINK_COL]) {
-        setCustomLinks(JSON.parse(items[0][APPLINK_COL]));
+        const parsed = JSON.parse(items[0][APPLINK_COL] || "[]");
+
+        // normalize for old data
+        const normalized: ICustomLink[] = Array.isArray(parsed)
+          ? parsed.map((x: any) => ({
+              Title: x?.Title ?? "",
+              URL: x?.URL ?? "",
+              IconData: x?.IconData,
+              IconURL: x?.IconURL
+            }))
+          : [];
+
+        setCustomLinks(normalized);
+      } else {
+        setCustomLinks([]);
       }
     } catch (err) {
       console.error("Error loading user links:", err);
@@ -124,13 +141,13 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
   // Reset to default state when dialog is hidden
   useEffect(() => {
     if (props.isHidden) {
-      // keep your default reset behavior
       setActiveTab("quick");
       setIsFormOpen(false);
       setMenuOpenIndex(null);
       setShowSuccessMessage(false);
       resetFormState();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.isHidden]);
 
   const persistToSharePoint = async (updatedLinks: ICustomLink[]) => {
@@ -146,10 +163,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
       };
 
       if (existingItems.length > 0) {
-        await sp.web.lists
-          .getByTitle(LIST_NAME)
-          .items.getById(existingItems[0].Id)
-          .update(payload);
+        await sp.web.lists.getByTitle(LIST_NAME).items.getById(existingItems[0].Id).update(payload);
       } else {
         await sp.web.lists.getByTitle(LIST_NAME).items.add(payload);
       }
@@ -163,10 +177,13 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     setLinkURL("");
     setTitleError("");
     setUrlError("");
+    setUploadedImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const openAddForm = () => {
     setIsEditMode(false);
+    setEditingIndex(null);
     resetFormState();
     setIsFormOpen(true);
     setMenuOpenIndex(null);
@@ -175,30 +192,28 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
   const openEditForm = (index: number) => {
     setIsEditMode(true);
     setEditingIndex(index);
-    setLinkTitle(customLinks[index].Title);
-    setLinkURL(customLinks[index].URL);
+    setLinkTitle(customLinks[index]?.Title || "");
+    setLinkURL(customLinks[index]?.URL || "");
     setTitleError("");
     setUrlError("");
+    setUploadedImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     setIsFormOpen(true);
     setMenuOpenIndex(null);
   };
 
   const validateForm = (): boolean => {
     let isValid = true;
-
-    // Clear previous errors
     setTitleError("");
     setUrlError("");
 
-    // 1. Validate Title Empty
     if (!linkTitle.trim()) {
       setTitleError("Name is required");
       isValid = false;
     } else {
-      // 2. Validate Duplicate Name
       const duplicateExists = customLinks.some((link, index) => {
         if (isEditMode && index === editingIndex) return false;
-        return link.Title.toLowerCase() === linkTitle.trim().toLowerCase();
+        return (link.Title || "").toLowerCase() === linkTitle.trim().toLowerCase();
       });
 
       if (duplicateExists) {
@@ -207,39 +222,77 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
       }
     }
 
-    // 3. Validate URL Empty
     if (!linkURL.trim()) {
       setUrlError("URL is required");
       isValid = false;
     } else if (!isValidURL(linkURL.trim())) {
-      // 4. Validate URL Format using improved validation
-      setUrlError(
-        "Not a valid URL. Please check the spelling entered correctly"
-      );
+      setUrlError("Not a valid URL. Please check the spelling entered correctly");
       isValid = false;
     }
 
     return isValid;
   };
 
-  const saveForm = async () => {
-    if (!validateForm()) {
+  // Upload handlers
+  const onClickUpload = () => fileInputRef.current?.click();
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) return;
+
+    // images only
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file only.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setUploadedImage(null);
       return;
     }
 
-    let updatedLinks = [...customLinks];
+    // optional: size guard (2MB)
+    const maxBytes = 2 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      alert("Image is too large. Please upload an image under 2MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setUploadedImage(null);
+      return;
+    }
 
-    // ✅ keep existing IconData/IconURL while editing
+    setUploadedImage(file);
+  };
+
+  const saveForm = async () => {
+    if (!validateForm()) return;
+
+    let iconData: string | undefined;
+
+    // if user uploaded image, convert to base64
+    if (uploadedImage) {
+      try {
+        iconData = await fileToDataUrl(uploadedImage);
+      } catch (e) {
+        console.error(e);
+        alert("Unable to read the selected image. Please try again.");
+        return;
+      }
+    }
+
+    const updatedLinks = [...customLinks];
+
     if (isEditMode && editingIndex !== null) {
+      const existing = updatedLinks[editingIndex];
+
       updatedLinks[editingIndex] = {
-        ...updatedLinks[editingIndex],
+        ...existing, // ✅ preserves any other fields
         Title: linkTitle.trim(),
         URL: linkURL.trim(),
+        // ✅ keep old icon if new not selected
+        IconData: iconData ?? existing?.IconData,
       };
     } else {
       updatedLinks.push({
         Title: linkTitle.trim(),
         URL: linkURL.trim(),
+        IconData: iconData, // optional
       });
     }
 
@@ -249,18 +302,10 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     setIsFormOpen(false);
     resetFormState();
 
-    // Show success message
-    if (isEditMode) {
-      setSuccessMessage("Successfully updated 1 custom URL");
-    } else {
-      setSuccessMessage("Successfully added 1 custom URL");
-    }
+    setSuccessMessage(isEditMode ? "Successfully updated 1 custom URL" : "Successfully added 1 custom URL");
     setShowSuccessMessage(true);
 
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 3000);
+    setTimeout(() => setShowSuccessMessage(false), 3000);
   };
 
   const cancelForm = () => {
@@ -285,7 +330,6 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
       }
     };
     document.addEventListener("mousedown", handleClick);
-
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
@@ -301,59 +345,32 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
       }}
       minWidth={"800px"}
     >
-      {/* Dividing Line */}
       <div className={styles.divider}></div>
+
       <DialogContent>
         <div className={styles.container}>
           {/* Tabs */}
           <div className={styles.tabContainer}>
-            <button
-              className={`${styles.tab} ${
-                activeTab === "quick" && styles.activeTab
-              }`}
-              onClick={() => setActiveTab("quick")}
-            >
+            <button className={`${styles.tab} ${activeTab === "quick" && styles.activeTab}`} onClick={() => setActiveTab("quick")}>
               Quick Links
             </button>
-
-            <button
-              className={`${styles.tab} ${
-                activeTab === "app" && styles.activeTab
-              }`}
-              onClick={() => setActiveTab("app")}
-            >
+            <button className={`${styles.tab} ${activeTab === "app" && styles.activeTab}`} onClick={() => setActiveTab("app")}>
               App Links
             </button>
-
-            <button
-              className={`${styles.tab} ${
-                activeTab === "custom" && styles.activeTab
-              }`}
-              onClick={() => setActiveTab("custom")}
-            >
+            <button className={`${styles.tab} ${activeTab === "custom" && styles.activeTab}`} onClick={() => setActiveTab("custom")}>
               Custom Links
             </button>
           </div>
 
-          {/* ---------------- Quick Links ---------------- */}
+          {/* Quick Links */}
           {activeTab === "quick" && (
             <div className={styles.linksGrid}>
               {props.savedApps
                 .filter((app) => app.AppType === "Quick Links")
                 .map((link, index) => (
-                  <a
-                    key={index}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={link.URL}
-                    className={styles.linkItem}
-                  >
+                  <a key={index} target="_blank" rel="noopener noreferrer" href={link.URL} className={styles.linkItem}>
                     <div className={styles.iconCircle}>
-                      {link.IconURL ? (
-                        <img src={link.IconURL} className={styles.appIcon} />
-                      ) : (
-                        "🔗"
-                      )}
+                      {link.IconURL ? <img src={link.IconURL} className={styles.appIcon} alt="" /> : "🔗"}
                     </div>
                     <div className={styles.linkTitle}>{link.Title}</div>
                   </a>
@@ -361,25 +378,15 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
             </div>
           )}
 
-          {/* ---------------- Apps Links ---------------- */}
+          {/* App Links */}
           {activeTab === "app" && (
             <div className={styles.linksGrid}>
               {props.savedApps
                 .filter((app) => app.AppType === "App Links")
                 .map((app, index) => (
-                  <a
-                    key={index}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={app.URL}
-                    className={styles.linkItem}
-                  >
+                  <a key={index} target="_blank" rel="noopener noreferrer" href={app.URL} className={styles.linkItem}>
                     <div className={styles.iconCircle}>
-                      {app.IconURL ? (
-                        <img src={app.IconURL} className={styles.appIcon} />
-                      ) : (
-                        "🔗"
-                      )}
+                      {app.IconURL ? <img src={app.IconURL} className={styles.appIcon} alt="" /> : "🔗"}
                     </div>
                     <div className={styles.linkTitle}>{app.Title}</div>
                   </a>
@@ -387,7 +394,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
             </div>
           )}
 
-          {/* ---------------- Custom Links ---------------- */}
+          {/* Custom Links */}
           {activeTab === "custom" && (
             <>
               <div className={styles.linksGrid}>
@@ -402,12 +409,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                 {/* Custom link items */}
                 {customLinks.map((link, index) => (
                   <div key={index} className={styles.customLinkItem}>
-                    <a
-                      href={link.URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.linkItem}
-                    >
+                    <a href={link.URL} target="_blank" rel="noopener noreferrer" className={styles.linkItem}>
                       <div className={styles.iconCircle}>
                         {link.IconData ? (
                           <img src={link.IconData} className={styles.customAppIcon} alt="" />
@@ -421,11 +423,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                     <div className={styles.menuWrapper}>
                       <IconButton
                         iconProps={{ iconName: "MoreVertical" }}
-                        onClick={() =>
-                          setMenuOpenIndex(
-                            menuOpenIndex === index ? null : index
-                          )
-                        }
+                        onClick={() => setMenuOpenIndex(menuOpenIndex === index ? null : index)}
                       />
 
                       {menuOpenIndex === index && (
@@ -445,12 +443,10 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                 ))}
               </div>
 
-              {/* ---------------- Inline Add/Edit Form ---------------- */}
+              {/* Inline Add/Edit Form */}
               {isFormOpen && (
                 <div className={styles.inlineForm}>
-                  <h3 className={styles.formTitle}>
-                    {isEditMode ? "Edit Link" : "Add Custom Links"}
-                  </h3>
+                  <h3 className={styles.formTitle}>{isEditMode ? "Edit Link" : "Add Custom Links"}</h3>
 
                   <div className={styles.formFields}>
                     <div className={styles.formField}>
@@ -465,10 +461,22 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                           if (titleError) setTitleError("");
                         }}
                         errorMessage={titleError}
-                        styles={{
-                          fieldGroup: { borderRadius: 8 },
-                        }}
+                        styles={{ fieldGroup: { borderRadius: 8 } }}
                       />
+
+                      {/* Upload Image */}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className={styles.hiddenFileInput}
+                        onChange={onFileChange}
+                      />
+
+                      <button type="button" className={styles.uploadBtn} onClick={onClickUpload}>
+                        <span>Upload Image</span>
+                        <img className={styles.uploadIcon} src={uploadIcon} alt="" />
+                      </button>
                     </div>
 
                     <div className={styles.formField}>
@@ -480,12 +488,10 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                         className={styles.inputLine}
                         onChange={(e, v: any) => {
                           setLinkURL(v);
-                          if (urlError) setUrlError("");
+                          if (urlError) setUrlError(""); // ✅ fixed
                         }}
                         errorMessage={urlError}
-                        styles={{
-                          fieldGroup: { borderRadius: 8 },
-                        }}
+                        styles={{ fieldGroup: { borderRadius: 8 } }}
                       />
                     </div>
                   </div>
@@ -504,10 +510,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
             <div className={styles.successMessage}>
               <span className={styles.successIcon}>✓</span>
               <span className={styles.successText}>{successMessage}</span>
-              <button
-                className={styles.closeButton}
-                onClick={() => setShowSuccessMessage(false)}
-              >
+              <button className={styles.closeButton} onClick={() => setShowSuccessMessage(false)}>
                 ✕
               </button>
             </div>

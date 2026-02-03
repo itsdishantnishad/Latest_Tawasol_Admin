@@ -96,11 +96,11 @@ export default class ThumbsUpAcknowledgeButton
     return (
       <div className={className}>
         {isAnimating && (
-          <div className={styles.thumbsUpAnimation} aria-hidden="true">👍</div>
+          <div  aria-hidden="true">👍</div>
         )}
 
         {!isAnimating && acknowledged && (
-          <div className={styles.thumbsUpStatic} title="Acknowledged">👍</div>
+          <div  title="Acknowledged">👍</div>
         )}
 
         {!isAnimating && !acknowledged && (

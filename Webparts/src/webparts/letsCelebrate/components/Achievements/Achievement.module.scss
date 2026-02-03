@@ -249,15 +249,13 @@
 }
 
 .emptyState {
-  text-align: center;
-  padding: 60px 20px;
-  color: #666;
-  font-size: 18px;
+  color: #3a3b43;
+  font-size: 16px;
   font-weight: 500;
-  border: 1px dashed #d0d0d0;
-  border-radius: 8px;
-  background: #fafafa;
+  line-height: 24px;
+  text-align: center;
   width: 100%;
+  margin-top: 30px;
 }
 
 .loadMoreBtn {

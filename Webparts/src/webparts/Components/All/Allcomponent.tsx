@@ -660,7 +660,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
                   <MeetingCard key={m?.id || i} event={m} />
                 ))
               ) : (
-                <div className={styles.emptyState}>No meetings scheduled for you.</div>
+                <div className={styles.emptyState}>No meeting is scheduled for you</div>
               )}
             </div>
           </>
@@ -712,7 +712,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
                 <MeetingCard key={m?.id || i} event={m} />
               ))
             ) : (
-              <div className={styles.emptyState}>No meetings scheduled for you.</div>
+              <div className={styles.emptyState}>No meeting is scheduled for you</div>
             )}
           </div>
         </>

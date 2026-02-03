@@ -324,7 +324,7 @@ const EventsTrainingsToggle: React.FC<IEventsTrainingsToggleProps> = (props) => 
         />
       ) : activeTab === EventsTrainingsTabKey.Meetings ? (
         mappedMeetings.length === 0 ? (
-          <div className={styles.emptyState}>No Meeting is Scheduled for you</div>
+          <div className={styles.emptyState}>No meeting is scheduled for you</div>
         ) : (
           <AllMeetings
             meetingsData={mappedMeetings}

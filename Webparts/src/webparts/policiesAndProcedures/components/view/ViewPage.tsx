@@ -1,11 +1,12 @@
 import * as React from "react";
 import {
-  Breadcrumb,
-  IBreadcrumbItem,
+  // Breadcrumb,
+  // IBreadcrumbItem,
   SearchBox,
   MessageBar,
   MessageBarType,
-  DefaultButton
+  DefaultButton,
+  // Breadcrumb
 } from "@fluentui/react";
 import type { WebPartContext } from "@microsoft/sp-webpart-base";
 import view from "./ViewPage.module.scss";
@@ -21,7 +22,7 @@ import {
 
 import { listServices } from "../../../services/listServices";
 import PoliciesSearchService from "../../../services/PoliciesAndProcedures/PoliciesSearchService";
-
+import GlobalBreadcrumbs from "../../../assets/GlobalBreadcrumbs";
 export interface IPoliciesAndProceduresViewProps {
   context: WebPartContext;
   functionDisplayName: string;
@@ -34,7 +35,7 @@ type FolderViewMode = "list" | "grid";
 type SearchState = "idle" | "loading" | "done" | "error";
 
 type IPoliciesAndProceduresViewState = {
-  breadcrumbs: IBreadcrumbItem[];
+ // breadcrumbs: IBreadcrumbItem[];
   currentItems: IPoliciesAndProceduresItem[];
   selectedItem?: IPoliciesAndProceduresItem;
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
@@ -76,10 +77,10 @@ export default class PoliciesAndProceduresView extends React.Component<
     this._searchService = new PoliciesSearchService(props.context);
 
     this.state = {
-      breadcrumbs: [
-        { key: "bread-root", text: "Policies & procedures" },
-        { key: "bread-function", text: props.functionDisplayName, isCurrentItem: true }
-      ],
+      // breadcrumbs: [
+      //   { key: "bread-root", text: "Policies & procedures" },
+      //   { key: "bread-function", text: props.functionDisplayName, isCurrentItem: true }
+      // ],
       currentItems: [],
       selectedItem: undefined,
       expandedChildren: {},
@@ -328,23 +329,9 @@ export default class PoliciesAndProceduresView extends React.Component<
   private renderTopBar(): React.ReactNode {
     return (
       <div className={view.topBar}>
-        <div className={view.topBarLeft}>
-          <p className={view.backLink} onClick={this.props.onBackToLanding}>
-            <span
-              className={view.backIcon}
-              aria-hidden="true"
-              dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }}
-            />
-            <span>Back</span>
-          </p>
-
-          <span className={view.topBarDivider} aria-hidden="true">
-            |
-          </span>
-
-          <Breadcrumb items={this.state.breadcrumbs} className={view.breadStyle} />
+        <div>
+          <GlobalBreadcrumbs/>
         </div>
-
         <div className={view.searchSlot}>
           <SearchBox
             placeholder="Search Documents"
