@@ -1,13 +1,17 @@
+
 import * as React from 'react';
 import styles from './GreetingsBanner.module.scss';
 import { MSGraphClientV3 } from '@microsoft/sp-http';
 import { IGreetingsBannerProps } from './IGreetingsBannerProps';
-import { MorningSVG, AfternoonSVG, EveningSVG } from '../../assets/constants';
+
+const GoodMorningIcon: any = require("../../assets/GoodMorningIcon.png");
+const GoodAfternoonIcon: any = require("../../assets/GoodAfternoonIcon.png");
+const GoodEveningIcon: any = require("../../assets/GoodEveningIcon.png");
 
 interface IGreetingsBannerState {
   firstName: string;
   greetingText: 'Good Morning' | 'Good Afternoon' | 'Good Evening';
-  greetingSvgMarkup: string;
+  greetingSvgMarkup: string; 
 }
 
 export default class GreetingsBanner extends React.Component<IGreetingsBannerProps, IGreetingsBannerState> {
@@ -43,31 +47,32 @@ export default class GreetingsBanner extends React.Component<IGreetingsBannerPro
               {greetingText}
               {firstName ? ',' : '!'}
             </span>
-            {firstName && <span className={styles.nameText}> {firstName}!</span>}
+            {firstName && <span className={styles.nameText}> {firstName}!</span>}{" "}
+
+            {/* ✅ render PNG icon */}
+            <img
+              className={styles.greetingsBannerEmoji}
+              src={greetingSvgMarkup}
+              alt=""
+              aria-hidden="true"
+            />
           </div>
-
-          {/* inline emoji at the end */}
-          {/* <span
-            className={styles.greetingsBannerEmoji}
-            aria-hidden="true"
-            dangerouslySetInnerHTML={{ __html: greetingSvgMarkup }}
-          /> */}
         </div>
-
-        {/* keep for future use if you want a subline; currently not in Figma */}
-        {/* <div className={styles.greetingsBannerSubText}>Have a great day at Tawasol.</div> */}
       </section>
     );
   }
 
   // ---------- Data helpers ----------
+  
   private async tryPopulateFirstNameFromGraph(): Promise<void> {
     try {
       const graph: MSGraphClientV3 = await this.props.getGraphClient();
       const me = await graph.api('/me').select('displayName').get();
       const displayName: string = me?.displayName || '';
       if (displayName) this.setState({ firstName: this.extractFirstName(displayName) });
-    } catch { /* fallback stays */ }
+    } catch(error) {
+      console.log(error)
+    }
   }
 
   private getFallbackFirstName(): string {
@@ -87,6 +92,10 @@ export default class GreetingsBanner extends React.Component<IGreetingsBannerPro
     return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
   }
 
+  private normalizeAsset(asset: any): string {
+    return asset && asset.default ? asset.default : asset;
+  }
+
   // ---------- Greeting / time helpers ----------
   private computeGreetingForCurrentTime(): {
     greetingText: IGreetingsBannerState['greetingText'];
@@ -95,9 +104,13 @@ export default class GreetingsBanner extends React.Component<IGreetingsBannerPro
     const now = new Date();
     const hour = now.getHours();
 
-    if (hour >= 4 && hour < 12)  return { greetingText: 'Good Morning',  greetingSvgMarkup: MorningSVG };
-    if (hour >= 12 && hour < 17) return { greetingText: 'Good Afternoon', greetingSvgMarkup: AfternoonSVG };
-    return { greetingText: 'Good Evening', greetingSvgMarkup: EveningSVG };
+    if (hour >= 4 && hour < 12) {
+      return { greetingText: 'Good Morning',  greetingSvgMarkup: this.normalizeAsset(GoodMorningIcon) };
+    }
+    if (hour >= 12 && hour < 17) {
+      return { greetingText: 'Good Afternoon',  greetingSvgMarkup: this.normalizeAsset(GoodAfternoonIcon) };
+    }
+    return { greetingText: 'Good Evening',  greetingSvgMarkup: this.normalizeAsset(GoodEveningIcon) };
   }
 
   private scheduleNextBoundaryTick(): void {
@@ -105,16 +118,16 @@ export default class GreetingsBanner extends React.Component<IGreetingsBannerPro
     const sinceMidnight = now.getTime() - new Date(now).setHours(0, 0, 0, 0);
     const h = now.getHours();
     let targetHour: number;
-    if (h < 4)       targetHour = 4;
+    if (h < 4) targetHour = 4;
     else if (h < 12) targetHour = 12;
     else if (h < 17) targetHour = 17;
-    else             targetHour = 24 + 4;
+    else targetHour = 24 + 4;
 
     const msToTarget = (targetHour * 3600000) - sinceMidnight;
     this.nextBoundaryTimerId = window.setTimeout(() => {
       const res = this.computeGreetingForCurrentTime();
       this.setState({ greetingText: res.greetingText, greetingSvgMarkup: res.greetingSvgMarkup });
       this.scheduleNextBoundaryTick();
-    }, Math.max(60000, msToTarget)); // at least 1 minute
+    }, Math.max(60000, msToTarget)); 
   }
 }
