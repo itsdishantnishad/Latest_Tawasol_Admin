@@ -577,7 +577,7 @@ export default class ProfilePageHeader extends React.Component<
     if (this.fileInputRef.current) this.fileInputRef.current.click();
   };
 
-  private handleProfileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+   private handleProfileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
     if (!file) return;
 
@@ -831,12 +831,12 @@ export default class ProfilePageHeader extends React.Component<
                   aria-label="Close"
                   onClick={() => this.setState({ copyFeedback: false })}
                 >
-                  ×
+                  
                 </button>
               </div>
             ) : null}
 
-            <div className={styles.kebabWrapper} ref={this.menuRef}>
+            {/* <div className={styles.kebabWrapper} ref={this.menuRef}>
               <button
                 className={styles.iconBtn + " " + styles.kebabBtn}
                 title="More options"
@@ -872,16 +872,16 @@ export default class ProfilePageHeader extends React.Component<
                   </button>
                 </div>
               ) : null}
-            </div>
+            </div> */}
 
-            <input
+            {/* <input
               ref={this.fileInputRef}
               type="file"
               accept="image/*"
               className={styles.hiddenInput}
               onChange={this.handleProfileChange}
-              aria-hidden="true"
-            />
+              aria-hidden="true" */}
+            {/* /> */}
           </div>
 
           {this.state.error ? (
