@@ -157,8 +157,8 @@
 /* Fixed 16:9 frame so ALL images behave identical across environments */
 .cardMedia {
   position: relative;
-  width: 100%;
-  height: 250px;
+  // width: 100%;
+  // height: 250px;
   // margin-bottom: 20px;
   border-radius: 10px;
   overflow: hidden;
@@ -168,17 +168,17 @@
   //   aspect-ratio: 16 / 9;
   // }
 
-  @supports not (aspect-ratio: 16 / 9) {
-    height: 0;
-    padding-top: 56.25%;
-  }
+  // @supports not (aspect-ratio: 16 / 9) {
+  //   height: 0;
+  //   padding-top: 56.25%;
+  // }
 
-  > * {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
+  // > * {
+  //   position: absolute;
+  //   inset: 0;
+  //   width: 100%;
+  //   height: 100%;
+  // }
 }
 
 /* Works for Fluent UI Image (root + inner img) */
@@ -188,13 +188,13 @@
   display: block;
 }
 
-.cardImg :global(img) {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
+// .cardImg :global(img) {
+//   width: 100% !important;
+//   height: 100% !important;
+//   object-fit: cover;
+//   object-position: center;
+//   display: block;
+// }
 
 .placeholder {
   background: linear-gradient(90deg, #f4f6f8, #f8fafb 30%, #f4f6f8 60%);
