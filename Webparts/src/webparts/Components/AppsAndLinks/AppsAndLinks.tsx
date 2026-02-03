@@ -36,6 +36,8 @@ export interface IAppsAndLinksProps {
 interface ICustomLink {
   Title: string;
   URL: string;
+  IconData?: string;
+  IconURL?: string;
 }
 
 interface IUserListItem {
@@ -227,8 +229,10 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
 
     let updatedLinks = [...customLinks];
 
+    // ✅ keep existing IconData/IconURL while editing
     if (isEditMode && editingIndex !== null) {
       updatedLinks[editingIndex] = {
+        ...updatedLinks[editingIndex],
         Title: linkTitle.trim(),
         URL: linkURL.trim(),
       };
@@ -404,7 +408,13 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                       rel="noopener noreferrer"
                       className={styles.linkItem}
                     >
-                      <div className={styles.iconCircle}>🔗</div>
+                      <div className={styles.iconCircle}>
+                        {link.IconData ? (
+                          <img src={link.IconData} className={styles.customAppIcon} alt="" />
+                        ) : (
+                          "🔗"
+                        )}
+                      </div>
                       <div className={styles.linkTitle}>{link.Title}</div>
                     </a>
 
@@ -470,7 +480,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                         className={styles.inputLine}
                         onChange={(e, v: any) => {
                           setLinkURL(v);
-                          if (urlError) setUrlError(urlError);
+                          if (urlError) setUrlError("");
                         }}
                         errorMessage={urlError}
                         styles={{

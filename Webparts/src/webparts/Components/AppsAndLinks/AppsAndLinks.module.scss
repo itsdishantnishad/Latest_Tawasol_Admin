@@ -418,6 +418,13 @@
   }
 }
 
+.customAppIcon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  display: block;
+}
+
 // Add these styles to your existing SCSS file
 
 .divider {
