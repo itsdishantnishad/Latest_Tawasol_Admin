@@ -46,9 +46,9 @@ export const LoadingBoundary: React.FC<LoadingBoundaryProps> = ({
   gap = 12,
   ariaLabel = "Loading content",
   hideWhileLoading = false,
-  timeoutMs = 10000 // ✅ NEW: 10 second default timeout
+  timeoutMs = 10000 
 }) => {
-  // ✅ NEW: Timeout safety to prevent infinite shimmer
+ 
   const [timedOut, setTimedOut] = React.useState(false);
 
   React.useEffect(() => {
@@ -69,7 +69,6 @@ export const LoadingBoundary: React.FC<LoadingBoundaryProps> = ({
     return () => clearTimeout(timer);
   }, [loading, timeoutMs]);
 
-  // ✅ NEW: Timeout treated as error with helpful message
   if (timedOut) {
     return (
       <div>

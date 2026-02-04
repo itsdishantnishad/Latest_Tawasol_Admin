@@ -259,6 +259,16 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
     });
   }, []);
 
+  const toBase64Utf8 = React.useCallback((input: string): string => {
+    // Works for unicode too (no deprecated unescape)
+    const bytes = new TextEncoder().encode(input);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }, []);
+
   const getDefaultAvatar = React.useCallback((nameOrEmail: string): string => {
     const safe = String(nameOrEmail || "").trim() || "User";
     const initials = safe
@@ -302,8 +312,8 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
       </svg>
     `.trim();
 
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
-  }, []);
+    return `data:image/svg+xml;base64,${toBase64Utf8(svg)}`;
+  }, [toBase64Utf8]);
 
   const ensurePeopleFromGraph = React.useCallback(
     async (emails: string[]) => {
