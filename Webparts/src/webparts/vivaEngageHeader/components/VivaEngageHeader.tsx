@@ -4,7 +4,7 @@ import { IVivaEngageHeaderProps } from "./IVivaEngageHeaderProps";
 
 // assets are one level up from /components
 const LeftSideArrow: string  = require("../assets/LeftSideArrow.svg");
-const RightSideArrow: string = require("../assets/RightSideArrow.svg");
+const RightSideArrow: string = require("../../../webparts/assets/Arrowicon.svg");
 const BackgroundSvg: string  = require("../assets/DHREImg.svg");
 
 interface IVivaEngageHeaderState { }
