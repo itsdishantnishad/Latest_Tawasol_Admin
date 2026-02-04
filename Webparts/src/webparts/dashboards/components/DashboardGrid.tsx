@@ -44,10 +44,10 @@ const DashboardGrid: React.FC<IDashboardGridProps> = ({ title, items, onOpen, sh
                   imageFit={ImageFit.cover}
                   maximizeFrame
                   loading="lazy"
-                  styles={{
-                    root: { width: '100%', height: '100%' },
-                    image: { width: '100%', height: '100%', objectFit: 'cover' }
-                  }}
+                  // styles={{
+                  //   root: { width: '100%', height: '100%' },
+                  //   image: { width: '100%', height: '100%', objectFit: 'cover' }
+                  // }}
                 />
               ) : (
                 <div className={styles.placeholder} />

@@ -1,5 +1,10 @@
 @import "~@fluentui/react/dist/sass/References.scss";
 
+.meetingContainerErr{
+  padding: 30px 60px;
+  text-align: center;
+}
+
 .meetingContainer {
   // width: 100%;
   // max-width: 1440px;
@@ -7,7 +12,6 @@
   // padding: 60px 20px;
   // background-color: #e5e7eb;
   padding: 30px 60px;
-  text-align: center;
 }
 
 .header {
