@@ -30,12 +30,16 @@ interface ILearningLink {
   backgroundColor?: string;
 }
 
+
+// to convert src to URL from String
+const toImgSrc = (m: any): string => (typeof m === "string" ? m : (m?.default || m));
+
 // Sample learning links
 const learningLinks: ILearningLink[] = [
   {
     id: 1,
     title: "STRYVE By LinkedIn Learning",
-    logo: require("../../assets/stryve.svg"),
+    logo: toImgSrc(require("../../assets/stryve.webp")),
     logoAlt: "STRYVE",
     url: "https://www.linkedin.com/company/stryvelearning/?utm_source=chatgpt.com",
     backgroundColor: "#FDECDC",
@@ -43,7 +47,7 @@ const learningLinks: ILearningLink[] = [
   {
     id: 2,
     title: "eCornell by DHRE",
-    logo: require("../../assets/ecornell.svg"),
+    logo: toImgSrc(require("../../assets/ecornell.webp")),
     logoAlt: "eCornell",
     url: "https://auth.ecornell.com/cas/login?service=https%3A%2F%2Flms.ecornell.com%2Flogin%2Fcas#entry-37079268",
     backgroundColor: "#FDECDC",
@@ -51,7 +55,7 @@ const learningLinks: ILearningLink[] = [
   {
     id: 3,
     title: "LMS by DHRE",
-    logo: require("../../assets/lms.svg"),
+    logo: toImgSrc(require("../../assets/lms.webp")),
     logoAlt: "LMS by DHRE",
     url: "https://esbe.fa.em8.oraclecloud.com/fscmUI/redwood/learner/learn/learn-enrollment-details?launchedFrom=myLearnExperience&learnerRecordId=300001155944032&persona=ORA_LEARNER",
     backgroundColor: "#FDECDC",
@@ -62,7 +66,7 @@ const learningContentLinks: ILearningLink[] = [
   {
     id: 1,
     title: "DHRE Unconscious Bias",
-    logo: require("../../assets/learningconcious.svg"),
+    logo: toImgSrc(require("../../assets/learningconcious.webp")),
     logoAlt: "Bias",
     url: "https://esbe.fa.em8.oraclecloud.com/fscmUI/redwood/learner/learn/learn-landing?tab=myLearnExperience&pagesUseSessionStoredFilters=learning-landing",
     backgroundColor: "#FDECDC",
@@ -70,7 +74,7 @@ const learningContentLinks: ILearningLink[] = [
   {
     id: 2,
     title: "DHRE Effective Time Management",
-    logo: require("../../assets/effectivemanagement.svg"),
+    logo: toImgSrc(require("../../assets/effectivemanagement.webp")),
     logoAlt: "Time",
     url: "https://esbe.fa.em8.oraclecloud.com/fscmUI/redwood/learner/learn/learn-landing?tab=myLearnExperience&pagesUseSessionStoredFilters=learning-landing",
     backgroundColor: "#FDECDC",
@@ -78,7 +82,7 @@ const learningContentLinks: ILearningLink[] = [
   {
     id: 3,
     title: "DHRE Priority Matrix Job Aid",
-    logo: require("../../assets/priorityjob.svg"),
+    logo: toImgSrc(require("../../assets/priorityjob.webp")),
     logoAlt: "Matrix",
     url: "https://esbe.fa.em8.oraclecloud.com/fscmUI/redwood/learner/learn/learn-landing?tab=myLearnExperience&pagesUseSessionStoredFilters=learning-landing",
     backgroundColor: "#FDECDC",

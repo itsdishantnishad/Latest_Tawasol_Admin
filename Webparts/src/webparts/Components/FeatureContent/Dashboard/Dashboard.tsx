@@ -3,11 +3,13 @@ import styles from './Dashboard.module.scss';
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
 import ConditionalLink from '../../ConditionalLink/ConditionalLink';
 
+const toImgSrc = (m: any): string => (typeof m === "string" ? m : (m?.default || m));
+
 const rightArrow = require("../images/arrow-right.svg");
-const dashboardImageOne = require("../../../assets/footfall.svg");
-const dashboardImageTwo = require("../../../assets/disqualification.svg");
-const dashboardImageThree = require("../../../assets/cxi-score.svg");
-const dashboardImageFour = require("../../../assets/sales-report.svg");
+const dashboardImageOne = toImgSrc(require("../../../assets/footfall.webp"));
+const dashboardImageTwo = toImgSrc(require("../../../assets/disqualification.webp"));
+const dashboardImageThree = toImgSrc(require("../../../assets/cxi-score.webp"));
+const dashboardImageFour = toImgSrc(require("../../../assets/sales-report.webp"));
 export interface IDashboard {
     id: string;
     header: string;

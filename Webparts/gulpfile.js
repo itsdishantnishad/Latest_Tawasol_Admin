@@ -13,4 +13,26 @@ build.rig.getTasks = function () {
   return result;
 };
 
+/**
+ * Fix: Support importing/require() of .webp files in older SPFx (older webpack)
+ * We must use file-loader (asset modules are not supported here).
+ */
+build.configureWebpack.mergeConfig({
+  additionalConfiguration: (generatedConfig) => {
+    generatedConfig.module.rules.push({
+      test: /\.webp(\?[^.]*)?$/,
+      use: [
+        {
+          loader: require.resolve('file-loader'),
+          options: {
+            name: '[name].[hash].[ext]'
+          }
+        }
+      ]
+    });
+
+    return generatedConfig;
+  }
+});
+
 build.initialize(require('gulp'));
