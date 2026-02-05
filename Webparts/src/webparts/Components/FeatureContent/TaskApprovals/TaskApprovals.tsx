@@ -418,7 +418,7 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
             {activeError ? (
               <div className={styles.errormessage}>Error: {activeError}</div>
             ) : sortedActiveRows.length === 0 && activeCount === 0 ? (
-              <div style={{ textAlign: "center", padding: "34px 12px" }}>
+              <div style={{ textAlign: "center", padding: "0" }}>
                 <img
                   src={TaskApprovalPlaceholderIcon}
                   alt="No tasks"
