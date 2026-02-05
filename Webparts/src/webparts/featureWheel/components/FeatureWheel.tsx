@@ -318,7 +318,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         <h1>
           <span>Tawasol</span>, The smarter way to stay connected
         </h1>
-        <h6>Click to see all the menus under Tawasol</h6>
+        {/* <h6>Click to see all the menus under Tawasol</h6> */}
       </div>
 
       <FeatureSelector features={features} selectedFeature={selectedFeature} onFeatureSelect={setSelectedFeature} />
