@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import styles from './GreetingsBanner.module.scss';
 import { MSGraphClientV3 } from '@microsoft/sp-http';
@@ -50,12 +49,12 @@ export default class GreetingsBanner extends React.Component<IGreetingsBannerPro
             {firstName && <span className={styles.nameText}> {firstName}!</span>}{" "}
 
             {/* ✅ render PNG icon */}
-            <img
+            {/* <img
               className={styles.greetingsBannerEmoji}
               src={greetingSvgMarkup}
               alt=""
               aria-hidden="true"
-            />
+            /> */}
           </div>
         </div>
       </section>
