@@ -13,28 +13,31 @@ export interface IGalleryProps {
 export const Gallery: React.FC<IGalleryProps> = (props) => {
   const [spImages, setSpImages] = React.useState<IServiceGalleryImage[]>([]);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [hasError, setHasError] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     let mounted = true;
 
     const load = async (): Promise<void> => {
       setIsLoading(true);
+      setHasError(false);
       try {
         const svc = new GalleryService(props.context, "Image Gallery");
         const latest = await svc.getLatestFolderImages(8);
         if (mounted) setSpImages(latest || []);
       } catch {
-        if (mounted) setSpImages([]);
+        if (mounted) {
+          setHasError(true);
+          setSpImages([]);
+        }
       } finally {
         if (mounted) setIsLoading(false);
       }
     };
 
-    // Avoid calling before SPFx context is ready
     if (props.context?.pageContext?.web?.absoluteUrl) {
       void load();
     } else {
-      // If context not ready, keep empty (will show "No Image..." once not loading)
       setSpImages([]);
     }
 
@@ -70,25 +73,31 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
   }, [props.seeAllURL, webUrl, origin]);
   // --- END ---
 
-  const hasImages = spImages && spImages.length > 0;
+  const hasImages = spImages.length > 0;
 
   return (
     <div className={styles.galleryContainer}>
       {isLoading && (
-        <div className={styles.loadingHint} aria-live="polite">
-          Loading latest images...
+        <div className={styles.statusMessage} role="status" aria-live="polite">
+          Loading gallery...
         </div>
       )}
 
-      {!isLoading && !hasImages && (
-        <div className={styles.loadingHint} role="status" aria-live="polite">
+      {!isLoading && hasError && (
+        <div className={styles.statusMessage} role="status" aria-live="polite">
+          Something went wrong. Please reload the page.
+        </div>
+      )}
+
+      {!isLoading && !hasError && !hasImages && (
+        <div className={styles.statusMessage} role="status" aria-live="polite">
           No Image Found in Library
         </div>
       )}
 
       {hasImages && (
         <div className={styles.imageGrid}>
-          {/* Row 1 – images 1–4 */}
+          {/* Row 1 */}
           <div className={styles.row}>
             {spImages.slice(0, 4).map((image, index) => (
               <div
@@ -102,7 +111,7 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
             ))}
           </div>
 
-          {/* Row 2 – images 5–8 */}
+          {/* Row 2 */}
           <div className={styles.row}>
             {spImages.slice(4, 8).map((image, index) => (
               <div
@@ -118,7 +127,6 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
         </div>
       )}
 
-      {/* View All Button (keep visible like before) */}
       <div className={styles.buttonContainer}>
         <ConditionalLink to={viewAllHref}>
           <PrimaryButton label="View All" />
