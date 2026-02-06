@@ -566,9 +566,9 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
 
                 <div className={styles.achievementCardContainer}>
                   <div className={styles.achievementCircleContainer}>
-                    <div className={styles.achievementOuterCircle}>
+                    {/* <div className={styles.achievementOuterCircle}>
                       <div className={styles.achievementInnerCircle} />
-                    </div>
+                    </div> */}
                   </div>
 
                   {currentItems.map((item) => {
