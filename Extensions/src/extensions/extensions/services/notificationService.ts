@@ -132,7 +132,7 @@ export class NotificationService {
     const rows: IRawNotifItem[] = (j?.value || []) as IRawNotifItem[];
 
     // isNew means unread: not in readKeys (persisted per-item)
-    const items = rows.map((x) => this.mapItem(x, status.readKeys));
+    const items = rows.map((x) => this.mapItem(x, status.lastSeenAt, status.readKeys));
     return items.slice(0, count);
   }
 
@@ -172,7 +172,7 @@ export class NotificationService {
 
   // ======================== internals ========================
 
-  private mapItem(x: IRawNotifItem, readKeys: Set<number>): INotificationItem {
+  private mapItem(x: IRawNotifItem, lastSeenAt: Date, readKeys: Set<number>): INotificationItem {
     const id = x.Id;
     const url =
       typeof x.URL === "string"
@@ -180,7 +180,7 @@ export class NotificationService {
         : (x.URL as any)?.Url || "";
 
     const created = x.Created ? new Date(x.Created) : new Date();
-    const isNew = !readKeys.has(id);
+    const isNew = created > lastSeenAt && !readKeys.has(id);
     const descRaw = x.TIRDescription || "";
     const descText = this._htmlToPlainText(descRaw);
 
