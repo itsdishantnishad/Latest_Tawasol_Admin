@@ -127,7 +127,7 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
         <GlobalBreadcrumbs
           sectionLabel="Home"
           currentLabel="Dashboards"
-          onBack={this.onBackToMaster} // (left label also does one-step back)
+          onBack={this.onBackToMaster}
         />
       </div>
     );
