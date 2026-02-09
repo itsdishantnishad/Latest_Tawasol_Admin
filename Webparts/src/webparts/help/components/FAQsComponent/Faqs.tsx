@@ -40,8 +40,8 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
   public static defaultProps: Partial<IFaqsProps> = {
     listTitle: "FAQs"
   };
-private chatBotRef = React.createRef<HTMLAnchorElement>();
-private rafId: number | null = null;
+  private chatBotRef = React.createRef<HTMLAnchorElement>();
+  private rafId: number | null = null;
 
   public constructor(props: IFaqsProps) {
     super(props);
@@ -56,7 +56,7 @@ private rafId: number | null = null;
   }
 
   public async componentDidMount(): Promise<void> {
-     this.startFloatCheck();
+    this.startFloatCheck();
     try {
       const sp = spfi().using(SPFx(this.props.context));
       const listTitle = this.props.listTitle as string;
@@ -66,9 +66,9 @@ private rafId: number | null = null;
         .items.select(
           "Id",
           "TIRQuestion",
-          "TIRAnswer",     
-          "TIRQuestionArabic", 
-          "TIRAnswerArabic",   
+          "TIRAnswer",
+          "TIRQuestionArabic",
+          "TIRAnswerArabic",
           "TIRFAQCategories"
         )
         .orderBy("ID")();
@@ -78,7 +78,7 @@ private rafId: number | null = null;
         category: i.TIRFAQCategories || "",
         questionEn: i.TIRQuestion || "",
         answerEn: i.TIRAnswer || "",
-        questionAr: i.TIRQuestionArabic || "",   
+        questionAr: i.TIRQuestionArabic || "",
         answerAr: i.TIRAnswerArabic || ""
       }));
 
@@ -101,11 +101,11 @@ private rafId: number | null = null;
   }
 
 
- public componentWillUnmount(): void {
+  public componentWillUnmount(): void {
     this.stopFloatCheck();
   }
 
-   // ========== FLOATING CHATBOT ==========
+  // ========== FLOATING CHATBOT ==========
   private startFloatCheck(): void {
     this.checkFloatPosition();
   }
@@ -231,20 +231,21 @@ private rafId: number | null = null;
         <div className={styles.faqList}>
           {items.map((item) => this.renderItem(item))}
         </div>
-          {/* ✅ CHATBOT FAB */}
+        {/* ✅ CHATBOT FAB */}
         <a
           ref={this.chatBotRef}
           className={styles.chatBotFab}
-          href={this.props.chatBotDeepLink || "#"}
+          href={
+            this.props.chatBotDeepLink ||
+            "https://teams.microsoft.com/l/app/58e72336-dc5b-4253-8dc2-cf961136ebe3?source=app-header-share-entrypoint"
+          }
           target="_blank"
           rel="noreferrer"
           aria-label="Open chatbot"
-          onClick={(e) => {
-            if (!this.props.chatBotDeepLink) e.preventDefault();
-          }}
         >
           <img src={chatBotIcon} alt="Chatbot" />
         </a>
+
       </div>
     );
   }
