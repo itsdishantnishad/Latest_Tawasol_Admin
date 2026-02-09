@@ -70,7 +70,6 @@ export default class FiltersBar extends React.Component<IFiltersBarProps> {
         <div className={styles.zoneTabs}>
           <Pivot selectedKey={activeTab} onLinkClick={this.handleTabChange}>
             <PivotItem headerText="All News" itemKey="All" />
-            <PivotItem headerText="Announcements" itemKey="Announcements" />
           </Pivot>
         </div>
 

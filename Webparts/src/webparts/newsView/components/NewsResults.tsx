@@ -95,9 +95,12 @@ export interface INewsResultsProps {
   view: ViewMode;
 }
 
-type AnimationState = { animateGrid: boolean; animateList: boolean };
+type AnimationState = { 
+  animateGrid: boolean; 
+  animateList: boolean;
+};
 
-// ✅ NEW: Month grouping helpers (minimal addition)
+// Month grouping helpers (minimal addition)
 const MONTHS = [
   "January","February","March","April","May","June",
   "July","August","September","October","November","December",
@@ -135,7 +138,11 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
 
   constructor(props: INewsResultsProps) {
     super(props);
-    this.state = { animateGrid: false, animateList: false };
+    this.state = { 
+      animateGrid: false, 
+      animateList: false,
+      // imageAspectRatios: new Map()
+    };
   }
 
   componentDidMount() {
@@ -167,6 +174,17 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
 
     this.animationTimers.push(timerId);
   }
+
+  // private handleImageLoad = (imageSrc: string, event: React.SyntheticEvent<HTMLImageElement>) => {
+  //   const img = event.currentTarget;
+  //   const aspectRatio = img.naturalWidth / img.naturalHeight;
+    
+  //   this.setState((prevState) => {
+  //     const newMap = new Map(prevState.imageAspectRatios);
+  //     newMap.set(imageSrc, aspectRatio);
+  //     return { imageAspectRatios: newMap };
+  //   });
+  // };
 
   private renderMetaRow(newsItem: NewsRow, variant: "grid" | "list") {
     const metaClassName = variant === "grid" ? styles.gridMetaInline : styles.metaInline;
@@ -320,19 +338,25 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
                   data-interception="off"
                   onClick={(event) => this.handleAnchorClick(event, targetUrl)}
                 >
-                  <div className={styles.listMedia}>
-                    <Image
-                      src={previewImageSrc}
-                      alt={newsItem.title}
-                      shouldStartVisible
-                      imageFit={ImageFit.cover}
-                    />
-                    {categoryIconSrc && (
-                      <span className={styles.listCatIcon}>
-                        <Image src={categoryIconSrc} alt="" width={28} height={28} imageFit={ImageFit.contain} />
-                      </span>
-                    )}
-                  </div>
+                <div className={styles.listMedia}>
+                  <Image
+                    src={previewImageSrc}
+                    alt={newsItem.title}
+                    shouldStartVisible
+                    imageFit={ImageFit.cover}
+                  />
+                  {categoryIconSrc && (
+                    <span className={styles.listCatIcon}>
+                      <Image
+                        src={categoryIconSrc}
+                        alt=""
+                        width={28}
+                        height={28}
+                        imageFit={ImageFit.contain}
+                      />
+                    </span>
+                  )}
+                </div>
 
                   <div className={styles.listBody}>
                     <div className={styles.leftRow}>
