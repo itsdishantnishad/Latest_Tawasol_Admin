@@ -216,12 +216,12 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
         </div>
 
         <div className={styles.findPhotoWrapper}>
-          <button
+          {/* <button
             className={styles.findPhotoButton}
             onClick={() => setShowFindMyPhoto(!showFindMyPhoto)}
           >
             Find my Photo <span className={styles.dropdownIcon}>▼</span>
-          </button>
+          </button> */}
 
           {showFindMyPhoto && (
             <div className={styles.findPhotoDropdown}>
