@@ -330,6 +330,15 @@
   }
 }
 
+.moreDashboards {
+  max-width: 1200px; 
+  margin: 0 auto;
+
+  :global(.dashboardGrid) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* ===== Responsive ===== */
 @media (max-width:1200px) {
   .grid {
