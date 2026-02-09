@@ -223,19 +223,20 @@ export default class Beverages extends React.Component<
             </div>
           </div>
         </div>
-         <a
+        <a
           ref={this.chatBotRef}
           className={styles.chatBotFab}
-          href={this.props.chatBotDeepLink || "#"}
+          href={
+            this.props.chatBotDeepLink ||
+            "https://teams.microsoft.com/l/app/58e72336-dc5b-4253-8dc2-cf961136ebe3?source=app-header-share-entrypoint"
+          }
           target="_blank"
           rel="noreferrer"
           aria-label="Open chatbot"
-          onClick={(e) => {
-            if (!this.props.chatBotDeepLink) e.preventDefault();
-          }}
         >
           <img src={chatBotIcon} alt="Chatbot" />
         </a>
+
       </div>
     );
   }
