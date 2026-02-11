@@ -14,7 +14,7 @@ const CSS = `
 .__gbc_row{display:inline-flex;align-items:center;gap:12px;height:22px; font-family: 'Inter', sans-serif;}
 .__gbc_back{
   display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;
-    font-size: 16px; line-height: 24px; letter-spacing: 0; color: #000000; font-weight: 400; }
+    font-size: 14px; line-height: 24px; letter-spacing: 0; color: #000000; font-weight: 400; }
 .__gbc_back svg{width:18px;height:18px;display:block}
 .__gbc_divider{width:1px;height:16px;background:rgba(58,59,67,.35)}
 .__gbc_wrap{
