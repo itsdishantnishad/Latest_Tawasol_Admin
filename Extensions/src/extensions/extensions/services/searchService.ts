@@ -14,20 +14,11 @@ export interface ISuggestItem {
   kind: SuggestKind;
 }
 
-/**
- * ================================================
- * PROFILE PAGE CONFIG
- * ================================================
- *
- * Custom modern page in current site:
- *   PROFILE_PAGE_FOLDER = 'SitePages';
- *   PROFILE_PAGE_NAME   = 'Profile.aspx';
- *   => <site>/SitePages/Profile.aspx?uid=<id>&accountname=<upn>
- *
- * Classic profile page (optional):
- *   USE_CLASSIC_PROFILE = true;
- *   => <site>/_layouts/15/userprofile.aspx?accountname=<upn>
- */
+
+// ================================================
+// PROFILE PAGE CONFIG
+// ================================================
+
 const PROFILE_PAGE_FOLDER: string = 'SitePages';
 const PROFILE_PAGE_NAME: string = 'Profile.aspx';
 const USE_CLASSIC_PROFILE: boolean = false;
@@ -89,16 +80,6 @@ export class SearchService {
   // ------------------------------------------------------------------
   // PEOPLE SUGGESTIONS  (Graph directory search: /users?$search=)
   // ------------------------------------------------------------------
-  /**
-   * Uses Microsoft Graph directory search:
-   *   GET /users?$search="displayName:term OR mail:term OR userPrincipalName:term"
-   *
-   * Returns:
-   *  - title:     displayName
-   *  - subtitle:  "jobTitle - department"
-   *  - imageUrl:  userphoto.aspx (UPN-based)
-   *  - url:       custom Profile.aspx?uid=<id>&accountname=<upn>
-   */
   public async queryPeople(text: string, top: number): Promise<ISuggestItem[]> {
     const q = text.trim();
     if (!q) return [];
