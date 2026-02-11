@@ -11,7 +11,7 @@ export interface IProfileCardProps {
 }
 
 // ✅ Dubai logo (make sure file exists in: src/webparts/profilePageHeader/assets/)
-const DubaiIcon_URL: string = require("../assets/Dubaiicon.png");
+const DubaiIcon_URL: string = require("../assets/Dubaiicon.svg");
 
 // ✅ Background vectors
 const VectorA_URL: string = require("../assets/VectorA.png");
@@ -64,7 +64,7 @@ const ProfileCard: React.FC<IProfileCardProps> = (props) => {
       <div className={styles.name}>{displayName || "—"}</div>
       <div className={styles.subtitle}>{subtitle}</div>
 
-      <div className={styles.qrOuter}>
+      {/* <div className={styles.qrOuter}>
         <div className={styles.qrInner}>
           {qrCodeUrl ? (
             <img className={styles.qrImg} src={qrCodeUrl} alt="QR Code" />
@@ -72,7 +72,7 @@ const ProfileCard: React.FC<IProfileCardProps> = (props) => {
             <div className={styles.qrFallback}>QR not available</div>
           )}
         </div>
-      </div>
+      </div> */}
 
       <div className={styles.empId}>
         <span className={styles.empLabel}>Emp. ID :</span>{" "}
