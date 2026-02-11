@@ -142,6 +142,15 @@ export class GlobalBreadcrumbs {
         p = p.toLowerCase();
         return p.includes("/sitepages/about-dhre.aspx");
     }
+
+    private isProfilePage():boolean {
+        let p = window.location.pathname || "";
+        try { p = decodeURIComponent(p); } catch { }
+        p = p.toLowerCase();
+        return p.includes("/sitepages/profile.aspx");
+    }
+
+
     private getModernPageTitle(): string {
         const h1 =
             document.querySelector('h1[data-automation-id="pageHeaderTitle"]') ||
@@ -354,7 +363,7 @@ export class GlobalBreadcrumbs {
 
         const info = await this.getCurrentSitePageInfo();
         let section = (this.isTasksPage() || this.isOfferBenefitsPage() || this.isBeverageMenuPage()
-         || this.isLetsCelebratePage() || this.isDashboardPage() || this.isGalleryPage() || this.isFormsLibraryPage() || this.isAboutDhrePage()) ? "Home" : "Pages";
+         || this.isLetsCelebratePage() || this.isDashboardPage() || this.isGalleryPage() || this.isFormsLibraryPage() || this.isAboutDhrePage() || this.isProfilePage()) ? "Home" : "Pages";
         let title = info.title || this.getModernPageTitle();
 
         if (this.isBeverageMenuPage()) {
