@@ -361,6 +361,11 @@ export class GlobalBreadcrumbs {
             return;
         }
 
+        if(this.isDashboardPage()){
+            this.unmount()
+            return;
+        }
+
         const info = await this.getCurrentSitePageInfo();
         let section = (this.isTasksPage() || this.isOfferBenefitsPage() || this.isBeverageMenuPage()
          || this.isLetsCelebratePage() || this.isDashboardPage() || this.isGalleryPage() || this.isFormsLibraryPage() || this.isAboutDhrePage() || this.isProfilePage()) ? "Home" : "Pages";

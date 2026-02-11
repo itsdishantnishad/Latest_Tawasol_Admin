@@ -109,29 +109,20 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
   };
 
   /** Back | Home › Dashboards (Back only in detail view) */
-  private renderTopBar(): React.ReactNode {
-    const { active } = this.state;
-    if (!active) return null;
+  /** Back | Home › Dashboards (Back only in detail view) */
+private renderTopBar(): React.ReactNode {
+  const { active } = this.state;
+  return (
+    <div className={styles.topBar}>
+      <GlobalBreadcrumbs
+        sectionLabel="Home"
+        currentLabel="Dashboards"
+        onBack={active ? this.onBackToMaster : undefined} 
+      />
+    </div>
+  );
+}
 
-    return (
-      <div className={styles.topBar}>
-        {/* EXISTING BACK BUTTON WITH ICON — kept exactly as-is */}
-        {/* <button className={styles.backBtn} onClick={this.onBackToMaster} aria-label="Back" title="Back">
-          <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }} />
-          <span>Back</span>
-        </button>
-
-        <span className={styles.divider}>|</span> */}
-
-        {/* REPLACED Fluent UI Breadcrumb with GlobalBreadcrumbs */}
-        <GlobalBreadcrumbs
-          sectionLabel="Home"
-          currentLabel="Dashboards"
-          onBack={this.onBackToMaster}
-        />
-      </div>
-    );
-  }
 
   render(): React.ReactElement<IDashboardProps> {
     const { loading, error, categories, selectedCategory, dashboards, active, related, relatedExpanded, hasMoreRelated } = this.state;
