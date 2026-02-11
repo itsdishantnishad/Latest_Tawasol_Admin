@@ -602,7 +602,17 @@ export default class ExtensionsApplicationCustomizer
 
     // Services
     const currentUpn = (this.userEmail || this.context.pageContext.user.loginName || '').toLowerCase();
-    this.search = new SearchService(this.webUrl, this.context.msGraphClientFactory, this.context.spHttpClient as SPHttpClient);
+    // ✅ UPDATED: pass "me" identifiers so SearchService can detect when the searched person is the current user
+    this.search = new SearchService(
+      this.webUrl,
+      this.context.msGraphClientFactory,
+      this.context.spHttpClient as SPHttpClient,
+      {
+        upn: currentUpn,
+        email: this.context.pageContext.user.email || '',
+        loginName: this.context.pageContext.user.loginName || ''
+      }
+    );
     this.nav = new NavigationService(this.context.spHttpClient as SPHttpClient, this.webUrl);
     this.notifService = new NotificationService(
       this.context.spHttpClient as SPHttpClient,
@@ -667,7 +677,6 @@ export default class ExtensionsApplicationCustomizer
         this.photoService
       );
     }
-
 
     // Initial render of footer and floating nav
     await this.refreshNavAndFooter();
