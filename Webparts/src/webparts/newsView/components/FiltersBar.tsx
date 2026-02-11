@@ -73,43 +73,44 @@ export default class FiltersBar extends React.Component<IFiltersBarProps> {
           </Pivot>
         </div>
 
-        <div className={styles.zoneFilters}>
-          <Dropdown
-            options={departmentOptions}
-            selectedKey={selectedDepartment}
-            onChange={this.handleDepartmentChange}
-            ariaLabel="Filter by department"
-          />
-          {/* <SearchBox
-            placeholder="Search News"
-            value={searchQuery}
-            onChange={this.handleSearchChange}
-            ariaLabel="Search news"
-          /> */}
-        </div>
-
-        <div className={styles.zoneToggle}>
-          <div className={styles.viewToggle} role="group" aria-label="Toggle view">
-            <button
-              className={`${styles.toggleBtn} ${
-                currentViewMode === "grid" ? styles.active : ""
-              }`}
-              onClick={() => setViewMode("grid")}
-              aria-pressed={currentViewMode === "grid"}
-              type="button"
-            >
-              <img src={gridViewIconSrc} alt="Grid view" />
-            </button>
-            <button
-              className={`${styles.toggleBtn} ${
-                currentViewMode === "list" ? styles.active : ""
-              }`}
-              onClick={() => setViewMode("list")}
-              aria-pressed={currentViewMode === "list"}
-              type="button"
-            >
-              <img src={listViewIconSrc} alt="List view" />
-            </button>
+        <div className={styles.filterRightArea}>
+          <div className={styles.zoneFilters}>
+            <Dropdown
+              options={departmentOptions}
+              selectedKey={selectedDepartment}
+              onChange={this.handleDepartmentChange}
+              ariaLabel="Filter by department"
+            />
+            {/* <SearchBox
+              placeholder="Search News"
+              value={searchQuery}
+              onChange={this.handleSearchChange}
+              ariaLabel="Search news"
+            /> */}
+          </div>
+          <div className={styles.zoneToggle}>
+            <div className={styles.viewToggle} role="group" aria-label="Toggle view">
+              <button
+                className={`${styles.toggleBtn} ${
+                  currentViewMode === "grid" ? styles.active : ""
+                }`}
+                onClick={() => setViewMode("grid")}
+                aria-pressed={currentViewMode === "grid"}
+                type="button"
+              >
+                <img src={gridViewIconSrc} alt="Grid view" />
+              </button>
+              <button
+                className={`${styles.toggleBtn} ${
+                  currentViewMode === "list" ? styles.active : ""
+                }`}
+                onClick={() => setViewMode("list")}
+                aria-pressed={currentViewMode === "list"}
+                type="button"
+              >
+                <img src={listViewIconSrc} alt="List view" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
