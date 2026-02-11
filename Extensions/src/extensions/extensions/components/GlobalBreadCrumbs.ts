@@ -107,8 +107,41 @@ export class GlobalBreadcrumbs {
         p = p.toLowerCase();
         return p.endsWith("/sitepages/policies-and-procedures.aspx");
     }
-    
 
+    private isLetsCelebratePage(): boolean {
+        let p = window.location.pathname || "";
+        try { p = decodeURIComponent(p); } catch { }
+        p = p.toLowerCase();
+        return p.includes("/sitepages/lets-celebrate.aspx");
+    }
+
+    private isDashboardPage(): boolean {
+        let p = window.location.pathname || "";
+        try { p = decodeURIComponent(p); } catch { }
+        p = p.toLowerCase();
+        return p.includes("/sitepages/dashboards.aspx"); 
+    }
+
+    private isGalleryPage(): boolean {
+        let p = window.location.pathname || "";
+        try { p = decodeURIComponent(p); } catch { }
+        p = p.toLowerCase();
+        return p.endsWith("/sitepages/dhre-gallery.aspx");
+    }
+
+     private isFormsLibraryPage(): boolean {
+        let p = window.location.pathname || "";
+        try { p = decodeURIComponent(p); } catch { }
+        p = p.toLowerCase();
+        return p.includes("/sitepages/forms-library.aspx");
+    }
+
+     private isAboutDhrePage(): boolean {
+        let p = window.location.pathname || "";
+        try { p = decodeURIComponent(p); } catch { }
+        p = p.toLowerCase();
+        return p.includes("/sitepages/about-dhre.aspx");
+    }
     private getModernPageTitle(): string {
         const h1 =
             document.querySelector('h1[data-automation-id="pageHeaderTitle"]') ||
@@ -314,18 +347,19 @@ export class GlobalBreadcrumbs {
             this.unmount();
             return;
         }
-        if(this.isOfferBenefitsPage()){
+        if (this.isOfferBenefitsPage()) {
             this.unmount()
             return;
         }
 
         const info = await this.getCurrentSitePageInfo();
-       let section = (this.isTasksPage() || this.isOfferBenefitsPage() || this.isBeverageMenuPage()) ? "Home" : "Pages";
+        let section = (this.isTasksPage() || this.isOfferBenefitsPage() || this.isBeverageMenuPage()
+         || this.isLetsCelebratePage() || this.isDashboardPage() || this.isGalleryPage() || this.isFormsLibraryPage() || this.isAboutDhrePage()) ? "Home" : "Pages";
         let title = info.title || this.getModernPageTitle();
 
         if (this.isBeverageMenuPage()) {
-             title = "BeverageMenu"; 
-         }
+            title = "BeverageMenu";
+        }
 
         if (info.isNews) section = "News Story";
         else if (info.contentType) {
