@@ -31,8 +31,10 @@ $muted: #6C6C6C;
 
 /* ── CONTROLS (Pivot, Dept, Search, Toggle) ───────────────────── */
 .controls{
-  display:grid;
-  grid-template-columns: 1fr auto auto;   /* left spacer grows, filters + toggle hug right */
+  // display:grid;
+  // grid-template-columns: 1fr auto auto;   /* left spacer grows, filters + toggle hug right */
+  display: flex;
+  justify-content: space-between;
   align-items:center;
   column-gap:16px;
   width:100%;
@@ -40,9 +42,15 @@ $muted: #6C6C6C;
   min-height:56px;
   min-width:0; /* allow shrink */
 }
+
+.filterRightArea{
+    display: flex;
+    gap: 1rem;
+}
+
 .zoneTabs   { justify-self:start; }
 .zoneFilters{
-  justify-self:end;
+  justify-content: flex-end;
   display:flex; align-items:center; gap:12px;
   min-width:420px;
   min-width:0;
