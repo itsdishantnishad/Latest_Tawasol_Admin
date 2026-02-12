@@ -109,19 +109,29 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
   };
 
   /** Back | Home › Dashboards (Back only in detail view) */
-  /** Back | Home › Dashboards (Back only in detail view) */
-private renderTopBar(): React.ReactNode {
-  const { active } = this.state;
-  return (
-    <div className={styles.topBar}>
-      <GlobalBreadcrumbs
-        sectionLabel="Home"
-        currentLabel="Dashboards"
-        onBack={active ? this.onBackToMaster : undefined} 
-      />
-    </div>
-  );
-}
+  private getHomeUrl = (): string => {
+    return this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+  };
+
+  private onBackClick = (): void => {
+    if (this.state.active) {
+      this.onBackToMaster();
+      return;
+    }
+    window.location.assign(this.getHomeUrl());
+  };
+
+  private renderTopBar(): React.ReactNode {
+    return (
+      <div className={styles.topBar}>
+        <GlobalBreadcrumbs
+          sectionLabel="Home"
+          currentLabel="Dashboards"
+          onBack={this.onBackClick} 
+        />
+      </div>
+    );
+  }
 
 
   render(): React.ReactElement<IDashboardProps> {
@@ -141,14 +151,14 @@ private renderTopBar(): React.ReactNode {
         <div className={styles.layout}>
           {!active && (
             <>
-            <div className={styles.rail}>
-              <CategoryRail
-                items={categories}
-                selectedId={selectedCategory?.id}
-                onSelect={this.onSelectCategory}
-              />
-            </div>
-            <div className={styles.verticleDivider}></div>
+              <div className={styles.rail}>
+                <CategoryRail
+                  items={categories}
+                  selectedId={selectedCategory?.id}
+                  onSelect={this.onSelectCategory}
+                />
+              </div>
+              <div className={styles.verticleDivider}></div>
             </>
           )}
 
