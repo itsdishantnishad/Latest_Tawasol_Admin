@@ -7,8 +7,12 @@ import { Text, Spinner, SpinnerSize } from "@fluentui/react";
 import styles from "./ProfilePageHeader.module.scss";
 import { IBadgeItem, IProfilePageHeaderProps } from "./IProfilePageHeaderProps";
 
-// ✅ ProfileCard popup component
 import ProfileCard from "./ProfileCard";
+
+import {
+  buildVCardFromGraphCore,
+  generateQrDataUrl
+} from "../../services/Profile/CardQRService";
 
 import {
   fetchUserProfilePicture,
@@ -26,7 +30,6 @@ import {
   loadSelectedBadge
 } from "../../services/Profile/profileHeaderServices";
 
-const ProfileIcon_URL: string = require("../assets/profileCircleImg.svg");
 const ProfileLoaderIcon_URL: string = require("../assets/Profileicon.png");
 
 /** ---- ES2018 compatible settled wrapper (no Promise.allSettled) ---- */
@@ -36,8 +39,8 @@ type SettledResult<T> =
 
 function toSettled<T>(p: Promise<T>): Promise<SettledResult<T>> {
   return p.then(
-    (value) => ({ status: "fulfilled", value: value }),
-    (reason) => ({ status: "rejected", reason: reason })
+    (value) => ({ status: "fulfilled", value }),
+    (reason) => ({ status: "rejected", reason })
   );
 }
 
@@ -66,6 +69,9 @@ interface IProfilePageHeaderState {
 
   showProfileCard: boolean;
   profileCardPos: { top: number; left: number };
+
+  qrCodeUrl: string;
+  qrVcard: string;
 }
 
 // NOTE: fetchGraphMeInfo returns this shape in your project
@@ -87,11 +93,9 @@ export default class ProfilePageHeader extends React.Component<
   private profileBtnRef: React.RefObject<HTMLButtonElement>;
   private profilePopoverRef: React.RefObject<HTMLDivElement>;
 
-  // ✅ observe when header becomes fully invisible
   private headerWrapRef: React.RefObject<HTMLDivElement>;
   private headerObserver: IntersectionObserver | null = null;
 
-  // ✅ store webpart chrome element to cleanup class
   private wpChromeEl: HTMLElement | null = null;
 
   constructor(props: IProfilePageHeaderProps) {
@@ -121,7 +125,10 @@ export default class ProfilePageHeader extends React.Component<
       targetAccountName: "",
 
       showProfileCard: false,
-      profileCardPos: { top: 0, left: 0 }
+      profileCardPos: { top: 0, left: 0 },
+
+      qrCodeUrl: "",
+      qrVcard: ""
     };
 
     this.menuRef = React.createRef();
@@ -138,10 +145,8 @@ export default class ProfilePageHeader extends React.Component<
   public componentDidMount(): void {
     document.addEventListener("click", this.handleOutsideClick, true);
 
-    // ✅ Close ProfileCard only when header is fully out of view
     this.setupHeaderVisibilityObserver();
 
-    // ✅ Hide SharePoint webpart chrome icons (🔗 + ⋮) ONLY for this webpart
     this.tryHideSharePointWebPartChrome();
 
     this.initializeProfile();
@@ -165,14 +170,12 @@ export default class ProfilePageHeader extends React.Component<
       this.headerObserver = null;
     }
 
-    // ✅ cleanup chrome class
     if (this.wpChromeEl) {
       this.wpChromeEl.classList.remove("tawasolHideWpChromeActions");
       this.wpChromeEl = null;
     }
   }
 
-  // ✅ Close only when header completely not visible
   private setupHeaderVisibilityObserver(): void {
     try {
       const el = this.headerWrapRef.current;
@@ -186,7 +189,6 @@ export default class ProfilePageHeader extends React.Component<
           if (!entries || !entries.length) return;
           const entry = entries[0];
 
-          // ✅ only when header completely gone (not even 1px visible)
           if (entry && entry.intersectionRatio === 0) {
             if (this.state.showProfileCard) {
               this.setState({ showProfileCard: false });
@@ -202,7 +204,6 @@ export default class ProfilePageHeader extends React.Component<
     }
   }
 
-  // ✅ Hide SharePoint webpart chrome icons (🔗 + ⋮) for THIS webpart only.
   private tryHideSharePointWebPartChrome(): void {
     try {
       const root = this.headerWrapRef.current;
@@ -231,7 +232,7 @@ export default class ProfilePageHeader extends React.Component<
       const uid = (params.get("uid") || "").trim();
       const accountname = (params.get("accountname") || "").trim();
       const userKey = uid || accountname;
-      return { userKey: userKey, accountname: accountname };
+      return { userKey, accountname };
     } catch {
       return { userKey: "", accountname: "" };
     }
@@ -359,19 +360,14 @@ export default class ProfilePageHeader extends React.Component<
 
   private async initializeProfileAsync(): Promise<void> {
     const siteUrl = await getSiteUrl();
-    this.setState({ siteUrl: siteUrl });
+    this.setState({ siteUrl });
 
     const target = this.getTargetFromUrl();
     const userKey = target.userKey;
     const accountname = target.accountname;
 
     const pcUser =
-      this.props &&
-      this.props.context &&
-      this.props.context.pageContext &&
-      this.props.context.pageContext.user
-        ? this.props.context.pageContext.user
-        : null;
+      this.props?.context?.pageContext?.user ? this.props.context.pageContext.user : null;
 
     const loginName = pcUser ? pcUser.loginName || "" : "";
     const ctxEmail = pcUser ? pcUser.email || "" : "";
@@ -386,11 +382,12 @@ export default class ProfilePageHeader extends React.Component<
     const initialDisplayName =
       (this.props.fullName || "").trim() || (this.state.fullName || "").trim() || "Loading...";
 
-    const avatarSeed = initialDisplayName === "Loading..." ? derivedAccount || "User" : initialDisplayName;
+    const avatarSeed =
+      initialDisplayName === "Loading..." ? derivedAccount || "User" : initialDisplayName;
     const initialPhoto = this.getDefaultAvatar(avatarSeed, 180);
 
     this.setState({
-      isSelf: isSelf,
+      isSelf,
       targetUserKey: userKey,
       targetAccountName: derivedAccount,
       fullName: initialDisplayName,
@@ -453,7 +450,9 @@ export default class ProfilePageHeader extends React.Component<
     }
 
     const coreDisplayName =
-      graphCore && (graphCore as any).displayName ? String((graphCore as any).displayName).trim() : "";
+      graphCore && (graphCore as any).displayName
+        ? String((graphCore as any).displayName).trim()
+        : "";
 
     const finalFullName =
       (graphInfo && graphInfo.fullName ? String(graphInfo.fullName).trim() : "") ||
@@ -463,11 +462,27 @@ export default class ProfilePageHeader extends React.Component<
       (this.state.fullName || "").trim() ||
       "User";
 
-    const finalDesignation = graphInfo && graphInfo.designation ? String(graphInfo.designation).trim() : "";
+    const finalDesignation =
+      graphInfo && graphInfo.designation ? String(graphInfo.designation).trim() : "";
+
     const finalDepartment =
       (graphInfo && graphInfo.department ? String(graphInfo.department).trim() : "") ||
       (spInfo && spInfo.department ? String(spInfo.department).trim() : "") ||
       (this.state.department || "").trim();
+
+    let qrVcard = "";
+    let qrCodeUrl = "";
+
+    if (graphCore) {
+      try {
+        qrVcard = buildVCardFromGraphCore(graphCore, finalFullName);
+        // High-res + quiet zone => better scan on weak cameras
+        qrCodeUrl = await generateQrDataUrl(qrVcard, { width: 720, margin: 4, ecLevel: "Q" });
+      } catch {
+        qrVcard = "";
+        qrCodeUrl = "";
+      }
+    }
 
     let finalPhoto = (graphPhotoUrl || "").trim();
 
@@ -501,7 +516,9 @@ export default class ProfilePageHeader extends React.Component<
       fullName: finalFullName,
       designation: finalDesignation,
       department: finalDepartment,
-      graphCore: graphCore,
+      graphCore,
+      qrCodeUrl,
+      qrVcard,
       error: null
     });
   }
@@ -559,7 +576,7 @@ export default class ProfilePageHeader extends React.Component<
     left = Math.max(pad, Math.min(left, window.innerWidth - cardW - pad));
     top = Math.max(pad, top);
 
-    return { top: top, left: left };
+    return { top, left };
   };
 
   private toggleProfileCard = (): void => {
@@ -577,7 +594,7 @@ export default class ProfilePageHeader extends React.Component<
     if (this.fileInputRef.current) this.fileInputRef.current.click();
   };
 
-   private handleProfileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+  private handleProfileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
     if (!file) return;
 
@@ -718,6 +735,9 @@ export default class ProfilePageHeader extends React.Component<
           department={this.state.department}
           photoUrl={this.state.currentPhoto}
           employeeId={employeeId}
+          qrCodeUrl={this.state.qrCodeUrl}
+          // keep safe if ProfileCard props not updated yet
+          {...({ qrVcard: this.state.qrVcard } as any)}
         />
       </div>,
       document.body
@@ -767,7 +787,6 @@ export default class ProfilePageHeader extends React.Component<
 
         <div className={styles.flexCol}>
           <div className={styles.actions} role="group" aria-label="Header actions">
-            {/* ✅ KEEP THIS ICON (ProfileCard button) */}
             <button
               ref={this.profileBtnRef}
               type="button"
@@ -830,58 +849,9 @@ export default class ProfilePageHeader extends React.Component<
                   className={styles.copyClose}
                   aria-label="Close"
                   onClick={() => this.setState({ copyFeedback: false })}
-                >
-                  
-                </button>
+                ></button>
               </div>
             ) : null}
-
-            {/* <div className={styles.kebabWrapper} ref={this.menuRef}>
-              <button
-                className={styles.iconBtn + " " + styles.kebabBtn}
-                title="More options"
-                aria-label="More options"
-                onClick={this.toggleMenu}
-                type="button"
-                disabled={this.state.isLoading}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24">
-                  <circle cx="12" cy="5" r="2" />
-                  <circle cx="12" cy="12" r="2" />
-                  <circle cx="12" cy="19" r="2" />
-                </svg>
-              </button>
-
-              {this.state.showMenu ? (
-                <div className={styles.dropdownMenu}>
-                  <button
-                    type="button"
-                    className={
-                      styles.changePhotoBtn +
-                      (this.state.isSelf ? "" : " " + styles.changePhotoBtnDisabled)
-                    }
-                    onClick={this.openFileDialog}
-                    role="menuitem"
-                    title={this.state.isSelf ? "Change Profile Photo" : "You can change only your own photo"}
-                    aria-disabled={!this.state.isSelf}
-                  >
-                    <img src={ProfileIcon_URL} className={styles.changePhotoIcon} alt="" />
-                    <span className={styles.changePhotoLabel}>
-                      {this.state.isSelf ? "Change Profile Photo" : "Change Profile Photo (Self only)"}
-                    </span>
-                  </button>
-                </div>
-              ) : null}
-            </div> */}
-
-            {/* <input
-              ref={this.fileInputRef}
-              type="file"
-              accept="image/*"
-              className={styles.hiddenInput}
-              onChange={this.handleProfileChange}
-              aria-hidden="true" */}
-            {/* /> */}
           </div>
 
           {this.state.error ? (

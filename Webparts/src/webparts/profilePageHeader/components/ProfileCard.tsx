@@ -7,13 +7,11 @@ export interface IProfileCardProps {
   department?: string;
   photoUrl?: string;
   employeeId?: string;
-  qrCodeUrl?: string; // can be dataURL OR normal URL
+  qrCodeUrl?: string; // dataURL
+  qrVcard?: string;   // vCard payload (download fallback)
 }
 
-// ✅ Dubai logo (make sure file exists in: src/webparts/profilePageHeader/assets/)
 const DubaiIcon_URL: string = require("../assets/Dubaiicon.svg");
-
-// ✅ Background vectors
 const VectorA_URL: string = require("../assets/VectorA.png");
 const VectorB_URL: string = require("../assets/VectorB.png");
 
@@ -34,17 +32,33 @@ const buildSubtitle = (jobTitle?: string, department?: string): string => {
 };
 
 const ProfileCard: React.FC<IProfileCardProps> = (props) => {
-  const { displayName, jobTitle, department, photoUrl, employeeId, qrCodeUrl } = props;
+  const { displayName, jobTitle, department, photoUrl, employeeId, qrCodeUrl, qrVcard } = props;
 
   const subtitle = buildSubtitle(jobTitle, department);
   const initials = getInitials(displayName);
 
+  const handleDownloadContact = React.useCallback(() => {
+    if (!qrVcard) return;
+
+    const safeName = (displayName || "contact")
+      .trim()
+      .replace(/[^a-z0-9 _-]/gi, "")
+      .replace(/\s+/g, " ");
+
+    const fileName = safeName ? `${safeName}.vcf` : "contact.vcf";
+
+    const blob = new Blob([qrVcard], { type: "text/vcard;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [qrVcard, displayName]);
+
   return (
     <div className={styles.card} role="dialog" aria-label="Profile Card">
-      {/* ✅ SWAPPED: vectorA position will show VectorB image */}
       <img className={styles.vectorA} src={VectorB_URL} alt="" aria-hidden="true" />
-
-      {/* ✅ SWAPPED: vectorB position will show VectorA image */}
       <img className={styles.vectorB} src={VectorA_URL} alt="" aria-hidden="true" />
 
       <div className={styles.topLogoStrip}>
@@ -64,15 +78,31 @@ const ProfileCard: React.FC<IProfileCardProps> = (props) => {
       <div className={styles.name}>{displayName || "—"}</div>
       <div className={styles.subtitle}>{subtitle}</div>
 
-      {/* <div className={styles.qrOuter}>
+      {/* ✅ QR (click to download vcf if scanning fails) */}
+      <div
+        className={styles.qrOuter}
+        title={qrVcard ? "Scan to save contact (or click to download .vcf)" : "Scan to save contact"}
+        role={qrVcard ? "button" : undefined}
+        tabIndex={qrVcard ? 0 : -1}
+        onClick={() => {
+          if (qrVcard) handleDownloadContact();
+        }}
+        onKeyDown={(e) => {
+          if (!qrVcard) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleDownloadContact();
+          }
+        }}
+      >
         <div className={styles.qrInner}>
           {qrCodeUrl ? (
-            <img className={styles.qrImg} src={qrCodeUrl} alt="QR Code" />
+            <img className={styles.qrImg} src={qrCodeUrl} alt="Scan to add contact" />
           ) : (
             <div className={styles.qrFallback}>QR not available</div>
           )}
         </div>
-      </div> */}
+      </div>
 
       <div className={styles.empId}>
         <span className={styles.empLabel}>Emp. ID :</span>{" "}
