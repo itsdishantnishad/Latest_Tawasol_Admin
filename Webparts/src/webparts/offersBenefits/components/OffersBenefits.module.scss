@@ -398,18 +398,32 @@
 .medWorkMuted { font-size: 12.5px; color: #7a7a7a; top: 451px; }
 
 /* Medical banner fixed 497 */
+// .medBanner {
+//   height: 100%;
+//   border-radius: 16px;
+//   background: #fff;
+//   display: grid;
+//   grid-template-columns: minmax(0, 1fr) minmax(420px, 520px);
+//   gap: 18px;
+//   padding: 26px;
+//   overflow: hidden;
+// }
 .medBanner {
   height: 100%;
   border-radius: 16px;
   background: #fff;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(420px, 520px);
+
+  /* ✅ right side flexible now (no fixed 420px) */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+
   gap: 18px;
   padding: 26px;
   overflow: hidden;
 }
 
-.medBannerLeft { min-width: 0; }
+.medBannerLeft { min-width: 0;
+padding: 70px;  line-height: 2; }
 .medBannerTitle {
   font-size: 34px;
   font-weight: 900;
@@ -472,15 +486,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 0;        /* ✅ important for grid shrink */
+  min-height: 0;
+  overflow: hidden;    /* ✅ never spill out on zoom */
 }
+
 .medBannerImg {
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-width: 100%;
   max-height: 100%;
   display: block;
   border-radius: 12px;
-  object-fit: contain; /* ✅ phone should never crop */
+
+  object-fit: contain; /* ✅ never crop */
 }
+
 
 /* =========================================================
    PRIVILEGES — fixed sizes
@@ -625,4 +646,32 @@
 @media (max-width: 720px) {
   .medGridTop { grid-template-columns: 1fr; }
   .privGridBottom { grid-template-columns: 1fr; }
+}
+@media (max-width: 1200px) {
+  .medBanner {
+    grid-template-columns: 1fr; /* ✅ stack so image never cuts */
+  }
+
+  .medBannerRight {
+    justify-content: center;
+  }
+
+  .medBannerImg {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 360px; /* ✅ keep it visible, no cut */
+  }
+}
+@media (max-width: 1100px) {
+  .medBanner {
+    grid-template-columns: 1fr; /* ✅ stack */
+  }
+
+  .medBannerImg {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 380px; /* ✅ safe inside banner */
+  }
 }
