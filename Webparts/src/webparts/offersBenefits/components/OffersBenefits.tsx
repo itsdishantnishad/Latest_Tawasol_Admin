@@ -1,8 +1,9 @@
 import * as React from "react";
 import styles from "./OffersBenefits.module.scss";
+
 import { PayloadModel, AnyCard } from "./types";
 import { fetchJson, readPlaceholder } from "./Api";
-import GlobalBreadcrumbs, { GlobalBreadcrumbsProps } from "../../assets/GlobalBreadcrumbs";
+import GlobalBreadcrumbs from "../../assets/GlobalBreadcrumbs";
 
 const GlobeIcon: string = require("../assets/globe.png");
 const GlobeIcon1: string = require("../assets/globeblack.png");
@@ -34,11 +35,13 @@ export default class OffersBenefits extends React.Component<
   State
 > {
   private abort?: AbortController;
+
   state: State = { loading: true, activeTab: "medical" };
 
   componentDidMount() {
     this.load(this.state.activeTab);
   }
+
   componentWillUnmount() {
     this.abort?.abort();
   }
@@ -111,7 +114,6 @@ export default class OffersBenefits extends React.Component<
         ? styles.privBottomRightCard
         : styles.privCardAny;
 
-    // ✅ IMAGE CARD: caption permanently removed (text is inside image)
     if (card.type === "imageCard") {
       const img = (card as any).imageOverride || (card as any).imageUrl;
 
@@ -138,11 +140,12 @@ export default class OffersBenefits extends React.Component<
           rawTitle
         );
 
-      // ✅ whole title red only for bottom-right card, NOT for Core Direction card
-      const wantAllRed: boolean = Boolean((card as any).accentTitle) || isImportance;
+      const wantAllRed: boolean =
+        Boolean((card as any).accentTitle) || isImportance;
       const wholeTitleRed: boolean = wantAllRed && i !== 0;
 
-      const twoColBullets: boolean = Boolean((card as any).twoCol) || isImportance;
+      const twoColBullets: boolean =
+        Boolean((card as any).twoCol) || isImportance;
 
       const bulletHeading: string =
         (card as any).bulletHeading ||
@@ -173,7 +176,9 @@ export default class OffersBenefits extends React.Component<
           key={i}
           className={`${styles.cardWrap} ${styles.privCardWrap} ${hookWrap}`}
         >
-          <div className={`${styles.card} ${styles.privCard} ${styles.privTextCard}`}>
+          <div
+            className={`${styles.card} ${styles.privCard} ${styles.privTextCard}`}
+          >
             <div className={styles.privTextPad}>
               {(card as any).logoUrl && (
                 <div className={styles.privLogoRow}>
@@ -185,7 +190,6 @@ export default class OffersBenefits extends React.Component<
                 </div>
               )}
 
-              {/* ✅ Core Direction BLACK, only accent words RED */}
               <div
                 className={`${styles.privTitleBase} ${titleClass} ${
                   wholeTitleRed ? styles.privTitleRed : ""
@@ -295,9 +299,18 @@ export default class OffersBenefits extends React.Component<
           : styles.medBtnAny;
 
       return (
-        <div key={i} className={`${styles.cardWrap} ${styles.medCardWrap} ${hookWrap}`}>
+        <div
+          key={i}
+          className={`${styles.cardWrap} ${styles.medCardWrap} ${hookWrap}`}
+        >
           <div className={`${styles.card} ${styles.medCard}`}>
-            {img && <img className={`${styles.medCardImage} ${imgClass}`} src={img} alt="" />}
+            {img && (
+              <img
+                className={`${styles.medCardImage} ${imgClass}`}
+                src={img}
+                alt=""
+              />
+            )}
 
             <div className={styles.medBody}>
               <div className={`${styles.medTitleBase} ${titleClass}`}>
@@ -331,7 +344,9 @@ export default class OffersBenefits extends React.Component<
     if (card.type === "infoCard") {
       const rows: any[] = (card as any).rows || [];
       const pick = (label: string) =>
-        rows.find((r) => String(r.label || "").toLowerCase() === label.toLowerCase());
+        rows.find(
+          (r) => String(r.label || "").toLowerCase() === label.toLowerCase()
+        );
 
       const phone = pick("Phone");
       const email = pick("Email");
@@ -344,10 +359,17 @@ export default class OffersBenefits extends React.Component<
       const whTz = whParts[1] ? `(${whParts[1]})` : "";
 
       return (
-        <div key={i} className={`${styles.cardWrap} ${styles.medCardWrap} ${hookWrap}`}>
+        <div
+          key={i}
+          className={`${styles.cardWrap} ${styles.medCardWrap} ${hookWrap}`}
+        >
           <div className={`${styles.card} ${styles.medCard}`}>
             {topImg && (
-              <img className={`${styles.medCardImage} ${styles.medContactImg}`} src={topImg} alt="" />
+              <img
+                className={`${styles.medCardImage} ${styles.medContactImg}`}
+                src={topImg}
+                alt=""
+              />
             )}
 
             <div className={styles.medBody}>
@@ -374,12 +396,9 @@ export default class OffersBenefits extends React.Component<
                 </div>
               )}
 
-              {/* {horizontal line} */}
               <div className={styles.line}>
-                    <hr></hr>
+                <hr />
               </div>
-
-              {/* divider removed permanently */}
 
               <div className={styles.medWorkTitle}>Working Hours</div>
               {whMain && <div className={styles.medWorkText}>{whMain}</div>}
@@ -394,10 +413,17 @@ export default class OffersBenefits extends React.Component<
       const b: any = card;
 
       return (
-        <div key={i} className={`${styles.cardWrap} ${styles.medBannerWrap} ${hookWrap}`}>
-          <div className={styles.medBanner}>
+        <div
+          key={i}
+          className={`${styles.cardWrap} ${styles.medBannerWrap} ${hookWrap}`}
+        >
+          {/* ✅ waveOffset on the banner => controls both waves together */}
+          <div className={`${styles.medBanner} ${styles.waveOffset}`}>
             <div className={styles.medBannerLeft}>
-              <div className={styles.medBannerTitle} dangerouslySetInnerHTML={{ __html: b.title }} />
+              <div
+                className={styles.medBannerTitle}
+                dangerouslySetInnerHTML={{ __html: b.title }}
+              />
               {b.subtitle && <div className={styles.medBannerSub}>{b.subtitle}</div>}
 
               {Array.isArray(b.bullets) && b.bullets.length > 0 && (
@@ -414,7 +440,11 @@ export default class OffersBenefits extends React.Component<
                 <div className={styles.medBannerBadges}>
                   {b.badges.map((bd: any, bi: number) => (
                     <a key={bi} href={bd.linkUrl} target="_blank" rel="noreferrer">
-                      <img className={styles.medBannerBadge} src={bd.imageUrl} alt="store badge" />
+                      <img
+                        className={styles.medBannerBadge}
+                        src={bd.imageUrl}
+                        alt="store badge"
+                      />
                     </a>
                   ))}
                 </div>
@@ -422,8 +452,17 @@ export default class OffersBenefits extends React.Component<
 
               {b.websiteUrl && (
                 <div className={styles.medBannerSiteRow}>
-                  <a className={styles.medBannerSiteLink} href={b.websiteUrl} target="_blank" rel="noreferrer">
-                    <img src={GlobeIcon1} className={styles.medBannerGlobeIcon} alt="" />
+                  <a
+                    className={styles.medBannerSiteLink}
+                    href={b.websiteUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <img
+                      src={GlobeIcon1}
+                      className={styles.medBannerGlobeIcon}
+                      alt=""
+                    />
                     {b.websiteText || b.websiteUrl}
                   </a>
                 </div>
@@ -431,7 +470,9 @@ export default class OffersBenefits extends React.Component<
             </div>
 
             <div className={styles.medBannerRight}>
-              {b.rightImageUrl && <img className={styles.medBannerImg} src={b.rightImageUrl} alt="" />}
+              {b.rightImageUrl && (
+                <img className={styles.medBannerImg} src={b.rightImageUrl} alt="" />
+              )}
             </div>
           </div>
         </div>
@@ -457,33 +498,40 @@ export default class OffersBenefits extends React.Component<
       : this.props.sectionTitlePrivileges;
 
     return (
-      <div className={`${styles.wrapper} ${activeTab === "medical" ? styles.isMedical : styles.isPrivileges}`}>
-        {/* ✅ NEW: container fixes centering + 100% zoom cut */}
+      <div
+        className={`${styles.wrapper} ${
+          activeTab === "medical" ? styles.isMedical : styles.isPrivileges
+        }`}
+      >
         <div className={styles.container}>
-          {/* Tabs */}
           <div className={styles.segRow}>
-         <div className={styles.breadPosition}>
-           <GlobalBreadcrumbs/>
-         </div>
-          <div className={styles.segWrap}>
-            <div className={styles.seg}>
-              <button
-                className={`${styles.segBtn} ${activeTab === "medical" ? styles.segBtnActive : ""}`}
-                onClick={() => this.load("medical")}
-                type="button"
-              >
-                Medical Insurance
-              </button>
-              <button
-                className={`${styles.segBtn} ${activeTab === "privileges" ? styles.segBtnActive : ""}`}
-                onClick={() => this.load("privileges")}
-                type="button"
-              >
-                Employee Privileges
-              </button>
+            <div className={styles.breadPosition}>
+              <GlobalBreadcrumbs />
             </div>
-          </div>
-         
+
+            <div className={styles.segWrap}>
+              <div className={styles.seg}>
+                <button
+                  className={`${styles.segBtn} ${
+                    activeTab === "medical" ? styles.segBtnActive : ""
+                  }`}
+                  onClick={() => this.load("medical")}
+                  type="button"
+                >
+                  Medical Insurance
+                </button>
+
+                <button
+                  className={`${styles.segBtn} ${
+                    activeTab === "privileges" ? styles.segBtnActive : ""
+                  }`}
+                  onClick={() => this.load("privileges")}
+                  type="button"
+                >
+                  Employee Privileges
+                </button>
+              </div>
+            </div>
           </div>
 
           {!!sectionTitle && <div className={styles.sectionTitle}>{sectionTitle}</div>}
@@ -491,7 +539,6 @@ export default class OffersBenefits extends React.Component<
           <div className={styles.grid}>
             {error && <div className={styles.error}>Error: {error}</div>}
 
-            {/* LOADING */}
             {loading && !error && (
               <>
                 {!isPriv ? (
@@ -551,13 +598,14 @@ export default class OffersBenefits extends React.Component<
               </>
             )}
 
-            {/* RENDER DATA */}
             {!loading && !error && (
               <>
                 {!isPriv ? (
                   <>
                     <div className={styles.medGridTop}>
-                      {medNonBanner.map((c: AnyCard, i: number) => this.renderMedicalCard(c, i))}
+                      {medNonBanner.map((c: AnyCard, i: number) =>
+                        this.renderMedicalCard(c, i)
+                      )}
                     </div>
 
                     {medBanner && (
@@ -573,7 +621,9 @@ export default class OffersBenefits extends React.Component<
                     </div>
 
                     <div className={styles.privGridBottom}>
-                      {privBottom.map((c: AnyCard, bi: number) => this.renderPrivCard(c, bi + 2))}
+                      {privBottom.map((c: AnyCard, bi: number) =>
+                        this.renderPrivCard(c, bi + 2)
+                      )}
                     </div>
                   </>
                 )}

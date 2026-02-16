@@ -1,10 +1,3 @@
-/* =========================================================
-   Offers & Benefits (FINAL)
-   - Centered container (max 1320) to stop right-side cut at 100% zoom
-   - Figma fixed heights: 497 (medical), 314 (priv bottom), 360 (priv top)
-   - Bottom-left privileges image uses contain (no crop for embedded text)
-   ========================================================= */
-
 .wrapper {
   --bg: #fff4ea;
   --ink: #2f2f2f;
@@ -17,11 +10,8 @@
   box-sizing: border-box;
   background: var(--bg);
   border-radius: 12px;
-
-  /* IMPORTANT: avoid large horizontal padding here (SharePoint already has padding) */
   padding: 0 0 40px;
   overflow-x: hidden;
-
   font-family: "Inter", sans-serif;
 }
 
@@ -31,26 +21,17 @@
   box-sizing: border-box;
 }
 
-/* ✅ NEW: the only place we keep horizontal padding + centering */
 .container {
   margin: 0 auto;
-  /* max-width: 1320px; */
-  /* padding: 0 clamp(12px, 3vw, 60px); */
   width: 100%;
   padding: 0px 60px;
 }
 
-/* keep for typings */
 .isMedical { --ob-mode: medical; }
 .isPrivileges { --ob-mode: privileges; }
 
-/* ================= Tabs ================= */
-.segWrap {
-  display: flex;
-  justify-content: center;
-  padding-top: 0px;
-}
-
+/* Tabs */
+.segWrap { display: flex; justify-content: center; }
 .seg {
   background: #fff;
   border: 1px solid #fbbf7f;
@@ -58,14 +39,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
   display: inline-flex;
   padding: 4px;
-  max-width: 100%;
 }
-
 .segBtn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   border: 0;
   background: transparent;
   border-radius: 999px;
@@ -77,27 +52,10 @@
   white-space: nowrap;
   transition: all .2s ease;
 }
-
 .segBtnActive {
-  background: radial-gradient(
-    245.31% 848.44% at 112.5% -164.06%,
-    #dda160 0,
-    #ffdbb4 100%
-  );
+  background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #dda160 0, #ffdbb4 100%);
 }
 
-// .segBtnActive::after {
-//   content: "";
-//   position: absolute;
-//   left: 10px;
-//   right: 10px;
-//   bottom: 6px;
-//   height: 8px;
-//   border-radius: 999px;
-//   background: rgba(217, 150, 88, 0.55);
-// }
-
-/* ================= Section title (Core Direction) ================= */
 .sectionTitle {
   margin: 22px 0 0;
   font-size: 16px;
@@ -105,7 +63,6 @@
   color: #111;
 }
 
-/* ================= Layout wrapper ================= */
 .grid {
   margin-top: 30px;
   width: 100%;
@@ -114,13 +71,9 @@
   gap: 20px;
 }
 
-.error {
-  width: 100%;
-  color: #b00020;
-  font-weight: 700;
-}
+.error { color: #b00020; font-weight: 700; }
 
-/* ================= Skeleton ================= */
+/* Skeleton */
 .skel {
   background: #eee;
   border-radius: inherit;
@@ -133,42 +86,30 @@
   100% { opacity: .6; }
 }
 
-/* ================= Base Card wrappers ================= */
 .cardWrap { min-width: 0; display: block; }
-.card {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  border-radius: inherit;
-}
+.card { width: 100%; height: 100%; overflow: hidden; border-radius: inherit; }
 
-/* keep these non-empty for typings */
 .medCardWrap { min-width: 0; }
 .privCardWrap { min-width: 0; }
 .medCardAny { min-width: 0; }
 .privCardAny { min-width: 0; }
 
-/* ================= Grids ================= */
-/* MEDICAL (3 cards fixed 497 height) */
+/* Grids */
 .medGridTop {
   width: 100%;
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-rows: 497px; /* ✅ figma */
+  grid-auto-rows: 497px;
 }
+.medGridBottom { width: 100%; }
 
-.medGridBottom {
-  width: 100%;
-}
-
-/* PRIVILEGES */
 .privGridTop {
   width: 100%;
   display: grid;
   gap: 20px;
   grid-template-columns: minmax(0, 0.414fr) minmax(0, 0.586fr);
-  grid-auto-rows: 360px; /* ✅ figma-like top cards */
+  grid-auto-rows: 360px;
   min-height: 400px;
 }
 
@@ -177,23 +118,21 @@
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: 314px; /* ✅ figma bottom cards */
+  grid-auto-rows: 314px;
   min-height: 400px;
 }
 
-/* =========================================================
-   MEDICAL — fixed sizes
-   ========================================================= */
+/* Medical cards */
 .medHospitalCard,
 .medBenefitsCard,
 .medContactCard {
   border-radius: 16px;
-  height: 497px; /* ✅ figma */
+  height: 497px;
 }
 
 .medBannerWrap {
   border-radius: 16px;
-  height: 497px; /* ✅ figma */
+  height: 497px;
   background: #fff;
   box-shadow: 0 8px 24px rgba(0,0,0,.06);
 }
@@ -202,30 +141,17 @@
   height: 100%;
   border-radius: inherit;
   box-shadow: 0 8px 24px rgba(0,0,0,.06);
-  display: flex;              /* ✅ keeps content inside fixed height */
+  display: flex;
   flex-direction: column;
 }
 
-/* per-card backgrounds */
 .medHospitalCard .medCard {
-  background: linear-gradient(
-    89.65deg,
-    #fef1db 7.61%,
-    #fdebd2 47.34%,
-    #f9e3c7 95.71%
-  );
+  background: linear-gradient(89.65deg, #fef1db 7.61%, #fdebd2 47.34%, #f9e3c7 95.71%);
 }
 .medBenefitsCard .medCard { background: #fdebd2; }
 .medContactCard .medCard { background: #feead1; }
 
-.medCardImage {
-  width: 100%;
-  display: block;
-  flex: 0 0 auto;
-  object-fit: cover;
-}
-
-/* image heights inside 497 card */
+.medCardImage { width: 100%; display: block; flex: 0 0 auto; object-fit: cover; }
 .medHospitalImg { height: 285px; }
 .medBenefitsImg { height: 285px; }
 .medContactImg  { height: 220px; }
@@ -241,212 +167,91 @@
 }
 
 .medTitleBase {
-   margin: 0; 
-   color: var(--ink); 
-   font-size: 20px;
-   font: "inter";
-   font-weight: 500px;
-   line-height: 28px;
-   top: 337px;
-   left: 24px;
-  }
-.medHospitalTitle{
-  top: 337px;
-  left: 24px;
-  font: "inter";
+  margin: 0;
+  color: var(--ink);
+  font-size: 20px;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
   line-height: 28px;
-  font-weight: 500px;
-}
-.medBenefitsTitle { top: 337px;
-  left: 24px;
-  font: "inter";
-  line-height: 28px;
-  font-weight: 500px;
- }
-.medTitleAny { 
-  top: 337px;
-  left: 24px;
-  font: "inter";
-  line-height: 28px;
-  font-weight: 500px;
 }
 
 .medSubBase {
-   top: 373px;
-   left: 24px;
-   font-family: "inter";
-   font-weight: 400;
-   font-size: 14px;
-   line-height: 22px;
-   letter-spacing: -0.5px;
-   }
-.medHospitalSub{
-   top: 373px;
-   left: 24px;
-   font-family: "inter";
-   font-weight: 400;
-   font-size: 14px;
-   line-height: 22px;
-   letter-spacing: -0.5px;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.5px;
 }
-.medBenefitsSub { 
-   top: 373px;
-   left: 24px;
-   font-family: "inter";
-   font-weight: 400;
-   font-size: 14px;
-   line-height: 22px;
-   letter-spacing: -0.5px;
- }
-.medSubAny {
-  top: 373px;
-   left: 24px;
-   font-family: "inter";
-   font-weight: 400;
-   font-size: 14px;
-   line-height: 22px;
-   letter-spacing: -0.5px;
-  }
 
-/* CTA pinned to bottom inside fixed height */
-.medCtaRow {  
-  margin-top: auto;
-  padding-top: 14px;
-  display: flex;
-  justify-content: center;
- }
+/* ✅ keep for typings (non-empty) */
+.medHospitalTitle { --obKeep: 1; }
+.medBenefitsTitle { --obKeep: 1; }
+.medTitleAny      { --obKeep: 1; }
+.medHospitalSub { --obKeep: 1; }
+.medBenefitsSub { --obKeep: 1; }
+.medSubAny      { --obKeep: 1; }
+
+.medCtaRow { margin-top: auto; padding-top: 14px; display: flex; justify-content: center; }
 
 .medCtaBtn {
   width: 100%;
-  max-width: 379px;     
+  max-width: 379px;
   height: 40px;
   border-radius: 167px;
-  opacity: 1;
-
-  position: static;
-  top: auto;
-  left: auto;
-
-  padding-left: 12px;
-  padding-right: 12px;
-  box-sizing: border-box;
-
+  padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-
   border: 0;
   cursor: pointer;
   color: #fff;
-
-  background: radial-gradient(
-    245.31% 848.44% at 112.5% -164.06%,
-    #101820 0%,
-    #202D39 100%
-  );
-
-  box-shadow:
-    0px 4px 4px 0px #768B9E inset,
-    -4px -6px 4px 0px #00000082 inset;
-    text-decoration: none;
+  background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #101820 0%, #202D39 100%);
+  box-shadow: 0px 4px 4px 0px #768B9E inset, -4px -6px 4px 0px #00000082 inset;
+  text-decoration: none;
 }
 
-
-/* keep non-empty for typings */
 .medHospitalBtn { --obHook: 1; }
 .medBenefitsBtn { --obHook: 1; }
 .medBtnAny { --obHook: 1; }
 
-/* Contact */
-.medContactHead {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--ink);
-  margin-bottom: 10px;
-}
-
-.medInfoRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  font-size: 14px;
-  color: #3b3b3b;
-}
-
-.medInfoVal {
-  color: #0d5fd7;
-  font-weight: 700;
-  text-decoration: none;
-}
+.medContactHead { font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 10px; }
+.medInfoRow { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 14px; color: #3b3b3b; }
+.medInfoVal { color: #0d5fd7; font-weight: 700; text-decoration: none; }
 .medInfoVal:hover { text-decoration: underline; }
 
-/* divider kept but hidden */
-.medDivider { display: none; }
+.medWorkTitle { font-size: 20px; font-weight: 500; color: #000; margin-top: 18px; margin-bottom: 6px; line-height: 28px; }
+.medWorkText { font-size: 13.5px; color: #454545; }
+.medWorkMuted { font-size: 12.5px; color: #7a7a7a; }
 
-.medWorkTitle {
-  top: 385px;
-  font-style: "inter";
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--ink);
-  margin-top: 18px;
-  margin-bottom: 6px;
-  line-height: 28px;
-  color: #000000;
-}
-.medWorkText { font-size: 13.5px; color: #454545; top: 421px; }
-.medWorkMuted { font-size: 12.5px; color: #7a7a7a; top: 451px; }
-
-/* Medical banner fixed 497 */
-// .medBanner {
-//   height: 100%;
-//   border-radius: 16px;
-//   background: #fff;
-//   display: grid;
-//   grid-template-columns: minmax(0, 1fr) minmax(420px, 520px);
-//   gap: 18px;
-//   padding: 26px;
-//   overflow: hidden;
-// }
+/* ================= Banner ================= */
 .medBanner {
   height: 100%;
   border-radius: 16px;
   background: #fff;
   display: grid;
-
-  /* ✅ right side flexible now (no fixed 420px) */
   grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
-
   gap: 18px;
   padding: 26px;
-  overflow: hidden;
+
+  position: relative;
+  overflow: hidden;      /* ✅ waves clipped */
+  isolation: isolate;    /* ✅ clean stacking */
 }
 
-.medBannerLeft { min-width: 0;
-padding: 70px;  line-height: 2; }
-.medBannerTitle {
-  font-size: 34px;
-  font-weight: 900;
-  color: #111;
-  line-height: 1.15;
+.medBannerLeft {
+  min-width: 0;
+  padding: 70px;
+  line-height: 2;
+  position: relative;
+  z-index: 2;
 }
+
+.medBannerTitle { font-size: 34px; font-weight: 900; color: #111; line-height: 1.15; }
 .medBannerTitle em { color: var(--accent); font-style: normal; }
 .medBannerSub { margin-top: 10px; color: #555; font-size: 15px; line-height: 1.5; }
 
-.medBannerBullets {
-  margin-top: 14px;
-  padding-left: 0;
-  list-style: none;
-}
-.medBannerBullets li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 10px 0;
-  color: #222;
-}
+.medBannerBullets { margin-top: 14px; padding-left: 0; list-style: none; }
+.medBannerBullets li { display: flex; align-items: flex-start; gap: 10px; margin: 10px 0; color: #222; }
 
 .medBannerCheck {
   flex: 0 0 22px;
@@ -456,72 +261,101 @@ padding: 70px;  line-height: 2; }
   display: inline-grid;
   place-items: center;
 }
-.medBannerCheck:after {
-  content: "✓";
-  font-weight: 900;
-  font-size: 14px;
-  color: #fff;
-  line-height: 1;
-}
+.medBannerCheck:after { content: "✓"; font-weight: 900; font-size: 14px; color: #fff; line-height: 1; }
 
-.medBannerBadges {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-  flex-wrap: wrap;
-}
+.medBannerBadges { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
 .medBannerBadge { height: 34px; width: auto; display: block; }
 
 .medBannerSiteRow { margin-top: 10px; }
-.medBannerSiteLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #0d1115;
-  text-decoration: none;
-  font-weight: 800;
-}
+.medBannerSiteLink { display: inline-flex; align-items: center; gap: 8px; color: #0d1115; text-decoration: none; font-weight: 800; }
 .medBannerSiteLink:hover { text-decoration: underline; }
 .medBannerGlobeIcon { width: 16px; height: 16px; display: block; }
 
+/* ✅ SINGLE CONTROL FOR BOTH WAVES */
+.waveOffset {
+  --waveShiftX: -234px;     /* + => move waves right, - => left */
+  --waveShiftY: 270px;    /* + => move waves down, - => up */
+  --waveScale: 1.2;      /* wave size */
+  --waveRotate: 1.8deg;  /* figma rotation */
+}
+
+/* ✅ Right column (phone + waves) */
 .medBannerRight {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 0;        /* ✅ important for grid shrink */
+  min-width: 0;
   min-height: 0;
-  overflow: hidden;    /* ✅ never spill out on zoom */
+  z-index: 1;             /* sits above banner background */
 }
 
+/* ✅ WAVES are attached to RIGHT column (matches Figma better) */
+.medBannerRight::before,
+.medBannerRight::after {
+  content: "";
+  position: absolute;
+  width: 654.7484px;
+  height: 681.6377px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  pointer-events: none;
+  opacity: 1;
+
+  top: 50%;
+  left: 50%;
+  z-index: 0; /* behind phone */
+  transform-origin: center;
+}
+
+/* wave1 */
+.medBannerRight::before {
+  background-image: url("../assets/wave1.png");
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--waveRotate))
+    translate(
+      calc(260px + var(--waveShiftX)),
+      calc(-200px + var(--waveShiftY))
+    )
+    scale(var(--waveScale));
+}
+
+/* wave2 */
+.medBannerRight::after {
+  background-image: url("../assets/wave2.png");
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--waveRotate))
+    translate(
+      calc(220px + var(--waveShiftX)),
+      calc(-145px + var(--waveShiftY))
+    )
+    scale(var(--waveScale));
+}
+
+/* ✅ PHONE ON TOP + BIGGER PEACH SHADOW */
 .medBannerImg {
   width: 100%;
   height: auto;
   max-width: 100%;
   max-height: 100%;
   display: block;
-  border-radius: 12px;
+  object-fit: contain;
+  position: relative;
+  z-index: 2;
 
-  object-fit: contain; /* ✅ never crop */
+  /* bigger peach shadow (requested) */
+  filter:
+    drop-shadow(0 40px 97px rgba(245, 184, 140, 0.55))
+    drop-shadow(0 10px 16px rgba(0, 0, 0, 0.10));
 }
 
-
-/* =========================================================
-   PRIVILEGES — fixed sizes
-   ========================================================= */
+/* Privileges */
 .privTopLeftCard,
-.privTopRightCard {
-  border-radius: 12px;
-  // min-height: 360px;
-  min-height: 400px;
-  // overflow: hidden;
-}
-
+.privTopRightCard { border-radius: 12px; min-height: 400px; }
 .privBottomLeftCard,
-.privBottomRightCard {
-  border-radius: 16px;
-  min-height: 350px;
-  // overflow: hidden;
-}
+.privBottomRightCard { border-radius: 16px; min-height: 350px; }
 
 .privCard {
   height: 100%;
@@ -530,39 +364,26 @@ padding: 70px;  line-height: 2; }
   box-shadow: 0 8px 24px rgba(0,0,0,.06);
 }
 
-.privImage {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  object-position: top left;
-}
+.privImage { width: 100%; height: 100%; display: block; object-fit: cover; object-position: top left; }
+.privBottomLeftCard .privImage { object-fit: cover; background: #e9e9e9; }
 
-/* ✅ IMPORTANT: Create Challenges card should NOT crop (text is inside image) */
-.privBottomLeftCard .privImage {
-  object-fit: cover;
-  background: #e9e9e9;
-}
-
-/* privilege text card */
 .privTextCard { background: #ffe8d1; }
 .privTextPad { padding: 26.5px; height: 100%; }
 
 .privLogoRow { margin-bottom: 24px; }
 .privLogo { height: 47px; width: 208.37px; display: block; }
 
-/* Title base BLACK */
 .privTitleBase { margin: 0; color: var(--ink); }
 .privTitleRed { color: var(--accent); margin-top: 20px; }
 .privAccentWord { color: var(--accent); font-weight: 600; }
 
-.privTopLeftTitle { font-size: 28px; font-weight: 600; line-height: 36px;  }
+.privTopLeftTitle { font-size: 28px; font-weight: 600; line-height: 36px; }
 .privBottomRightTitle { font-size: 20px; font-weight: 600; line-height: 28px; }
 .privTitleAny { font-size: 24px; font-weight: 900; }
 
 .privSubBase { margin-top: 25px; color: #555; line-height: 1.5; }
 .privTopLeftSub { font-size: 16px; }
-.privBottomRightSub { font-size: 16px; font-weight: 400; font:"Inter"; line-height: 24px; }
+.privBottomRightSub { font-size: 16px; font-weight: 400; font-family: "Inter", sans-serif; line-height: 24px; }
 .privSubAny { font-size: 14px; }
 
 .privSiteRow { margin-top: 45px; }
@@ -575,24 +396,12 @@ padding: 70px;  line-height: 2; }
   font-weight: 400;
   font-size: 18px;
   line-height: 24px;
-  font-style: "Regular";
 }
 .privSiteLink:hover { text-decoration: underline; }
 .privGlobeIcon { width: 16px; height: 16px; display: block; }
 
-.privBulletHeading {
-  margin-top: 28px;
-  font-weight: 600;
- font-family: "Inter";
-  color: var(--ink);
-  font-size: 18px;
-  font-style: "semi Bold";
-}
-
-.privBullets {
-  margin: 12px 0 0;
-  padding-left: 18px;
-}
+.privBulletHeading { margin-top: 28px; font-weight: 600; font-family: "Inter", sans-serif; color: var(--ink); font-size: 18px; }
+.privBullets { margin: 12px 0 0; padding-left: 18px; }
 .privBullets li::marker { color: var(--accent); }
 
 .privBulletsTwoCol {
@@ -619,30 +428,27 @@ padding: 70px;  line-height: 2; }
   background: var(--accent);
 }
 
-.segRow{
+/* Tabs row layout */
+.segRow {
   display: grid;
-  grid-template-columns: 1fr auto 1fr; /* left | center | right */
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 16px;
 }
 
-/* breadcrumbs left */
-.breadPosition{
+.breadPosition {
   grid-column: 1;
   justify-self: start;
   margin-left: 0 !important;
 }
 
-.line{
+.line {
   width: 267px;
   height: 0px;
-  top: 385px;
-  left:24px;
-  border: 1px;
-  color: #B4B2B2;
+  border: 1px solid #B4B2B2;
 }
 
-/* ================= Responsive (keep figma as long as possible) ================= */
+/* Responsive */
 @media (max-width: 980px) {
   .medGridTop { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .privGridTop { grid-template-columns: 1fr; }
@@ -653,31 +459,32 @@ padding: 70px;  line-height: 2; }
   .medGridTop { grid-template-columns: 1fr; }
   .privGridBottom { grid-template-columns: 1fr; }
 }
-@media (max-width: 1200px) {
-  .medBanner {
-    grid-template-columns: 1fr; /* ✅ stack so image never cuts */
-  }
 
-  .medBannerRight {
-    justify-content: center;
+@media (max-width: 1200px) {
+  .medBanner { grid-template-columns: 1fr; }
+
+  /* ✅ wave tuning for smaller screens */
+  .waveOffset {
+    --waveShiftX: 10px;
+    --waveShiftY: 20px;
+    --waveScale: 0.85;
   }
 
   .medBannerImg {
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: 360px; /* ✅ keep it visible, no cut */
+    max-height: 360px;
   }
 }
+
 @media (max-width: 1100px) {
-  .medBanner {
-    grid-template-columns: 1fr; /* ✅ stack */
-  }
+  .medBanner { grid-template-columns: 1fr; }
 
   .medBannerImg {
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: 380px; /* ✅ safe inside banner */
+    max-height: 380px;
   }
 }
