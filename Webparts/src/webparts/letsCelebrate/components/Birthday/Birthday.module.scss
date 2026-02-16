@@ -79,22 +79,22 @@
   }
 }
 
-
 .shimmerList {
   > div {
     display: grid;
     gap: 14px;
   }
-
   > div > div {
     border-radius: 8px;
-    background: #f3f3f3;                 /* not white */
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(0, 0, 0, .06);
     box-shadow: 0 3px 12px rgba(0, 0, 0, .12);
     padding: 10px 12px;
   }
-
   :global(.ms-Shimmer-container) {
     margin: 0;
+    background: transparent;
   }
 }

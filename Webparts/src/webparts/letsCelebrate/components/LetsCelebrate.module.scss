@@ -19,28 +19,30 @@
    ========================================================= */
 
 .loadingTabs {
-  background: #ededed !important;         /* gray only */
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(0, 0, 0, .06);
   box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
 }
 
-/* For other tabs shimmer cards too (no white, no tint) */
 .standardShimmerCard {
   > div {
     display: grid;
     gap: 16px;
   }
-
   > div > div {
     border-radius: 12px;
-    background: #f3f3f3;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(0, 0, 0, .06);
     box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
     padding: 12px 14px;
   }
-
   :global(.ms-Shimmer-container) {
     margin: 0;
+    background: transparent;
   }
 }
 

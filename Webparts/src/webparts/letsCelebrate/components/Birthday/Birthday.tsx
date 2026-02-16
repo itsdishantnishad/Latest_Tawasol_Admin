@@ -125,24 +125,25 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
           <p>{todayTitle}</p>
         </div>
 
-        <div className={styles.shimmerList}>
-          <LoadingBoundary
-            loading={!!loading}
-            error={!loading ? error : null}
-            errorMessage={typeof error === "string" ? error : undefined}
-            onRetry={onRetry}
-            preset="profile"
-            count={shimmerCountToday}
-            gap={14}
-            ariaLabel="Loading celebrations"
-          >
-            <PeopleSimpleFeed
-              items={buckets.today}
-              webAbsoluteUrl={webAbsoluteUrl}
-              emptyText={emptyTodayText}
-            />
-          </LoadingBoundary>
-        </div>
+        {loading ? (
+          <div className={styles.shimmerList}>
+            <LoadingBoundary
+              loading={true}
+              preset="profile"
+              count={shimmerCountToday}
+              gap={14}
+              ariaLabel="Loading celebrations"
+            >
+              <div />
+            </LoadingBoundary>
+          </div>
+        ) : (
+          <PeopleSimpleFeed
+            items={buckets.today}
+            webAbsoluteUrl={webAbsoluteUrl}
+            emptyText={error ? "Failed to load." : emptyTodayText}
+          />
+        )}
       </div>
 
       <div className={styles.section}>
@@ -150,49 +151,50 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
           <span>{upcomingTitle}</span>
         </button>
 
-        <div className={styles.shimmerList}>
-          <LoadingBoundary
-            loading={!!loading}
-            error={!loading ? error : null}
-            errorMessage={typeof error === "string" ? error : undefined}
-            onRetry={onRetry}
-            preset="profile"
-            count={shimmerCountUpcoming}
-            gap={14}
-            ariaLabel="Loading upcoming celebrations"
-          >
-            {(!buckets.upcomingGroups || buckets.upcomingGroups.length === 0) ? (
-              <PeopleSimpleFeed
-                items={[]}
-                webAbsoluteUrl={webAbsoluteUrl}
-                emptyText={emptyUpcomingText}
-                renderCta={() => null}
-              />
-            ) : (
-              <div>
-                {buckets.upcomingGroups.map((g) => (
-                  <div key={g.key}>
-                    <div
-                      style={{
-                        padding: "10px 0 6px",
-                        fontWeight: 600,
-                        fontSize: "14px",
-                      }}
-                    >
-                      {g.label}
-                    </div>
-
-                    <PeopleSimpleFeed
-                      items={g.items}
-                      webAbsoluteUrl={webAbsoluteUrl}
-                      renderCta={() => null}
-                    />
+        {loading ? (
+          <div className={styles.shimmerList}>
+            <LoadingBoundary
+              loading={true}
+              preset="profile"
+              count={shimmerCountUpcoming}
+              gap={14}
+              ariaLabel="Loading upcoming celebrations"
+            >
+              <div />
+            </LoadingBoundary>
+          </div>
+        ) : (
+          (!buckets.upcomingGroups || buckets.upcomingGroups.length === 0) ? (
+            <PeopleSimpleFeed
+              items={[]}
+              webAbsoluteUrl={webAbsoluteUrl}
+              emptyText={error ? "Failed to load." : emptyUpcomingText}
+              renderCta={() => null}
+            />
+          ) : (
+            <div>
+              {buckets.upcomingGroups.map((g) => (
+                <div key={g.key}>
+                  <div
+                    style={{
+                      padding: "10px 0 6px",
+                      fontWeight: 600,
+                      fontSize: "14px",
+                    }}
+                  >
+                    {g.label}
                   </div>
-                ))}
-              </div>
-            )}
-          </LoadingBoundary>
-        </div>
+
+                  <PeopleSimpleFeed
+                    items={g.items}
+                    webAbsoluteUrl={webAbsoluteUrl}
+                    renderCta={() => null}
+                  />
+                </div>
+              ))}
+            </div>
+          )
+        )}
       </div>
     </div>
   );
