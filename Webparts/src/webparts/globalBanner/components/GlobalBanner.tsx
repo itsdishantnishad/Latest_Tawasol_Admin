@@ -1,15 +1,38 @@
 import * as React from "react";
 import { DisplayMode } from "@microsoft/sp-core-library";
+import { Shimmer, ShimmerElementType } from "@fluentui/react";
 import styles from "./GlobalBanner.module.scss";
 import { IBannerProps } from "./IGlobalBannerProps";
+import { LoadingBoundary } from "../../Components/LoadingShimmer/LoadingBoundary";
 import {
   DEFAULT_BANNER_URL,
   DEFAULT_BANNER_TITLE,
   DEFAULT_BANNER_DESCRIPTION
 } from "../../assets/constants";
 
-export default class Banner extends React.Component<IBannerProps> {
-  private _lastPreloaded?: string;
+interface IBannerState {
+  loading: boolean;
+  error?: unknown;
+  imgUrl: string;
+  reloadKey: number;
+}
+
+export default class Banner extends React.Component<IBannerProps, IBannerState> {
+  public constructor(props: IBannerProps) {
+    super(props);
+
+    const initialUrl =
+      props.customBannerUrl?.trim()?.length
+        ? props.customBannerUrl.trim()
+        : DEFAULT_BANNER_URL;
+
+    this.state = {
+      loading: true,
+      error: undefined,
+      imgUrl: initialUrl,
+      reloadKey: 0
+    };
+  }
 
   private getResolvedTitleParts(): { first: string; rest: string } {
     const { titleFirst, titleSecond } = this.props;
@@ -24,99 +47,129 @@ export default class Banner extends React.Component<IBannerProps> {
     return { first: f, rest: restArr.join(" ") };
   }
 
-  private preload(url: string) {
-    const u = (url || "").trim();
-    if (!u || this._lastPreloaded === u) return;
-    this._lastPreloaded = u;
-
-    // Warm cache early so scroll doesn't pay the cost
-    const img = new Image();
-    img.decoding = "async";
-    img.src = u;
+  private getEffectiveUrl(props: IBannerProps): string {
+    return props.customBannerUrl?.trim()?.length
+      ? props.customBannerUrl.trim()
+      : DEFAULT_BANNER_URL;
   }
+
+  private startLoading(url: string) {
+    this.setState((s) => ({
+      loading: true,
+      error: undefined,
+      imgUrl: url,
+      reloadKey: s.reloadKey + 1
+    }));
+  }
+
+  private onImgLoad = () => {
+    this.setState({ loading: false, error: undefined });
+  };
+
+  private onImgError = (e: any) => {
+    this.setState({ loading: false, error: e || new Error("Failed to load banner") });
+  };
 
   public componentDidMount(): void {
-    const effectiveUrl =
-      this.props.customBannerUrl?.trim()?.length ? this.props.customBannerUrl.trim() : DEFAULT_BANNER_URL;
-
-    this.preload(effectiveUrl);
+    this.startLoading(this.getEffectiveUrl(this.props));
   }
 
-  public componentDidUpdate(prev: IBannerProps): void {
-    if (prev.customBannerUrl !== this.props.customBannerUrl) {
-      const effectiveUrl =
-        this.props.customBannerUrl?.trim()?.length ? this.props.customBannerUrl.trim() : DEFAULT_BANNER_URL;
-      this.preload(effectiveUrl);
+  public componentDidUpdate(prevProps: IBannerProps): void {
+    if (prevProps.customBannerUrl !== this.props.customBannerUrl) {
+      this.startLoading(this.getEffectiveUrl(this.props));
     }
   }
 
-  public shouldComponentUpdate(next: IBannerProps): boolean {
-    return (
-      next.titleFirst !== this.props.titleFirst ||
-      next.titleSecond !== this.props.titleSecond ||
-      next.bannerSubTitle !== this.props.bannerSubTitle ||
-      next.customBannerUrl !== this.props.customBannerUrl ||
-      next.displayMode !== this.props.displayMode
-    );
-  }
-
   public render(): React.ReactElement<IBannerProps> {
-    const { bannerSubTitle, customBannerUrl, displayMode } = this.props;
+    const { bannerSubTitle, displayMode } = this.props;
+    const { loading, error, imgUrl, reloadKey } = this.state;
 
     const resolvedDescription =
       bannerSubTitle?.trim()?.length ? bannerSubTitle : DEFAULT_BANNER_DESCRIPTION;
 
-    const effectiveUrl =
-      customBannerUrl && customBannerUrl.trim().length > 0
-        ? customBannerUrl.trim()
-        : DEFAULT_BANNER_URL;
-
     const { first: firstWord, rest: remainingWords } = this.getResolvedTitleParts();
-
     const isEdit = displayMode === DisplayMode.Edit;
 
     return (
       <section className={styles.bannerRoot} role="region" aria-label="Banner">
         <div className={styles.frame}>
-          {isEdit ? (
-            // In EDIT mode: avoid <img> so SharePoint image editor doesn't hook in
-            <div
-              className={styles.bannerBg}
-              role="img"
-              aria-label="Global banner"
-              style={{ backgroundImage: `url("${effectiveUrl}")` }}
-            />
-          ) : (
-            // In VIEW mode: normal <img>
-            <img
-              className={styles.customImage}
-              src={effectiveUrl}
-              alt="Global banner"
-              decoding="async"
-              loading="eager"
-              width={1320}
-              height={260}
-            />
-          )}
 
+          {/* ✅ IMPORTANT: Probe image OUTSIDE LoadingBoundary (so it loads even when boundary hides children) */}
+          <img
+            key={reloadKey}
+            className={styles.preloadProbe}
+            src={imgUrl}
+            alt=""
+            aria-hidden="true"
+            onLoad={this.onImgLoad}
+            onError={this.onImgError}
+          />
+
+          <LoadingBoundary
+            loading={loading}
+            error={error}
+            errorMessage="Banner failed to load."
+            // ✅ keep onRetry removed
+            preset="banner"
+            count={1}
+            gap={0}
+            ariaLabel="Loading banner"
+            timeoutMs={15000}
+          >
+            {isEdit ? (
+              <div
+                className={styles.bannerBg}
+                role="img"
+                aria-label="Global banner"
+                style={{ backgroundImage: `url("${imgUrl}")` }}
+              />
+            ) : (
+              <img
+                className={styles.customImage}
+                src={imgUrl}
+                alt="Global banner"
+                decoding="async"
+                loading="eager"
+                width={1320}
+                height={260}
+              />
+            )}
+          </LoadingBoundary>
+
+          {/* ✅ TEXT shimmer while loading */}
           <div className={styles.textOverlay}>
             <div className={styles.textWrap}>
-              {(firstWord || remainingWords) && (
-                <h2 className={styles.title}>
-                  <span className={styles.titleFirst}>{firstWord}</span>
-                  {remainingWords ? (
-                    <>
-                      {" "}
-                      <span className={styles.titleRest}>{remainingWords}</span>
-                    </>
-                  ) : null}
-                </h2>
-              )}
-              {resolvedDescription && (
-                <p className={styles.description}>{resolvedDescription}</p>
+              {loading ? (
+                <div className={styles.textShimmer} aria-label="Loading banner text">
+                  <Shimmer
+                    shimmerElements={[
+                      { type: ShimmerElementType.line, width: "42%", height: 24 },
+                      { type: ShimmerElementType.gap, width: "100%", height: 10 },
+                      { type: ShimmerElementType.line, width: "55%", height: 14 }
+                    ]}
+                  />
+                </div>
+              ) : (
+                <>
+                  {(firstWord || remainingWords) && (
+                    <h2 className={styles.title}>
+                      <span className={styles.titleFirst}>{firstWord}</span>
+                      {remainingWords ? (
+                        <>
+                          {" "}
+                          <span className={styles.titleRest}>{remainingWords}</span>
+                        </>
+                      ) : null}
+                    </h2>
+                  )}
+                  {resolvedDescription && (
+                    <p className={styles.description}>{resolvedDescription}</p>
+                  )}
+                </>
               )}
             </div>
           </div>
+
         </div>
       </section>
     );

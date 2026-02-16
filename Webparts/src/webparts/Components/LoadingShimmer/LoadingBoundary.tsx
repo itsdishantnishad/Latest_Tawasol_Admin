@@ -1,27 +1,21 @@
 import * as React from "react";
-import { Shimmer, MessageBar, MessageBarType, DefaultButton } from "@fluentui/react";
+import { Shimmer, MessageBar, MessageBarType } from "@fluentui/react";
 import { getShimmerElements, type ShimmerPreset } from "./ShimmerPresets";
 
 export interface LoadingBoundaryProps {
   loading: boolean;
   children: React.ReactNode;
-
-  // Optional error handling
   error?: unknown;
   errorMessage?: string;
   onRetry?: () => void;
-
   // Shimmer options
   preset?: ShimmerPreset;
-  count?: number; // how many shimmer blocks to show
-  gap?: number;   // px between blocks
+  count?: number;
+  gap?: number; 
   ariaLabel?: string;
-
-  // If you want to disable shimmer and show nothing while loading
   hideWhileLoading?: boolean;
-  
-  // ✅ NEW: Timeout configuration (default 10 seconds)
   timeoutMs?: number;
+  renderChildrenOnTimeout?: boolean;
 }
 
 function toErrorText(error: unknown): string {
@@ -40,15 +34,14 @@ export const LoadingBoundary: React.FC<LoadingBoundaryProps> = ({
   children,
   error,
   errorMessage,
-  onRetry,
   preset = "list",
   count = 3,
   gap = 12,
   ariaLabel = "Loading content",
   hideWhileLoading = false,
-  timeoutMs = 10000 
+  timeoutMs = 10000,
+  renderChildrenOnTimeout = false
 }) => {
- 
   const [timedOut, setTimedOut] = React.useState(false);
 
   React.useEffect(() => {
@@ -58,11 +51,7 @@ export const LoadingBoundary: React.FC<LoadingBoundaryProps> = ({
     }
 
     const timer = setTimeout(() => {
-      console.error(`LoadingBoundary timeout after ${timeoutMs}ms - forcing error state`);
-      console.error('Component may be stuck in loading state. Check for:');
-      console.error('1. API calls that never complete');
-      console.error('2. Race conditions in component mounting');
-      console.error('3. Data interception issues');
+      console.error(`LoadingBoundary timeout after ${timeoutMs}ms`);
       setTimedOut(true);
     }, timeoutMs);
 
@@ -75,32 +64,11 @@ export const LoadingBoundary: React.FC<LoadingBoundaryProps> = ({
         <MessageBar messageBarType={MessageBarType.warning} isMultiline={true}>
           This content is taking longer than expected to load. This might be due to network issues or the content being temporarily unavailable.
         </MessageBar>
-
-        <div style={{ marginTop: 10 }}>
-          {onRetry ? (
-            <>
-              <DefaultButton text="Retry" onClick={() => {
-                setTimedOut(false);
-                onRetry();
-              }} />
-              <DefaultButton 
-                text="Reload Page" 
-                onClick={() => window.location.reload()} 
-                style={{ marginLeft: 8 }}
-              />
-            </>
-          ) : (
-            <DefaultButton 
-              text="Reload Page" 
-              onClick={() => window.location.reload()} 
-            />
-          )}
-        </div>
+        {renderChildrenOnTimeout ? <div style={{ marginTop: 10 }}>{children}</div> : null}
       </div>
     );
   }
 
-  // Error UI (optional)
   if (!loading && error) {
     const msg = errorMessage || toErrorText(error) || "Something went wrong.";
     return (
@@ -108,17 +76,11 @@ export const LoadingBoundary: React.FC<LoadingBoundaryProps> = ({
         <MessageBar messageBarType={MessageBarType.error} isMultiline={true}>
           {msg}
         </MessageBar>
-
-        {onRetry ? (
-          <div style={{ marginTop: 10 }}>
-            <DefaultButton text="Retry" onClick={onRetry} />
-          </div>
-        ) : null}
       </div>
     );
   }
 
-  // Loading UI
+  // LOADING UI
   if (loading) {
     if (hideWhileLoading) return null;
 
@@ -134,6 +96,5 @@ export const LoadingBoundary: React.FC<LoadingBoundaryProps> = ({
     );
   }
 
-  // Render actual content
   return <>{children}</>;
 };

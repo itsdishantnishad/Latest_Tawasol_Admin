@@ -5,12 +5,12 @@ export type ShimmerPreset =
   | "card"
   | "details"
   | "profile"
-  | "text";
+  | "text"
+  | "banner";
 
 export function getShimmerElements(preset: ShimmerPreset): IShimmerElement[] {
   switch (preset) {
     case "list":
-      // Looks like rows: title + 2 lines, repeated by caller
       return [
         { type: ShimmerElementType.line, width: "40%", height: 14 },
         { type: ShimmerElementType.gap, width: "100%", height: 10 },
@@ -20,7 +20,6 @@ export function getShimmerElements(preset: ShimmerPreset): IShimmerElement[] {
       ];
 
     case "card":
-      // Card with header + body + footer line
       return [
         { type: ShimmerElementType.line, width: "55%", height: 14 },
         { type: ShimmerElementType.gap, width: "100%", height: 10 },
@@ -30,7 +29,6 @@ export function getShimmerElements(preset: ShimmerPreset): IShimmerElement[] {
       ];
 
     case "details":
-      // Detail page: title + bigger block + lines
       return [
         { type: ShimmerElementType.line, width: "65%", height: 18 },
         { type: ShimmerElementType.gap, width: "100%", height: 12 },
@@ -44,7 +42,6 @@ export function getShimmerElements(preset: ShimmerPreset): IShimmerElement[] {
       ];
 
     case "profile":
-      // Avatar + name + subtitle + small lines
       return [
         { type: ShimmerElementType.circle, height: 44 },
         { type: ShimmerElementType.gap, width: 12 },
@@ -52,6 +49,10 @@ export function getShimmerElements(preset: ShimmerPreset): IShimmerElement[] {
         { type: ShimmerElementType.gap, width: "100%", height: 10 },
         { type: ShimmerElementType.line, width: "55%", height: 12 }
       ];
+
+    case "banner":
+      // Single full-width block (height matches GlobalBanner 260px)
+      return [{ type: ShimmerElementType.line, width: "100%", height: 260 }];
 
     case "text":
     default:
