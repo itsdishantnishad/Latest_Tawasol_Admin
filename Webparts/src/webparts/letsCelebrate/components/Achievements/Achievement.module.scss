@@ -282,3 +282,29 @@
     transform: scale(0.98);
   }
 }
+
+/* =========================================================
+   Standard blurred shimmer container (Achievements)
+   ========================================================= */
+
+.standardShimmerCard {
+  width: 100%;
+
+  > div {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+  }
+
+  > div > div {
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+    padding: 12px 14px;
+  }
+
+  :global(.ms-Shimmer-container) {
+    margin: 0;
+  }
+}

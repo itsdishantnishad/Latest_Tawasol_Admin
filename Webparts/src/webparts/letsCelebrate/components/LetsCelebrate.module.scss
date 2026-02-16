@@ -14,6 +14,36 @@
   font-family: 'Inter', sans-serif !important;
 }
 
+/* =========================================================
+   Standard blurred shimmer container
+   ========================================================= */
+
+.loadingTabs {
+  background: #ededed !important;         /* gray only */
+  border: 1px solid rgba(0, 0, 0, .06);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+}
+
+/* For other tabs shimmer cards too (no white, no tint) */
+.standardShimmerCard {
+  > div {
+    display: grid;
+    gap: 16px;
+  }
+
+  > div > div {
+    border-radius: 12px;
+    background: #f3f3f3;
+    border: 1px solid rgba(0, 0, 0, .06);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+    padding: 12px 14px;
+  }
+
+  :global(.ms-Shimmer-container) {
+    margin: 0;
+  }
+}
+
 .letsCelebrate {
   overflow: hidden;
   padding: 1em;
@@ -37,12 +67,12 @@
   a {
     text-decoration: none;
     color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
+    color: var(--link);
 
     &:hover {
       text-decoration: underline;
       color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
+      color: var(--linkHovered);
     }
   }
 }

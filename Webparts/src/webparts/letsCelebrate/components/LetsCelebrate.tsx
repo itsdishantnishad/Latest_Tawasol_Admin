@@ -9,6 +9,7 @@ import NavTabs, { NavTabsOption } from '../../Components/NavTabs/NavTabs';
 import Achievements from './Achievements/Achievement';
 import { TahweelService, TahweelActiveEmployee } from '../../services/Integration/TahweelService';
 import type { IPersonBase } from './Birthday/PeopleSimpleFeed';
+import { LoadingBoundary } from '../../Components/LoadingShimmer/LoadingBoundary';
 
 const DefaultAvatar: string = require('../../assets/profileCircleImg.svg');
 
@@ -21,8 +22,10 @@ export interface ILetsCelebrateState {
 
   loadingBirthdays: boolean;
   loadingAnniversaries: boolean;
+  loadingNewJoiners: boolean;
   errorBirthdays: string | null;
   errorAnniversaries: string | null;
+  errorNewJoiners: string | null;
 }
 
 export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, ILetsCelebrateState> {
@@ -39,25 +42,42 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
 
       loadingBirthdays: true,
       loadingAnniversaries: true,
+      loadingNewJoiners: true,
       errorBirthdays: null,
-      errorAnniversaries: null
+      errorAnniversaries: null,
+      errorNewJoiners: null
     };
 
     this.spService = new listServices(this.props.context);
     this.tahweelService = new TahweelService({ httpClient: this.props.context.httpClient });
   }
 
-  public async componentDidMount(): Promise<void> {
+  public componentDidMount(): void {
+    void this.loadAll();
+  }
 
-    const newJoinerP = this.spService.getNewJoiners('New Joiner')
-      .then((data) => ({ data: data || [] }))
-      .catch(() => ({ data: [] }));
+  private loadAll = async (): Promise<void> => {
+    this.setState({
+      loadingBirthdays: true,
+      loadingAnniversaries: true,
+      loadingNewJoiners: true,
+      errorBirthdays: null,
+      errorAnniversaries: null,
+      errorNewJoiners: null
+    });
 
-    const dobP = this.tahweelService.fetchActiveEmployees({ DOB: '1', DOJ: '0' })
+    const newJoinerP = this.spService
+      .getNewJoiners('New Joiner')
+      .then((data) => ({ data: data || [], error: null as string | null }))
+      .catch((e) => ({ data: [], error: (e?.message || 'Failed to load new joiners.') as string }));
+
+    const dobP = this.tahweelService
+      .fetchActiveEmployees({ DOB: '1', DOJ: '0' })
       .then((rows) => ({ rows: rows || [], error: null as string | null }))
       .catch((e) => ({ rows: [] as TahweelActiveEmployee[], error: (e?.message || 'Failed to load birthdays.') as string }));
 
-    const dojP = this.tahweelService.fetchActiveEmployees({ DOB: '0', DOJ: '1' })
+    const dojP = this.tahweelService
+      .fetchActiveEmployees({ DOB: '0', DOJ: '1' })
       .then((rows) => ({ rows: rows || [], error: null as string | null }))
       .catch((e) => ({ rows: [] as TahweelActiveEmployee[], error: (e?.message || 'Failed to load anniversaries.') as string }));
 
@@ -65,16 +85,18 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
 
     this.setState({
       newJoinersData: newJoinerRes.data,
-
       birthdayItems: (dobRes.rows || []).map((x) => this.mapEmployeeToPersonBase(x, 'DOB')),
       anniversaryItems: (dojRes.rows || []).map((x) => this.mapEmployeeToPersonBase(x, 'DOJ')),
 
       loadingBirthdays: false,
       loadingAnniversaries: false,
+      loadingNewJoiners: false,
+
       errorBirthdays: dobRes.error,
-      errorAnniversaries: dojRes.error
+      errorAnniversaries: dojRes.error,
+      errorNewJoiners: newJoinerRes.error
     });
-  }
+  };
 
   private handleTabChange = (tab: ILetsCelebrateState['selectedTab']) => {
     this.setState({ selectedTab: tab });
@@ -144,18 +166,11 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
     return this.ordinal(years) + ' Anniversary';
   }
 
-  /**
-   * Teams deep-link builder
-   * Note: If the email is NOT a resolvable Teams user in your tenant, Teams will open a blank new chat.
-   */
   private buildTeamsChatLink(email: string, message: string): string {
     const e = (email || '').trim();
     if (!e) return '';
-
-    // Keep @ as-is (Teams sometimes fails to resolve when value stays %40)
     const users = encodeURIComponent(e).replace(/%40/gi, '@');
     const msg = encodeURIComponent(message || '');
-
     return `https://teams.microsoft.com/l/chat/0/0?users=${users}&message=${msg}`;
   }
 
@@ -168,7 +183,6 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
 
     const email = (emp.email || '').trim();
 
-    // Auto-prefill message with person name
     const typedMessage =
       mode === 'DOB'
         ? (`Happy Birthday ${name}! 🎉`)
@@ -178,9 +192,7 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
 
     const designation = (emp.designation || '').trim() || (emp.division || '').trim();
     const department = (emp.department || '').trim();
-
     const extraRightText = mode === 'DOJ' ? this.getAnniversaryText(emp.doj, isoDate) : '';
-
     const imageUrl = (emp.imageDataUrl || emp.imageUrl || DefaultAvatar).toString().trim() || DefaultAvatar;
 
     return {
@@ -204,8 +216,10 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
       anniversaryItems,
       loadingBirthdays,
       loadingAnniversaries,
+      loadingNewJoiners,
       errorBirthdays,
-      errorAnniversaries
+      errorAnniversaries,
+      errorNewJoiners
     } = this.state;
 
     const tabs: NavTabsOption<ILetsCelebrateState['selectedTab']>[] = [
@@ -231,6 +245,11 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
       ? 'Loading Anniversary...'
       : (errorAnniversaries ? 'Failed to load anniversaries.' : 'No upcoming anniversaries.');
 
+    const tabLoading =
+      (selectedTab === "birthdays" && loadingBirthdays) ||
+      (selectedTab === "anniversaries" && loadingAnniversaries) ||
+      (selectedTab === "newJoiners" && loadingNewJoiners);
+
     return (
       <>
         <div className={styles.topWrapper}>
@@ -238,10 +257,11 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
             tabs={tabs}
             value={selectedTab}
             onChange={this.handleTabChange}
-            className={stylesNav.navTabs}
+            className={`${stylesNav.navTabs} ${tabLoading ? styles.loadingTabs : ""}`}
             tabClassName={stylesNav.tab}
           />
         </div>
+
         <div className={styles.wrapOuter}>
           {selectedTab === "birthdays" && (
             <Birthday
@@ -250,6 +270,8 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
               upcomingTitle="Upcoming Birthdays"
               emptyTodayText={birthdayEmptyToday}
               emptyUpcomingText={birthdayEmptyUpcoming}
+              loading={loadingBirthdays}
+              error={errorBirthdays}
             />
           )}
 
@@ -260,11 +282,25 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
               upcomingTitle="Upcoming Anniversaries"
               emptyTodayText={anniversaryEmptyToday}
               emptyUpcomingText={anniversaryEmptyUpcoming}
+              loading={loadingAnniversaries}
+              error={errorAnniversaries}
             />
           )}
 
           {selectedTab === 'newJoiners' && (
-            <NewJoiner items={newJoinersData} />
+            <div className={styles.standardShimmerCard}>
+              <LoadingBoundary
+                loading={loadingNewJoiners}
+                error={!loadingNewJoiners ? errorNewJoiners : null}
+                errorMessage={errorNewJoiners || undefined}
+                preset="details"
+                count={2}
+                gap={16}
+                ariaLabel="Loading new joiners"
+              >
+                <NewJoiner items={newJoinersData} />
+              </LoadingBoundary>
+            </div>
           )}
 
           {selectedTab === 'achievements' && (
