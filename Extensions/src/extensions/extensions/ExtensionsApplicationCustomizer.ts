@@ -602,7 +602,7 @@ export default class ExtensionsApplicationCustomizer
 
     // Services
     const currentUpn = (this.userEmail || this.context.pageContext.user.loginName || '').toLowerCase();
-    // ✅ UPDATED: pass "me" identifiers so SearchService can detect when the searched person is the current user
+    // pass "me" identifiers so SearchService can detect when the searched person is the current user
     this.search = new SearchService(
       this.webUrl,
       this.context.msGraphClientFactory,
@@ -629,7 +629,7 @@ export default class ExtensionsApplicationCustomizer
       () => { window.location.href = urls.home; },
       () => { void this.handleBellClick(); },
       (input: HTMLInputElement) => {
-        // NOTE: This block is ONLY for Search Suggestion + PhotoService wiring
+        // This block is ONLY for Search Suggestion + PhotoService wiring
         // Create PhotoService once (shared by SuggestBox avatars)
         if (!this.photoService) {
           this.photoService = new PhotoService(
@@ -663,7 +663,7 @@ export default class ExtensionsApplicationCustomizer
     // (Keep this block to preserve current behaviour, but remove duplicates + reuse the same PhotoService)
     const headerWrap = document.querySelector(`.${styles.TIRHdrWrap}`) as HTMLElement;
     if (headerWrap) {
-      // ✅ Single shared PhotoService for SuggestBox (meeting-style logic)
+      // Single shared PhotoService for SuggestBox (meeting-style logic)
       this.photoService = new PhotoService(
         this.webUrl,
         this.context.pageContext.user.email || this.context.pageContext.user.loginName,
@@ -694,7 +694,7 @@ export default class ExtensionsApplicationCustomizer
       this.breadcrumbs?.onNavigated();
     });
 
-    // optional: keep your 800ms safety retry
+    // keep your 800ms safety retry
     setTimeout((): void => {
       this.breadcrumbs?.onNavigated();
     }, 800);

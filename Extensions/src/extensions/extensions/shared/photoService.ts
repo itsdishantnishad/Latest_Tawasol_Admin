@@ -49,17 +49,10 @@ export class PhotoService {
     return this._spUserPhotoUrl("L", userEmailOrUpn);
   }
 
-  /**
-   * Back-compat: setAvatar(img, size, upn, displayName)
-   * Order:
-   * 1) Initials immediately
-   * 2) Graph photo (DATA URL)
-   * 3) SharePoint userphoto.aspx fallback
-   * 4) Initials if image load fails
-   */
+
   public async setAvatar(
     img: HTMLImageElement,
-    size: "S" | "M" | "L" = "M", // kept for compat, unused
+    size: "S" | "M" | "L" = "M", 
     userEmailOrUpn?: string,
     displayName?: string
   ): Promise<void> {
@@ -79,10 +72,9 @@ export class PhotoService {
     // 2) Graph photo as DATA URL
     try {
       const dataUrl = await this.getUserPhotoDataUrl(upn, name);
-      // getUserPhotoDataUrl already falls back to initials
       if (dataUrl) img.src = dataUrl;
     } catch {
-      // do nothing -> initials remain
+      // do nothing ->
     }
   }
 
