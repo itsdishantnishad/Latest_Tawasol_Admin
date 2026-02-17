@@ -190,7 +190,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
     <div className={styles.eventDetail}>
       {/* ================= HEADER ================= */}
       <div className={styles.header}>
-        <div className={styles.breadcrumb}>
+        {/* <div className={styles.breadcrumb}>
           <span className={styles.backArrow}>‹</span>
           <span className={styles.backText}>Back |</span>
 
@@ -204,7 +204,7 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
 
           <span className={styles.separator}>›</span>
           <span className={styles.current}>{eventTitle}</span>
-        </div>
+        </div> */}
 
         <div className={styles.titleSection}>
           <h1 className={styles.eventTitle}>
@@ -396,3 +396,4 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
 };
 
 export default EventDetail;
+ 
