@@ -13,6 +13,7 @@
   padding: 16px 24px;
   transition: box-shadow .3s ease;
   border-left: 5px solid #0E6187;
+
   &.pastEvent {
     .actionSection{
       .pastEventLabel {
@@ -29,14 +30,22 @@
   }
 }
 
-// Date Section
+/* ✅ Missing in module typings: anchor wrapper used in EventCard.tsx */
+.cardLinkWrapper{
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+}
+
+/* Date Section */
 .dateSection {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 181px;
-  height: 104px;
+  height: 125px;
   background: #FFF4EA;
   border-radius: 8px;
   padding: 0;
@@ -56,15 +65,16 @@
   line-height: 16px;
 }
 
-// Image Section
+/* Image Section */
 .imageSection {
   flex-shrink: 0;
   position: relative;
+  height: 125px;
 }
 
 .eventImage {
   border-radius: 10px;
-  height: 125px;
+  height: 100%;
   object-fit: cover;
   width: 250px;
   object-position: center top;
@@ -80,11 +90,11 @@
   padding: 4px 10px;
   position: absolute;
   top: 8px;
-  
+
   &.upcoming {
     background-color: #ef4444;
   }
-  
+
   &.registered {
     background-color: #10b981;
   }
@@ -171,55 +181,52 @@
   font-weight: 400;
 }
 
-// Action Section
+/* ✅ Action Section (Figma alignment) */
 .actionSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  min-width: 180px;
+
   .registerButton {
-    margin-top: auto;
-    width: 100%;
+    align-items: center;
+    background: radial-gradient(883.19% 262.8% at 112.5% -164.06%, #101820 0, #202d39 100%);
     border: none;
-    border-radius: 999px;
-    // background: linear-gradient(180deg, #111827 0%, #020617 100%);
-    // color: #ffffff;
-    padding: 10px 16px;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 20px;
+    border-radius: 167px;
+    box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, .51), inset 0 4px 4px 0 #768b9e;
+    color: #fff;
     cursor: pointer;
-    // box-shadow: 0 10px 20px rgba(15, 23, 42, 0.35);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    background: radial-gradient(
-    circle at top left,
-    rgba(32, 45, 57, 1) 0%,
-    rgba(16, 24, 32, 1) 100%
-  );
-    box-shadow: -4px -6px 4px 0px rgba(0, 0, 0, 0.51) inset,
-      0px 4px 4px 0px rgba(118, 139, 158, 1) inset;
-    color: #ffffff;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 26px rgba(15, 23, 42, 0.45);
-    }
-
-    &:active {
-      transform: translateY(0);
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.35);
-    }
+    display: flex;
+    font-family: Inter, sans-serif !important;
+    font-size: 14px;
+    font-weight: 600;
+    gap: 4px;
+    height: 44px;
+    justify-content: center;
+    line-height: 20px;
+    min-width: 150px;
+    padding: 0 18px;
+    text-decoration: none;
+    transition: all .3s ease;
   }
 }
 
-
-
 .countdownWrapper {
   text-align: right;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: flex-end;
+  line-height: 1.2;
 }
 
 .countdownLabel {
   color: #3A3B43;
   font-size: 14px;
   line-height: 20px;
-  margin-bottom: 4px;
+  margin-bottom: 0;
   font-weight: 500;
 }
 
@@ -230,16 +237,43 @@
   font-weight: 600;
 }
 
-// Container styles for demo
+/* ================= Legend (All tab: Events + Trainings + Teams) ================= */
+.legend {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin: 10px 0 18px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.swatchEvent { background: #0e6187; }
+.swatchTraining { background: #4bb86c; }
+.swatchTeams { background: #4c8ae0; }
+
+/* Container styles */
 .eventsContainer {
   min-height: 100vh;
-  // background-color: #fef7f0;
   padding: 0;
-  
 }
 
 .eventsWrapper {
-  margin: 0 auto;
+  margin: 30px auto;
   display: flex;
   flex-direction: column;
   gap: 1em;
@@ -250,154 +284,176 @@
   font-size: 18px;
   font-weight: 500;
   line-height: 24px;
-  margin-bottom: 24px;
-  margin-top: 32px;
+  margin-bottom: 0;
+  margin-top: 0;
 }
 
-.infoBox {
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  
-  h2 {
-    margin: 0 0 12px 0;
-    font-size: 20px;
-    font-weight: 700;
-    color: #111827;
-  }
-  
-  p {
-    margin: 4px 0;
-    font-size: 14px;
-    color: #374151;
+.emptyState{
+  color: #3a3b43;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  text-align: center;
+  width: 100%;
+  margin-top: 30px;
+}
+
+/* =========================================================
+   ✅ Missing classes referenced by Allcomponent.tsx & AllEvents.tsx
+   (Added to fix TS2339 SCSS module typings)
+   ========================================================= */
+
+.tabContainer{
+  width: 100%;
+  margin: 8px 0 18px;
+}
+
+.tabContainerInner{
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  justify-content: flex-start;
+  border-bottom: 1px solid rgba(0,0,0,.12);
+}
+
+.tabButton{
+  appearance: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 12px 0;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  color: #6c6c6c;
+  position: relative;
+}
+
+.activeTab{
+  color: #000;
+  font-weight: 600;
+
+  &::after{
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    height: 3px;
+    width: 100%;
+    background: #DA291C;
+    border-radius: 2px;
   }
 }
 
-// Responsive design
+/* Previous Events block used in AllEvents.tsx */
+.previousEventsContainer{
+  margin-top: 24px;
+}
+
+.previousHeaderRow{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.heading{
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #101820;
+}
+
+.viewAllButton{
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #0E6187;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  padding: 8px 0;
+}
+
+.gridLayout{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Responsive */
 @media (max-width: 1024px) {
-  .eventCard {
-    flex-wrap: wrap;
-  }
-  
+  .eventCard { flex-wrap: wrap; }
+
   .actionSection {
     width: 100%;
+    align-items: center;
     text-align: center;
     margin-left: 0;
     margin-top: 16px;
   }
+
+  .gridLayout{
+    grid-template-columns: 1fr;
+  }
 }
 
-@media (max-width: 768px) {
-  .eventCard {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .dateSection {
-    width: 100%;
-  }
-  
-  .imageSection {
-    width: 100%;
-  }
-  
-  .eventImage {
-    width: 100%;
-    height: 200px;
-  }
-  
-  .detailsSection {
-    width: 100%;
-  }
-  
-  .actionSection {
-    width: 100%;
-  }
-}
-.previousEventsContainer {
-  margin-top: 80px;
+/* =========================================================
+   Previous Events (Events tab) - UI fixes
+   - Show 3+ cards per row on wide screens (Figma-like 424px cards)
+   - Restore View All button pill style
+   ========================================================= */
+
+.viewAllButton{
+  align-items: center;
+  background: radial-gradient(883.19% 262.8% at 112.5% -164.06%, #101820 0, #202d39 100%);
+  border: none;
+  border-radius: 167px;
+  box-shadow: inset -4px -6px 4px 0 rgba(0, 0, 0, 0.51), inset 0 4px 4px 0 #768b9e;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  height: 36px;
+  line-height: 20px;
+  min-width: 110px;
+  padding: 0 12px;
+  justify-content: center;
+  transition: transform .2s ease, filter .2s ease;
 }
 
-.heading {
-  color: #000000;
-  font-size: 24px;
-  line-height: 32px;
-  font-weight: 500;
-  margin: 0;
+.viewAllButton:hover{
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+
+.viewAllButton:active{
+  transform: translateY(0);
+}
+
+.gridLayout{
+  display: grid;
+  /* Each card ~424px (Figma). Auto-fit will create 3+ columns when space allows */
+  grid-template-columns: repeat(auto-fit,minmax(360px, 450px));
+  gap: 24px;
+  justify-content: start;
   margin-bottom: 24px;
 }
 
-.gridLayout {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+@media (max-width: 1024px) {
+  .gridLayout{
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
 }
 
-/* Tabs */
-.tabContainer {
-  margin-top: 32px;
-}
-
-.tabContainerInner{
-  border-bottom: 1px solid #CCCACA;
-  display: flex;
-  gap: 24px;
-}
-
-.tabButton {
-  background: 0 0;
-  border: none;
-  color: #6C6C6C;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
-  padding: 15px 0;
-  position: relative;
-  transition: color .3s ease;
-}
-
-.activeTab {
-  color: #000000;
-  font-weight: 500;
-}
-
-.activeTab::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  left: 0;
-  bottom: 0;
-  position: absolute;
-  width: 100%;
-  border-radius: 20px 20px 0 0;
-  background-color: #DA291C;
-}
-.viewSwitchContainer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.viewSwitchContainer .tabButton {
-  padding: 6px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.cardLinkWrapper {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-
-  &:hover .eventCard {
-    transform: translateY(-2px);
-    transition: transform 0.2s ease;
+@media (max-width: 640px) {
+  .gridLayout{
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }

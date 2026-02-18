@@ -19,6 +19,7 @@
   border-radius: 50px;
   padding: 4px;
   width: fit-content;
+  font-family: 'Inter', sans-serif;
 }
 
 .tab {
@@ -194,6 +195,13 @@
   background: #da291c;
   width: 18px;
   border-radius: 40px;
+}
+
+.serviceIcon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  display: block;
 }
 
 @media (max-width: 768px) {

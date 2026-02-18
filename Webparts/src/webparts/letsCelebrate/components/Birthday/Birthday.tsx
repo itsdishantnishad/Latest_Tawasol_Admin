@@ -1,6 +1,7 @@
 import * as React from "react";
 import PeopleSimpleFeed, { IPersonBase } from "./PeopleSimpleFeed";
 import styles from "./Birthday.module.scss";
+import { LoadingBoundary } from "../../../Components/LoadingShimmer/LoadingBoundary";
 
 export interface BirthdaysFeedProps {
   items: IPersonBase[];
@@ -11,6 +12,13 @@ export interface BirthdaysFeedProps {
 
   emptyTodayText: string;
   emptyUpcomingText: string;
+
+  /** Shimmer */
+  loading?: boolean;
+  error?: unknown;
+  onRetry?: () => void;
+  shimmerCountToday?: number;
+  shimmerCountUpcoming?: number;
 }
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -29,11 +37,9 @@ const parseMonthDay = (raw?: string): { m: number; d: number } | null => {
   const v = (raw || "").trim();
   if (!v) return null;
 
-  // supports "DD-MMM-YYYY" or "YYYY-MM-DD"
   const parts = v.split("-");
   if (parts.length < 2) return null;
 
-  // "YYYY-MM-DD"
   if (parts[0].length === 4) {
     const m = parseInt(parts[1], 10);
     const d = parseInt(parts[2], 10);
@@ -41,7 +47,6 @@ const parseMonthDay = (raw?: string): { m: number; d: number } | null => {
     return { m: m - 1, d };
   }
 
-  // "DD-MMM-YYYY"
   const d = parseInt(parts[0], 10);
   const mon = (parts[1] || "").toUpperCase();
   const m = monthMap[mon];
@@ -73,6 +78,11 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
   upcomingTitle,
   emptyTodayText,
   emptyUpcomingText,
+  loading = false,
+  error,
+  onRetry,
+  shimmerCountToday = 3,
+  shimmerCountUpcoming = 6,
 }) => {
   const buckets = React.useMemo(() => {
     const rows = (items || [])
@@ -87,8 +97,6 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
       .sort((a, b) => a.diff - b.diff);
 
     const today = rows.filter((x) => x.diff === 0).map((x) => x.item);
-
-    // upcoming rows (diff > 0), grouped by day+month
     const upcomingRows = rows.filter((x) => x.diff > 0);
 
     const groups: Array<{ key: string; label: string; items: IPersonBase[] }> = [];
@@ -111,17 +119,31 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
   }, [items]);
 
   return (
-    <div className={styles.wrap}>
+    <div className={`${styles.wrap} ${loading ? styles.isLoading : ""}`}>
       <div className={styles.section}>
         <div className={styles.sectionHead}>
           <p>{todayTitle}</p>
         </div>
 
-        <PeopleSimpleFeed
-          items={buckets.today}
-          webAbsoluteUrl={webAbsoluteUrl}
-          emptyText={emptyTodayText}
-        />
+        {loading ? (
+          <div className={styles.shimmerList}>
+            <LoadingBoundary
+              loading={true}
+              preset="profile"
+              count={shimmerCountToday}
+              gap={14}
+              ariaLabel="Loading celebrations"
+            >
+              <div />
+            </LoadingBoundary>
+          </div>
+        ) : (
+          <PeopleSimpleFeed
+            items={buckets.today}
+            webAbsoluteUrl={webAbsoluteUrl}
+            emptyText={error ? "Failed to load." : emptyTodayText}
+          />
+        )}
       </div>
 
       <div className={styles.section}>
@@ -129,36 +151,49 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
           <span>{upcomingTitle}</span>
         </button>
 
-        {(!buckets.upcomingGroups || buckets.upcomingGroups.length === 0) ? (
-          <PeopleSimpleFeed
-            items={[]}
-            webAbsoluteUrl={webAbsoluteUrl}
-            emptyText={emptyUpcomingText}
-            renderCta={() => null}
-          />
-        ) : (
-          <div>
-            {buckets.upcomingGroups.map((g) => (
-              <div key={g.key}>
-                {/* Date heading like: "21 December" */}
-                <div
-                  style={{
-                    padding: "10px 0 6px",
-                    fontWeight: 600,
-                    fontSize: "14px",
-                  }}
-                >
-                  {g.label}
-                </div>
-
-                <PeopleSimpleFeed
-                  items={g.items}
-                  webAbsoluteUrl={webAbsoluteUrl}
-                  renderCta={() => null}
-                />
-              </div>
-            ))}
+        {loading ? (
+          <div className={styles.shimmerList}>
+            <LoadingBoundary
+              loading={true}
+              preset="profile"
+              count={shimmerCountUpcoming}
+              gap={14}
+              ariaLabel="Loading upcoming celebrations"
+            >
+              <div />
+            </LoadingBoundary>
           </div>
+        ) : (
+          (!buckets.upcomingGroups || buckets.upcomingGroups.length === 0) ? (
+            <PeopleSimpleFeed
+              items={[]}
+              webAbsoluteUrl={webAbsoluteUrl}
+              emptyText={error ? "Failed to load." : emptyUpcomingText}
+              renderCta={() => null}
+            />
+          ) : (
+            <div>
+              {buckets.upcomingGroups.map((g) => (
+                <div key={g.key}>
+                  <div
+                    style={{
+                      padding: "10px 0 6px",
+                      fontWeight: 600,
+                      fontSize: "14px",
+                    }}
+                  >
+                    {g.label}
+                  </div>
+
+                  <PeopleSimpleFeed
+                    items={g.items}
+                    webAbsoluteUrl={webAbsoluteUrl}
+                    renderCta={() => null}
+                  />
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
     </div>

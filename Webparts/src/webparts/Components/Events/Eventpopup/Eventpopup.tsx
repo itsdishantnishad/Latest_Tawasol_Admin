@@ -40,41 +40,84 @@ const EventPopup: React.FC<EventPopupProps> = ({
   const [isRegistered, setIsRegistered] = React.useState(false);
   const [newregister, setnewregister] = React.useState(false);
 
-  const sp: SPFI = React.useMemo(() => spfi().using(SPFx(context)), [context]);
+  const sp: SPFI | null = React.useMemo(() => {
+    try {
+      return context ? spfi().using(SPFx(context)) : null;
+    } catch {
+      return null;
+    }
+  }, [context]);
 
-  const userEmail = context?.pageContext?.user?.loginName;
+  const uniqNums = (arr: number[]) =>
+    Array.from(new Set(arr.filter((n) => Number.isFinite(n) && n > 0)));
 
-  // fetch & check if user registered this event
-  React.useEffect(() => {
-    const callCheck = async () => {
+  const parseNumericIdList = (raw: any): number[] => {
+    const text = String(raw || "");
+    const tokens = text
+      // IMPORTANT: keep \n and \r as ESCAPES, not real newlines inside the regex
+      .split(/[,\n\r;]+/)
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    const ids = tokens
+      .filter((t) => /^\d+$/.test(t))
+      .map((t) => parseInt(t, 10))
+      .filter((n) => Number.isFinite(n) && n > 0);
+
+    return uniqNums(ids);
+  };
+
+  const getCurrentUserId = React.useCallback(async (): Promise<number> => {
+    const legacyId = (context?.pageContext as any)?.legacyPageContext?.userId;
+    if (legacyId) return Number(legacyId);
+
+    if (sp) {
       try {
-        const regItems: any[] = await sp.web.lists
-          .getByTitle("Registered User Event")
-          .items.select("*", "Author/EMail")
-          .expand("Author")();
+        const me: any = await sp.web.currentUser.select("Id")();
+        return Number(me?.Id || 0);
+      } catch {
+        return 0;
+      }
+    }
+    return 0;
+  }, [context, sp]);
 
-        const userRow = regItems.find(
-          (r) => r.Author?.EMail?.toLowerCase() === userEmail.toLowerCase()
-        );
+  React.useEffect(() => {
+    let alive = true;
 
-        if (userRow?.TIRRegisteredUsers) {
-          const arr = userRow.TIRRegisteredUsers.split(",").map((x: any) =>
-            x.trim()
-          );
-          setIsRegistered(arr.some((v: any) => v.includes(String(ID))));
-        } else {
-          setIsRegistered(false);
+    const callCheck = async () => {
+      if (!sp || !context || !ID) return;
+
+      try {
+        const userId = await getCurrentUserId();
+        if (!userId) {
+          if (alive) setIsRegistered(false);
+          return;
         }
+
+        const rows: any[] = await sp.web.lists
+          .getByTitle("Registered User Event")
+          .items.select("Id", "AuthorId", "TIRRegisteredUsers")
+          .filter(`AuthorId eq ${userId}`)
+          .top(1)();
+
+        const row = rows?.[0];
+        const ids = parseNumericIdList(row?.TIRRegisteredUsers);
+        const registered = ids.includes(Number(ID));
+
+        if (alive) setIsRegistered(registered);
       } catch (err) {
         console.error("register check error", err);
-        setIsRegistered(false);
+        if (alive) setIsRegistered(false);
       }
     };
 
-    if (userEmail && ID) callCheck();
-  }, [userEmail, ID]);
+    callCheck();
+    return () => {
+      alive = false;
+    };
+  }, [sp, context, ID, getCurrentUserId]);
 
-  // time status logic
   React.useEffect(() => {
     const calculate = () => {
       if (!eventDateTime) {
@@ -112,19 +155,15 @@ const EventPopup: React.FC<EventPopupProps> = ({
     calculate();
     const i = setInterval(calculate, 1000);
     return () => clearInterval(i);
-  }, [eventDateTime, isRegistered]);
+  }, [eventDateTime]);
 
-  const handleRegisterClick = () => {
-    setnewregister(true);
-  };
+  const handleRegisterClick = () => setnewregister(true);
 
   return (
     <div className={`${styles.eventCardNew} ${isPastEvent ? styles.pastEvent : ""}`}>
-      {/* Image Section with rounded top corners */}
       <div className={styles.imageContainer}>
         <img src={imageUrl} alt={title} className={styles.eventImage} />
-        
-        {/* Status Badge */}
+
         {!isPastEvent && (
           <span
             className={`${styles.statusBadge} ${
@@ -136,23 +175,12 @@ const EventPopup: React.FC<EventPopupProps> = ({
         )}
       </div>
 
-      {/* Content Section */}
       <div className={styles.cardContent}>
-        {/* Category */}
         <div className={styles.categoryTag}>{category}</div>
-
-        {/* Title */}
         <h3 className={styles.eventTitle}>{title}</h3>
 
-        {/* Time Info */}
         <div className={styles.infoRow}>
-          <svg
-            className={styles.icon}
-            fill="currentColor"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-          >
+          <svg className={styles.icon} fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
             <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
             <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" fill="none" />
           </svg>
@@ -162,15 +190,8 @@ const EventPopup: React.FC<EventPopupProps> = ({
           </span>
         </div>
 
-        {/* Location Info */}
         <div className={styles.infoRow}>
-          <svg
-            className={styles.icon}
-            fill="currentColor"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-          >
+          <svg className={styles.icon} fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
             <path
               d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
               fill="currentColor"
@@ -179,22 +200,18 @@ const EventPopup: React.FC<EventPopupProps> = ({
           <span className={styles.infoText}>{location}</span>
         </div>
 
-        {/* Action Button */}
         <div className={styles.actionSection}>
           {isPastEvent ? (
             <div className={styles.pastEventLabel}>Past event</div>
           ) : isRegistered ? (
             <div className={styles.countdownSection}>
               <div className={styles.countdownText}>
-                Event starts in <span className={styles.countdownHighlight}>{countdown}</span>
+                Event starts in{" "}
+                <span className={styles.countdownHighlight}>{countdown}</span>
               </div>
             </div>
           ) : (
-            <button
-              type="button"
-              className={styles.viewDetailsButton}
-              onClick={handleRegisterClick}
-            >
+            <button type="button" className={styles.viewDetailsButton} onClick={handleRegisterClick}>
               View Details
             </button>
           )}

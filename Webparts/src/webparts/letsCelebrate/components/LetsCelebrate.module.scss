@@ -1,5 +1,51 @@
 @import '~@fluentui/react/dist/sass/References.scss';
 
+.topWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.wrapOuter{
+  padding: 0 120px 60px;
+  margin-top: 32px;
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* =========================================================
+   Standard blurred shimmer container
+   ========================================================= */
+
+.loadingTabs {
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, .06);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+}
+
+.standardShimmerCard {
+  > div {
+    display: grid;
+    gap: 16px;
+  }
+  > div > div {
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 0, 0, .06);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+    padding: 12px 14px;
+  }
+  :global(.ms-Shimmer-container) {
+    margin: 0;
+    background: transparent;
+  }
+}
+
 .letsCelebrate {
   overflow: hidden;
   padding: 1em;
@@ -23,12 +69,12 @@
   a {
     text-decoration: none;
     color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
+    color: var(--link);
 
     &:hover {
       text-decoration: underline;
       color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
+      color: var(--linkHovered);
     }
   }
 }

@@ -37,7 +37,7 @@ const BeverageMenu: React.FC<IBeverageMenuProps> = (props) => {
 
   const viewAllHref = React.useMemo(() => {
     const configured = (props.seeAllURL || "").trim();
-    const raw = configured || "SitePages/Beverage-Menu.aspx";
+    const raw = configured || "SitePages/Beverages.aspx";
 
     if (/^https?:\/\//i.test(raw)) {
       try {
@@ -56,9 +56,14 @@ const BeverageMenu: React.FC<IBeverageMenuProps> = (props) => {
   }, [props.seeAllURL, webUrl, origin]);
   // --- END ---
 
+  const cards = React.useMemo(
+    () => defaultBeverages.map((c) => ({ ...c, url: viewAllHref })),
+    [viewAllHref]
+  );
+
   return (
     <div>
-      <ShuffledCards cards={defaultBeverages} />
+      <ShuffledCards cards= {cards} />
 
       <div className={styles.ctaWrapper}>
         <ConditionalLink to={viewAllHref}>

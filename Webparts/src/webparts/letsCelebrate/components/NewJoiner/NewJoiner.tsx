@@ -12,110 +12,121 @@ export interface INewJoinersFeedProps {
   };
 }
 
-const NewJoiner: React.FC<INewJoinersFeedProps> = ({
-  items = [],
-  celebrations,
-  formatDate,
-  webAbsoluteUrl
-}) => {
+const PAGE_SIZE = 5;
 
-  // -------------------------
-  // 🟦 FIX 1: SORT BY JOINING DATE
-  // -------------------------
+const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items = [] }) => {
+  const [visibleCount, setVisibleCount] = React.useState<number>(PAGE_SIZE);
+
   const sortedItems = React.useMemo(() => {
     if (!items || items.length === 0) return [];
 
     return [...items].sort((a, b) => {
       const dateA = new Date(a.JoiningDate || a.joiningDate || a.date || "").getTime();
       const dateB = new Date(b.JoiningDate || b.joiningDate || b.date || "").getTime();
-      return dateA - dateB;          // earliest first
-      // return dateB - dateA;        // latest first (if needed)
+      return dateA - dateB;
     });
   }, [items]);
 
+  React.useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [items]);
+
+  const itemsToRender = sortedItems.slice(0, visibleCount);
+  const canLoadMore = visibleCount < sortedItems.length;
+
+  const splitName = (fullName: string) => {
+    const cleaned = (fullName || "").trim().replace(/\s+/g, " ");
+    if (!cleaned) return { first: "", rest: "" };
+
+    const parts = cleaned.split(" ");
+    const first = parts[0];
+    const rest = parts.slice(1).join(" ");
+    return { first, rest };
+  };
 
   return (
-    <>
-      <div className={styles.content}>
-        {sortedItems.length > 0 ? (
-          <div className={styles.feed}>
-            {sortedItems.map((item: any) => {
-              return (
-                <article key={item.ID || item.id || item.Title}>
-                  <div className={styles.cardTop}>
-                    <header className={styles.header}>
-                      <h2 className={styles.name}>
-                        <span className={styles.nameDecor}>
-                          {item.Title || item.name}
+    <div className={styles.content}>
+      {sortedItems.length > 0 ? (
+        <div className={styles.feed}>
+          {itemsToRender.map((item: any) => {
+            const fullName = item.Title || item.name || "";
+            const { first, rest } = splitName(fullName);
+
+            const emailToUse: string | undefined = item?.TIRUserEmail?.trim();
+            const teamsChatUrl = emailToUse
+              ? `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(emailToUse)}`
+              : "";
+
+            return (
+              <article key={item.ID || item.id || item.Title}>
+                <div className={styles.cardTop}>
+                  <header className={styles.header}>
+                    <h2 className={styles.name}>
+                      <span className={styles.firstName}>{first}</span>
+                      {rest ? <span className={styles.lastName}> {rest}</span> : null}
+                    </h2>
+                    <div className={styles.role}>{item.Designation || item.department}</div>
+                  </header>
+
+                  <div className={styles.ctaCol}>
+                    {emailToUse ? (
+                      <a
+                        className={styles.sayHello}
+                        target="_blank"
+                        rel="noreferrer"
+                        data-interception="off"
+                        href={teamsChatUrl}
+                      >
+                        <span className={styles.helloIcon} aria-hidden="true">
+                          🤝
                         </span>
-                      </h2>
-                      <div className={styles.role}>
-                        {item.Designation || item.department}
-                      </div>
-                    </header>
+                        <span>Say Hello</span>
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
 
-                    <div className={styles.ctaCol}>
-                      {(() => {
-                        //  const dummyEmail = "dishant.nishad@essencetechlabs.com"; 
-                        // const emailToUse = (item?.UserEmail && item.UserEmail.trim()) || dummyEmail;
-                        const emailToUse = item?.TIRUserEmail?.trim();
-                        if (!emailToUse) {
-                          return null;
-                        }
-                        console.log(emailToUse);
-                        const teamsChatUrl = `https://teams.microsoft.com/l/chat/0/0?users=${emailToUse}`;
-                        return (
-                          <a
-                            className={styles.sayHello}
-                            target="_blank"
-                            rel="noreferrer"
-                            data-interception="off"
-                            href={teamsChatUrl}
-                          >
-                            <span className={styles.helloIcon} aria-hidden="true">
-                              🤝
-                            </span>
-                            <span>Say Hello</span>
-                          </a>
-                        );
-                      })()}
-                    </div>
+                <div className={styles.card}>
+                  <div className={styles.left}>
+                    <img
+                      className={styles.photo}
+                      src={item.UserPicture || item.image}
+                      alt={fullName || "Profile photo"}
+                    />
                   </div>
 
-                  <div className={styles.card}>
-                    <div className={styles.left}>
-                      <img
-                        className={styles.photo}
-                        src={item.UserPicture || item.image}
-                        alt={item.Title || item.name || "Profile photo"}
+                  <div className={styles.right}>
+                    <section className={styles.body}>
+                      <p
+                        className={styles.para}
+                        dangerouslySetInnerHTML={{ __html: item.Description || "" }}
                       />
-                    </div>
-
-                    <div className={styles.right}>
-                      <section className={styles.body}>
-                        <p
-                          dangerouslySetInnerHTML={{
-                            __html: item.Description || ""
-                          }}
-                          className={styles.para}
-                        />
-                      </section>
-                    </div>
+                    </section>
                   </div>
-                </article>
-              );
-            })}
-          </div>
-        ) : (
-          // -------------------------
-          // 🟦 FIX 2: CLEAR EMPTY MESSAGE
-          // -------------------------
-          <div className={styles.emptyState}>
-            <p>No New Joiners</p>
-          </div>
-        )}
-      </div>
-    </>
+                </div>
+              </article>
+            );
+          })}
+
+          {canLoadMore && (
+            <div className={styles.loadMoreWrap}>
+              <button
+                type="button"
+                className={styles.loadMoreBtn}
+                onClick={() => setVisibleCount((c) => Math.min(c + PAGE_SIZE, sortedItems.length))}
+                aria-label="Load more new joiners"
+              >
+                Load More
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className={styles.emptyState}>
+          <p>No New Joiners</p>
+        </div>
+      )}
+    </div>
   );
 };
 

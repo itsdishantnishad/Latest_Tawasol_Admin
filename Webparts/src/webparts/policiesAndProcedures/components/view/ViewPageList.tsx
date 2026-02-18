@@ -1,146 +1,281 @@
+import * as React from "react";
+import { Checkbox, IconButton } from "@fluentui/react";
+import styles from "./ViewPage.module.scss";
 
+import ViewPageListServices from "../../../services/PoliciesAndProcedures/ViewPageListServices";
+import type {
+  FavouriteIndex,
+  IPoliciesAndProceduresItem
+} from "../../../services/PoliciesAndProcedures/ViewPageListTypes";
+export type { IPoliciesAndProceduresItem } from "../../../services/PoliciesAndProcedures/ViewPageListTypes";
 
+import PoliciesSearchService from "../../../services/PoliciesAndProcedures/PoliciesSearchService";
 
-import * as React from 'react';
-import { Checkbox, IconButton } from '@fluentui/react';
-import styles from './ViewPage.module.scss';
 import {
-  ICON_DOC_FOLDER_GRID, ICON_DOC_FOLDER_LIST, ICON_EXPORT_TO_CSV, ICON_FOLDER,
-  ICON_JPG, ICON_PDF, ICON_POWERPOINT, ICON_TEXT, ICON_WORD, ICON_ZIP,
-  ICON_ARROW_UP, ICON_ARROW_DOWN, ICON_TAG
-} from '../../../assets/constants';
+  ICON_DOC_FOLDER_GRID,
+  ICON_DOC_FOLDER_LIST,
+  ICON_EXPORT_TO_CSV,
+  ICON_FOLDER,
+  ICON_ARROW_UP,
+  ICON_ARROW_DOWN,
+  ICON_TAG,
+  ICON_HEART,
+  ICON_HEART_SAVED,
+  ICON_DOWNLOAD
+} from "../../../assets/constants";
 
-export type IPoliciesAndProceduresItem = {
-  id: string;
-  name: string;
-  isFolder?: boolean;
-  ext?: 'pdf' | 'docx' | 'xlsx' | 'pptx' | 'jpg' | 'txt' | 'zip';
-  modifiedBy?: string;
-  modifiedOn?: Date;
-  department?: string;
-  tag?: string;
-  previewUrl?: string;
-  serverRelativeUrl?: string;
-};
+type SearchState = "idle" | "loading" | "done" | "error";
 
 export interface IPoliciesAndProceduresListProps {
   items: IPoliciesAndProceduresItem[];
   activeId?: string;
-
   onOpenFile: (fileItem: IPoliciesAndProceduresItem) => void;
-  onToggleFolder: (folderItem: IPoliciesAndProceduresItem) => void;
+  onClearPreview?: () => void;
 
-  // ✅ single expand id (matches your ViewPage.tsx)
-  expandedFolderId?: string;
+  // NOTE: parent is async - keep it compatible
+  onToggleFolder: (folderItem: IPoliciesAndProceduresItem) => Promise<void> | void;
 
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
+  onSwitchFolderView: (folderId: string, mode: "list" | "grid") => void;
+  getFolderViewMode: (folderId: string) => "list" | "grid";
+  favouriteIndex?: FavouriteIndex;
+  onToggleFavourite?: (file: IPoliciesAndProceduresItem) => void;
+  dmsLibraryRoot?: string;
 
-  onSwitchFolderView: (folderId: string, mode: 'list' | 'grid') => void;
-  getFolderViewMode: (folderId: string) => 'list' | 'grid';
+  searchText?: string;
+  autoExpandFolderIds?: string[];
+  searchState?: SearchState;
 }
 
 type State = {
-  /** selected file ids per scope (folderId or 'root') */
   selectedIds: Record<string, Set<string>>;
+  expandedFolderIds: Set<string>;
 };
 
-export default class PoliciesAndProceduresList extends React.Component<IPoliciesAndProceduresListProps, State> {
-  state: State = { selectedIds: {} };
+
+export default class PoliciesAndProceduresList extends React.Component<
+  IPoliciesAndProceduresListProps,
+  State
+> {
+  public state: State = {
+    selectedIds: {},
+    expandedFolderIds: new Set()
+  };
+
+  private readonly _utils = new ViewPageListServices();
+  private _lastRoot?: string;
+
+  private get searchTextTrimmed(): string {
+    return (this.props.searchText || "").trim();
+  }
+
+   // Date Formating
+  private _formatModifiedDate(value: any): string {
+    const dt = value instanceof Date ? value : new Date(value);
+    if (isNaN(dt.getTime())) return "-";
+
+    return dt.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    });
+  }
+
+  // normalized forced expand keys (works for encoded/decoded)
+  private get forcedExpandKeys(): Set<string> {
+    return new Set((this.props.autoExpandFolderIds || []).map(PoliciesSearchService.toKey));
+  }
+
+  private isForced(folderId: string): boolean {
+    return this.forcedExpandKeys.has(PoliciesSearchService.toKey(folderId));
+  }
+
+  public componentDidUpdate(prevProps: IPoliciesAndProceduresListProps): void {
+    const currentSearchText = this.searchTextTrimmed;
+    const previousSearchText = (prevProps.searchText || "").trim();
+
+    const didAutoExpandChange =
+      (prevProps.autoExpandFolderIds || []).join("|") !==
+      (this.props.autoExpandFolderIds || []).join("|");
+
+    if (currentSearchText && (currentSearchText !== previousSearchText || didAutoExpandChange)) {
+      void this.ensureAutoExpanded();
+    }
+  }
+
+  private async ensureAutoExpanded(): Promise<void> {
+    const folderIdsToExpand = this.props.autoExpandFolderIds || [];
+    if (!folderIdsToExpand.length) return;
+
+    // Mark expanded in UI state
+    this.setState((previous) => {
+      const nextExpandedFolderIds = new Set(previous.expandedFolderIds);
+      folderIdsToExpand.forEach((folderId) => nextExpandedFolderIds.add(folderId));
+      return { ...previous, expandedFolderIds: nextExpandedFolderIds };
+    });
+
+    // Ensure children loaded
+    for (const folderId of folderIdsToExpand) {
+      const stubFolder: IPoliciesAndProceduresItem = {
+        id: folderId,
+        name: "",
+        isFolder: true,
+        serverRelativeUrl: folderId
+      };
+      await this.props.onToggleFolder(stubFolder);
+    }
+  }
 
   // ---------- selection helpers ----------
-  private getKeyForScope = (folderId?: string) => folderId || 'root';
+  private getSelectionScopeKey = (folderId?: string) => folderId || "root";
 
-  private isSelected = (id: string, folderId?: string) =>
-    this.state.selectedIds[this.getKeyForScope(folderId)]?.has(id) ?? false;
+  private isSelected = (itemId: string, folderId?: string) =>
+    this.state.selectedIds[this.getSelectionScopeKey(folderId)]?.has(itemId) ?? false;
 
-  private setSelectedBulk = (ids: string[], checked: boolean, folderId?: string) => {
-    const key = this.getKeyForScope(folderId);
-    this.setState(prev => {
-      const next = new Set(prev.selectedIds[key] ?? []);
-      if (checked) ids.forEach(i => next.add(i));
-      else ids.forEach(i => next.delete(i));
-      return { selectedIds: { ...prev.selectedIds, [key]: next } };
+  private setSelectedBulk = (itemIds: string[], checked: boolean, folderId?: string) => {
+    const scopeKey = this.getSelectionScopeKey(folderId);
+    this.setState((previous) => {
+      const nextSelectedSet = new Set(previous.selectedIds[scopeKey] ?? []);
+      if (checked) itemIds.forEach((id) => nextSelectedSet.add(id));
+      else itemIds.forEach((id) => nextSelectedSet.delete(id));
+      return { ...previous, selectedIds: { ...previous.selectedIds, [scopeKey]: nextSelectedSet } };
     });
   };
 
-  private toggleOne = (id: string, folderId?: string) => {
-    const key = this.getKeyForScope(folderId);
-    this.setState(prev => {
-      const next = new Set(prev.selectedIds[key] ?? []);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return { selectedIds: { ...prev.selectedIds, [key]: next } };
+  private toggleOne = (itemId: string, folderId?: string) => {
+    const scopeKey = this.getSelectionScopeKey(folderId);
+    this.setState((previous) => {
+      const nextSelectedSet = new Set(previous.selectedIds[scopeKey] ?? []);
+      nextSelectedSet.has(itemId) ? nextSelectedSet.delete(itemId) : nextSelectedSet.add(itemId);
+      return { ...previous, selectedIds: { ...previous.selectedIds, [scopeKey]: nextSelectedSet } };
     });
   };
 
-  // ---------- icon helpers ----------
-  private getIconUrl = (it: IPoliciesAndProceduresItem): string => {
-    if (it.isFolder) return ICON_FOLDER;
-    switch (it.ext) {
-      case 'pdf':  return ICON_PDF;
-      case 'docx': return ICON_WORD;
-      case 'pptx': return ICON_POWERPOINT;
-      case 'jpg':  return ICON_JPG;
-      case 'zip':  return ICON_ZIP;
-      case 'txt':  return ICON_TEXT;
-      case 'xlsx': return ICON_TEXT; // fallback
-      default:     return ICON_TEXT;
+  // ---------- folder expand helpers ----------
+  private isFolderExpanded = (folderId: string) => this.state.expandedFolderIds.has(folderId);
+
+  private expandFolder = async (folder: IPoliciesAndProceduresItem): Promise<void> => {
+    if (!this.props.expandedChildren[folder.id] && folder.serverRelativeUrl) {
+      await this.props.onToggleFolder(folder);
+    }
+    this.setState((previous) => {
+      const nextExpandedFolderIds = new Set(previous.expandedFolderIds);
+      nextExpandedFolderIds.add(folder.id);
+      return { ...previous, expandedFolderIds: nextExpandedFolderIds };
+    });
+  };
+
+  private collapseFolder = (folderId: string): void => {
+    this.setState((previous) => {
+      const nextExpandedFolderIds = new Set(previous.expandedFolderIds);
+      nextExpandedFolderIds.delete(folderId);
+      return { ...previous, expandedFolderIds: nextExpandedFolderIds };
+    });
+  };
+
+  private toggleFolderUi = async (
+    folder: IPoliciesAndProceduresItem,
+    event?: React.MouseEvent<HTMLElement>
+  ): Promise<void> => {
+    event?.stopPropagation();
+    if (this.isFolderExpanded(folder.id)) return this.collapseFolder(folder.id);
+    await this.expandFolder(folder);
+  };
+
+  private openFolderInViewMode = async (
+    folder: IPoliciesAndProceduresItem,
+    mode: "list" | "grid",
+    event?: React.MouseEvent<any>
+  ): Promise<void> => {
+    event?.stopPropagation();
+    this.props.onSwitchFolderView(folder.id, mode);
+
+    if (!this.isFolderExpanded(folder.id)) {
+      await this.expandFolder(folder);
+      return;
+    }
+
+    if (!this.props.expandedChildren[folder.id] && folder.serverRelativeUrl) {
+      await this.props.onToggleFolder(folder);
     }
   };
 
-  // ---------- CSV export (selected rows only) ----------
-  private exportSelectedToCsv = (selected: IPoliciesAndProceduresItem[], e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (!selected.length) return;
-
-    const header = ['Name', 'Type', 'Modified by', 'Modified on', 'Tag', 'Department'];
-    const rows = selected.map(row => [
-      `"${(row.name || '').replace(/"/g, '""')}"`,
-      row.ext || '',
-      `"${(row.modifiedBy || '').replace(/"/g, '""')}"`,
-      row.modifiedOn ? row.modifiedOn.toLocaleDateString() : '',
-      `"${(row.tag || '').replace(/"/g, '""')}"`,
-      row.department || ''
-    ].join(','));
-
-    const blob = new Blob([header.join(',') + '\r\n' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'documents.csv'; a.click();
-    URL.revokeObjectURL(url);
+  // ---------- search helpers ----------
+  private itemMatches = (item: IPoliciesAndProceduresItem, searchText: string): boolean => {
+    if (!searchText) return true;
+    return (
+      PoliciesSearchService.matches(item.name || "", searchText) ||
+      PoliciesSearchService.matches(item.tag || "", searchText) ||
+      PoliciesSearchService.matches(item.department || "", searchText)
+    );
   };
 
-  // ---------- render helpers ----------
-  private renderTypeIcon = (listItem: IPoliciesAndProceduresItem): React.ReactNode => (
-    <img className={styles.typeIcon} src={this.getIconUrl(listItem)} alt="" />
-  );
+  private folderHasMatch = (
+    folderId: string,
+    searchText: string,
+    visited = new Set<string>()
+  ): boolean => {
+    if (!searchText) return true;
 
-  private renderFileRow = (listItem: IPoliciesAndProceduresItem, isActive: boolean, folderId?: string): React.ReactNode => {
-    const checked = this.isSelected(listItem.id, folderId);
+    const normalizedFolderKey = PoliciesSearchService.toKey(folderId);
+    if (visited.has(normalizedFolderKey)) return false;
+    visited.add(normalizedFolderKey);
+
+    const expandedChildrenRealKey =
+      Object.keys(this.props.expandedChildren).find(
+        (storedKey) => PoliciesSearchService.toKey(storedKey) === normalizedFolderKey
+      ) || folderId;
+
+    const childItems = this.props.expandedChildren[expandedChildrenRealKey] || [];
+    for (const child of childItems) {
+      if (this.itemMatches(child, searchText)) return true;
+      if (child.isFolder && this.folderHasMatch(child.id, searchText, visited)) return true;
+    }
+    return false;
+  };
+
+  private shouldShowFolder = (folder: IPoliciesAndProceduresItem, searchText: string): boolean => {
+    if (!searchText) return true;
+
+    // KEY FIX:
+    // While search is still running or failed, never hide folders (prevents UI going blank)
+    const currentSearchState = this.props.searchState || "idle";
+    if (currentSearchState !== "done") return true;
+
+    if (this.isForced(folder.id)) return true;
+    if (this.itemMatches(folder, searchText)) return true;
+    return this.folderHasMatch(folder.id, searchText);
+  };
+
+  // ---------- list row ----------
+  private renderFileRow = (item: IPoliciesAndProceduresItem, isActive: boolean, folderId?: string) => {
+    const checked = this.isSelected(item.id, folderId);
+    const meta = this._utils.getRowMeta(item, this.props.favouriteIndex);
+
+    const showActions = !item.isFolder && !!item.serverRelativeUrl;
 
     return (
-      <div key={listItem.id} className={`${styles.row} ${isActive ? styles.rowActive : ''}`}>
-        <div>
+      <div key={item.id} className={`${styles.row} ${isActive ? styles.rowActive : ""}`}>
+        <div className={styles.cellCheck}>
           <Checkbox
             checked={checked}
-            onChange={(e, isChecked) => {
-              e?.stopPropagation();
-              this.toggleOne(listItem.id, folderId);
-              if (isChecked) {
-                this.props.onOpenFile(listItem);
-              }
+            onChange={(ev, isChecked) => {
+              ev?.stopPropagation();
+              this.toggleOne(item.id, folderId);
+              if (isChecked) this.props.onOpenFile(item);
+              else if (this.props.activeId === item.id) this.props.onClearPreview?.();
             }}
           />
         </div>
 
-        {/* ONLY icon/name click opens preview */}
-        <div>
+        <div className={styles.cellType}>
           <button
             type="button"
             className={styles.openBtn}
-            aria-label={`Open ${listItem.name}`}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
+            aria-label={item.name}
+            onClick={(e) => e.stopPropagation()}
           >
-            {this.renderTypeIcon(listItem)}
+            <img className={styles.typeIcon} src={meta.fileIcon} alt="" />
           </button>
         </div>
 
@@ -148,163 +283,240 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
           <button
             type="button"
             className={`${styles.nameStrong} ${styles.openBtn}`}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
+            onClick={(e) => e.stopPropagation()}
           >
-            {listItem.name}
+            {item.name}
           </button>
 
           <div className={styles.meta}>
-            Modified by : {listItem.modifiedBy || '-'} &nbsp;•&nbsp;
-            Modified on : {listItem.modifiedOn ? listItem.modifiedOn.toLocaleDateString() : '-'}
+            Modified by : {item.modifiedBy || "-"} &nbsp;•&nbsp;
+            Modified on : {item.modifiedOn ? this._formatModifiedDate(item.modifiedOn) : "-"}
           </div>
         </div>
 
-        <div>
-          {listItem.tag && (
-            <span className={styles.tagPill}>
-              <img src={ICON_TAG} alt="" className={styles.tagIcon} />
-              {listItem.tag}
-            </span>
-          )}
+        <div className={styles.cellCategory}>
+          <span className={styles.categoryInline} title={meta.categoryLabel}>
+            <img src={ICON_TAG} alt="" className={styles.categoryIcon} />
+            <span className={styles.categoryText}>{meta.categoryLabel}</span>
+          </span>
         </div>
 
-        <div className={styles.cellDept}>{listItem.department || ''}</div>
+        <div className={styles.cellRight}>
+          {!!item.department && <span className={styles.cellDept}>{item.department}</span>}
+
+          {showActions && (
+            <div className={styles.cellActions}>
+              <button
+                type="button"
+                className={styles.favBtn}
+                title={meta.isFavourite ? "Remove from favourites" : "Add to favourites"}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.props.onToggleFavourite?.(item);
+                }}
+              >
+                <img
+                  src={meta.isFavourite ? ICON_HEART_SAVED : ICON_HEART}
+                  alt=""
+                  className={styles.favIcon}
+                />
+              </button>
+
+              {!!meta.downloadUrl && (
+                <a
+                  className={styles.downloadBtn}
+                  href={meta.downloadUrl}
+                  title="Download"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img src={ICON_DOWNLOAD} alt="" className={styles.downloadIcon} />
+                </a>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
 
-  private renderGridCard = (listItem: IPoliciesAndProceduresItem, isActive: boolean, folderId?: string): React.ReactNode => {
-    const checked = this.isSelected(listItem.id, folderId);
+  // ---------- grid card ----------
+  private renderGridCard = (item: IPoliciesAndProceduresItem, isActive: boolean, folderId?: string) => {
+    const checked = this.isSelected(item.id, folderId);
+    const meta = this._utils.getRowMeta(item, this.props.favouriteIndex);
 
     return (
-      <div key={listItem.id} className={`${styles.card} ${isActive ? styles.cardActive : ''}`}>
+      <div key={item.id} className={`${styles.card} ${isActive ? styles.cardActive : ""}`}>
         <div className={styles.cardThumb}>
-          <button
-            type="button"
-            className={styles.openBtn}
-            aria-label={`Open ${listItem.name}`}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
-          >
-            {this.renderTypeIcon(listItem)}
+          <button type="button" className={styles.openBtn} aria-label={item.name} onClick={(e) => e.stopPropagation()}>
+            <img className={styles.typeIcon} src={meta.fileIcon} alt="" />
           </button>
         </div>
 
+        <div className={styles.cardFavWrap}>
+          {!item.isFolder && !!item.serverRelativeUrl && (
+            <button
+              type="button"
+              className={styles.favBtn}
+              title={meta.isFavourite ? "Remove from favourites" : "Add to favourites"}
+              onClick={(e) => {
+                e.stopPropagation();
+                this.props.onToggleFavourite?.(item);
+              }}
+            >
+              <img
+                src={meta.isFavourite ? ICON_HEART_SAVED : ICON_HEART}
+                alt=""
+                className={styles.favIcon}
+              />
+            </button>
+          )}
+
+          {!item.isFolder && !!meta.downloadUrl && (
+            <a className={styles.favBtn} href={meta.downloadUrl} title="Download" onClick={(e) => e.stopPropagation()}>
+              <img src={ICON_DOWNLOAD} alt="" className={styles.favIcon} />
+            </a>
+          )}
+        </div>
+
         <div className={styles.cardTitle}>
-          <button
-            type="button"
-            className={styles.openBtn}
-            onClick={(e) => { e.stopPropagation(); this.props.onOpenFile(listItem); }}
-          >
-            {listItem.name}
+          <button type="button" className={styles.openBtn} onClick={(e) => e.stopPropagation()}>
+            {item.name}
           </button>
         </div>
 
         <div className={styles.cardMetaRow}>
-          <span className={styles.meta}>{listItem.modifiedBy || '-'}</span>
-          <span className={styles.meta}>{listItem.modifiedOn ? listItem.modifiedOn.toLocaleDateString() : '-'}</span>
+          <span className={styles.meta}>{item.modifiedBy || "-"}</span>
+          <span className={styles.meta}>{item.modifiedOn ? item.modifiedOn.toLocaleDateString() : "-"}</span>
+        </div>
+
+        <div>
+          <span className={styles.tagPill}>
+            <img src={ICON_TAG} alt="" className={styles.tagIcon} />
+            {meta.categoryLabel}
+          </span>
         </div>
 
         <div className={styles.cardFooter}>
-          {listItem.tag && (
-            <span className={styles.cardTag}>
-              <img src={ICON_TAG} alt="" className={styles.tagIcon} />
-              {listItem.tag}
-            </span>
-          )}
-          <span className={styles.cardDept}>{listItem.department || ''}</span>
+          <span className={styles.cardDept}>{item.department || ""}</span>
         </div>
 
-        <Checkbox
-          checked={checked}
-          onChange={(e, isChecked) => {
-            e?.stopPropagation();
-            this.toggleOne(listItem.id, folderId);
-            if (isChecked) {
-              this.props.onOpenFile(listItem);
-            }
-          }}
-          styles={{ root: { position: 'absolute', top: 8, left: 8 } }}
-        />
+        <div className={styles.cardCheckboxWrap}>
+          <Checkbox
+            checked={checked}
+            onChange={(ev, isChecked) => {
+              ev?.stopPropagation();
+              this.toggleOne(item.id, folderId);
+              if (isChecked) this.props.onOpenFile(item);
+              else if (this.props.activeId === item.id) this.props.onClearPreview?.();
+            }}
+          />
+        </div>
       </div>
     );
   };
 
-  /**
-   *  Recursive renderer for folder children
-   * - Shows subfolders ALSO
-   * - Clicking folder loads children using parent handler (dataProvider)
-   */
   private renderFolderChildrenRecursive = (folderId: string): React.ReactNode => {
-    const children = this.props.expandedChildren[folderId] || [];
-    const folders = children.filter(x => x.isFolder);
-    const files = children.filter(x => !x.isFolder);
+    const currentSearchText = this.searchTextTrimmed;
+
+    const normalizedFolderKey = PoliciesSearchService.toKey(folderId);
+    const expandedChildrenRealKey =
+      Object.keys(this.props.expandedChildren).find(
+        (storedKey) => PoliciesSearchService.toKey(storedKey) === normalizedFolderKey
+      ) || folderId;
+
+    const childItems = this.props.expandedChildren[expandedChildrenRealKey] || [];
+
+    const childFolders = childItems
+      .filter((child) => child.isFolder)
+      .filter((folder) => this.shouldShowFolder(folder, currentSearchText));
+
+    const childFiles = childItems
+      .filter((child) => !child.isFolder)
+      .filter((file) => this.itemMatches(file, currentSearchText));
 
     return (
       <div>
-        {/* Subfolders */}
-        {folders.map(sf => this.renderFolderBlock(sf, true))}
+        {childFolders.map((folder) => this.renderFolderBlock(folder, true))}
 
-        {/* Files */}
-        {this.props.getFolderViewMode(folderId) === 'list' && (
-          <div>
-            {files.map(file => this.renderFileRow(file, this.props.activeId === file.id, folderId))}
-          </div>
+        {this.props.getFolderViewMode(folderId) === "list" && (
+          <div>{childFiles.map((file) => this.renderFileRow(file, this.props.activeId === file.id, folderId))}</div>
         )}
 
-        {this.props.getFolderViewMode(folderId) === 'grid' && (
+        {this.props.getFolderViewMode(folderId) === "grid" && (
           <div className={styles.gridBody}>
-            {files.map(file => this.renderGridCard(file, this.props.activeId === file.id, folderId))}
+            {childFiles.map((file) => this.renderGridCard(file, this.props.activeId === file.id, folderId))}
           </div>
         )}
       </div>
     );
   };
 
-  private renderFolderBlock = (folder: IPoliciesAndProceduresItem, isNested?: boolean): React.ReactNode => {
-    const { expandedFolderId, expandedChildren, getFolderViewMode } = this.props;
+  private renderFolderBlock = (folder: IPoliciesAndProceduresItem, nested?: boolean): React.ReactNode => {
+    const currentSearchText = this.searchTextTrimmed;
+    if (!this.shouldShowFolder(folder, currentSearchText)) return null;
 
-    const isExpanded = expandedFolderId === folder.id;
-    const mode = getFolderViewMode(folder.id);
+    const mustExpandFromSearch = !!currentSearchText && this.isForced(folder.id);
+    const isExpanded = mustExpandFromSearch || this.isFolderExpanded(folder.id);
 
-    const children = expandedChildren[folder.id] || [];
-    const filesOnly = children.filter(x => !x.isFolder);
+    const viewMode = this.props.getFolderViewMode(folder.id);
 
-    const allFileIds = filesOnly.map(f => f.id);
-    const selectedFiles = filesOnly.filter(f => this.isSelected(f.id, folder.id));
-    const allSelected = allFileIds.length > 0 && allFileIds.every(id => this.isSelected(id, folder.id));
+    const normalizedFolderKey = PoliciesSearchService.toKey(folder.id);
+    const expandedChildrenRealKey =
+      Object.keys(this.props.expandedChildren).find(
+        (storedKey) => PoliciesSearchService.toKey(storedKey) === normalizedFolderKey
+      ) || folder.id;
+
+    const childItems = this.props.expandedChildren[expandedChildrenRealKey] || [];
+
+    const filesInFolder = childItems
+      .filter((child) => !child.isFolder)
+      .filter((file) => this.itemMatches(file, currentSearchText));
+
+    const allFileIds = filesInFolder.map((file) => file.id);
+    const selectedFiles = filesInFolder.filter((file) => this.isSelected(file.id, folder.id));
+    const isAllSelected =
+      allFileIds.length > 0 && allFileIds.every((fileId) => this.isSelected(fileId, folder.id));
 
     return (
-      <div key={folder.id} className={`${styles.folderBlock} ${isNested ? styles.folderNested : ''}`}>
-
-        <button
+      <div key={folder.id} className={`${styles.folderBlock} ${nested ? styles.folderNested : ""}`}>
+        <div
           className={styles.folderHeader}
-          onClick={(e) => { e.stopPropagation(); this.props.onToggleFolder(folder); }}
+          role="button"
+          tabIndex={0}
           aria-expanded={isExpanded}
-          type="button"
+          onClick={(e) => void this.toggleFolderUi(folder, e)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              void this.toggleFolderUi(folder);
+            }
+          }}
         >
           <img src={isExpanded ? ICON_ARROW_UP : ICON_ARROW_DOWN} alt="" className={styles.typeIcon} />
+
           <span className={styles.folderIconWrap}>
             <img className={styles.typeIcon} src={ICON_FOLDER} alt="" />
           </span>
+
           <span className={styles.folderTitle}>{folder.name}</span>
 
           <div className={styles.folderToolbar}>
             <IconButton
-              className={mode === 'list' ? styles.viewBtnActive : styles.viewBtn}
+              className={viewMode === "list" ? styles.viewBtnActive : styles.viewBtn}
               onRenderIcon={() => <img src={ICON_DOC_FOLDER_LIST} alt="" className={styles.typeIcon} />}
               title="List view"
               ariaLabel="List view"
-              onClick={(e) => { e.stopPropagation(); this.props.onSwitchFolderView(folder.id, 'list'); }}
+              onClick={(e) => void this.openFolderInViewMode(folder, "list", e)}
             />
             <IconButton
-              className={mode === 'grid' ? styles.viewBtnActive : styles.viewBtn}
+              className={viewMode === "grid" ? styles.viewBtnActive : styles.viewBtn}
               onRenderIcon={() => <img src={ICON_DOC_FOLDER_GRID} alt="" className={styles.typeIcon} />}
               title="Grid view"
               ariaLabel="Grid view"
-              onClick={(e) => { e.stopPropagation(); this.props.onSwitchFolderView(folder.id, 'grid'); }}
+              onClick={(e) => void this.openFolderInViewMode(folder, "grid", e)}
             />
           </div>
-        </button>
+        </div>
 
         {isExpanded && (
           <div className={styles.folderContent}>
@@ -312,7 +524,7 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
               <div className={styles.selectAllWrap} onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   label="Select all"
-                  checked={allSelected}
+                  checked={isAllSelected}
                   onChange={(e, checked) => {
                     e?.stopPropagation();
                     this.setSelectedBulk(allFileIds, !!checked, folder.id);
@@ -323,20 +535,24 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
               {selectedFiles.length > 0 && (
                 <div
                   className={styles.actionBarRight}
-                  onClick={(e) => this.exportSelectedToCsv(selectedFiles, e)}
                   role="button"
                   tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    this._utils.exportSelectedToCsv(selectedFiles, "documents.csv");
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') this.exportSelectedToCsv(selectedFiles);
+                    if (e.key === "Enter" || e.key === " ") {
+                      this._utils.exportSelectedToCsv(selectedFiles, "documents.csv");
+                    }
                   }}
                 >
                   <img src={ICON_EXPORT_TO_CSV} alt="" className={styles.typeIcon} />
-                  <span>Export to CSV</span>
+                  <span>Export</span>
                 </div>
               )}
             </div>
 
-            {/* recursive children render (folders + files) */}
             {this.renderFolderChildrenRecursive(folder.id)}
           </div>
         )}
@@ -345,17 +561,26 @@ export default class PoliciesAndProceduresList extends React.Component<IPolicies
   };
 
   public render(): React.ReactElement<IPoliciesAndProceduresListProps> {
-    const { items } = this.props;
-    const rootFolders = items.filter(x => x.isFolder);
-    const rootFiles = items.filter(x => !x.isFolder);
+    const libraryRoot = (this.props.dmsLibraryRoot || "").trim();
+    if (libraryRoot !== (this._lastRoot || "")) {
+      this._lastRoot = libraryRoot;
+      this._utils.setLibraryRoot(libraryRoot);
+    }
+
+    const currentSearchText = this.searchTextTrimmed;
+
+    const rootFolders = this.props.items
+      .filter((item) => item.isFolder)
+      .filter((folder) => this.shouldShowFolder(folder, currentSearchText));
+
+    const rootFiles = this.props.items
+      .filter((item) => !item.isFolder)
+      .filter((file) => this.itemMatches(file, currentSearchText));
 
     return (
       <div>
-        {/* Root folders */}
-        {rootFolders.map(f => this.renderFolderBlock(f))}
-
-        {/* Root files */}
-        {rootFiles.map(file => this.renderFileRow(file, this.props.activeId === file.id))}
+        {rootFolders.map((folder) => this.renderFolderBlock(folder))}
+        {rootFiles.map((file) => this.renderFileRow(file, this.props.activeId === file.id))}
       </div>
     );
   }

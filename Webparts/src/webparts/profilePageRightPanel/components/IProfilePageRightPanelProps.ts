@@ -5,6 +5,7 @@ export interface IProfilePageRightPanelProps {
   applyLeaveUrl?: string;
   hrLetterUrl?: string;
   hrLetterHeroUrl?: string;
+  eventsTrainingViewAllUrl?: string;
   sticky?: boolean;
   stickyTop?: number;
   eventsTrainingTab?: "events" | "training";

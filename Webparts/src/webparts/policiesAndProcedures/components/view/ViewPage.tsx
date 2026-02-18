@@ -1,19 +1,28 @@
+import * as React from "react";
+import {
+  // Breadcrumb,
+  // IBreadcrumbItem,
+  SearchBox,
+  MessageBar,
+  MessageBarType,
+  DefaultButton,
+  // Breadcrumb
+} from "@fluentui/react";
+import type { WebPartContext } from "@microsoft/sp-webpart-base";
+import view from "./ViewPage.module.scss";
+import { breadcrumbBeforeBackArrowSVG } from "../../../assets/constants";
 
-
-import * as React from 'react';
-import { Breadcrumb, IBreadcrumbItem } from '@fluentui/react';
-import type { WebPartContext } from '@microsoft/sp-webpart-base';
-import view from './ViewPage.module.scss';
-import { breadcrumbBeforeBackArrowSVG } from '../../../assets/constants';
-
-import PoliciesandProceduresList, { IPoliciesAndProceduresItem } from './ViewPageList';
-import PoliciesandProceduresPreview from './ViewPagePreview';
+import PoliciesandProceduresList, { IPoliciesAndProceduresItem } from "./ViewPageList";
+import PoliciesandProceduresPreview from "./ViewPagePreview";
 import {
   IPoliciesAndProceduresDataProvider,
   PoliciesAndProceduresDummyProvider,
   PoliciesAndProceduresSharePointProvider
-} from './ViewPageDataProvider';
+} from "../../../services/PoliciesAndProcedures/ViewPageLibraryService";
 
+import { listServices } from "../../../services/listServices";
+import PoliciesSearchService from "../../../services/PoliciesAndProcedures/PoliciesSearchService";
+import GlobalBreadcrumbs from "../../../assets/GlobalBreadcrumbs";
 export interface IPoliciesAndProceduresViewProps {
   context: WebPartContext;
   functionDisplayName: string;
@@ -22,18 +31,24 @@ export interface IPoliciesAndProceduresViewProps {
   dmsLibraryRoot?: string;
 }
 
-type FolderViewMode = 'list' | 'grid';
+type FolderViewMode = "list" | "grid";
+type SearchState = "idle" | "loading" | "done" | "error";
 
 type IPoliciesAndProceduresViewState = {
-  breadcrumbs: IBreadcrumbItem[];
+ // breadcrumbs: IBreadcrumbItem[];
   currentItems: IPoliciesAndProceduresItem[];
   selectedItem?: IPoliciesAndProceduresItem;
-
-  // SINGLE expanded folder id (matches ViewPageList.tsx)
-  expandedFolderId?: string;
-
   expandedChildren: Record<string, IPoliciesAndProceduresItem[]>;
   folderViewMode: Record<string, FolderViewMode>;
+  favouriteIndex: Record<string, number>;
+  searchResults: IPoliciesAndProceduresItem[];
+  searchText: string;
+  autoExpandFolderIds: string[];
+  searchState: SearchState;
+
+  // ✅ initial shimmer control
+  initialLoading: boolean;
+  initialError: string | null;
 };
 
 export default class PoliciesAndProceduresView extends React.Component<
@@ -41,122 +56,399 @@ export default class PoliciesAndProceduresView extends React.Component<
   IPoliciesAndProceduresViewState
 > {
   private dataProvider: IPoliciesAndProceduresDataProvider;
+  private readonly _libraryRoot: string;
+
+  private readonly _searchService: PoliciesSearchService;
+  private _searchTimerId?: number;
+  private _searchNonce: number = 0;
 
   constructor(props: IPoliciesAndProceduresViewProps) {
     super(props);
 
+    const siteRelativeUrl = props.context.pageContext.web.serverRelativeUrl || "";
+    const siteBase = siteRelativeUrl === "/" ? "" : siteRelativeUrl;
+    const computedFallbackRoot = encodeURI(`${siteBase}/GRC framework Documents`);
+    this._libraryRoot = (props.dmsLibraryRoot || computedFallbackRoot).trim();
+
     this.dataProvider = props.useSharePointProvider
-      ? new PoliciesAndProceduresSharePointProvider(
-          props.context,
-          props.dmsLibraryRoot || '/sites/Intranet/DMS'
-        )
+      ? new PoliciesAndProceduresSharePointProvider(props.context, this._libraryRoot)
       : new PoliciesAndProceduresDummyProvider();
 
+    this._searchService = new PoliciesSearchService(props.context);
+
     this.state = {
-      breadcrumbs: [
-        { key: 'bread-root', text: 'Policies & procedures' },
-        { key: 'bread-function', text: props.functionDisplayName, isCurrentItem: true }
-      ],
+      // breadcrumbs: [
+      //   { key: "bread-root", text: "Policies & procedures" },
+      //   { key: "bread-function", text: props.functionDisplayName, isCurrentItem: true }
+      // ],
       currentItems: [],
-      selectedItem: undefined, // ✅ do not auto preview
-      expandedFolderId: undefined,
+      selectedItem: undefined,
       expandedChildren: {},
-      folderViewMode: {}
+      folderViewMode: {},
+      favouriteIndex: {},
+      searchResults: [],
+      searchText: "",
+      autoExpandFolderIds: [],
+      searchState: "idle",
+
+      initialLoading: true,
+      initialError: null
     };
   }
 
   public async componentDidMount(): Promise<void> {
-    const rootItems = await this.dataProvider.getRootItems(this.props.functionDisplayName);
-    this.setState({
-      currentItems: rootItems
-      // keep selectedItem undefined until user clicks file
-    });
+    await this.loadInitial();
   }
+
+  public componentWillUnmount(): void {
+    if (this._searchTimerId) window.clearTimeout(this._searchTimerId);
+    this._searchNonce++;
+  }
+
+  private loadInitial = async (): Promise<void> => {
+    this.setState({ initialLoading: true, initialError: null });
+
+    try {
+      const listService = new listServices(this.props.context);
+
+      const [rootItems, favouriteIndex] = await Promise.all([
+        this.dataProvider.getRootItems(this.props.functionDisplayName),
+        listService.getFavouriteIndex("Document Favourites")
+      ]);
+
+      this.setState({
+        currentItems: rootItems,
+        favouriteIndex,
+        initialLoading: false
+      });
+    } catch (e: any) {
+      // eslint-disable-next-line no-console
+      console.error("ViewPage initial load failed:", e);
+
+      this.setState({
+        currentItems: [],
+        favouriteIndex: {},
+        initialLoading: false,
+        initialError: e?.message || "Failed to fetch"
+      });
+    }
+  };
 
   private handleOpenFile = (fileItem: IPoliciesAndProceduresItem): void => {
     this.setState({ selectedItem: fileItem });
   };
 
-  private handleToggleFolder = async (folderItem: IPoliciesAndProceduresItem): Promise<void> => {
-    const { expandedFolderId, expandedChildren } = this.state;
+  private handleClearPreview = (): void => {
+    this.setState({ selectedItem: undefined });
+  };
 
-    // collapse same folder
-    if (expandedFolderId === folderItem.id) {
-      this.setState({ expandedFolderId: undefined });
-      return;
-    }
+  private handleToggleFavourite = async (file: IPoliciesAndProceduresItem): Promise<void> => {
+    try {
+      if (!file?.serverRelativeUrl) return;
 
-    // load children first time
-    if (!expandedChildren[folderItem.id] && folderItem.serverRelativeUrl) {
-      const children = await this.dataProvider.getFolderChildren(
-        this.props.functionDisplayName,
-        folderItem.serverRelativeUrl
+      const listService = new listServices(this.props.context);
+
+      const webAbsoluteUrl = this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+      const siteOrigin = new URL(webAbsoluteUrl).origin;
+
+      // this is the SAME key format used while saving
+      let rel = (file.serverRelativeUrl || "").trim();
+      try {
+        rel = decodeURI(rel);
+      } catch {}
+
+      const favKey = listServices
+        .convertToRelativeUrl(`${siteOrigin}${encodeURI(file.serverRelativeUrl)}`)
+        .toLowerCase();
+
+      // optimistic UI toggle
+      this.setState((prev) => {
+        const next = { ...prev.favouriteIndex };
+        if (typeof next[favKey] !== "undefined") delete next[favKey];
+        else next[favKey] = 1; // any number is fine for UI presence
+        return { favouriteIndex: next };
+      });
+
+      const absoluteFileUrl = `${siteOrigin}${encodeURI(file.serverRelativeUrl)}`;
+      await listService.toggleFavourite(
+        absoluteFileUrl,
+        file.name,
+        undefined,
+        undefined,
+        "Document Favourites"
       );
 
-      this.setState(prev => ({
-        expandedFolderId: folderItem.id,
-        expandedChildren: { ...prev.expandedChildren, [folderItem.id]: children }
+      // final truth from server
+      const updatedFavouriteIndex = await listService.getFavouriteIndex("Document Favourites");
+      this.setState({ favouriteIndex: updatedFavouriteIndex });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("toggle favourite failed", error);
+
+      try {
+        const listService = new listServices(this.props.context);
+        const updatedFavouriteIndex = await listService.getFavouriteIndex("Document Favourites");
+        this.setState({ favouriteIndex: updatedFavouriteIndex });
+      } catch {}
+    }
+  };
+
+  private handleEnsureFolderChildren = async (folderItem: IPoliciesAndProceduresItem): Promise<void> => {
+    if (!folderItem?.id) return;
+
+    const normalizedFolderKey = PoliciesSearchService.toKey(folderItem.id);
+
+    const existingKey = Object.keys(this.state.expandedChildren).find(
+      (storedKey) => PoliciesSearchService.toKey(storedKey) === normalizedFolderKey
+    );
+    if (existingKey && this.state.expandedChildren[existingKey]) return;
+
+    const folderServerRelativeUrl = folderItem.serverRelativeUrl || folderItem.id;
+    if (!folderServerRelativeUrl) return;
+
+    try {
+      const childItems = await this.dataProvider.getFolderChildren(
+        this.props.functionDisplayName,
+        folderServerRelativeUrl
+      );
+
+      this.setState((previous) => ({
+        expandedChildren: { ...previous.expandedChildren, [folderItem.id]: childItems }
       }));
-    } else {
-      this.setState({ expandedFolderId: folderItem.id });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("load folder children failed", error);
     }
   };
 
   private handleSwitchFolderView = (folderId: string, mode: FolderViewMode): void => {
-    this.setState(prev => ({ folderViewMode: { ...prev.folderViewMode, [folderId]: mode } }));
+    this.setState((previous) => ({
+      folderViewMode: { ...previous.folderViewMode, [folderId]: mode }
+    }));
   };
 
-  private onExportCsv = (): void => {
-    // NOTE: Export logic is already inside ViewPageList.tsx (exportSelectedToCsv).
-    // If later you want export button in parent, we can wire it here.
+  // ---------------- SEARCH ----------------
+  private onSearchChange = (_?: any, value?: string): void => {
+    const searchTextRaw = value ?? "";
+    this.setState({ searchText: searchTextRaw });
+
+    if (this._searchTimerId) window.clearTimeout(this._searchTimerId);
+
+    const searchTextTrimmed = searchTextRaw.trim();
+
+    if (!searchTextTrimmed) {
+      this._searchNonce++;
+      this.setState({
+        autoExpandFolderIds: [],
+        searchResults: [],
+        searchState: "idle"
+      });
+      return;
+    }
+
+    this.setState({ searchState: "loading" });
+
+    this._searchTimerId = window.setTimeout(() => {
+      void this.runDeepSearch(searchTextTrimmed);
+    }, 250);
   };
+
+  private async runDeepSearch(searchTextTrimmed: string): Promise<void> {
+    const currentRequestNonce = ++this._searchNonce;
+
+    try {
+      const matchingFiles = await this._searchService.searchFilesInFunction(
+        this._libraryRoot,
+        this.props.functionDisplayName,
+        searchTextTrimmed,
+        100
+      );
+
+      if (currentRequestNonce !== this._searchNonce) return;
+
+      const functionRootServerRelativeUrl = PoliciesSearchService.buildFunctionRootRel(
+        this._libraryRoot,
+        this.props.functionDisplayName
+      );
+
+      const folderPathByNormalizedKey = new Map<string, string>();
+
+      for (const fileItem of matchingFiles) {
+        const fileServerRelativeUrl = (fileItem.serverRelativeUrl || "").trim();
+        if (!fileServerRelativeUrl) continue;
+
+        const folderChain = PoliciesSearchService.getFolderChainFromFile(
+          fileServerRelativeUrl,
+          functionRootServerRelativeUrl
+        );
+
+        for (const folderServerRelativePath of folderChain) {
+          folderPathByNormalizedKey.set(
+            PoliciesSearchService.toKey(folderServerRelativePath),
+            folderServerRelativePath
+          );
+        }
+      }
+
+      const foldersToExpandOrdered = Array.from(folderPathByNormalizedKey.values()).sort(
+        (leftPath, rightPath) => leftPath.length - rightPath.length
+      );
+
+      for (const folderServerRelativePath of foldersToExpandOrdered) {
+        if (currentRequestNonce !== this._searchNonce) return;
+
+        const stubFolder: IPoliciesAndProceduresItem = {
+          id: folderServerRelativePath,
+          name: "",
+          isFolder: true,
+          serverRelativeUrl: folderServerRelativePath
+        };
+
+        await this.handleEnsureFolderChildren(stubFolder);
+      }
+
+      if (currentRequestNonce !== this._searchNonce) return;
+
+      this.setState({
+        autoExpandFolderIds: foldersToExpandOrdered,
+        searchState: "done"
+      });
+    } catch (error) {
+      if (currentRequestNonce !== this._searchNonce) return;
+
+      // eslint-disable-next-line no-console
+      console.error("deep search failed", error);
+
+      this.setState({
+        autoExpandFolderIds: [],
+        searchState: "error"
+      });
+    }
+  }
 
   private renderTopBar(): React.ReactNode {
     return (
       <div className={view.topBar}>
-        <p onClick={this.props.onBackToLanding}>
-          <span
-            aria-hidden="true"
-            dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }}
-            style={{ verticalAlign: 'sub' }}
+        <div>
+          <GlobalBreadcrumbs/>
+        </div>
+        <div className={view.searchSlot}>
+          <SearchBox
+            placeholder="Search Documents"
+            value={this.state.searchText}
+            onChange={this.onSearchChange}
+            onClear={() => this.onSearchChange(undefined, "")}
           />
-          <span>Back</span>
-        </p>
-        <p>|</p>
-        <Breadcrumb items={this.state.breadcrumbs} className={view.breadStyle} />
-        <div className={view.searchSlot} />
+        </div>
+      </div>
+    );
+  }
+
+  private renderInitialShimmer(): React.ReactNode {
+    return (
+      <div className={view.initialShimmerWrap} aria-label="Loading documents">
+        <div className={view.initialShimmerGrid}>
+          {/* LEFT: list skeleton */}
+          <div className={view.shimmerPanel}>
+            <div className={view.shimmerPanelPad}>
+              <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerTitle}`} />
+              <div className={`${view.shimmerBlock} ${view.shimmerLineSm} ${view.shimmerSub} ${view.shimmerGapSm}`} />
+
+              <div className={`${view.shimmerList} ${view.shimmerGapMd}`}>
+                {Array.from({ length: 7 }).map((_, idx) => (
+                  <div key={idx} className={view.shimmerRow}>
+                    <div className={`${view.shimmerBlock} ${view.shimmerIcon}`} />
+                    <div>
+                      <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerTitle}`} />
+                      <div className={`${view.shimmerBlock} ${view.shimmerLineSm} ${view.shimmerSub} ${view.shimmerGapSm}`} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: preview skeleton */}
+          <div className={view.shimmerPanel}>
+            <div className={view.shimmerPanelPad}>
+              <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerPreviewHeader}`} />
+              <div className={`${view.shimmerPreviewLines} ${view.shimmerGapMd}`}>
+                <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerPreviewLineA}`} />
+                <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerPreviewLineB}`} />
+                <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerPreviewLineC}`} />
+                <div className={`${view.shimmerBlock} ${view.shimmerLine} ${view.shimmerPreviewLineD}`} />
+              </div>
+
+              <div className={`${view.shimmerBlock} ${view.shimmerPreviewFrame} ${view.shimmerGapMd}`} />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   public render(): React.ReactElement<IPoliciesAndProceduresViewProps> {
-    const { currentItems, selectedItem, expandedFolderId, expandedChildren, folderViewMode } = this.state;
+    const {
+      currentItems,
+      selectedItem,
+      expandedChildren,
+      folderViewMode,
+      favouriteIndex,
+      searchText,
+      autoExpandFolderIds,
+      searchState,
+      initialLoading,
+      initialError
+    } = this.state;
+
+    const showInitialShimmer = initialLoading || (!!initialError && currentItems.length === 0);
 
     return (
       <section>
         {this.renderTopBar()}
 
-        <div className={view.wrap}>
-          <div className={view.left}>
-            <PoliciesandProceduresList
-              items={currentItems}
-              activeId={selectedItem?.id}
-              onOpenFile={this.handleOpenFile}
-              onToggleFolder={this.handleToggleFolder}
-              expandedFolderId={expandedFolderId}       
-              expandedChildren={expandedChildren}
-              onSwitchFolderView={this.handleSwitchFolderView}
-              getFolderViewMode={(fid) => folderViewMode[fid] || 'list'}
-            />
+        {initialError ? (
+          <div className={view.initialErrorBar}>
+            <MessageBar messageBarType={MessageBarType.error} isMultiline={false}>
+              {initialError}
+              <span className={view.errorBarActions}>
+                <DefaultButton text="Retry" onClick={this.loadInitial} />
+              </span>
+            </MessageBar>
           </div>
+        ) : null}
 
-          <div className={view.rightPane}>
-            <PoliciesandProceduresPreview
-              item={selectedItem}
-              categoryTitle={this.props.functionDisplayName}
-            />
+        {showInitialShimmer ? (
+          this.renderInitialShimmer()
+        ) : (
+          <div className={view.wrap}>
+            <div className={view.left}>
+              <PoliciesandProceduresList
+                items={currentItems}
+                activeId={selectedItem?.id}
+                onOpenFile={this.handleOpenFile}
+                onClearPreview={this.handleClearPreview}
+                onToggleFolder={this.handleEnsureFolderChildren}
+                expandedChildren={expandedChildren}
+                onSwitchFolderView={this.handleSwitchFolderView}
+                getFolderViewMode={(folderId) => folderViewMode[folderId] || "list"}
+                favouriteIndex={favouriteIndex}
+                onToggleFavourite={this.handleToggleFavourite}
+                dmsLibraryRoot={this._libraryRoot}
+                searchText={searchText}
+                autoExpandFolderIds={autoExpandFolderIds}
+                searchState={searchState}
+              />
+            </div>
+
+            <div className={view.rightPane}>
+              <PoliciesandProceduresPreview
+                item={selectedItem}
+                categoryTitle={this.props.functionDisplayName}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </section>
     );
   }

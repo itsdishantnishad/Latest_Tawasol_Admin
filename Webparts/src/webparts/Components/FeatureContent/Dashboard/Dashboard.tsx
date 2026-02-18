@@ -1,15 +1,15 @@
-
-
 import * as React from 'react';
 import styles from './Dashboard.module.scss';
 import PrimaryButton from '../../PrimaryButton/PrimaryButton';
 import ConditionalLink from '../../ConditionalLink/ConditionalLink';
 
+const toImgSrc = (m: any): string => (typeof m === "string" ? m : (m?.default || m));
+
 const rightArrow = require("../images/arrow-right.svg");
-const dashboardImageOne = require("../images/footfall.png");
-const dashboardImageTwo = require("../images/disqualification.png");
-const dashboardImageThree = require("../images/cxi-score.png");
-const dashboardImageFour = require("../images/sales-report.png");
+const dashboardImageOne = toImgSrc(require("../../../assets/footfall.webp"));
+const dashboardImageTwo = toImgSrc(require("../../../assets/disqualification.webp"));
+const dashboardImageThree = toImgSrc(require("../../../assets/cxi-score.webp"));
+const dashboardImageFour = toImgSrc(require("../../../assets/sales-report.webp"));
 export interface IDashboard {
     id: string;
     header: string;

@@ -7,7 +7,7 @@ import type { WebPartContext } from "@microsoft/sp-webpart-base";
 
 /**
  * GRAPH HELPERS
- * ✅ FIX: SPFx typings require getClient("3") (no-arg call will fail TS2554)
+ *  FIX: SPFx typings require getClient("3") (no-arg call will fail TS2554)
  */
 const getGraphClient = async (context: WebPartContext): Promise<MSGraphClientV3 | null> => {
   const factory = context?.msGraphClientFactory;
@@ -21,37 +21,165 @@ const getGraphClient = async (context: WebPartContext): Promise<MSGraphClientV3 
   }
 };
 
+/**
+ *  Helper: decide Graph endpoint for current user vs searched user
+ * userKey can be:
+ * - AAD Object Id (preferred)
+ * - UPN / email
+ */
+const graphUserEndpoint = (userKey?: string): string => {
+  const key = String(userKey || "").trim();
+  return key ? `/users/${encodeURIComponent(key)}` : "/me";
+};
+
+/**
+ *  NOTE: We keep your old export name fetchGraphMeInfo for backward compatibility,
+ * but now it supports optional userKey so it can fetch another user too.
+ */
 export const fetchGraphMeInfo = async (
-  context: WebPartContext
+  context: WebPartContext,
+  userKey?: string
 ): Promise<{ fullName: string; designation: string; department: string } | null> => {
   const client = await getGraphClient(context);
   if (!client) return null;
 
   try {
-    const me = await client.api("/me").select("displayName,jobTitle,department").get();
+    const ep = graphUserEndpoint(userKey);
+    const u = await client.api(ep).select("displayName,jobTitle,department").get();
+
     return {
-      fullName: String(me?.displayName || "").trim(),
-      designation: String(me?.jobTitle || "").trim(),
-      department: String(me?.department || "").trim(),
+      fullName: String(u?.displayName || "").trim(),
+      designation: String(u?.jobTitle || "").trim(),
+      department: String(u?.department || "").trim(),
     };
   } catch (e) {
-    console.log("[profileHeaderServices] Graph /me failed:", e);
+    console.log("[profileHeaderServices] Graph user info failed:", e);
     return null;
   }
 };
 
-export const fetchGraphMyPhotoBlob = async (context: WebPartContext): Promise<Blob | null> => {
+/**
+ * CORE USER FIELDS
+ * These are the common directory profile fields that are typically available.
+ */
+export type GraphCoreUserFields = {
+  id?: string;
+  displayName?: string;
+  givenName?: string;
+  surname?: string;
+  jobTitle?: string;
+  department?: string;
+  companyName?: string;
+  officeLocation?: string;
+  mail?: string;
+  userPrincipalName?: string;
+  mobilePhone?: string;
+  businessPhones?: string[];
+  preferredLanguage?: string;
+  employeeId?: string;
+  employeeType?: string;
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  accountEnabled?: boolean;
+};
+
+/**
+ *  Keep export name same, but now supports optional userKey:
+ * - userKey undefined => /me
+ * - userKey defined  => /users/{userKey}
+ */
+export const fetchGraphCoreUserFields = async (
+  context: WebPartContext,
+  userKey?: string
+): Promise<GraphCoreUserFields | null> => {
   const client = await getGraphClient(context);
   if (!client) return null;
 
   try {
-    const ab: ArrayBuffer = await (client.api("/me/photo/$value") as any)
-      .responseType("arraybuffer")
-      .get();
+    const select = [
+      "id",
+      "displayName",
+      "givenName",
+      "surname",
+      "jobTitle",
+      "department",
+      "companyName",
+      "officeLocation",
+      "mail",
+      "userPrincipalName",
+      "mobilePhone",
+      "businessPhones",
+      "preferredLanguage",
+      "employeeId",
+      "employeeType",
+      "streetAddress",
+      "city",
+      "state",
+      "postalCode",
+      "country",
+      "accountEnabled",
+    ].join(",");
 
+    const ep = graphUserEndpoint(userKey);
+    const u: any = await client.api(ep).select(select).get();
+    const businessPhones: string[] = Array.isArray(u?.businessPhones)
+      ? u.businessPhones
+          .filter((x: any) => String(x || "").trim())
+          .map((x: any) => String(x).trim())
+      : [];
+
+    const out: GraphCoreUserFields = {
+      id: String(u?.id || "").trim() || undefined,
+      displayName: String(u?.displayName || "").trim() || undefined,
+      givenName: String(u?.givenName || "").trim() || undefined,
+      surname: String(u?.surname || "").trim() || undefined,
+      jobTitle: String(u?.jobTitle || "").trim() || undefined,
+      department: String(u?.department || "").trim() || undefined,
+      companyName: String(u?.companyName || "").trim() || undefined,
+      officeLocation: String(u?.officeLocation || "").trim() || undefined,
+      mail: String(u?.mail || "").trim() || undefined,
+      userPrincipalName: String(u?.userPrincipalName || "").trim() || undefined,
+      mobilePhone: String(u?.mobilePhone || "").trim() || undefined,
+      businessPhones: businessPhones.length ? businessPhones : undefined,
+      preferredLanguage: String(u?.preferredLanguage || "").trim() || undefined,
+      employeeId: String(u?.employeeId || "").trim() || undefined,
+      employeeType: String(u?.employeeType || "").trim() || undefined,
+      streetAddress: String(u?.streetAddress || "").trim() || undefined,
+      city: String(u?.city || "").trim() || undefined,
+      state: String(u?.state || "").trim() || undefined,
+      postalCode: String(u?.postalCode || "").trim() || undefined,
+      country: String(u?.country || "").trim() || undefined,
+      accountEnabled: typeof u?.accountEnabled === "boolean" ? u.accountEnabled : undefined,
+    };
+
+    return out;
+  } catch (e) {
+    console.log("[profileHeaderServices] Graph core fields failed:", e);
+    return null;
+  }
+};
+
+/**
+ * Photo: now supports optional userKey
+ */
+export const fetchGraphMyPhotoBlob = async (context: WebPartContext, userKey?: string): Promise<Blob | null> => {
+  const client = await getGraphClient(context);
+  if (!client) return null;
+
+  try {
+    const ep = userKey
+      ? `/users/${encodeURIComponent(String(userKey).trim())}/photo/$value`
+      : `/me/photo/$value`;
+
+    const ab: ArrayBuffer = await (client.api(ep) as any).responseType("arraybuffer").get();
     if (!ab || !ab.byteLength) return null;
+
     return new Blob([ab], { type: "image/jpeg" });
   } catch (e) {
+    // Photo often fails for some users; keep it silent-ish
     console.log("[profileHeaderServices] Graph photo failed:", e);
     return null;
   }
@@ -59,6 +187,7 @@ export const fetchGraphMyPhotoBlob = async (context: WebPartContext): Promise<Bl
 
 /**
  * SHAREPOINT PROFILE FALLBACKS
+ * These are SELF-ONLY (myProperties, SetMyProfilePicture)
  */
 export const fetchUserProfilePicture = async (): Promise<string | null> => {
   try {
@@ -153,8 +282,89 @@ export const updateUserProfilePicture = async (photoUrl: string): Promise<void> 
   }
 };
 
-export const copyProfileToClipboard = async (fullName: string, subtitle: string): Promise<void> => {
-  await navigator.clipboard.writeText(`${fullName}\n${subtitle}`);
+/**
+ * Clipboard helper with fallback (some browsers block navigator.clipboard in non-secure contexts).
+ */
+export const copyTextToClipboard = async (text: string): Promise<void> => {
+  const value = String(text || "").replace(/\r\n/g, "\n");
+  if (!value.trim()) return;
+
+  try {
+    await navigator.clipboard.writeText(value);
+    return;
+  } catch {
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = value;
+    ta.setAttribute("readonly", "true");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.style.top = "0";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+  }
+};
+
+export const buildProfessionalProfileText = (args: {
+  core?: GraphCoreUserFields | null;
+  fallbackName?: string;
+  fallbackDesignation?: string;
+  fallbackDepartment?: string;
+}): string => {
+  const core = args.core || {};
+  const name = (core.displayName || args.fallbackName || "").trim();
+  const jobTitle = (core.jobTitle || args.fallbackDesignation || "").trim();
+  const department = (core.department || args.fallbackDepartment || "").trim();
+  const company = (core.companyName || "").trim();
+  const office = (core.officeLocation || "").trim();
+  const email = (core.mail || "").trim();
+  const upn = (core.userPrincipalName || "").trim();
+  const mobile = (core.mobilePhone || "").trim();
+  const businessPhones = (core.businessPhones || []).filter(Boolean).join(", ").trim();
+  const lang = (core.preferredLanguage || "").trim();
+  const employeeId = (core.employeeId || "").trim();
+  const employeeType = (core.employeeType || "").trim();
+  const addrParts = [core.streetAddress, core.city, core.state, core.postalCode, core.country]
+    .map((x) => String(x || "").trim())
+    .filter(Boolean);
+  const address = addrParts.join(", ");
+
+  const status =
+    typeof core.accountEnabled === "boolean" ? (core.accountEnabled ? "Active" : "Disabled") : "";
+
+  const lines: string[] = [];
+  lines.push("PROFILE INFORMATION");
+  lines.push("──────────────────");
+
+  const add = (label: string, value?: string) => {
+    const v = String(value || "").trim();
+    if (!v) return;
+    lines.push(`${label}: ${v}`);
+  };
+
+  add("Name", name);
+  add("Job Title", jobTitle);
+  add("Department", department);
+  add("Company", company);
+  add("Office Location", office);
+  add("Email", email || upn);
+  if (email && upn && email.toLowerCase() !== upn.toLowerCase()) add("UPN", upn);
+
+  add("Business Phone", businessPhones);
+  add("Mobile Phone", mobile);
+  add("Preferred Language", lang);
+  add("Employee ID", employeeId);
+  add("Employee Type", employeeType);
+  add("Address", address);
+  add("Account Status", status);
+
+  lines.push("");
+  lines.push(`Copied on: ${new Date().toLocaleString()}`);
+
+  return lines.join("\n");
 };
 
 export type SelectedBadge = { name: string; imageUrl: string };

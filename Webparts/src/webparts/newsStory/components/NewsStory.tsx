@@ -1,13 +1,18 @@
-import * as React from 'react';
-import type { INewsStoryProps } from './INewsStoryProps';
-import Slider, { Settings } from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-import styles from './NewsStory.module.scss';
-import { listServices } from '../../services/listServices';
+import * as React from "react";
+import type { INewsStoryProps } from "./INewsStoryProps";
+import Slider, { Settings } from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import styles from "./NewsStory.module.scss";
+import { listServices } from "../../services/listServices";
+
+// Shared shimmer wrapper (Option 1)
+import { LoadingBoundary } from "../../Components/LoadingShimmer";
 
 export interface INewsStoryState {
   promos: any[];
+  loading: boolean;
+  error: unknown;
 }
 
 export interface ICarouselProps {
@@ -17,15 +22,15 @@ export interface ICarouselProps {
 }
 
 // Placeholder URL
-const PLACEHOLDER_URL = 'https://placehold.net/400x400.png';
+const PLACEHOLDER_URL = "https://placehold.net/400x400.png";
 
 // Center caption arrows
-const LeftArrowImg: string = require('../../assets/LeftArrow.png');
-const RightArrowImg: string = require('../../assets/RightArrow.png');
+const LeftArrowImg: string = require("../../assets/LeftArrow.png");
+const RightArrowImg: string = require("../../assets/RightArrow.png");
 
 // Side arrow icons
-const LeftArrowIcon: string = require('../../assets/blackLeft.svg') as string;
-const RightVectorIcon: string = require('../../assets/VectorIcon.svg') as string;
+const LeftArrowIcon: string = require("../../assets/blackLeft.svg") as string;
+const RightVectorIcon: string = require("../../assets/VectorIcon.svg") as string;
 
 const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
   const sliderRef = React.useRef<any>(null);
@@ -51,21 +56,21 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
 
   const onNewsImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>): void => {
     const img = e.currentTarget;
-    if (img.dataset.fallbackApplied === 'true') return;
-    img.dataset.fallbackApplied = 'true';
+    if (img.dataset.fallbackApplied === "true") return;
+    img.dataset.fallbackApplied = "true";
     img.src = PLACEHOLDER_URL;
   };
 
   // Convert server-relative path to absolute
   const resolveUrl = (rawUrl: string): string => {
-    const u = (rawUrl || '').trim();
-    if (!u) return '';
+    const u = (rawUrl || "").trim();
+    if (!u) return "";
 
     if (/^https?:\/\//i.test(u)) return u;
-    if (u.startsWith('/')) return `${window.location.origin}${u}`;
+    if (u.startsWith("/")) return `${window.location.origin}${u}`;
 
-    const base = props.webUrl.replace(/\/$/, '');
-    return `${base}/${u.replace(/^\//, '')}`;
+    const base = props.webUrl.replace(/\/$/, "");
+    return `${base}/${u.replace(/^\//, "")}`;
   };
 
   /**
@@ -73,10 +78,10 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
    * getpreview.ashx?path=/SitePages/Article.aspx
    */
   const getItemUrl = (news: any): string => {
-    const imgUrl: string = news?.newsImage || '';
+    const imgUrl: string = news?.newsImage || "";
     const match = imgUrl.match(/[?&]path=([^&]+)/i);
 
-    if (!match || !match[1]) return '';
+    if (!match || !match[1]) return "";
 
     return resolveUrl(decodeURIComponent(match[1]));
   };
@@ -88,7 +93,7 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplaySpeed: props.interval,
-    afterChange: (idx: number) => setCurrentIndex(idx),
+    afterChange: (idx: number) => setCurrentIndex(idx)
   };
 
   return (
@@ -109,22 +114,22 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
             tabIndex={0}
             onClick={() => {
               if (detailUrl) {
-                window.open(detailUrl, '_self');
+                window.open(detailUrl, "_self");
               }
             }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && detailUrl) {
-                window.open(detailUrl, '_self');
+              if (e.key === "Enter" && detailUrl) {
+                window.open(detailUrl, "_self");
               }
             }}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: "pointer" }}
           >
             <div className={styles.heroMedia}>
               <img
                 className={styles.heroImage}
                 src={imgSrc}
                 onError={onNewsImgError}
-                alt={news?.title ? String(news.title) : 'News banner'}
+                alt={news?.title ? String(news.title) : "News banner"}
               />
 
               <div className={styles.topGradient} />
@@ -177,7 +182,7 @@ const AutoPlayMethods = (props: ICarouselProps): React.ReactElement => {
                   <img src={RightArrowImg} alt="" />
                 </button>
 
-                <div className={styles.captionTitle}>{news?.title || ''}</div>
+                <div className={styles.captionTitle}>{news?.title || ""}</div>
 
                 <button
                   type="button"
@@ -204,33 +209,64 @@ export default class NewsStory extends React.Component<INewsStoryProps, INewsSto
 
   public constructor(props: INewsStoryProps) {
     super(props);
-    this.state = { promos: [] };
+
+    this.state = {
+      promos: [],
+      loading: true,
+      error: null
+    };
+
     this.spService = new listServices(this.props.context);
-  }
 
-  public render(): React.ReactElement<INewsStoryProps> {
-    const webUrl = this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, '');
-
-    return (
-      <div className={styles.promotionalBanner}>
-        <AutoPlayMethods
-          promos={this.state.promos}
-          interval={this.props.interval}
-          webUrl={webUrl}
-        />
-      </div>
-    );
+    this.loadNews = this.loadNews.bind(this);
   }
 
   public async componentDidMount(): Promise<void> {
+    await this.loadNews();
+  }
+
+  private async loadNews(): Promise<void> {
     try {
+      this.setState({ loading: true, error: null });
+
       const maxItems =
         this.props.maxItems && this.props.maxItems > 0 ? this.props.maxItems : 3;
 
       const listItems = await this.spService.getNewsStory(maxItems);
-      this.setState({ promos: listItems });
+
+      this.setState({
+        promos: Array.isArray(listItems) ? listItems : [],
+        loading: false,
+        error: null
+      });
     } catch (error) {
-      console.error('Error loading news story', error);
+      // keep promos empty, show error via LoadingBoundary
+      console.error("Error loading news story", error);
+      this.setState({ loading: false, error });
     }
+  }
+
+  public render(): React.ReactElement<INewsStoryProps> {
+    const webUrl = this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+    const { promos, loading, error } = this.state;
+
+    return (
+      <div className={styles.promotionalBanner}>
+        <LoadingBoundary
+          loading={loading}
+          error={error}
+          onRetry={this.loadNews}
+          preset="card"
+          count={1}
+          ariaLabel="Loading news story"
+        >
+          {promos && promos.length > 0 ? (
+            <AutoPlayMethods promos={promos} interval={this.props.interval} webUrl={webUrl} />
+          ) : (
+            <div style={{ padding: 12 }}>No news available.</div>
+          )}
+        </LoadingBoundary>
+      </div>
+    );
   }
 }

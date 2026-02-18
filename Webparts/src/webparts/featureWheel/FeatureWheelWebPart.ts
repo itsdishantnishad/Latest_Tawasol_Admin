@@ -1,5 +1,3 @@
-// src/webparts/featureWheel/FeatureWheelWebPart.ts
-
 import * as React from "react";
 import * as ReactDom from "react-dom";
 import { Version } from "@microsoft/sp-core-library";
@@ -28,26 +26,40 @@ export interface IFeatureWheelWebPartProps {
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
-  public render(): void {
-    const element: React.ReactElement<IFeatureWheelProps> = React.createElement(
-      FeatureWheel,
-      {
-        letsCelebrate: this.properties.letsCelebrate,
-        trainingAndDevelopment: this.properties.trainingAndDevelopment,
-        upcomingEvents: this.properties.upcomingEvents,
-        getOffersAndDiscounts: this.properties.getOffersAndDiscounts,
-        imageGallery: this.properties.imageGallery,
-        documents: this.properties.documents,
-        meeting: this.properties.meeting,
-        interactiveForms: this.properties.interactiveForms,
-        dashboard: this.properties.dashboard,
-        beverageMenu: this.properties.beverageMenu,
-        taskApprovals: this.properties.taskApprovals,
-        context: this.context,
-      }
-    );
+  private readonly _reactRenderDelayMilliseconds: number = 1500;
+  private _delayedRenderTimerId?: number;
 
-    ReactDom.render(element, this.domElement);
+  public render(): void {
+    // Cancel any existing delayed render
+    if (this._delayedRenderTimerId) {
+      window.clearTimeout(this._delayedRenderTimerId);
+      this._delayedRenderTimerId = undefined;
+    }
+
+    // Remove shimmer completely: show nothing during delay
+    this.domElement.innerHTML = "";
+
+    // Delay mounting React component
+    this._delayedRenderTimerId = window.setTimeout(() => {
+      const featureWheelElement: React.ReactElement<IFeatureWheelProps> =
+        React.createElement(FeatureWheel, {
+          letsCelebrate: this.properties.letsCelebrate,
+          trainingAndDevelopment: this.properties.trainingAndDevelopment,
+          upcomingEvents: this.properties.upcomingEvents,
+          getOffersAndDiscounts: this.properties.getOffersAndDiscounts,
+          imageGallery: this.properties.imageGallery,
+          documents: this.properties.documents,
+          meeting: this.properties.meeting,
+          interactiveForms: this.properties.interactiveForms,
+          dashboard: this.properties.dashboard,
+          beverageMenu: this.properties.beverageMenu,
+          taskApprovals: this.properties.taskApprovals,
+          context: this.context,
+        });
+
+      ReactDom.render(featureWheelElement, this.domElement);
+      this._delayedRenderTimerId = undefined;
+    }, this._reactRenderDelayMilliseconds);
   }
 
   protected onInit(): Promise<void> {
@@ -82,7 +94,6 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
             default:
               environmentMessage = strings.UnknownEnvironment;
           }
-
           return environmentMessage;
         });
     }
@@ -95,7 +106,14 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
   }
 
   protected onDispose(): void {
+    // Cancel pending delayed render
+    if (this._delayedRenderTimerId) {
+      window.clearTimeout(this._delayedRenderTimerId);
+      this._delayedRenderTimerId = undefined;
+    }
+
     ReactDom.unmountComponentAtNode(this.domElement);
+    this.domElement.innerHTML = "";
   }
 
   protected get dataVersion(): Version {
@@ -106,9 +124,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
     return {
       pages: [
         {
-          header: {
-            description: strings.PropertyPaneDescription,
-          },
+          header: { description: strings.PropertyPaneDescription },
           groups: [
             {
               groupName: strings.BasicGroupName,
@@ -117,8 +133,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
                   label: "Please enter URL for 'Let's Celebrate' see all",
                 }),
                 PropertyPaneTextField("trainingAndDevelopment", {
-                  label:
-                    "Please enter URL for 'Training & Development' see all",
+                  label: "Please enter URL for 'Training & Development' see all",
                 }),
                 PropertyPaneTextField("upcomingEvents", {
                   label: "Please enter URL for 'Upcoming events' see all",

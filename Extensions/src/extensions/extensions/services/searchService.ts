@@ -14,36 +14,65 @@ export interface ISuggestItem {
   kind: SuggestKind;
 }
 
-/**
- * ================================================
- * PROFILE PAGE CONFIG
- * ================================================
- *
- * Only change PROFILE_PAGE_NAME (and optionally PROFILE_PAGE_FOLDER).
- *
- * Example 1 – custom modern page in current site:
- *   PROFILE_PAGE_FOLDER = 'SitePages';
- *   PROFILE_PAGE_NAME   = 'profile-page.aspx';
- *   => https://<current-site>/SitePages/profile-page.aspx?accountname=<upn>
- *
- * Example 2 – classic user profile page:
- *   USE_CLASSIC_PROFILE = true;
- *   => https://<current-site>/_layouts/15/userprofile.aspx?accountname=<upn>
- */
-const PROFILE_PAGE_FOLDER: string = 'SitePages';        // 'SitePages' or 'Pages' etc.
-const PROFILE_PAGE_NAME: string   = 'profile.aspx'; // only file name to change
 
-// Set this true if you want classic userprofile.aspx instead of custom page.
+// ================================================
+// PROFILE PAGE CONFIG
+// ================================================
+
+const PROFILE_PAGE_FOLDER: string = 'SitePages';
+const PROFILE_PAGE_NAME: string = 'Profile.aspx';
 const USE_CLASSIC_PROFILE: boolean = false;
 
 export class SearchService {
   private graph?: MSGraphClientV3;
 
+  /**
+   * Normalized identifiers for the current logged-in user.
+   * Used to detect when the search result is "me" and avoid adding uid/accountname.
+   */
+  private readonly _meIds: Set<string>;
+
   constructor(
     private readonly webUrl: string,
     private readonly msGraphClientFactory: { getClient: (v: string) => Promise<MSGraphClientV3> },
-    private readonly spHttpClient: SPHttpClient
-  ) {}
+    private readonly spHttpClient: SPHttpClient,
+    me?: { upn?: string; email?: string; loginName?: string }
+  ) {
+    const ids = new Set<string>();
+
+    const rawUpn = (me?.upn || '').trim();
+    const rawEmail = (me?.email || '').trim();
+    const rawLogin = (me?.loginName || '').trim();
+
+    const n1 = this._normalizeAccount(rawUpn);
+    const n2 = this._normalizeAccount(rawEmail);
+    const n3 = this._normalizeAccount(rawLogin);
+
+    if (n1) ids.add(n1);
+    if (n2) ids.add(n2);
+    if (n3) ids.add(n3);
+
+    // loginName can be: i:0#.f|membership|user@tenant.com
+    if (rawLogin.includes('|')) {
+      const last = rawLogin.split('|').pop() || '';
+      const nLast = this._normalizeAccount(last);
+      if (nLast) ids.add(nLast);
+    }
+
+    this._meIds = ids;
+  }
+
+  private _normalizeAccount(value: string): string {
+    const v = (value || '').trim();
+    if (!v) return '';
+    const noClaims = v.includes('|') ? (v.split('|').pop() || v) : v;
+    return noClaims.trim().toLowerCase();
+  }
+
+  private _isMe(upn?: string): boolean {
+    const n = this._normalizeAccount(upn || '');
+    return !!n && this._meIds.has(n);
+  }
 
   private async getGraph(): Promise<MSGraphClientV3> {
     if (!this.graph) {
@@ -57,59 +86,58 @@ export class SearchService {
   }
 
   /**
-   * Build the profile URL for a given user UPN/email.
-   * - Tenant + site come from this.webUrl (dynamic)
-   * - Only PROFILE_PAGE_NAME is edited manually
+   * Build the profile URL for a given user.
+   * Best practice: use AAD ObjectId (uid) + optional UPN for fallback.
    */
-  private buildPersonProfileUrl(upn: string): string {
-    if (!upn) return '#';
+  private buildPersonProfileUrl(args: { uid?: string; upn?: string }): string {
+    const uid = String(args?.uid || '').trim();
+    const upn = String(args?.upn || '').trim();
+
+    if (!uid && !upn) return '#';
 
     // Current web URL without trailing slash
     const baseWeb = this.webUrl.replace(/\/$/, '');
 
     if (USE_CLASSIC_PROFILE) {
-      // Classic profile page under _layouts
+      // Classic profile page under _layouts (supports accountname)
       const classicUrl = `${baseWeb}/_layouts/15/userprofile.aspx`;
+      const account = upn || uid; // fallback if UPN missing
       const sep = classicUrl.indexOf('?') >= 0 ? '&' : '?';
-      return `${classicUrl}${sep}accountname=${encodeURIComponent(upn)}`;
+      return `${classicUrl}${sep}accountname=${encodeURIComponent(account)}`;
     }
 
     // Custom modern page: <current-site>/<folder>/<page>.aspx
-    const folder = PROFILE_PAGE_FOLDER.replace(/^\/|\/$/g, ''); // no leading/trailing slash
-    const page   = PROFILE_PAGE_NAME.replace(/^\//, '');        // no leading slash
+    const folder = PROFILE_PAGE_FOLDER.replace(/^\/|\/$/g, '');
+    const page = PROFILE_PAGE_NAME.replace(/^\//, '');
 
     const pagePath = `${baseWeb}/${folder}/${page}`;
-    const sep = pagePath.indexOf('?') >= 0 ? '&' : '?';
 
-    return `${pagePath}${sep}accountname=${encodeURIComponent(upn)}`;
+    // ✅ SELF: open clean Profile.aspx (no params) so right panel is not hidden
+    if (this._isMe(upn)) {
+      return pagePath;
+    }
+
+    const qp: string[] = [];
+    if (uid) qp.push(`uid=${encodeURIComponent(uid)}`);
+    if (upn) qp.push(`accountname=${encodeURIComponent(upn)}`);
+
+    return `${pagePath}?${qp.join('&')}`;
   }
 
   // ------------------------------------------------------------------
   // PEOPLE SUGGESTIONS  (Graph directory search: /users?$search=)
   // ------------------------------------------------------------------
-  /**
-   * Uses Microsoft Graph directory search:
-   *   GET /users?$search="text"&$top=n&$count=true
-   *
-   * Returns:
-   *  - title:     displayName
-   *  - subtitle:  "jobTitle - department"
-   *  - imageUrl:  userphoto.aspx (built from UPN/mail)
-   *  - url:       profile page (custom or classic) via buildPersonProfileUrl
-   */
   public async queryPeople(text: string, top: number): Promise<ISuggestItem[]> {
     const q = text.trim();
     if (!q) return [];
 
     try {
       const client = await this.getGraph();
-
-      // Strip quotes just in case
       const term = q.replace(/["']/g, '');
 
-      // Graph directory search requires property:value format
-      // Allowed props: displayName, mail, givenName, surname, userPrincipalName
-      const searchExpr = `"displayName:${term}"`;
+      // Better search coverage: name OR email OR UPN
+      const searchExpr =
+        `"displayName:${term}" OR "mail:${term}" OR "userPrincipalName:${term}"`;
 
       const res = await client
         .api('/users')
@@ -119,27 +147,31 @@ export class SearchService {
           $top: top,
           $count: 'true'
         })
+        .select('id,displayName,jobTitle,department,mail,userPrincipalName')
         .get();
 
       const users: any[] = res?.value || [];
 
+      const baseWeb = this.webUrl.replace(/\/$/, '');
       const items: ISuggestItem[] = users.map(u => {
         const displayName: string = u.displayName || '';
         const jobTitle: string = u.jobTitle || '';
         const dept: string = u.department || '';
+
+        // Prefer UPN for thumbnails and fallback
         const upn: string = u.userPrincipalName || u.mail || '';
+        const uid: string = u.id || '';
 
         const subtitleParts = [jobTitle, dept].filter(Boolean);
         const subtitle: string = subtitleParts.join(' - ') || upn || '';
 
-        const photoKey: string = upn || u.id || '';
-        const photoUrl: string = photoKey
-          ? `${this.webUrl}/_layouts/15/userphoto.aspx?size=M&username=${encodeURIComponent(
-              photoKey
-            )}`
+        // userphoto.aspx works best with accountname=<UPN>
+        const photoUrl: string = upn
+          ? `${baseWeb}/_layouts/15/userphoto.aspx?size=M&accountname=${encodeURIComponent(upn)}`
           : '';
 
-        const personUrl = this.buildPersonProfileUrl(upn);
+        // Build your custom profile page URL using uid + upn fallback
+        const personUrl = this.buildPersonProfileUrl({ uid, upn });
 
         return {
           title: displayName || upn || '(no name)',
@@ -152,7 +184,6 @@ export class SearchService {
 
       return items;
     } catch {
-      // console.error('[SearchService.queryPeople] Graph error', e);
       return [];
     }
   }
@@ -174,83 +205,68 @@ export class SearchService {
       `-Path:"${this.webUrl}/_layouts/"`,
       `-Path:"${this.webUrl}/_catalogs/"`,
       `-Path:"${this.webUrl}/Lists/"`,
-      `-Path:"${this.webUrl}/SiteAssets/"`
+      `-FileName:Form.aspx`
     ];
-    const kql = kqlParts.join(' AND ');
+
+    const kql = kqlParts.filter(Boolean).join(' AND ');
 
     const select = [
       'Title',
       'Path',
-      'FileType',
-      'contentclass',
-      'ContentType',
-      'SPWebUrl',
-      'PictureThumbnailURL',
-      'SiteTitle',
-      'Author',
-      'HitHighlightedSummary'
+      'FileName',
+      'HitHighlightedSummary',
+      'ListItemId',
+      'ParentLink'
     ].join(',');
 
-    const url =
-      `${this.webUrl}/_api/search/query?` +
-      `querytext='${encodeURIComponent(kql)}'` +
+    const api =
+      `${this.webUrl.replace(/\/$/, '')}/_api/search/query` +
+      `?querytext='${encodeURIComponent(kql)}'` +
+      `&selectproperties='${encodeURIComponent(select)}'` +
       `&rowlimit=${take}` +
-      `&selectproperties='${select}'`;
+      `&trimduplicates=true`;
 
-    const r: SPHttpClientResponse = await this.spHttpClient.get(
-      url,
-      SPHttpClient.configurations.v1
-    );
-    const json: any = await r.json();
-    const rows: any[] =
-      json?.PrimaryQueryResult?.RelevantResults?.Table?.Rows || [];
+    try {
+      const res: SPHttpClientResponse = await this.spHttpClient.get(
+        api,
+        SPHttpClient.configurations.v1
+      );
 
-    const items: ISuggestItem[] = [];
+      if (!res.ok) return [];
 
-    for (const row of rows) {
-      const cells: Record<string, string> = {};
-      (row?.Cells || []).forEach((c: any) => {
-        cells[c.Key] = c.Value;
-      });
+      const data = await res.json();
 
-      const path = cells['Path'] || '';
-      const pathLower = path.toLowerCase();
-      const contentClass = (cells['contentclass'] || '').toLowerCase();
-      const thumb = cells['PictureThumbnailURL'] || '';
-      const contentType = cells['ContentType'] || '';
+      const rows: any[] =
+        data?.PrimaryQueryResult?.RelevantResults?.Table?.Rows || [];
 
-      const isPage =
-        contentClass === 'sts_listitem_webpagelibrary' &&
-        pathLower.includes('/sitepages/') &&
-        pathLower.endsWith('.aspx');
+      const items: ISuggestItem[] = [];
 
-      if (!isPage) continue;
+      for (const r of rows) {
+        const cells: any[] = r?.Cells || [];
+        const get = (k: string): string => {
+          const c = cells.find(x => x?.Key === k);
+          return (c?.Value || '').toString();
+        };
 
-      let scopeLabel = 'Page';
-      const ct = contentType.toLowerCase();
+        const title = get('Title') || get('FileName') || '(no title)';
+        const path = get('Path');
+        const thumb = ''; // reserved
 
-      if (ct.includes('news')) {
-        scopeLabel = 'News';
-      } else if (ct.includes('event')) {
-        scopeLabel = 'Events';
-      } else if (ct.includes('training')) {
-        scopeLabel = 'Training';
+        // Scope label
+        const scopeLabel = 'Page';
+
+        items.push({
+          title,
+          subtitle: scopeLabel,
+          url: path || '#',
+          imageUrl: thumb || undefined,
+          kind: 'page'
+        });
       }
 
-      const title =
-        cells['Title'] ||
-        path.split('/').pop() ||
-        '(no title)';
-
-      items.push({
-        title,
-        subtitle: scopeLabel,
-        url: path || '#',
-        imageUrl: thumb || undefined,
-        kind: 'page'
-      });
+      return items;
+    } catch {
+      return [];
     }
-
-    return items;
   }
 }

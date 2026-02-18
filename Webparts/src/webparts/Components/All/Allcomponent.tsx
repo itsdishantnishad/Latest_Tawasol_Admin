@@ -1,147 +1,583 @@
 import * as React from "react";
+import moment from "moment";
+
 import EventCard from "../Events/EventCard";
 import Trainingcard from "../Trainings/TrainingCard";
 import MeetingCard from "../TeamsMeeting/MeetingCard";
 import CalendarViewComponent from "../Events/Calendarview/CalendarView";
+
 import styles from "../Events/Allevents.module.scss";
-import PreviousEventCard from "../Events/PreviousCard/PreviousEvents";
-interface Props {
+import { SPHttpClient, MSGraphClientV3 } from "@microsoft/sp-http";
+
+interface IAllComponentProps {
   filteredEvents: any[];
   filteredTrainings: any[];
   filteredMeetings: any[];
-  context: any;
-  viewMode: string;
+  context?: any;
+  viewMode: "list" | "calendar";
 }
 
-const AllComponents: React.FC<Props> = ({
-  filteredEvents,
-  filteredTrainings,
-  filteredMeetings,
+const safeStr = (v: any) => String(v ?? "").split("\n")[0].trim();
+
+/** ✅ Prefer ISO token if SharePoint provides "display\nISO" */
+const pickBestDateText = (v: any): string => {
+  const s = String(v ?? "").trim();
+  if (!s) return "";
+
+  const parts = s
+    .split(/\n+/g)
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  const iso =
+    parts.find((p) => /^\d{4}-\d{2}-\d{2}T/.test(p)) ||
+    parts.find((p) => /\d{4}-\d{2}-\d{2}T/.test(p));
+
+  return iso || parts[0] || "";
+};
+
+/** Robust date parser (ISO-prefer + UTC-safe) */
+const parseSPDate = (value: any): Date | null => {
+  if (!value) return null;
+
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+
+  if (typeof value === "object") {
+    const dt = (value as any)?.dateTime || (value as any)?.DateTime;
+    if (dt) {
+      const rawObj = pickBestDateText(dt);
+      const hasTz = /Z$|[+-]\d{2}:?\d{2}$/.test(rawObj);
+      const looksIso =
+        /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?(\.\d+)?$/.test(rawObj);
+
+      const normalized =
+        looksIso && !hasTz
+          ? `${rawObj.includes(" ") ? rawObj.replace(" ", "T") : rawObj}Z`
+          : rawObj;
+
+      const dObj = new Date(normalized);
+      return isNaN(dObj.getTime()) ? null : dObj;
+    }
+  }
+
+  const raw = pickBestDateText(value);
+  if (!raw) return null;
+
+  const hasTz = /Z$|[+-]\d{2}:?\d{2}$/.test(raw);
+  const looksIso =
+    /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?(\.\d+)?$/.test(raw);
+
+  const normalized =
+    looksIso && !hasTz
+      ? `${raw.includes(" ") ? raw.replace(" ", "T") : raw}Z`
+      : raw;
+
+  const d1 = new Date(normalized);
+  if (!isNaN(d1.getTime())) return d1;
+
+  const m = moment(
+    normalized,
+    [
+      moment.ISO_8601,
+      "M/D/YYYY h:mm A",
+      "M/D/YYYY h:mm:ss A",
+      "M/D/YYYY H:mm",
+      "M/D/YYYY",
+      "DD/MM/YYYY",
+      "DD/MM/YYYY HH:mm",
+    ],
+    true
+  );
+
+  return m.isValid() ? m.toDate() : null;
+};
+
+const fmtTime = (d: Date) =>
+  d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+
+const daysBetween = (start: Date, end: Date) => {
+  const ms = end.getTime() - start.getTime();
+  const days = Math.ceil(ms / (1000 * 60 * 60 * 24));
+  return Math.max(1, days);
+};
+
+const normalizeIsRegistered = (item: any): boolean => {
+  const v =
+    item?.isRegistered ??
+    item?.isregistered ??
+    item?.IsRegistered ??
+    item?.Isregistered ??
+    item?.registered ??
+    item?.Registered ??
+    item?.isReg ??
+    item?.IsReg;
+
+  if (typeof v === "boolean") return v;
+
+  const s = String(v ?? "").trim().toLowerCase();
+  if (!s) return false;
+
+  if (["true", "yes", "1", "registered"].includes(s)) return true;
+
+  return false;
+};
+
+const isNotNull = <T,>(x: T | null | undefined): x is T => x !== null && x !== undefined;
+
+const mapTrainingForCard = (item: any, idx: number) => {
+  const idRaw = item?.ID ?? item?.Id ?? item?.ListItemID ?? item?.ListItemId ?? idx + 1;
+  const id = Number(idRaw) || idx + 1;
+
+  const startRaw =
+    item?.eventStartDate ||
+    item?.EventStartDate ||
+    item?.startDate ||
+    item?.StartDate;
+
+  const endRaw =
+    item?.eventEndDate ||
+    item?.EventEndDate ||
+    item?.endDate ||
+    item?.EndDate;
+
+  const start = parseSPDate(startRaw);
+  const end = parseSPDate(endRaw);
+
+  if (!start || !end) return null;
+
+  const durationDays = daysBetween(start, end);
+
+  const timeRange = `${fmtTime(start)} - ${fmtTime(end)}`;
+
+  const meetingLink = safeStr(
+    item?.joiningURL ||
+      item?.joiningUrl ||
+      item?.meetingLink ||
+      item?.MeetingLink ||
+      ""
+  );
+
+  const pageUrl = safeStr(item?.pageUrl || item?.Path || item?.path || "#");
+
+  const isReg = normalizeIsRegistered(item) || !!meetingLink;
+
+  return {
+    ...item,
+
+    id,
+    ID: id,
+
+    imageUrl: item?.newsImage || item?.imageUrl || item?.Image || "",
+    category: item?.category || item?.Category || "Classroom",
+    title: item?.title || item?.Title || "Untitled",
+
+    timeRange,
+    time: timeRange,
+
+    startDate: safeStr(startRaw) || start.toISOString(),
+    endDate: safeStr(endRaw) || end.toISOString(),
+
+    duration: `${durationDays} day${durationDays > 1 ? "s" : ""}`,
+
+    // Instructor (used by TrainingCard UI)
+    instructorName:
+      item?.instructor?.name ||
+      item?.instructorName ||
+      item?.InstructorName ||
+      item?.organizerName ||
+      item?.OrganizerName ||
+      "",
+    instructorTitle:
+      item?.instructor?.role || item?.instructorTitle || item?.InstructorTitle || "",
+    instructorEmail:
+      item?.instructor?.email ||
+      item?.instructorEmail ||
+      item?.InstructorEmail ||
+      item?.instructor?.id ||
+      item?.Instructor?.Email ||
+      item?.Instructor?.EMail ||
+      item?.Organizer?.Email ||
+      item?.Organizer?.EMail ||
+      item?.Author?.Email ||
+      item?.Author?.EMail ||
+      "",
+
+    location: safeStr(item?.location),
+    meetingLink,
+    joinUrl: meetingLink || "#",
+    pageUrl,
+
+    start,
+    end,
+    Eventtype: "Trainings",
+    isRegistered: isReg,
+    isregistered: isReg,
+    status: isReg ? "Registered" : "Upcoming",
+  };
+};
+
+const parseNumericIdList = (raw: any): number[] => {
+  const s = String(raw ?? "").trim();
+  if (!s) return [];
+
+  const parts = s
+    .split(/[,;|\s]+/g)
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  const nums = parts
+    .map((p) => Number(p))
+    .filter((n) => Number.isFinite(n) && n > 0);
+
+  return Array.from(new Set(nums));
+};
+
+type PersonInfo = { name: string; avatarUrl: string };
+
+const Allcomponent: React.FC<IAllComponentProps> = ({
+  filteredEvents = [],
+  filteredTrainings = [],
+  filteredMeetings = [],
   context,
   viewMode,
 }) => {
   const now = new Date();
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
-   const parsedEvents = React.useMemo(() => {
-  
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
-    return (filteredEvents || []).map((item: any) => {
+  // ----------------------------
+  // Graph: resolve instructor name + avatar (cache by email)
+  // ----------------------------
+  const [personByEmail, setPersonByEmail] = React.useState<Record<string, PersonInfo>>({});
+  const personCacheRef = React.useRef<Record<string, PersonInfo>>({});
 
-      // Always use FIRST LINE → accurate, same as UI
-      const startDateStr = item.eventStartDate?.split("\n")[0]?.trim();
-      const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim();
-  
-      // Parse EXACTLY as SharePoint stored it
-      const eventStart = startDateStr ? new Date(startDateStr) : null;
-      const eventEnd   = endDateStr ? new Date(endDateStr) : null;
-  
-      // FIX location duplication
-      const location = item.location?.split("\n")[0]?.trim() || "";
-  
-      let time = "Not specified";
-  
-      if (eventStart && eventEnd) {
-        const formatTime = (date: Date) =>
-          date.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true
-          });
-  
-        time = `${formatTime(eventStart)} - ${formatTime(eventEnd)}`;
-      }
-  
-      return {
-        ...item,
-        date: eventStart ? String(eventStart.getDate()).padStart(2, "0") : "",
-        month: eventStart ? months[eventStart.getMonth()] : "",
-        day: eventStart ? days[eventStart.getDay()] : "",
-        title: item.title || "Untitled Event",
-        time,
-        location,
-        eventDateTime: eventStart,
-        category:item.category,
-        imageUrl: item.newsImage || "",
-        isregistered: !!item.isRegistered,
-      };
+  const blobToDataUrl = React.useCallback((blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
     });
-  }, [filteredEvents]);
- const mapSharePointTrainingsForAll = (data: any[]) => {
+  }, []);
 
-  const deduped = Array.from(
-    new Map(data.map(i => [i.ListItemID || i.title, i])).values()
+  const toBase64Utf8 = React.useCallback((input: string): string => {
+    // Works for unicode too (no deprecated unescape)
+    const bytes = new TextEncoder().encode(input);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }, []);
+
+  const getDefaultAvatar = React.useCallback((nameOrEmail: string): string => {
+    const safe = String(nameOrEmail || "").trim() || "User";
+    const initials = safe
+      .split(" ")
+      .map((n) => n?.trim()?.[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+
+    const colors = [
+      "#0078D4",
+      "#00A4EF",
+      "#50E6FF",
+      "#8764B8",
+      "#881798",
+      "#E43BA6",
+      "#E74856",
+      "#F7630C",
+      "#FFB900",
+      "#00CC6A",
+    ];
+
+    const colorIndex =
+      safe.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+
+    const bgColor = colors[colorIndex];
+
+    const svg = `
+      <svg width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+        <rect width="48" height="48" fill="${bgColor}"/>
+        <text x="50%" y="50%"
+              text-anchor="middle"
+              dy=".35em"
+              font-family="Segoe UI, Arial, sans-serif"
+              font-size="20"
+              font-weight="600"
+              fill="white">
+          ${initials}
+        </text>
+      </svg>
+    `.trim();
+
+    return `data:image/svg+xml;base64,${toBase64Utf8(svg)}`;
+  }, [toBase64Utf8]);
+
+  const ensurePeopleFromGraph = React.useCallback(
+    async (emails: string[]) => {
+      const ctx = context;
+      if (!ctx?.msGraphClientFactory) return;
+
+      const unique = Array.from(
+        new Set((emails || []).map((e) => String(e || "").trim()).filter(Boolean))
+      );
+      const missing = unique.filter((e) => !personCacheRef.current[e]);
+      if (!missing.length) return;
+
+      const graph: MSGraphClientV3 = await ctx.msGraphClientFactory.getClient("3");
+
+      const updates: Record<string, PersonInfo> = {};
+
+      for (const email of missing) {
+        let displayName = email;
+
+        // 1) display name
+        try {
+          const user = await graph.api(`/users/${email}`).select("displayName").get();
+          if (user?.displayName) displayName = user.displayName;
+        } catch {
+          // ignore
+        }
+
+        // 2) photo (fallback to initials)
+        let avatarUrl = "";
+        try {
+          const photoResponse = await graph.api(`/users/${email}/photo/$value`).get();
+
+          let blob: Blob;
+          if (photoResponse instanceof ArrayBuffer) {
+            blob = new Blob([photoResponse], { type: "image/jpeg" });
+          } else if (photoResponse instanceof Blob) {
+            blob = photoResponse;
+          } else {
+            throw new Error("Unexpected photo response type");
+          }
+
+          avatarUrl = await blobToDataUrl(blob);
+        } catch {
+          avatarUrl = getDefaultAvatar(displayName || email);
+        }
+
+        updates[email] = { name: displayName, avatarUrl };
+      }
+
+      if (Object.keys(updates).length) {
+        setPersonByEmail((prev) => {
+          const next = { ...prev, ...updates };
+          personCacheRef.current = next;
+          return next;
+        });
+      }
+    },
+    [context, blobToDataUrl, getDefaultAvatar]
   );
 
-  return deduped.map((item, index) => {
+  // ✅ FIX: Load registered Event IDs from "Registered User Event" → TIRRegisteredUsers (same as AllEvents.tsx)
+  const [myRegisteredEventIds, setMyRegisteredEventIds] = React.useState<number[]>([]);
 
-    const startDateStr = item.eventStartDate?.split("\n")[0]?.trim() || "";
-    const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim() || "";
+  React.useEffect(() => {
+    let cancelled = false;
 
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(endDateStr);
+    const run = async () => {
+      try {
+        if (!context) {
+          if (!cancelled) setMyRegisteredEventIds([]);
+          return;
+        }
 
-    const monthLabel = `${startDate.toLocaleString("default", {
-      month: "long",
-    })} ${startDate.getFullYear()}`;
+        // get userId
+        let userId: number | undefined =
+          (context.pageContext as any)?.legacyPageContext?.userId;
 
-    const dateRange = `${startDate.getDate()}-${endDate.getDate()} ${startDate.toLocaleString(
-      "default",
-      { month: "short" }
-    )} ${startDate.getFullYear()}`;
+        if (!userId) {
+          const meUrl = `${context.pageContext.web.absoluteUrl}/_api/web/currentuser?$select=Id`;
+          const meRes = await context.spHttpClient.get(meUrl, SPHttpClient.configurations.v1);
+          if (!meRes.ok) {
+            if (!cancelled) setMyRegisteredEventIds([]);
+            return;
+          }
+          const me = await meRes.json();
+          userId = Number(me?.Id) || 0;
+        }
 
-    const timeRange = `${startDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true
-    })} - ${endDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true
-    })}`;
+        if (!userId) {
+          if (!cancelled) setMyRegisteredEventIds([]);
+          return;
+        }
 
-   // FIX location duplication
-    const location = item.location?.split("\n")[0]?.trim() || "";
+        const url =
+          `${context.pageContext.web.absoluteUrl}` +
+          `/_api/web/lists/getbytitle('${encodeURIComponent("Registered User Event")}')/items` +
+          `?$top=1&$select=Id,AuthorId,TIRRegisteredUsers&$filter=AuthorId eq ${userId}`;
 
-    return {
-      ...item,
-      id: index + 1,
-      imageUrl:
-        item.newsImage || "https://via.placeholder.com/400x200?text=No+Image",
-      category: "Classroom",
-      title: item.title || "Untitled Training",
-      date: dateRange,
-      duration: `${Math.ceil(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-      )} days`,
-      instructorName: item?.instructor?.name,
-      instructorTitle: item?.instructor?.role,
-      instructorImageUrl: `https://i.pravatar.cc/150?img=${(index % 6) + 1}`,
-      month: monthLabel,
-      isRegistered: !!item.joiningURL,
-      isMyTraining: !!item.joiningURL,
-      location: location,   // 🔥 FIXED
-      joinUrl: item.joiningURL || "#",
-      Eventtype: "Trainings",
-      startDate: startDateStr,
-      endDate: endDateStr,
-      subtitle: "",
-      time: timeRange,
-      trainingId:  item.ID ,
+        const resp = await context.spHttpClient.get(url, SPHttpClient.configurations.v1);
+        if (!resp.ok) {
+          if (!cancelled) setMyRegisteredEventIds([]);
+          return;
+        }
+
+        const json = await resp.json();
+        const row = Array.isArray(json?.value) ? json.value[0] : null;
+        const ids = parseNumericIdList(row?.TIRRegisteredUsers);
+
+        if (!cancelled) setMyRegisteredEventIds(ids);
+      } catch {
+        if (!cancelled) setMyRegisteredEventIds([]);
+      }
     };
-  });
-};
 
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [context]);
 
-  const mappedTrainings = mapSharePointTrainingsForAll(filteredTrainings);
-  const Alldata = [...parsedEvents, ...mappedTrainings, ...filteredMeetings];
-  const myEvents = parsedEvents.filter((e: any) => e.isregistered);
-  const myTrainings = mappedTrainings.filter((t: any) => t.isMyTraining);
-  const myAlldata = [...myEvents, ...myTrainings, ...filteredMeetings];
-  const previousEvents = parsedEvents.filter(
-    (e: any) => e.eventDateTime && e.eventDateTime < now
-  ).slice(0,3); // show only 6 previous events
+  const sortAsc = React.useCallback((a: any, b: any) => {
+    const aT = a?.start?.getTime?.() ?? a?.eventDateTime?.getTime?.() ?? 0;
+    const bT = b?.start?.getTime?.() ?? b?.eventDateTime?.getTime?.() ?? 0;
+    return aT - bT;
+  }, []);
+
+  const parsedEvents: any[] = React.useMemo(() => {
+    return (filteredEvents || [])
+      .map((item: any, idx: number) => {
+        const idRaw = item?.ID ?? item?.Id ?? item?.ListItemID ?? item?.ListItemId ?? idx + 1;
+        const id = Number(idRaw) || idx + 1;
+
+        const start = parseSPDate(item?.eventStartDate || item?.EventStartDate || item?.startDate || item?.StartDate);
+        const end = parseSPDate(item?.eventEndDate || item?.EventEndDate || item?.endDate || item?.EndDate);
+
+        if (!start || !end) return null;
+
+        const eventIdNum = Number(item?.eventId ?? item?.EventId ?? item?.ID ?? item?.Id);
+
+        const isReg =
+          (eventIdNum ? myRegisteredEventIds.includes(eventIdNum) : false) ||
+          normalizeIsRegistered(item);
+
+        const day = start.toLocaleDateString("en-US", { weekday: "long" });
+        const date = String(start.getDate()).padStart(2, "0");
+        const month = start.toLocaleDateString("en-US", { month: "short" });
+
+        return {
+          ...item,
+          ID: id,
+          id,
+
+          day,
+          date,
+          month,
+
+          title: item?.title || item?.Title || "Untitled",
+          category: item?.category || item?.Category || "",
+          imageUrl: item?.newsImage || item?.imageUrl || item?.Image || "",
+          time: `${fmtTime(start)} - ${fmtTime(end)}`,
+          location: safeStr(item?.location),
+          pageUrl: safeStr(item?.pageUrl || item?.Path || item?.path || ""),
+          eventDateTime: start,
+
+          isregistered: isReg,
+          isRegistered: isReg,
+          status: isReg ? "Registered" : "Upcoming",
+
+          start,
+          end,
+          Eventtype: item?.Eventtype || "Events",
+        };
+      })
+      .filter(isNotNull);
+  }, [filteredEvents, myRegisteredEventIds]);
+
+  const parsedTrainings: any[] = React.useMemo(() => {
+    return (filteredTrainings || [])
+      .map((it: any, idx: number) => mapTrainingForCard(it, idx))
+      .filter(isNotNull);
+  }, [filteredTrainings]);
+
+  // Resolve instructor name/photo for trainings shown in All tab
+  React.useEffect(() => {
+    const emails = (parsedTrainings || [])
+      .map((t: any) => String(t?.instructorEmail || "").trim())
+      .filter(Boolean);
+
+    if (!emails.length) return;
+    void ensurePeopleFromGraph(emails);
+  }, [parsedTrainings, ensurePeopleFromGraph]);
+
+  const meetings: any[] = React.useMemo(
+    () => (filteredMeetings || []).slice(),
+    [filteredMeetings]
+  );
+
+  const isUpcomingOrOngoing = (start?: Date, end?: Date) => {
+    const s = start instanceof Date ? start : undefined;
+    const e = end instanceof Date ? end : undefined;
+    const effectiveEnd = e || s;
+    if (!effectiveEnd) return false;
+    return effectiveEnd.getTime() >= now.getTime();
+  };
+
+  const allUpcomingEvents = React.useMemo(
+    () =>
+      [...parsedEvents]
+        .filter((e) => isUpcomingOrOngoing(e.start, e.end))
+        .sort(sortAsc),
+    [parsedEvents, now]
+  );
+
+  const myUpcomingEvents = React.useMemo(
+    () =>
+      [...parsedEvents]
+        .filter((e) => (e.isRegistered || e.isregistered) && isUpcomingOrOngoing(e.start, e.end))
+        .sort(sortAsc),
+    [parsedEvents, now]
+  );
+
+  const allUpcomingTrainings = React.useMemo(
+    () =>
+      [...parsedTrainings]
+        .filter((t) => isUpcomingOrOngoing(t.start, t.end))
+        .sort(sortAsc),
+    [parsedTrainings, now]
+  );
+
+  const myUpcomingTrainings = React.useMemo(
+    () =>
+      [...parsedTrainings]
+        .filter((t) => (t.isRegistered || t.isregistered) && isUpcomingOrOngoing(t.start, t.end))
+        .sort(sortAsc),
+    [parsedTrainings, now]
+  );
+
+  const upcomingMeetings = React.useMemo(() => {
+    return (meetings || []).filter((m) => {
+      const s =
+        m?.start instanceof Date
+          ? m.start
+          : parseSPDate(m?.start?.dateTime ?? m?.start);
+      const e =
+        m?.end instanceof Date ? m.end : parseSPDate(m?.end?.dateTime ?? m?.end);
+
+      if (!s && !e) return true;
+      return isUpcomingOrOngoing(s || undefined, e || undefined);
+    });
+  }, [meetings, now]);
+
+  const showCalendar = viewMode !== "list";
+
+  const allCalendarItems = React.useMemo(
+    () => [...allUpcomingEvents, ...allUpcomingTrainings, ...upcomingMeetings],
+    [allUpcomingEvents, allUpcomingTrainings, upcomingMeetings]
+  );
+
+  const myCalendarItems = React.useMemo(
+    () => [...myUpcomingEvents, ...myUpcomingTrainings, ...upcomingMeetings],
+    [myUpcomingEvents, myUpcomingTrainings, upcomingMeetings]
+  );
+
+  const showLegend = !showCalendar;
 
   return (
     <>
@@ -152,187 +588,147 @@ const AllComponents: React.FC<Props> = ({
               activeTab === "all" ? styles.activeTab : ""
             }`}
             onClick={() => setActiveTab("all")}
+            type="button"
           >
             All Events & Trainings
           </button>
+
           <button
             className={`${styles.tabButton} ${
               activeTab === "my" ? styles.activeTab : ""
             }`}
             onClick={() => setActiveTab("my")}
+            type="button"
           >
             My Events & Trainings
           </button>
         </div>
       </div>
-      {activeTab === "all" ? (
-        // ------------ ALL DATA ------------
-        viewMode === "list" ? (
-          <>
-            <div className={styles.eventsContainer}>
-              <div className={styles.eventsWrapper}>
-              <h5>Events</h5>
-              {parsedEvents.map((event: any, index: any) => (
-                <EventCard key={index} {...event} context={context} />
-              ))}
 
-              <h5>Trainings</h5>
-              {mappedTrainings.map((event: any) => (
-                <Trainingcard key={event.id} {...event} context={context}/>
-              ))}
-
-              <h5>Meetings</h5>
-              {filteredMeetings.map((event: any) => (
-                <MeetingCard
-                  key={event.id}
-                  event={event}
-                  onJoinClick={() => alert("Joining Meeting...")}
-                />
-              ))}
-            </div>
-
-            <div className={styles.previousEventsContainer}>
-              <h2 className={styles.heading}>Previous Events</h2>
-              <div className={styles.gridLayout}>
-                {previousEvents.length > 0 ? (
-                  previousEvents.map((event: any, index: any) => (
-                    <PreviousEventCard
-                      key={index}
-                      title={event.title}
-                      date={`${event.day}, ${event.date} ${event.month}`}
-                      imageUrl={event.imageUrl}
-                      imageCount={0}
-                      pageUrl={event?.pageUrl}
-                    />
-                  ))
-                ) : (
-                  <p>No previous events found.</p>
-                )}
-              </div>
-            </div>
+      {showLegend && (
+        <div className={styles.legend}>
+          <div className={styles.legendItem}>
+            <span className={`${styles.swatch} ${styles.swatchEvent}`} />
+            <span>Events</span>
           </div>
-          
-          {/* <div className={styles.eventsContainer}>
+          <div className={styles.legendItem}>
+            <span className={`${styles.swatch} ${styles.swatchTraining}`} />
+            <span>Trainings</span>
+          </div>
+          <div className={styles.legendItem}>
+            <span className={`${styles.swatch} ${styles.swatchTeams}`} />
+            <span>Teams Meeting</span>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "all" ? (
+        showCalendar ? (
+          <CalendarViewComponent events={allCalendarItems} context={context} from="All" />
+        ) : (
+          <>
+            <h2 className={styles.heading}>Events</h2>
             <div className={styles.eventsWrapper}>
-              {upcomingEvents.length > 0 ? (
-                upcomingEvents.map((event:any, index:any) => (
-                  <EventCard key={index} {...event} context={props.context} />
+              {allUpcomingEvents.length > 0 ? (
+                allUpcomingEvents.map((e, i) => (
+                  <EventCard key={e.id || i} {...(e as any)} />
                 ))
               ) : (
-                <p>No upcoming events found.</p>
+                <div className={styles.emptyState}>No upcoming events found.</div>
               )}
             </div>
 
-            <div className={styles.previousEventsContainer}>
-              <h2 className={styles.heading}>Previous Events</h2>
-              <div className={styles.gridLayout}>
-                {previousEvents.length > 0 ? (
-                  previousEvents.map((event:any, index:any) => (
-                    <PreviousEventCard key={index} title={event.title} date={`${event.day}, ${event.date} ${event.month}`} imageUrl={event.imageUrl} imageCount={0} sitepageurl={sitepageurl}/>
-                  ))
-                ) : (
-                  <p>No previous events found.</p>
-                )}
-              </div>
+            <h2 className={styles.heading}>Trainings</h2>
+            <div className={styles.eventsWrapper}>
+              {allUpcomingTrainings.length > 0 ? (
+                allUpcomingTrainings.map((t, i) => (
+                  <Trainingcard
+                    key={t.id || i}
+                    {...(t as any)}
+                    instructorName={
+                      personByEmail[String((t as any)?.instructorEmail || "").trim()]?.name ||
+                      (t as any)?.instructorName
+                    }
+                    instructorImageUrl={
+                      personByEmail[String((t as any)?.instructorEmail || "").trim()]?.avatarUrl ||
+                      ((t as any)?.instructorName
+                        ? getDefaultAvatar((t as any)?.instructorName)
+                        : undefined)
+                    }
+                    context={context}
+                  />
+                ))
+              ) : (
+                <div className={styles.emptyState}>No upcoming trainings found.</div>
+              )}
             </div>
-          </div> */}
-          </>
-        ) : (
-          <>
-            <CalendarViewComponent events={Alldata} context={context} from="All" />
-            <div className={styles.previousEventsContainer}>
-              <h2 className={styles.heading}>Previous Events</h2>
-              <div className={styles.gridLayout}>
-                {previousEvents.length > 0 ? (
-                  previousEvents.map((event: any, index: any) => (
-                    <PreviousEventCard
-                      key={index}
-                      title={event.title}
-                      date={`${event.day}, ${event.date} ${event.month}`}
-                      imageUrl={event.imageUrl}
-                      imageCount={0}
-                      pageUrl={event?.pageUrl}
-                    />
-                  ))
-                ) : (
-                  <p>No previous events found.</p>
-                )}
-              </div>
+
+            <h2 className={styles.heading}>Meetings</h2>
+            <div className={styles.eventsWrapper}>
+              {upcomingMeetings.length > 0 ? (
+                upcomingMeetings.map((m, i) => (
+                  <MeetingCard key={m?.id || i} event={m} />
+                ))
+              ) : (
+                <div className={styles.emptyState}>No meeting is scheduled for you</div>
+              )}
             </div>
           </>
         )
-      ) : activeTab === "my" ? (
-        // ------------ MY DATA ------------
-        viewMode === "list" ? (
-          <>
-            <div className={styles.eventsWrapper}>
-              <h5>My Events</h5>
-              {myEvents.map((event: any) => (
-                <EventCard key={event.id} {...event} context={context} />
-              ))}
-            </div>
+      ) : showCalendar ? (
+        <CalendarViewComponent events={myCalendarItems} context={context} from="My" />
+      ) : (
+        <>
+          <h2 className={styles.heading}>Events</h2>
+          <div className={styles.eventsWrapper}>
+            {myUpcomingEvents.length > 0 ? (
+              myUpcomingEvents.map((e, i) => (
+                <EventCard key={e.id || i} {...(e as any)} />
+              ))
+            ) : (
+              <div className={styles.emptyState}>No registered upcoming events.</div>
+            )}
+          </div>
 
-            <div className={styles.eventsWrapper}>
-              <h5>My Trainings</h5>
-              {myTrainings.map((training: any) => (
-                <Trainingcard key={training.id} {...training} context={context} />
-              ))}
-            </div>
+          <h2 className={styles.heading}>Trainings</h2>
+          <div className={styles.eventsWrapper}>
+            {myUpcomingTrainings.length > 0 ? (
+              myUpcomingTrainings.map((t, i) => (
+                <Trainingcard
+                  key={t.id || i}
+                  {...(t as any)}
+                  instructorName={
+                    personByEmail[String((t as any)?.instructorEmail || "").trim()]?.name ||
+                    (t as any)?.instructorName
+                  }
+                  instructorImageUrl={
+                    personByEmail[String((t as any)?.instructorEmail || "").trim()]?.avatarUrl ||
+                    ((t as any)?.instructorName
+                      ? getDefaultAvatar((t as any)?.instructorName)
+                      : undefined)
+                  }
+                  context={context}
+                />
+              ))
+            ) : (
+              <div className={styles.emptyState}>No registered upcoming trainings.</div>
+            )}
+          </div>
 
-            <div className={styles.eventsWrapper}>
-              <h5>My Meetings</h5>
-              {filteredMeetings.map((meeting: any) => (
-                <MeetingCard key={meeting.id} event={meeting} />
-              ))}
-            </div>
-            
-            <div className={styles.previousEventsContainer}>
-              <h2 className={styles.heading}>Previous Events</h2>
-              <div className={styles.gridLayout}>
-                {previousEvents.length > 0 ? (
-                  previousEvents.map((event: any, index: any) => (
-                    <PreviousEventCard
-                      key={index}
-                      title={event.title}
-                      date={`${event.day}, ${event.date} ${event.month}`}
-                      imageUrl={event.imageUrl}
-                      imageCount={0}
-                      pageUrl={event?.pageUrl}
-                    />
-                  ))
-                ) : (
-                  <p>No previous events found.</p>
-                )}
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <CalendarViewComponent events={myAlldata} context={context} />
-            <div className={styles.previousEventsContainer}>
-              <h2 className={styles.heading}>Previous Events</h2>
-              <div className={styles.gridLayout}>
-                {previousEvents.length > 0 ? (
-                  previousEvents.map((event: any, index: any) => (
-                    <PreviousEventCard
-                      key={index}
-                      title={event.title}
-                      date={`${event.day}, ${event.date} ${event.month}`}
-                      imageUrl={event.imageUrl}
-                      imageCount={0}
-                      pageUrl={event?.pageUrl}
-                    />
-                  ))
-                ) : (
-                  <p>No previous events found.</p>
-                )}
-              </div>
-            </div>
-          </>
-        )
-      ) : null}
+          <h2 className={styles.heading}>Meetings</h2>
+          <div className={styles.eventsWrapper}>
+            {upcomingMeetings.length > 0 ? (
+              upcomingMeetings.map((m, i) => (
+                <MeetingCard key={m?.id || i} event={m} />
+              ))
+            ) : (
+              <div className={styles.emptyState}>No meeting is scheduled for you</div>
+            )}
+          </div>
+        </>
+      )}
     </>
   );
 };
 
-export default AllComponents;
+export default Allcomponent;

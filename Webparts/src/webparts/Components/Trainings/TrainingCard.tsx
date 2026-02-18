@@ -7,6 +7,17 @@ import "@pnp/sp/items";
 
 const outlookIcon: string = require("../../assets/outlook-icon.svg");
 
+function normalizeApprovalStatus(v: any): "none" | "pending" | "approved" | "rejected" {
+  const raw = String(v ?? "").trim().toLowerCase();
+  if (!raw) return "none";
+  if (raw.includes("approve")) return "approved";
+  if (raw.includes("reject")) return "rejected";
+  if (raw.includes("pend")) return "pending";
+  // default: treat unknown as pending (safer than enabling join)
+  return "pending";
+}
+
+
 export interface TrainingCardProps {
   startDate: string;
   endDate: string;
@@ -21,6 +32,9 @@ export interface TrainingCardProps {
   trainingId: number;
   meetingLink: string;
   context: any; // WebPartContext
+  instructorName?: string;
+  instructorTitle?: string;
+  instructorImageUrl?: string;
 }
 
 interface TrainingCardState {
@@ -73,7 +87,16 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
       return;
     }
 
-    const currentUserId = context.pageContext.legacyPageContext.userId;
+    let currentUserId: number = (context?.pageContext as any)?.legacyPageContext?.userId || 0;
+
+    if (!currentUserId) {
+      try {
+        const me: any = await this.sp.web.currentUser.select("Id")();
+        currentUserId = Number(me?.Id || 0);
+      } catch {
+        // ignore
+      }
+    }
 
     try {
       const existingItems = await this.sp.web.lists
@@ -88,14 +111,14 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
 
       if (existingItems.length > 0) {
         const registeredItem = existingItems[0];
-        
+
         // Get approval status from the field
         const approvalValue = registeredItem.TIRApproval || registeredItem.TIRApprovalChoice || "Pending";
-        const status = approvalValue.toLowerCase();
+        const status = normalizeApprovalStatus(approvalValue);
 
         this.setState({
           approvalStatus: status,
-          registeredItemId: registeredItem.Id,
+          registeredItemId: registeredItem?.Id ?? null,
           isEventCompleted: completed,
           isLoading: false,
         });
@@ -129,7 +152,16 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
       return;
     }
 
-    const currentUserId = context.pageContext.legacyPageContext.userId;
+    let currentUserId: number = (context?.pageContext as any)?.legacyPageContext?.userId || 0;
+
+    if (!currentUserId) {
+      try {
+        const me: any = await this.sp.web.currentUser.select("Id")();
+        currentUserId = Number(me?.Id || 0);
+      } catch {
+        // ignore
+      }
+    }
 
     this.setState({ isSubmitting: true, errorMessage: "" });
 
@@ -146,12 +178,12 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
       if (existingItems.length > 0) {
         const existingItem = existingItems[0];
         const approvalValue = existingItem.TIRApproval || existingItem.TIRApprovalChoice || "Pending";
-        const status = approvalValue.toLowerCase();
+        const status = normalizeApprovalStatus(approvalValue);
 
         this.setState({
           isSubmitting: false,
           approvalStatus: status,
-          registeredItemId: existingItem.Id,
+          registeredItemId: existingItem?.Id ?? null,
           errorMessage: "",
         });
         return;
@@ -210,8 +242,8 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
     const { approvalStatus, isEventCompleted, isSubmitting, isLoading } = this.state;
 
     if (isLoading) {
-      return { 
-        text: "Loading...", 
+      return {
+        text: "Loading...",
         disabled: true,
         className: styles.loadingButton,
         onClick: undefined
@@ -264,7 +296,7 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
     }
 
     return {
-      text: isSubmitting ? "Submitting..." : "Request for Approval",
+      text: isSubmitting ? "Submitting..." : "Join",
       onClick: this.handleRequestApproval,
       disabled: isSubmitting,
       className: styles.requestButton
@@ -284,7 +316,10 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
       duration,
       location,
       imageUrl,
-      pageUrl
+      pageUrl,
+      instructorName,
+      instructorTitle,
+      instructorImageUrl,
     } = this.props;
 
     const { errorMessage, approvalStatus } = this.state;
@@ -334,27 +369,52 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
 
             <div className={styles.metaSection}>
               <div className={styles.metaItem}>
-                <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12,6 12,12 16,14"></polyline>
+                <svg className={styles.icon} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10.0001 1.66602C5.40841 1.66602 1.66675 5.40768 1.66675 9.99935C1.66675 14.591 5.40841 18.3327 10.0001 18.3327C14.5917 18.3327 18.3334 14.591 18.3334 9.99935C18.3334 5.40768 14.5917 1.66602 10.0001 1.66602ZM13.6251 12.9743C13.5084 13.1743 13.3001 13.2827 13.0834 13.2827C12.9751 13.2827 12.8667 13.2577 12.7667 13.191L10.1834 11.6493C9.54175 11.266 9.06675 10.4243 9.06675 9.68268V6.26602C9.06675 5.92435 9.35008 5.64102 9.69175 5.64102C10.0334 5.64102 10.3167 5.92435 10.3167 6.26602V9.68268C10.3167 9.98268 10.5667 10.4243 10.8251 10.5743L13.4084 12.116C13.7084 12.291 13.8084 12.6743 13.6251 12.9743Z" fill="#DA291C" />
                 </svg>
                 <span>{time} | {duration}</span>
               </div>
               <div className={styles.metaItem}>
-                <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
+                <svg className={styles.icon} width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g clipPath="url(#clip0_25344_30036)">
+                    <path d="M17.1834 7.04232C16.3084 3.19232 12.9501 1.45898 10.0001 1.45898C10.0001 1.45898 10.0001 1.45898 9.99175 1.45898C7.05008 1.45898 3.68341 3.18398 2.80841 7.03398C1.83341 11.334 4.46675 14.9757 6.85008 17.2673C7.73341 18.1173 8.86675 18.5423 10.0001 18.5423C11.1334 18.5423 12.2667 18.1173 13.1417 17.2673C15.5251 14.9757 18.1584 11.3423 17.1834 7.04232ZM10.0001 11.2173C8.55008 11.2173 7.37508 10.0423 7.37508 8.59232C7.37508 7.14232 8.55008 5.96732 10.0001 5.96732C11.4501 5.96732 12.6251 7.14232 12.6251 8.59232C12.6251 10.0423 11.4501 11.2173 10.0001 11.2173Z" fill="#DA291C" />
+                  </g>
+                  <defs>
+                    <clipPath id="clip0_25344_30036">
+                      <rect width="20" height="20" fill="white" />
+                    </clipPath>
+                  </defs>
                 </svg>
                 <span>{location}</span>
               </div>
-            </div>
+                 {instructorName && (
+              <div className={styles.instructorRow}>
+                {instructorImageUrl ? (
+                  <img
+                    src={instructorImageUrl}
+                    alt={instructorName}
+                    className={styles.instructorAvatar}
+                  />
+                ) : (
+                  <div className={styles.instructorAvatarFallback}>
+                    {(instructorName?.trim()?.[0] || "?").toUpperCase()}
+                  </div>
+                )}
 
+                <div className={styles.instructorText}>
+                  <div className={styles.instructorName}>{instructorName}</div>
+                  {instructorTitle && <div className={styles.instructorTitle}>{instructorTitle}</div>}
+                </div>
+              </div>
+            )}
+            </div>
             {errorMessage && (
               <div className={styles.errorMessage}>{errorMessage}</div>
             )}
 
-            <button
-              className={`${styles.actionButton} ${btn.className || ""}`}
+            <div className={styles.actionSection}>
+              <button
+              className={styles.actionButton}
               onClick={btn.onClick}
               disabled={btn.disabled}
             >
@@ -363,6 +423,7 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
               )}
               {btn.text}
             </button>
+            </div>
           </div>
         </div>
       </a>

@@ -1,94 +1,304 @@
 import * as React from "react";
+import moment from "moment";
 import styles from "./Allevents.module.scss";
 import EventCard from "./EventCard";
 import PreviousEventCard from "./PreviousCard/PreviousEvents";
 import CalendarViewComponent from "./Calendarview/CalendarView";
 
+import { SPFI, spfi, SPFx } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/lists";
+import "@pnp/sp/items";
+
 export interface IAlleventsProps {
-  AllEventItems:any;
+  AllEventItems: any;
   context?: any;
-  viewtype?: string;
+  viewtype?: string; // "list" or "calendar"
 }
+
+const uniqNums = (arr: number[]) =>
+  Array.from(new Set(arr.filter((n) => Number.isFinite(n) && n > 0)));
+
+const parseNumericIdList = (raw: any): number[] => {
+  const text = String(raw || "");
+  const tokens = text
+    .split(/[,;\n\r]+/g)
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  const ids = tokens
+    .filter((t) => /^\d+$/.test(t))
+    .map((t) => parseInt(t, 10));
+
+  return uniqNums(ids);
+};
+
+/** ✅ Prefer ISO token if SharePoint provides "display\nISO" */
+const pickBestDateText = (v: any): string => {
+  const s = String(v ?? "").trim();
+  if (!s) return "";
+
+  const parts = s
+    .split(/\n+/g)
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  const iso =
+    parts.find((p) => /^\d{4}-\d{2}-\d{2}T/.test(p)) ||
+    parts.find((p) => /\d{4}-\d{2}-\d{2}T/.test(p));
+
+  return iso || parts[0] || "";
+};
+
+// ✅ MAIN parsing formats
+const parseSPDate = (value: any): Date | null => {
+  if (!value) return null;
+
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+
+  if (typeof value === "object" && value?.dateTime) {
+    const rawObj = pickBestDateText(value.dateTime);
+
+    const hasTz = /Z$|[+-]\d{2}:?\d{2}$/.test(rawObj);
+    const looksIso =
+      /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?(\.\d+)?$/.test(rawObj);
+
+    const normalized =
+      looksIso && !hasTz
+        ? `${rawObj.includes(" ") ? rawObj.replace(" ", "T") : rawObj}Z`
+        : rawObj;
+
+    const d = new Date(normalized);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  const raw = pickBestDateText(value);
+  if (!raw) return null;
+
+  const hasTz = /Z$|[+-]\d{2}:?\d{2}$/.test(raw);
+  const looksIso =
+    /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?(\.\d+)?$/.test(raw);
+
+  const normalizedRaw =
+    looksIso && !hasTz
+      ? `${raw.includes(" ") ? raw.replace(" ", "T") : raw}Z`
+      : raw;
+
+  const d1 = new Date(normalizedRaw);
+  if (!isNaN(d1.getTime())) return d1;
+
+  const m = moment(
+    normalizedRaw,
+    [
+      moment.ISO_8601,
+      "DD/MM/YYYY",
+      "DD/MM/YYYY HH:mm",
+      "DD/MM/YYYY HH:mm:ss",
+      "DD/MM/YYYY hh:mm A",
+      "MM/DD/YYYY",
+      "MM/DD/YYYY HH:mm",
+      "MM/DD/YYYY hh:mm A",
+      "YYYY-MM-DD HH:mm:ss",
+    ],
+    false
+  );
+
+  return m.isValid() ? m.toDate() : null;
+};
 
 const AllEvents: React.FC<IAlleventsProps> = (props) => {
   const now = new Date();
-  const sitepageurl = `${props?.context?.pageContext?.web?.absoluteUrl}/SitePages/`;
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
+  const [showAllPrevious, setShowAllPrevious] = React.useState(false);
+
+  const sp: SPFI | null = React.useMemo(() => {
+    try {
+      return props.context ? spfi().using(SPFx(props.context)) : null;
+    } catch {
+      return null;
+    }
+  }, [props.context]);
+
+  const [myRegisteredIds, setMyRegisteredIds] = React.useState<number[]>([]);
+
+  const getCurrentUserId = React.useCallback(async (): Promise<number> => {
+    const legacyId = (props.context?.pageContext as any)?.legacyPageContext
+      ?.userId;
+    if (legacyId) return Number(legacyId);
+
+    if (sp) {
+      const me: any = await sp.web.currentUser.select("Id")();
+      return Number(me?.Id || 0);
+    }
+    return 0;
+  }, [props.context, sp]);
+
+  const loadMyRegisteredIds = React.useCallback(async () => {
+    if (!sp || !props.context) return;
+
+    try {
+      const userId = await getCurrentUserId();
+      if (!userId) {
+        setMyRegisteredIds([]);
+        return;
+      }
+
+      const rows: any[] = await sp.web.lists
+        .getByTitle("Registered User Event")
+        .items.select("Id", "AuthorId", "TIRRegisteredUsers", "Modified")
+        .filter(`AuthorId eq ${userId}`)
+        .top(5000)();
+
+      const all: number[] = [];
+      (rows || []).forEach((r) =>
+        all.push(...parseNumericIdList(r?.TIRRegisteredUsers))
+      );
+
+      setMyRegisteredIds(uniqNums(all));
+    } catch (e) {
+      console.error("loadMyRegisteredIds failed", e);
+      setMyRegisteredIds([]);
+    }
+  }, [sp, props.context, getCurrentUserId]);
+
+  React.useEffect(() => {
+    loadMyRegisteredIds();
+  }, [loadMyRegisteredIds]);
 
   const parsedEvents = React.useMemo(() => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    return (props.AllEventItems || [])
+      .map((item: any) => {
+        const start = parseSPDate(item?.eventStartDate);
+        const end = parseSPDate(item?.eventEndDate);
 
-  return (props.AllEventItems || []).map((item: any) => {
+        if (!start || !end) return null;
 
-    // Always use FIRST LINE → accurate, same as UI
-    const startDateStr = item.eventStartDate?.split("\n")[0]?.trim();
-    const endDateStr   = item.eventEndDate?.split("\n")[0]?.trim();
+        const location = String(item?.location ?? "").split("\n")[0].trim();
 
-    // Parse EXACTLY as SharePoint stored it
-    const eventStart = startDateStr ? new Date(startDateStr) : null;
-    const eventEnd   = endDateStr ? new Date(endDateStr) : null;
+        const eventId =
+          Number(
+            item?.ID ??
+              item?.Id ??
+              item?.id ??
+              item?.ListItemID ??
+              item?.ListItemId ??
+              0
+          ) || 0;
 
-    // FIX location duplication
-    const location = item.location?.split("\n")[0]?.trim() || "";
+        const isReg = eventId ? myRegisteredIds.includes(eventId) : false;
 
-    let time = "Not specified";
+        const fmt = (d: Date) =>
+          d.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          });
 
-    if (eventStart && eventEnd) {
-      const formatTime = (date: Date) =>
-        date.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true
+        const time = `${fmt(start)} - ${fmt(end)}`;
+
+        const cardDate = start.toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
         });
 
-      time = `${formatTime(eventStart)} - ${formatTime(eventEnd)}`;
-    }
+        return {
+          ...item,
+          start,
+          end,
+          Eventtype: "Events",
+          ID: eventId,
 
-    return {
-      ...item,
-      date: eventStart ? String(eventStart.getDate()).padStart(2, "0") : "",
-      month: eventStart ? months[eventStart.getMonth()] : "",
-      day: eventStart ? days[eventStart.getDay()] : "",
-      title: item.title || "Untitled Event",
-      time,
-      location,
-      eventDateTime: eventStart,
-      category:item.category,
-      imageUrl: item.newsImage || "",
-      isregistered: !!item.isRegistered,
-    };
+          date: String(start.getDate()).padStart(2, "0"),
+          month: months[start.getMonth()],
+          day: days[start.getDay()],
+
+          title: item?.title || "Untitled",
+          time,
+          location,
+          eventDateTime: start,
+          eventEndDateTime: end,
+          cardDate,
+          category: item?.category,
+          imageUrl: item?.newsImage || "",
+
+          isregistered: isReg,
+          isRegistered: isReg,
+          status: isReg ? "Registered" : "Upcoming",
+        };
+      })
+      .filter(Boolean);
+  }, [props.AllEventItems, myRegisteredIds]);
+
+  const upcomingEvents = parsedEvents.filter((e: any) => {
+    const end = e?.eventEndDateTime ? new Date(e.eventEndDateTime) : null;
+    const start = e?.eventDateTime ? new Date(e.eventDateTime) : null;
+
+    if (end && !isNaN(end.getTime())) return end.getTime() >= now.getTime();
+    if (start && !isNaN(start.getTime())) return start.getTime() >= now.getTime();
+    return false;
   });
-}, [props.AllEventItems]);
 
+  const previousEvents = parsedEvents.filter((e: any) => {
+    const end = e?.eventEndDateTime ? new Date(e.eventEndDateTime) : null;
+    const start = e?.eventDateTime ? new Date(e.eventDateTime) : null;
 
+    if (end && !isNaN(end.getTime())) return end.getTime() < now.getTime();
+    if (start && !isNaN(start.getTime())) return start.getTime() < now.getTime();
+    return false;
+  });
 
-  const upcomingEvents = parsedEvents.filter((e:any) => e.eventDateTime && e.eventDateTime > now);
-  const previousEvents = parsedEvents.filter((e:any) => e.eventDateTime && e.eventDateTime < now);
-  const myEvents = parsedEvents.filter((e:any) => e.isregistered);
+  const previousEventsSorted = React.useMemo(() => {
+    return [...previousEvents].sort(
+      (a: any, b: any) =>
+        (b.eventDateTime?.getTime?.() || 0) - (a.eventDateTime?.getTime?.() || 0)
+    );
+  }, [previousEvents]);
+
+  const previousEventsToRender = showAllPrevious
+    ? previousEventsSorted
+    : previousEventsSorted.slice(0, 3);
+
+  const myEvents = parsedEvents.filter((e: any) => e.isregistered);
+
+  const showCalendar = props.viewtype !== "list";
 
   return (
     <>
-      {/* Tabs */}
       <div className={styles.tabContainer}>
         <div className={styles.tabContainerInner}>
-          <button className={`${styles.tabButton} ${activeTab === "all" ? styles.activeTab : ""}`} onClick={() => setActiveTab("all")}>
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "all" ? styles.activeTab : ""
+            }`}
+            onClick={() => setActiveTab("all")}
+          >
             All Events
           </button>
-          <button className={`${styles.tabButton} ${activeTab === "my" ? styles.activeTab : ""}`} onClick={() => setActiveTab("my")}>
+          <button
+            className={`${styles.tabButton} ${
+              activeTab === "my" ? styles.activeTab : ""
+            }`}
+            onClick={() => setActiveTab("my")}
+          >
             My Events
           </button>
         </div>
       </div>
 
       {activeTab === "all" ? (
-        props.viewtype === "list" ? (
+        showCalendar ? (
+          // ✅ Events tab: NO legend in calendar view
+          <CalendarViewComponent events={parsedEvents} context={props.context} from="Events" />
+        ) : (
           <div className={styles.eventsContainer}>
             <div className={styles.eventsWrapper}>
               {upcomingEvents.length > 0 ? (
-                upcomingEvents.map((event:any, index:any) => (
-                  <EventCard key={index} {...event} context={props.context} />
+                upcomingEvents.map((event: any, index: any) => (
+                  <EventCard key={index} {...event} />
                 ))
               ) : (
                 <p>No upcoming events found.</p>
@@ -96,11 +306,32 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
             </div>
 
             <div className={styles.previousEventsContainer}>
-              <h2 className={styles.heading}>Previous Events</h2>
+              <div className={styles.previousHeaderRow}>
+                <h2 className={styles.heading}>Previous Events</h2>
+
+                {!showAllPrevious && previousEventsSorted.length > 3 && (
+                  <button
+                    type="button"
+                    className={styles.viewAllButton}
+                    onClick={() => setShowAllPrevious(true)}
+                    aria-label="View all previous events"
+                  >
+                    View All
+                  </button>
+                )}
+              </div>
+
               <div className={styles.gridLayout}>
-                {previousEvents.length > 0 ? (
-                  previousEvents.map((event:any, index:any) => (
-                    <PreviousEventCard key={index} title={event.title} date={`${event.day}, ${event.date} ${event.month}`} imageUrl={event.imageUrl} imageCount={0} pageUrl={event?.pageUrl}/>
+                {previousEventsToRender.length > 0 ? (
+                  previousEventsToRender.map((event: any, index: any) => (
+                    <PreviousEventCard
+                      key={index}
+                      title={event.title}
+                      date={event.cardDate}
+                      imageUrl={event.imageUrl}
+                      imageCount={0}
+                      pageUrl={event?.pageUrl}
+                    />
                   ))
                 ) : (
                   <p>No previous events found.</p>
@@ -108,14 +339,15 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
               </div>
             </div>
           </div>
-        ) : (
-          <CalendarViewComponent events={parsedEvents} context={props.context}/>
         )
+      ) : showCalendar ? (
+        // ✅ Events tab (My Events): NO legend in calendar view
+        <CalendarViewComponent events={myEvents} context={props.context} from="Events" />
       ) : (
         <div className={styles.eventsContainer}>
           <div className={styles.eventsWrapper}>
             {myEvents.length > 0 ? (
-              myEvents.map((event:any, index:any) => (
+              myEvents.map((event: any, index: any) => (
                 <EventCard key={index} {...event} />
               ))
             ) : (

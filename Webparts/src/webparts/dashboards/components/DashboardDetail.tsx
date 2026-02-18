@@ -2,6 +2,8 @@ import * as React from 'react';
 import { Stack, Text, Image, PrimaryButton } from '@fluentui/react';
 import { DashboardItem } from '../../services/listServices';
 import ui from './Dashboards.module.scss';
+import DashboardGrid from './DashboardGrid';
+
 
 export interface IDashboardDetailProps {
   item: DashboardItem;
@@ -43,24 +45,14 @@ export default class DashboardDetail extends React.Component<IDashboardDetailPro
           <>
             <span className={ui.moreTitle}>More Dashboards</span>
 
-            <div className={ui.relatedGrid}>
-              {related.map(it => (
-                <div
-                  key={it.id}
-                  className={ui.card}
-                  onClick={() => onOpen(it)}
-                  title={it.title}
-                >
-                  {it.thumbUrl ? (
-                    <Image src={it.thumbUrl} alt="" className={ui.cardImg} />
-                  ) : (
-                    <div className={ui.cardImg} />
-                  )}
-                  <span className={ui.cardTitle}>{it.title}</span>
-                  {it.body && <span className={ui.cardBody}>{it.body}</span>}
-                </div>
-              ))}
-            </div>
+            <section className={ui.moreDashboards}>
+              <DashboardGrid
+                title=""
+                items={related}
+                onOpen={onOpen}
+                showTitle={false}
+              />
+            </section>
 
             {showViewAll && (
               <div className={ui.viewAllRow}>

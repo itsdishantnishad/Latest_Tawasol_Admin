@@ -1,17 +1,13 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
-import { Version } from '@microsoft/sp-core-library';
-import {
-  IPropertyPaneConfiguration,
-  PropertyPaneTextField
-} from '@microsoft/sp-property-pane';
+import { Version, DisplayMode } from '@microsoft/sp-core-library';
+import { IPropertyPaneConfiguration, PropertyPaneTextField } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
 import * as strings from 'GlobalBannerWebPartStrings';
 import Banner from './components/GlobalBanner';
 import { IBannerProps } from './components/IGlobalBannerProps';
 import { initUrlConstants } from '../assets/constants';
-
 
 export interface IBannerWebPartProps {
   titleFirst: string;
@@ -22,15 +18,17 @@ export interface IBannerWebPartProps {
 
 export default class BannerWebPart extends BaseClientSideWebPart<IBannerWebPartProps> {
 
-    protected async onInit(): Promise<void> {
-      initUrlConstants(this.context);
-      return super.onInit();
-    }
+  protected async onInit(): Promise<void> {
+    initUrlConstants(this.context);
+    return super.onInit();
+  }
 
   public render(): void {
     const element: React.ReactElement<IBannerProps> = React.createElement(Banner, {
-      ...this.properties
+      ...this.properties,
+      displayMode: this.displayMode
     });
+
     ReactDom.render(element, this.domElement);
   }
 

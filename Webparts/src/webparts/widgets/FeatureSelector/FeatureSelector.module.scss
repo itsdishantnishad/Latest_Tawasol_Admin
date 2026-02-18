@@ -1,9 +1,15 @@
 .featureSelector {
-  height: 250px;
+  height: 220px;
   display: grid;
   grid-template-columns: repeat(13, 110px);
   justify-content: center;
   zoom: 1.2;
+  @media(max-width: 1400px){
+    zoom: 1.1;
+  }
+  @media(max-width: 1366px){
+    zoom: 1;
+  }
 }
 
 .card {
@@ -48,71 +54,73 @@
 
 /* Background variants */
 .dashboardCard {
-  background-image: url("../../Components/FeatureContent/assets/Dashboard.png");
+  background-image: url("../../Components/FeatureContent/assets/Dashboard.webp");
 }
 
 .galleryCard {
-  background-image: url("../../Components/FeatureContent/assets/ImageGallery.png");
+  background-image: url("../../Components/FeatureContent/assets/ImageGallery.webp");
   box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
 }
 
 .documentsCard {
-  background-image: url("../../Components/FeatureContent/assets/Documents.png");
+  background-image: url("../../Components/FeatureContent/assets/Documents.webp");
   box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
 }
 
 .eventsCard {
-  background-image: url("../../Components/FeatureContent/assets/Events.png");
+  background-image: url("../../Components/FeatureContent/assets/Events.webp");
   box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 2;
 }
 
 .celebrateCard {
-  background-image: url("../../Components/FeatureContent/assets/LetsCelebrate.png");
-  box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
+  background-image: url("../../Components/FeatureContent/assets/LetsCelebrate.webp");
+  box-shadow:
+  -15.07px 7.93px 18.25px -7.93px #00000033,
+  15.07px -2.07px 18.25px -7.93px #00000033;
   z-index: 7;
 }
 
 .meetingCard {
-  background-image: url("../../Components/FeatureContent/assets/Meeting.png");
+  background-image: url("../../Components/FeatureContent/assets/Meeting.webp");
   box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 6;
 }
 
 .serviceLinksCard {
-  background-image: url("../../Components/FeatureContent/assets/Service-Links.png");
+  background-image: url("../../Components/FeatureContent/assets/Service-Links.webp");
   box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 4;
 }
 
 .interactiveFormsCard {
-  background-image: url("../../Components/FeatureContent/assets/InteractiveForms.png");
+  background-image: url("../../Components/FeatureContent/assets/InteractiveForms.webp");
   box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 3;
 }
 
 .offersCard {
-  background-image: url("../../Components/FeatureContent/assets/Offers.png");
+  background-image: url("../../Components/FeatureContent/assets/Offers.webp");
   box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
 }
 
 .trainingCard {
-  background-image: url("../../Components/FeatureContent/assets/Training.png");
+  background-image: url("../../Components/FeatureContent/assets/Training.webp");
   box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
 }
 
 .aboutDhreCard {
-  background-image: url("../../Components/FeatureContent/assets/AboutDHRE.png");
+  background-image: url("../../Components/FeatureContent/assets/AboutDHRE.webp");
   box-shadow: -15.07px 7.93px 18.25px -7.93px #00000033;
 }
 
 .tasksCard {
-  background-image: url("../../Components/FeatureContent/assets/Tasks.png");
+  background-image: url("../../Components/FeatureContent/assets/Tasks.webp");
   box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 1;
 }
 
 .beverageCard {
-  background-image: url("../../Components/FeatureContent/assets/Services.png");
+  background-image: url("../../Components/FeatureContent/assets/Services.webp");
   box-shadow: -14.98px 0px 18.14px -7.89px #00000040;
 }

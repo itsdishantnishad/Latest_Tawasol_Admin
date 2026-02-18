@@ -5,7 +5,7 @@ import { listServices } from '../../services/listServices';
 import NewsResults from './NewsResults';
 import FiltersBar from './FiltersBar';
 
-export type TabKey = "All" | "Announcements";
+export type TabKey = "All";
 export type ViewMode = "grid" | "list";
 
 export type NewsRow = {
@@ -29,7 +29,6 @@ export interface INewsViewState {
   error?: string;
 
   allNewsItems: NewsRow[];
-  announcementItems: NewsRow[];
 
   activeTab: TabKey;
   selectedDepartment: string; // "All" or dept name
@@ -47,7 +46,6 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
     this.state = {
       loading: true,
       allNewsItems: [],
-      announcementItems: [],
 
       activeTab: "All",
       selectedDepartment: "All",
@@ -70,8 +68,6 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
     try {
       const allNewsArticles: NewsRow[] = await this.newsDataService.getNewsStory(30);
 
-      const announcementItems: NewsRow[] = allNewsArticles.filter(this.isAnnouncement);
-
       const uniqueDepartments = Array.from(
         new Set(
           allNewsArticles
@@ -87,7 +83,6 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
 
       this.setState({
         allNewsItems: allNewsArticles,
-        announcementItems,
         departmentOptions,
         loading: false
       });
@@ -102,14 +97,9 @@ export default class NewsView extends React.Component<INewsViewProps, INewsViewS
     return (value || "").trim().toLowerCase();
   }
 
-  private isAnnouncement = (item: NewsRow): boolean => {
-    const t = this.normalize(item.newsType);
-    return t.includes("announce");
-  };
-
   private matchesTab = (item: NewsRow, tab: TabKey): boolean => {
-    if (tab === "All") return true;
-    return this.isAnnouncement(item);
+    // Only "All" tab remains, so always return true
+    return true;
   };
 
   private matchesDepartment = (item: NewsRow, selectedDepartment: string): boolean => {

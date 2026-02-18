@@ -19,13 +19,12 @@
   padding: 0;
   cursor: pointer;
 
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    sans-serif;
+  font-family: 'Inter', sans-serif !important;
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
   letter-spacing: 0;
-  color: #b0b0b0;
+  color: #6C6C6C;
   vertical-align: middle;
 }
 
@@ -115,8 +114,8 @@
 
 .langButtonInactive {
   background-color: transparent;
-  border: 1.5px solid #c5b9ac;
-  color: #c5b9ac;
+  border: 1.5px solid #101820;
+  color: #000000;
 }
 
 .faqList {
@@ -206,3 +205,28 @@
   color: #3a3b43;
 }
 
+/* ================= CHATBOT FAB  ================= */
+.chatBotFab{
+  --chatbot-base-bottom: 24px;
+  --chatbot-raise: 0px;
+
+  position: fixed !important;
+  width: 84.6796875px;
+  height: 75.92423248px;
+  opacity: 1;
+  right: 24px;
+  bottom: var(--chatbot-base-bottom);
+  cursor: pointer;
+  z-index: 9999;
+  pointer-events: auto;
+
+  transform: translateY(calc(-1 * var(--chatbot-raise)));
+  transition: transform .24s ease;
+  will-change: transform;
+}
+
+.chatBotFab img{
+  width: 100%;
+  height: 100%;
+  display: block;
+}

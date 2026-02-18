@@ -40,6 +40,7 @@ export enum ContentTypeId {
   NEWS_STORY = "0x0101009D1CB255DA76424F860D91F20E6C411800B8C2DF9C7C0D3343B05E3F3EC59E444E",
   TRAINING = "0x0101009D1CB255DA76424F860D91F20E6C411800B721B228147AA74E9D35C742E0E4560C",
   EVENT = "0x0101009D1CB255DA76424F860D91F20E6C41180091B43BD03BCDD947979C2884C4C8FF39",
+  LETSCONNECT = "0x0101009D1CB255DA76424F860D91F20E6C4118002B6231845DC1944FBF97864C855DA046",
 }
 
 /** ===== Types ===== */
@@ -112,6 +113,15 @@ export type AnnouncementBannerListItem = {
   isActive: boolean;
 };
 
+export type UrlFieldValue = { Url?: string; Description?: string };
+
+export type LetsMeetPageItem = {
+  id: number;
+  title: string;
+  pageUrl: string;
+  youtubeUrl: string;
+};
+
 export class listServices {
   private sp: SPFI;
 
@@ -157,6 +167,69 @@ export class listServices {
     tmp.innerHTML = html;
     return (tmp.textContent || tmp.innerText || "").replace(/\s+/g, " ").trim();
   }
+
+  private normalizePhotoUrl(raw?: string): string | undefined {
+    const val = (raw || "").trim();
+    if (!val) return undefined;
+
+    // If stored URL is a SPO thumbnail/transform link, try to use the underlying docid (original)
+    try {
+      const base = this.context.pageContext.web.absoluteUrl;
+      const u = new URL(val, base);
+
+      const isThumb = u.pathname.includes("/transform/thumbnail");
+      if (isThumb) {
+        const docid = u.searchParams.get("docid");
+        if (docid) return decodeURIComponent(docid);
+      }
+    } catch {
+      // ignore and return original
+    }
+
+    return val;
+  }
+
+  private normalizeFavouriteKey(url?: string): string {
+    const raw = (url || "").trim();
+    if (!raw) return "";
+
+    const webAbs = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+    const origin = new URL(webAbs).origin;
+
+    try {
+      // Build absolute URL safely
+      const abs = /^https?:\/\//i.test(raw)
+        ? raw
+        : `${origin}${raw.startsWith("/") ? "" : "/"}${raw}`;
+
+      const u = new URL(abs);
+
+      // remove any encoding differences (spaces vs %20 etc.)
+      let path = u.pathname || "";
+      try { path = decodeURI(path); } catch { /* ignore */ }
+
+      // standardize slashes + case
+      path = path.replace(/\/{2,}/g, "/").trim();
+      return path.toLowerCase(); // server-relative key (matches getFavouriteIndex usage)
+    } catch {
+      // fallback
+      const clean = raw.split(/[?#]/)[0];
+      return listServices.convertToRelativeUrl(clean).toLowerCase();
+    }
+  }
+
+/** Build a clean absolute URL to store in TIRFileUrl */
+private toStoredAbsoluteUrl(serverRelPath: string): string {
+  const webAbs = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+  const origin = new URL(webAbs).origin;
+
+  let rel = serverRelPath || "";
+  try { rel = decodeURI(rel); } catch { /* ignore */ }
+  rel = rel.startsWith("/") ? rel : `/${rel}`;
+
+  // store encoded absolute (safe for spaces etc.)
+  return `${origin}${encodeURI(rel)}`;
+}
 
   // UPDATED helper: strip HTML BUT keep line breaks (for bullet pointers)
   private static toPlainTextWithLines(raw?: string): string {
@@ -217,11 +290,28 @@ export class listServices {
     return lines.join("\n");
   }
 
-  private toAbsoluteUrl(serverRelative: string): string {
-    const web = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
-    if (!serverRelative) return web;
-    if (serverRelative.startsWith("http")) return serverRelative;
-    return `${web}${serverRelative.startsWith("/") ? "" : "/"}${serverRelative}`;
+  private toAbsoluteUrl(path: string): string {
+    const webAbs = this.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+    const val = (path || "").trim();
+
+    if (!val) return webAbs;
+
+    // already absolute
+    if (/^https?:\/\//i.test(val)) return val;
+
+    const origin = new URL(webAbs).origin;
+
+    // server-relative (starts with /sites/..., /teams/..., /_layouts/...)
+    if (val.startsWith("/")) {
+      return `${origin}${val}`;
+    }
+
+    // web-relative (SitePages/..., Shared%20Documents/..., etc.)
+    if (val.startsWith("./")) {
+      return `${webAbs}/${val.substring(2)}`;
+    }
+
+    return `${webAbs}/${val}`;
   }
 
   /** Convert SharePoint ISO (UTC or with offset) into local ISO string. */
@@ -438,7 +528,7 @@ export class listServices {
         Querytext: "*",
         RowLimit: 1,
         TrimDuplicates: false,
-        SelectProperties: ["Id", "Title", "TIREventEndDate", "TIREventStartDate", "TIRLocation", "TIREventCategory", "URL"],
+        SelectProperties: ["Id", "ListItemID", "Title", "TIREventEndDate", "TIREventStartDate", "TIRLocation", "TIREventCategory", "URL"],
         QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
         HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
         EnableInterleaving: true,
@@ -446,7 +536,7 @@ export class listServices {
 
       return results.PrimarySearchResults.map((item: any) => {
         return {
-          ID: item.Id,
+          ID: Number(item.ListItemID || item.ListItemId || item.Id) || 0,
           title: item.Title,
           eventEndDate: item.TIREventEndDate,
           eventStartDate: item.TIREventStartDate,
@@ -518,6 +608,7 @@ export class listServices {
         TrimDuplicates: false,
         SelectProperties: [
           "Id",
+          "ListItemID",
           "Title",
           "TIREventEndDate",
           "TIREventStartDate",
@@ -559,7 +650,7 @@ export class listServices {
         }
 
         return {
-          ID: item.Id,
+          ID: Number(item.ListItemID || item.ListItemId || item.Id) || 0,
           title: item.Title,
           eventEndDate: item.TIREventEndDate,
           eventStartDate: item.TIREventStartDate,
@@ -573,6 +664,47 @@ export class listServices {
     } catch (error) {
       return Promise.reject(error);
     }
+  }
+
+  // ===== Lets Meet (Site Pages) =====
+
+  private readUrlField(val?: UrlFieldValue | string): string {
+    if (!val) return "";
+    if (typeof val === "string") return val.trim();
+    return (val.Url || "").trim();
+  }
+
+  private escOData(val: string): string {
+    return (val || "").replace(/'/g, "''");
+  }
+
+  public async getLetsMeetPagesFromSitePages(
+    sitePagesListTitle: string,
+    contentTypeId: string,
+    top: number = 12
+  ): Promise<LetsMeetPageItem[]> {
+    const listTitle = sitePagesListTitle || "Site Pages";
+    const ctId = contentTypeId;
+
+    const rows: any[] = await this.sp.web.lists
+      .getByTitle(listTitle)
+      .items.select("Id", "Title", "FileRef", "URL", "TIRSortOrder", "Modified", "ContentTypeId")
+      .filter(`startswith(ContentTypeId,'${this.escOData(ctId)}')`)
+      .orderBy("TIRSortOrder", true)
+      .orderBy("Modified", false)
+      .top(top)();
+
+    return (rows || []).map((r: any) => {
+      const pageUrl = this.toAbsoluteUrl(r?.FileRef || "");
+      const youtubeUrl = this.readUrlField(r?.URL);
+
+      return {
+        id: Number(r?.Id) || 0,
+        title: r?.Title || "",
+        pageUrl,
+        youtubeUrl,
+      } as LetsMeetPageItem;
+    });
   }
 
   /** ===== Simple list-based loaders (Apps, Joiners, Portfolio, Values) ===== */
@@ -618,7 +750,7 @@ export class listServices {
   public async getNewJoiners(listName: string): Promise<any[]> {
     const results = await this.sp.web.lists
       .getByTitle(listName)
-      .items.select("Title", "TIRSortOrder", "TIRDesignation", "TIRUserPicture", "TIRDescription","TIRUserEmail")
+      .items.select("Title", "TIRSortOrder", "TIRDesignation", "TIRUserPicture", "TIRDescription", "TIRUserEmail")
       .orderBy("TIRSortOrder", false)();
 
     return results.map((item: any) => ({
@@ -627,7 +759,7 @@ export class listServices {
       Designation: item.TIRDesignation,
       UserPicture: item.TIRUserPicture ? item.TIRUserPicture.Url : "#",
       Description: item.TIRDescription,
-      TIRUserEmail: item.TIRUserEmail
+      TIRUserEmail: item.TIRUserEmail,
     }));
   }
 
@@ -687,8 +819,8 @@ export class listServices {
 
     const mapped: OrgMember[] = rows.map((it: any) => {
       const ph = it?.TIRUserPicture;
-      const photoUrl = typeof ph === "string" ? ph : ph?.Url || undefined;
-
+      const rawUrl = typeof ph === "string" ? ph : ph?.Url || "";
+      const photoUrl = this.normalizePhotoUrl(rawUrl);
       const userField = it?.TIRUser || {};
       const userTitle = (userField?.Title || "").trim();
 
@@ -906,7 +1038,9 @@ export class listServices {
   /** ===== Boards: Recently Updated / Most Used ===== */
 
   public async getRecentlyUpdatedDocuments(dmsLibraryRoot: string, rowLimit: number = 6): Promise<DocumentSummary[]> {
-    const rootRel = (dmsLibraryRoot || "/sites/Intranet/DMS").replace(/\/$/, "");
+    const rootRel = (dmsLibraryRoot || "").replace(/\/$/, "");
+    if (!rootRel) return [];
+
     const rootAbs = this.toAbsoluteUrl(rootRel);
 
     const query: ISearchQuery = {
@@ -972,6 +1106,258 @@ export class listServices {
     return listServices.mapSearchRowsToDocs(rows);
   }
 
+  // Policies and Procedures Document Library
+  public async getMostUsedDocumentsInLibrary(dmsLibraryRoot: string, rowLimit: number = 6): Promise<DocumentSummary[]> {
+    const rootRel = (dmsLibraryRoot || "").replace(/\/$/, "");
+    if (!rootRel) return [];
+
+    const rootAbs = this.toAbsoluteUrl(rootRel);
+
+    const query: ISearchQuery = {
+      Querytext: `Path:"${rootAbs}" IsDocument:True`,
+      RowLimit: rowLimit,
+      TrimDuplicates: true,
+      SelectProperties: [
+        "WorkId",
+        "Title",
+        "Path",
+        "FileType",
+        "Filename",
+        "ViewsLifeTime",
+        "LastModifiedTime",
+        "TIRDepartmentOWSTEXT",
+        "TIRTagOWSTEXT",
+        "DepartmentOWSTEXT",
+        "Department",
+        "ContentType",
+      ],
+      SortList: [{ Property: "ViewsLifeTime", Direction: 1 }],
+    };
+
+    const res: any = await this.sp.search(query);
+    const rows =
+      res?.RawSearchResults?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
+      res?.PrimaryQueryResult?.RelevantResults?.Table?.Rows ||
+      res?.PrimarySearchResultsTable?.Rows ||
+      [];
+
+    return listServices.mapSearchRowsToDocs(rows);
+  }
+
+  private readHyperlink(val: any): string {
+    if (!val) return "";
+    if (typeof val === "string") return val.trim();
+    return (val.Url || val.url || "").trim();
+  }
+
+private readTaxonomyLabel(val: any): string {
+  if (!val) return "";
+  if (typeof val === "string") {
+    // sometimes "Label|TermGuid" or just "Label"
+    return String(val).split("|")[0].trim();
+  }
+  if (Array.isArray(val)) {
+    return val
+      .map((v) => (v?.Label ? String(v.Label) : String(v?.label || "")))
+      .filter(Boolean)
+      .join(", ");
+  }
+  if (val?.Label) return String(val.Label);
+  return "";
+}
+
+  private guessExt(name?: string, url?: string): string {
+    const pick = (s?: string) => {
+      const t = (s || "").toLowerCase();
+      const m = t.match(/\.([0-9a-z]+)(?:$|\?)/i);
+      return (m?.[1] || "").toLowerCase();
+    };
+    return pick(name) || pick(url) || "";
+  }
+
+  public async getUserFavouriteDocuments(
+    favouritesListTitle: string = "Document Favourites",
+    rowLimit: number = 3
+  ): Promise<DocumentSummary[]> {
+    let userId: number | undefined = (this.context.pageContext as any)?.legacyPageContext?.userId;
+    if (!userId) {
+      const me: any = await this.sp.web.currentUser();
+      userId = Number(me?.Id) || 0;
+    }
+
+    const baseSelect: string[] = [
+      "Id",
+      "Title",
+      "TIRFileUrl",
+      "TIRTags",
+      "TIRIsActive",
+      "Modified",
+      "AuthorId",
+      "TIRDepartment",
+    ];
+
+    const fetchLimit = Math.max(rowLimit * 5, rowLimit);
+
+    let rows: any[] = [];
+    try {
+      rows = await this.sp.web.lists
+        .getByTitle(favouritesListTitle)
+        .items.select(...baseSelect)
+        .filter(`AuthorId eq ${userId}`)  
+        .orderBy("Modified", false)
+        .top(fetchLimit)();
+    } catch {
+      const fallbackSelect = baseSelect.filter(x => x !== "TIRDepartment");
+      rows = await this.sp.web.lists
+        .getByTitle(favouritesListTitle)
+        .items.select(...fallbackSelect)
+        .filter(`AuthorId eq ${userId}`)
+        .orderBy("Modified", false)
+        .top(fetchLimit)();
+    }
+
+    const mapped: DocumentSummary[] = (rows || [])
+      .filter((r) => r?.TIRIsActive !== false)
+      .map((r: any) => {
+        const url = this.readHyperlink(r?.TIRFileUrl);
+
+        const name =
+          r?.Title ||
+          (url ? decodeURIComponent(url.split("/").pop() || "Document") : "Document");
+
+        return {
+          id: String(r?.Id ?? ""),
+          name,
+          url,
+          ext: this.guessExt(name, url),
+          tag: this.readTaxonomyLabel(r?.TIRTags),
+          dept: this.readTaxonomyLabel(r?.TIRDepartment), 
+        } as DocumentSummary;
+      })
+      .slice(0, rowLimit);
+
+    return mapped;
+  }
+
+  public async getFavouriteIndex(
+    favouritesListTitle: string = "Document Favourites"
+  ): Promise<Record<string, number>> {
+
+    let userId: number | undefined = (this.context.pageContext as any)?.legacyPageContext?.userId;
+    if (!userId) {
+      const me: any = await this.sp.web.currentUser();
+      userId = Number(me?.Id) || 0;
+    }
+
+    const rows = await this.sp.web.lists
+      .getByTitle(favouritesListTitle)
+      .items.select("Id", "TIRFileUrl", "TIRIsActive", "AuthorId")
+      .filter(`AuthorId eq ${userId}`)
+      .top(5000)();
+
+    const map: Record<string, number> = {};
+    (rows || []).forEach((r: any) => {
+      if (r?.TIRIsActive === false) return;
+
+      const url = this.readHyperlink(r?.TIRFileUrl);
+      const key = this.normalizeFavouriteKey(url);
+      if (!key) return;
+
+      map[key] = Number(r?.Id);
+    });
+
+    return map;
+  }
+
+  public async toggleFavourite(
+    fileUrl: string,
+    title?: string,
+    _tags?: any,
+    _department?: any,
+    favouritesListTitle: string = "Document Favourites"
+  ): Promise<void> {
+    const input = (fileUrl || "").trim();
+    if (!input) return;
+
+    let userId: number | undefined = (this.context.pageContext as any)?.legacyPageContext?.userId;
+    if (!userId) {
+      const me: any = await this.sp.web.currentUser();
+      userId = Number(me?.Id) || 0;
+    }
+
+    const list = this.sp.web.lists.getByTitle(favouritesListTitle);
+
+    const rows = await list.items
+      .select("Id", "TIRFileUrl", "TIRIsActive", "AuthorId", "Modified")
+      .filter(`AuthorId eq ${userId}`)
+      .orderBy("Modified", false)
+      .top(5000)();
+
+    const targetKey = this.normalizeFavouriteKey(input);
+
+    const matches = (rows || []).filter((r: any) => {
+      const u = this.readHyperlink(r?.TIRFileUrl);
+      return this.normalizeFavouriteKey(u) === targetKey;
+    });
+
+    // ========= IF EXISTS =========
+    if (matches.length) {
+      const anyActive = matches.some((m: any) => m?.TIRIsActive !== false);
+
+      // ---- REMOVE favourite (PRIMARY = HARD DELETE) ----
+      if (anyActive) {
+        try {
+          // delete all duplicates (active + inactive)
+          await Promise.all(matches.map((m: any) => list.items.getById(m.Id).delete()));
+          return;
+        } catch (err) {
+          // fallback: soft delete if user can't delete
+          await Promise.all(
+            matches.map((m: any) =>
+              list.items.getById(m.Id).update({ TIRIsActive: false })
+            )
+          );
+          return;
+        }
+      }
+
+      // ---- ADD favourite again (reactivate newest + cleanup duplicates) ----
+      const [keep, ...rest] = matches;
+
+      try {
+        await list.items.getById(keep.Id).update({ TIRIsActive: true });
+
+        // cleanup old duplicates (try delete, fallback set inactive)
+        await Promise.all(
+          rest.map(async (m: any) => {
+            try {
+              await list.items.getById(m.Id).delete();
+            } catch {
+              await list.items.getById(m.Id).update({ TIRIsActive: false });
+            }
+          })
+        );
+
+        return;
+      } catch {
+        // if reactivate fails, fall through to add fresh row
+      }
+    }
+
+    // ========= ADD NEW =========
+    const serverRelKey = targetKey; // already server-relative lowercased
+    const absToStore = this.toStoredAbsoluteUrl(serverRelKey);
+
+    const fileName =
+      (title || "").trim() ||
+      decodeURIComponent(serverRelKey.split("/").pop() || "Document");
+
+    await list.items.add({
+      Title: fileName,
+      TIRFileUrl: { Url: absToStore, Description: "" },
+      TIRIsActive: true,
+    });
+  }
   /** ===== Announcement Banner (time-window & timezone aware) ===== */
   public async getActiveAnnouncementBannersByListTitle(
     listTitle: string,

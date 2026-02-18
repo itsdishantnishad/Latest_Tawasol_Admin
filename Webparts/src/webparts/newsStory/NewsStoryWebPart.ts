@@ -1,31 +1,32 @@
-import * as React from 'react';
-import * as ReactDom from 'react-dom';
-import { Version } from '@microsoft/sp-core-library';
+import * as React from "react";
+import * as ReactDom from "react-dom";
+import { Version } from "@microsoft/sp-core-library";
 import {
   type IPropertyPaneConfiguration,
   PropertyPaneTextField,
   PropertyPaneSlider,
-} from '@microsoft/sp-property-pane';
-import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
+} from "@microsoft/sp-property-pane";
+import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
 
-import * as strings from 'NewsStoryWebPartStrings';
-import NewsStory from './components/NewsStory';
-import { INewsStoryProps } from './components/INewsStoryProps';
-import { IReadonlyTheme } from '@microsoft/sp-component-base';
+import * as strings from "NewsStoryWebPartStrings";
+import NewsStory from "./components/NewsStory";
+import { INewsStoryProps } from "./components/INewsStoryProps";
+import { IReadonlyTheme } from "@microsoft/sp-component-base";
 
 export interface INewsStoryWebPartProps {
   description: string;
   maxItems?: number;
 }
 
-export default class NewsStoryWebPart
-  extends BaseClientSideWebPart<INewsStoryWebPartProps> {
+export default class NewsStoryWebPart extends BaseClientSideWebPart<INewsStoryWebPartProps> {
 
   public render(): void {
+    // ✅ FIX: Direct render - component manages its own loading state
+    // Removed delayed mounting and innerHTML shimmer that was causing race conditions
     const element: React.ReactElement<INewsStoryProps> = React.createElement(
       NewsStory,
       {
-        interval: 500, // existing behavior
+        interval: 500,
         context: this.context,
         maxItems: this.properties.maxItems || 3,
       }
@@ -42,18 +43,18 @@ export default class NewsStoryWebPart
 
   private _getEnvironmentMessage(): Promise<string> {
     if (!!this.context.sdks.microsoftTeams) {
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext().then(context => {
+      return this.context.sdks.microsoftTeams.teamsJs.app.getContext().then((context) => {
         switch (context.app.host.name) {
-          case 'Office':
+          case "Office":
             return this.context.isServedFromLocalhost
               ? strings.AppLocalEnvironmentOffice
               : strings.AppOfficeEnvironment;
-          case 'Outlook':
+          case "Outlook":
             return this.context.isServedFromLocalhost
               ? strings.AppLocalEnvironmentOutlook
               : strings.AppOutlookEnvironment;
-          case 'Teams':
-          case 'TeamsModern':
+          case "Teams":
+          case "TeamsModern":
             return this.context.isServedFromLocalhost
               ? strings.AppLocalEnvironmentTeams
               : strings.AppTeamsTabEnvironment;
@@ -76,11 +77,11 @@ export default class NewsStoryWebPart
     const { semanticColors } = currentTheme;
 
     if (semanticColors) {
-      this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
-      this.domElement.style.setProperty('--link', semanticColors.link || null);
-      this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
+      this.domElement.style.setProperty("--bodyText", semanticColors.bodyText || null);
+      this.domElement.style.setProperty("--link", semanticColors.link || null);
+      this.domElement.style.setProperty("--linkHovered", semanticColors.linkHovered || null);
       this.domElement.style.setProperty(
-        '--primaryButtonBackground',
+        "--primaryButtonBackground",
         semanticColors.primaryButtonBackground || null
       );
     }
@@ -91,7 +92,7 @@ export default class NewsStoryWebPart
   }
 
   protected get dataVersion(): Version {
-    return Version.parse('1.0');
+    return Version.parse("1.0");
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
@@ -105,11 +106,11 @@ export default class NewsStoryWebPart
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
+                PropertyPaneTextField("description", {
                   label: strings.DescriptionFieldLabel,
                 }),
-                PropertyPaneSlider('maxItems', {
-                  label: 'Number of news items to show',
+                PropertyPaneSlider("maxItems", {
+                  label: "Number of news items to show",
                   min: 1,
                   max: 50,
                   step: 1,

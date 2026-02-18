@@ -1,11 +1,23 @@
-// @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: local('Instrument Serif Regular'), url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: local('Instrument Serif Italic'), url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
+
 .wrapper {
   background: #FFF4EA;
-  padding: 80px 76px;
+  padding: 60px;
 }
 
 .title {
-  font-family: "Instrument Serif", serif;
+  font-family: 'Instrument Serif Regular';
   font-size: 42px;
   font-weight: 400;
   letter-spacing: 1px;
@@ -14,32 +26,71 @@
   text-align: center;
 }
 
-.teamWord { font-style: italic; color: #DA291C; }
-.orgWord  { font-style: normal; color: #000; }
+.teamWord { font-family: 'Instrument Serif Italic'; color: #DA291C; }
+.orgWord  { color: #000; }
 
 .state,
 .error {
-  text-align: center;
-  padding: 12px 0;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 0, 0, 0.06);
+  border: 1px solid rgba(255, 0, 0, 0.18);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
   font-size: 14px;
+}
+
+.retryBtn {
+  appearance: none;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+
+  transition: transform 0.08s ease, box-shadow 0.15s ease;
+}
+
+.retryBtn:hover {
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+}
+
+.retryBtn:active {
+  transform: scale(0.98);
 }
 .error { color: #DA291C; }
 
 .topCardWrap {
   display: flex;
   justify-content: center;
-  margin: 0px 0 60px
+  margin-bottom: 50px;
+  // margin: 0 auto 28px;
+  // max-width: 1320px;
 }
 
 .row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: clamp(14px, 1.5vw, 18px);
-  margin-bottom: 52px;
+  gap: 30px;
+  justify-content: center;
+  width: 100%;
+  margin-top: 30px;
+  // place-self: center;
+  // max-width: 1320px;
+  // margin: 0 auto 32px;
 
-  @media (max-width: 1200px) { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 640px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 1300px) { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 1050px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 820px)  { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 540px)  { grid-template-columns: 1fr; }
 }
 
 .card {
@@ -47,6 +98,11 @@
   position: relative;
   border-radius: 12px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  overflow: hidden;
+  // width: 244px;
 }
 
 .card:hover,
@@ -55,8 +111,8 @@
 }
 
 .cardLg {
-  width: 230px;
-  margin: 0 auto;
+  width: 244px;
+  max-width: 90vw;
   text-align: center;
 }
 
@@ -67,43 +123,86 @@
     linear-gradient(#FFF4EA, #FFF4EA) padding-box,
     linear-gradient(180deg, #DDA160 0%, #FFDBB4 100%) border-box;
   box-shadow: inset 0 4px 4px 0 #FED3A4;
+  padding: 10px;
 }
 
-.photoWrap { width: 100%; margin-bottom: 0; }
-.photo { width: 100%; object-fit: cover; display: block; }
-.photoFallback { width: 100%; height: 100%; }
+.photoWrap {
+  width: 100%;
+  // aspect-ratio: 4 / 5;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f3f3;
+}
+
+// .photoWrapLg {
+//   aspect-ratio: 1 / 1;
+// }
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.photoFallback {
+  width: 100%;
+  background: #f3f3f3;
+  aspect-ratio: 4 / 5;
+}
+
+.photoWrapLg + .photoFallback,
+.photoWrapLg.photoFallback {
+  aspect-ratio: 1 / 1;
+}
 
 .accent {
   background: #da291c;
   border-radius: 50px;
   height: 2.5px;
-  margin: 24px 0 20px;
-  width: 50%;
+  width: 95px;
+  margin: 16px 0 12px;
 }
 .accentCenter { margin-left: auto; margin-right: auto; }
 
 .name {
   color: #000;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 500;
-  margin-bottom: 4px;
-  line-height: 32px;
+  margin-bottom: 6px;
+  line-height: 20px;
   font-family: "Inter", sans-serif;
 }
 
 .role {
   color: #6C6C6C;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 14px;
+  line-height: 20px;
   font-weight: 400;
   font-family: "Inter", sans-serif;
 }
 
+.cardLg .name {
+  font-size: 24px;
+  line-height: 26px;
+}
+
+.cardLg .role {
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 400;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .deptBand {
-  margin: 14px 0 26px;
-  padding: 22px 10px 6px;
-  position: relative;
   border-radius: 12px;
+  margin: 0 auto;
+  max-width: 1340px;
+  padding: 20px 0px 0px;
+  position: relative;
 }
 
 .deptTitle {
@@ -119,20 +218,21 @@
 
 .deptRail {
   position: relative;
-  height: 22px;
-  margin: 0 auto 14px;
+  height: 10px;
+  margin-bottom: 10px;
 }
 .deptRail::before {
   content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 10px;
-  height: 1px;
-  background: #CCCACA;
-  opacity: 0.6;
+  background: #cccaca;
   border-radius: 1px;
+  height: 1px;
+  left: 10%;
+  opacity: .6;
+  position: absolute;
+  right: 10%;
+  top: 0;
 }
+
 .stub {
   position: absolute;
   top: 0;
@@ -144,31 +244,28 @@
 
 .deptGrid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(140px, 1fr));
-  gap: clamp(10px, 1.4vw, 16px);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
   justify-items: center;
 
   @media (max-width: 1200px) { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 640px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 900px)  { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 640px)  { grid-template-columns: repeat(2, 1fr); }
 }
 
 .deptBox {
-  width: 168px;
-  max-width: 168px;
+  // width: 168px;
+  // max-width: 168px;
   min-height: 96px;
   padding: 0 12px;
   border-radius: 16px;
-
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-
-  background: radial-gradient(circle at 50% 0, #DDA160 0%, #FFDBB4 100%);
-  box-shadow: inset 0 4px 4px 0 #FED3A4;
-  border: 1px solid #E9B883;
-
+  background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #DDA160 0%, #FFDBB4 100%);
+  box-shadow: 0px 4px 4px 0px #FED3A4 inset;
+  // border: 1px solid #E9B883;
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 500;
   font-size: 16px;
@@ -182,55 +279,175 @@
   display: block;
 }
 
-/* ✅ IMPORTANT: box + bullets wrapper */
 .deptCol {
-  width: 168px;
-  max-width: 168px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  min-width: 0; /* ✅ allow wrapping */
 }
 
-/* ✅ Bullet pointers */
 .deptList {
-  margin: 14px 0 0;
-  padding-left: 18px;
-  list-style: disc;
-
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  font-size: 14px;
-
-  /* ✅ FIX: was 11px causing overlap */
-  line-height: 20px;
-
   color: #000;
-
-  /* ✅ safe wrapping */
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  list-style: disc;
+  padding-left: 20px;
   white-space: normal;
-  overflow-wrap: anywhere;
   word-break: break-word;
 }
 
 .deptList li {
-  margin: 0 0 8px;
-  line-height: 20px; /* ✅ ensure li also keeps proper spacing */
+  margin: 0 0 10px;
+  line-height: 22px;
+}
+
+/* ===========================
+   SHIMMER (Team Org)
+   =========================== */
+
+@keyframes tosShimmerMove {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+.shimmerContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding-top: 10px;
+}
+
+.shimmerRow {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.shimmerCard {
+  width: 100%;
+  max-width: 244px;
+  height: 320px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 18px 14px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.shimmerCardLg {
+  height: 340px;
+}
+
+.shimmerAvatar,
+.shimmerLine,
+.deptShimmerBox {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.06) 25%,
+    rgba(0,0,0,0.12) 37%,
+    rgba(0,0,0,0.06) 63%
+  );
+  background-size: 400% 100%;
+  animation: tosShimmerMove 1.25s ease-in-out infinite;
+}
+
+.shimmerAvatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 999px;
+  margin-top: 6px;
+}
+
+.shimmerLine {
+  border-radius: 999px;
+  margin-top: 14px;
+}
+
+.shimmerLineName { width: 70%; height: 14px; }
+.shimmerLineRole { width: 54%; height: 12px; margin-top: 10px; }
+
+@media (max-width: 1300px) {
+  .shimmerRow { gap: 24px; }
+}
+
+@media (max-width: 540px) {
+  .shimmerCard { max-width: 280px; }
+  .shimmerCardLg { max-width: 320px; }
+}
+
+/* ===========================
+   Dept shimmer + stubRow helpers
+   =========================== */
+
+.deptShimmerGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  justify-items: center;
+}
+
+.deptShimmerBox {
+  width: 100%;
+  min-height: 96px;
+  border-radius: 16px;
+}
+
+@media (max-width: 900px) {
+  .deptShimmerGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .deptShimmerGrid { grid-template-columns: 1fr; }
+}
+
+/* ✅ No inline style: stubs distributed evenly using grid */
+.stubRow {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 0;
+  height: 10px;
+
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: start;
+}
+
+.stubGrid {
+  width: 1px;
+  height: 10px;
+  background: rgba(204, 202, 202, 0.8);
+  justify-self: center;
 }
 
 @media (max-width: 768px) {
   .wrapper { padding: 32px 16px 40px; border-radius: 8px; }
   .title { font-size: 32px; margin-bottom: 22px; }
-  .card { max-width: 260px; }
-  .cardLg { width: 100%; max-width: 260px; }
+
   .name { font-size: 20px; line-height: 28px; }
   .role { font-size: 14px; line-height: 22px; }
-  .deptBand { margin: 12px 0 22px; padding-top: 18px; }
+
+  .cardLg .name { font-size: 22px; line-height: 30px; }
+  .cardLg .role { font-size: 14px; line-height: 22px; }
+
+  .deptBand { margin: 12px auto 22px; padding-top: 18px; }
 }
 
-@media (max-width: 480px) {
-  .row { grid-template-columns: 1fr; }
-  .wrapper { padding: 28px 12px 32px; border-radius: 0; }
-  .card, .cardLg { width: 100%; max-width: 280px; margin-left: auto; margin-right: auto; }
-  .title { font-size: 28px; }
-  .deptGrid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+@media (max-width: 540px) {
+  .card { width: 100%; max-width: 280px; margin-left: auto; margin-right: auto; }
+  .cardLg { width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; }
 }

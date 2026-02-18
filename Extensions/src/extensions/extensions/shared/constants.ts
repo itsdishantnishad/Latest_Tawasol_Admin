@@ -48,22 +48,28 @@ export type ResolvedUrls = {
   help: string;
 };
 
-/** Join base + path without double slashes (ES5-safe, no startsWith). */
 function joinUrl(base: string, path: string): string {
-  if (!path) return base;
-  const b = base.replace(/\/+$/, '');               // trim trailing slashes
-  const needsSlash = path.length > 0 && path.charAt(0) !== '/';
-  return b + (needsSlash ? '/' : '') + path;
+  const b = (base || '').replace(/\/+$/, '');
+  const p = (path || '').trim();
+
+  if (!p) return b || '/';
+  if (p.startsWith('http://') || p.startsWith('https://')) return p;
+
+  if (p === '/') return b || '/';
+
+  if (!p.startsWith('/')) return `${b}/${p}`;
+  return `${b}${p}`;
 }
 
 /**
- * Resolve all paths against a base web URL (e.g., context.pageContext.web.absoluteUrl).
- * Example: resolveUrls('https://contoso.sharepoint.com/sites/MySite')
+ * Resolve all URL_PATHS against a base URL.
+ * - baseUrl should be the current web absoluteUrl.
  */
-export function resolveUrls(baseWebUrl: string): ResolvedUrls {
-  const root = baseWebUrl.replace(/\/+$/, '');
+export function resolveUrls(baseUrl: string): ResolvedUrls {
+  const root = (baseUrl || '').replace(/\/+$/, '');
+
   return {
-    home:      baseWebUrl,
+    home:      joinUrl(root, URL_PATHS.home),
     feed:      joinUrl(root, URL_PATHS.feed),
     tasks:     joinUrl(root, URL_PATHS.tasks),
     offers:    joinUrl(root, URL_PATHS.offers),

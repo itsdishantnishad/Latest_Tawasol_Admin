@@ -125,6 +125,7 @@
 /* ✅ Title + arrows row */
 .captionBar {
   align-items: center;
+  font-family: 'Inter', sans-serif;
   bottom: 32px;
   display: flex;
   gap: 24px;
@@ -139,7 +140,6 @@
 }
 
 .captionTitle {
-  font-family: 'Inter', sans-serif;
   font-size: 18px;
   line-height: 24px;
   font-weight: 500;
@@ -149,7 +149,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
   pointer-events: none;
 
   @media (max-width: 580px) {
@@ -164,11 +163,9 @@
   background: transparent;
   padding: 0;
   cursor: pointer;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   outline: none;
   box-shadow: none;
   -webkit-appearance: none;

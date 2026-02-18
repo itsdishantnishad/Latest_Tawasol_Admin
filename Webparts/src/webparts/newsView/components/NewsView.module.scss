@@ -31,8 +31,10 @@ $muted: #6C6C6C;
 
 /* ── CONTROLS (Pivot, Dept, Search, Toggle) ───────────────────── */
 .controls{
-  display:grid;
-  grid-template-columns: 1fr auto auto;   /* left spacer grows, filters + toggle hug right */
+  // display:grid;
+  // grid-template-columns: 1fr auto auto;   /* left spacer grows, filters + toggle hug right */
+  display: flex;
+  justify-content: space-between;
   align-items:center;
   column-gap:16px;
   width:100%;
@@ -40,9 +42,15 @@ $muted: #6C6C6C;
   min-height:56px;
   min-width:0; /* allow shrink */
 }
+
+.filterRightArea{
+    display: flex;
+    gap: 1rem;
+}
+
 .zoneTabs   { justify-self:start; }
 .zoneFilters{
-  justify-self:end;
+  justify-content: flex-end;
   display:flex; align-items:center; gap:12px;
   min-width:420px;
   min-width:0;
@@ -392,7 +400,31 @@ $muted: #6C6C6C;
   align-self: center;
 }
 
-.listMedia { width: 200px; border-radius:8px; position:relative; overflow:hidden; background:#eee; aspect-ratio: 1.75; }
+.listMedia {
+  width: 200px;
+  aspect-ratio: 16 / 9;   /* stable thumbnail ratio */
+  display: grid;
+  place-items: stretch;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #eee;
+}
+
+/* Fluent UI Image must fill the grid cell */
+.listMedia :global(.ms-Image-root) {
+  width: 100%;
+  height: 100%;
+  display: grid;
+}
+
+.listMedia :global(.ms-Image-image) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* IMPORTANT */
+  display: block;
+}
+
 .listCatIcon{ position:absolute; top:6px; left:6px; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; box-shadow:0 1px 4px rgba(0,0,0,.15);
   img{ width:100%; height:100%; object-fit:contain; }
 }
@@ -538,16 +570,11 @@ $muted: #6C6C6C;
   .smallTitle{ font-size:14px; }
 
   .listItemLink{ grid-template-columns: 1fr; gap:10px; padding:12px; }
-  .listMedia{ width:100%; height:160px; }
 
-  /* Force Fluent Image to fill the thumbnail box */
-  .listMedia :global(.ms-Image),
-  .listMedia :global(.ms-Image-image),
-  .listMedia :global(img){
-    width:100% !important;
-    height:100% !important;
-    object-fit:cover !important;
-    display:block;
+  .listMedia{
+    width:100%;
+    aspect-ratio: 1.75;
+    min-height: 140px;   // optional safety
   }
 
   .titleRow{ grid-template-columns:1fr; gap:6px; }

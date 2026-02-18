@@ -3,8 +3,9 @@
 .formsLibraryRoot {
   display: flex;
   column-gap: 32px;
-  padding: 16px;
-  bottom: 50px;
+  padding: 0px 60px;
+  // bottom: 50px;
+  margin-top: 24px;
 }
 
 .leftPane {
@@ -12,10 +13,12 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
 }
 
 .rightPane {
-  width: 540px;
+  // width: 540px;
+  flex: 1;
   height: 552px;                 
   background-color: #FDECDB6B;   
   border: 1px solid #FDECDB;
@@ -36,6 +39,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  font-family: 'Inter', sans-serif;
 }
 
 .deptHeader {
@@ -83,6 +87,7 @@
 .deptTitle {
   font-weight: 600;
   color: #323130;
+  font-family: 'Inter', sans-serif;
 }
 
 .deptHeaderRight {
@@ -138,6 +143,7 @@
   font-size: 14px;
   color: #323130;
   font-weight: 500;
+  font-family: 'Inter', sans-serif;
 }
 
 .exportButtonCustom {
@@ -233,11 +239,13 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: 'Inter', sans-serif;
 }
 
 .formMeta {
   font-size: 11px;
   color: #605e5c;
+  font-family: 'Inter', sans-serif;
   opacity: 0.7;
 }
 
@@ -247,6 +255,7 @@
   margin-left: 12px;
   flex-shrink: 0;
   margin-top: 13px; 
+  font-family: 'Inter', sans-serif;
 }
 
 .digitalizedChip {
@@ -438,3 +447,121 @@
 }
 
 
+/* ================= Initial Shimmer (FormsLibrary) ================= */
+
+@keyframes flShimmerMove {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.initialErrorBar {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.errorBarActions {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.initialShimmerWrap {
+  padding: 6px 0 2px;
+}
+
+.initialShimmerGrid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 920px) {
+  .initialShimmerGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shimmerPanel {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.shimmerPanelPad {
+  padding: 14px;
+}
+
+.shimmerBlock {
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.09) 20%,
+    rgba(0, 0, 0, 0.05) 40%
+  );
+  background-size: 200% 100%;
+  animation: flShimmerMove 1.25s ease-in-out infinite;
+}
+
+.shimmerLine {
+  height: 12px;
+  border-radius: 999px;
+}
+
+.shimmerLineSm {
+  height: 10px;
+  border-radius: 999px;
+}
+
+.shimmerGapSm {
+  margin-top: 10px;
+}
+
+.shimmerGapMd {
+  margin-top: 14px;
+}
+
+.shimmerList {
+  display: grid;
+  gap: 10px;
+}
+
+.shimmerRow {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.shimmerIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.shimmerTitle {
+  width: 70%;
+}
+
+.shimmerSub {
+  width: 48%;
+}
+
+.shimmerPreviewHeader {
+  width: 58%;
+}
+
+.shimmerPreviewLines {
+  display: grid;
+  gap: 10px;
+}
+
+.shimmerPreviewLineA { width: 92%; }
+.shimmerPreviewLineB { width: 82%; }
+.shimmerPreviewLineC { width: 88%; }
+.shimmerPreviewLineD { width: 60%; }
+
+.shimmerPreviewFrame {
+  height: 420px;
+  border-radius: 12px;
+}

@@ -45,10 +45,16 @@ const defaultForms: IForm[] = [
 
 export const Forms: React.FC<IFormsProps> = (props) => {
   const forms = props.forms || defaultForms;
+  const viewAllHref = (props.seeAllURL || "#").trim() || "#";
+
+   const cards = React.useMemo(
+    () => forms.map((c) => ({ ...c, url: viewAllHref })),
+    [forms, viewAllHref]
+  );
 
   return (
     <div>
-      <ShuffledCards cards={forms} />
+      <ShuffledCards cards={cards} />
 
       <div className={styles.ctaWrapper}>
         <ConditionalLink to={props.seeAllURL}>

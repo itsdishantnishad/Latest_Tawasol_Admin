@@ -2,6 +2,7 @@ import * as React from 'react';
 import styles from './PoliciesAndProcedures.module.scss';
 import { FunctionCategory, SupportDepartment } from './Landing';
 import { FocusZone, FocusZoneDirection, Image, ImageFit, Link } from '@fluentui/react';
+import PoliciesSearchService from "../../services/PoliciesAndProcedures/PoliciesSearchService";
 
 interface ITilesProps {
   variant: 'core' | 'support';
@@ -33,8 +34,10 @@ export default class Tiles extends React.Component<ITilesProps> {
   public render(): React.ReactElement<ITilesProps> {
     const { variant, categories, departments, searchText } = this.props;
 
-    if (variant === 'core') {
-      const visibleCategories = categories.filter(c => this.matchesSearchQuery(c.title, searchText));
+    if (variant === "core") {
+      const visibleCategories = categories.filter(c =>
+        PoliciesSearchService.matches(c.title, searchText)
+      );
       return (
         <FocusZone isCircularNavigation direction={FocusZoneDirection.bidirectional}>
           <div className={styles.coreGrid}>

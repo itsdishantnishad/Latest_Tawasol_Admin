@@ -13,6 +13,7 @@ import Beverages from './components/Beverages';
 
 export interface IBeveragesWebPartProps {
   description: string;
+  chatBotDeepLink: string
 }
 
 export default class BeveragesWebPart extends BaseClientSideWebPart<IBeveragesWebPartProps> {
@@ -24,6 +25,7 @@ export default class BeveragesWebPart extends BaseClientSideWebPart<IBeveragesWe
     const element = React.createElement(Beverages, {
       context: this.context,
       listTitle: "Beverages Menu",
+      chatBotDeepLink: this.properties.chatBotDeepLink 
     });
 
     ReactDom.render(element, this.domElement);
@@ -103,6 +105,10 @@ export default class BeveragesWebPart extends BaseClientSideWebPart<IBeveragesWe
               groupFields: [
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
+                }),
+                PropertyPaneTextField('chatBotDeepLink', {
+                  label: 'Chatbot deep link',
+                  placeholder: 'Paste chatbot URL / deep link here'
                 })
               ]
             }

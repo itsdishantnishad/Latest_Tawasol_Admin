@@ -1,5 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'Instrument Serif Regular';
+  src: local('Instrument Serif Regular'), url('../../../assets/fonts/instrumentserif-regular.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Instrument Serif Italic';
+  src: local('Instrument Serif Italic'), url('../../../assets/fonts/instrumentserif-italic.woff') format('woff');
+}
+
 .headerWrap {
-  margin-bottom: 18px;
+  margin-bottom: 32px;
 }
 
 .titleRow {
@@ -12,7 +25,7 @@
   margin: 0;
   width: 147px;
   height: 55px;
-  font-family: "Instrument Serif";
+  font-family: 'Instrument Serif Regular';
   font-weight: 400;
   font-size: 42px;
   line-height: 100%;
@@ -22,12 +35,25 @@
 
 .titleLets {
   color: #DA291C;
-  font-style: italic;
+  font-family: 'Instrument Serif Italic';
 }
 
 .titleMeet {
   color: #000;
   font-style: normal;
+}
+.cardWrap {
+  width: 100%;
+}
+
+/* Title under each video */
+.cardTitle {
+    color: #3A3B43;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 28px;
+  margin-top: 20px;
 }
 
 .arrowIcon {
@@ -40,14 +66,16 @@
 }
 
 .desc {
-  margin-top: 12px;
+  margin-top: 15px;
   max-width: 1320px;
+  font-size: 16px;
+  line-height: 24px;
+  font-family: 'Inter', sans-serif;
 }
 
 
 .letsMeetGallery {
-  width: 100%;
-  padding: 20px 60px;
+  padding: 0px 60px;
 }
 
 .error {
@@ -59,17 +87,15 @@
 /* simple grid */
 .grid {
   display: grid;
-  gap: 22px;
-
-  /* auto-fit helps it wrap naturally */
-  grid-template-columns: repeat(auto-fit, minmax(424px, 424px));
+  gap: 24px;
+  grid-template-columns: repeat(3, 1fr);
   justify-content: start;
 }
 
 /* EXACT size required */
 .card {
   position: relative;
-  width: 424px;
+  // width: 424px;
   height: 238px;
   border-radius: 16px;
   overflow: hidden;
@@ -115,6 +141,10 @@
 @media (max-width: 480px) {
   .grid {
     grid-template-columns: 1fr;
+  }
+
+  .cardWrap {
+    width: 100%;
   }
 
   .card {

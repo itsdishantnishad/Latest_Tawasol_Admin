@@ -1,5 +1,8 @@
+// src/webparts/LetsCelebrate/LetsCelebrate.tsx
+
 import * as React from 'react';
 import stylesNav from '../../Components/NavTabs/NavTabs.module.scss';
+import styles from './LetsCelebrate.module.scss';
 import type { ILetsCelebrateProps } from './ILetsCelebrateProps';
 import NewJoiner from './NewJoiner/NewJoiner';
 import Birthday from './Birthday/Birthday';
@@ -8,6 +11,7 @@ import NavTabs, { NavTabsOption } from '../../Components/NavTabs/NavTabs';
 import Achievements from './Achievements/Achievement';
 import { TahweelService, TahweelActiveEmployee } from '../../services/Integration/TahweelService';
 import type { IPersonBase } from './Birthday/PeopleSimpleFeed';
+import { LoadingBoundary } from '../../Components/LoadingShimmer/LoadingBoundary';
 
 const DefaultAvatar: string = require('../../assets/profileCircleImg.svg');
 
@@ -20,43 +24,122 @@ export interface ILetsCelebrateState {
 
   loadingBirthdays: boolean;
   loadingAnniversaries: boolean;
+  loadingNewJoiners: boolean;
   errorBirthdays: string | null;
   errorAnniversaries: string | null;
+  errorNewJoiners: string | null;
 }
+
+type LetsCelebrateTabKey = ILetsCelebrateState['selectedTab'];
+
+/** ✅ Read initial tab from URL like your toggle.tsx */
+const getInitialTab = (): LetsCelebrateTabKey => {
+  if (typeof window === "undefined") return "birthdays";
+
+  const raw = new URLSearchParams(window.location.search).get("tab") || "";
+  const norm = raw.trim().toLowerCase().replace(/[\s_-]/g, "");
+
+  switch (norm) {
+    case "birthdays":
+    case "birthday":
+      return "birthdays";
+
+    case "anniversaries":
+    case "anniversary":
+      return "anniversaries";
+
+    case "newjoiners":
+    case "newjoiner":
+      return "newJoiners";
+
+    case "achievements":
+    case "achievement":
+      return "achievements";
+
+    default:
+      return "birthdays";
+  }
+};
+
+/* Write tab to URL (replaceState like your toggle.tsx) */
+const tabToUrlValue = (tab: LetsCelebrateTabKey) => {
+  switch (tab) {
+    case "newJoiners": return "newjoiners";
+    default: return tab; // birthdays, anniversaries, achievements
+  }
+};
+
+const setUrlTab = (tab: LetsCelebrateTabKey) => {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  url.searchParams.set("tab", tabToUrlValue(tab));
+  window.history.replaceState({}, "", url.toString());
+};
 
 export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, ILetsCelebrateState> {
   private spService: listServices;
   private tahweelService: TahweelService;
 
+  private _onPopState = () => {
+    const t = getInitialTab();
+    if (t !== this.state.selectedTab) {
+      this.setState({ selectedTab: t });
+    }
+  };
+
   constructor(props: ILetsCelebrateProps) {
     super(props);
+
     this.state = {
-      selectedTab: 'birthdays',
+      selectedTab: getInitialTab(), // ✅ from URL
       newJoinersData: [],
       birthdayItems: [],
       anniversaryItems: [],
 
       loadingBirthdays: true,
       loadingAnniversaries: true,
+      loadingNewJoiners: true,
       errorBirthdays: null,
-      errorAnniversaries: null
+      errorAnniversaries: null,
+      errorNewJoiners: null
     };
 
     this.spService = new listServices(this.props.context);
     this.tahweelService = new TahweelService({ httpClient: this.props.context.httpClient });
   }
 
-  public async componentDidMount(): Promise<void> {
+  public componentDidMount(): void {
+    // keep in sync when user back/forward
+    window.addEventListener("popstate", this._onPopState);
+    void this.loadAll();
+  }
 
-    const newJoinerP = this.spService.getNewJoiners('New Joiner')
-      .then((data) => ({ data: data || [] }))
-      .catch(() => ({ data: [] }));
+  public componentWillUnmount(): void {
+    window.removeEventListener("popstate", this._onPopState);
+  }
 
-    const dobP = this.tahweelService.fetchActiveEmployees({ DOB: '1', DOJ: '0' })
+  private loadAll = async (): Promise<void> => {
+    this.setState({
+      loadingBirthdays: true,
+      loadingAnniversaries: true,
+      loadingNewJoiners: true,
+      errorBirthdays: null,
+      errorAnniversaries: null,
+      errorNewJoiners: null
+    });
+
+    const newJoinerP = this.spService
+      .getNewJoiners('New Joiner')
+      .then((data) => ({ data: data || [], error: null as string | null }))
+      .catch((e) => ({ data: [], error: (e?.message || 'Failed to load new joiners.') as string }));
+
+    const dobP = this.tahweelService
+      .fetchActiveEmployees({ DOB: '1', DOJ: '0' })
       .then((rows) => ({ rows: rows || [], error: null as string | null }))
       .catch((e) => ({ rows: [] as TahweelActiveEmployee[], error: (e?.message || 'Failed to load birthdays.') as string }));
 
-    const dojP = this.tahweelService.fetchActiveEmployees({ DOB: '0', DOJ: '1' })
+    const dojP = this.tahweelService
+      .fetchActiveEmployees({ DOB: '0', DOJ: '1' })
       .then((rows) => ({ rows: rows || [], error: null as string | null }))
       .catch((e) => ({ rows: [] as TahweelActiveEmployee[], error: (e?.message || 'Failed to load anniversaries.') as string }));
 
@@ -64,19 +147,22 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
 
     this.setState({
       newJoinersData: newJoinerRes.data,
-
       birthdayItems: (dobRes.rows || []).map((x) => this.mapEmployeeToPersonBase(x, 'DOB')),
       anniversaryItems: (dojRes.rows || []).map((x) => this.mapEmployeeToPersonBase(x, 'DOJ')),
 
       loadingBirthdays: false,
       loadingAnniversaries: false,
-      errorBirthdays: dobRes.error,
-      errorAnniversaries: dojRes.error
-    });
-  }
+      loadingNewJoiners: false,
 
-  private handleTabChange = (tab: ILetsCelebrateState['selectedTab']) => {
+      errorBirthdays: dobRes.error,
+      errorAnniversaries: dojRes.error,
+      errorNewJoiners: newJoinerRes.error
+    });
+  };
+
+  private handleTabChange = (tab: LetsCelebrateTabKey) => {
     this.setState({ selectedTab: tab });
+    setUrlTab(tab); // ✅ write to URL so internal page matches
   };
 
   private splitName(fullName: string): { firstName: string; lastName: string } {
@@ -143,15 +229,10 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
     return this.ordinal(years) + ' Anniversary';
   }
 
-  /**
-   * Teams deep-link builder
-   * Note: If the email is NOT a resolvable Teams user in your tenant, Teams will open a blank new chat.
-   */
   private buildTeamsChatLink(email: string, message: string): string {
     const e = (email || '').trim();
     if (!e) return '';
 
-    // Keep @ as-is (Teams sometimes fails to resolve when value stays %40)
     const users = encodeURIComponent(e).replace(/%40/gi, '@');
     const msg = encodeURIComponent(message || '');
 
@@ -167,7 +248,6 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
 
     const email = (emp.email || '').trim();
 
-    // Auto-prefill message with person name
     const typedMessage =
       mode === 'DOB'
         ? (`Happy Birthday ${name}! 🎉`)
@@ -203,11 +283,13 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
       anniversaryItems,
       loadingBirthdays,
       loadingAnniversaries,
+      loadingNewJoiners,
       errorBirthdays,
-      errorAnniversaries
+      errorAnniversaries,
+      errorNewJoiners
     } = this.state;
 
-    const tabs: NavTabsOption<ILetsCelebrateState['selectedTab']>[] = [
+    const tabs: NavTabsOption<LetsCelebrateTabKey>[] = [
       { key: 'birthdays', label: 'Birthdays' },
       { key: 'anniversaries', label: 'Anniversaries' },
       { key: 'newJoiners', label: 'New Joiners' },
@@ -230,17 +312,24 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
       ? 'Loading Anniversary...'
       : (errorAnniversaries ? 'Failed to load anniversaries.' : 'No upcoming anniversaries.');
 
-    return (
-      <div>
-        <NavTabs
-          tabs={tabs}
-          value={selectedTab}
-          onChange={this.handleTabChange}
-          className={stylesNav.navTabs}
-          tabClassName={stylesNav.tab}
-        />
+    const tabLoading =
+      (selectedTab === "birthdays" && loadingBirthdays) ||
+      (selectedTab === "anniversaries" && loadingAnniversaries) ||
+      (selectedTab === "newJoiners" && loadingNewJoiners);
 
-        <div>
+    return (
+      <>
+        <div className={styles.topWrapper}>
+          <NavTabs
+            tabs={tabs}
+            value={selectedTab}
+            onChange={this.handleTabChange}
+            className={`${stylesNav.navTabs} ${tabLoading ? styles.loadingTabs : ""}`}
+            tabClassName={stylesNav.tab}
+          />
+        </div>
+
+        <div className={styles.wrapOuter}>
           {selectedTab === "birthdays" && (
             <Birthday
               items={birthdayItems}
@@ -248,6 +337,9 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
               upcomingTitle="Upcoming Birthdays"
               emptyTodayText={birthdayEmptyToday}
               emptyUpcomingText={birthdayEmptyUpcoming}
+              loading={loadingBirthdays}
+              error={errorBirthdays}
+              // ✅ onRetry removed (no Retry button)
             />
           )}
 
@@ -258,18 +350,44 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
               upcomingTitle="Upcoming Anniversaries"
               emptyTodayText={anniversaryEmptyToday}
               emptyUpcomingText={anniversaryEmptyUpcoming}
+              loading={loadingAnniversaries}
+              error={errorAnniversaries}
+              // ✅ onRetry removed (no Retry button)
             />
           )}
 
           {selectedTab === 'newJoiners' && (
-            <NewJoiner items={newJoinersData} />
+            loadingNewJoiners ? (
+              <div className={styles.standardShimmerCard}>
+                <LoadingBoundary
+                  loading={true}
+                  preset="details"
+                  count={2}
+                  gap={16}
+                  ariaLabel="Loading new joiners"
+                >
+                  <div />
+                </LoadingBoundary>
+              </div>
+            ) : (
+              <LoadingBoundary
+                loading={false}
+                error={errorNewJoiners}
+                errorMessage={errorNewJoiners || undefined}
+                preset="details"
+                count={0}
+                gap={0}
+              >
+                <NewJoiner items={newJoinersData} />
+              </LoadingBoundary>
+            )
           )}
 
           {selectedTab === 'achievements' && (
             <Achievements context={this.props.context} />
           )}
         </div>
-      </div>
+      </>
     );
   }
 }

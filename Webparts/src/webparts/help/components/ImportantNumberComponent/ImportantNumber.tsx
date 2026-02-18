@@ -30,14 +30,21 @@ interface IImportantNumberState {
   error?: string;
   groups: { category: string; items: IImportantNumberItem[] }[];
 }
+const openTeamsChat = (email?: string) => {
+  const e = (email || "").trim();
+  if (!e) return;
+  window.open(
+    `https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(e)}`,
+    "_blank",
+    "noopener,noreferrer"
+  );
+};
 
-export default class ImportantNumber
-  extends React.Component<IImportantNumberProps, IImportantNumberState> {
+export default class ImportantNumber extends React.Component<IImportantNumberProps, IImportantNumberState> {
 
   public static defaultProps: Partial<IImportantNumberProps> = {
     listTitle: "Help Center"
   };
-
   public constructor(props: IImportantNumberProps) {
     super(props);
     this.state = {
@@ -57,13 +64,15 @@ export default class ImportantNumber
     });
   }
 
+
+
   private async loadItems(): Promise<void> {
     const sp = spfi().using(SPFx(this.props.context));
     const listTitle = this.props.listTitle as string;
 
     const raw: any[] = await sp.web.lists
       .getByTitle(listTitle)
-      .items.select("Id", "Title", "TIRPhone", "TIRIsActive", "TIRHelpCenterCategory", "URL", "TIRLocationURL")
+      .items.select("Id", "Title", "TIRPhone", "TIRIsActive", "TIRHelpCenterCategory", "TIRUserEmail", "TIRLocationURL")
       .filter("TIRIsActive eq 1")
       .orderBy("TIRHelpCenterCategory")();
 
@@ -82,18 +91,18 @@ export default class ImportantNumber
       return { display, tel };
     };
 
-   const items: IImportantNumberItem[] = raw.map((i) => {
-  const phone = normalizePhone(i.TIRPhone); 
-  return {
-    id: i.Id,
-    category: i.TIRHelpCenterCategory,
-    title: i.Title,
-    phoneDisplay: phone.display,
-    phoneTel: phone.tel,
-    teamsUrl: normalizeUrl(i.URL), 
-    locationUrl: normalizeUrl(i.TIRLocationURL), 
-  };
-});
+    const items: IImportantNumberItem[] = raw.map((i) => {
+      const phone = normalizePhone(i.TIRPhone);
+      return {
+        id: i.Id,
+        category: i.TIRHelpCenterCategory,
+        title: i.Title,
+        phoneDisplay: phone.display,
+        phoneTel: phone.tel,
+        teamsUrl: normalizeUrl(i.TIRUserEmail),
+        locationUrl: normalizeUrl(i.TIRLocationURL),
+      };
+    });
 
     const groupMap: { [cat: string]: IImportantNumberItem[] } = {};
     items.forEach((item) => {
@@ -103,7 +112,7 @@ export default class ImportantNumber
       groupMap[item.category].push(item);
     });
 
-    const categoryOrder = ["Nurse Locations", "Pantry", "Admin Hotline", "Office Locations"];
+    const categoryOrder = ["Nurse Locations", "Pantry","Office Locations","Admin Hotline"];
 
     const seenCategories: string[] = [];
     const orderedGroups: { category: string; items: IImportantNumberItem[] }[] = [];
@@ -174,9 +183,14 @@ export default class ImportantNumber
 
         <div className={styles.rowRight}>
           {item.teamsUrl && (
-            <a href={item.teamsUrl} target="_blank" rel="noreferrer" className={styles.iconLink} aria-label="Teams meeting" >
+            <button
+              type="button"
+              className={styles.iconLink}
+              aria-label="Teams chat"
+              onClick={() => openTeamsChat(item.teamsUrl)}
+            >
               <img src={teamsIcon} alt="Teams" className={styles.iconImage} />
-            </a>
+            </button>
           )}
 
           {item.locationUrl && (

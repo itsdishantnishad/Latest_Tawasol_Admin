@@ -21,8 +21,8 @@ export default class HrLettersCard extends React.Component<IHrLettersCardProps> 
     const { requestUrl, introText, heroUrl } = this.props;
 
     return (
-      <section className={styles.card} aria-label="HR Letters">
-        <div className={styles.headTitle}>HR Letters</div>
+      <section className={styles.card} aria-label="Request for HR Letter">
+        <div className={styles.headTitle}>Request for HR Letter</div>
 
         <p className={styles.subText}>{introText}</p>
 

@@ -4,6 +4,7 @@ import * as React from "react";
 import { getSP } from "../../../services/spSetUp/pnpConfig";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import styles from "./Achievement.module.scss";
+import { LoadingBoundary } from "../../../Components/LoadingShimmer/LoadingBoundary";
 
 const ArrowDown_Icon = require("../../assets/ArrowDown.svg");
 const Congratulations_Icon = require("../../assets/congratulationIcon.jpg");
@@ -54,16 +55,13 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
     fetchData();
   }, [context]);
 
-  // Handles Hyperlink/Image column returned as object/string/JSON-string safely
   const extractUrl = (value: any): string | null => {
     if (!value) return null;
 
-    // If SharePoint returns JSON string for Image/Hyperlink columns
     if (typeof value === "string") {
       const s = value.trim();
       if (!s) return null;
 
-      // try JSON parse (Image column sometimes returns JSON string)
       if ((s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]"))) {
         try {
           const parsed = JSON.parse(s);
@@ -78,7 +76,6 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
       return s;
     }
 
-    // Hyperlink/Image object commonly has Url
     if (typeof value === "object") {
       return value.Url || value.url || value.URL || value.serverRelativeUrl || null;
     }
@@ -105,9 +102,7 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
     };
 
     items.forEach((item) => {
-      // ✅ use new column
       const rawMonth: string = item?.TIRMonthOfAchievement || "Unknown";
-
       const shortMonth = rawMonth.split("-")[0]?.toLowerCase().slice(0, 3) || "";
       const fullMonth =
         monthMap[shortMonth] || rawMonth.replace(/[-\d]/g, "").trim() || "Unknown";
@@ -119,23 +114,18 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
     return groups;
   }, [items]);
 
-
   React.useEffect(() => {
-  const monthsToAutoOpen = Object.keys(groupedItems).slice(0, visibleMonths);
-  if (!monthsToAutoOpen.length) return;
+    const monthsToAutoOpen = Object.keys(groupedItems).slice(0, visibleMonths);
+    if (!monthsToAutoOpen.length) return;
 
-  setExpandedMonths((prev) => {
-    const next = { ...prev };
-
-    // ✅ open each visible month by default (but don't override user's toggles)
-    monthsToAutoOpen.forEach((m) => {
-      if (next[m] === undefined) next[m] = true;
+    setExpandedMonths((prev) => {
+      const next = { ...prev };
+      monthsToAutoOpen.forEach((m) => {
+        if (next[m] === undefined) next[m] = true;
+      });
+      return next;
     });
-
-    return next;
-  });
-}, [groupedItems, visibleMonths]);
-
+  }, [groupedItems, visibleMonths]);
 
   const getNameParts = (fullName: string) => {
     const parts = (fullName || "").trim().split(" ").filter(Boolean);
@@ -156,7 +146,17 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
   if (loading) {
     return (
       <div className={styles.content}>
-        <p className={styles.loading}>Loading achievements...</p>
+        <div className={styles.standardShimmerCard}>
+          <LoadingBoundary
+            loading={true}
+            preset="details"
+            count={2}
+            gap={16}
+            ariaLabel="Loading achievements"
+          >
+            <div />
+          </LoadingBoundary>
+        </div>
       </div>
     );
   }
@@ -197,11 +197,8 @@ const Achievements: React.FC<IAchievementsFeedProps> = ({ context }) => {
                 <div className={styles.monthContent}>
                   {groupedItems[month].map((item: any) => {
                     const { first, last } = getNameParts(item?.Title);
-
-                    // ✅ use new column
                     const imageUrl = extractUrl(item?.TIRUserPicture);
 
-                    // ✅ use new columns
                     const designation = item?.TIRDesignation || "Team Member";
                     const contact = item?.TIRContact || "";
                     const description = item?.TIRDescription || "";

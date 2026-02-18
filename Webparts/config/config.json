@@ -170,14 +170,6 @@
         }
       ]
     },
-    "onboarding-web-part": {
-      "components": [
-        {
-          "entrypoint": "./lib/webparts/onboarding/OnboardingWebPart.js",
-          "manifest": "./src/webparts/onboarding/OnboardingWebPart.manifest.json"
-        }
-      ]
-    },
     "offers-benefits-web-part": {
       "components": [
         {
@@ -298,7 +290,6 @@
     "EventGalleryWebPartStrings": "lib/webparts/eventGallery/loc/{locale}.js",
     "GlobalBannerWebPartStrings": "lib/webparts/globalBanner/loc/{locale}.js",
     "MeetingWebPartStrings": "lib/webparts/meeting/loc/{locale}.js",
-    "OnboardingWebPartStrings": "lib/webparts/onboarding/loc/{locale}.js",
     "OffersBenefitsWebPartStrings": "lib/webparts/offersBenefits/loc/{locale}.js",
     "AnnouncementBannerWebPartStrings": "lib/webparts/announcementBanner/loc/{locale}.js",
     "GreetingsBannerWebPartStrings": "lib/webparts/greetingsBanner/loc/{locale}.js",

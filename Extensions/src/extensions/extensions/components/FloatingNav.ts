@@ -16,11 +16,10 @@ export class FloatingNav {
   private footerEl: HTMLElement | null = null;
 
   private listenersWired = false;
-
   private footerMO?: MutationObserver;
 
-  // tighter gap above footer
-  private readonly gapAboveFooterPx = 8;
+  private urlWatcherWired = false;
+  private readonly handleUrlChange = () => this.refreshActiveState();
 
   private handleScrollOrResize = () => this.scheduleRecompute();
 
@@ -38,13 +37,32 @@ export class FloatingNav {
     return p || "/";
   }
 
-  /** Robust active check (works with full URL / relative URL / SPA navigation) */
+  private escapeHtml(v: string): string {
+    return (v || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  private toAbsoluteUrl(rawUrl: string): string {
+    if (!rawUrl) return "";
+    try {
+      // Resolve against current page URL (handles relative, site-relative, absolute)
+      return new URL(rawUrl, window.location.href).href;
+    } catch {
+      if (rawUrl.startsWith("/")) return rawUrl;
+      return `/${rawUrl}`;
+    }
+  }
+
   private isActiveUrl(targetUrl: string): boolean {
     if (!targetUrl) return false;
 
     try {
       const current = new URL(window.location.href);
-      const target = new URL(targetUrl, current.origin);
+      const target = new URL(targetUrl, current.href);
 
       const cPath = this.normalizePath(current.pathname);
       const tPath = this.normalizePath(target.pathname);
@@ -57,28 +75,33 @@ export class FloatingNav {
     }
   }
 
-  /** Signature to prevent MutationObserver feedback loops */
   private buildSig(items: INavItem[]): string {
     const path = this.normalizePath(window.location.pathname);
-    const itemsSig = items
-      .map((i) => `${i.id}|${i.label}|${i.url}|${i.icon}`)
-      .join("||");
+    const itemsSig = items.map((i) => `${i.id}|${i.label}|${i.url}|${i.icon}`).join("||");
     return `${path}::${itemsSig}`;
   }
 
   private buildButtonsHtml(items: INavItem[]): string {
     return items
       .map((item) => {
-        const active = this.isActiveUrl(item.url);
+        const href = this.toAbsoluteUrl(item.url);
+        const active = this.isActiveUrl(href);
         const activeClass = active ? ` ${styles.TIRNavItemActive}` : "";
+        const safeLabel = this.escapeHtml(item.label);
+
+        // IMPORTANT: disables SharePoint soft navigation -> forces full load (prevents shimmer stuck)
+        const ariaCurrent = active ? ' aria-current="page"' : "";
+
         return `
-          <a class="${styles.TIRNavItem}${activeClass}" href="${item.url}">
+          <a class="${styles.TIRNavItem}${activeClass}"
+             href="${href}"
+             data-interception="off"${ariaCurrent}>
             ${
               item.icon
-                ? `<img src="${item.icon}" class="${styles.TIRNavIcon}" alt="" aria-hidden="true" />`
+                ? `<img src="${this.escapeHtml(item.icon)}" class="${styles.TIRNavIcon}" alt="" aria-hidden="true" />`
                 : ""
             }
-            <span class="${styles.TIRNavLabel}">${item.label}</span>
+            <span class="${styles.TIRNavLabel}">${safeLabel}</span>
           </a>`;
       })
       .join("");
@@ -96,11 +119,11 @@ export class FloatingNav {
   public render(hostId: string, navigationItems: INavItem[]): void {
     if (!navigationItems?.length) return;
 
-    const sig = this.buildSig(navigationItems);
+    document.body.classList.add("tir-has-floating-nav");
 
+    const sig = this.buildSig(navigationItems);
     const existingHost = document.getElementById(hostId);
 
-    // If host exists, do NOT touch DOM unless signature changed
     if (existingHost) {
       this.neutralizeHost(existingHost);
 
@@ -111,36 +134,30 @@ export class FloatingNav {
         `.${styles.TIRFloatingNav}`
       ) as HTMLElement;
 
-      // Only update markup if nav actually needs change (prevents infinite loops)
       if (prevSig !== sig) {
-        const group = existingHost.querySelector(
-          `.${styles.TIRButtonGroup}`
-        ) as HTMLElement | null;
+        const group = existingHost.querySelector(`.${styles.TIRButtonGroup}`) as HTMLElement | null;
 
         if (group) group.innerHTML = this.buildButtonsHtml(navigationItems);
         else existingHost.innerHTML = this.buildNavHtml(navigationItems);
 
         existingHost.setAttribute("data-tir-nav-sig", sig);
 
-        // re-grab in case nav was re-rendered
         this.floatingNavigationElement = existingHost.querySelector(
           `.${styles.TIRFloatingNav}`
         ) as HTMLElement;
       }
 
-      // pointer safety
       if (this.floatingNavigationElement) {
-        (this.floatingNavigationElement as HTMLElement).style.pointerEvents = "auto";
+        this.floatingNavigationElement.style.pointerEvents = "auto";
       }
 
       this.footerEl = this.resolveFooterElement();
       this.installObservers();
       this.ensureListeners();
-      this.recomputeLift();
+      this.ensureUrlWatcher();
       return;
     }
 
-    // Create new
     const host = document.createElement("div");
     host.id = hostId;
     host.innerHTML = this.buildNavHtml(navigationItems);
@@ -152,16 +169,13 @@ export class FloatingNav {
     this.hostElementId = hostId;
     this.floatingNavigationElement = host.querySelector(`.${styles.TIRFloatingNav}`) as HTMLElement;
 
-    // pointer safety
     host.style.pointerEvents = "none";
-    if (this.floatingNavigationElement) {
-      this.floatingNavigationElement.style.pointerEvents = "auto";
-    }
+    if (this.floatingNavigationElement) this.floatingNavigationElement.style.pointerEvents = "auto";
 
     this.footerEl = this.resolveFooterElement();
     this.installObservers();
     this.ensureListeners();
-    this.recomputeLift();
+    this.ensureUrlWatcher();
   }
 
   public dispose(): void {
@@ -171,6 +185,12 @@ export class FloatingNav {
       window.removeEventListener("scroll", this.handleScrollOrResize);
       window.removeEventListener("resize", this.handleScrollOrResize);
       this.listenersWired = false;
+    }
+
+    if (this.urlWatcherWired) {
+      window.removeEventListener("popstate", this.handleUrlChange);
+      window.removeEventListener("hashchange", this.handleUrlChange);
+      this.urlWatcherWired = false;
     }
 
     this.io?.disconnect();
@@ -186,6 +206,8 @@ export class FloatingNav {
     this.io = undefined;
     this.ro = undefined;
     this.rAF = undefined;
+
+    document.body.classList.remove("tir-has-floating-nav");
   }
 
   private ensureListeners(): void {
@@ -195,6 +217,66 @@ export class FloatingNav {
     this.listenersWired = true;
   }
 
+  private ensureUrlWatcher(): void {
+    if (this.urlWatcherWired) return;
+
+    window.addEventListener("popstate", this.handleUrlChange);
+    window.addEventListener("hashchange", this.handleUrlChange);
+
+    // Patch history to detect SPA URL changes
+    const w = window as any;
+    if (!w.__tir_history_patched__) {
+      w.__tir_history_patched__ = true;
+
+      const origPush = history.pushState;
+      history.pushState = function (...args: any[]) {
+        const ret = origPush.apply(this, args as any);
+        window.dispatchEvent(new Event("popstate"));
+        return ret;
+      } as any;
+
+      const origReplace = history.replaceState;
+      history.replaceState = function (...args: any[]) {
+        const ret = origReplace.apply(this, args as any);
+        window.dispatchEvent(new Event("popstate"));
+        return ret;
+      } as any;
+    }
+
+    this.urlWatcherWired = true;
+  }
+
+  private refreshActiveState(): void {
+    const hostId = this.hostElementId;
+    if (!hostId) return;
+
+    const host = document.getElementById(hostId);
+    if (!host) return;
+
+    const links = Array.from(host.querySelectorAll(`a.${styles.TIRNavItem}`)) as HTMLAnchorElement[];
+    const current = window.location.href;
+
+    links.forEach((a) => {
+      const href = a.getAttribute("href") || "";
+      let abs = href;
+      try {
+        abs = new URL(href, current).href;
+      } catch {
+        // ignore
+      }
+
+      const active = this.isActiveUrl(abs);
+
+      if (active) {
+        a.classList.add(styles.TIRNavItemActive);
+        a.setAttribute("aria-current", "page");
+      } else {
+        a.classList.remove(styles.TIRNavItemActive);
+        a.removeAttribute("aria-current");
+      }
+    });
+  }
+
   private neutralizeHost(host: HTMLElement): void {
     host.style.position = "fixed";
     host.style.left = "0";
@@ -202,7 +284,7 @@ export class FloatingNav {
     host.style.width = "0";
     host.style.height = "0";
     host.style.zIndex = "10000";
-    host.style.pointerEvents = "none"; // IMPORTANT: never block page clicks
+    host.style.pointerEvents = "none";
   }
 
   private installObservers(): void {
@@ -219,7 +301,6 @@ export class FloatingNav {
       this.ro.observe(this.footerEl);
     }
 
-    // Keep only ONE footer mutation observer (avoid leaks)
     if (!this.footerMO) {
       this.footerMO = new MutationObserver(() => {
         const f = this.resolveFooterElement();
@@ -240,33 +321,7 @@ export class FloatingNav {
 
   private scheduleRecompute(): void {
     if (this.rAF) cancelAnimationFrame(this.rAF);
-    this.rAF = requestAnimationFrame(() => this.recomputeLift());
-  }
-
-  /**
-   * Lift ONLY when footer would collide with nav (not when footer becomes visible).
-   */
-  private recomputeLift(): void {
-    if (!this.floatingNavigationElement) return;
-
-    let raise = 0;
-
-    if (this.footerEl) {
-      const footerRect = this.footerEl.getBoundingClientRect();
-      const vh = window.innerHeight || document.documentElement.clientHeight;
-
-      const cs = window.getComputedStyle(this.floatingNavigationElement);
-      const bottomRaw = cs.bottom || "0";
-      const bottom = parseFloat(bottomRaw);
-      const bottomPx = Number.isFinite(bottom) ? bottom : 0;
-
-      const navBottomY = vh - bottomPx; // baseline nav bottom line at raise=0
-
-      const needed = (navBottomY + this.gapAboveFooterPx) - footerRect.top;
-      if (needed > 0) raise = needed;
-    }
-
-    this.floatingNavigationElement.style.setProperty("--float-raise", `${Math.ceil(raise)}px`);
+    // lift logic intentionally disabled
   }
 
   private resolveFooterElement(): HTMLElement | null {

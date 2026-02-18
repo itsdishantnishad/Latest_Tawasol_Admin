@@ -2,13 +2,14 @@
 
 @font-face {
   font-family: 'Instrument Serif Regular';
-  src: local('Instrument Serif Regular'), url('/../assets/fonts/instrumentserif-regular.woff') format('woff');
+  src: local('Instrument Serif Regular'),
+    url('/../assets/fonts/instrumentserif-regular.woff') format('woff');
 }
-
 
 @font-face {
   font-family: 'Instrument Serif Italic';
-  src: local('Instrument Serif Italic'), url('/../assets/fonts/instrumentserif-italic.woff') format('woff');
+  src: local('Instrument Serif Italic'),
+    url('/../assets/fonts/instrumentserif-italic.woff') format('woff');
 }
 
 .content {
@@ -19,41 +20,37 @@
   margin-bottom: 40px;
 }
 
-/* ==== Feed wrapper ==== */
 .feed {
   display: grid;
   gap: 0;
+  width: 100%;
 }
 
-/* ==== Each person card ==== */
-.cardTop{
+.cardTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
   padding-top: 32px;
 }
+
 .card {
   display: flex;
-  // flex-wrap: wrap;
   gap: 20px;
   align-items: start;
   padding-bottom: 32px;
   border-bottom: 1px solid #F8CCA3;
 
   @media (max-width: 900px) {
-    // grid-template-columns: 140px 1fr;
     .ctaCol { grid-column: 1 / -1; justify-content: flex-start; }
   }
 
   @media (max-width: 640px) {
-    // grid-template-columns: 1fr;
     .left { order: -1; }
     .ctaCol { grid-column: 1 / -1; }
   }
 }
 
-/* ==== sides ==== */
 .left {
   display: flex;
   justify-content: center;
@@ -64,11 +61,10 @@
 .right {
   display: grid;
   grid-auto-rows: min-content;
-  gap: 10px;               
-  align-content: start;    
+  gap: 10px;
+  align-content: start;
 }
 
-/* ==== image ==== */
 .photo {
   height: 286px;
   object-fit: cover;
@@ -77,20 +73,29 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-/* ==== header (name + role) ==== */
 .header { margin-bottom: 5px; }
 
 .name {
   margin: 0 0 5px 0;
-  font-family: 'Instrument Serif Regular';
   font-size: 36px;
   font-weight: 400;
   line-height: 100%;
   color: #000000;
 }
 
-.nameDecor { color: #DA291C; font-family: 'Instrument Serif Italic'; }
-.role{
+.firstName {
+  color: #DA291C;
+  font-family: 'Instrument Serif Italic';
+  font-weight: 400;
+}
+
+.lastName {
+  color: #000000;
+  font-family: 'Instrument Serif Regular';
+  font-weight: 400;
+}
+
+.role {
   color: #3A3B43;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
@@ -98,20 +103,16 @@
   line-height: 22px;
 }
 
-/* ==== meta rows ==== */
-.meta { display: grid; gap: 2px 12px; margin: 8px 0 10px; color: #666; font-size: 14px; }
-.metaRow strong { color: #444; font-weight: 600; }
-
-/* ==== body text ==== */
 .body {
   display: grid;
-  gap: 10px;          /* vertical spacing between paragraphs */
-  margin-top: 0px;    /* small breathing room after meta */
+  gap: 10px;
+  margin-top: 0px;
 }
 
-.para{
+.para {
   margin: 0;
-  div{
+
+  div {
     color: #3A3B43 !important;
     font-size: 16px !important;
     line-height: 24px !important;
@@ -121,8 +122,10 @@
   }
 }
 
-/* ==== CTA column & button ==== */
-.ctaCol { display: flex; justify-content: flex-end; }
+.ctaCol {
+  display: flex;
+  justify-content: flex-end;
+}
 
 .sayHello {
   align-items: center;
@@ -138,14 +141,44 @@
   font-size: 14px;
   font-family: 'Inter', sans-serif;
   line-height: 20px;
+
   &:hover { filter: brightness(0.98); }
   &:active { transform: translateY(1px); }
 }
 
 .helloIcon { font-size: 16px; line-height: 0; }
 
+.loadMoreWrap{
+  display: flex;
+  justify-content: center;
+  padding: 28px 0 0;
+}
+
+.loadMoreBtn{
+  align-items: center;
+  background: radial-gradient(883.19% 262.8% at 112.5% -164.06%, #101820 0, #202D39 100%);
+  border: none;
+  border-radius: 167px;
+  box-shadow: inset -4px -6px 4px 0 rgba(0,0,0,.51), inset 0 4px 4px 0 #768B9E;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  height: 40px;
+  width: 110px;
+  justify-content: center;
+  padding: 0 12px;
+  transition: all .3s ease;
+
+  &:hover { opacity: .92; transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+  &:focus-visible { outline: 2px solid #DA291C; outline-offset: 2px; }
+}
+
 .emptyState {
-  p{
+  p {
     color: #777;
     font-style: italic;
     text-align: center;

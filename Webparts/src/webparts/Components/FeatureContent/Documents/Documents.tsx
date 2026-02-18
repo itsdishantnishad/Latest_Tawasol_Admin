@@ -30,7 +30,7 @@ const defaultDocuments: IDocument[] = [
     url: '#',
     backgroundImage: ProjectDevelopmentIcon
   },
-  {
+  { 
     id: '2',
     header: 'Commercial',
     url: '#',
@@ -63,7 +63,7 @@ export const Documents: React.FC<IDocumentsProps> = (props) => {
     const configured = (props.seeAllURL || "").trim();
 
     // Default fallback page inside same site
-    const raw = configured || "SitePages/PoliciesAndProcedures.aspx";
+    const raw = configured || "SitePages/Policies-and-Procedures.aspx";
 
     // Absolute URL → keep path, enforce same tenant
     if (/^https?:\/\//i.test(raw)) {
@@ -84,10 +84,15 @@ export const Documents: React.FC<IDocumentsProps> = (props) => {
     return `${webUrl}/${raw}`;
   }, [props.seeAllURL, webUrl, origin]);
   // =========================================================
+  
+   const cards = React.useMemo(
+    () => documents.map((c) => ({ ...c, url: viewAllHref })),
+    [documents, viewAllHref]
+  );
 
   return (
     <div>
-      <ShuffledCards cards={documents} />
+      <ShuffledCards cards={cards} />
 
       <div className={styles.ctaWrapper}>
         <ConditionalLink to={viewAllHref}>

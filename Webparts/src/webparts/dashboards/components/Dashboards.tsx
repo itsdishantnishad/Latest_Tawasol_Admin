@@ -5,7 +5,7 @@ import { listServices, DashboardCategory, DashboardItem } from '../../services/l
 import { ListName } from '../../services/Constants';
 import { breadcrumbBeforeBackArrowSVG } from '../../assets/constants';
 
-// ⬇️ NEW: global breadcrumbs (single .ts utility component)
+// global breadcrumbs (single .ts utility component)
 import GlobalBreadcrumbs from '../../assets/GlobalBreadcrumbs';
 
 
@@ -109,29 +109,30 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
   };
 
   /** Back | Home › Dashboards (Back only in detail view) */
-  private renderTopBar(): React.ReactNode {
-    const { active } = this.state;
-    if (!active) return null;
+  private getHomeUrl = (): string => {
+    return this.props.context.pageContext.web.absoluteUrl.replace(/\/$/, "");
+  };
 
+  private onBackClick = (): void => {
+    if (this.state.active) {
+      this.onBackToMaster();
+      return;
+    }
+    window.location.assign(this.getHomeUrl());
+  };
+
+  private renderTopBar(): React.ReactNode {
     return (
       <div className={styles.topBar}>
-        {/* ⬅️ EXISTING BACK BUTTON WITH ICON — kept exactly as-is */}
-        {/* <button className={styles.backBtn} onClick={this.onBackToMaster} aria-label="Back" title="Back">
-          <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: breadcrumbBeforeBackArrowSVG }} />
-          <span>Back</span>
-        </button>
-
-        <span className={styles.divider}>|</span> */}
-
-        {/* ⬇️ REPLACED Fluent UI Breadcrumb with GlobalBreadcrumbs */}
         <GlobalBreadcrumbs
           sectionLabel="Home"
           currentLabel="Dashboards"
-          onBack={this.onBackToMaster} // (left label also does one-step back)
+          onBack={this.onBackClick} 
         />
       </div>
     );
   }
+
 
   render(): React.ReactElement<IDashboardProps> {
     const { loading, error, categories, selectedCategory, dashboards, active, related, relatedExpanded, hasMoreRelated } = this.state;
@@ -150,14 +151,14 @@ export default class Dashboards extends React.Component<IDashboardProps, State> 
         <div className={styles.layout}>
           {!active && (
             <>
-            <div className={styles.rail}>
-              <CategoryRail
-                items={categories}
-                selectedId={selectedCategory?.id}
-                onSelect={this.onSelectCategory}
-              />
-            </div>
-            <div className={styles.verticleDivider}></div>
+              <div className={styles.rail}>
+                <CategoryRail
+                  items={categories}
+                  selectedId={selectedCategory?.id}
+                  onSelect={this.onSelectCategory}
+                />
+              </div>
+              <div className={styles.verticleDivider}></div>
             </>
           )}
 

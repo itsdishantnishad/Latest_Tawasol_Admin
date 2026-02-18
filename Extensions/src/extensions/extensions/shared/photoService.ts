@@ -1,514 +1,209 @@
-// import { MSGraphClientFactory } from "@microsoft/sp-http";
-
-// export type PhotoSize = "S" | "M" | "L";
-
-// export class PhotoService {
-//   private readonly webUrl: string;
-//   private readonly currentUserUpn: string;
-//   private readonly currentUserDisplayName: string;
-//   private readonly graphFactory?: MSGraphClientFactory;
-//   private readonly placeholderUrl?: string;
-
-//   // Cache placeholder hash per size so we can detect SharePoint "silhouette" image
-//   private static spPlaceholderHash: Record<string, string | null> = {};
-
-//   constructor(
-//     webUrl: string,
-//     currentUserUpn: string,
-//     currentUserDisplayName: string = "", // ✅ CHANGED: optional default
-//     graphFactory?: MSGraphClientFactory,
-//     placeholderUrl?: string
-//   ) {
-//     this.webUrl = (webUrl || "").replace(/\/+$/, "");
-//     this.currentUserUpn = (currentUserUpn || "").trim();
-//     this.currentUserDisplayName = (currentUserDisplayName || "").trim();
-//     this.graphFactory = graphFactory;
-//     this.placeholderUrl = placeholderUrl;
-//   }
-
-//   // -------------------------
-//   // Public helpers
-//   // -------------------------
-//   public getSmall(upn?: string): string {
-//     return this.buildSpUrl("S", upn);
-//   }
-//   public getMedium(upn?: string): string {
-//     return this.buildSpUrl("M", upn);
-//   }
-//   public getLarge(upn?: string): string {
-//     return this.buildSpUrl("L", upn);
-//   }
-
-//   /**
-//    * Graph -> SharePoint userphoto -> Initials -> Placeholder
-//    */
-//   public async setPhoto(
-//     img: HTMLImageElement,
-//     size: PhotoSize,
-//     upn?: string,
-//     displayName?: string
-//   ): Promise<void> {
-//     const resolvedUpn = (upn || this.currentUserUpn || "").trim();
-//     const resolvedName = (displayName || this.currentUserDisplayName || "").trim();
-
-//     // Show initials immediately while loading (no flicker)
-//     const initialsUri = this.getInitialsDataUri(resolvedName || resolvedUpn);
-//     if (initialsUri) img.src = initialsUri;
-
-//     // 1) Try Graph
-//     const graphBlob = await this.tryGetGraphPhoto(resolvedUpn);
-//     if (graphBlob) {
-//       this.setObjectUrl(img, graphBlob);
-//       return;
-//     }
-
-//     // 2) Try SharePoint userphoto.aspx
-//     const spBlob = await this.tryGetSharePointPhoto(size, resolvedUpn);
-//     if (spBlob) {
-//       const isPlaceholder = await this.isSharePointPlaceholder(spBlob, size);
-//       if (!isPlaceholder) {
-//         this.setObjectUrl(img, spBlob);
-//         return;
-//       }
-//     }
-
-//     // 3) Initials
-//     if (initialsUri) {
-//       img.src = initialsUri;
-//       return;
-//     }
-
-//     // 4) Placeholder (last option)
-//     if (this.placeholderUrl) {
-//       img.src = this.placeholderUrl;
-//     }
-//   }
-
-//   // -------------------------
-//   // Graph
-//   // -------------------------
-//   private async tryGetGraphPhoto(upn?: string): Promise<Blob | null> {
-//     if (!this.graphFactory) return null;
-
-//     try {
-//       const client = await this.getGraphClient();
-//       if (!client) return null;
-
-//       const rawUpn = (upn || "").trim();
-//       const targetUpn = rawUpn.toLowerCase();
-//       const currentUpn = (this.currentUserUpn || "").trim().toLowerCase();
-
-//       // ✅ CHANGED: use /me for current user (less permissions)
-//       const apiPath =
-//         !targetUpn || targetUpn === currentUpn
-//           ? "/me/photo/$value"
-//           : `/users/${encodeURIComponent(rawUpn)}/photo/$value`;
-
-//       const blob = (await client.api(apiPath).responseType("blob").get()) as Blob;
-//       if (blob && blob.size > 0) return blob;
-
-//       return null;
-//     } catch {
-//       return null;
-//     }
-//   }
-
-//   private async getGraphClient(): Promise<any | null> {
-//     try {
-//       return await (this.graphFactory as any).getClient("3");
-//     } catch {
-//       try {
-//         return await (this.graphFactory as any).getClient();
-//       } catch {
-//         return null;
-//       }
-//     }
-//   }
-
-//   // -------------------------
-//   // SharePoint userphoto.aspx
-//   // -------------------------
-//   private buildSpUrl(size: PhotoSize, upn?: string): string {
-//     const email = (upn || this.currentUserUpn || "").trim();
-//     const ver = new Date().toISOString().slice(0, 13); // YYYY-MM-DDTHH
-//     const userParam = email ? `&username=${encodeURIComponent(email)}` : "";
-//     return `${this.webUrl}/_layouts/15/userphoto.aspx?size=${size}${userParam}&ver=${ver}`;
-//   }
-
-//   private async tryGetSharePointPhoto(size: PhotoSize, upn?: string): Promise<Blob | null> {
-//     try {
-//       const url = this.buildSpUrl(size, upn);
-//       const resp = await fetch(url, { credentials: "same-origin" });
-//       if (!resp.ok) return null;
-//       const blob = await resp.blob();
-//       return blob && blob.size > 0 ? blob : null;
-//     } catch {
-//       return null;
-//     }
-//   }
-
-//   private async isSharePointPlaceholder(blob: Blob, size: PhotoSize): Promise<boolean> {
-//     const key = `sp_placeholder_${size}`;
-
-//     if (!(key in PhotoService.spPlaceholderHash)) {
-//       PhotoService.spPlaceholderHash[key] = await this.computeSharePointPlaceholderHash(size);
-//     }
-
-//     const placeholderHash = PhotoService.spPlaceholderHash[key];
-//     if (!placeholderHash) return false;
-
-//     const currentHash = await this.sha256Hex(await this.blobToArrayBuffer(blob));
-//     return currentHash === placeholderHash;
-//   }
-
-//   private async computeSharePointPlaceholderHash(size: PhotoSize): Promise<string | null> {
-//     try {
-//       const fakeUpn = "__no_such_user__@__invalid__.com";
-//       const url = this.buildSpUrl(size, fakeUpn);
-
-//       const resp = await fetch(url, { credentials: "same-origin" });
-//       if (!resp.ok) return null;
-
-//       const blob = await resp.blob();
-//       if (!blob || blob.size === 0) return null;
-
-//       const hash = await this.sha256Hex(await this.blobToArrayBuffer(blob));
-//       return hash || null;
-//     } catch {
-//       return null;
-//     }
-//   }
-
-//   // -------------------------
-//   // Initials SVG
-//   // -------------------------
-//   private getInitialsDataUri(nameOrEmail: string): string {
-//     const initials = this.getInitials(nameOrEmail);
-//     if (!initials) return "";
-
-//     const svg = `
-//       <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">
-//         <circle cx="32" cy="32" r="32" fill="#E9ECEF"/>
-//         <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
-//               font-family="Inter, Arial" font-size="22" font-weight="600" fill="#2B2B2B">
-//           ${this.escapeXml(initials)}
-//         </text>
-//       </svg>
-//     `.trim();
-
-//     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-//   }
-
-//   private getInitials(value: string): string {
-//     const v = (value || "").trim();
-//     if (!v) return "";
-
-//     const base = v.indexOf("@") > -1 ? v.split("@")[0] : v;
-
-//     const parts = base
-//       .replace(/[._-]+/g, " ")
-//       .split(" ")
-//       .map((p) => p.trim())
-//       .filter(Boolean);
-
-//     if (!parts.length) return "";
-
-//     const first = parts[0].charAt(0);
-//     const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : "";
-//     return (first + last).toUpperCase().slice(0, 2);
-//   }
-
-//   private escapeXml(s: string): string {
-//     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-//   }
-
-//   // -------------------------
-//   // Utilities
-//   // -------------------------
-//   private setObjectUrl(img: HTMLImageElement, blob: Blob): void {
-//     const prev = img.getAttribute("data-objurl");
-//     if (prev) {
-//       try {
-//         URL.revokeObjectURL(prev);
-//       } catch {
-//         // ignore
-//       }
-//     }
-
-//     const url = URL.createObjectURL(blob);
-//     img.src = url;
-//     img.setAttribute("data-objurl", url);
-//   }
-
-//   private blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
-//     return new Promise((resolve, reject) => {
-//       const reader = new FileReader();
-//       reader.onerror = () => reject(new Error("Failed to read blob"));
-//       reader.onload = () => resolve(reader.result as ArrayBuffer);
-//       reader.readAsArrayBuffer(blob);
-//     });
-//   }
-
-//   private async sha256Hex(buffer: ArrayBuffer): Promise<string> {
-//     const cryptoObj = (window as any).crypto;
-//     if (!cryptoObj?.subtle?.digest) return "";
-
-//     const hashBuffer = (await cryptoObj.subtle.digest("SHA-256", buffer)) as ArrayBuffer;
-//     const bytes = new Uint8Array(hashBuffer);
-
-//     let hex = "";
-//     for (let i = 0; i < bytes.length; i++) {
-//       const h = bytes[i].toString(16);
-//       hex += h.length === 1 ? "0" + h : h;
-//     }
-//     return hex;
-//   }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import { MSGraphClientFactory } from "@microsoft/sp-http";
-
-export type PhotoSize = "S" | "M" | "L";
-
+// src/extensions/extensions/shared/photoService.ts
+
+import type { MSGraphClientFactory } from '@microsoft/sp-http';
+import { MSGraphClientV3 } from '@microsoft/sp-http';
+
+/**
+ * PhotoService
+ * - Uses "meeting-style" Graph photo fetch logic (no responseType override)
+ * - Returns a DATA URL for reliable avatar rendering (works for SuggestBox + Header)
+ * - Falls back to SharePoint userphoto.aspx and finally initials SVG
+ */
 export class PhotoService {
-  private readonly webUrl: string;
-  private readonly currentUserUpn: string;
-  private readonly currentUserDisplayName: string;
-  private readonly graphFactory?: MSGraphClientFactory;
-  private readonly placeholderUrl?: string;
+  private readonly _webUrl: string;
+  private readonly _currentUserUpn: string;
+  private readonly _graphFactory?: MSGraphClientFactory;
+  private readonly _currentUserDisplayName?: string;
 
-  // silhouette hash (one-time per size) to detect "no photo" from userphoto.aspx
-  private static spSilhouetteHash: Partial<Record<PhotoSize, string | null>> = {};
+  private _graph?: MSGraphClientV3;
+  private readonly _cache = new Map<string, string>();
 
   constructor(
     webUrl: string,
     currentUserUpn: string,
     graphFactory?: MSGraphClientFactory,
-    currentUserDisplayName: string = "",
-    placeholderUrl?: string
+    currentUserDisplayName?: string
   ) {
-    this.webUrl = (webUrl || "").replace(/\/+$/, "");
-    this.currentUserUpn = (currentUserUpn || "").trim();
-    this.currentUserDisplayName = (currentUserDisplayName || "").trim();
-    this.graphFactory = graphFactory;
-    this.placeholderUrl = placeholderUrl;
+    this._webUrl = (webUrl || '').replace(/\/$/, '');
+    this._currentUserUpn = (currentUserUpn || '').toLowerCase();
+    this._graphFactory = graphFactory;
+    this._currentUserDisplayName = currentUserDisplayName;
   }
 
-  // keep existing helpers (used by Header for initial render)
-  public getSmall(upn?: string): string {
-    return this.buildSpUrl("S", upn);
+  // =========================================================
+  // Compatibility helpers (used by Header.ts / SuggestBox.ts)
+  // =========================================================
+
+  /** Back-compat: SharePoint userphoto.aspx URL (size=S). */
+  public getSmall(userEmailOrUpn?: string): string {
+    return this._spUserPhotoUrl("S", userEmailOrUpn);
   }
-  public getMedium(upn?: string): string {
-    return this.buildSpUrl("M", upn);
+
+  /** Back-compat: SharePoint userphoto.aspx URL (size=M). */
+  public getMedium(userEmailOrUpn?: string): string {
+    return this._spUserPhotoUrl("M", userEmailOrUpn);
   }
-  public getLarge(upn?: string): string {
-    return this.buildSpUrl("L", upn);
+
+  /** Back-compat: SharePoint userphoto.aspx URL (size=L). */
+  public getLarge(userEmailOrUpn?: string): string {
+    return this._spUserPhotoUrl("L", userEmailOrUpn);
+  }
+
+
+  public async setAvatar(
+    img: HTMLImageElement,
+    size: "S" | "M" | "L" = "M", 
+    userEmailOrUpn?: string,
+    displayName?: string
+  ): Promise<void> {
+    const upn = (userEmailOrUpn || this._currentUserUpn || "").trim();
+    const name = (displayName || this._currentUserDisplayName || upn || "User").trim();
+
+    // 1) initials immediately
+    const initialsUrl = this.getDefaultAvatarDataUrl(name);
+    img.src = initialsUrl;
+
+    // keep initials if anything fails
+    img.onerror = () => {
+      img.onerror = null;
+      img.src = initialsUrl;
+    };
+
+    // 2) Graph photo as DATA URL
+    try {
+      const dataUrl = await this.getUserPhotoDataUrl(upn, name);
+      if (dataUrl) img.src = dataUrl;
+    } catch {
+      // do nothing ->
+    }
+  }
+
+  /** Back-compat: free any object URLs if used elsewhere. */
+  public cleanup(img: HTMLImageElement): void {
+    try {
+      const src = img?.src || "";
+      if (src.startsWith("blob:")) URL.revokeObjectURL(src);
+    } catch {
+      // ignore
+    }
+  }
+
+  private _spUserPhotoUrl(size: "S" | "M" | "L", userEmailOrUpn?: string): string {
+    const account = (userEmailOrUpn || this._currentUserUpn || "").trim();
+    const safe = encodeURIComponent(account);
+    return `${this._webUrl}/_layouts/15/userphoto.aspx?size=${size}&accountname=${safe}`;
+  }
+
+  /** SharePoint-rendered photo URL (fast fallback; works without Graph permissions). */
+  public getUserPhotoFallbackUrl(userEmailOrUpn?: string): string {
+    const account = (userEmailOrUpn || this._currentUserUpn || '').trim();
+    const safe = encodeURIComponent(account);
+    return `${this._webUrl}/_layouts/15/userphoto.aspx?size=M&accountname=${safe}`;
+  }
+
+  /** Initials/avatar placeholder as a DATA URL (SVG). */
+  public getDefaultAvatarDataUrl(nameOrUpn?: string): string {
+    const label = (nameOrUpn || this._currentUserDisplayName || this._currentUserUpn || 'User').trim();
+    const initials = this._initials(label);
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#e9ecef"/>
+            <stop offset="1" stop-color="#dfe3e6"/>
+          </linearGradient>
+        </defs>
+        <rect width="64" height="64" rx="32" fill="url(#g)"/>
+        <text x="32" y="38" text-anchor="middle" font-family="Segoe UI, Arial" font-size="22" font-weight="600" fill="#5a5a5a">${initials}</text>
+      </svg>
+    `.trim();
+
+    return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
   }
 
   /**
-   * ✅ Apply best photo to an <img>:
-   * Graph -> userphoto.aspx -> initials -> placeholder
+   * Returns a DATA URL for the user's photo.
+   * - Uses in-memory cache
+   * - Tries Graph: /users/{id}/photo/$value
+   * - Falls back to initials SVG
    */
-  public async setAvatar(
-    img: HTMLImageElement,
-    size: PhotoSize = "M",
-    upn?: string,
-    displayName?: string
-  ): Promise<void> {
-    const resolvedUpn = (upn || this.currentUserUpn || "").trim();
-    const resolvedName = (displayName || this.currentUserDisplayName || "").trim();
+  public async getUserPhotoDataUrl(userEmailOrUpn?: string, displayName?: string): Promise<string> {
+    const key = (userEmailOrUpn || this._currentUserUpn || "").toLowerCase();
+    const initials = this.getDefaultAvatarDataUrl(displayName || key);
 
-    // Always start with SP url (fast, sync)
-    img.src = this.buildSpUrl(size, resolvedUpn);
+    if (!key) return initials;
 
-    // 1) Graph
-    const graphBlob = await this.tryGetGraphPhoto();
-    if (graphBlob) {
-      this.setObjectUrl(img, graphBlob);
-      return;
-    }
+    const cached = this._cache.get(key);
+    if (cached) return cached;
 
-    // 2) SharePoint userphoto.aspx (detect silhouette)
-    const spBlob = await this.fetchBlob(img.src);
-    if (spBlob) {
-      const isSilhouette = await this.isSharePointSilhouette(spBlob, size);
-      if (!isSilhouette) {
-        // keep userphoto.aspx (already set as src)
-        return;
+    try {
+      const dataUrl = await this._fetchGraphPhotoAsDataUrl(key);
+
+      if (dataUrl && dataUrl.startsWith("data:image")) {
+        this._cache.set(key, dataUrl);
+        return dataUrl;
       }
-    }
 
-    // 3) Initials (from displayName, fallback to upn)
-    const initialsUri = this.initialsDataUri(resolvedName || resolvedUpn);
-    if (initialsUri) {
-      this.cleanup(img);
-      img.src = initialsUri;
-      return;
-    }
-
-    // 4) Placeholder (last option)
-    if (this.placeholderUrl) {
-      this.cleanup(img);
-      img.src = this.placeholderUrl;
+      return initials;
+    } catch {
+      return initials;
     }
   }
 
-  /** Revoke previous Graph blob url if we set one */
-  public cleanup(img: HTMLImageElement): void {
-    const prev = img.getAttribute("data-objurl");
-    if (prev) {
+  private async _ensureGraph(): Promise<MSGraphClientV3 | undefined> {
+    if (this._graph) return this._graph;
+    if (!this._graphFactory) return undefined;
+
+    return new Promise((resolve) => {
       try {
-        URL.revokeObjectURL(prev);
+        this._graphFactory!.getClient('3').then((client) => {
+          this._graph = client;
+          resolve(client);
+        }).catch(() => resolve(undefined));
       } catch {
-        /* ignore */
+        resolve(undefined);
       }
-      img.removeAttribute("data-objurl");
-    }
+    });
   }
 
-  // --------------------
-  // Graph (current user)
-  // --------------------
-  private async tryGetGraphPhoto(): Promise<Blob | null> {
-    if (!this.graphFactory) return null;
+  private async _fetchGraphPhotoAsDataUrl(userEmailOrUpn: string): Promise<string> {
+    const graph = await this._ensureGraph();
+    if (!graph) throw new Error('Graph client not available');
 
-    try {
-      const client = await (this.graphFactory as any).getClient("3");
-      const blob = (await client.api("/me/photo/$value").responseType("blob").get()) as Blob;
-      return blob && blob.size > 0 ? blob : null;
-    } catch {
-      return null;
-    }
-  }
+    const id = encodeURIComponent(userEmailOrUpn);
+    const res: any = await graph.api(`/users/${id}/photo/$value`).get();
 
-  // --------------------
-  // SharePoint userphoto
-  // --------------------
-  private buildSpUrl(size: PhotoSize, upn?: string): string {
-    const email = (upn || this.currentUserUpn || "").trim();
-    const ver = new Date().toISOString().slice(0, 13); // YYYY-MM-DDTHH
-    const userParam = email ? `&username=${encodeURIComponent(email)}` : "";
-    return `${this.webUrl}/_layouts/15/userphoto.aspx?size=${size}${userParam}&ver=${ver}`;
-  }
-
-  private async fetchBlob(url: string): Promise<Blob | null> {
-    try {
-      const resp = await fetch(url, { credentials: "same-origin" });
-      if (!resp.ok) return null;
-      const blob = await resp.blob();
-      return blob && blob.size > 0 ? blob : null;
-    } catch {
-      return null;
-    }
-  }
-
-  private async isSharePointSilhouette(blob: Blob, size: PhotoSize): Promise<boolean> {
-    const baseline = await this.getSilhouetteHash(size);
-    if (!baseline) return false; // if we can't compute baseline, don't block userphoto
-    const current = await this.sha256Hex(blob);
-    return !!current && current === baseline;
-  }
-
-  private async getSilhouetteHash(size: PhotoSize): Promise<string | null> {
-    if (PhotoService.spSilhouetteHash[size] !== undefined) {
-      return PhotoService.spSilhouetteHash[size] || null;
+    let blob: Blob;
+    if (res instanceof Blob) {
+      blob = res;
+    } else if (res && typeof res === 'object' && res.byteLength !== undefined) {
+      blob = new Blob([res], { type: 'image/jpeg' });
+    } else if (typeof res === 'string') {
+      const fetched = await fetch(res);
+      blob = await fetched.blob();
+    } else {
+      blob = new Blob([res], { type: 'image/jpeg' });
     }
 
-    // Use a fake UPN to get the "silhouette" response once
-    const fakeUpn = "__no_such_user__@__invalid__.com";
-    const url = this.buildSpUrl(size, fakeUpn);
-    const blob = await this.fetchBlob(url);
-
-    const hash = blob ? await this.sha256Hex(blob) : "";
-    PhotoService.spSilhouetteHash[size] = hash || null;
-    return PhotoService.spSilhouetteHash[size] || null;
+    return await this._blobToDataUrl(blob);
   }
 
-  private async sha256Hex(blob: Blob): Promise<string> {
-    const cryptoObj = (window as any).crypto;
-    if (!cryptoObj?.subtle?.digest) return "";
-
-    const buf = await blob.arrayBuffer();
-    const hashBuf = (await cryptoObj.subtle.digest("SHA-256", buf)) as ArrayBuffer;
-    const bytes = new Uint8Array(hashBuf);
-
-    let hex = "";
-    for (let i = 0; i < bytes.length; i++) {
-      const h = bytes[i].toString(16);
-      hex += h.length === 1 ? "0" + h : h;
-    }
-    return hex;
+  private _blobToDataUrl(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Failed to read blob'));
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.readAsDataURL(blob);
+    });
   }
 
-  // --------------------
-  // Initials
-  // --------------------
-  private initialsDataUri(nameOrEmail: string): string | null {
-    const initials = this.getInitials(nameOrEmail);
-    if (!initials) return null;
-
-    const svg =
-      `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">` +
-      `<circle cx="32" cy="32" r="32" fill="#E9ECEF"/>` +
-      `<text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle" ` +
-      `font-family="Inter, Arial" font-size="22" font-weight="600" fill="#2B2B2B">` +
-      `${this.escapeXml(initials)}` +
-      `</text></svg>`;
-
-    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-  }
-
-  private getInitials(value: string): string {
-    const v = (value || "").trim();
-    if (!v) return "";
-
-    const base = v.indexOf("@") > -1 ? v.split("@")[0] : v;
-    const parts = base
-      .replace(/[._-]+/g, " ")
-      .split(" ")
-      .map((p) => p.trim())
-      .filter(Boolean);
-
-    if (!parts.length) return "";
-    const first = parts[0].charAt(0);
-    const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : "";
-    return (first + last).toUpperCase().slice(0, 2);
-  }
-
-  private escapeXml(s: string): string {
-    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-
-  // --------------------
-  // Blob URL helper (Graph)
-  // --------------------
-  private setObjectUrl(img: HTMLImageElement, blob: Blob): void {
-    this.cleanup(img);
-    const objUrl = URL.createObjectURL(blob);
-    img.src = objUrl;
-    img.setAttribute("data-objurl", objUrl);
+  private _initials(name: string): string {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return 'U';
+    const first = parts[0][0] || '';
+    const last = parts.length > 1 ? (parts[parts.length - 1][0] || '') : '';
+    const out = (first + last).toUpperCase();
+    return out || 'U';
   }
 }

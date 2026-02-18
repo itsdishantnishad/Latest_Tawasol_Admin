@@ -12,7 +12,10 @@ export interface IDashboardGridProps {
 
 const DashboardGrid: React.FC<IDashboardGridProps> = ({ title, items, onOpen, showTitle = true }) => {
   const onKey = (e: React.KeyboardEvent, it: DashboardItem) => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(it); }
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onOpen(it);
+    }
   };
 
   return (
@@ -31,18 +34,25 @@ const DashboardGrid: React.FC<IDashboardGridProps> = ({ title, items, onOpen, sh
             onKeyDown={(e) => onKey(e, it)}
             title={it.title}
           >
-            {it.thumbUrl ? (
-              <Image
-                src={it.thumbUrl}
-                alt=""
-                className={styles.cardImg}
-                imageFit={ImageFit.cover}
-                maximizeFrame
-                loading="lazy"
-              />
-            ) : (
-              <div className={`${styles.placeholder}`} />
-            )}
+            {/* Fixed 16:9 media frame (prevents env-based sizing issues) */}
+            <div className={styles.cardMedia}>
+              {it.thumbUrl ? (
+                <Image
+                  src={it.thumbUrl}
+                  alt=""
+                  className={styles.cardImg}
+                  imageFit={ImageFit.cover}
+                  maximizeFrame
+                  loading="lazy"
+                  // styles={{
+                  //   root: { width: '100%', height: '100%' },
+                  //   image: { width: '100%', height: '100%', objectFit: 'cover' }
+                  // }}
+                />
+              ) : (
+                <div className={styles.placeholder} />
+              )}
+            </div>
 
             <Stack tokens={{ childrenGap: 2 }}>
               <span className={styles.cardTitle}>{it.title}</span>

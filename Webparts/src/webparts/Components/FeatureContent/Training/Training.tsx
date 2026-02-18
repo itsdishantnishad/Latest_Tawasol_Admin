@@ -289,12 +289,12 @@ export const Training: React.FC<ITrainingProps> = (props) => {
   // ----------------------------------------
 
   if (loading) {
-    return <div className={styles.trainingContainer}>Loading trainings...</div>;
+    return <div className={styles.trainingContainerErr}>Loading trainings...</div>;
   }
 
   if (error) {
     return (
-      <div className={styles.trainingContainer}>
+      <div className={styles.trainingContainerErr}>
         <p style={{ color: "red" }}>Error loading trainings: {error}</p>
       </div>
     );

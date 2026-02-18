@@ -1,103 +1,146 @@
 @import '~@fluentui/react/dist/sass/References.scss';
+
+/* Keep Inter from Google (already has display=swap) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
+/* Local fonts */
 @font-face {
   font-family: 'Instrument Serif Regular';
-  src: local('Instrument Serif Regular'), url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+  src: local('Instrument Serif Regular'),
+    url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
+  font-display: swap;
 }
-
 
 @font-face {
   font-family: 'Instrument Serif Italic';
-  src: local('Instrument Serif Italic'), url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+  src: local('Instrument Serif Italic'),
+    url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
+  font-display: swap;
 }
 
-/* Outer: controls page spacing around the banner */
+/* =================== BANNER =================== */
+
 .bannerRoot {
-  // background: #fef7f0;
   box-sizing: border-box;
   padding: 30px 60px;
-  @media (max-width: 900px){
+
+  @media (max-width: 900px) {
     padding: 16px;
   }
 }
 
-/* Inner: holds the media + overlay and keeps rounded mask */
 .frame {
   position: relative;
   width: 100%;
-  // border-radius: 8px;
-  // overflow: hidden;   
-  @media (max-width: 900px){
-    overflow: hidden;
-    position: relative;
-    width: 100%;
+  aspect-ratio: 1320 / 260;
+  overflow: hidden;
+  border-radius: 15px;
+  contain: paint;
+  transform: translateZ(0);
+  will-change: transform;
+
+  @media (max-width: 900px) {
+    /* keep your mobile height; aspect-ratio still helps during initial layout */
     height: 250px;
-    border-radius: 30px;
   }
 }
 
-/* Media fills the inner frame */
-.svgHost {
-  width: 100%;
-  height: auto;
-  display: block;
-
-  svg { width: 100%; height: auto; display: block; }
-}
-
+/* VIEW MODE: <img> */
 .customImage {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
-  @media (max-width: 900px){
-    height: 100%;
-    width: fit-content;
-  }
+
+  /* Prevent intrinsic sizing/layout quirks */
+  object-fit: cover;
+
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
-/* Overlay respects the inner frame, not the outer padding */
+/* EDIT MODE: background-image div (avoids SharePoint image editor hooks on <img>) */
+.bannerBg {
+  width: 100%;
+  height: 100%;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
 .textOverlay {
+  -ms-flex-align: center;
+  -ms-flex-pack: center;
+  align-items: center;
+  display: -ms-flexbox;
+  display: flex;
   inset: 0;
+  justify-content: center;
   padding: 15px;
   position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  @media (max-width: 900px){
+}
+
+.textWrap {
+  text-align: center;
+}
+
+/* =================== TEXT =================== */
+
+.title {
+  font-size: 60px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 100%;
+  margin-bottom: 12px;
+  margin-top: 0;
+  text-align: center;
+
+  @media (max-width: 991.98px) {
+    font-size: clamp(26px, 6vw, 60px);
   }
 }
 
-.textWrap { text-align: center;}
-
-/* Title + description */
-.title {
-  margin-top: 0;
-  margin-bottom: 12px;
-  font-size: 60px;
-  line-height: 100%;
-  letter-spacing: 0;
-  text-align: center;
-  font-weight: 400;
+.titleFirst {
+  color: #DA291C;
+  font-family: 'Instrument Serif Italic';
 }
 
-.titleFirst { color: #DA291C; font-family: 'Instrument Serif Italic'; }
-.titleRest  { color: #000000; font-family: 'Instrument Serif Regular'; }
+.titleRest {
+  color: #000000;
+  font-family: 'Instrument Serif Regular';
+}
 
 .description {
-  font-family: 'Inter', sans-serif;
   color: #5B6770;
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
   font-weight: 400;
   letter-spacing: 0;
   line-height: 24px;
+  margin: 0 auto;
   text-align: center;
   width: 70%;
-  margin: 0 auto;
+
+  @media (max-width: 991.98px) {
+    font-size: clamp(14px, 3.5vw, 16px);
+  }
+}
+.preloadProbe {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  left: -9999px;
+  top: -9999px;
 }
 
-@media (max-width: 991.98px) {
-  .bannerRoot { --pad: 12px; }   
-  .title { font-size: clamp(26px, 6vw, 60px); }
-  .description { font-size: clamp(14px, 3.5vw, 16px); }
+.textShimmer {
+  width: min(680px, 90%);
+  margin: 0 auto;
 }

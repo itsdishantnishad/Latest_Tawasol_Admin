@@ -9,50 +9,114 @@ export class Footer {
     // Parameters intentionally unused — we get data via render()
   }
 
+  private escapeHtml(s: string): string {
+    return (s || '').replace(/[&<>"']/g, (c) => {
+      switch (c) {
+        case '&': return '&amp;';
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#39;';
+        default: return c;
+      }
+    });
+  }
+
+  private safeUrl(raw?: string): string {
+    const v = (raw || '').trim();
+    if (!v) return '';
+    try {
+      // allow relative URLs too
+      const u = new URL(v, window.location.origin);
+      const p = u.protocol.toLowerCase();
+      if (p === 'http:' || p === 'https:' || p === 'mailto:' || p === 'tel:') return u.href;
+      return '';
+    } catch {
+      return '';
+    }
+  }
+
   public async render(hostId: string, allLinks: IFooterLink[]): Promise<void> {
-    const { main, social } = allLinks.reduce(
+    const buckets = allLinks.reduce(
       (acc, link) => {
-        if ((link.TIRIconURL || '').trim() !== '') acc.social.push(link);
-        else acc.main.push(link);
+        const url = (link.URL || '').trim();
+        const icon = (link.TIRIconURL || '').trim();
+
+        if (icon) {
+          // social icon (only if it has a URL)
+          if (url) acc.social.push(link);
+          else acc.meta.push(link);
+        } else if (url) {
+          // main footer links
+          acc.main.push(link);
+        } else {
+          // meta row (copyright/settings)
+          acc.meta.push(link);
+        }
+
         return acc;
       },
-      { main: [] as IFooterLink[], social: [] as IFooterLink[] }
+      { main: [] as IFooterLink[], social: [] as IFooterLink[], meta: [] as IFooterLink[] }
     );
+
+    // copyright from meta item (Title only row)
+    const year = new Date().getFullYear();
+    const metaText =
+      buckets.meta.find(m => {
+        const t = (m.Title || '').toLowerCase();
+        return t.includes('copyright') || t.includes('all rights') || t.includes('©') || t.includes('&copy;');
+      })?.Title || buckets.meta[0]?.Title || `© ${year} Tawasol. All rights reserved`;
+
+    // Optional: support {year} placeholder
+    const copyrightText =
+      (metaText || '').replace(/\{year\}/gi, String(year)) || `© ${year} Tawasol. All rights reserved`;
 
     const footerHtml = `
       <footer class="${styles.TIRFooter}">
-        <h2 class="${styles.TIRFooterLogo}">Tawasol</h2>
+     <!--
+    <h2 class="${styles.TIRFooterLogo}">Tawasol</h2>
 
-        <nav class="${styles.TIRFooterNav}">
-          ${main
-            .map(
-              (l) => `
-            <a href="${l.URL}" class="${styles.TIRFooterLink}">
-              ${l.Title}
-            </a>`
-            )
-            .join('')}
-        </nav>
-
+    <nav class="${styles.TIRFooterNav}">
+      ${buckets.main
+        .map((l) => {
+          const href = this.safeUrl(l.URL);
+          if (!href) return '';
+          return `
+            <a href="${href}" class="${styles.TIRFooterLink}">
+              ${this.escapeHtml(l.Title)}
+            </a>
+          `;
+        })
+        .join('')}
+    </nav>
+    
         <hr class="${styles.TIRFooterLine}" />
-
+       -->
         <div class="${styles.TIRFooterBottom}">
-          <div class="${styles.TIRFooterBottomCenter}"></div>
+          <div class="${styles.TIRFooterBottomLeft}"></div>
+
+          <div class="${styles.TIRFooterCopy}">
+            ${this.escapeHtml(copyrightText)}
+          </div>
 
           ${
-            social.length > 0
+            buckets.social.length > 0
               ? `<div class="${styles.TIRSocials}">
-                  ${social
-                    .map(
-                      (s) => `
-                    <a href="${s.URL}" target="_blank" rel="noopener noreferrer"
-                       class="${styles.TIRSocialLink}" title="${s.Title}">
-                      <img src="${s.TIRIconURL}" alt="${s.Title}" class="${styles.TIRFooterIcon}" />
-                    </a>`
-                    )
+                  ${buckets.social
+                    .map((s) => {
+                      const href = this.safeUrl(s.URL);
+                      const img = this.safeUrl(s.TIRIconURL);
+                      if (!href || !img) return '';
+                      return `
+                        <a href="${href}" target="_blank" rel="noopener noreferrer"
+                           class="${styles.TIRSocialLink}" title="${this.escapeHtml(s.Title)}">
+                          <img src="${img}" alt="${this.escapeHtml(s.Title)}" class="${styles.TIRFooterIcon}" />
+                        </a>
+                      `;
+                    })
                     .join('')}
                 </div>`
-              : ''
+              : `<div></div>`
           }
         </div>
       </footer>
@@ -69,17 +133,13 @@ export class Footer {
     // Place footer at the real bottom (below comments if comments exist)
     this.placeFooter(host);
 
-    // In modern pages, comments/footer regions can load after initial render.
-    // Run placement again a bit later to “snap” it correctly.
     window.setTimeout(() => this.placeFooter(host!), 800);
     window.setTimeout(() => this.placeFooter(host!), 2000);
   }
 
   private placeFooter(host: HTMLElement): void {
-    // Always detach first to avoid duplicates / wrong position
     if (host.parentElement) host.parentElement.removeChild(host);
 
-    // 1) Best: replace the actual Page SiteFooter region (it’s after comments)
     const siteFooterRegion =
       (document.querySelector('[data-viewport-id*="Page.SiteFooter"]') as HTMLElement) ||
       (document.querySelector('div[id^="vpc.Page.SiteFooter"]') as HTMLElement) ||
@@ -92,10 +152,8 @@ export class Footer {
       return;
     }
 
-    // 2) Next best: insert AFTER comments wrapper (footer should be below comments)
     const cw = document.getElementById('CommentsWrapper') as HTMLElement | null;
     if (cw) {
-      // Use the parent wrapper block (usually contains the spacing/line)
       const wrapper = (cw.parentElement?.parentElement as HTMLElement) || (cw.parentElement as HTMLElement) || cw;
       const parent = wrapper.parentElement;
 
@@ -106,7 +164,6 @@ export class Footer {
       }
     }
 
-    // 3) Fallback: append to page canvas / chrome
     const mount =
       (document.querySelector('#spPageCanvasContent') as HTMLElement) ||
       (document.querySelector('#spPageChromeAppDiv') as HTMLElement) ||
@@ -116,8 +173,6 @@ export class Footer {
   }
 
   public dispose(): void {
-    // remove host by id (safer)
-    // also remove footer element if left behind
     const host = document.getElementById('tir-footer-host');
     if (host) host.remove();
 

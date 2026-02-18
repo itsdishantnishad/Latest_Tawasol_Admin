@@ -1,5 +1,5 @@
 /* ProfilePageHeader.module.scss */
-/* ✅ Same as ProfileHeader.module.scss (only renamed file) */
+/* ✅ UPDATED FULL FILE (NO DUPLICATES | NO CONFLICTS) */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
@@ -21,11 +21,11 @@
 .flexCol {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 /* =========================================================
    ✅ FORCE SharePoint FIRST ROW (where ProfileHeader sits)
-   to allow full-bleed (remove left/right canvas space + no clipping)
    ========================================================= */
 :global(#spPageCanvasContent) {
   margin-top: 0 !important;
@@ -45,25 +45,155 @@
   overflow: visible !important;
 }
 
-/* ✅ Safety: prevent horizontal scrollbar because of 100vw full-bleed */
 :global(body) {
   overflow-x: hidden !important;
 }
 
 /* =========================================================
-   ✅ HERO FULL WIDTH (LEFT+RIGHT) + ✅ ZERO GAP FROM TOP
+   ✅ HERO FULL WIDTH
    ========================================================= */
 .headerWrap {
   padding: 44px 56px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
   border-radius: 0;
-  overflow: hidden;
+
+  overflow: visible;
+
   position: relative;
+  width: 100%;
+
+  background-image:
+    url("../assets/Gradient.webp"),
+    linear-gradient(90deg, #fbd8c7 0%, #fee2cf 35%, #ffd6b6 68%, #ffe4d1 100%);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
+
+// Transparent Shimmer
+.bannerShimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0; /* above background, below content (content is z-index:1) */
+
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.10),
+    inset 0 -36px 80px rgba(0, 0, 0, 0.06);
+
+  overflow: hidden;
+}
+
+.bannerShimmer::after {
+  content: "";
+  position: absolute;
+  top: -25%;
+  left: -60%;
+  width: 55%;
+  height: 150%;
+  transform: skewX(-16deg);
+
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.22) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
+
+  filter: blur(1px);
+  animation: bannerShimmerSweep 1.6s ease-in-out infinite;
+}
+
+@keyframes bannerShimmerSweep {
+  0% {
+    transform: translateX(0) skewX(-16deg);
+    opacity: 0.55;
+  }
+  55% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(220%) skewX(-16deg);
+    opacity: 0.55;
+  }
+}
+
+/* =========================================================
+   ✅ Skeleton blocks (transparent + shadow shades)
+   ========================================================= */
+.skelBase {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.10),
+    0 8px 22px rgba(0, 0, 0, 0.08);
+}
+
+.skelBase::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.30) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+
+  filter: blur(1px);
+  animation: skelShimmer 1.25s ease-in-out infinite;
+}
+
+@keyframes skelShimmer {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+.skelCircleLg {
+  @extend .skelBase;
+  width: 150px;
+  height: 150px;
+  border-radius: 999px;
+}
+
+.skelLineLg {
+  @extend .skelBase;
+  width: clamp(160px, 22vw, 240px);
+  height: 40px;
+  border-radius: 14px;
+}
+
+.skelLineMd {
+  @extend .skelBase;
+  width: clamp(200px, 32vw, 340px);
+  height: 40px;
+  border-radius: 14px;
+}
+
+.skelLineSm {
+  @extend .skelBase;
+  width: clamp(160px, 26vw, 280px);
+  height: 18px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+/* Optional decorative corners */
 .cornerLeft {
   position: absolute;
   width: 569px;
@@ -104,10 +234,15 @@
   z-index: 1;
 }
 
+/* ========================================================= */
 .actions {
   align-self: flex-start;
   position: relative;
   margin-left: auto;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .copyPill {
@@ -191,9 +326,10 @@
 }
 
 .kebabBtn {
-  margin-left: 20px;
+  margin-left: 0;
 }
 
+/* ========================================================= */
 .identityCard {
   width: 100%;
   max-width: 780px;
@@ -218,6 +354,30 @@
   height: 150px;
   flex-shrink: 0;
   margin-top: 120px;
+}
+
+.avatarHost {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.avatarOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 360px;
+  background: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+
+.avatarLoading {
+  background: rgb(255, 244, 234);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .avatarBadge {
@@ -253,6 +413,7 @@
   color: #da291c;
 }
 
+/* ========================================================= */
 .metaCol {
   display: flex;
   flex-direction: column;
@@ -296,6 +457,7 @@
   text-overflow: ellipsis;
 }
 
+/* ========================================================= */
 .kebabWrapper {
   position: relative;
   display: inline-block;
@@ -331,6 +493,12 @@
   }
 }
 
+.changePhotoBtnDisabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .changePhotoIcon {
   width: 24px;
   height: 24px;
@@ -343,6 +511,7 @@
   color: #101820;
 }
 
+/* ========================================================= */
 .badgesRow {
   display: flex;
   gap: 14px;
@@ -352,12 +521,20 @@
   flex-wrap: wrap;
 }
 
+.badgesReadOnly {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.badgesReadOnly .badgeItem {
+  cursor: default !important;
+}
+
 .badgeItem {
   display: flex;
   flex-direction: column;
   gap: 6px;
   align-items: center;
-  margin-top: 160px;
   cursor: pointer;
   user-select: none;
 
@@ -407,6 +584,7 @@
   white-space: nowrap;
 }
 
+/* ========================================================= */
 .errorMessage {
   display: flex;
   align-items: center;
@@ -427,6 +605,10 @@
   }
 }
 
+.hiddenInput {
+  display: none;
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -438,6 +620,83 @@
   }
 }
 
+/* =========================================================
+   [PROFILECARD] Button styles
+   ========================================================= */
+.profileCardWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0;
+}
+
+.profileCardBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #ffffff;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.profileCardBtnActive {
+  background: #ffffff;
+}
+
+.profileCardIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* Portal container */
+.profileCardPortal {
+  position: fixed;
+  z-index: 100000;
+  pointer-events: auto;
+}
+
+/* =========================================================
+   ✅ HIDE SharePoint WebPart Chrome Icons (🔗 + ⋮)
+   (These are not from your TSX, they are SharePoint chrome)
+   ========================================================= */
+:global(.tawasolHideWpChromeActions) {
+  /* Most common labels in modern SharePoint */
+  button[aria-label="Copy link"],
+  button[title="Copy link"],
+  button[aria-label="More options"],
+  button[title="More options"],
+  button[aria-label="Copy link to clipboard"],
+  button[title="Copy link to clipboard"] {
+    display: none !important;
+  }
+
+  /* Extra safety selectors (some tenants) */
+  [data-automation-id="copyLinkButton"],
+  [data-automation-id="moreOptionsButton"] {
+    display: none !important;
+  }
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
 @media (max-width: 768px) {
   .headerWrap {
     min-height: 260px;
