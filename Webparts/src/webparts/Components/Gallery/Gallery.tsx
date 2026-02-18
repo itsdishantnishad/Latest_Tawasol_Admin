@@ -100,30 +100,33 @@ export const Gallery: React.FC<IGalleryProps> = (props) => {
           {/* Row 1 */}
           <div className={styles.row}>
             {spImages.slice(0, 4).map((image, index) => (
-              <div
-                key={image.id}
-                className={`${styles.imageItem} ${
-                  index === 0 || index === 3 ? styles.shortImage : styles.tallImage
-                }`}
-              >
-                <img src={image.url} alt={image.alt || `Gallery image ${index + 1}`} />
-              </div>
+              <ConditionalLink key={image.id} to={viewAllHref}>
+                <div
+                  className={`${styles.imageItem} ${index === 0 || index === 3 ? styles.shortImage : styles.tallImage
+                    }`}
+                  aria-label={`Open gallery (View All) from image ${index + 1}`}
+                >
+                  <img src={image.url} alt={image.alt || `Gallery image ${index + 1}`} />
+                </div>
+              </ConditionalLink>
             ))}
           </div>
 
           {/* Row 2 */}
           <div className={styles.row}>
             {spImages.slice(4, 8).map((image, index) => (
-              <div
-                key={image.id}
-                className={`${styles.imageItem} ${
-                  index === 0 || index === 3 ? styles.shortImage : styles.tallImage
-                }`}
-              >
+              <ConditionalLink key={image.id} to={viewAllHref}>
+                <div
+                  className={`${styles.imageItem} ${index === 0 || index === 3 ? styles.shortImage : styles.tallImage
+                    }`}
+                  aria-label={`Open gallery (View All) from image ${index + 5}`}
+                >
                 <img src={image.url} alt={image.alt || `Gallery image ${index + 5}`} />
-              </div>
+                </div>
+              </ConditionalLink>
             ))}
           </div>
+
         </div>
       )}
 
