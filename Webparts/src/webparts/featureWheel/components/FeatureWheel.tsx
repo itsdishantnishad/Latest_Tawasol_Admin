@@ -517,23 +517,25 @@ const Dashboard = React.lazy(() => import("../../Components/FeatureContent/Dashb
 const Offers = React.lazy(() => import("../../Components/FeatureContent/Offers/Offers"));
 const Training = React.lazy(() => import("../../Components/FeatureContent/Training/Training"));
 const AboutDHRE = React.lazy(() => import("../../Components/FeatureContent/AboutDHRE/AboutDHRE"));
+// const Newsletter = React.lazy(() => import("../../Components/FeatureContent/Newsletter/Newsletter"));
 const TaskApprovals = React.lazy(() => import("../../Components/FeatureContent/TaskApprovals/TaskApprovals"));
 const BeverageMenu = React.lazy(() => import("../../Components/FeatureContent/BeverageMenu/BeverageMenu"));
-
+const Newsletter = React.lazy(() => import("../../Components/FeatureContent/Newsletters/Newsletter"));
 const features: Feature[] = [
-  { id: "dashboard", title: "Dashboard", subtitle: "Track, analyze, optimize", backgroundImage: "url('../../Components/FeatureContent/assets/Dashboard.svg')" },
-  { id: "offers", title: "Offers", subtitle: "Exclusive perks just for you", backgroundImage: "url('../../Components/FeatureContent/assets/Offers.svg')" },
-  { id: "training", title: "Trainings", subtitle: "Grow skills, unlock new doors", backgroundImage: "url('../../Components/FeatureContent/assets/Training.svg')" },
-  { id: "gallery", title: "Gallery", subtitle: "Past events images and memories", backgroundImage: "url('../../Components/FeatureContent/assets/ImageGallery.svg')" },
-  { id: "documents", title: "Procedures", subtitle: "All files in one place", backgroundImage: "url('../../Components/FeatureContent/assets/Documents.svg')" },
-  { id: "about_dhre", title: "About DHRE", subtitle: "Journey through DHRE", backgroundImage: "url('../../Components/FeatureContent/assets/AboutDHRE.svg')" },
-  { id: "employee_events", title: "Lets Celebrate", subtitle: "Birthday, anniversary & new joiners", backgroundImage: "url('../../Components/FeatureContent/assets/LetsCelebrate.svg')" },
-  { id: "meetings", title: "Meetings", subtitle: "Connect, discuss, move forward", backgroundImage: "url('../../Components/FeatureContent/assets/Meeting.svg')" },
-  { id: "service_links", title: "Links", subtitle: "Quick access, zero hassle", backgroundImage: "url('../../Components/FeatureContent/assets/Service-Links.svg')" },
-  { id: "forms", title: "Forms", subtitle: "All interactive forms In one place", backgroundImage: "url('../../Components/FeatureContent/assets/InteractiveForms.svg')" },
-  { id: "events", title: "Events", subtitle: "Discover whats happening next", backgroundImage: "url('../../Components/FeatureContent/assets/Events.svg')" },
-  { id: "tasks", title: "Tasks", subtitle: "Get things done with clarity", backgroundImage: "url('../../Components/FeatureContent/assets/Tasks.svg')" },
-  { id: "beverage_menu", title: "Services", subtitle: "Simplify your journey ahead", backgroundImage: "url('../../Components/FeatureContent/assets/Services.svg')" },
+  { id: "dashboard", title: "Dashboard", subtitle: "Track, analyze, optimize", backgroundImage: "url('../../Components/FeatureContent/assets/Dashboard.webp')" },
+  { id: "offers", title: "Offers", subtitle: "Exclusive perks just for you", backgroundImage: "url('../../Components/FeatureContent/assets/Offers.webp')" },
+  { id: "training", title: "Trainings", subtitle: "Grow skills, unlock new doors", backgroundImage: "url('../../Components/FeatureContent/assets/Training.webp')" },
+  { id: "gallery", title: "Gallery", subtitle: "Past events images and memories", backgroundImage: "url('../../Components/FeatureContent/assets/ImageGallery.webp')" },
+  { id: "documents", title: "Procedures", subtitle: "All files in one place", backgroundImage: "url('../../Components/FeatureContent/assets/Documents.webp')" },
+  { id: "employee_events", title: "Lets Celebrate", subtitle: "Birthday, anniversary & new joiners", backgroundImage: "url('../../Components/FeatureContent/assets/LetsCelebrate.webp')" },
+  { id: "about_dhre", title: "About DHRE", subtitle: "Journey through DHRE", backgroundImage: "url('../../Components/FeatureContent/assets/AboutDHRE.webp')" },
+  { id: "tasks", title: "Approvals", subtitle: "Get things done with clarity", backgroundImage: "url('../../Components/FeatureContent/assets/Tasks.webp')" },
+  { id: "newsletters", title: "Newsletters", subtitle: "Get things done with clarity", backgroundImage: "url('../../Components/FeatureContent/assets/newsletter.webp')" },
+  { id: "meetings", title: "Meetings", subtitle: "Connect, discuss, move forward", backgroundImage: "url('../../Components/FeatureContent/assets/Meeting.webp')" },
+  { id: "service_links", title: "Links", subtitle: "Quick access, zero hassle", backgroundImage: "url('../../Components/FeatureContent/assets/Service-Links.webp')" },
+  { id: "forms", title: "Forms", subtitle: "All interactive forms In one place", backgroundImage: "url('../../Components/FeatureContent/assets/InteractiveForms.webp')" },
+  { id: "events", title: "Events", subtitle: "Discover whats happening next", backgroundImage: "url('../../Components/FeatureContent/assets/Events.webp')" },
+  { id: "beverage_menu", title: "Services", subtitle: "Simplify your journey ahead", backgroundImage: "url('../../Components/FeatureContent/assets/Services.webp')" },
 ];
 
 const featureTitleContent: Record<string, { header: string; subHeader: string }> = {
@@ -546,6 +548,7 @@ const featureTitleContent: Record<string, { header: string; subHeader: string }>
   forms: { header: "Interactive Forms", subHeader: "All your essential forms – legacy, claims, business excellence, and more" },
   about_dhre: { header: "About DHRE", subHeader: "Dive deep into DHRE: Our departments, culture, and core values." },
   tasks: { header: "Task Approvals", subHeader: "Streamline your work to accomplish more, faster." },
+  newsletters: { header: "Newsletters", subHeader: "Company updates, insights, and highlights - all in one place." },
   beverage_menu: { header: "Beverage Menu", subHeader: "Find your favourite drink to fuel your day" },
   dashboard: { header: "Dashboard", subHeader: "Track everything at a glance – insights made simple!" },
   offers: { header: "Offers & Benefits", subHeader: "Save more with benefits designed for you" },
@@ -629,8 +632,9 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
       case "forms":
         return <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />;
 
-      case "about_dhre":
-        return <AboutDHRE context={props.context} />;
+      case "about_dhre": return <AboutDHRE context={props.context} />;
+
+      case "newsletters": return <Newsletter />;
 
       case "tasks":
         return <TaskApprovals context={props.context} seeAllURL={props.taskApprovals} />;

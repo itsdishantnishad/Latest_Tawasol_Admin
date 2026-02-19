@@ -1,7 +1,7 @@
 .featureSelector {
   height: 220px;
   display: grid;
-  grid-template-columns: repeat(13, 110px);
+  grid-template-columns: repeat(14, 110px);
   justify-content: center;
   zoom: 1.2;
   @media(max-width: 1400px){
@@ -118,6 +118,11 @@
   background-image: url("../../Components/FeatureContent/assets/Tasks.webp");
   box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
   z-index: 1;
+}
+
+.newslettersCard {
+  background-image: url("../../Components/FeatureContent/assets/newsletter.webp");
+  box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
 }
 
 .beverageCard {
