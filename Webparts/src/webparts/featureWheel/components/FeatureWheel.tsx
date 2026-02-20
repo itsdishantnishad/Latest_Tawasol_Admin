@@ -556,7 +556,7 @@ const featureTitleContent: Record<string, { header: string; subHeader: string }>
 };
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
-  const [selectedFeature, setSelectedFeature] = useState<string>("employee_events");
+  const [selectedFeature, setSelectedFeature] = useState<string>("tasks");
 
   // ✅ Track which LetsCelebrate tab is currently active inside FeaturedWheel
   const [celebrateTab, _setCelebrateTab] = useState<CelebrateTabKey>("birthdays");
