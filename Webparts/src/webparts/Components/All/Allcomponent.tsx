@@ -101,119 +101,27 @@ const daysBetween = (start: Date, end: Date) => {
   return Math.max(1, days);
 };
 
-const normalizeIsRegistered = (item: any): boolean => {
-  const v =
-    item?.isRegistered ??
-    item?.isregistered ??
-    item?.IsRegistered ??
-    item?.Isregistered ??
-    item?.registered ??
-    item?.Registered ??
-    item?.isReg ??
-    item?.IsReg;
-
-  if (typeof v === "boolean") return v;
-
-  const s = String(v ?? "").trim().toLowerCase();
-  if (!s) return false;
-
-  if (["true", "yes", "1", "registered"].includes(s)) return true;
-
-  return false;
-};
-
 const isNotNull = <T,>(x: T | null | undefined): x is T => x !== null && x !== undefined;
 
-const mapTrainingForCard = (item: any, idx: number) => {
-  const idRaw = item?.ID ?? item?.Id ?? item?.ListItemID ?? item?.ListItemId ?? idx + 1;
-  const id = Number(idRaw) || idx + 1;
+const toServerRelativeUrl = (pathOrUrl: string): string => {
+  const s = String(pathOrUrl || "").trim();
+  if (!s) return "";
+  try {
+    if (/^https?:\/\//i.test(s)) {
+      return new URL(s).pathname;
+    }
+  } catch {
+    // ignore
+  }
+  return s;
+};
 
-  const startRaw =
-    item?.eventStartDate ||
-    item?.EventStartDate ||
-    item?.startDate ||
-    item?.StartDate;
+const escapeODataString = (s: string): string => String(s || "").replace(/'/g, "''");
 
-  const endRaw =
-    item?.eventEndDate ||
-    item?.EventEndDate ||
-    item?.endDate ||
-    item?.EndDate;
-
-  const start = parseSPDate(startRaw);
-  const end = parseSPDate(endRaw);
-
-  if (!start || !end) return null;
-
-  const durationDays = daysBetween(start, end);
-
-  const timeRange = `${fmtTime(start)} - ${fmtTime(end)}`;
-
-  const meetingLink = safeStr(
-    item?.joiningURL ||
-      item?.joiningUrl ||
-      item?.meetingLink ||
-      item?.MeetingLink ||
-      ""
-  );
-
-  const pageUrl = safeStr(item?.pageUrl || item?.Path || item?.path || "#");
-
-  const isReg = normalizeIsRegistered(item) || !!meetingLink;
-
-  return {
-    ...item,
-
-    id,
-    ID: id,
-
-    imageUrl: item?.newsImage || item?.imageUrl || item?.Image || "",
-    category: item?.category || item?.Category || "Classroom",
-    title: item?.title || item?.Title || "Untitled",
-
-    timeRange,
-    time: timeRange,
-
-    startDate: safeStr(startRaw) || start.toISOString(),
-    endDate: safeStr(endRaw) || end.toISOString(),
-
-    duration: `${durationDays} day${durationDays > 1 ? "s" : ""}`,
-
-    // Instructor (used by TrainingCard UI)
-    instructorName:
-      item?.instructor?.name ||
-      item?.instructorName ||
-      item?.InstructorName ||
-      item?.organizerName ||
-      item?.OrganizerName ||
-      "",
-    instructorTitle:
-      item?.instructor?.role || item?.instructorTitle || item?.InstructorTitle || "",
-    instructorEmail:
-      item?.instructor?.email ||
-      item?.instructorEmail ||
-      item?.InstructorEmail ||
-      item?.instructor?.id ||
-      item?.Instructor?.Email ||
-      item?.Instructor?.EMail ||
-      item?.Organizer?.Email ||
-      item?.Organizer?.EMail ||
-      item?.Author?.Email ||
-      item?.Author?.EMail ||
-      "",
-
-    location: safeStr(item?.location),
-    meetingLink,
-    joinUrl: meetingLink || "#",
-    pageUrl,
-
-    start,
-    end,
-    Eventtype: "Trainings",
-    isRegistered: isReg,
-    isregistered: isReg,
-    status: isReg ? "Registered" : "Upcoming",
-  };
+const safeUrlFromHyperlinkField = (v: any): string => {
+  if (!v) return "";
+  if (typeof v === "string") return v;
+  return String(v?.Url ?? v?.url ?? "").trim();
 };
 
 const parseNumericIdList = (raw: any): number[] => {
@@ -233,6 +141,21 @@ const parseNumericIdList = (raw: any): number[] => {
 };
 
 type PersonInfo = { name: string; avatarUrl: string };
+
+type TrainingMeta = { id: number; joinUrl: string };
+
+type SettledResult<T> =
+  | { status: 'fulfilled'; value: T }
+  | { status: 'rejected'; reason: any };
+
+const allSettled = async <T,>(promises: Promise<T>[]): Promise<SettledResult<T>[]> => {
+  return Promise.all(
+    promises.map((p) =>
+      p.then((value) => ({ status: 'fulfilled', value } as const))
+       .catch((reason) => ({ status: 'rejected', reason } as const))
+    )
+  );
+};
 
 const Allcomponent: React.FC<IAllComponentProps> = ({
   filteredEvents = [],
@@ -260,7 +183,6 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
   }, []);
 
   const toBase64Utf8 = React.useCallback((input: string): string => {
-    // Works for unicode too (no deprecated unescape)
     const bytes = new TextEncoder().encode(input);
     let binary = "";
     for (let i = 0; i < bytes.length; i++) {
@@ -269,35 +191,36 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
     return btoa(binary);
   }, []);
 
-  const getDefaultAvatar = React.useCallback((nameOrEmail: string): string => {
-    const safe = String(nameOrEmail || "").trim() || "User";
-    const initials = safe
-      .split(" ")
-      .map((n) => n?.trim()?.[0])
-      .filter(Boolean)
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+  const getDefaultAvatar = React.useCallback(
+    (nameOrEmail: string): string => {
+      const safe = String(nameOrEmail || "").trim() || "User";
+      const initials = safe
+        .split(" ")
+        .map((n) => n?.trim()?.[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join("")
+        .toUpperCase();
 
-    const colors = [
-      "#0078D4",
-      "#00A4EF",
-      "#50E6FF",
-      "#8764B8",
-      "#881798",
-      "#E43BA6",
-      "#E74856",
-      "#F7630C",
-      "#FFB900",
-      "#00CC6A",
-    ];
+      const colors = [
+        "#0078D4",
+        "#00A4EF",
+        "#50E6FF",
+        "#8764B8",
+        "#881798",
+        "#E43BA6",
+        "#E74856",
+        "#F7630C",
+        "#FFB900",
+        "#00CC6A",
+      ];
 
-    const colorIndex =
-      safe.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+      const colorIndex =
+        safe.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
 
-    const bgColor = colors[colorIndex];
+      const bgColor = colors[colorIndex];
 
-    const svg = `
+      const svg = `
       <svg width="48" height="48" xmlns="http://www.w3.org/2000/svg">
         <rect width="48" height="48" fill="${bgColor}"/>
         <text x="50%" y="50%"
@@ -312,8 +235,10 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
       </svg>
     `.trim();
 
-    return `data:image/svg+xml;base64,${toBase64Utf8(svg)}`;
-  }, [toBase64Utf8]);
+      return `data:image/svg+xml;base64,${toBase64Utf8(svg)}`;
+    },
+    [toBase64Utf8]
+  );
 
   const ensurePeopleFromGraph = React.useCallback(
     async (emails: string[]) => {
@@ -374,8 +299,14 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
     [context, blobToDataUrl, getDefaultAvatar]
   );
 
-  // ✅ FIX: Load registered Event IDs from "Registered User Event" → TIRRegisteredUsers (same as AllEvents.tsx)
+  // ✅ Load registered Event IDs from "Registered User Event" → TIRRegisteredUsers
   const [myRegisteredEventIds, setMyRegisteredEventIds] = React.useState<number[]>([]);
+
+  // ✅ Load my Registered Training IDs from "Registered Training" → TIRTrainingID
+  const [myRegisteredTrainingIds, setMyRegisteredTrainingIds] = React.useState<number[]>([]);
+
+  // ✅ Resolve Site Pages meta by FileRef (Id + TIRJoiningURL)
+  const [trainingMetaByFileRef, setTrainingMetaByFileRef] = React.useState<Record<string, TrainingMeta>>({});
 
   React.useEffect(() => {
     let cancelled = false;
@@ -383,19 +314,24 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
     const run = async () => {
       try {
         if (!context) {
-          if (!cancelled) setMyRegisteredEventIds([]);
+          if (!cancelled) {
+            setMyRegisteredEventIds([]);
+            setMyRegisteredTrainingIds([]);
+          }
           return;
         }
 
         // get userId
-        let userId: number | undefined =
-          (context.pageContext as any)?.legacyPageContext?.userId;
+        let userId: number | undefined = (context.pageContext as any)?.legacyPageContext?.userId;
 
         if (!userId) {
           const meUrl = `${context.pageContext.web.absoluteUrl}/_api/web/currentuser?$select=Id`;
           const meRes = await context.spHttpClient.get(meUrl, SPHttpClient.configurations.v1);
           if (!meRes.ok) {
-            if (!cancelled) setMyRegisteredEventIds([]);
+            if (!cancelled) {
+              setMyRegisteredEventIds([]);
+              setMyRegisteredTrainingIds([]);
+            }
             return;
           }
           const me = await meRes.json();
@@ -403,28 +339,53 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
         }
 
         if (!userId) {
-          if (!cancelled) setMyRegisteredEventIds([]);
+          if (!cancelled) {
+            setMyRegisteredEventIds([]);
+            setMyRegisteredTrainingIds([]);
+          }
           return;
         }
 
-        const url =
+        // Events registrations
+        const eventUrl =
           `${context.pageContext.web.absoluteUrl}` +
           `/_api/web/lists/getbytitle('${encodeURIComponent("Registered User Event")}')/items` +
           `?$top=1&$select=Id,AuthorId,TIRRegisteredUsers&$filter=AuthorId eq ${userId}`;
 
-        const resp = await context.spHttpClient.get(url, SPHttpClient.configurations.v1);
-        if (!resp.ok) {
+        const eventResp = await context.spHttpClient.get(eventUrl, SPHttpClient.configurations.v1);
+        if (eventResp.ok) {
+          const json = await eventResp.json();
+          const row = Array.isArray(json?.value) ? json.value[0] : null;
+          const ids = parseNumericIdList(row?.TIRRegisteredUsers);
+          if (!cancelled) setMyRegisteredEventIds(ids);
+        } else {
           if (!cancelled) setMyRegisteredEventIds([]);
-          return;
         }
 
-        const json = await resp.json();
-        const row = Array.isArray(json?.value) ? json.value[0] : null;
-        const ids = parseNumericIdList(row?.TIRRegisteredUsers);
+        // Trainings registrations
+        const trUrl =
+          `${context.pageContext.web.absoluteUrl}` +
+          `/_api/web/lists/getbytitle('${encodeURIComponent("Registered Training")}')/items` +
+          `?$top=5000&$select=Id,AuthorId,TIRTrainingID&$filter=AuthorId eq ${userId}`;
 
-        if (!cancelled) setMyRegisteredEventIds(ids);
+        const trResp = await context.spHttpClient.get(trUrl, SPHttpClient.configurations.v1);
+        if (trResp.ok) {
+          const trJson = await trResp.json();
+          const ids = Array.isArray(trJson?.value)
+            ? trJson.value
+                .map((r: any) => Number(r?.TIRTrainingID))
+                .filter((n: number) => Number.isFinite(n) && n > 0)
+            : [];
+
+          if (!cancelled) setMyRegisteredTrainingIds(Array.from(new Set(ids)));
+        } else {
+          if (!cancelled) setMyRegisteredTrainingIds([]);
+        }
       } catch {
-        if (!cancelled) setMyRegisteredEventIds([]);
+        if (!cancelled) {
+          setMyRegisteredEventIds([]);
+          setMyRegisteredTrainingIds([]);
+        }
       }
     };
 
@@ -433,6 +394,66 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
       cancelled = true;
     };
   }, [context]);
+
+  // Resolve Site Pages meta (Id + join URL) for trainings.
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        if (!context || !(filteredTrainings || []).length) return;
+
+        const webUrl = context.pageContext.web.absoluteUrl;
+        const fileRefs = (filteredTrainings || [])
+          .map((t: any) => safeStr(t?.pageUrl || t?.Path || t?.path || ""))
+          .map(toServerRelativeUrl)
+          .filter(Boolean);
+
+        const unique = Array.from(new Set(fileRefs));
+        const missing = unique.filter((ref) => !trainingMetaByFileRef[ref]);
+        if (!missing.length) return;
+
+        const results = await allSettled(
+          missing.map(async (fileRef) => {
+            const url =
+              `${webUrl}` +
+              `/_api/web/lists/getbytitle('${encodeURIComponent("Site Pages")}')/items` +
+              `?$top=1&$select=Id,FileRef,TIRJoiningURL&$filter=FileRef eq '${escapeODataString(fileRef)}'`;
+
+            const resp = await context.spHttpClient.get(url, SPHttpClient.configurations.v1);
+            if (!resp.ok) return null;
+
+            const json = await resp.json();
+            const row = Array.isArray(json?.value) ? json.value[0] : null;
+            if (!row) return null;
+
+            const id = Number(row?.Id || 0);
+            const joinUrl = safeUrlFromHyperlinkField(row?.TIRJoiningURL);
+
+            return id > 0 ? { fileRef, id, joinUrl } : null;
+          })
+        );
+
+        const updates: Record<string, TrainingMeta> = {};
+        for (const r of results) {
+          if (r.status === 'fulfilled' && r.value) {
+            updates[r.value.fileRef] = { id: r.value.id, joinUrl: r.value.joinUrl };
+          }
+        }
+
+        if (!cancelled && Object.keys(updates).length) {
+          setTrainingMetaByFileRef((prev) => ({ ...prev, ...updates }));
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [context, filteredTrainings, trainingMetaByFileRef]);
 
   const sortAsc = React.useCallback((a: any, b: any) => {
     const aT = a?.start?.getTime?.() ?? a?.eventDateTime?.getTime?.() ?? 0;
@@ -453,9 +474,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
 
         const eventIdNum = Number(item?.eventId ?? item?.EventId ?? item?.ID ?? item?.Id);
 
-        const isReg =
-          (eventIdNum ? myRegisteredEventIds.includes(eventIdNum) : false) ||
-          normalizeIsRegistered(item);
+        const isReg = (eventIdNum ? myRegisteredEventIds.includes(eventIdNum) : false);
 
         const day = start.toLocaleDateString("en-US", { weekday: "long" });
         const date = String(start.getDate()).padStart(2, "0");
@@ -492,11 +511,94 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
 
   const parsedTrainings: any[] = React.useMemo(() => {
     return (filteredTrainings || [])
-      .map((it: any, idx: number) => mapTrainingForCard(it, idx))
-      .filter(isNotNull);
-  }, [filteredTrainings]);
+      .map((item: any, idx: number) => {
+        const startRaw =
+          item?.eventStartDate || item?.EventStartDate || item?.startDate || item?.StartDate;
 
-  // Resolve instructor name/photo for trainings shown in All tab
+        const endRaw =
+          item?.eventEndDate || item?.EventEndDate || item?.endDate || item?.EndDate;
+
+        const start = parseSPDate(startRaw);
+        const end = parseSPDate(endRaw);
+        if (!start || !end) return null;
+
+        const durationDays = daysBetween(start, end);
+        const timeRange = `${fmtTime(start)} - ${fmtTime(end)}`;
+
+        const pageUrl = safeStr(item?.pageUrl || item?.Path || item?.path || "");
+        const fileRef = toServerRelativeUrl(pageUrl);
+
+        const meta = fileRef ? trainingMetaByFileRef[fileRef] : undefined;
+        const trainingId = Number(meta?.id || item?.ListItemID || item?.ListItemId || item?.ID || item?.Id || 0);
+
+        const meetingLink = safeStr(
+          meta?.joinUrl ||
+            item?.joiningURL ||
+            item?.joiningUrl ||
+            item?.meetingLink ||
+            item?.MeetingLink ||
+            ""
+        );
+
+        const idForKey = trainingId || idx + 1;
+
+        return {
+          ...item,
+
+          id: idForKey,
+          ID: idForKey,
+
+          trainingId,
+
+          imageUrl: item?.newsImage || item?.imageUrl || item?.Image || "",
+          category: item?.category || item?.Category || "Classroom",
+          title: item?.title || item?.Title || "Untitled",
+
+          timeRange,
+          time: timeRange,
+
+          startDate: String(startRaw ?? '') || start.toISOString(),
+          endDate: String(endRaw ?? '') || end.toISOString(),
+
+          duration: `${durationDays} day${durationDays > 1 ? "s" : ""}`,
+
+          // Instructor (used by TrainingCard UI)
+          instructorName:
+            item?.instructor?.name ||
+            item?.instructorName ||
+            item?.InstructorName ||
+            item?.organizerName ||
+            item?.OrganizerName ||
+            "",
+          instructorTitle:
+            item?.instructor?.role || item?.instructorTitle || item?.InstructorTitle || "",
+          instructorEmail:
+            item?.instructor?.email ||
+            item?.instructorEmail ||
+            item?.InstructorEmail ||
+            item?.instructor?.id ||
+            item?.Instructor?.Email ||
+            item?.Instructor?.EMail ||
+            item?.Organizer?.Email ||
+            item?.Organizer?.EMail ||
+            item?.Author?.Email ||
+            item?.Author?.EMail ||
+            "",
+
+          location: safeStr(item?.location),
+          meetingLink,
+          joinUrl: meetingLink || "#",
+          pageUrl,
+
+          start,
+          end,
+          Eventtype: "Trainings",
+        };
+      })
+      .filter(isNotNull);
+  }, [filteredTrainings, trainingMetaByFileRef]);
+
+  // Resolve instructor name/photo for trainings shown
   React.useEffect(() => {
     const emails = (parsedTrainings || [])
       .map((t: any) => String(t?.instructorEmail || "").trim())
@@ -520,10 +622,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
   };
 
   const allUpcomingEvents = React.useMemo(
-    () =>
-      [...parsedEvents]
-        .filter((e) => isUpcomingOrOngoing(e.start, e.end))
-        .sort(sortAsc),
+    () => [...parsedEvents].filter((e) => isUpcomingOrOngoing(e.start, e.end)).sort(sortAsc),
     [parsedEvents, now]
   );
 
@@ -536,19 +635,19 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
   );
 
   const allUpcomingTrainings = React.useMemo(
-    () =>
-      [...parsedTrainings]
-        .filter((t) => isUpcomingOrOngoing(t.start, t.end))
-        .sort(sortAsc),
+    () => [...parsedTrainings].filter((t) => isUpcomingOrOngoing(t.start, t.end)).sort(sortAsc),
     [parsedTrainings, now]
   );
 
   const myUpcomingTrainings = React.useMemo(
     () =>
       [...parsedTrainings]
-        .filter((t) => (t.isRegistered || t.isregistered) && isUpcomingOrOngoing(t.start, t.end))
+        .filter((t) => {
+          const tid = Number(t?.trainingId || 0);
+          return tid > 0 && myRegisteredTrainingIds.includes(tid) && isUpcomingOrOngoing(t.start, t.end);
+        })
         .sort(sortAsc),
-    [parsedTrainings, now]
+    [parsedTrainings, myRegisteredTrainingIds, now]
   );
 
   const upcomingMeetings = React.useMemo(() => {
@@ -584,9 +683,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
       <div className={styles.tabContainer}>
         <div className={styles.tabContainerInner}>
           <button
-            className={`${styles.tabButton} ${
-              activeTab === "all" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === "all" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("all")}
             type="button"
           >
@@ -594,9 +691,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
           </button>
 
           <button
-            className={`${styles.tabButton} ${
-              activeTab === "my" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === "my" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("my")}
             type="button"
           >
@@ -630,9 +725,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
             <h2 className={styles.heading}>Events</h2>
             <div className={styles.eventsWrapper}>
               {allUpcomingEvents.length > 0 ? (
-                allUpcomingEvents.map((e, i) => (
-                  <EventCard key={e.id || i} {...(e as any)} />
-                ))
+                allUpcomingEvents.map((e, i) => <EventCard key={e.id || i} {...(e as any)} />)
               ) : (
                 <div className={styles.emptyState}>No upcoming events found.</div>
               )}
@@ -666,9 +759,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
             <h2 className={styles.heading}>Meetings</h2>
             <div className={styles.eventsWrapper}>
               {upcomingMeetings.length > 0 ? (
-                upcomingMeetings.map((m, i) => (
-                  <MeetingCard key={m?.id || i} event={m} />
-                ))
+                upcomingMeetings.map((m, i) => <MeetingCard key={m?.id || i} event={m} />)
               ) : (
                 <div className={styles.emptyState}>No meeting is scheduled for you</div>
               )}
@@ -682,9 +773,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
           <h2 className={styles.heading}>Events</h2>
           <div className={styles.eventsWrapper}>
             {myUpcomingEvents.length > 0 ? (
-              myUpcomingEvents.map((e, i) => (
-                <EventCard key={e.id || i} {...(e as any)} />
-              ))
+              myUpcomingEvents.map((e, i) => <EventCard key={e.id || i} {...(e as any)} />)
             ) : (
               <div className={styles.emptyState}>No registered upcoming events.</div>
             )}
@@ -718,9 +807,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
           <h2 className={styles.heading}>Meetings</h2>
           <div className={styles.eventsWrapper}>
             {upcomingMeetings.length > 0 ? (
-              upcomingMeetings.map((m, i) => (
-                <MeetingCard key={m?.id || i} event={m} />
-              ))
+              upcomingMeetings.map((m, i) => <MeetingCard key={m?.id || i} event={m} />)
             ) : (
               <div className={styles.emptyState}>No meeting is scheduled for you</div>
             )}

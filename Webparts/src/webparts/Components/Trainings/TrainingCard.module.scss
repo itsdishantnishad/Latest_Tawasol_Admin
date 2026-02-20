@@ -261,6 +261,33 @@
   color: #605e5c;
 }
 
+.countdownWrapper {
+  text-align: right;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: flex-end;
+  line-height: 1.2;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.countdownLabel {
+  color: #3A3B43;
+  font-size: 14px;
+  line-height: 20px;
+  margin-bottom: 0;
+  font-weight: 500;
+}
+
+.countdownTime {
+  color: #DA291C;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
 .errorMessage {
   color: #d13438;
   font-size: 12px;

@@ -1,10 +1,9 @@
 import * as React from "react";
 import styles from "./Training.module.scss";
-import { AllTrainingCard } from "./Card";
 import { LearningLinks } from "./Learningcard";
-import Trainingcard from "./TrainingCard";
+import TrainingCard from "./TrainingCard";
 import CalendarViewComponent from "../Events/Calendarview/CalendarView";
-import { MSGraphClientV3 } from "@microsoft/sp-http";
+import { MSGraphClientV3, SPHttpClient } from "@microsoft/sp-http";
 
 import { spfi, SPFx, SPFI } from "@pnp/sp";
 import "@pnp/sp/webs";
@@ -16,8 +15,9 @@ interface IAccordionState {
 }
 
 export interface ITrainingmoduleProps {
-  AllTrainingdata: any[] | undefined;
-  viewtype?: string;
+  AllTrainingdata?: any[];
+  Trainings?: any[];
+  viewtype?: "list" | "calendar" | string;
   context?: any;
 }
 
@@ -30,11 +30,10 @@ interface ILearningLink {
   backgroundColor?: string;
 }
 
-
 // to convert src to URL from String
-const toImgSrc = (m: any): string => (typeof m === "string" ? m : (m?.default || m));
+const toImgSrc = (m: any): string => (typeof m === "string" ? m : m?.default || m);
 
-// Sample learning links
+// Sample learning links (kept from your old file)
 const learningLinks: ILearningLink[] = [
   {
     id: 1,
@@ -89,6 +88,86 @@ const learningContentLinks: ILearningLink[] = [
   },
 ];
 
+// ----------------------------
+// Helpers (date + URL)
+// ----------------------------
+const safeStr = (v: any): string => String(v ?? "").trim();
+
+/** Prefer ISO token if SharePoint provides "display\nISO" */
+const pickBestDateText = (v: any): string => {
+  const s = String(v ?? "").trim();
+  if (!s) return "";
+
+  const parts = s
+    .split(/\n+/g)
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  const iso =
+    parts.find((p) => /^\d{4}-\d{2}-\d{2}T/.test(p)) ||
+    parts.find((p) => /\d{4}-\d{2}-\d{2}T/.test(p));
+
+  return iso || parts[0] || "";
+};
+
+const parseSPDate = (value: any): Date | null => {
+  if (!value) return null;
+
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+
+  // Graph payload shape {dateTime:"..."}
+  if (typeof value === "object") {
+    const dt = (value as any)?.dateTime || (value as any)?.DateTime;
+    if (dt) {
+      const rawObj = pickBestDateText(dt);
+      const dObj = new Date(rawObj);
+      return isNaN(dObj.getTime()) ? null : dObj;
+    }
+  }
+
+  const raw = pickBestDateText(value);
+  if (!raw) return null;
+
+  const d1 = new Date(raw);
+  return isNaN(d1.getTime()) ? null : d1;
+};
+
+const fmtTime = (d: Date) =>
+  d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+
+const daysBetween = (start: Date, end: Date) => {
+  const ms = end.getTime() - start.getTime();
+  const days = Math.ceil(ms / (1000 * 60 * 60 * 24));
+  return Math.max(1, days);
+};
+
+const uniqNums = (arr: number[]): number[] => Array.from(new Set(arr));
+
+const toServerRelativeUrl = (pathOrUrl: string): string => {
+  const s = String(pathOrUrl || "").trim();
+  if (!s) return "";
+  try {
+    if (/^https?:\/\//i.test(s)) {
+      return new URL(s).pathname;
+    }
+  } catch {
+    // ignore
+  }
+  return s;
+};
+
+const escapeODataString = (s: string): string => String(s || "").replace(/'/g, "''");
+
+const safeUrlFromHyperlinkField = (v: any): string => {
+  if (!v) return "";
+  if (typeof v === "string") return v;
+  return String(v?.Url ?? v?.url ?? "").trim();
+};
+
+type PersonInfo = { name: string; avatarUrl: string };
+
+type TrainingMeta = { id: number; joinUrl: string };
+
 type MappedTraining = {
   id: number;
   trainingId: number;
@@ -96,45 +175,113 @@ type MappedTraining = {
   imageUrl: string;
   category: string;
   title: string;
+  subtitle: string;
 
   // display strings
   dateRangeDisplay: string;
   timeRange: string;
-
-  // ✅ TrainingCardProps requires `time`
   time: string;
 
   // raw dates
   startDate: string;
   endDate: string;
 
+  // calendar needs real dates too
+  start: Date;
+  end: Date;
+  eventDateTime: Date;
+
   duration: string;
+
   instructorName?: string;
   instructorTitle?: string;
   instructorImageUrl?: string;
-
-  // Graph-backed person (from instructor email)
   instructorEmail?: string;
 
   month: string;
-
-  // kept for backward-compat but not used for My-tab filtering anymore
-  isMyTraining: boolean;
-
   location: string;
+
   meetingLink: string;
   joinUrl: string;
-
   pageUrl: string;
 
   Eventtype: "Trainings";
-  subtitle: string;
 };
 
-const safeStr = (v: any): string => String(v ?? "").trim();
+// ----------------------------
+// Promise.allSettled polyfill (ES6 safe)
+// ----------------------------
+type Settled<T> =
+  | { status: "fulfilled"; value: T }
+  | { status: "rejected"; reason: unknown };
 
-const uniqNums = (arr: number[]): number[] => Array.from(new Set(arr));
+const allSettled = <T,>(promises: Promise<T>[]): Promise<Settled<T>[]> => {
+  return Promise.all(
+    promises.map((p) =>
+      p.then(
+        (value) => ({ status: "fulfilled", value } as Settled<T>),
+        (reason) => ({ status: "rejected", reason } as Settled<T>)
+      )
+    )
+  );
+};
 
+// ----------------------------
+// Default avatar (utf8-safe base64)
+// ----------------------------
+const toBase64Utf8 = (input: string): string => {
+  const bytes = new TextEncoder().encode(input);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+};
+
+const getDefaultAvatar = (nameOrEmail: string): string => {
+  const safe = String(nameOrEmail || "").trim() || "User";
+  const initials = safe
+    .split(" ")
+    .map((n) => n?.trim()?.[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  const colors = [
+    "#0078D4",
+    "#00A4EF",
+    "#50E6FF",
+    "#8764B8",
+    "#881798",
+    "#E43BA6",
+    "#E74856",
+    "#F7630C",
+    "#FFB900",
+    "#00CC6A",
+  ];
+
+  const colorIndex =
+    safe.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+
+  const bgColor = colors[colorIndex];
+
+  const svg = `
+    <svg width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" fill="${bgColor}"/>
+      <text x="50%" y="50%" text-anchor="middle" dy=".35em"
+            font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" fill="white">
+        ${initials}
+      </text>
+    </svg>
+  `.trim();
+
+  return `data:image/svg+xml;base64,${toBase64Utf8(svg)}`;
+};
+
+// ----------------------------
+// Map training items (robust parsing; filters invalid dates)
+// ----------------------------
 const mapSharePointTrainingsForAll = (data: any[]): MappedTraining[] => {
   const deduped = Array.from(
     new Map(
@@ -147,79 +294,101 @@ const mapSharePointTrainingsForAll = (data: any[]): MappedTraining[] => {
 
   return deduped
     .map((item: any, index: number) => {
-      const startDateStr = safeStr(item?.eventStartDate).split("\n")[0]?.trim() || "";
-      const endDateStr = safeStr(item?.eventEndDate).split("\n")[0]?.trim() || "";
+      const startRaw =
+        item?.eventStartDate || item?.EventStartDate || item?.startDate || item?.StartDate;
+      const endRaw =
+        item?.eventEndDate || item?.EventEndDate || item?.endDate || item?.EndDate;
 
-      if (!startDateStr || !endDateStr) return null;
+      const start = parseSPDate(startRaw);
+      const end = parseSPDate(endRaw);
+      if (!start || !end) return null;
 
-      const startDate = new Date(startDateStr);
-      const endDate = new Date(endDateStr);
+      const monthLabel = `${start.toLocaleString("default", { month: "long" })} ${start.getFullYear()}`;
 
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return null;
-
-      const monthLabel = `${startDate.toLocaleString("default", { month: "long" })} ${startDate.getFullYear()}`;
-
-      const dateRangeDisplay = `${startDate.getDate()}-${endDate.getDate()} ${startDate.toLocaleString("default", {
+      const dateRangeDisplay = `${start.getDate()}-${end.getDate()} ${start.toLocaleString("default", {
         month: "short",
-      })} ${startDate.getFullYear()}`;
+      })} ${start.getFullYear()}`;
 
-      const timeRange = `${startDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      })} - ${endDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      })}`;
+      const timeRange = `${fmtTime(start)} - ${fmtTime(end)}`;
 
       const location = safeStr(item?.location).split("\n")[0]?.trim() || "";
 
-      const spIdRaw = item?.ID ?? item?.Id ?? item?.ListItemID ?? item?.ListItemId;
-      const spId = Number(spIdRaw) || 0;
+      // trainingId should be Site Pages item ID
+      const spIdRaw = item?.ListItemID ?? item?.ListItemId ?? item?.ID ?? item?.Id;
+      const spId = Number(spIdRaw) > 0 ? Number(spIdRaw) : 0;
 
-      const meetingLink = safeStr(item?.joiningURL || item?.joiningUrl || item?.meetingLink || item?.MeetingLink);
-      const pageUrl = safeStr(item?.pageUrl) || "#";
+      const meetingLink = safeStr(
+        item?.joiningURL || item?.joiningUrl || item?.meetingLink || item?.MeetingLink || ""
+      );
+
+      const pageUrl = safeStr(item?.pageUrl || item?.Path || item?.path || "") || "#";
+
+      const durationDays = daysBetween(start, end);
+
+      const instructorName =
+        item?.instructor?.name ||
+        item?.instructorName ||
+        item?.InstructorName ||
+        item?.organizerName ||
+        item?.OrganizerName ||
+        "";
+
+      const instructorTitle =
+        item?.instructor?.role || item?.instructorTitle || item?.InstructorTitle || "";
+
+      const instructorEmail =
+        item?.instructor?.email ||
+        item?.instructorEmail ||
+        item?.InstructorEmail ||
+        item?.instructor?.id ||
+        item?.Instructor?.Email ||
+        item?.Instructor?.EMail ||
+        item?.Organizer?.Email ||
+        item?.Organizer?.EMail ||
+        item?.Author?.Email ||
+        item?.Author?.EMail ||
+        "";
+
+      const startIso = pickBestDateText(startRaw) || start.toISOString();
+      const endIso = pickBestDateText(endRaw) || end.toISOString();
+
+      const idForKey = spId || index + 1;
 
       return {
         ...item,
-        id: spId || index + 1,
-        trainingId: spId || index + 1,
+        id: idForKey,
+        trainingId: spId, // may be 0 until we resolve from Site Pages
 
-        imageUrl: item?.newsImage || "https://via.placeholder.com/400x200?text=No+Image",
-        category: "Classroom",
-        title: item?.title || "Untitled Training",
+        imageUrl: item?.newsImage || item?.imageUrl || item?.Image || "https://via.placeholder.com/400x200?text=No+Image",
+        category: item?.category || item?.Category || "Classroom",
+        title: item?.title || item?.Title || "Untitled Training",
+        subtitle: item?.subtitle || "",
 
         dateRangeDisplay,
         timeRange,
-        time: timeRange, // ✅ satisfy TrainingCardProps
+        time: timeRange,
 
-        startDate: startDateStr,
-        endDate: endDateStr,
+        startDate: startIso,
+        endDate: endIso,
 
-        duration: `${Math.max(
-          1,
-          Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-        )} days`,
+        start,
+        end,
+        eventDateTime: start,
 
-        instructorName: item?.instructor?.name,
-        instructorTitle: item?.instructor?.role,
-        instructorEmail: item?.instructor?.email || item?.instructor?.id,
+        duration: `${durationDays} day${durationDays > 1 ? "s" : ""}`,
+
+        instructorName,
+        instructorTitle,
+        instructorEmail,
         instructorImageUrl: undefined,
 
         month: monthLabel,
-
-        // ❌ OLD LOGIC (kept but NOT used for filtering My tab anymore)
-        isMyTraining: !!meetingLink,
-
         location,
         meetingLink,
         joinUrl: meetingLink || "#",
-
         pageUrl,
 
         Eventtype: "Trainings",
-        subtitle: "",
       } as MappedTraining;
     })
     .filter(Boolean) as MappedTraining[];
@@ -228,13 +397,99 @@ const mapSharePointTrainingsForAll = (data: any[]): MappedTraining[] => {
 const Training: React.FC<ITrainingmoduleProps> = (props) => {
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
 
-  const mappedTrainings = React.useMemo(
-    () => mapSharePointTrainingsForAll(props.AllTrainingdata || []),
-    [props.AllTrainingdata]
-  );
+  // Use either prop name
+  const source = (props.AllTrainingdata || props.Trainings || []) as any[];
+
+  // Base mapped list (no async meta resolution yet)
+  const baseMappedTrainings = React.useMemo(() => mapSharePointTrainingsForAll(source), [source]);
 
   // ----------------------------
-  // PnP: Current user + Registered Training list filtering (FIX)
+  // Resolve Site Pages meta by FileRef (Id + TIRJoiningURL)
+  // ----------------------------
+  const [metaByFileRef, setMetaByFileRef] = React.useState<Record<string, TrainingMeta>>({});
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        if (!props.context || !baseMappedTrainings.length) return;
+
+        const webUrl = props.context.pageContext.web.absoluteUrl;
+        const fileRefs = baseMappedTrainings
+          .map((t) => toServerRelativeUrl(t.pageUrl || ""))
+          .filter(Boolean);
+
+        const unique = Array.from(new Set(fileRefs));
+        const missing = unique.filter((ref) => !metaByFileRef[ref]);
+        if (!missing.length) return;
+
+        const results = await allSettled(
+          missing.map(async (fileRef) => {
+            const url =
+              `${webUrl}` +
+              `/_api/web/lists/getbytitle('Site Pages')/items` +
+              `?$top=1&$select=Id,FileRef,TIRJoiningURL&$filter=FileRef eq '${escapeODataString(fileRef)}'`;
+
+            const resp = await props.context.spHttpClient.get(url, SPHttpClient.configurations.v1);
+            if (!resp.ok) return null;
+
+            const json = await resp.json();
+            const row = Array.isArray(json?.value) ? json.value[0] : null;
+            if (!row) return null;
+
+            const id = Number(row?.Id || 0);
+            const joinUrl = safeUrlFromHyperlinkField(row?.TIRJoiningURL);
+
+            return id > 0 ? { fileRef, id, joinUrl } : null;
+          })
+        );
+
+        const updates: Record<string, TrainingMeta> = {};
+        results.forEach((r) => {
+          if (r.status === "fulfilled" && (r as any).value) {
+            const v = (r as any).value as any;
+            if (v?.fileRef && v?.id) {
+              updates[v.fileRef] = { id: v.id, joinUrl: v.joinUrl || "" };
+            }
+          }
+        });
+
+        if (!cancelled && Object.keys(updates).length) {
+          setMetaByFileRef((prev) => ({ ...prev, ...updates }));
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.context, baseMappedTrainings, metaByFileRef]);
+
+  // Apply resolved meta to mapped trainings
+  const mappedTrainings = React.useMemo(() => {
+    return baseMappedTrainings.map((t) => {
+      const fileRef = toServerRelativeUrl(t.pageUrl || "");
+      const meta = fileRef ? metaByFileRef[fileRef] : undefined;
+
+      const trainingId = Number(meta?.id || t.trainingId || 0);
+      const meetingLink = safeStr(meta?.joinUrl || t.meetingLink || "");
+
+      return {
+        ...t,
+        trainingId,
+        meetingLink,
+        joinUrl: meetingLink || "#",
+      };
+    });
+  }, [baseMappedTrainings, metaByFileRef]);
+
+  // ----------------------------
+  // PnP: Current user + Registered Training list filtering
   // ----------------------------
   const sp: SPFI | null = React.useMemo(() => {
     try {
@@ -300,10 +555,8 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
   }, [mappedTrainings, myTrainingIds]);
 
   // ----------------------------
-  // Graph: resolve instructor name + avatar (with initials fallback)
+  // Graph: resolve instructor name + avatar (cache by email)
   // ----------------------------
-  type PersonInfo = { name: string; avatarUrl: string };
-
   const [personByEmail, setPersonByEmail] = React.useState<Record<string, PersonInfo>>({});
   const personCacheRef = React.useRef<Record<string, PersonInfo>>({});
 
@@ -316,58 +569,12 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
     });
   }, []);
 
-  const getDefaultAvatar = React.useCallback((nameOrEmail: string): string => {
-    const safe = String(nameOrEmail || "").trim() || "User";
-    const initials = safe
-      .split(" ")
-      .map((n) => n?.trim()?.[0])
-      .filter(Boolean)
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
-
-    const colors = [
-      "#0078D4",
-      "#00A4EF",
-      "#50E6FF",
-      "#8764B8",
-      "#881798",
-      "#E43BA6",
-      "#E74856",
-      "#F7630C",
-      "#FFB900",
-      "#00CC6A",
-    ];
-
-    const colorIndex =
-      safe.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
-
-    const bgColor = colors[colorIndex];
-
-    const svg = `
-      <svg width="48" height="48" xmlns="http://www.w3.org/2000/svg">
-        <rect width="48" height="48" fill="${bgColor}"/>
-        <text x="50%" y="50%"
-              text-anchor="middle"
-              dy=".35em"
-              font-family="Segoe UI, Arial, sans-serif"
-              font-size="20"
-              font-weight="600"
-              fill="white">
-          ${initials}
-        </text>
-      </svg>
-    `.trim();
-
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
-  }, []);
-
   const ensurePeopleFromGraph = React.useCallback(
     async (emails: string[]) => {
       const ctx = props.context;
       if (!ctx?.msGraphClientFactory) return;
 
-      const unique = Array.from(new Set((emails || []).filter(Boolean)));
+      const unique = Array.from(new Set((emails || []).map((e) => String(e || "").trim()).filter(Boolean)));
       const missing = unique.filter((e) => !personCacheRef.current[e]);
       if (!missing.length) return;
 
@@ -376,15 +583,14 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
 
       for (const email of missing) {
         const fallbackName =
-          mappedTrainings.find((t) => t.instructorEmail === email)?.instructorName || email;
+          mappedTrainings.find((t) => String(t.instructorEmail || "").trim() === email)?.instructorName || email;
 
         let displayName = fallbackName;
-
         try {
           const user = await graph.api(`/users/${email}`).select("displayName").get();
           if (user?.displayName) displayName = user.displayName;
         } catch {
-          // ignore - keep fallback
+          // ignore
         }
 
         let avatarUrl = "";
@@ -416,25 +622,39 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
         });
       }
     },
-    [props.context, mappedTrainings, blobToDataUrl, getDefaultAvatar]
+    [props.context, mappedTrainings, blobToDataUrl]
   );
 
   React.useEffect(() => {
     const emails = mappedTrainings
-      .map((t) => (t.instructorEmail || "").trim())
+      .map((t) => String(t.instructorEmail || "").trim())
       .filter(Boolean);
 
     if (!emails.length) return;
     void ensurePeopleFromGraph(emails);
   }, [mappedTrainings, ensurePeopleFromGraph]);
 
+  // ----------------------------
+  // Accordion open state per month
+  // ----------------------------
   const [expandedMonths, setExpandedMonths] = React.useState<IAccordionState>(() => {
     const initialState: IAccordionState = {};
-    mappedTrainings.forEach((item) => {
+    baseMappedTrainings.forEach((item) => {
       initialState[item.month] = true;
     });
     return initialState;
   });
+
+  React.useEffect(() => {
+    // if months change due to new data, ensure defaults exist
+    setExpandedMonths((prev) => {
+      const next: IAccordionState = { ...prev };
+      mappedTrainings.forEach((t) => {
+        if (typeof next[t.month] === "undefined") next[t.month] = true;
+      });
+      return next;
+    });
+  }, [mappedTrainings]);
 
   const groupedCourses = React.useMemo(() => {
     const filteredData = activeTab === "all" ? mappedTrainings : myTrainings;
@@ -443,6 +663,11 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
     filteredData.forEach((course) => {
       if (!groups[course.month]) groups[course.month] = [];
       groups[course.month].push(course);
+    });
+
+    // sort within each month by start
+    Object.keys(groups).forEach((k) => {
+      groups[k] = groups[k].slice().sort((a, b) => a.start.getTime() - b.start.getTime());
     });
 
     return groups;
@@ -455,6 +680,11 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
     }));
   };
 
+  // ----------------------------
+  // Render
+  // ----------------------------
+  const isList = String(props.viewtype || "list") === "list";
+
   return (
     <>
       {/* Tabs */}
@@ -463,92 +693,94 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
           <button
             className={`${styles.tabButton} ${activeTab === "all" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("all")}
+            type="button"
           >
             All Trainings
           </button>
           <button
             className={`${styles.tabButton} ${activeTab === "my" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("my")}
+            type="button"
           >
             My Trainings
           </button>
         </div>
       </div>
 
-      {props.viewtype === "list" ? (
+      {isList ? (
         <div className={styles.courseListing}>
-          {activeTab !== "my" ? (
-            Object.entries(groupedCourses).map(([month, courses]) => (
-              <div key={month} className={styles.monthSection}>
-                <button
-                  className={styles.accordionHeader}
-                  onClick={() => toggleMonth(month)}
-                  aria-expanded={!!expandedMonths[month]}
+          {Object.entries(groupedCourses).map(([month, courses]) => (
+            <div key={month} className={styles.monthSection}>
+              <button
+                className={styles.accordionHeader}
+                onClick={() => toggleMonth(month)}
+                aria-expanded={!!expandedMonths[month]}
+                type="button"
+              >
+                <h2 className={styles.monthTitle}>{month}</h2>
+                <svg
+                  className={`${styles.chevron} ${expandedMonths[month] ? styles.chevronUp : ""}`}
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
                 >
-                  <h2 className={styles.monthTitle}>{month}</h2>
-                  <svg
-                    className={`${styles.chevron} ${expandedMonths[month] ? styles.chevronUp : ""}`}
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                  >
-                    <path
-                      d="M5 7.5L10 12.5L15 7.5"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                  <path
+                    d="M5 7.5L10 12.5L15 7.5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+
+              {expandedMonths[month] && (
+                <div className={styles.cardsGrid}>
+                  {courses.map((course) => (
+                    <TrainingCard
+                      key={course.trainingId || course.id}
+                      startDate={course.startDate}
+                      endDate={course.endDate}
+                      category={course.category}
+                      title={course.title}
+                      subtitle={course.subtitle}
+                      time={course.time}
+                      duration={course.duration}
+                      location={course.location}
+                      imageUrl={course.imageUrl}
+                      pageUrl={course.pageUrl}
+                      trainingId={course.trainingId}
+                      meetingLink={course.meetingLink}
+                      context={props.context}
+                      // Department (Managed Metadata) - pass through if the search payload already has it
+                      // (matches TrainingPageDetail behaviour; avoids extra Site Pages reads)
+                      departmentName={
+                        (course as any).departmentName ||
+                        (course as any).department ||
+                        (course as any).TIRDepartment ||
+                        ""
+                      }
+                      departmentTaxId={(course as any).departmentTaxId || (course as any).owstaxIdTIRDepartment || ""}
+                      instructorName={
+                        (course.instructorEmail
+                          ? personByEmail[String(course.instructorEmail || "").trim()]?.name
+                          : "") || course.instructorName
+                      }
+                      instructorTitle={course.instructorTitle}
+                      instructorImageUrl={
+                        (course.instructorEmail
+                          ? personByEmail[String(course.instructorEmail || "").trim()]?.avatarUrl
+                          : "") || (course.instructorName ? getDefaultAvatar(course.instructorName) : undefined)
+                      }
                     />
-                  </svg>
-                </button>
-
-                {expandedMonths[month] && (
-                  <div className={styles.cardsGrid}>
-                    {courses.map((course) => (
-                      <AllTrainingCard
-                        key={course.trainingId || course.id}
-                        imageUrl={course.imageUrl}
-                        category={course.category}
-                        title={course.title}
-                        date={course.startDate}
-                        endDate={course.endDate}
-                        duration={course.duration}
-                        instructorName={personByEmail[course.instructorEmail || ""]?.name || course.instructorName}
-                        instructorTitle={course.instructorTitle}
-                        instructorImageUrl={
-                          personByEmail[course.instructorEmail || ""]?.avatarUrl ||
-                          (course.instructorName ? getDefaultAvatar(course.instructorName) : undefined)
-                        }
-                        pageUrl={course.pageUrl}
-                        context={props.context}
-                        trainingId={course.trainingId}
-                        meetingLink={course.meetingLink}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <div className={styles.myTrainingsGrid}>
-              {myTrainings.map((event) => (
-                <Trainingcard
-                  key={event.trainingId || event.id}
-                  {...event}
-                  instructorName={personByEmail[event.instructorEmail || ""]?.name || event.instructorName}
-                  instructorImageUrl={
-                    personByEmail[event.instructorEmail || ""]?.avatarUrl ||
-                    (event.instructorName ? getDefaultAvatar(event.instructorName) : undefined)
-                  }
-                  time={event.time}
-                  context={props.context}
-                />
-              ))}
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          ))}
 
-          {/* Learning Section */}
+          {/* Learning Section (kept from old file) */}
           <div className={styles.learningSection}>
             <div className={styles.learningColumn}>
               <LearningLinks
@@ -567,7 +799,10 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
           </div>
         </div>
       ) : (
-        <CalendarViewComponent events={mappedTrainings as any} context={props.context} />
+        <CalendarViewComponent
+          events={(activeTab === "my" ? myTrainings : mappedTrainings) as any}
+          context={props.context}
+        />
       )}
     </>
   );
