@@ -25,6 +25,8 @@ import { SPHttpClient } from "@microsoft/sp-http";
 export interface IFeedbackModalProps {
   isOpen: boolean;
   onDismiss: () => void;
+  /** Called after a successful first-time submission */
+  onSubmitted?: () => void;
   context: WebPartContext;
 
   /** Training page item id (saved as TIRTrainingID in Registered Training / Feedback list) */
@@ -282,6 +284,9 @@ const FeedbackModal: React.FC<IFeedbackModalProps> = (props) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitMessage, setSubmitMessage] = useState<{ type: MessageBarType; text: string } | null>(null);
 
+  // ✅ One-time feedback (no updates)
+  const [alreadySubmitted, setAlreadySubmitted] = useState<boolean>(false);
+
   const departmentOptions: IDropdownOption[] = (departments || []).map((d) => ({ key: d.id, text: d.label }));
 
   const loadStaticChoices = React.useCallback(async () => {
@@ -320,9 +325,48 @@ const FeedbackModal: React.FC<IFeedbackModalProps> = (props) => {
     }
   }, [sp, cfg.fieldDepartmentInternal, cfg.listTitle, props.context]);
 
-  React.useEffect(() => {
+  
+  const checkAlreadySubmitted = React.useCallback(async () => {
+    try {
+      const trainingId = Number(props.trainingId);
+      if (!Number.isFinite(trainingId) || trainingId <= 0) {
+        setAlreadySubmitted(false);
+        return;
+      }
+
+      const userId = await getCurrentUserId(sp, props.context);
+      if (!userId) {
+        setAlreadySubmitted(false);
+        return;
+      }
+
+      const list = sp.web.lists.getByTitle(cfg.listTitle);
+
+      const rows: any[] = await list.items
+        .select("Id")
+        .filter(`AuthorId eq ${userId} and ${cfg.fieldTrainingIdInternal} eq ${trainingId}`)
+        .top(1)();
+
+      const exists = Array.isArray(rows) && rows.length > 0;
+      setAlreadySubmitted(exists);
+
+      if (exists) {
+        setSubmitMessage({
+          type: MessageBarType.warning,
+          text: "You have already submitted feedback for this training.",
+        });
+      }
+    } catch {
+      // If check fails, do not block the user (they can submit; server-side check will still prevent duplicates)
+      setAlreadySubmitted(false);
+    }
+  }, [sp, props.context, props.trainingId, cfg.listTitle, cfg.fieldTrainingIdInternal]);
+
+React.useEffect(() => {
     if (props.isOpen) {
       setSubmitMessage(null);
+      setAlreadySubmitted(false);
+
       setFormData((p) => ({
         ...p,
         name: p.name || safeStr(props.context?.pageContext?.user?.displayName),
@@ -330,11 +374,16 @@ const FeedbackModal: React.FC<IFeedbackModalProps> = (props) => {
 
       void loadStaticChoices();
       void loadDepartments();
+      void checkAlreadySubmitted();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.isOpen]);
 
   const validateForm = (): boolean => {
+    if (alreadySubmitted) {
+      setSubmitMessage({ type: MessageBarType.warning, text: "You have already submitted feedback for this training." });
+      return false;
+    }
     if (!formData.name.trim()) {
       setSubmitMessage({ type: MessageBarType.error, text: "Please enter your name" });
       return false;
@@ -355,103 +404,111 @@ const FeedbackModal: React.FC<IFeedbackModalProps> = (props) => {
   };
 
   const handleSubmit = async (): Promise<void> => {
-    setSubmitMessage(null);
-    if (!validateForm()) return;
+  setSubmitMessage(null);
 
-    const trainingId = Number(props.trainingId);
-    if (!Number.isFinite(trainingId) || trainingId <= 0) {
-      setSubmitMessage({ type: MessageBarType.error, text: "Invalid training id." });
+  // One-time only (no update)
+  if (alreadySubmitted) {
+    setSubmitMessage({ type: MessageBarType.warning, text: "You have already submitted feedback for this training." });
+    return;
+  }
+
+  if (!validateForm()) return;
+
+  const trainingId = Number(props.trainingId);
+  if (!Number.isFinite(trainingId) || trainingId <= 0) {
+    setSubmitMessage({ type: MessageBarType.error, text: "Invalid training id." });
+    return;
+  }
+
+  setIsSubmitting(true);
+  try {
+    const userId = await getCurrentUserId(sp, props.context);
+    if (!userId) throw new Error("Could not resolve current userId.");
+
+    const list = sp.web.lists.getByTitle(cfg.listTitle);
+
+    // Server-side check again (prevents duplicates in race conditions)
+    const existing: any[] = await list.items
+      .select("Id")
+      .filter(`AuthorId eq ${userId} and ${cfg.fieldTrainingIdInternal} eq ${trainingId}`)
+      .top(1)();
+
+    if (Array.isArray(existing) && existing.length > 0) {
+      setAlreadySubmitted(true);
+      setSubmitMessage({ type: MessageBarType.warning, text: "You have already submitted feedback for this training." });
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const userId = await getCurrentUserId(sp, props.context);
-      if (!userId) throw new Error("Could not resolve current userId.");
+    // Create a new feedback item
+    const addRes: any = await list.items.add({ Title: formData.name });
+    let itemId: number | null = addRes?.data?.Id ?? addRes?.data?.ID ?? addRes?.item?.Id ?? addRes?.item?.ID ?? null;
 
-      const list = sp.web.lists.getByTitle(cfg.listTitle);
-
-      // 1) Find existing feedback for same training + author (1 per user per training)
-      let existingId: number | null = null;
-      try {
-        const rows: any[] = await list.items
-          .select("Id", "AuthorId", cfg.fieldTrainingIdInternal)
-          .filter(`AuthorId eq ${userId} and ${cfg.fieldTrainingIdInternal} eq ${trainingId}`)
-          .top(1)();
-        existingId = rows?.[0]?.Id ?? null;
-      } catch {
-        existingId = null;
-      }
-
-      // 2) Create or update item
-      let itemId = existingId;
-      const isUpdate = !!existingId;
-
-      if (!itemId) {
-        const addRes: any = await list.items.add({ Title: formData.name });
-        itemId = addRes?.data?.Id ?? addRes?.data?.ID ?? addRes?.item?.Id ?? addRes?.item?.ID ?? null;
-
-        if (!itemId) {
-          const latest: any[] = await list.items
-            .select("Id", "AuthorId", "Created")
-            .filter(`AuthorId eq ${userId}`)
-            .orderBy("Created", false)
-            .top(1)();
-          itemId = latest?.[0]?.Id ?? null;
-        }
-      }
-
-      if (!itemId) throw new Error("Could not create/update feedback item.");
-
-      const item = list.items.getById(itemId);
-
-      // 3) Set non-taxonomy fields
-      await trySetFieldWithCandidates(item, ["Title"], [formData.name]);
-      await trySetFieldWithCandidates(
-        item,
-        [cfg.fieldTrainingIdInternal, "TrainingId", "TrainingID", "TIRTrainingId"],
-        [String(trainingId)]
-      );
-
-      await trySetFieldWithCandidates(item, [cfg.fieldDivisionInternal, "Division"], [formData.division]);
-      await trySetFieldWithCandidates(item, [cfg.fieldRatingInternal, "Rating"], [formData.rating]);
-
-      // 4) Department (Managed Metadata)
-      const selected = departments.find((d) => d.id === formData.departmentId);
-      const deptGuid = extractGuid(selected?.id || formData.departmentId) || safeStr(formData.departmentId);
-      const deptLabel = safeStr(selected?.label);
-
-      // Prefer the resolved internal name first
-      const fieldCandidates = uniqBy(
-        [resolvedDeptInternal, cfg.fieldDepartmentInternal, "Department_x0020_Name", "DepartmentName", "Department"].filter(Boolean),
-        (x) => x
-      );
-
-      const valueCandidates = deptLabel
-        ? [`-1;#${deptLabel}|${deptGuid}`, `${deptLabel}|${deptGuid}`, deptLabel]
-        : [deptGuid];
-
-      await trySetFieldWithCandidates(item, fieldCandidates, valueCandidates);
-
-      setSubmitMessage({
-        type: MessageBarType.success,
-        text: isUpdate ? "Feedback updated successfully!" : "Feedback submitted successfully!",
-      });
-
-      setTimeout(() => {
-        setSubmitMessage(null);
-        props.onDismiss();
-      }, 1600);
-    } catch (error: any) {
-      console.error("[FeedbackModal] submit failed", error);
-      setSubmitMessage({
-        type: MessageBarType.error,
-        text: `Error: ${error?.message || "Failed to submit feedback."}`,
-      });
-    } finally {
-      setIsSubmitting(false);
+    if (!itemId) {
+      const latest: any[] = await list.items
+        .select("Id", "AuthorId", "Created")
+        .filter(`AuthorId eq ${userId}`)
+        .orderBy("Created", false)
+        .top(1)();
+      itemId = latest?.[0]?.Id ?? null;
     }
-  };
+
+    if (!itemId) throw new Error("Could not create feedback item.");
+
+    const item = list.items.getById(itemId);
+
+    // Set non-taxonomy fields
+    await trySetFieldWithCandidates(item, ["Title"], [formData.name]);
+    await trySetFieldWithCandidates(
+      item,
+      [cfg.fieldTrainingIdInternal, "TrainingId", "TrainingID", "TIRTrainingId"],
+      [String(trainingId)]
+    );
+
+    await trySetFieldWithCandidates(item, [cfg.fieldDivisionInternal, "Division"], [formData.division]);
+    await trySetFieldWithCandidates(item, [cfg.fieldRatingInternal, "Rating"], [formData.rating]);
+
+    // Department (Managed Metadata)
+    const selected = departments.find((d) => d.id === formData.departmentId);
+    const deptGuid = extractGuid(selected?.id || formData.departmentId) || safeStr(formData.departmentId);
+    const deptLabel = safeStr(selected?.label);
+
+    const fieldCandidates = uniqBy(
+      [resolvedDeptInternal, cfg.fieldDepartmentInternal, "Department_x0020_Name", "DepartmentName", "Department"].filter(Boolean),
+      (x) => x
+    );
+
+    const valueCandidates = deptLabel
+      ? [`-1;#${deptLabel}|${deptGuid}`, `${deptLabel}|${deptGuid}`, deptLabel]
+      : [deptGuid];
+
+    await trySetFieldWithCandidates(item, fieldCandidates, valueCandidates);
+
+    setAlreadySubmitted(true);
+    setSubmitMessage({ type: MessageBarType.success, text: "Feedback submitted successfully!" });
+
+    // Notify parent so it can update the button state without a page refresh
+    try {
+      props.onSubmitted?.();
+    } catch {
+      // ignore
+    }
+
+    setTimeout(() => {
+      setSubmitMessage(null);
+      props.onDismiss();
+    }, 1600);
+  } catch (error: any) {
+    console.error("[FeedbackModal] submit failed", error);
+    setSubmitMessage({
+      type: MessageBarType.error,
+      text: `Error: ${error?.message || "Failed to submit feedback."}`,
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
 
   const handleDismiss = (): void => {
     if (!isSubmitting) {
@@ -476,7 +533,7 @@ const FeedbackModal: React.FC<IFeedbackModalProps> = (props) => {
             ariaLabel="Close"
             className={styles.closeButton}
             onClick={handleDismiss}
-            disabled={isSubmitting}
+            disabled={isSubmitting || alreadySubmitted}
           />
         </div>
 
@@ -499,7 +556,7 @@ const FeedbackModal: React.FC<IFeedbackModalProps> = (props) => {
             value={formData.name}
             onChange={(_, newValue) => setFormData({ ...formData, name: newValue || "" })}
             className={styles.textField}
-            disabled={isSubmitting}
+            disabled={isSubmitting || alreadySubmitted}
           />
         </div>
 
@@ -511,7 +568,7 @@ const FeedbackModal: React.FC<IFeedbackModalProps> = (props) => {
             selectedKey={formData.division}
             onChange={(_, option) => setFormData({ ...formData, division: (option?.key as string) || "" })}
             className={styles.dropdown}
-            disabled={isSubmitting}
+            disabled={isSubmitting || alreadySubmitted}
           />
         </div>
 
@@ -523,7 +580,7 @@ const FeedbackModal: React.FC<IFeedbackModalProps> = (props) => {
             selectedKey={formData.departmentId}
             onChange={(_, option) => setFormData({ ...formData, departmentId: (option?.key as string) || "" })}
             className={styles.dropdown}
-            disabled={isSubmitting || deptLoading}
+            disabled={isSubmitting || alreadySubmitted || deptLoading}
           />
         </div>
 
@@ -535,15 +592,15 @@ const FeedbackModal: React.FC<IFeedbackModalProps> = (props) => {
             selectedKey={formData.rating}
             onChange={(_, option) => setFormData({ ...formData, rating: (option?.key as string) || "" })}
             className={styles.dropdown}
-            disabled={isSubmitting}
+            disabled={isSubmitting || alreadySubmitted}
           />
         </div>
 
         <PrimaryButton
-          text={isSubmitting ? "Submitting..." : "Submit"}
+          text={alreadySubmitted ? "Submitted" : isSubmitting ? "Submitting..." : "Submit"}
           onClick={handleSubmit}
           className={styles.submitButton}
-          disabled={isSubmitting}
+          disabled={isSubmitting || alreadySubmitted}
         />
       </div>
     </Modal>
