@@ -106,7 +106,8 @@ export class ServiceNowApprovalService {
     const parsedPayload = this.safeParsePossiblyDoubleEncodedJson(responseText);
 
     const apiResponse: ServiceNowApiResponse = parsedPayload || {};
-    const rawItems: ServiceNowRawItem[] = Array.isArray(apiResponse.result) ? apiResponse.result : [];
+    const result = apiResponse.result;
+    const rawItems: ServiceNowRawItem[] = Array.isArray(result) ? result : result && typeof result === "object" ? [result as ServiceNowRawItem] : [];
 
     const approvals: ServiceNowApproval[] = rawItems.map((item) => ({
       workflowNumber: item?.number || "",
