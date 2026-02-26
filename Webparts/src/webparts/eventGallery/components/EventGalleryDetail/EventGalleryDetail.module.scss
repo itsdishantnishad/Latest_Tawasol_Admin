@@ -893,6 +893,14 @@
   img {
     width: 32px;
     height: 32px;
+    background: #ffff;
+    border-radius: 50%;
+    opacity: 0.8;
+  }
+
+  img:hover{
+    opacity: 1;
+    transition: 0.3s ease-out;
   }
 
   &:disabled {
