@@ -51,9 +51,9 @@ const App: React.FC<IAppProps> = (props) => {
           />
         )}
 
-        {tab === "Inside Scoop" && (
+        {/* {tab === "Inside Scoop" && (
           <div style={{ padding: 16 }}>Inside Scoop (coming soon)</div>
-        )}
+        )} */}
       </div>
     </div>
   );
