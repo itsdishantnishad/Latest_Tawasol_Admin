@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import styles from "./Faqs.module.scss";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
@@ -13,6 +12,7 @@ export interface IFaqsProps {
   context: WebPartContext;
   listTitle?: string;
   chatBotDeepLink?: string;
+  showChatBot?: boolean;
 }
 
 interface IFaqItem {
@@ -38,8 +38,10 @@ interface IFaqsState {
 
 export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
   public static defaultProps: Partial<IFaqsProps> = {
-    listTitle: "FAQs"
+    listTitle: "FAQs",
+    showChatBot: true,
   };
+
   private chatBotRef = React.createRef<HTMLAnchorElement>();
   private rafId: number | null = null;
 
@@ -51,12 +53,15 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
       items: [],
       currentCategory: "Human Capital",
       language: "English",
-      expandedId: undefined
+      expandedId: undefined,
     };
   }
 
   public async componentDidMount(): Promise<void> {
-    this.startFloatCheck();
+    if (this.props.showChatBot !== false) {
+      this.startFloatCheck();
+    }
+
     try {
       const sp = spfi().using(SPFx(this.props.context));
       const listTitle = this.props.listTitle as string;
@@ -79,7 +84,7 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
         questionEn: i.TIRQuestion || "",
         answerEn: i.TIRAnswer || "",
         questionAr: i.TIRQuestionArabic || "",
-        answerAr: i.TIRAnswerArabic || ""
+        answerAr: i.TIRAnswerArabic || "",
       }));
 
       const firstInCategory = items.find(
@@ -89,17 +94,30 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
       this.setState({
         loading: false,
         items,
-        expandedId: firstInCategory ? firstInCategory.id : undefined
+        expandedId: firstInCategory ? firstInCategory.id : undefined,
       });
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("FAQ load error", err);
       this.setState({
         loading: false,
-        error: "Unable to load FAQs."
+        error: "Unable to load FAQs.",
       });
     }
   }
 
+  public componentDidUpdate(prevProps: IFaqsProps): void {
+    const prevShow = prevProps.showChatBot !== false;
+    const currShow = this.props.showChatBot !== false;
+
+    if (prevShow !== currShow) {
+      if (currShow) {
+        this.startFloatCheck();
+      } else {
+        this.stopFloatCheck();
+      }
+    }
+  }
 
   public componentWillUnmount(): void {
     this.stopFloatCheck();
@@ -107,6 +125,8 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
 
   // ========== FLOATING CHATBOT ==========
   private startFloatCheck(): void {
+    // avoid starting multiple RAF loops
+    if (this.rafId !== null) return;
     this.checkFloatPosition();
   }
 
@@ -115,16 +135,31 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
+
+    // reset raise if element still exists
+    const chatBot = this.chatBotRef.current;
+    if (chatBot) chatBot.style.setProperty("--chatbot-raise", "0px");
   }
 
   private checkFloatPosition = (): void => {
+    // if bot is globally OFF, stop the loop
+    if (this.props.showChatBot === false) {
+      this.stopFloatCheck();
+      return;
+    }
+
     const chatBot = this.chatBotRef.current;
+
+    // if bot not in DOM yet, keep waiting (only when enabled)
     if (!chatBot) {
       this.rafId = requestAnimationFrame(this.checkFloatPosition);
       return;
     }
 
-    const footer = document.querySelector('[class*="TIRFooter"]') as HTMLElement;
+    const footer = document.querySelector('[class*="TIRFooter"]') as
+      | HTMLElement
+      | null;
+
     if (!footer) {
       chatBot.style.setProperty("--chatbot-raise", "0px");
       this.rafId = requestAnimationFrame(this.checkFloatPosition);
@@ -149,13 +184,12 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
     this.rafId = requestAnimationFrame(this.checkFloatPosition);
   };
 
-
   private setCategory = (category: CategoryKey): void => {
     const { items } = this.state;
     const firstInCategory = items.find((x) => x.category === category);
     this.setState({
       currentCategory: category,
-      expandedId: firstInCategory ? firstInCategory.id : undefined
+      expandedId: firstInCategory ? firstInCategory.id : undefined,
     });
   };
 
@@ -165,7 +199,7 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
 
   private toggleItem = (id: number): void => {
     this.setState((prev) => ({
-      expandedId: prev.expandedId === id ? undefined : id
+      expandedId: prev.expandedId === id ? undefined : id,
     }));
   };
 
@@ -179,6 +213,13 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
   public render(): React.ReactElement<IFaqsProps> {
     const { loading, error, currentCategory, language } = this.state;
     const items = this.visibleItems;
+
+    const botHref = (
+      this.props.chatBotDeepLink ||
+      "https://teams.microsoft.com/l/app/58e72336-dc5b-4253-8dc2-cf961136ebe3?source=app-header-share-entrypoint"
+    ).trim();
+
+    const showBot = this.props.showChatBot !== false && !!botHref;
 
     if (loading) {
       return <div className={styles.wrapper}>Loading…</div>;
@@ -231,21 +272,20 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
         <div className={styles.faqList}>
           {items.map((item) => this.renderItem(item))}
         </div>
-        {/* ✅ CHATBOT FAB */}
-        <a
-          ref={this.chatBotRef}
-          className={styles.chatBotFab}
-          href={
-            this.props.chatBotDeepLink ||
-            "https://teams.microsoft.com/l/app/58e72336-dc5b-4253-8dc2-cf961136ebe3?source=app-header-share-entrypoint"
-          }
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Open chatbot"
-        >
-          <img src={chatBotIcon} alt="Chatbot" />
-        </a>
 
+        {/* ✅ CHATBOT FAB (hidden when showChatBot is OFF) */}
+        {showBot && (
+          <a
+            ref={this.chatBotRef}
+            className={styles.chatBotFab}
+            href={botHref}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Open chatbot"
+          >
+            <img src={chatBotIcon} alt="Chatbot" />
+          </a>
+        )}
       </div>
     );
   }
@@ -257,9 +297,7 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
         key={category}
         type="button"
         className={
-          isActive
-            ? `${styles.topTab} ${styles.topTabActive}`
-            : styles.topTab
+          isActive ? `${styles.topTab} ${styles.topTabActive}` : styles.topTab
         }
         onClick={() => this.setCategory(category)}
       >
@@ -272,15 +310,12 @@ export default class Faqs extends React.Component<IFaqsProps, IFaqsState> {
   private renderItem(item: IFaqItem): JSX.Element {
     const isOpen = this.state.expandedId === item.id;
     const { language } = this.state;
+
     const question =
-      language === "Arabic"
-        ? item.questionAr || item.questionEn
-        : item.questionEn;
+      language === "Arabic" ? item.questionAr || item.questionEn : item.questionEn;
 
     const answer =
-      language === "Arabic"
-        ? item.answerAr || item.answerEn
-        : item.answerEn;
+      language === "Arabic" ? item.answerAr || item.answerEn : item.answerEn;
 
     return (
       <div

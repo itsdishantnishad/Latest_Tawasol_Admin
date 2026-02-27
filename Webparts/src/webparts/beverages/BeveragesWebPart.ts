@@ -1,69 +1,77 @@
-import * as React from 'react';
-import * as ReactDom from 'react-dom';
-import { Version } from '@microsoft/sp-core-library';
+import * as React from "react";
+import * as ReactDom from "react-dom";
+import { Version } from "@microsoft/sp-core-library";
 import {
   type IPropertyPaneConfiguration,
-  PropertyPaneTextField
-} from '@microsoft/sp-property-pane';
-import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-import { IReadonlyTheme } from '@microsoft/sp-component-base';
+  PropertyPaneTextField,
+  PropertyPaneToggle,
+} from "@microsoft/sp-property-pane";
+import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
+import { IReadonlyTheme } from "@microsoft/sp-component-base";
 
-import * as strings from 'BeveragesWebPartStrings';
-import Beverages from './components/Beverages';
+import * as strings from "BeveragesWebPartStrings";
+import Beverages from "./components/Beverages";
 
 export interface IBeveragesWebPartProps {
   description: string;
-  chatBotDeepLink: string
+  chatBotDeepLink: string;
+  showChatBot?: boolean; // NEW
 }
 
 export default class BeveragesWebPart extends BaseClientSideWebPart<IBeveragesWebPartProps> {
-
   private _isDarkTheme: boolean = false;
-  private _environmentMessage: string = '';
+  private _environmentMessage: string = "";
 
   public render(): void {
     const element = React.createElement(Beverages, {
       context: this.context,
       listTitle: "Beverages Menu",
-      chatBotDeepLink: this.properties.chatBotDeepLink 
+      chatBotDeepLink: this.properties.chatBotDeepLink,
+
+      // NEW
+      showChatBot: this.properties.showChatBot !== false,
     });
 
     ReactDom.render(element, this.domElement);
   }
 
   protected onInit(): Promise<void> {
-    return this._getEnvironmentMessage().then(message => {
+    // Default ON (so existing pages don’t suddenly hide it)
+    if (this.properties.showChatBot === undefined) {
+      this.properties.showChatBot = true;
+    }
+
+    return this._getEnvironmentMessage().then((message) => {
       this._environmentMessage = message;
     });
   }
 
   private _getEnvironmentMessage(): Promise<string> {
     if (!!this.context.sdks.microsoftTeams) {
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
-          let environmentMessage: string = '';
-          switch (context.app.host.name) {
-            case 'Office':
-              environmentMessage = this.context.isServedFromLocalhost
-                ? strings.AppLocalEnvironmentOffice
-                : strings.AppOfficeEnvironment;
-              break;
-            case 'Outlook':
-              environmentMessage = this.context.isServedFromLocalhost
-                ? strings.AppLocalEnvironmentOutlook
-                : strings.AppOutlookEnvironment;
-              break;
-            case 'Teams':
-            case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost
-                ? strings.AppLocalEnvironmentTeams
-                : strings.AppTeamsTabEnvironment;
-              break;
-            default:
-              environmentMessage = strings.UnknownEnvironment;
-          }
-          return environmentMessage;
-        });
+      return this.context.sdks.microsoftTeams.teamsJs.app.getContext().then((context) => {
+        let environmentMessage: string = "";
+        switch (context.app.host.name) {
+          case "Office":
+            environmentMessage = this.context.isServedFromLocalhost
+              ? strings.AppLocalEnvironmentOffice
+              : strings.AppOfficeEnvironment;
+            break;
+          case "Outlook":
+            environmentMessage = this.context.isServedFromLocalhost
+              ? strings.AppLocalEnvironmentOutlook
+              : strings.AppOutlookEnvironment;
+            break;
+          case "Teams":
+          case "TeamsModern":
+            environmentMessage = this.context.isServedFromLocalhost
+              ? strings.AppLocalEnvironmentTeams
+              : strings.AppTeamsTabEnvironment;
+            break;
+          default:
+            environmentMessage = strings.UnknownEnvironment;
+        }
+        return environmentMessage;
+      });
     }
 
     return Promise.resolve(
@@ -80,9 +88,9 @@ export default class BeveragesWebPart extends BaseClientSideWebPart<IBeveragesWe
     const { semanticColors } = currentTheme;
 
     if (semanticColors) {
-      this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
-      this.domElement.style.setProperty('--link', semanticColors.link || null);
-      this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
+      this.domElement.style.setProperty("--bodyText", semanticColors.bodyText || null);
+      this.domElement.style.setProperty("--link", semanticColors.link || null);
+      this.domElement.style.setProperty("--linkHovered", semanticColors.linkHovered || null);
     }
   }
 
@@ -91,7 +99,7 @@ export default class BeveragesWebPart extends BaseClientSideWebPart<IBeveragesWe
   }
 
   protected get dataVersion(): Version {
-    return Version.parse('1.0');
+    return Version.parse("1.0");
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
@@ -103,18 +111,26 @@ export default class BeveragesWebPart extends BaseClientSideWebPart<IBeveragesWe
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
+                PropertyPaneTextField("description", {
+                  label: strings.DescriptionFieldLabel,
                 }),
-                PropertyPaneTextField('chatBotDeepLink', {
-                  label: 'Chatbot deep link',
-                  placeholder: 'Paste chatbot URL / deep link here'
-                })
-              ]
-            }
-          ]
-        }
-      ]
+
+                // NEW toggle
+                PropertyPaneToggle("showChatBot", {
+                  label: "Show Help Bot",
+                  onText: "On",
+                  offText: "Off",
+                }),
+
+                PropertyPaneTextField("chatBotDeepLink", {
+                  label: "Chatbot deep link",
+                  placeholder: "Paste chatbot URL / deep link here",
+                }),
+              ],
+            },
+          ],
+        },
+      ],
     };
   }
 }

@@ -4,8 +4,9 @@ import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
   type IPropertyPaneConfiguration,
-  PropertyPaneTextField
-} from '@microsoft/sp-property-pane';
+  PropertyPaneTextField,
+  PropertyPaneToggle
+} from "@microsoft/sp-property-pane";
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
@@ -15,6 +16,8 @@ import { IHelpProps } from './components/IHelpProps';
 
 export interface IHelpWebPartProps {
   description: string;
+  chatBotDeepLink?: string;
+  showChatBot?: boolean; // ✅ new
 }
 
 export default class HelpWebPart extends BaseClientSideWebPart<IHelpWebPartProps> {
@@ -32,7 +35,9 @@ export default class HelpWebPart extends BaseClientSideWebPart<IHelpWebPartProps
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
         context: this.context,
-        listTitle: "Help Center"
+        listTitle: "Help Center",
+        chatBotDeepLink: this.properties.chatBotDeepLink,
+        showChatBot: this.properties.showChatBot !== false
       }
     );
 
@@ -40,6 +45,11 @@ export default class HelpWebPart extends BaseClientSideWebPart<IHelpWebPartProps
   }
 
   protected onInit(): Promise<void> {
+    // Default ON (so existing pages don’t suddenly hide it)
+    if (this.properties.showChatBot === undefined) {
+      this.properties.showChatBot = true;
+    }
+
     return this._getEnvironmentMessage().then(message => {
       this._environmentMessage = message;
     });
@@ -110,12 +120,19 @@ export default class HelpWebPart extends BaseClientSideWebPart<IHelpWebPartProps
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
+                PropertyPaneTextField("description", {
                   label: strings.DescriptionFieldLabel
                 }),
-                PropertyPaneTextField('chatBotDeepLink', {
-                  label: 'Chatbot deep link',
-                  placeholder: 'Paste chatbot URL / deep link here'
+
+                PropertyPaneToggle("showChatBot", {
+                  label: "Show Help Bot",
+                  onText: "On",
+                  offText: "Off"
+                }),
+
+                PropertyPaneTextField("chatBotDeepLink", {
+                  label: "Chatbot deep link",
+                  placeholder: "Paste chatbot URL / deep link here"
                 })
               ]
             }

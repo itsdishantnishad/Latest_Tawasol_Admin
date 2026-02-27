@@ -1174,7 +1174,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
           console.error("Error fetching achievements:", e);
           if (mounted) {
             setSpAchievements([]);
-            setErrorAchievements(e?.message || "Failed to load achievements.");
+            // setErrorAchievements(e?.message || "Failed to load achievements.");
+            setErrorAchievements("Something went wrong. Please try again.");
           }
         } finally {
           if (mounted) setLoadingAchievements(false);
@@ -1207,7 +1208,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
           console.error("Tahweel birthdays failed:", e);
           if (mounted) {
             setApiBirthdays([]);
-            setErrorBirthdays(e?.message || "Failed to load birthdays.");
+            // setErrorBirthdays(e?.message || "Something went wrong. Please try again.");
+            setErrorBirthdays("Something went wrong. Please try again.");
           }
         } finally {
           if (mounted) setLoadingBirthdays(false);
@@ -1238,7 +1240,8 @@ export const LetsCelebrate: React.FC<ILetsCelebrateProps> = (props) => {
           console.error("Tahweel anniversaries failed:", e);
           if (mounted) {
             setApiAnniversaries([]);
-            setErrorAnniversaries(e?.message || "Failed to load anniversaries.");
+            // setErrorAnniversaries(e?.message || "Failed to load anniversaries.");
+            setErrorAnniversaries("Something went wrong. Please try again.");
           }
         } finally {
           if (mounted) setLoadingAnniversaries(false);
