@@ -1,0 +1,105 @@
+{
+	"info": {
+		"_postman_id": "ea4af216-c152-40e2-b317-8ce0cabb1914",
+		"name": "Azure Face API - Detection Only",
+		"description": "Test Microsoft Azure Face API (Detection only, no restricted features).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Detect Face (No Approval Needed)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Ocp-Apim-Subscription-Key",
+						"value": "{{face_api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"url\": \"https://raw.githubusercontent.com/Azure-Samples/cognitive-services-sample-data-files/master/ComputerVision/Images/faces.jpg\"\n}"
+				},
+				"url": {
+					"raw": "{{face_api_endpoint}}/face/v1.0/detect?returnFaceId=true&returnFaceAttributes=headPose,mask,occlusion,blur,noise,exposure",
+					"host": [
+						"{{face_api_endpoint}}"
+					],
+					"path": [
+						"face",
+						"v1.0",
+						"detect"
+					],
+					"query": [
+						{
+							"key": "returnFaceId",
+							"value": "true"
+						},
+						{
+							"key": "returnFaceAttributes",
+							"value": "headPose,mask,occlusion,blur,noise,exposure"
+						}
+					]
+				},
+				"description": "Detect faces and safe attributes (no restricted features like verification or identification)."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "face_api_endpoint",
+			"value": "https://face-api-tawasol-dhre-dev-001.cognitiveservices.azure.com"
+		},
+		{
+			"key": "face_api_key",
+			"value": "174s6jG76EQU72R7JwloYlvgRbb48A9ujVDOo61DfXM9IHffDFtyJQQJ99BKACF24PCXJ3w3AAAKACOG8mV0"
+		},
+		{
+			"key": "faceindex_list_title",
+			"value": "DHRE Gallery FaceIndex row"
+		},
+		{
+			"key": "faceindex_field_albumId",
+			"value": "AlbumId"
+		},
+		{
+			"key": "faceindex_field_fileRef",
+			"value": "TIRFileRef"
+		},
+		{
+			"key": "faceindex_field_largeFaceListId",
+			"value": "TIRLargeFaceListId"
+		},
+		{
+			"key": "faceindex_field_persistedFaceId",
+			"value": "TIRPersistedFaceId"
+		}
+	]
+}
