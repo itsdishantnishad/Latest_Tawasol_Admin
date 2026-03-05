@@ -16,13 +16,10 @@ export interface IFaceConfig {
 }
 
 /**
- * This reads values from your Postman collection JSON file:
- * - variable[] contains entries like { key: "face_api_endpoint", value: "..." }
- *
- * IMPORTANT: Rename the JSON to avoid spaces if possible.
- * Example: src/config/azure-face-config.json
+ * Reads values from AzureFaceConfig.json (Postman collection style):
+ * variable[] contains entries like { key: "face_api_endpoint", value: "..." }
  */
-const postmanCollection: any = require("../FaceAPI/config/AzureFaceConfig.json"); // <-- adjust path/name
+const postmanCollection: any = require("../FaceAPI/config/AzureFaceConfig.json"); // <-- adjust path/name if needed
 
 function getVar(k: string): string | undefined {
   const vars: any[] = postmanCollection?.variable || [];
@@ -31,7 +28,7 @@ function getVar(k: string): string | undefined {
 }
 
 function normalizeEndpoint(ep: string): string {
-  return ep.replace(/\/+$/, ""); // remove trailing slashes
+  return ep.replace(/\/+$/, "");
 }
 
 export function loadFaceConfig(): IFaceConfig {
@@ -46,8 +43,14 @@ export function loadFaceConfig(): IFaceConfig {
 
   const faceIndexListTitle = getVar("faceindex_list_title") || "DHRE Gallery FaceIndex row";
 
+  /**
+   * IMPORTANT:
+   * You renamed the *display name* of the built-in Title column to "AlbumId".
+   * But its INTERNAL NAME is still "Title".
+   * So albumId field mapping must be "Title" (unless you create a new real column whose internal name is AlbumId).
+   */
   const faceIndexFields: IFaceIndexFields = {
-    albumId: getVar("faceindex_field_albumId") || "AlbumId",
+    albumId: getVar("faceindex_field_albumId") || "Title", 
     fileRef: getVar("faceindex_field_fileRef") || "TIRFileRef",
     largeFaceListId: getVar("faceindex_field_largeFaceListId") || "TIRLargeFaceListId",
     persistedFaceId: getVar("faceindex_field_persistedFaceId") || "TIRPersistedFaceId",

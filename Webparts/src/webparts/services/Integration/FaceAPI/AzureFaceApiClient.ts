@@ -25,83 +25,94 @@ export interface IFindSimilarResult {
 export class AzureFaceApiClient {
   constructor(private endpoint: string, private key: string) {}
 
-  // Tune these for F0 throttling behavior
-  private readonly max429Retries = 6; // total attempts = 1 + retries
-  private readonly maxWaitSeconds = 60; // cap wait
-
   private sleep(ms: number): Promise<void> {
     return new Promise((res) => setTimeout(res, ms));
   }
 
-  private parseRetryAfterSeconds(res: Response, bodyText?: string): number {
-    // 1) Standard Retry-After (seconds)
-    const ra = res.headers.get("Retry-After");
+  private parseRetryAfterMs(res: Response, bodyText?: string): number | null {
+    // 1) Standard header
+    const ra = res.headers.get("retry-after");
     if (ra) {
-      const n = parseInt(ra, 10);
-      if (!isNaN(n) && n > 0) return n;
+      const asNum = Number(ra);
+      if (!Number.isNaN(asNum) && asNum >= 0) return asNum * 1000;
+
+      // HTTP-date format
+      const dt = Date.parse(ra);
+      if (!Number.isNaN(dt)) {
+        const diff = dt - Date.now();
+        if (diff > 0) return diff;
+      }
     }
 
-    // 2) Azure sometimes returns ms
-    const raMs = res.headers.get("x-ms-retry-after-ms");
-    if (raMs) {
-      const n = parseInt(raMs, 10);
-      if (!isNaN(n) && n > 0) return Math.ceil(n / 1000);
-    }
-
-    // 3) Your Face API error includes: "retry after 53 seconds"
+    // 2) Face API sometimes returns "Please retry after X seconds" in body
     if (bodyText) {
-      const m = bodyText.match(/retry after\s+(\d+)\s+seconds/i);
-      if (m) {
-        const n = parseInt(m[1], 10);
-        if (!isNaN(n) && n > 0) return n;
+      const m = bodyText.match(/retry\s+after\s+(\d+)\s+seconds?/i);
+      if (m?.[1]) {
+        const sec = Number(m[1]);
+        if (!Number.isNaN(sec) && sec >= 0) return sec * 1000;
       }
     }
 
-    // fallback
-    return 5;
+    return null;
   }
 
-  /**
-   * Fetch with key header + automatic retry for 429.
-   * Does NOT throw on non-OK (caller decides).
-   */
-  private async fetchWithRetry(url: string, init: RequestInit, attempt = 0): Promise<Response> {
-    const res = await fetch(url, {
-      ...init,
-      headers: {
-        "Ocp-Apim-Subscription-Key": this.key,
-        ...(init.headers || {}),
-      },
-    });
+  private isRetriableStatus(status: number): boolean {
+    return status === 408 || status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+  }
 
-    if (res.status === 429) {
-      const txt = await res.text().catch(() => "");
-      const waitSeconds = Math.min(this.parseRetryAfterSeconds(res, txt), this.maxWaitSeconds);
+  private async fetchWithRetry(url: string, init: RequestInit, maxRetries = 6): Promise<Response> {
+    const baseDelayMs = 800;
+    let lastErr: unknown;
 
-      if (attempt >= this.max429Retries) {
-        // give up after retries
-        throw new Error(`Face API rate limit (429). Details: ${txt}`);
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const res = await fetch(url, {
+          ...init,
+          headers: {
+            "Ocp-Apim-Subscription-Key": this.key,
+            ...(init.headers || {}),
+          },
+        });
+
+        if (res.ok) return res;
+
+        // Read body once for retry hints / better error
+        const bodyText = await res.text().catch(() => "");
+
+        if (!this.isRetriableStatus(res.status) || attempt === maxRetries) {
+          // Not retriable (or out of retries)
+          throw new Error(`Face API error ${res.status}: ${bodyText}`);
+        }
+
+        // Retriable
+        const retryAfterMs = this.parseRetryAfterMs(res, bodyText);
+        const backoffMs = baseDelayMs * Math.pow(2, attempt);
+        const jitterMs = Math.floor(Math.random() * 250);
+        const waitMs = Math.min(60_000, (retryAfterMs ?? backoffMs) + jitterMs);
+
+        await this.sleep(waitMs);
+        continue;
+      } catch (e) {
+        lastErr = e;
+
+        // Fetch/network error → retry with backoff
+        if (attempt === maxRetries) {
+          throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
+        }
+
+        const backoffMs = baseDelayMs * Math.pow(2, attempt);
+        const jitterMs = Math.floor(Math.random() * 250);
+        await this.sleep(Math.min(60_000, backoffMs + jitterMs));
       }
-
-      await this.sleep(waitSeconds * 1000);
-      return this.fetchWithRetry(url, init, attempt + 1);
     }
 
-    return res;
+    // Should never reach, but keep TS happy
+    throw lastErr instanceof Error ? lastErr : new Error("Face API error: unknown");
   }
 
-  /**
-   * Fetch + throw on non-OK (but still retries 429 automatically).
-   */
   private async doFetch(url: string, init: RequestInit): Promise<Response> {
-    const res = await this.fetchWithRetry(url, init);
-
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      throw new Error(`Face API error ${res.status}: ${txt}`);
-    }
-
-    return res;
+    // fetchWithRetry already throws a detailed error when needed
+    return await this.fetchWithRetry(url, init);
   }
 
   async largeFaceListExists(largeFaceListId: string): Promise<boolean> {
@@ -116,17 +127,16 @@ export class AzureFaceApiClient {
     return true;
   }
 
-  async createLargeFaceList(
-    largeFaceListId: string,
-    name: string,
-    recognitionModel: RecognitionModel = "recognition_04"
-  ): Promise<void> {
+  async createLargeFaceList(largeFaceListId: string, name: string, recognitionModel: RecognitionModel = "recognition_04"): Promise<void> {
     const url = `${this.endpoint}/face/v1.0/largefacelists/${encodeURIComponent(largeFaceListId)}`;
 
     await this.doFetch(url, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, recognitionModel }),
+      body: JSON.stringify({
+        name,
+        recognitionModel,
+      }),
     });
   }
 
@@ -189,14 +199,16 @@ export class AzureFaceApiClient {
   }
 
   async trainLargeFaceList(largeFaceListId: string): Promise<void> {
-    const url = `${this.endpoint}/face/v1.0/largefacelists/${encodeURIComponent(largeFaceListId)}/train`;
+    const url =
+      `${this.endpoint}/face/v1.0/largefacelists/${encodeURIComponent(largeFaceListId)}/train`;
+
     await this.doFetch(url, { method: "POST" });
   }
 
-  async getTrainingStatus(
-    largeFaceListId: string
-  ): Promise<{ status: "notstarted" | "running" | "succeeded" | "failed"; message?: string }> {
-    const url = `${this.endpoint}/face/v1.0/largefacelists/${encodeURIComponent(largeFaceListId)}/training`;
+  async getTrainingStatus(largeFaceListId: string): Promise<{ status: "notstarted" | "running" | "succeeded" | "failed"; message?: string }> {
+    const url =
+      `${this.endpoint}/face/v1.0/largefacelists/${encodeURIComponent(largeFaceListId)}/training`;
+
     const res = await this.doFetch(url, { method: "GET" });
     return (await res.json()) as any;
   }
@@ -207,7 +219,7 @@ export class AzureFaceApiClient {
       const st = await this.getTrainingStatus(largeFaceListId);
       if (st.status === "succeeded") return;
       if (st.status === "failed") throw new Error(`LargeFaceList training failed: ${st.message || ""}`);
-      await this.sleep(pollMs);
+      await new Promise(res => setTimeout(res, pollMs));
     }
     // Not fatal; training may still finish later
   }

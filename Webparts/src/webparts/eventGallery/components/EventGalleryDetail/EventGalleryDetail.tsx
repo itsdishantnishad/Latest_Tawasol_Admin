@@ -815,6 +815,8 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
 
   /* ================= Indexing (on-demand) ================= */
 
+  const sleep = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
+
   const fetchBytesFromSharePointFile = async (img: any): Promise<ArrayBuffer> => {
     const url = resolveImageUrl(img, props.context);
     const res = await fetch(url, { credentials: "same-origin" });
@@ -838,33 +840,56 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
     for (const f of detected) {
       const rect = f.faceRectangle as IFaceRectangle;
       const persistedFaceId = await faceApi.addFaceToLargeFaceList(largeFaceListId, bytes, rect, "detection_03", fileRef);
+
       await faceIndex.addRow({
         albumId,
         fileRef,
         largeFaceListId,
         persistedFaceId,
       });
+
+      // Extra spacing helps a lot on Face F0 tier
+      await sleep(250);
     }
   };
 
   const ensureAlbumIndexed = async (albumId: string, largeFaceListId: string): Promise<void> => {
+    // Fail fast if the SP list is missing / wrong title / no permission.
+    // This prevents hammering Face API and triggering 429 repeatedly.
+    await faceIndex.ensureListAccessible();
+
     const hasAny = await faceIndex.hasAnyForAlbum(albumId);
     if (hasAny) return;
 
     setStatusMsg("First time setup: indexing this album for face search…");
 
     // Index ALL current images once (on-demand)
-    const concurrency = 3;
+    // Face API F0 tier throttles very easily. Keep it single-threaded.
+    const concurrency = 1;
     let i = 0;
+    let failed = 0;
 
     const workers = Array.from({ length: concurrency }, async () => {
       while (i < images.length) {
         const idx = i++;
-        await indexSingleImage(albumId, largeFaceListId, images[idx]);
+        try {
+          await indexSingleImage(albumId, largeFaceListId, images[idx]);
+        } catch (e) {
+          failed++;
+          console.error("Indexing failed for image", images?.[idx], e);
+          // Continue indexing remaining images
+        }
+
+        // Small gap between images further reduces 429.
+        await sleep(300);
       }
     });
 
     await Promise.all(workers);
+
+    if (failed > 0) {
+      setStatusMsg(`Indexing finished with ${failed} failed file(s). Training face list…`);
+    }
 
     setStatusMsg("Training album face list…");
     await faceApi.trainLargeFaceList(largeFaceListId);

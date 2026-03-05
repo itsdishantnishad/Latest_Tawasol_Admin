@@ -87,7 +87,7 @@
 		},
 		{
 			"key": "faceindex_field_albumId",
-			"value": "AlbumId"
+			"value": "Title"
 		},
 		{
 			"key": "faceindex_field_fileRef",
