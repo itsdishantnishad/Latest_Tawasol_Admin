@@ -3,8 +3,10 @@ import NavSegment from "../Navigation/NavSegment";
 import LetsMeetGallery from "../LetsMeetGallery/LetsMeetGallery";
 import EventGalleryHome from "../EventGalleryHome/EventGalleryhome";
 import type { WebPartContext } from "@microsoft/sp-webpart-base";
+
 type TopTab = "Image Gallery" | "Inside Scoop" | "Let's Meet";
-const TABS: readonly TopTab[] = ["Image Gallery", "Inside Scoop", "Let's Meet"] as const;
+// const TABS: readonly TopTab[] = ["Image Gallery", "Inside Scoop", "Let's Meet"] as const;
+const TABS: readonly TopTab[] = ["Image Gallery", "Let's Meet"] as const;
 
 export interface IAppProps {
   context: WebPartContext;
@@ -16,7 +18,6 @@ export interface IAppProps {
 }
 
 const App: React.FC<IAppProps> = (props) => {
-  // ✅ Default should be Image Gallery
   const [tab, setTab] = React.useState<TopTab>("Image Gallery");
 
   const title =
@@ -33,7 +34,6 @@ const App: React.FC<IAppProps> = (props) => {
           onChange={(v) => setTab(v)}
           ariaLabel="Gallery tabs"
         />
-
       </div>
 
       <div style={{ marginTop: 18 }}>
@@ -51,9 +51,9 @@ const App: React.FC<IAppProps> = (props) => {
           />
         )}
 
-        {tab === "Inside Scoop" && (
+        {/* {tab === "Inside Scoop" && (
           <div style={{ padding: 16 }}>Inside Scoop (coming soon)</div>
-        )}
+        )} */}
       </div>
     </div>
   );

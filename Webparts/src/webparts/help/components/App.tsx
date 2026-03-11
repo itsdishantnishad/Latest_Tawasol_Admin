@@ -37,7 +37,13 @@ export default class App extends React.Component<IHelpProps, IAppState> {
             listTitle="Help Center"
           />
         )}
-        {active === "FAQs" && <Faqs context={context} />}
+        {active === "FAQs" && (
+          <Faqs
+            context={context}
+            chatBotDeepLink={this.props.chatBotDeepLink}
+            showChatBot={this.props.showChatBot}
+          />
+        )}
       </>
     );
   }

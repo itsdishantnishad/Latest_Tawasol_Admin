@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import styles from "./Beverages.module.scss";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
@@ -8,12 +7,7 @@ const chatBotIcon: string = require("../assets/ChatBot.svg");
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
-
-export interface IBeveragesProps {
-  context: WebPartContext;
-  listTitle?: string;
-  chatBotDeepLink?: string;
-}
+import { IBeveragesProps } from "./IBeveragesProps";
 
 interface IBeverageItem {
   Id: number;
@@ -40,6 +34,11 @@ export default class Beverages extends React.Component<
   IBeveragesProps,
   IBeveragesState
 > {
+  public static defaultProps: Partial<IBeveragesProps> = {
+    listTitle: LIST_DEFAULT,
+    showChatBot: true,
+  };
+
   private sp = spfi().using(SPFx(this.props.context));
   private chatBotRef = React.createRef<HTMLAnchorElement>();
   private rafId: number | null = null;
@@ -47,12 +46,27 @@ export default class Beverages extends React.Component<
   state: IBeveragesState = {
     items: [],
     loading: true,
-    error: null
+    error: null,
   };
 
   componentDidMount(): void {
     this.loadItems();
-    this.startFloatCheck();
+
+    // only run floating loop if chatbot is enabled
+    if (this.props.showChatBot !== false) {
+      this.startFloatCheck();
+    }
+  }
+
+  componentDidUpdate(prevProps: IBeveragesProps): void {
+    const prevShow = prevProps.showChatBot !== false;
+    const currShow = this.props.showChatBot !== false;
+
+    // start/stop RAF when toggle changes
+    if (prevShow !== currShow) {
+      if (currShow) this.startFloatCheck();
+      else this.stopFloatCheck();
+    }
   }
 
   componentWillUnmount(): void {
@@ -72,7 +86,7 @@ export default class Beverages extends React.Component<
         Id: i.Id,
         Title: i.Title,
         BMCategory: i.TIRBMCategory,
-        BMIsActive: i.TIRIsActive
+        BMIsActive: i.TIRIsActive,
       }));
 
       this.setState({ items, loading: false });
@@ -101,7 +115,7 @@ export default class Beverages extends React.Component<
       <div className={styles.menuRow}>
         {cols.map((col, i) => (
           <div key={i} className={styles.menuCol}>
-            {col.map(it => (
+            {col.map((it) => (
               <div key={it.Id} className={styles.menuItem}>
                 {it.Title}
               </div>
@@ -114,6 +128,8 @@ export default class Beverages extends React.Component<
 
   // ========== FLOATING CHATBOT LOGIC ==========
   private startFloatCheck(): void {
+    // avoid multiple RAF loops
+    if (this.rafId !== null) return;
     this.checkFloatPosition();
   }
 
@@ -122,18 +138,28 @@ export default class Beverages extends React.Component<
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
+
+    // reset raise
+    const chatBot = this.chatBotRef.current;
+    if (chatBot) chatBot.style.setProperty("--chatbot-raise", "0px");
   }
 
   private checkFloatPosition = (): void => {
+    // if bot is OFF, stop loop
+    if (this.props.showChatBot === false) {
+      this.stopFloatCheck();
+      return;
+    }
+
     const chatBot = this.chatBotRef.current;
     if (!chatBot) {
       this.rafId = requestAnimationFrame(this.checkFloatPosition);
       return;
     }
 
-    const footer = document.querySelector('[class*="TIRFooter"]') as HTMLElement;
+    const footer = document.querySelector('[class*="TIRFooter"]') as HTMLElement | null;
     if (!footer) {
-      chatBot.style.setProperty('--chatbot-raise', '0px');
+      chatBot.style.setProperty("--chatbot-raise", "0px");
       this.rafId = requestAnimationFrame(this.checkFloatPosition);
       return;
     }
@@ -148,9 +174,9 @@ export default class Beverages extends React.Component<
 
     if (overlap > 0 && footerTop < viewportHeight) {
       const raise = overlap + 70;
-      chatBot.style.setProperty('--chatbot-raise', `${raise}px`);
+      chatBot.style.setProperty("--chatbot-raise", `${raise}px`);
     } else {
-      chatBot.style.setProperty('--chatbot-raise', '0px');
+      chatBot.style.setProperty("--chatbot-raise", "0px");
     }
 
     this.rafId = requestAnimationFrame(this.checkFloatPosition);
@@ -158,6 +184,13 @@ export default class Beverages extends React.Component<
 
   render(): JSX.Element {
     const { items, loading, error } = this.state;
+
+    const botHref = (
+      this.props.chatBotDeepLink ||
+      "https://teams.microsoft.com/l/app/58e72336-dc5b-4253-8dc2-cf961136ebe3?source=app-header-share-entrypoint"
+    ).trim();
+
+    const showBot = this.props.showChatBot !== false && !!botHref;
 
     if (loading) {
       return <Spinner size={SpinnerSize.large} label="Loading beverages..." />;
@@ -175,12 +208,15 @@ export default class Beverages extends React.Component<
     return (
       <div className={styles.wrapper}>
         <div className={styles.categoriesContainer}>
-
           {/* HOT */}
           <div className={`${styles.categoryBlock} ${styles.fullRow}`}>
             <div className={styles.imgWrap}>
               <img src={Ellipse_IMG} className={styles.ellipseImg} alt="" />
-              <img src={HOT_IMG} className={`${styles.hotImg} ${styles.hotImg1}`} alt="Hot Beverages" />
+              <img
+                src={HOT_IMG}
+                className={`${styles.hotImg} ${styles.hotImg1}`}
+                alt="Hot Beverages"
+              />
             </div>
             <div>
               <Text className={styles.menuTitle}>Hot Beverages</Text>
@@ -188,7 +224,7 @@ export default class Beverages extends React.Component<
             </div>
           </div>
 
-          {/* TEA (🔥 NOW BELOW HOT) */}
+          {/* TEA */}
           <div className={`${styles.categoryBlock} ${styles.fullRow}`}>
             <div className={styles.imgWrap}>
               <img src={Ellipse_IMG} className={styles.ellipseImg} alt="" />
@@ -204,18 +240,27 @@ export default class Beverages extends React.Component<
           <div className={`${styles.categoryBlock} ${styles.fullRow}`}>
             <div className={styles.imgWrap}>
               <img src={Ellipse_IMG} className={styles.ellipseImg} alt="" />
-              <img src={COLD_IMG} className={`${styles.coldImg} ${styles.coldImg1}`} alt="Cold Beverages" />
+              <img
+                src={COLD_IMG}
+                className={`${styles.coldImg} ${styles.coldImg1}`}
+                alt="Cold Beverages"
+              />
             </div>
             <div>
               <Text className={styles.menuTitle}>Cold Beverages</Text>
               {this.renderMenu(cold)}
             </div>
           </div>
+
           {/* MILK */}
           <div className={`${styles.categoryBlock} ${styles.inlineRow}`}>
             <div className={styles.imgWrap}>
               <img src={Ellipse_IMG} className={styles.ellipseImg} alt="" />
-              <img src={MILK_IMG} className={`${styles.milkImg} ${styles.milkImg1}`} alt="Milk Menu" />
+              <img
+                src={MILK_IMG}
+                className={`${styles.milkImg} ${styles.milkImg1}`}
+                alt="Milk Menu"
+              />
             </div>
             <div>
               <Text className={styles.menuTitle}>Milk Alternatives</Text>
@@ -223,20 +268,20 @@ export default class Beverages extends React.Component<
             </div>
           </div>
         </div>
-        <a
-          ref={this.chatBotRef}
-          className={styles.chatBotFab}
-          href={
-            this.props.chatBotDeepLink ||
-            "https://teams.microsoft.com/l/app/58e72336-dc5b-4253-8dc2-cf961136ebe3?source=app-header-share-entrypoint"
-          }
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Open chatbot"
-        >
-          <img src={chatBotIcon} alt="Chatbot" />
-        </a>
 
+        {/* CHATBOT FAB (hidden when toggle OFF) */}
+        {showBot && (
+          <a
+            ref={this.chatBotRef}
+            className={styles.chatBotFab}
+            href={botHref}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Open chatbot"
+          >
+            <img src={chatBotIcon} alt="Chatbot" />
+          </a>
+        )}
       </div>
     );
   }

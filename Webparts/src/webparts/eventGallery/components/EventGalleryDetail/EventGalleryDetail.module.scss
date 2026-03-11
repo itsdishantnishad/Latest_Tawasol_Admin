@@ -415,60 +415,6 @@
   padding: 8px 16px;
   border-radius: 20px;
 }
-
-/* Responsive */
-@media (max-width: 768px) {
-  .eventDetail {
-    padding: 20px;
-  }
-
-  .eventTitle {
-    font-size: 28px;
-  }
-
-  .findPhotoDropdown {
-    left: 0;
-    right: 0;
-    width: 90%;
-    transform: translateX(2%);
-  }
-
-  .tabButtons {
-    flex-direction: column;
-  }
-
-  .actionButtons {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .photoGrid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 8px;
-  }
-
-  .navButton {
-    width: 40px;
-    height: 40px;
-    font-size: 40px;
-  }
-
-  .prevButton {
-    left: 10px;
-  }
-
-  .nextButton {
-    right: 10px;
-  }
-
-  .closeButton {
-    top: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
-    font-size: 30px;
-  }
-}
 .profileConfirmWrapper {
   display: flex;
   flex-direction: column;
@@ -893,6 +839,14 @@
   img {
     width: 32px;
     height: 32px;
+    background: #ffff;
+    border-radius: 50%;
+    opacity: 0.8;
+  }
+
+  img:hover{
+    opacity: 1;
+    transition: 0.3s ease-out;
   }
 
   &:disabled {
@@ -909,4 +863,242 @@
   font-size: 18px;
   color: #fff;
   pointer-events: none; // prevents click interference
+}
+
+/* ==== Responsive (same breakpoints as Portfolio file) ==== */
+@media (max-width: 1200px) {
+  .eventDetail {
+    padding: 20px 40px;
+  }
+
+  .findPhotoDropdown {
+    width: 520px;
+    max-width: 92vw;
+  }
+
+  .photoGrid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .dropZone,
+  .dropZoneCamera {
+    width: 560px;
+    max-width: 100%;
+  }
+
+  .profileConfirmBox {
+    width: 420px;
+    max-width: 100%;
+  }
+
+  .lightboxContainer {
+    max-width: 75vw;
+  }
+
+  .navLeft { left: -48px; }
+  .navRight { right: -48px; }
+
+  .sideThumbsLeft { left: -160px; width: 120px; height: 160px; }
+  .sideThumbsRight { right: -160px; width: 120px; height: 160px; }
+}
+
+@media (max-width: 992px) {
+  .eventDetail {
+    padding: 20px 24px;
+  }
+
+  .eventTitle {
+    font-size: 34px;
+  }
+
+  .findPhotoDropdown {
+    width: 480px;
+    max-width: 94vw;
+    padding: 20px;
+  }
+
+  .photoGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    margin-bottom: 50px;
+  }
+
+  .dropZone {
+    width: 100%;
+    max-width: 520px;
+    height: 170px;
+    padding: 14px;
+    box-sizing: border-box;
+  }
+
+  .dropZoneCamera {
+    width: 100%;
+    max-width: 520px;
+    height: 250px;
+    padding: 14px;
+    box-sizing: border-box;
+  }
+
+  .cameraVideo {
+    width: 260px;
+    height: 190px;
+  }
+
+  .profileConfirmBox {
+    width: 100%;
+    max-width: 380px;
+    height: auto;
+    padding: 14px;
+    box-sizing: border-box;
+  }
+
+  .checkIcon {
+    right: 110px;
+    bottom: 35px;
+  }
+
+  .moreEventsCardsRow {
+    gap: 18px;
+  }
+
+  .lightboxContainer {
+    max-width: 82vw;
+    max-height: 75vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .eventDetail {
+    padding: 20px 16px;
+  }
+
+  .header {
+    margin-bottom: 24px;
+  }
+
+  .titleSection {
+    text-align: left;
+  }
+
+  .eventTitle {
+    font-size: 28px;
+  }
+
+  .findPhotoDropdown {
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-width: none;
+    transform: none;
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .tabButtons {
+    flex-direction: column;
+  }
+
+  .actionButtons {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .photoGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    margin-bottom: 40px;
+  }
+
+  .navButton {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+  }
+
+  .prevButton {
+    left: 10px;
+  }
+
+  .nextButton {
+    right: 10px;
+  }
+
+  .closeButton {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
+  }
+
+  .dropZone,
+  .dropZoneCamera {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 170px;
+    padding: 16px;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .cameraVideo {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+  }
+
+  .profileConfirmBox {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .checkIcon {
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .moreEventsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .viewAllButton {
+    width: 100%;
+  }
+
+  .lightboxContainer {
+    max-width: 92vw;
+    max-height: 78vh;
+  }
+
+  .sideThumbsLeft,
+  .sideThumbsRight {
+    display: none;
+  }
+
+  .navLeft {
+    left: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 28px;
+  }
+
+  .navRight {
+    right: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 28px;
+  }
+
+  .carouselControls {
+    gap: 28px;
+    bottom: -44px;
+  }
+
+  .carouselBtn img {
+    width: 28px;
+    height: 28px;
+  }
 }

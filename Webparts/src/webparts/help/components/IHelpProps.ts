@@ -7,5 +7,7 @@ export interface IHelpProps {
   hasTeamsContext: boolean;
   userDisplayName: string;
   context: WebPartContext;   
-  listTitle: string;       
+  listTitle: string;
+  chatBotDeepLink?: string;
+  showChatBot?: boolean;
 }

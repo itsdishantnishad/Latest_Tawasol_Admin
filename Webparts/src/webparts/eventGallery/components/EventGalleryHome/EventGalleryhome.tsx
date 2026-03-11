@@ -94,7 +94,7 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
   const currentSiteRoot: string =
     props?.context?.pageContext?.web?.serverRelativeUrl || "";
   const lowerSiteRoot = currentSiteRoot.toLowerCase();
-  
+
   // for selected event images
   const getImagesForEvent = (eventTitle: string) => {
     const match = images.find(
@@ -103,7 +103,15 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
 
     return match?.images || [];
   };
-  
+
+  // ✅ NEW: for selected event folder (server relative)
+  const getFolderUrlForEvent = (eventTitle: string): string => {
+    const match = images.find(
+      (folder) => folder.folderName.toLowerCase() === eventTitle.toLowerCase()
+    );
+    return match?.folderServerRelativeUrl || "";
+  };
+
   const buildImageUrlFromNewsImage = (
     newsImage: string | undefined
   ): string => {
@@ -248,13 +256,13 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
         if (isNaN(eventDate.getTime())) return;
 
         const year = eventDate.getFullYear().toString();
-        
+
         if (!yearGroups[year]) {
           yearGroups[year] = [];
         }
         yearGroups[year].push(event);
       } catch (e) {
-        console.warn('Invalid date format:', event.date);
+        console.warn("Invalid date format:", event.date);
       }
     });
 
@@ -265,7 +273,7 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
         year,
         albumCount: yearGroups[year].length,
         coverImage: yearGroups[year][0]?.imageUrl || FALLBACK_IMAGE,
-        events: yearGroups[year]
+        events: yearGroups[year],
       }));
 
     return years;
@@ -296,6 +304,8 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
 
             return {
               folderName: folder.Name,
+              // ✅ NEW: store folder server relative URL
+              folderServerRelativeUrl: folder.ServerRelativeUrl,
               images: files.map((file: any) => ({
                 title: file.Name,
                 fileRef: file.ServerRelativeUrl,
@@ -334,12 +344,12 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
       if (yearIndex !== -1) {
         // Show enough months to include this year
         setVisibleMonths(Math.max(visibleMonths, yearIndex + 3));
-        
+
         // Scroll to the year section after a brief delay
         setTimeout(() => {
           const elements = document.querySelectorAll(`.${styles.monthHeader}`);
           if (elements[yearIndex]) {
-            elements[yearIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
+            elements[yearIndex].scrollIntoView({ behavior: "smooth", block: "start" });
           }
         }, 100);
       }
@@ -357,9 +367,10 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
         onBack={handleBackToGallery}
         eventdata={dummyEvents}
         images={getImagesForEvent(selectedEvent.title)}
-        dymaicUrl={
-          props?.context?._pageContext?.web?.absoluteUrl?.split("/sites")[0]
-        }
+        // ✅ REQUIRED: Pass SPFx context to detail component
+        context={props.context}
+        // ✅ Pass folder serverRelativeUrl (helps create LargeFaceListId via folder UniqueId)
+        dymaicUrl={getFolderUrlForEvent(selectedEvent.title)}
       />
     );
   }
@@ -455,7 +466,7 @@ const EventGallery: React.FC<IEventGalleryProps> = (props) => {
       {groupedByYear.length > 0 && (
         <div className={styles.moreEventGallery}>
           <h2 className={styles.moreEventHeader}>More Event Gallery</h2>
-          
+
           <div className={styles.yearGalleryGrid}>
             {groupedByYear.map((yearGroup) => {
               const imgSrc = yearGroup.coverImage || FALLBACK_IMAGE;
