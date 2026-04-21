@@ -5,48 +5,42 @@
   src: local('Instrument Serif Regular'), url('../../assets/fonts/instrumentserif-regular.woff') format('woff');
 }
 
-
 @font-face {
   font-family: 'Instrument Serif Italic';
   src: local('Instrument Serif Italic'), url('../../assets/fonts/instrumentserif-italic.woff') format('woff');
 }
 
-
-/* --- Container --- */
 .wrap {
-  background: #ffebda;         /* same soft peach bg */
+  background: #ffebda;
   padding: 60px;
-  // border-radius: 12px;
 }
 
-/* two rows (Vision / Mission) */
 .row {
   display: grid;
   grid-template-columns: 350px 1fr;
   gap: 60px;
   align-items: flex-start;
   margin-bottom: 80px;
+
   @media (max-width: 991px){
     display: flex;
     flex-wrap: wrap;
   }
 }
 
-.leftPic{
-  img {
-    // width: 100%;
-    // height: auto;
-    display: block;
-  }
+.leftPic img {
+  display: block;
 }
 
-/* ✅ this was missing earlier */
+.leftPic .targetImg {
+  display: block;
+}
+
 .rightCopy {
   display: block;
   position: relative;
 }
 
-/* Headings */
 .sectionTitle {
   margin: 0 0 24px 0;
   line-height: 1;
@@ -58,7 +52,7 @@
 
 .our {
   font-family: 'Instrument Serif Italic';
-  color: #d6362d;               /* red accent */
+  color: #d6362d;
   font-size: 42px;
   font-weight: 400;
 }
@@ -70,7 +64,6 @@
   font-weight: 400;
 }
 
-/* Vision paragraph */
 .visionText {
   color: #3A3B43;
   font-family: 'Inter', sans-serif;
@@ -81,8 +74,6 @@
   max-width: 100%;
 }
 
-/* Mission points */
-/* --- Mission points (UPDATED) --- */
 .points {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -91,14 +82,12 @@
 }
 
 .point {
-  /* pehle yahan 2-column grid tha; ab vertical stack */
   display: flex;
   flex-direction: column;
-  align-items: flex-start;  /* left align like Figma */
+  align-items: flex-start;
   gap: 11px;
   max-width: 75%;
 }
-
 
 .numImg {
   display: block;
@@ -108,7 +97,6 @@
   object-fit: contain;
 }
 
-/* fallback text number ke liye bhi same placement/size */
 .numTxt {
   font-family: 'Instrument Serif Regular';
   font-size: 86px;
@@ -117,7 +105,6 @@
   margin-bottom: 6px;
 }
 
-/* mission description ka color as requested */
 .text {
   color: #3A3B43;
   font-family: 'Inter', sans-serif;
@@ -128,15 +115,57 @@
   max-width: 100%;
 }
 
-/* --- Responsive tweaks --- */
+/* Tablet */
 @media (max-width: 900px) {
   .points { gap: 20px; }
   .numImg { width: 72px; }
   .numTxt { font-size: 72px; }
 }
 
+/* ✅ MOBILE FIX (2 + 1 layout) */
 @media (max-width: 640px) {
-  .points { grid-template-columns: 1fr; }
+  .points {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .point {
+    max-width: 100%;
+  }
+
+  .point:nth-child(3) {
+    grid-column: span 2;
+  }
+
   .numImg { width: 64px; }
   .numTxt { font-size: 64px; }
+}
+
+@media (max-width: 480px) {
+ .leftPic img{
+  width: 88px;
+  height: 50.58px;
+  top: 32.03px;
+  left: 16px;
+ }
+}
+
+@media (max-width:480px){
+  .leftPic .targetImg {
+    width: 72.88px;
+    height: 89.64px;
+    top: 365.43px;
+    left: 10px;
+  }
+}
+
+@media (max-width:343px){
+  .visionText{
+   font: inter;
+   font-weight: 400;
+   size: 14px;
+   line-height: 22px;
+   letter-spacing: -0.5px;
+
+  }
 }
