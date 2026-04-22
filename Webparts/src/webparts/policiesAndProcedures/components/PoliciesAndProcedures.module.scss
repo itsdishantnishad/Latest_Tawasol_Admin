@@ -641,77 +641,254 @@
 }
 
 
-/* --------------------------------- Responsive --------------------------------- */
+// /* --------------------------------- Responsive --------------------------------- */
 
-@media (max-width: 1600px) {
-  .supportGrid {
-    grid-template-columns: repeat(6, 1fr);
+// @media (max-width: 1600px) {
+//   .supportGrid {
+//     grid-template-columns: repeat(6, 1fr);
+//   }
+// }
+
+// @media (max-width: 1360px) {
+//   .supportGrid {
+//     grid-template-columns: repeat(5, 1fr);
+//   }
+
+//   .coreTile {
+//     flex: 1 1 auto;
+//   }
+// }
+
+// @media (max-width: 1100px) {
+//   .supportGrid {
+//     grid-template-columns: repeat(4, 1fr);
+//   }
+
+//   .libWrap {
+//     grid-template-columns: 1fr;
+//   }
+// }
+
+// @media (max-width: 991px) {
+//   .supportGrid {
+//     grid-template-columns: repeat(3, 1fr);
+//   }
+// }
+
+// @media (max-width: 800px) {
+//   .topBar {
+//     grid-template-columns: 1fr;
+//   }
+
+//   .supportGrid {
+//     grid-template-columns: repeat(2, 1fr);
+//   }
+
+//   .docGrid {
+//     grid-template-columns: repeat(3, minmax(180px, 1fr));
+//   }
+
+//   .boards {
+//     grid-template-columns: 1fr;
+//   }
+// }
+
+// @media (max-width: 640px) {
+//   .homeTopRow {
+//     flex-wrap: wrap-reverse;
+//   }
+
+//   .searchHome {
+//     &>div {
+//       width: 100%;
+//     }
+//   }
+
+//   .supportGrid {
+//     grid-template-columns: repeat(2, 1fr);
+//   }
+// }
+
+
+// @media (max-width: 480px) {
+//   .supportGrid {
+//     grid-template-columns: repeat(1, 1fr);
+//   }
+// }
+
+
+//   responsivness 
+
+
+
+@media (max-width: 768px) {
+
+  /* ── Page ── */
+  .page {
+    padding: 0 16px 96px;
+    zoom: 1;                        /* reset zoom on mobile */
+    box-sizing: border-box;
   }
-}
 
-@media (max-width: 1360px) {
-  .supportGrid {
-    grid-template-columns: repeat(5, 1fr);
+  /* ── Banner ── */
+  .banner {
+    height: auto;
+    min-height: 120px;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
   }
 
-  .coreTile {
-    flex: 1 1 auto;
-  }
-}
-
-@media (max-width: 1100px) {
-  .supportGrid {
-    grid-template-columns: repeat(4, 1fr);
+  .bannerTitle {
+    font-size: 32px;
+    line-height: 100%;
+    font-weight: 400;
   }
 
-  .libWrap {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 991px) {
-  .supportGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 800px) {
-  .topBar {
-    grid-template-columns: 1fr;
+   .bannerTitle span {
+    font-size: 32px;
+    line-height: 100%;
+    font-weight: 400;
+    font-style: italic;
   }
 
-  .supportGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .bannerSub {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 400;
   }
 
-  .docGrid {
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
-  }
-
-  .boards {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
+  
   .homeTopRow {
-    flex-wrap: wrap-reverse;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 12px;
+    margin-bottom: 16px;
   }
 
+  .sectionHeading {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── Search Documents button ── */
   .searchHome {
-    &>div {
-      width: 100%;
+    & > div {
+      width: 160px;
+      height: 36px;
+      border-radius: 50px;
+      border: 1px solid #E8E8E8;
+      background-color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 16px;
     }
   }
 
+  /* ── Core grid: 2 columns ── */
+  .coreGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 11px;                             
+    margin-bottom: 32px;
+  }
+
+  /* ── Core tile: exact Figma size ── */
+  .coreTile {
+    width: 100%;
+    height: 177px;                         
+    border-radius: 8px;                    
+    overflow: hidden;
+  }
+
+  .coreCaption {
+    font-size: 14px;                       
+    font-weight: 500;
+    line-height: 20px;
+    padding: 12px;
+  }
+
+ 
   .supportGrid {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;                     
+    margin-bottom: 32px;
+  }
+
+  .supportTile {
+    width: 100%;
+    height: 177px;                 
+    min-height: 177px;
+    padding: 16px 12px;
+    border-radius: 8px;            
+    border: 1px solid var(--pp-border);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .supportIcon {
+    margin-bottom: 8px;
+  }
+
+  .supportIcon :global(.ms-Image) {
+    width: 80px !important;
+    height: 70px !important;
+  }
+
+  .supportTitle {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    color: #000;
+    margin-top: auto;              
+  }
+
+  .name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;             
+    display: block;
+  }
+
+  .nameLink {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;              
+    display: block;
   }
 }
 
-
 @media (max-width: 480px) {
+  .page {
+    padding: 0 12px 96px;
+  }
+
+  .coreGrid {
+    gap: 8px;
+  }
+
+  .coreTile {
+    height: 160px;
+  }
+
   .supportGrid {
-    grid-template-columns: repeat(1, 1fr);
+    gap: 8px;
+  }
+
+  .supportTitle {
+    font-size: 13px;
   }
 }
