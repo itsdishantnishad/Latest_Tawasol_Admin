@@ -184,41 +184,193 @@
   margin-top: 20px;
 }
 
-
-@media (max-width: 1400px) {
-  .mainVideo {
-    height: auto;
-    aspect-ratio: 1320 / 699;
-  }
-}
-
-@media (max-width: 980px) {
-  .episodesRow {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 768px) {
+
+  .letsMeetDetail {
+    padding: 0 16px;
+  }
+
+  /* ── Main video ── */
+  .mainVideoWrap {
+    margin: 0;
+    padding: 0 16px;              
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .mainVideo {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 343 / 220;
+    border-radius: 12px;
+    max-width: unset;
+  }
+
   .mainKicker {
-    font-size: 22px;
+    font-size: 18px;
   }
+
   .mainTitle {
-    font-size: 34px;
+    font-size: 28px;
   }
+
   .playBtn {
-    width: 64px;
-    height: 64px;
+    width: 52px;
+    height: 52px;
+    margin-top: 10px;
+  }
+
+  .playTriangle {
+    border-left: 15px solid #fff;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    margin-left: 3px;
+  }
+
+  /* ── "Missed an Episode?" heading ── */
+  .letsMeetDetail {
+    padding: 0;                    
+  }
+
+  .mainVideoWrap {
+    margin: 0;                     
+    padding: 0 16px;               
+  }
+
+  .mainVideo {
+    width: 100%;
+    height: 218px;
+    aspect-ratio: unset;
+    border-radius: 8px;
+    max-width: unset;
+  }
+
+  .missedWrap {
+    margin: 16px 0 0;
+    padding: 0 16px;               
+    width: 100%;
+    max-width: unset;
+    box-sizing: border-box;
+  }
+
+  .missedHeading {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 28px;
+    color: #3a3b43;
+    margin: 16px 0 12px;
+  }
+
+  /* ── Episodes horizontal scroll row ── */
+  .episodesRow {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 16px;
+    width: 100%;
+    margin: 0;
+    padding-left: 0;
+    padding-right: 16px;
+    padding-bottom: 4px;
+    box-sizing: border-box;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .episodesRow::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Each episode card ── */
+  .episodeCard {
+    flex: 0 0 296px;                
+    width: 296px;
+    min-width: 0;
+  }
+
+  /* ── Episode media ── */
+  .episodeMedia {
+    width: 296px;
+    height: 218px;                  
+    aspect-ratio: unset;
+    border-radius: 8px;             
+    overflow: hidden;
+    position: relative;
+  }
+
+  .episodeImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ── Small play button ── */
+  .playBtnSmall {
+    width: 36px;
+    height: 36px;
+    bottom: 12px;
+  }
+
+  .playTriangleSmall {
+    border-left: 10px solid #fff;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    margin-left: 2px;
+  }
+
+  /* ── Title below episode card ── */
+  .episodeTitleBelow {
+    font-size: 12px;
+    line-height: 18px;
+    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
 @media (max-width: 480px) {
+  .letsMeetDetail {
+    padding: 0 16px;
+  }
+
+  .mainVideo {
+    aspect-ratio: 343 / 210;
+  }
+
+  .mainKicker {
+    font-size: 16px;
+  }
+
+  .mainTitle {
+    font-size: 24px;
+  }
+
   .episodesRow {
-    grid-template-columns: 1fr;
+    width: calc(100% + 16px);
+  }
+
+  .episodeCard {
+    flex: 0 0 260px;
+    width: 260px;
   }
 
   .episodeMedia {
-    height: auto;
-    aspect-ratio: 424 / 238;
+    width: 260px;
+    height: 190px;
+  }
+
+  .playBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .playTriangle {
+    border-left: 13px solid #fff;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
   }
 }
-

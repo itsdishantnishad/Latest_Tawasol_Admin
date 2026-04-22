@@ -136,20 +136,260 @@
   width: 100%;
   padding: 16px 0;
 }
+@media (max-width: 768px) {
 
-/* responsive fallback: on small screen make it fluid */
+  /* ── Page padding ── */
+  .letsMeetGallery {
+    padding: 0 16px;
+  }
+
+  /* ── Header ── */
+  .headerWrap {
+    margin-bottom: 16px;
+  }
+
+  .titleRow {
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .title {
+    width: auto;
+    height: auto;
+    font-size: 32px;
+    line-height: 100%;
+    letter-spacing: 0.5px;
+  }
+
+  .arrowIcon {
+    width: 120px;
+    height: auto;
+    margin-bottom: 4px;
+  }
+
+  .desc {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 22px;
+    max-width: 100%;
+    overflow: visible;
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    white-space: normal;
+    text-overflow: unset;
+  }
+
+  /* ── Featured card ── */
+  .featuredWrap {
+    width: 100%;
+    margin-left: 0;
+    margin-bottom: 4px;
+    box-sizing: border-box;
+  }
+
+  .featuredCard {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 343 / 220;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .featuredWrap .cardTitle {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+    margin-top: 10px;
+    white-space: normal;
+    color: #3a3b43;
+  }
+
+  .featuredWrap .playCenter {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* ── "Missed an Episode?" label ── */
+  .sectionLabel {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 28px;
+    color: #3a3b43;
+    margin: 20px 0 12px;
+    display: block;
+  }
+
+  /* ── Episodes horizontal row ── */
+  .grid,
+  .scrollRow {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 16px;
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    padding: 0 16px 4px;
+    box-sizing: border-box;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .grid::-webkit-scrollbar,
+  .scrollRow::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── Each card wrap ── */
+  .cardWrap {
+    flex: 0 0 296px;
+    width: 296px;
+    min-width: 296px;
+  }
+
+  /* ── Card ── */
+  .card {
+    width: 296px;
+    height: 218px;
+    aspect-ratio: unset;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    flex: unset;
+  }
+
+  .thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .cardTitle {
+    font-size: 13px;
+    line-height: 20px;
+    margin-top: 8px;
+    font-weight: 600;
+    color: #3a3b43;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Play button ── */
+  .playCenter {
+    width: 40px;
+    height: 40px;
+  }
+
+  .playTriangle {
+    border-left: 13px solid #fff;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    margin-left: 3px;
+  }
+}
+
+/* ── Filter tabs ── */
+@media (max-width: 768px) {
+  .tabsRow {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    padding: 0 16px;
+    box-sizing: border-box;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .tabsRow::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabBtn {
+    flex: 0 0 auto;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 360px;
+    border: 1px solid #d0cdc9;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    color: #3a3b43;
+    white-space: nowrap;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tabBtnActive {
+    background: radial-gradient(120% 120% at 0% 0%, #DDA160 0%, #FFDBB4 100%);
+    border: 1px solid #F0BB82;
+    color: #3a3b43;
+    font-weight: 600;
+  }
+}
+
 @media (max-width: 480px) {
-  .grid {
-    grid-template-columns: 1fr;
+  .letsMeetGallery {
+    padding: 0 16px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .arrowIcon {
+    width: 100px;
+  }
+
+  .desc {
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .grid,
+  .scrollRow {
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    padding: 0 16px 4px;
   }
 
   .cardWrap {
-    width: 100%;
+    flex: 0 0 260px;
+    width: 260px;
+    min-width: 260px;
   }
 
   .card {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 424 / 238;
+    width: 260px;
+    height: 190px;
+  }
+
+  .playCenter {
+    width: 36px;
+    height: 36px;
+  }
+
+  .playTriangle {
+    border-left: 11px solid #fff;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
   }
 }

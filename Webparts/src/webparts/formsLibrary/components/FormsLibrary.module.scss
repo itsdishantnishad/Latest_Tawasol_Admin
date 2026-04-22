@@ -565,3 +565,181 @@
   height: 420px;
   border-radius: 12px;
 }
+
+
+
+
+@media (max-width: 768px) {
+
+  /* ── Main layout ── */
+  .formsLibraryRoot {
+    flex-direction: column;
+    padding: 0 16px;
+    column-gap: 0;
+    margin-top: 16px;
+  }
+
+  /* ── Hide right pane on mobile ── */
+  .rightPane {
+    display: none;
+  }
+
+   .searchRow {
+    display: none;
+  }
+
+  /* ── Left pane full width ── */
+  .leftPane {
+    width: 100%;
+    gap: 16px;
+  }
+
+
+  .deptSection {
+    width: 100%;
+    gap: 16px;
+  }
+
+  
+  .deptHeader {
+    width: 100%;
+    height: 44px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+  }
+
+  .deptHeaderRight {
+    display: flex;
+    align-items: center;
+    column-gap: 4px;              
+  }
+
+  .deptTitle {
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .folderIcon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .arrowIconOpen,
+  .arrowIconCollapsed {
+    width: 16px;
+    height: 16px;
+  }
+
+  .listIcon,
+  .gridIcon {
+    width: 24px;
+    height: 24px;
+    min-width: 20px;
+  }
+
+  .deptBody {
+    width: 100%;
+    gap: 4px;
+  }
+
+  
+  .controlRow {
+    width: 100%;
+    height: 40px;
+    margin-left: 0;
+    padding: 6px 8px;
+  }
+
+  .selectAllText {
+    font-size: 13px;
+    line-height: 16px;
+  }
+
+  .exportButtonCustom {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  /* ── Search row ── */
+  .searchRow {
+    column-gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  
+  .formsList {
+    row-gap: 0;
+  }
+
+  
+  .formRow {
+    width: 100%;
+    min-height: 52px;
+    padding: 10px 8px;
+    gap: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .formCheckbox {
+    width: 16px;
+    height: 16px;
+    top: 2px;
+    left: 0;
+  }
+
+  .pdfIcon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .formTitle {
+    font-size: 13px;
+    line-height: 20px;
+    white-space: normal;          
+  }
+
+  .formMeta {
+    font-size: 10px;
+  }
+
+  .formRowRight {
+    margin-left: 8px;
+    margin-top: 10px;
+  }
+
+  .digitalizedChip {
+    font-size: 10px;
+    width: auto;
+  }
+
+  .listIcon i {
+    font-size: 16px;
+  }
+
+  .formsGrid {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .formsLibraryRoot {
+    padding: 0 12px;
+    margin-top: 12px;
+  }
+
+  .deptHeader {
+    padding: 8px 10px;
+  }
+
+  .deptTitle {
+    font-size: 14px;
+  }
+
+  .formTitle {
+    font-size: 14px;
+  }
+
+  .formMeta {
+    font-size: 10px;
+  }
+}
