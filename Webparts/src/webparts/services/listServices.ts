@@ -499,7 +499,14 @@ private toStoredAbsoluteUrl(serverRelPath: string): string {
         Querytext: "*",
         RowLimit: 1,
         TrimDuplicates: false,
-        SelectProperties: ["Title", "TIREventEndDate", "TIREventStartDate", "TIRLocation"],
+        SelectProperties: [
+          "Title",
+          "TIREventEndDate",
+          "TIREventStartDate",
+          "TIRLocation",
+          "owstaxIdTIRDepartment",
+          "TIRDepartment",
+        ],
         QueryTemplate: ID ? `{searchTerms} ListItemID:${ID}` : `{searchTerms}`,
         HiddenConstraints: `-SitePageFlags:Template ${constraints}`,
         EnableInterleaving: true,
@@ -511,6 +518,10 @@ private toStoredAbsoluteUrl(serverRelPath: string): string {
           eventEndDate: item.TIREventEndDate,
           eventStartDate: item.TIREventStartDate,
           location: item.TIRLocation,
+          // keep both keys for compatibility
+          department: item.TIRDepartment ? item.TIRDepartment : "",
+          departmentName: item.TIRDepartment ? item.TIRDepartment : "",
+          departmentTaxId: item.owstaxIdTIRDepartment || "",
         } as any;
       });
     } catch (error) {

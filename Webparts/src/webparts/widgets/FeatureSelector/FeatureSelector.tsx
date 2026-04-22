@@ -47,6 +47,7 @@ const bgClassById: Record<string, string> = {
   forms: styles.interactiveFormsCard,
   dashboard: styles.dashboardCard,
   offers: styles.offersCard,
+  newsletters: styles.newslettersCard,
   training: styles.trainingCard,
   about_dhre: styles.aboutDhreCard,
   tasks: styles.tasksCard,
