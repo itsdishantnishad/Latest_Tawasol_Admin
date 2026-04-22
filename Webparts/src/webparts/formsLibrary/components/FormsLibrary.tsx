@@ -328,11 +328,11 @@ export default class FormsLibrary extends React.Component<IFormsLibraryProps, IF
     const q = (this.props.searchText || "").toLowerCase().trim();
     const filteredItems = q
       ? items.filter(
-          (i) =>
-            (i.title || "").toLowerCase().includes(q) ||
-            (i.modifiedBy || "").toLowerCase().includes(q) ||
-            (i.department || "").toLowerCase().includes(q)
-        )
+        (i) =>
+          (i.title || "").toLowerCase().includes(q) ||
+          (i.modifiedBy || "").toLowerCase().includes(q) ||
+          (i.department || "").toLowerCase().includes(q)
+      )
       : items;
 
     let isOpen = !!expanded[dept];
@@ -376,7 +376,8 @@ export default class FormsLibrary extends React.Component<IFormsLibraryProps, IF
               }}
               style={{ opacity: isGrid ? 1 : 0.4 }}
             >
-              <img src={GRIDLINE_ICON_URL} alt="Grid View" style={{ width: 16, height: 16 }} />
+
+              <img src={GRIDLINE_ICON_URL} alt="Grid View" className={styles.gridIconImg} />
             </IconButton>
           </div>
         </div>
