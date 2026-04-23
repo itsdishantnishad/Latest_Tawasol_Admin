@@ -57,7 +57,9 @@ const ProfileCard: React.FC<IProfileCardProps> = (props) => {
   }, [qrVcard, displayName]);
 
   return (
-    <div className={styles.card} role="dialog" aria-label="Profile Card">
+
+    <div className={styles.cardContainer}>
+       <div className={styles.card} role="dialog" aria-label="Profile Card">
       <img className={styles.vectorA} src={VectorB_URL} alt="" aria-hidden="true" />
       <img className={styles.vectorB} src={VectorA_URL} alt="" aria-hidden="true" />
 
@@ -109,6 +111,8 @@ const ProfileCard: React.FC<IProfileCardProps> = (props) => {
         <span className={styles.empValue}>{(employeeId || "—").trim() || "—"}</span>
       </div>
     </div>
+   </div>
+
   );
 };
 

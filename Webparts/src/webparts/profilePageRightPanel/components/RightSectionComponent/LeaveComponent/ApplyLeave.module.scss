@@ -1,3 +1,222 @@
+// .card {
+//   width: 100%;
+//   max-width: 424px;
+//   min-height: 402px;
+
+//   background: #FFFFFF;
+//   border-radius: 6px;
+//   box-sizing: border-box;
+//   padding: 20px 24px 24px 24px;
+
+//   display: grid;
+//   grid-template-rows: auto auto auto auto auto;
+//   row-gap: 16px;
+// }
+
+// .headTitle {
+//   // width: 120px;
+//   height: 24px;
+//   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+//   font-weight: 500;
+//   font-size: 16px;
+//   line-height: 24px;
+//   color: #000000;
+// }
+
+// .subText {
+//   width: 331px;
+//   height: 44px;
+//   margin: 0;
+//   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+//   font-weight: 400;
+//   font-size: 14px;
+//   line-height: 22px;
+//   color: #6C6C6C;
+// }
+
+// .balanceBox {
+//   width: 331px;
+//   height: 126px;
+//   border-radius: 8px;
+//   border: 1px solid #F8CCA3;
+//   background: #FFF9F4;
+//   box-sizing: border-box;
+
+//   display: grid;
+//   grid-template-rows: 67px 18px 1fr;
+//   align-items: start;
+//   justify-items: center;
+//   padding: 12px 12px 0 12px;
+// }
+
+// .balanceNumber {
+//   min-height: 45px;
+//   height: auto;
+//   text-align: center;
+
+//   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+//   font-weight: 700;
+//   font-size: 32px;
+//   line-height: 44.02px;
+//   color: #000000;
+
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// }
+
+// .balanceNumberMessage {
+//   font-weight: 600;
+//   font-size: 16px;
+//   line-height: 22px;
+//   padding: 0 8px;
+//   word-break: break-word;
+// }
+
+// .balanceLabel {
+//   margin-top: -6px;
+//   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+//   font-weight: 500;
+//   font-size: 14px;
+//   line-height: 18px;
+//   color: #3A3B43;
+// }
+
+// .balancePeriod {
+//   margin-top: 4px;
+//   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+//   font-weight: 500;
+//   font-size: 12px;
+//   line-height: 16px;
+//   color: #6C6C6C;
+// }
+
+// .kpisRow {
+//   width: 376px;
+//   height: 52px;
+//   display: grid;
+//   grid-template-columns: 1fr 1px 1fr;
+//   column-gap: 0;
+//   align-items: center;
+// }
+
+// .kpi {
+//   display: grid;
+//   row-gap: 4px;
+//   justify-items: center;
+//   text-align: center;
+// }
+
+// .kpiNumber {
+//   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+//   font-weight: 700;
+//   font-size: 18px;
+//   line-height: 22px;
+//   color: #000000;
+// }
+
+// .kpiLabel {
+//   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+//   font-weight: 500;
+//   font-size: 12px;
+//   line-height: 16px;
+//   color: #6C6C6C;
+// }
+
+// .verticalDivider {
+//   width: 1px;
+//   height: 100%;
+//   background: #E8E8E8;
+// }
+
+// .cta {
+//   width: 309px;
+//   text-decoration: none;
+//   border-radius: 167px;
+//   border: 1.5px solid #C5B9AC;
+//   background: #FFFFFF;
+//   padding: 0 12px;
+//   display: inline-flex;
+//   align-items: center;
+//   justify-content: center;
+//   cursor: pointer;
+//   min-width: 176px;
+//   transition: background-color 0.1s ease-in-out;
+// }
+
+// .cta:hover {
+//   background-color: #FEEAD6;
+// }
+
+// .cta:disabled {
+//   cursor: not-allowed;
+//   opacity: 0.7;
+// }
+
+// .ctaText {
+//   width: 83px;
+//   min-width: 72px;
+//   height: 20px;
+//   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+//   font-weight: 600;
+//   font-size: 14px;
+//   line-height: 20px;
+//   color: #000000;
+
+//   white-space: nowrap;
+//   overflow: visible;
+//   text-overflow: clip;
+// }
+
+// .isDisabled {
+//   pointer-events: none;
+//   opacity: 0.6;
+// }
+
+// @media (max-width: 480px) {
+//   .cta {
+//     width: 100%;
+//     min-width: 176px;
+//   }
+// }
+
+// @media (max-width: 480px) {
+//   .card {
+//     padding: 16px;
+//     min-height: unset;
+//   }
+
+//   .subText,
+//   .balanceBox,
+//   .kpisRow,
+//   .cta {
+//     width: 100%;
+//   }
+
+//   .kpiNumber { font-size: 17px; }
+//   .balanceNumber { font-size: 34px; line-height: 40px; }
+
+//   .kpisRow {
+//     grid-template-columns: 1fr;
+//     row-gap: 12px;
+//     height: auto;
+//   }
+
+//   .verticalDivider { display: none; }
+//   .balancePeriod { text-align: center; white-space: nowrap; }
+// }
+
+// @media (min-width: 481px) and (max-width: 768px) {
+//   .subText,
+//   .balanceBox,
+//   .kpisRow,
+//   .cta {
+//     width: 100%;
+//   }
+// }
+
+
+
 .card {
   width: 100%;
   max-width: 424px;
@@ -9,24 +228,27 @@
   padding: 20px 24px 24px 24px;
 
   display: grid;
-  grid-template-rows: auto auto auto auto auto;
+  grid-template-rows: auto auto auto auto;
   row-gap: 16px;
 }
 
 .headTitle {
-  // width: 120px;
-  height: 24px;
+  min-height: 24px;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
   color: #000000;
+  word-break: break-word;
 }
 
 .subText {
-  width: 331px;
-  height: 44px;
+  width: 100%;
+  max-width: 331px;
+  min-height: 44px;
+  height: auto;
   margin: 0;
+
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -35,18 +257,20 @@
 }
 
 .balanceBox {
-  width: 331px;
-  height: 126px;
+  width: 100%;
+  max-width: 331px;
+  min-height: 126px;
+  height: auto;
   border-radius: 8px;
   border: 1px solid #F8CCA3;
   background: #FFF9F4;
   box-sizing: border-box;
 
   display: grid;
-  grid-template-rows: 67px 18px 1fr;
+  grid-template-rows: auto auto auto;
   align-items: start;
   justify-items: center;
-  padding: 12px 12px 0 12px;
+  padding: 12px;
 }
 
 .balanceNumber {
@@ -57,12 +281,14 @@
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 700;
   font-size: 32px;
-  line-height: 44.02px;
+  line-height: 44px;
   color: #000000;
 
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
+  word-break: break-word;
 }
 
 .balanceNumberMessage {
@@ -71,15 +297,17 @@
   line-height: 22px;
   padding: 0 8px;
   word-break: break-word;
+  white-space: normal;
 }
 
 .balanceLabel {
-  margin-top: -6px;
+  margin-top: -2px;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 500;
   font-size: 14px;
   line-height: 18px;
   color: #3A3B43;
+  text-align: center;
 }
 
 .balancePeriod {
@@ -89,59 +317,25 @@
   font-size: 12px;
   line-height: 16px;
   color: #6C6C6C;
-}
-
-.kpisRow {
-  width: 376px;
-  height: 52px;
-  display: grid;
-  grid-template-columns: 1fr 1px 1fr;
-  column-gap: 0;
-  align-items: center;
-}
-
-.kpi {
-  display: grid;
-  row-gap: 4px;
-  justify-items: center;
   text-align: center;
-}
-
-.kpiNumber {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 22px;
-  color: #000000;
-}
-
-.kpiLabel {
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 16px;
-  color: #6C6C6C;
-}
-
-.verticalDivider {
-  width: 1px;
-  height: 100%;
-  background: #E8E8E8;
+  word-break: break-word;
 }
 
 .cta {
-  width: 309px;
+  width: 100%;
+  max-width: 309px;
+  min-height: 40px;
   text-decoration: none;
   border-radius: 167px;
   border: 1.5px solid #C5B9AC;
   background: #FFFFFF;
-  padding: 0 12px;
+  padding: 10px 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  min-width: 176px;
   transition: background-color 0.1s ease-in-out;
+  box-sizing: border-box;
 }
 
 .cta:hover {
@@ -154,14 +348,15 @@
 }
 
 .ctaText {
-  width: 83px;
+  width: auto;
   min-width: 72px;
-  height: 20px;
+  height: auto;
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   font-weight: 600;
   font-size: 14px;
   line-height: 20px;
   color: #000000;
+  text-align: center;
 
   white-space: nowrap;
   overflow: visible;
@@ -173,44 +368,77 @@
   opacity: 0.6;
 }
 
-@media (max-width: 480px) {
+/* Tablet */
+@media (max-width: 768px) {
+  .card {
+    max-width: 100%;
+    min-height: auto;
+    padding: 18px 16px 20px;
+    row-gap: 14px;
+  }
+
+  .subText,
+  .balanceBox,
   .cta {
     width: 100%;
-    min-width: 176px;
+    max-width: 100%;
+  }
+
+  .balanceNumber {
+    font-size: 30px;
+    line-height: 40px;
   }
 }
 
+/* Mobile */
 @media (max-width: 480px) {
   .card {
     padding: 16px;
-    min-height: unset;
+    min-height: auto;
+    row-gap: 14px;
+  }
+
+  .headTitle {
+    font-size: 16px;
+    line-height: 24px;
   }
 
   .subText,
   .balanceBox,
-  .kpisRow,
   .cta {
     width: 100%;
+    max-width: 100%;
   }
 
-  .kpiNumber { font-size: 17px; }
-  .balanceNumber { font-size: 34px; line-height: 40px; }
-
-  .kpisRow {
-    grid-template-columns: 1fr;
-    row-gap: 12px;
-    height: auto;
+  .subText {
+    min-height: auto;
   }
 
-  .verticalDivider { display: none; }
-  .balancePeriod { text-align: center; white-space: nowrap; }
-}
+  .balanceBox {
+    min-height: 120px;
+    padding: 12px;
+  }
 
-@media (min-width: 481px) and (max-width: 768px) {
-  .subText,
-  .balanceBox,
-  .kpisRow,
+  .balanceNumber {
+    font-size: 26px;
+    line-height: 34px;
+  }
+
+  .balanceNumberMessage {
+    font-size: 15px;
+    line-height: 21px;
+  }
+
+  .balancePeriod {
+    white-space: normal;
+  }
+
   .cta {
-    width: 100%;
+    min-width: 0;
+    padding: 10px 12px;
+  }
+
+  .ctaText {
+    white-space: normal;
   }
 }
