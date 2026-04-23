@@ -449,82 +449,130 @@ const EventDetail: React.FC<IEventDetailProps> = (props) => {
         </div>
 
         <div className={styles.findPhotoWrapper}>
-          <button className={styles.findPhotoButton} onClick={() => setShowFindMyPhoto(!showFindMyPhoto)} type="button">
-            Find my Photo <span className={styles.dropdownIcon}>▼</span>
+  {/* Top row: Find my Photo (left) + Copy Link (right) */}
+  <div >
+    <button
+      className={styles.findPhotoButton}
+      onClick={() => setShowFindMyPhoto(!showFindMyPhoto)}
+      type="button"
+    >
+      Find my Photo{" "}
+      <span className={styles.dropdownIcon}>
+        {showFindMyPhoto ? "▲" : "▼"}
+      </span>
+    </button>
+  </div>
+
+  {/* Pills row — renders BELOW the button when open */}
+  {showFindMyPhoto && (
+    <div className={styles.findPhotoDropdown}>
+      <div className={styles.tabButtons}>
+        {(["profile", "upload", "take"] as const).map((tab) => (
+          <button
+            key={tab}
+            className={`${styles.tabButton} ${activeTab === tab ? styles.active : ""}`}
+            onClick={() => setActiveTab(tab)}
+            type="button"
+          >
+            {tab === "profile"
+              ? "Use Profile Picture"
+              : tab === "upload"
+              ? "Upload Photo"
+              : "Take a Picture"}
           </button>
+        ))}
+      </div>
 
-          {showFindMyPhoto && (
-            <div className={styles.findPhotoDropdown}>
-              <div className={styles.tabButtons}>
-                {(["profile", "upload", "take"] as const).map(tab => (
-                  <button
-                    key={tab}
-                    className={`${styles.tabButton} ${activeTab === tab ? styles.active : ""}`}
-                    onClick={() => setActiveTab(tab)}
-                    type="button"
-                  >
-                    {tab === "profile" ? "Use Profile Picture" : tab === "upload" ? "Upload Photo" : "Take a Picture"}
-                  </button>
-                ))}
+      <div className={styles.recognitionSection}>
+        {statusMsg && <p style={{ marginTop: 8 }}>{statusMsg}</p>}
+        {isBusy && <p>Working…</p>}
+
+        {activeTab === "profile" && (
+          <div>
+            <button
+              className={styles.captureBtn}
+              onClick={() => void useProfilePicture()}
+              type="button"
+              disabled={isBusy}
+            >
+              Use my profile picture
+            </button>
+            {profilePreview && (
+              <div style={{ marginTop: 10 }}>
+                <img
+                  src={profilePreview}
+                  alt="Profile preview"
+                  style={{ width: 96, height: 96, borderRadius: 8, objectFit: "cover" }}
+                />
               </div>
+            )}
+          </div>
+        )}
 
-              <div className={styles.recognitionSection}>
-                {statusMsg && <p style={{ marginTop: 8 }}>{statusMsg}</p>}
-                {isBusy && <p>Working…</p>}
-
-                {activeTab === "profile" && (
-                  <div>
-                    <button className={styles.captureBtn} onClick={() => void useProfilePicture()} type="button" disabled={isBusy}>
-                      Use my profile picture
-                    </button>
-
-                    {profilePreview && (
-                      <div style={{ marginTop: 10 }}>
-                        <img
-                          src={profilePreview}
-                          alt="Profile preview"
-                          style={{ width: 96, height: 96, borderRadius: 8, objectFit: "cover" }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === "upload" && (
-                  <div>
-                    <input type="file" accept=".jpg,.jpeg,.png" onChange={(e) => e.target.files && void handleUploadChange(e.target.files[0])} />
-                    {uploadedPreview && (
-                      <div style={{ marginTop: 10 }}>
-                        <img src={uploadedPreview} alt="Upload preview" style={{ width: 96, height: 96, borderRadius: 8, objectFit: "cover" }} />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === "take" && (
-                  <>
-                    <video ref={videoRef} autoPlay playsInline muted className={styles.cameraVideo} />
-                    <button className={styles.captureBtn} onClick={() => void capturePhoto()} type="button" disabled={isBusy}>
-                      Capture
-                    </button>
-
-                    {capturedPreview && (
-                      <div style={{ marginTop: 10 }}>
-                        <img src={capturedPreview} alt="Captured preview" style={{ width: 96, height: 96, borderRadius: 8, objectFit: "cover" }} />
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {matchedFileRefs !== null && (
-                  <button style={{ marginTop: 10 }} className={styles.captureBtn} onClick={clearResults} type="button">
-                    Clear results
-                  </button>
-                )}
+        {activeTab === "upload" && (
+          <div>
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png"
+              onChange={(e) =>
+                e.target.files && void handleUploadChange(e.target.files[0])
+              }
+            />
+            {uploadedPreview && (
+              <div style={{ marginTop: 10 }}>
+                <img
+                  src={uploadedPreview}
+                  alt="Upload preview"
+                  style={{ width: 96, height: 96, borderRadius: 8, objectFit: "cover" }}
+                />
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "take" && (
+          <>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className={styles.cameraVideo}
+            />
+            <button
+              className={styles.captureBtn}
+              onClick={() => void capturePhoto()}
+              type="button"
+              disabled={isBusy}
+            >
+              Capture
+            </button>
+            {capturedPreview && (
+              <div style={{ marginTop: 10 }}>
+                <img
+                  src={capturedPreview}
+                  alt="Captured preview"
+                  style={{ width: 96, height: 96, borderRadius: 8, objectFit: "cover" }}
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {matchedFileRefs !== null && (
+          <button
+            style={{ marginTop: 10 }}
+            className={styles.captureBtn}
+            onClick={clearResults}
+            type="button"
+          >
+            Clear results
+          </button>
+        )}
+      </div>
+    </div>
+  )}
+</div>
       </div>
 
       {/* GRID */}
