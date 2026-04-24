@@ -141,10 +141,93 @@
 .grid.animateIn > .card:nth-child(6){ animation-delay:480ms; }
 @media (prefers-reduced-motion: reduce){ .grid.animateIn > .card{ animation:none !important; } }
 
+// /* Responsive */
+// @media (min-width:1600px){ .wrapper{ max-width:560px; } .card{ height:248px; } }
+// @media (max-width:1280px){ .wrapper{ max-width:480px; } }
+// @media (max-width:1024px){ .wrapper{ max-width:460px; } }
+// @media (max-width:900px){  .wrapper{ max-width:100%;  } }
+// @media (max-width:600px){  .card{ height:230px; } .title{ font-size:15px; } }
+// @media (max-width:360px){  .card{ height:210px; } .heading{ font-size:15px; } .title{ font-size:14px; } }
+
+
 /* Responsive */
-@media (min-width:1600px){ .wrapper{ max-width:560px; } .card{ height:248px; } }
-@media (max-width:1280px){ .wrapper{ max-width:480px; } }
-@media (max-width:1024px){ .wrapper{ max-width:460px; } }
-@media (max-width:900px){  .wrapper{ max-width:100%;  } }
-@media (max-width:600px){  .card{ height:230px; } .title{ font-size:15px; } }
-@media (max-width:360px){  .card{ height:210px; } .heading{ font-size:15px; } .title{ font-size:14px; } }
+@media (min-width:1600px){
+  .wrapper{ max-width:560px; }
+  .card{ height:248px; }
+}
+
+@media (max-width:1280px){
+  .wrapper{ max-width:480px; }
+}
+
+@media (max-width:1024px){
+  .wrapper{ max-width:460px; }
+}
+
+/* Mobile / Responsive Horizontal Scroll */
+@media (max-width:900px){
+  .wrapper{
+    max-width:100%;
+    overflow:visible;
+  }
+
+  .grid{
+    display:grid;
+    grid-auto-flow:column;
+    grid-auto-columns:min(359px, calc(100vw - 96px));
+    grid-template-columns:none;
+    gap:16px;
+
+    overflow-x:auto;
+    overflow-y:hidden;
+
+    width:100%;
+    margin-top:20px;
+
+    padding-bottom:4px;
+    padding-right:16px;   /* right side spacing */
+    padding-left:0;
+
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+
+  .grid::-webkit-scrollbar{
+    display:none;
+  }
+
+
+
+  .card{
+    width:min(359px, calc(100vw - 96px));
+    min-width:min(359px, calc(100vw - 96px));
+    max-width:359px;
+    height:296px;
+    border-radius:8px;
+  }
+
+  .title{
+    font-size:16px;
+    line-height:22px;
+  }
+}
+
+@media (max-width:360px){
+  .grid{
+    grid-auto-columns:calc(100vw - 88px);
+  }
+
+  .card{
+    width:calc(100vw - 88px);
+    min-width:calc(100vw - 88px);
+    height:296px;
+  }
+
+  .heading{
+    font-size:15px;
+  }
+
+  .title{
+    font-size:14px;
+  }
+}
