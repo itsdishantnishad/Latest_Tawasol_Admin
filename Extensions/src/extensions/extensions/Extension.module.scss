@@ -634,6 +634,116 @@
   cursor: default;
 }
 
+
+/* ===================== MOBILE RESPONSIVE ===================== */
+@media (max-width: 480px) {
+
+  .TIRNotifOverlay {
+    place-items: start;
+    padding: 16px;
+  }
+
+  .TIRNotifModal {
+    width: 343px;
+    max-width: 100%;
+    height: 658px;
+    max-height: 100%;
+    border-radius: 12px;
+  }
+
+  .TIRNotifHeader {
+    padding: 12px 14px;
+  }
+
+  .TIRNotifTitle {
+    font-size: 16px;
+  }
+
+  .TIRMarkAll {
+    font-size: 13px;
+  }
+
+  .TIRNotifSections {
+    padding: 6px;
+  }
+
+  .TIRNotifSection {
+    padding: 6px;
+  }
+
+  .TIRNotifSectionCaption {
+    font-size: 12px;
+    margin: 6px 4px 8px;
+  }
+
+  .TIRNotifRow {
+    grid-template-columns: 36px 1fr auto;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .TIRNotifIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .TIRNotifRowTitle {
+    font-size: 13px;
+  }
+
+  .TIRNotifRowText {
+    font-size: 12px;
+  }
+
+  .TIRNotifRight {
+    gap: 4px;
+  }
+
+  .TIRNotifTime {
+    font-size: 11px;
+  }
+
+  .TIRNotifDot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .TIRNotifFooterBar {
+    padding: 6px 10px 10px;
+  }
+
+  .TIRNotifLoadMore {
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+}
+@media (max-width: 480px) {
+
+  .TIRNotifBody {
+    overflow: hidden;
+  }
+
+  .TIRNotifRowTitle,
+  .TIRNotifRowText {
+    white-space: normal;        /* line break allow */
+    overflow: visible;          /* cut na ho */
+    text-overflow: unset;       /* ellipsis hatao */
+    word-break: break-word;     /* long email bhi wrap ho */
+  }
+
+  .TIRNotifRowText {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;      /* max 2 line */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .TIRNotifRow {
+    align-items: start;         /* top align so text grow ho sake */
+  }
+}
+
 /* ==================== Onboarding ======================= */
 
 .onboardingBackdrop {
