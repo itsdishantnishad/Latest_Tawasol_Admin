@@ -11,6 +11,28 @@ import styles from "./FeatureWheel.module.scss";
 // Shared shimmer wrapper (Option 1)
 import { LoadingBoundary } from "../../Components/LoadingShimmer";
 
+
+
+const toImgSrc = (m: any): string => (typeof m === "string" ? m : m?.default || m);
+
+const featureImageById: Record<string, string> = {
+  dashboard: toImgSrc(require("../../Components/FeatureContent/assets/Dashboard.webp")),
+  gallery: toImgSrc(require("../../Components/FeatureContent/assets/ImageGallery.webp")),
+  documents: toImgSrc(require("../../Components/FeatureContent/assets/Documents.webp")),
+  events: toImgSrc(require("../../Components/FeatureContent/assets/Events.webp")),
+  employee_events: toImgSrc(require("../../Components/FeatureContent/assets/LetsCelebrate.webp")),
+  meetings: toImgSrc(require("../../Components/FeatureContent/assets/Meeting.webp")),
+  service_links: toImgSrc(require("../../Components/FeatureContent/assets/Service-Links.webp")),
+  forms: toImgSrc(require("../../Components/FeatureContent/assets/InteractiveForms.webp")),
+  offers: toImgSrc(require("../../Components/FeatureContent/assets/Offers.webp")),
+  training: toImgSrc(require("../../Components/FeatureContent/assets/Training.webp")),
+  about_dhre: toImgSrc(require("../../Components/FeatureContent/assets/AboutDHRE.webp")),
+  tasks: toImgSrc(require("../../Components/FeatureContent/assets/Tasks.webp")),
+  newsletters: toImgSrc(require("../../Components/FeatureContent/assets/newsletter.webp")),
+  beverage_menu: toImgSrc(require("../../Components/FeatureContent/assets/Services.webp")),
+};
+
+
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
 
@@ -139,6 +161,29 @@ const featureTitleContent: Record<string, { header: string; subHeader: string }>
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
   const [selectedFeature, setSelectedFeature] = useState<string>("tasks");
 
+  const mobileFeatureTrackRef = useRef<HTMLDivElement | null>(null);
+
+React.useEffect(() => {
+  const track = mobileFeatureTrackRef.current;
+  if (!track) return;
+
+  if (!window.matchMedia("(max-width: 768px)").matches) return;
+
+  const activeCard = track.querySelector(
+    `[data-feature-id="${selectedFeature}"]`
+  ) as HTMLElement | null;
+
+  if (!activeCard) return;
+
+  window.setTimeout(() => {
+    activeCard.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, 80);
+}, [selectedFeature]);
+
   // Track which LetsCelebrate tab is currently active inside FeaturedWheel
   const [celebrateTab, _setCelebrateTab] = useState<CelebrateTabKey>("birthdays");
   const celebrateTabRef = useRef<CelebrateTabKey>("birthdays");
@@ -246,6 +291,27 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
 
   const title = featureTitleContent[selectedFeature] || { header: "", subHeader: "" };
 
+  const selectedMobileIndex = Math.max(
+  0,
+  features.findIndex((f) => f.id === selectedFeature)
+);
+
+const getMobileCardClass = (index: number): string => {
+  let position = index - selectedMobileIndex;
+
+  if (position > features.length / 2) {
+    position -= features.length;
+  } else if (position < -features.length / 2) {
+    position += features.length;
+  }
+
+  if (position === 0) return styles.mobileFeatureCardSelected;
+  if (position === -1) return styles.mobileFeatureCardPrev;
+  if (position === 1) return styles.mobileFeatureCardNext;
+
+  return styles.mobileFeatureCardOther;
+};
+
   const shimmerFallback = (
     <LoadingBoundary loading={true} preset="details" count={1} ariaLabel="Loading feature content">
       <div />
@@ -260,7 +326,37 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
         </h1>
       </div>
 
-      <FeatureSelector features={features} selectedFeature={selectedFeature} onFeatureSelect={setSelectedFeature} />
+      <div className={styles.desktopFeatureSelector}>
+  <FeatureSelector
+    features={features}
+    selectedFeature={selectedFeature}
+    onFeatureSelect={setSelectedFeature}
+  />
+</div>
+
+<div className={styles.mobileFeatureSelector}>
+  <div className={styles.mobileFeatureTrack} ref={mobileFeatureTrackRef}>
+    {features.map((feature, index) => (
+      <button
+        key={feature.id}
+        type="button"
+        data-feature-id={feature.id}
+        className={`${styles.mobileFeatureCard} ${getMobileCardClass(index)}`}
+        onClick={() => setSelectedFeature(feature.id)}
+      >
+       <span
+  className={styles.mobileFeatureImage}
+  style={{
+    backgroundImage: `url(${featureImageById[feature.id] || ""})`,
+  }}
+/>
+        <span className={styles.mobileFeatureOverlay}>
+          <span>{feature.title}</span>
+        </span>
+      </button>
+    ))}
+  </div>
+</div>
 
       <FeatureTitle header={title.header} subHeader={title.subHeader} />
 
