@@ -15,6 +15,7 @@ interface IAllComponentProps {
   filteredMeetings: any[];
   context?: any;
   viewMode: "list" | "calendar";
+  isMobileView?: boolean;
 }
 
 const safeStr = (v: any) => String(v ?? "").split("\n")[0].trim();
@@ -152,7 +153,7 @@ const allSettled = async <T,>(promises: Promise<T>[]): Promise<SettledResult<T>[
   return Promise.all(
     promises.map((p) =>
       p.then((value) => ({ status: 'fulfilled', value } as const))
-       .catch((reason) => ({ status: 'rejected', reason } as const))
+        .catch((reason) => ({ status: 'rejected', reason } as const))
     )
   );
 };
@@ -163,6 +164,8 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
   filteredMeetings = [],
   context,
   viewMode,
+  isMobileView,
+
 }) => {
   const now = new Date();
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
@@ -373,8 +376,8 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
           const trJson = await trResp.json();
           const ids = Array.isArray(trJson?.value)
             ? trJson.value
-                .map((r: any) => Number(r?.TIRTrainingID))
-                .filter((n: number) => Number.isFinite(n) && n > 0)
+              .map((r: any) => Number(r?.TIRTrainingID))
+              .filter((n: number) => Number.isFinite(n) && n > 0)
             : [];
 
           if (!cancelled) setMyRegisteredTrainingIds(Array.from(new Set(ids)));
@@ -533,11 +536,11 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
 
         const meetingLink = safeStr(
           meta?.joinUrl ||
-            item?.joiningURL ||
-            item?.joiningUrl ||
-            item?.meetingLink ||
-            item?.MeetingLink ||
-            ""
+          item?.joiningURL ||
+          item?.joiningUrl ||
+          item?.meetingLink ||
+          item?.MeetingLink ||
+          ""
         );
 
         const idForKey = trainingId || idx + 1;
@@ -664,7 +667,10 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
     });
   }, [meetings, now]);
 
+  // const showCalendar = viewMode !== "list";
+
   const showCalendar = viewMode !== "list";
+  const showCardsBelowCalendar = isMobileView && showCalendar;
 
   const allCalendarItems = React.useMemo(
     () => [...allUpcomingEvents, ...allUpcomingTrainings, ...upcomingMeetings],
@@ -718,102 +724,120 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
       )}
 
       {activeTab === "all" ? (
-        showCalendar ? (
-          <CalendarViewComponent events={allCalendarItems} context={context} from="All" />
-        ) : (
-          <>
-            <h2 className={styles.heading}>Events</h2>
-            <div className={styles.eventsWrapper}>
-              {allUpcomingEvents.length > 0 ? (
-                allUpcomingEvents.map((e, i) => <EventCard key={e.id || i} {...(e as any)} />)
-              ) : (
-                <div className={styles.emptyState}>No upcoming events found.</div>
-              )}
+  <>
+    {showCalendar && (
+      <CalendarViewComponent
+        events={allCalendarItems}
+        context={context}
+        from="All"
+      />
+    )}
+
+    {(!showCalendar || showCardsBelowCalendar) && (
+      <>
+        <h2 className={styles.heading}>Events</h2>
+        <div className={styles.eventsWrapper}>
+          {allUpcomingEvents.length > 0 ? (
+            allUpcomingEvents.map((e, i) => (
+              <EventCard key={e.id || i} {...(e as any)} />
+            ))
+          ) : (
+            <div className={styles.emptyState}>
+              No upcoming events found.
             </div>
+          )}
+        </div>
 
-            <h2 className={styles.heading}>Trainings</h2>
-            <div className={styles.eventsWrapper}>
-              {allUpcomingTrainings.length > 0 ? (
-                allUpcomingTrainings.map((t, i) => (
-                  <Trainingcard
-                    key={t.id || i}
-                    {...(t as any)}
-                    instructorName={
-                      personByEmail[String((t as any)?.instructorEmail || "").trim()]?.name ||
-                      (t as any)?.instructorName
-                    }
-                    instructorImageUrl={
-                      personByEmail[String((t as any)?.instructorEmail || "").trim()]?.avatarUrl ||
-                      ((t as any)?.instructorName
-                        ? getDefaultAvatar((t as any)?.instructorName)
-                        : undefined)
-                    }
-                    context={context}
-                  />
-                ))
-              ) : (
-                <div className={styles.emptyState}>No upcoming trainings found.</div>
-              )}
+        <h2 className={styles.heading}>Trainings</h2>
+        <div className={styles.eventsWrapper}>
+          {allUpcomingTrainings.length > 0 ? (
+            allUpcomingTrainings.map((t, i) => (
+              <Trainingcard
+                key={t.id || i}
+                {...(t as any)}
+                context={context}
+              />
+            ))
+          ) : (
+            <div className={styles.emptyState}>
+              No upcoming trainings found.
             </div>
+          )}
+        </div>
 
-            <h2 className={styles.heading}>Meetings</h2>
-            <div className={styles.eventsWrapper}>
-              {upcomingMeetings.length > 0 ? (
-                upcomingMeetings.map((m, i) => <MeetingCard key={m?.id || i} event={m} />)
-              ) : (
-                <div className={styles.emptyState}>No meeting is scheduled for you</div>
-              )}
+        <h2 className={styles.heading}>Meetings</h2>
+        <div className={styles.eventsWrapper}>
+          {upcomingMeetings.length > 0 ? (
+            upcomingMeetings.map((m, i) => (
+              <MeetingCard key={m?.id || i} event={m} />
+            ))
+          ) : (
+            <div className={styles.emptyState}>
+              No meeting is scheduled for you
             </div>
-          </>
-        )
-      ) : showCalendar ? (
-        <CalendarViewComponent events={myCalendarItems} context={context} from="My" />
-      ) : (
-        <>
-          <h2 className={styles.heading}>Events</h2>
-          <div className={styles.eventsWrapper}>
-            {myUpcomingEvents.length > 0 ? (
-              myUpcomingEvents.map((e, i) => <EventCard key={e.id || i} {...(e as any)} />)
-            ) : (
-              <div className={styles.emptyState}>No registered upcoming events.</div>
-            )}
-          </div>
+          )}
+        </div>
+      </>
+    )}
+  </>
+) : (
+  <>
+    {showCalendar && (
+      <CalendarViewComponent
+        events={myCalendarItems}
+        context={context}
+        from="My"
+      />
+    )}
 
-          <h2 className={styles.heading}>Trainings</h2>
-          <div className={styles.eventsWrapper}>
-            {myUpcomingTrainings.length > 0 ? (
-              myUpcomingTrainings.map((t, i) => (
-                <Trainingcard
-                  key={t.id || i}
-                  {...(t as any)}
-                  instructorName={
-                    personByEmail[String((t as any)?.instructorEmail || "").trim()]?.name ||
-                    (t as any)?.instructorName
-                  }
-                  instructorImageUrl={
-                    personByEmail[String((t as any)?.instructorEmail || "").trim()]?.avatarUrl ||
-                    ((t as any)?.instructorName
-                      ? getDefaultAvatar((t as any)?.instructorName)
-                      : undefined)
-                  }
-                  context={context}
-                />
-              ))
-            ) : (
-              <div className={styles.emptyState}>No registered upcoming trainings.</div>
-            )}
-          </div>
+    {(!showCalendar || showCardsBelowCalendar) && (
+      <>
+        <h2 className={styles.heading}>Events</h2>
+        <div className={styles.eventsWrapper}>
+          {myUpcomingEvents.length > 0 ? (
+            myUpcomingEvents.map((e, i) => (
+              <EventCard key={e.id || i} {...(e as any)} />
+            ))
+          ) : (
+            <div className={styles.emptyState}>
+              No registered upcoming events.
+            </div>
+          )}
+        </div>
 
-          <h2 className={styles.heading}>Meetings</h2>
-          <div className={styles.eventsWrapper}>
-            {upcomingMeetings.length > 0 ? (
-              upcomingMeetings.map((m, i) => <MeetingCard key={m?.id || i} event={m} />)
-            ) : (
-              <div className={styles.emptyState}>No meeting is scheduled for you</div>
-            )}
-          </div>
-        </>
-      )}
+        <h2 className={styles.heading}>Trainings</h2>
+        <div className={styles.eventsWrapper}>
+          {myUpcomingTrainings.length > 0 ? (
+            myUpcomingTrainings.map((t, i) => (
+              <Trainingcard
+                key={t.id || i}
+                {...(t as any)}
+                context={context}
+              />
+            ))
+          ) : (
+            <div className={styles.emptyState}>
+              No registered upcoming trainings.
+            </div>
+          )}
+        </div>
+
+        <h2 className={styles.heading}>Meetings</h2>
+        <div className={styles.eventsWrapper}>
+          {upcomingMeetings.length > 0 ? (
+            upcomingMeetings.map((m, i) => (
+              <MeetingCard key={m?.id || i} event={m} />
+            ))
+          ) : (
+            <div className={styles.emptyState}>
+              No meeting is scheduled for you
+            </div>
+          )}
+        </div>
+      </>
+    )}
+  </>
+)}
     </>
   );
 };

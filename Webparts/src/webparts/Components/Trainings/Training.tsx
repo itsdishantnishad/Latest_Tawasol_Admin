@@ -19,6 +19,7 @@ export interface ITrainingmoduleProps {
   Trainings?: any[];
   viewtype?: "list" | "calendar" | string;
   context?: any;
+  isMobileView?: boolean
 }
 
 interface ILearningLink {
@@ -685,6 +686,30 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
   // ----------------------------
   const isList = String(props.viewtype || "list") === "list";
 
+
+const trainingSourceList = activeTab === "my" ? myTrainings : mappedTrainings;
+
+const today = new Date();
+const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+
+const hasTodayTraining = trainingSourceList.some((item: any) => {
+  const start = item?.start ? new Date(item.start) : item?.eventDateTime ? new Date(item.eventDateTime) : null;
+  const end = item?.end ? new Date(item.end) : start;
+
+  if (!start || isNaN(start.getTime())) return false;
+  if (!end || isNaN(end.getTime())) return false;
+
+  return start.getTime() <= todayEnd.getTime() && end.getTime() >= todayStart.getTime();
+});
+
+const todayDividerText = `${today.toLocaleString("en-US", {
+  month: "short",
+})} ${today.getDate()}${hasTodayTraining ? " • Today" : ""}`;
+
+
+
+
   return (
     <>
       {/* Tabs */}
@@ -707,7 +732,22 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
         </div>
       </div>
 
-      {isList ? (
+      {!isList && (
+  <>
+    <CalendarViewComponent
+      events={(activeTab === "my" ? myTrainings : mappedTrainings) as any}
+      context={props.context}
+    />
+
+    {props.isMobileView && (
+      <div className={styles.mobileDateDivider}>
+        <span>{todayDividerText}</span>
+      </div>
+    )}
+  </>
+)}
+
+      {(isList || props.isMobileView) && (
         <div className={styles.courseListing}>
           {Object.entries(groupedCourses).map(([month, courses]) => (
             <div key={month} className={styles.monthSection}>
@@ -740,28 +780,8 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
                   {courses.map((course) => (
                     <TrainingCard
                       key={course.trainingId || course.id}
-                      startDate={course.startDate}
-                      endDate={course.endDate}
-                      category={course.category}
-                      title={course.title}
-                      subtitle={course.subtitle}
-                      time={course.time}
-                      duration={course.duration}
-                      location={course.location}
-                      imageUrl={course.imageUrl}
-                      pageUrl={course.pageUrl}
-                      trainingId={course.trainingId}
-                      meetingLink={course.meetingLink}
+                      {...course}
                       context={props.context}
-                      // Department (Managed Metadata) - pass through if the search payload already has it
-                      // (matches TrainingPageDetail behaviour; avoids extra Site Pages reads)
-                      departmentName={
-                        (course as any).departmentName ||
-                        (course as any).department ||
-                        (course as any).TIRDepartment ||
-                        ""
-                      }
-                      departmentTaxId={(course as any).departmentTaxId || (course as any).owstaxIdTIRDepartment || ""}
                       instructorName={
                         (course.instructorEmail
                           ? personByEmail[String(course.instructorEmail || "").trim()]?.name
@@ -780,7 +800,6 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
             </div>
           ))}
 
-          {/* Learning Section (kept from old file) */}
           <div className={styles.learningSection}>
             <div className={styles.learningColumn}>
               <LearningLinks
@@ -798,11 +817,6 @@ const Training: React.FC<ITrainingmoduleProps> = (props) => {
             </div>
           </div>
         </div>
-      ) : (
-        <CalendarViewComponent
-          events={(activeTab === "my" ? myTrainings : mappedTrainings) as any}
-          context={props.context}
-        />
       )}
     </>
   );

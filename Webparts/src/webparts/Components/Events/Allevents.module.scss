@@ -1,5 +1,5 @@
-// EventCard.module.scss
-*{
+// AllEvents.module.scss
+* {
   font-family: 'Inter', sans-serif;
 }
 
@@ -15,7 +15,7 @@
   border-left: 5px solid #0E6187;
 
   &.pastEvent {
-    .actionSection{
+    .actionSection {
       .pastEventLabel {
         font-size: 14px;
         color: #3A3B43;
@@ -31,7 +31,7 @@
 }
 
 /* ✅ Missing in module typings: anchor wrapper used in EventCard.tsx */
-.cardLinkWrapper{
+.cardLinkWrapper {
   display: block;
   text-decoration: none;
   color: inherit;
@@ -160,6 +160,7 @@
       font-weight: 400;
       white-space: nowrap;
       line-height: 22px;
+
       &:last-child {
         margin-bottom: 0;
       }
@@ -262,9 +263,17 @@
   display: inline-block;
 }
 
-.swatchEvent { background: #0e6187; }
-.swatchTraining { background: #4bb86c; }
-.swatchTeams { background: #4c8ae0; }
+.swatchEvent {
+  background: #0e6187;
+}
+
+.swatchTraining {
+  background: #4bb86c;
+}
+
+.swatchTeams {
+  background: #4c8ae0;
+}
 
 /* Container styles */
 .eventsContainer {
@@ -279,7 +288,7 @@
   gap: 1em;
 }
 
-.eventsWrapper h5{
+.eventsWrapper h5 {
   color: #000;
   font-size: 18px;
   font-weight: 500;
@@ -288,7 +297,7 @@
   margin-top: 0;
 }
 
-.emptyState{
+.emptyState {
   color: #3a3b43;
   font-size: 16px;
   font-weight: 500;
@@ -303,20 +312,20 @@
    (Added to fix TS2339 SCSS module typings)
    ========================================================= */
 
-.tabContainer{
+.tabContainer {
   width: 100%;
   margin: 8px 0 18px;
 }
 
-.tabContainerInner{
+.tabContainerInner {
   display: flex;
   gap: 28px;
   align-items: center;
   justify-content: flex-start;
-  border-bottom: 1px solid rgba(0,0,0,.12);
+  border-bottom: 1px solid rgba(0, 0, 0, .12);
 }
 
-.tabButton{
+.tabButton {
   appearance: none;
   background: transparent;
   border: 0;
@@ -329,11 +338,11 @@
   position: relative;
 }
 
-.activeTab{
+.activeTab {
   color: #000;
   font-weight: 600;
 
-  &::after{
+  &::after {
     content: "";
     position: absolute;
     left: 0;
@@ -346,11 +355,11 @@
 }
 
 /* Previous Events block used in AllEvents.tsx */
-.previousEventsContainer{
+.previousEventsContainer {
   margin-top: 24px;
 }
 
-.previousHeaderRow{
+.previousHeaderRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -358,7 +367,7 @@
   gap: 12px;
 }
 
-.heading{
+.heading {
   margin: 0;
   font-size: 18px;
   line-height: 24px;
@@ -366,7 +375,7 @@
   color: #101820;
 }
 
-.viewAllButton{
+.viewAllButton {
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -377,7 +386,7 @@
   padding: 8px 0;
 }
 
-.gridLayout{
+.gridLayout {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -385,7 +394,9 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .eventCard { flex-wrap: wrap; }
+  .eventCard {
+    flex-wrap: wrap;
+  }
 
   .actionSection {
     width: 100%;
@@ -395,7 +406,7 @@
     margin-top: 16px;
   }
 
-  .gridLayout{
+  .gridLayout {
     grid-template-columns: 1fr;
   }
 }
@@ -406,7 +417,7 @@
    - Restore View All button pill style
    ========================================================= */
 
-.viewAllButton{
+.viewAllButton {
   align-items: center;
   background: radial-gradient(883.19% 262.8% at 112.5% -164.06%, #101820 0, #202d39 100%);
   border: none;
@@ -426,34 +437,279 @@
   transition: transform .2s ease, filter .2s ease;
 }
 
-.viewAllButton:hover{
+.viewAllButton:hover {
   filter: brightness(1.03);
   transform: translateY(-1px);
 }
 
-.viewAllButton:active{
+.viewAllButton:active {
   transform: translateY(0);
 }
 
-.gridLayout{
+.gridLayout {
   display: grid;
   /* Each card ~424px (Figma). Auto-fit will create 3+ columns when space allows */
-  grid-template-columns: repeat(auto-fit,minmax(360px, 450px));
+  grid-template-columns: repeat(auto-fit, minmax(360px, 450px));
   gap: 24px;
   justify-content: start;
   margin-bottom: 24px;
 }
 
+
+.noEventsCard {
+  width: 335px;
+  height: 192px;
+  max-width: calc(100vw - 40px);
+  margin: 20px auto;
+  border-radius: 12px;
+  background: #fff4ea;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.noEventsImg {
+  width: 118px;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.noEventsTitle {
+  margin: 0;
+  font-family: Inter, sans-serif;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 500;
+  color: #3A3B43;
+}
+
+.noEventsText {
+  margin: 4px 0 0;
+  font-family: Inter, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: #b0b0b0;
+  text-align: center;
+}
+
+
+
 @media (max-width: 1024px) {
-  .gridLayout{
+  .gridLayout {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 20px;
   }
 }
 
 @media (max-width: 640px) {
-  .gridLayout{
+  .gridLayout {
     grid-template-columns: 1fr;
     gap: 16px;
   }
+}
+
+
+@media (max-width: 768px) {
+  .eventsWrapper {
+    width: 100%;
+    max-width: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: block;
+    overflow: visible;
+  }
+
+  .cardLinkWrapper {
+    width: 100%;
+    max-width: none;
+    display: block;
+  }
+
+  .eventCard {
+    width: 100%;
+    max-width: none;
+    height: 322px;
+    min-height: 322px;
+    display: block;
+    box-sizing: border-box;
+    padding: 16px;
+    margin: 0 0 16px;
+    background: #ffffff;
+    border-radius: 12px;
+    border-left: 5px solid #0E6187;
+    overflow: hidden;
+    position: relative;
+    opacity: 1;
+  }
+
+  .dateSection {
+    display: none;
+  }
+
+  .contentWrapper {
+    display: block;
+    width: 100%;
+  }
+
+  .imageSection {
+    width: 100%;
+    height: 119px;
+    margin-bottom: 14px;
+  }
+
+  .eventImage {
+    width: 100%;
+    height: 119px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .statusBadge {
+    display: none;
+  }
+
+  .detailsSection {
+    max-width: 100%;
+    width: 100%;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .detailsSection .category {
+    font-family: Inter, sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 16px;
+    color: #DA291C;
+    margin: 0;
+  }
+
+  .detailsSection .title {
+    font-family: Inter, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0;
+    margin: 0;
+    color: #101820;
+  }
+
+  .locationSection {
+    width: 237px;
+    height: 40px;
+    margin-right: 0;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+
+  .locationSection .infoRow {
+    gap: 8px;
+    height: 16px;
+  }
+
+  .locationSection .infoRow .icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .locationSection .infoRow .infoText {
+    font-size: 10px;
+    line-height: 16px;
+    white-space: normal;
+  }
+
+  .actionSection {
+    width: 100%;
+    min-width: 0;
+    margin-top: 0;
+    align-items: center;
+  }
+
+  .actionSection .registerButton {
+    width: 311px;
+    max-width: 100%;
+    min-width: 0;
+    height: 36px;
+    border-radius: 167px;
+    padding-left: 12px;
+    padding-right: 12px;
+    font-size: 14px;
+    line-height: 20px;
+    margin: 0 auto;
+  }
+
+  .countdownWrapper {
+    display: none;
+  }
+
+  .noEventsCard {
+    width: 335px;
+    height: 192px;
+  }
+
+  .noEventsTitle {
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 500;
+    font-family: 'inter';
+  }
+
+  .noEventsText {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 400;
+  }
+
+  .mobileDateDivider {
+    width: 100%;
+    margin: 8px 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #101820;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0px;
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+  }
+
+  .mobileDateDivider::before,
+  .mobileDateDivider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.12);
+  }
+
+  .mobileDateDivider span {
+    padding: 0 10px;
+    white-space: nowrap;
+  }
+
+  .mobileDateDivider span {
+    position: relative;
+  }
+
+  .mobileDateDivider span::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 5px;
+    border-radius: 100px;
+    background: #CCCACA;
+  }
+
 }
