@@ -385,3 +385,140 @@
 :global(.rbc-month-view .rbc-date-cell.rbc-off-range .rbc-button-link) {
   color: rgba(0, 0, 0, 0.35) !important;
 }
+
+
+
+
+// responsive 
+
+@media (max-width: 768px) {
+
+  .wrap {
+    padding: 0 0 20px 0 !important;
+    padding-bottom: 110px !important;
+  }
+
+  .calendarHost {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
+
+  :global(.rbc-calendar) {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    background: #fff4ea !important;
+  }
+
+  :global(.rbc-month-view) {
+    width: 100% !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  :global(.rbc-header) {
+    padding: 8px 4px !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+  }
+
+  :global(.rbc-month-row) {
+    min-height: 44px !important;
+  }
+
+  :global(.rbc-date-cell) {
+    padding: 4px 0 0 6px !important;
+  }
+
+  :global(.rbc-month-view .rbc-date-cell .rbc-button-link) {
+    font-size: 14px !important;
+    line-height: 18px !important;
+  }
+
+  :global(.rbc-month-view .rbc-date-cell.rbc-now .rbc-button-link) {
+    width: 28px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+    font-size: 13px !important;
+  }
+
+  .toolbar {
+    padding: 6px 0 10px 0 !important;
+    min-height: auto !important;
+  }
+
+  .toolbarLeft {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0 !important;
+  }
+
+  .toolbarLabel {
+    font-size: 20px !important;
+    line-height: 28px !important;
+  }
+
+  .toolbarNav {
+    gap: 4px !important;
+  }
+
+  .navArrowBtn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .navArrowSvg {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .todayBtn,
+  .monthBtn {
+    display: none !important;
+  }
+
+  :global(.rbc-row-content),
+  :global(.rbc-month-row),
+  :global(.rbc-row),
+  :global(.rbc-month-view),
+  :global(.rbc-calendar) {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .pill {
+    display: none !important;
+  }
+
+  :global(.rbc-show-more) {
+    display: none !important;
+  }
+
+  .legend {
+    display: none !important;
+  }
+
+
+    .wrap {
+    padding-bottom: 8px !important;
+  }
+
+  .calendarHost {
+    margin-bottom: 0 !important;
+  }
+
+  :global(.rbc-calendar) {
+    margin-bottom: 0 !important;
+  }
+
+}

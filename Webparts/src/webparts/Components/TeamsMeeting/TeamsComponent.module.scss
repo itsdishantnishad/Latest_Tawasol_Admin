@@ -218,49 +218,360 @@
   }
 }
 
+// responsive 
 // Responsive adjustments
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
+  .eventsWrapper {
+    width: calc(100% - 32px);
+    max-width: none;
+    margin: 32px auto;
+  }
+
   .meetingCard {
-    flex-wrap: wrap;
+    width: 100%;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .dateSection {
+    width: 92px;
+    min-width: 92px;
+    height: 125px;
   }
 
   .imageSection {
-    svg {
-      width: 140px;
-      height: 80px;
+    width: 220px;
+    min-width: 220px;
+    height: 125px;
+
+    svg,
+    img {
+      width: 100%;
+      height: 125px;
+      object-fit: contain;
+    }
+  }
+
+  .contentWrapper {
+    min-width: 0;
+    flex: 1;
+    gap: 14px;
+  }
+
+  .detailsSection {
+    max-width: none;
+    min-width: 120px;
+    flex: 1;
+  }
+
+  .locationSection {
+    min-width: 160px;
+    margin-right: 0;
+    flex: 1;
+
+    .infoRow {
+      min-width: 0;
+    }
+
+    .infoText {
+      max-width: 155px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .actionSection {
+    width: 120px;
+    min-width: 120px;
+
+    .registerButton {
+      min-width: 120px;
+      height: 48px;
+      padding: 0 10px;
     }
   }
 }
 
 @media (max-width: 768px) {
-  .meetingCard {
+  .eventsContainer {
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
+
+  .eventsWrapper {
+    width: 100%;
+    max-width: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .meetingCard {
+    width: calc(100% - 32px);
+    max-width: none;
+    height: 334px;
+    min-height: 334px;
+    border-radius: 12px;
+    border-left: 5px solid #2EA8F4;
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+    background: #ffffff;
+    box-shadow: none;
+    padding: 12px;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+    display: block;
   }
 
   .dateSection {
-    width: 100%;
+    display: none;
   }
 
   .imageSection {
     width: 100%;
-    
-    svg {
+    height: 125px;
+    margin: 0 0 14px 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #EAF9FF;
+
+    svg,
+    img {
       width: 100%;
-      height: auto;
+      height: 125px;
+      border-radius: 6px;
+      object-fit: contain;
+      display: block;
+    }
+  }
+
+  .contentWrapper {
+    display: block;
+    width: 100%;
+  }
+
+  .detailsSection {
+    max-width: 100%;
+    width: 100%;
+    display: block;
+    margin: 0 0 10px 0;
+
+    .category {
+      margin: 0 0 4px 0;
+      color: #ff0000;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 400;
+      text-transform: none;
+    }
+
+    .title {
+      margin: 0;
+      color: #101820;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 600;
+      max-height: 48px;
+      overflow: hidden;
     }
   }
 
   .locationSection {
-    margin-right: 0;
+    width: 100%;
+    margin: 0;
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+
+    .infoRow {
+      height: 18px;
+      gap: 8px;
+      display: flex;
+      align-items: center;
+
+      .icon {
+        width: 14px;
+        height: 14px;
+        flex: 0 0 14px;
+        color: #DA291C;
+      }
+
+      .infoText {
+        color: #3A3B43;
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 400;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .instructorImage {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      border-radius: 50%;
+    }
   }
 
   .actionSection {
-    width: 100%;
+    width: auto;
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
 
     .registerButton {
       width: 100%;
+      height: 32px;
+      min-width: 0;
+      border-radius: 167px;
+      padding: 0 12px;
+      font-size: 14px;
+      line-height: 20px;
       justify-content: center;
     }
+  }
+}
+
+
+
+
+
+/* Fix meeting card breaking between 769px and 900px */
+@media (min-width: 769px) and (max-width: 900px) {
+  .eventsWrapper {
+    width: calc(100% - 32px);
+    max-width: none;
+    margin: 32px auto;
+  }
+
+  .meetingCard {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .dateSection {
+    width: 76px;
+    min-width: 76px;
+    height: 125px;
+  }
+
+  .dateSection .date {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .dateSection .day {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .imageSection {
+    width: 180px;
+    min-width: 180px;
+    height: 125px;
+  }
+
+  .imageSection svg,
+  .imageSection img {
+    width: 100%;
+    height: 125px;
+    object-fit: contain;
+  }
+
+  .contentWrapper {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .detailsSection {
+    flex: 1;
+    min-width: 105px;
+    max-width: 130px;
+  }
+
+  .detailsSection .category {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .detailsSection .title {
+    font-size: 18px;
+    line-height: 24px;
+    max-height: 48px;
+    overflow: hidden;
+  }
+
+  .locationSection {
+    flex: 1;
+    min-width: 115px;
+    max-width: 145px;
+    margin-right: 0;
+    gap: 10px;
+  }
+
+  .locationSection .infoRow {
+    min-width: 0;
+  }
+
+  .locationSection .infoRow .icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+  }
+
+  .locationSection .infoRow .infoText {
+    max-width: 115px;
+    font-size: 13px;
+    line-height: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .locationSection .instructorImage {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+  }
+
+  .actionSection {
+    width: 96px;
+    min-width: 96px;
+    flex: 0 0 96px;
+  }
+
+  .actionSection .registerButton {
+    width: 96px;
+    min-width: 96px;
+    height: 44px;
+    padding: 0 8px;
+    font-size: 14px;
+    line-height: 20px;
+    white-space: nowrap;
   }
 }
