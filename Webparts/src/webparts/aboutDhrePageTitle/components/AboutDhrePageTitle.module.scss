@@ -111,5 +111,66 @@
   .banner { min-height: 240px; border-radius: 14px; }
   .heading { font-size: 28px; }
   .line { width: 40vw; }
-  .copy { font-size: 15px; }
+  .copy { font-size: 14px; line-height: 22px; letter-spacing: 0.5px; font-weight: 400; padding-right: 10px; }
+}
+
+
+
+/* =========================
+   🔽 FIX: TEXT SHOULD NOT CUT
+   ========================= */
+
+@media (max-width: 480px) {
+
+  .banner {
+    width: 100%;
+    min-height: 432px; /* ✅ height ki jagah min-height */
+    height: auto;      /* ✅ allow expansion */
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* gradient same rakho */
+  .shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(255, 255, 255, 0.7) 70%,
+      rgba(255, 255, 255, 1) 100%
+    );
+  }
+
+  /* ✅ MOST IMPORTANT FIX */
+  .inner {
+    position: relative;   /* ❌ absolute hata diya */
+    bottom: auto;
+    left: auto;
+
+    width: 100%;
+    padding: 20px 16px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    margin-top: auto; /* pushes content downward */
+  }
+
+  /* optional: agar bottom sticking chahiye */
+  .banner {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .heading {
+    font-size: 26px;
+  }
+
+  .copy {
+    font-size: 14px;
+    line-height: 22px;
+  }
 }

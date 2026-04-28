@@ -160,3 +160,197 @@
   width: 100%;
   margin-block: 100px;
 }
+
+
+
+
+
+/* responsive */
+
+.desktopFeatureSelector {
+  display: block;
+}
+
+.mobileFeatureSelector {
+  display: none;
+}
+
+
+@media (max-width: 768px) {
+  .featureWheelContainer {
+    zoom: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+
+  .headingSection {
+    margin-top: 24px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .desktopFeatureSelector {
+    display: none !important;
+  }
+
+  .mobileFeatureSelector {
+    display: block !important;
+    width: 100vw !important;
+    margin-left: 50% !important;
+    transform: translateX(-50%) !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    padding: 20px 0 40px !important; /* Increased bottom padding for the shadow */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-x;
+
+    // new 
+    scroll-behavior: smooth !important;
+  
+    will-change: scroll-position;
+    
+    scroll-snap-stop: always !important;
+
+  }
+
+  .mobileFeatureSelector::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobileFeatureTrack {
+    width: max-content !important;
+    min-width: 100vw !important;
+    height: 240px !important; /* Sufficient height to prevent clipping */
+    display: flex !important;
+    align-items: center !important; /* CHANGED: Centers cards so growth is balanced */
+    justify-content: flex-start !important;
+    padding: 0 calc((100vw - 147px) / 2) !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    scroll-snap-type: x mandatory;
+
+    // new 
+    transform: translate3d(0, 0, 0);
+  }
+
+  .mobileFeatureCard {
+    position: relative !important;
+    flex: 0 0 121px !important;
+    width: 121px !important;
+    height: 152px !important;
+    margin: 0 -10px !important; /* Slight overlap for the fan effect */
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    cursor: pointer !important;
+    overflow: visible !important;
+    scroll-snap-align: center;
+    transition: all 0.3s ease; /* Smooth transition when scrolling */
+
+    // new 
+
+    transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.1) !important;
+  }
+
+  .mobileFeatureImage {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 8px !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .mobileFeatureOverlay {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 56px !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 8px 14px !important;
+    box-sizing: border-box !important;
+    border-radius: 0 0 8px 8px !important;
+    background: linear-gradient(
+      180deg,
+      rgba(16, 24, 32, 0) 0%,
+      rgba(16, 24, 32, 0.68) 100%
+    ) !important;
+    pointer-events: none;
+  }
+
+  .mobileFeatureOverlay span {
+    color: #ffffff !important;
+    font-family: "Inter", sans-serif !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  /* ── SELECTED card ── */
+  .mobileFeatureCardSelected {
+    position: relative !important;
+    flex: 0 0 147px !important;
+    width: 147px !important;
+    height: 184px !important;
+    z-index: 10 !important; /* Stays on top of everything */
+    margin: 0 5px !important;
+    transform: scale(1) !important; 
+    overflow: visible !important;
+
+   // new 
+
+   backface-visibility: hidden;
+   -webkit-font-smoothing: subpixel-antialiased;
+
+
+  }
+
+  .mobileFeatureCardSelected .mobileFeatureImage {
+    width: 147px !important;
+    height: 184px !important;
+    border-radius: 12px !important;
+    border: 5px solid #dc6408 !important; /* Thick orange border */
+    box-shadow: 0px 13.65px 27.3px 0px #e38e32 !important; /* Orange glow */
+  }
+
+  .mobileFeatureCardSelected .mobileFeatureOverlay {
+    border-radius: 0 0 12px 12px !important;
+    height: 60px !important;
+  }
+
+  /* ── PREV card (Tilted left) ── */
+  .mobileFeatureCardPrev {
+    z-index: 5 !important;
+    transform: rotate(-4deg) translateY(5px) !important;
+    opacity: 0.85 !important;
+  }
+
+  /* ── NEXT card (Tilted right) ── */
+  .mobileFeatureCardNext {
+    z-index: 5 !important;
+    transform: rotate(4deg) translateY(5px) !important;
+    opacity: 0.85 !important;
+  }
+
+  /* ── OTHER cards ── */
+  .mobileFeatureCardOther {
+    z-index: 1 !important;
+    transform: scale(0.9) !important;
+    opacity: 0.6 !important;
+  }
+
+  .titleContainer {
+    margin-top: 15px !important;
+  }
+}
+

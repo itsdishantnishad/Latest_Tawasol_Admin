@@ -302,3 +302,162 @@
 
 
 
+/*MOBILE RESPONSIVE FIX */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 0 16px 90px 16px;
+  }
+
+  .categoriesContainer {
+    margin-top: 16px;
+    margin-left: 0;
+    gap: 28px;
+  }
+
+  .categoryBlock {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .fullRow,
+  .inlineRow {
+    width: 100%;
+  }
+
+  .imgWrap {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 16px;
+    border-radius: 8px;
+    background: #FFE4C8;
+    overflow: hidden;
+  }
+
+  .ellipseImg {
+    display: none;
+  }
+
+  .menuTitle {
+    font-size: 24px;
+    line-height: 32px;
+    margin-bottom: 8px;
+  }
+
+  .menuRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: 0;
+    max-width: 100%;
+    margin-bottom: 0;
+  }
+
+  .menuCol {
+    row-gap: 0;
+  }
+
+  .menuItem {
+    font-size: 14px;
+    line-height: 20px;
+    max-width: 100%;
+    padding: 8px 0 0 0;
+  }
+
+  .menuItem::after {
+    max-width: 100%;
+    margin-top: 10px;
+  }
+
+  .hotImg,
+  .teaImg,
+  .milkImg,
+  .coldImg,
+  .hotImg1 {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .milkImg1,
+  .coldImg1 {
+    margin-top: 0;
+  }
+
+@media (max-width: 768px) {
+  .hotImg,
+  .hotImg1 {
+    width: 274.53px;
+    height: 198.88px;
+    max-width: 100%;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+
+  .milkImg,
+  .milkImg1 {
+    width: 225.45px;
+    height: 193.88px;
+    max-width: 100%;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+
+  .teaImg {
+    width: 252.12px;
+    height: 208.47px;
+    max-width: 100%;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+
+  .coldImg,
+  .coldImg1 {
+    width: 179px;
+    height: 180px;
+    max-width: 100%;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+}
+
+  .chatBotFab {
+    right: 16px;
+    bottom: 88px;
+    width: 72px;
+    height: 64px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wrapper {
+    padding: 0 16px 90px 16px;
+  }
+
+  .categoriesContainer {
+    gap: 24px;
+  }
+
+  .imgWrap {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .menuRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 12px;
+  }
+
+  .menuTitle {
+    font-size: 22px;
+    line-height: 30px;
+  }
+
+  .menuItem {
+    font-size: 13px;
+    line-height: 19px;
+  }
+}

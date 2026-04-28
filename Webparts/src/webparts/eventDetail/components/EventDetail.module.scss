@@ -1,3 +1,99 @@
+// .card {
+//   background: #ffffff;
+//   padding: 32px;
+//   border-radius: 24px;
+//   box-shadow: 0px 8px 28px rgba(0, 0, 0, 0.08);
+//   max-width: 520px;
+//   margin: 0 auto;
+//   font-family: "Segoe UI", sans-serif;
+// }
+
+// .tagsRow {
+//   display: flex;
+//   align-items: center;
+//   gap: 14px;
+//   margin-bottom: 20px;
+// }
+
+// .tagPrimary {
+//   color: #fff;
+//   padding: 6px 14px;
+//   border-radius: 6px;
+//   font-size: 14px;
+//   font-weight: 600;
+// }
+
+// .tagUpcoming {
+//   background: #d94136;
+// }
+
+// .tagRegistered {
+//   background: #10b981; /* same “Registered” feel as outer cards */
+// }
+
+// .tagPast {
+//   background: #3a3b43;
+// }
+
+// .tagSecondary {
+//   color: #d94136;
+//   font-size: 15px;
+//   font-weight: 500;
+// }
+
+// .title {
+//   font-size: 26px;
+//   font-weight: 700;
+//   color: #000;
+//   margin-bottom: 28px;
+//   line-height: 1.3;
+// }
+
+// .row {
+//   display: flex;
+//   align-items: center;
+//   gap: 10px;
+//   margin: 12px 0;
+// }
+
+// .icon {
+//   width: 22px;
+//   height: 22px;
+//   display: inline-flex;
+//   color: #da291c;
+// }
+
+// .icon svg {
+//   width: 100%;
+//   height: 100%;
+// }
+
+// .text {
+//   color: #333;
+//   font-size: 16px;
+// }
+
+// .separator {
+//   color: #bbb;
+//   margin: 0 8px;
+// }
+
+// /* ✅ Past/live label (outer “Past event” style equivalent) */
+// .pastEventLabel {
+//   font-size: 14px;
+//   line-height: 20px;
+//   font-weight: 500;
+//   color: #3a3b43;
+// }
+
+// .liveLabel {
+//   font-size: 14px;
+//   line-height: 20px;
+//   font-weight: 600;
+//   color: #da291c;
+// }
+
+
 .card {
   background: #ffffff;
   padding: 32px;
@@ -5,7 +101,7 @@
   box-shadow: 0px 8px 28px rgba(0, 0, 0, 0.08);
   max-width: 520px;
   margin: 0 auto;
-  font-family: "Segoe UI", sans-serif;
+  font-family: "Inter", "Segoe UI", sans-serif;
 }
 
 .tagsRow {
@@ -28,7 +124,7 @@
 }
 
 .tagRegistered {
-  background: #10b981; /* same “Registered” feel as outer cards */
+  background: #10b981;
 }
 
 .tagPast {
@@ -71,6 +167,8 @@
 .text {
   color: #333;
   font-size: 16px;
+  font-weight: 500;
+  font-family: "Inter", "Segoe UI", sans-serif;
 }
 
 .separator {
@@ -78,7 +176,6 @@
   margin: 0 8px;
 }
 
-/* ✅ Past/live label (outer “Past event” style equivalent) */
 .pastEventLabel {
   font-size: 14px;
   line-height: 20px;
@@ -91,4 +188,192 @@
   line-height: 20px;
   font-weight: 600;
   color: #da291c;
+}
+
+/* =========================================================
+   SharePoint Page Content Styling
+   This styles Event Highlights / More Info coming from page
+   ========================================================= */
+
+:global([data-automation-id="textBox"]) {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  color: #333333;
+}
+
+/* Event Highlights, More Info headings */
+:global([data-automation-id="textBox"] h1),
+:global([data-automation-id="textBox"] h2),
+:global([data-automation-id="textBox"] h3),
+:global([data-automation-id="textBox"] h4) {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: 0px;
+  color: #111111;
+  margin: 0 0 16px;
+  padding: 0;
+  vertical-align: middle;
+}
+
+/* Paragraph text */
+:global([data-automation-id="textBox"] p) {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0px;
+  color: #333333;
+  margin: 0 0 18px;
+  padding: 0;
+}
+
+/* Bold text like Team Challenges: */
+:global([data-automation-id="textBox"] strong),
+:global([data-automation-id="textBox"] b) {
+  font-weight: 700;
+  color: #111111;
+}
+
+/* Lists */
+:global([data-automation-id="textBox"] ul),
+:global([data-automation-id="textBox"] ol) {
+  margin: 8px 0 18px;
+  padding-left: 18px;
+}
+
+:global([data-automation-id="textBox"] li) {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  color: #333333;
+  margin-bottom: 6px;
+}
+
+/* Remove extra SharePoint spacing inside text webpart */
+:global([data-automation-id="textBox"] > div) {
+  margin: 0;
+  padding: 0;
+}
+
+:global([data-automation-id="textBox"] span) {
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+/* =========================================================
+   Mobile
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .card {
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: none;
+    max-width: none;
+    margin: 0;
+    font-family: "Inter", "Segoe UI", sans-serif;
+  }
+
+  .tagsRow {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .tagPrimary {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 600;
+  }
+
+  .tagSecondary {
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 500;
+  }
+
+  .title {
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .row {
+    gap: 6px;
+    margin: 8px 0;
+  }
+
+  .icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .text {
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 500;
+  }
+
+  .pastEventLabel,
+  .liveLabel {
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  /* SharePoint Page Content Mobile */
+  :global([data-automation-id="textBox"]) {
+    font-family: "Inter", "Segoe UI", sans-serif;
+    color: #333333;
+  }
+
+  :global([data-automation-id="textBox"] h1),
+  :global([data-automation-id="textBox"] h2),
+  :global([data-automation-id="textBox"] h3),
+  :global([data-automation-id="textBox"] h4) {
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 0px;
+    color: #111111;
+    margin: 0 0 16px;
+    padding: 0;
+    vertical-align: middle;
+  }
+
+  :global([data-automation-id="textBox"] p) {
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0px;
+    color: #333333;
+    margin: 0 0 18px;
+    padding: 0;
+  }
+
+  :global([data-automation-id="textBox"] strong),
+  :global([data-automation-id="textBox"] b) {
+    font-weight: 700;
+    color: #111111;
+  }
+
+  :global([data-automation-id="textBox"] ul),
+  :global([data-automation-id="textBox"] ol) {
+    margin: 8px 0 18px;
+    padding-left: 18px;
+  }
+
+  :global([data-automation-id="textBox"] li) {
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: #333333;
+    margin-bottom: 6px;
+  }
 }

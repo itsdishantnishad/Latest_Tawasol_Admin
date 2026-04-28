@@ -24,6 +24,7 @@
   .organizerRow {
     display: flex;
     gap: 10px;
+    margin-bottom: 14px;
 
     .organizerAvatar {
       width: 40px;
@@ -99,11 +100,13 @@ p {
   padding: 8px 14px;
   font-size: 14px;
   line-height: 20px;
+  cursor: pointer;
   width: -webkit-fill-available;
 }
 
 .joinButton {
   background-color: #28a745 !important; // Green for join
+  cursor: pointer;
 }
 
 .feedbackButton {

@@ -551,6 +551,7 @@
   height: 200px;
   border-radius: 12px;
   object-fit: cover;
+  margin-top: 8px;
 }
 
 .captureBtn {
@@ -563,6 +564,7 @@
   font-size: 15px;
   cursor: pointer;
   transition: 0.2s ease;
+  margin-top: 8px;
 }
 
 .captureBtn:hover {
@@ -977,7 +979,7 @@
   }
 
   .titleSection {
-    text-align: left;
+    text-align: center;
   }
 
   .eventTitle {
@@ -1046,6 +1048,7 @@
     width: 100%;
     max-width: 320px;
     height: auto;
+    margin-top: 8px;
   }
 
   .profileConfirmBox {
@@ -1100,5 +1103,120 @@
   .carouselBtn img {
     width: 28px;
     height: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .titleSection {
+    text-align: center;   
+  }
+}
+
+@media (max-width: 480px) {
+
+  // Wrapper becomes a column stack, left-aligned
+  .findPhotoWrapper {
+    display: flex;
+    flex-direction: column;        
+    align-items: flex-start;       
+    justify-content: flex-start;
+    width: 100%;
+    gap: 12px;                     
+    margin-bottom: 20px;
+  }
+
+  
+  .findPhotoButton {
+    width: auto;
+    height: 24px;
+    padding: 0;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;   // ← left align text
+    color: #3a3a3a;
+    text-align: left;
+  }
+
+  .findPhotoDropdown {
+    position: static !important;   
+    transform: none !important;
+    left: auto !important;
+    top: auto !important;
+    box-shadow: none;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    width: 100%;
+    margin-top: 0;
+    animation: none;
+  }
+
+  .dropdownContent {
+    gap: 0;
+    width: 100%;
+  }
+
+  // Pills row
+  .tabButtons {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 4px;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    width: 100%;
+    height: 40px;
+    align-items: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .tabButton {
+    flex: 0 0 auto;
+    height: 40px;
+    padding: 0 16px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: 360px;
+    background: transparent;
+    border: 1px solid #e0c9b0;
+    color: #3a3a3a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &.active {
+      background: radial-gradient(
+        245.31% 848.44% at 112.5% -164.06%,
+        #DDA160 0%,
+        #FFDBB4 100%
+      );
+      border: 1px solid #F0BB82;
+      box-shadow: 0px -2px 4px 0px #FED3A4 inset;
+      color: #3a3a3a;
+    }
+
+    &:hover:not(.active) {
+      background: radial-gradient(
+        245.31% 848.44% at 112.5% -164.06%,
+        #DDA160 0%,
+        #FFDBB4 100%
+      );
+      border: 1px solid #F0BB82;
+      box-shadow: 0px -2px 4px 0px #FED3A4 inset;
+      color: #3a3a3a;
+    }
   }
 }

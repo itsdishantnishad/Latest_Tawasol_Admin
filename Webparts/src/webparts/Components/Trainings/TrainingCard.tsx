@@ -1,6 +1,8 @@
-import * as React from 'react';
-import styles from './TrainingCard.module.scss';
+import * as React from "react";
+import styles from "./TrainingCard.module.scss";
+import FeedbackModal from "./FeedBack/FeedbackModal";
 import { SPFI, spfi, SPFx } from "@pnp/sp";
+
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
@@ -13,10 +15,47 @@ function normalizeApprovalStatus(v: any): "none" | "pending" | "approved" | "rej
   if (raw.includes("approve")) return "approved";
   if (raw.includes("reject")) return "rejected";
   if (raw.includes("pend")) return "pending";
-  // default: treat unknown as pending (safer than enabling join)
   return "pending";
 }
 
+const safeStr = (v: any): string => String(v ?? "").trim();
+
+const extractISODate = (value: any): string => {
+  const s = String(value ?? "").trim();
+  if (!s) return "";
+  return s.split("\n").pop()?.trim() || "";
+};
+
+const addDays = (d: Date, days: number): Date => {
+  const x = new Date(d.getTime());
+  x.setDate(x.getDate() + days);
+  return x;
+};
+
+const safeUrlFromHyperlinkField = (v: any): string => {
+  if (!v) return "";
+  if (typeof v === "string") return v;
+  return String(v?.Url ?? v?.url ?? "").trim();
+};
+
+const extractTermGuid = (raw?: any): string => {
+  const s = String(raw ?? "");
+  const m = s.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+  return m ? m[0] : "";
+};
+
+const parseTaxonomyLabel = (raw?: any): string => {
+  if (!raw) return "";
+  if (typeof raw === "string") {
+    const s = raw.trim();
+    // e.g. "-1;#Human Capital|GUID" or "Human Capital|GUID" or "Human Capital"
+    const after = s.includes(";#") ? s.split(";#").pop() || "" : s;
+    const label = after.includes("|") ? after.split("|")[0] : after;
+    return label.trim();
+  }
+
+  return safeStr(raw?.Label ?? raw?.label ?? raw?.TermLabel ?? raw?.termLabel);
+};
 
 export interface TrainingCardProps {
   startDate: string;
@@ -29,25 +68,35 @@ export interface TrainingCardProps {
   location: string;
   imageUrl: string;
   pageUrl: string;
-  trainingId: number;
-  meetingLink: string;
+  trainingId: number; // Site Pages item ID
+  meetingLink: string; // usually Site Pages Field: TIRJoiningURL
   context: any; // WebPartContext
   instructorName?: string;
   instructorTitle?: string;
   instructorImageUrl?: string;
+
+  // Optional: if the parent already has Department from Search/RLDAS,
+  // pass it so we don't need an extra Site Pages fetch.
+  departmentName?: string;
+  departmentTaxId?: string;
+  department?: string;
 }
 
 interface TrainingCardState {
   isSubmitting: boolean;
   errorMessage: string;
   approvalStatus: "none" | "pending" | "approved" | "rejected";
-  isEventCompleted: boolean;
   registeredItemId: number | null;
   isLoading: boolean;
+  joinUrl: string;
+  countdown: string;
+  isFeedbackOpen: boolean;
+  isFeedbackSubmitted: boolean;
 }
 
 class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState> {
   private sp: SPFI;
+  private countdownTimer: number | null = null;
 
   constructor(props: TrainingCardProps) {
     super(props);
@@ -58,36 +107,109 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
       isSubmitting: false,
       errorMessage: "",
       approvalStatus: "none",
-      isEventCompleted: false,
       registeredItemId: null,
       isLoading: true,
+      joinUrl: String(props.meetingLink || "").trim(),
+      countdown: "",
+      isFeedbackOpen: false,
+      isFeedbackSubmitted: false,
     };
   }
 
   public componentDidMount(): void {
-    this.checkExistingRequest();
+    this.startCountdown();
+    void this.initialize();
+  }
+
+  public componentDidUpdate(prevProps: TrainingCardProps): void {
+    if (prevProps.trainingId !== this.props.trainingId || prevProps.meetingLink !== this.props.meetingLink) {
+      void this.initialize();
+    }
+
+    if (prevProps.startDate !== this.props.startDate || prevProps.endDate !== this.props.endDate) {
+      this.startCountdown();
+    }
+  }
+
+  public componentWillUnmount(): void {
+    this.stopCountdown();
   }
 
   // -----------------------------------------
   // Utils
   // -----------------------------------------
-  private isEventCompleted = (endDateStr: string): boolean => {
-    if (!endDateStr) return false;
-    return new Date().getTime() > new Date(endDateStr).getTime();
+  private getStartEndDates = (): { start: Date | null; end: Date | null } => {
+    const startISO = extractISODate(this.props.startDate);
+    const endISO = extractISODate(this.props.endDate);
+
+    const s = startISO ? new Date(startISO) : null;
+    const e = endISO ? new Date(endISO) : null;
+
+    return {
+      start: s && !isNaN(s.getTime()) ? s : null,
+      end: e && !isNaN(e.getTime()) ? e : null,
+    };
+  };
+
+  private isEventCompleted = (): boolean => {
+    const { end } = this.getStartEndDates();
+    return !!end && new Date().getTime() > end.getTime();
   };
 
   // -----------------------------------------
-  // Check existing registration
+  // Countdown (same UX as Events: Days / HH:MM:SS / MM:SS)
   // -----------------------------------------
-  private checkExistingRequest = async (): Promise<void> => {
-    const { trainingId, endDate, context } = this.props;
+  private pad2 = (n: number): string => String(n).padStart(2, "0");
 
-    if (!trainingId) {
-      this.setState({ isLoading: false });
+  private startCountdown = (): void => {
+    this.stopCountdown();
+    this.updateCountdown();
+    this.countdownTimer = window.setInterval(this.updateCountdown, 1000);
+  };
+
+  private stopCountdown = (): void => {
+    if (this.countdownTimer) {
+      window.clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
+  };
+
+  private updateCountdown = (): void => {
+    const { start } = this.getStartEndDates();
+
+    // If event is completed or we can't parse start, hide countdown
+    if (!start || this.isEventCompleted()) {
+      if (this.state.countdown) this.setState({ countdown: "" });
       return;
     }
 
-    let currentUserId: number = (context?.pageContext as any)?.legacyPageContext?.userId || 0;
+    const now = new Date();
+    const diff = start.getTime() - now.getTime();
+    if (diff <= 0) {
+      if (this.state.countdown) this.setState({ countdown: "" });
+      return;
+    }
+
+    const daysRemaining = diff / (1000 * 60 * 60 * 24);
+    const days = Math.floor(daysRemaining);
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    let next = "";
+    if (days > 0) {
+      next = `${days} Day${days > 1 ? "s" : ""}`;
+    } else if (hours > 0) {
+      next = `${this.pad2(hours)}:${this.pad2(minutes)}:${this.pad2(seconds)}`;
+    } else {
+      next = `${this.pad2(minutes)}:${this.pad2(seconds)}`;
+    }
+
+    if (next !== this.state.countdown) this.setState({ countdown: next });
+  };
+
+  private getCurrentUserId = async (): Promise<number> => {
+    let currentUserId: number = (this.props.context?.pageContext as any)?.legacyPageContext?.userId || 0;
 
     if (!currentUserId) {
       try {
@@ -98,38 +220,200 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
       }
     }
 
+    return Number(currentUserId || 0);
+  };
+
+  // -----------------------------------------
+  // Department: Site Pages -> Registered Training (TIRDepartment)
+  // NOTE: Uses ONLY internal name: TIRDepartment
+  // -----------------------------------------
+  private setDepartmentOnRegisteredTraining = async (
+    registrationId: number,
+    trainingPageId: number
+  ): Promise<void> => {
+    try {
+      // 0) Prefer Department coming from parent (Search/RLDAS) when available
+      let label = safeStr(this.props.departmentName || this.props.department);
+      let guid = extractTermGuid(this.props.departmentTaxId);
+
+      // 1) If still missing, read taxonomy from Site Pages item
+      // NOTE:
+      // "owstaxIdTIRDepartment" is NOT a real list field on the Items (OData) endpoint.
+      // That key only appears in some responses like RenderListDataAsStream / Search.
+      // Selecting it causes 400: "The field or property 'owstaxIdTIRDepartment' does not exist." (your console screenshot)
+      let page: any = null;
+      if (!label || !guid) {
+        page = await this.sp.web.lists
+          .getByTitle("Site Pages")
+          .items.getById(trainingPageId)
+          .select("TIRDepartment")();
+
+        // TIRDepartment usually comes back as "Label|GUID" (or "-1;#Label|GUID").
+        // Sometimes it can be an object with { Label, TermGuid } depending on how it was fetched.
+        if (!label) label = parseTaxonomyLabel(page?.TIRDepartment);
+        if (!guid) {
+          guid =
+            extractTermGuid(page?.TIRDepartment?.TermGuid) ||
+            extractTermGuid(page?.TIRDepartment) ||
+            extractTermGuid(page?.TIRDepartment?.termGuid);
+        }
+      }
+
+      // 2) Text fallback for label (FieldValuesAsText gives label nicely)
+      if (!label) {
+        try {
+          const text: any = await this.sp.web.lists
+            .getByTitle("Site Pages")
+            .items.getById(trainingPageId)
+            .fieldValuesAsText();
+
+          label = safeStr(text?.TIRDepartment);
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!label || !guid) {
+        console.warn("[TrainingCard] Department not available on Site Pages item.", {
+          trainingPageId,
+          label,
+          guid,
+          keys: Object.keys(page || {}),
+        });
+        return;
+      }
+
+      const regItem = this.sp.web.lists.getByTitle("Registered Training").items.getById(registrationId);
+
+      // Same robust approach as TrainingPageDetail:
+      //  - Try multiple possible internal names
+      //  - Try multiple value formats (taxonomy single vs text fallback)
+      const fieldCandidates = ["TIRDepartment", "Department_x0020_Name", "DepartmentName", "Department"];
+      const valueCandidates = [`-1;#${label}|${guid}`, `${label}|${guid}`, label];
+
+      for (const fieldName of fieldCandidates) {
+        for (const fieldValue of valueCandidates) {
+          try {
+            const res: any = await regItem.validateUpdateListItem([
+              { FieldName: fieldName, FieldValue: fieldValue },
+            ]);
+
+            const hasException = Array.isArray(res) && res.some((r) => r?.HasException);
+            if (!hasException) return; // ✅ success
+          } catch {
+            // keep trying
+          }
+        }
+      }
+
+      console.warn("[TrainingCard] Failed to set TIRDepartment on Registered Training item.", {
+        registrationId,
+        trainingPageId,
+        label,
+        guid,
+      });
+    } catch (e) {
+      console.warn("[TrainingCard] Department update failed.", e);
+    }
+  };
+
+  // -----------------------------------------
+  // Init: joinUrl + existing request
+  // -----------------------------------------
+  private initialize = async (): Promise<void> => {
+    const { trainingId, meetingLink } = this.props;
+
+    if (!trainingId) {
+      this.setState({ isLoading: false });
+      return;
+    }
+
+    this.setState({ isLoading: true, errorMessage: "", isFeedbackSubmitted: false });
+
+    // Prefer join URL from props, else fetch from Site Pages (Field: TIRJoiningURL)
+    let joinUrl = String(meetingLink || "").trim();
+    if (!joinUrl) {
+      try {
+        const page: any = await this.sp.web.lists
+          .getByTitle("Site Pages")
+          .items.getById(trainingId)
+          .select("TIRJoiningURL")();
+
+        joinUrl = safeUrlFromHyperlinkField(page?.TIRJoiningURL);
+      } catch {
+        // ignore
+      }
+    }
+
+    this.setState({ joinUrl });
+
+    await this.checkExistingRequest();
+    await this.checkFeedbackSubmitted();
+  };
+
+  // -----------------------------------------
+  // Check if feedback already submitted (Training Feedback list)
+  // One feedback per user per training
+  // -----------------------------------------
+  private checkFeedbackSubmitted = async (): Promise<void> => {
+    const { trainingId } = this.props;
+    if (!trainingId) return;
+
+    try {
+      const userId = await this.getCurrentUserId();
+      if (!userId) return;
+
+      const rows: any[] = await this.sp.web.lists
+        .getByTitle("Training Feedback")
+        .items.select("Id")
+        .filter(`AuthorId eq ${userId} and TIRTrainingID eq ${trainingId}`)
+        .top(1)();
+
+      this.setState({ isFeedbackSubmitted: Array.isArray(rows) && rows.length > 0 });
+    } catch {
+      // If check fails, don't block the user (modal does its own server-side duplicate check)
+      this.setState({ isFeedbackSubmitted: false });
+    }
+  };
+
+  // -----------------------------------------
+  // Check existing registration
+  // -----------------------------------------
+  private checkExistingRequest = async (): Promise<void> => {
+    const { trainingId } = this.props;
+    if (!trainingId) {
+      this.setState({ isLoading: false });
+      return;
+    }
+
+    const currentUserId = await this.getCurrentUserId();
+
     try {
       const existingItems = await this.sp.web.lists
         .getByTitle("Registered Training")
-        .items.filter(
-          `TIRTrainingID eq ${trainingId} and AuthorId eq ${currentUserId}`
-        )
+        .items.select("Id", "TIRApproval", "Created")
+        .filter(`TIRTrainingID eq ${trainingId} and AuthorId eq ${currentUserId}`)
         .orderBy("Created", false)
         .top(1)();
 
-      const completed = this.isEventCompleted(endDate);
-
       if (existingItems.length > 0) {
         const registeredItem = existingItems[0];
-
-        // Get approval status from the field
-        const approvalValue = registeredItem.TIRApproval || registeredItem.TIRApprovalChoice || "Pending";
-        const status = normalizeApprovalStatus(approvalValue);
+        const status = normalizeApprovalStatus(registeredItem?.TIRApproval);
 
         this.setState({
           approvalStatus: status,
           registeredItemId: registeredItem?.Id ?? null,
-          isEventCompleted: completed,
           isLoading: false,
         });
       } else {
         this.setState({
           approvalStatus: "none",
-          isEventCompleted: completed,
+          registeredItemId: null,
           isLoading: false,
         });
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Check existing request error:", error);
       this.setState({
         isLoading: false,
@@ -139,29 +423,20 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
   };
 
   // -----------------------------------------
-  // Request approval
+  // Request approval (+ Department + Stage)
   // -----------------------------------------
   private handleRequestApproval = async (e: React.MouseEvent): Promise<void> => {
-    e.preventDefault(); // Prevent navigation
+    e.preventDefault();
     e.stopPropagation();
 
-    const { trainingId, title, context } = this.props;
+    const { trainingId, title } = this.props;
 
     if (!trainingId) {
-      this.setState({ errorMessage: "No training data available" });
+      this.setState({ errorMessage: "Training ID not found." });
       return;
     }
 
-    let currentUserId: number = (context?.pageContext as any)?.legacyPageContext?.userId || 0;
-
-    if (!currentUserId) {
-      try {
-        const me: any = await this.sp.web.currentUser.select("Id")();
-        currentUserId = Number(me?.Id || 0);
-      } catch {
-        // ignore
-      }
-    }
+    const currentUserId = await this.getCurrentUserId();
 
     this.setState({ isSubmitting: true, errorMessage: "" });
 
@@ -169,16 +444,14 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
       // Check again for existing registration before submitting
       const existingItems = await this.sp.web.lists
         .getByTitle("Registered Training")
-        .items.filter(
-          `TIRTrainingID eq ${trainingId} and AuthorId eq ${currentUserId}`
-        )
+        .items.select("Id", "TIRApproval", "Created")
+        .filter(`TIRTrainingID eq ${trainingId} and AuthorId eq ${currentUserId}`)
+        .orderBy("Created", false)
         .top(1)();
 
-      // If registration already exists, prevent duplicate
       if (existingItems.length > 0) {
         const existingItem = existingItems[0];
-        const approvalValue = existingItem.TIRApproval || existingItem.TIRApprovalChoice || "Pending";
-        const status = normalizeApprovalStatus(approvalValue);
+        const status = normalizeApprovalStatus(existingItem?.TIRApproval);
 
         this.setState({
           isSubmitting: false,
@@ -189,22 +462,43 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
         return;
       }
 
-      // No existing registration found, proceed with new submission
-      const newItem = await this.sp.web.lists
+      const addRes = await this.sp.web.lists
         .getByTitle("Registered Training")
         .items.add({
           TIRApproval: "Pending",
+          TIRStage: "Pending",
           TIRTrainingID: trainingId,
           Title: title,
         });
 
+      // PnP can return Id differently depending on version
+      let createdId: number | null =
+        addRes?.data?.Id ?? addRes?.data?.ID ?? addRes?.item?.Id ?? addRes?.item?.ID ?? null;
+
+      if (!createdId) {
+        const latest = await this.sp.web.lists
+          .getByTitle("Registered Training")
+          .items.select("Id")
+          .filter(`TIRTrainingID eq ${trainingId} and AuthorId eq ${currentUserId}`)
+          .orderBy("Created", false)
+          .top(1)();
+
+        createdId = latest?.[0]?.Id ?? null;
+      }
+
+      // ✅ Set Department (TIRDepartment) from Site Pages item
+      if (createdId) {
+        await this.setDepartmentOnRegisteredTraining(createdId, trainingId);
+      }
+
       this.setState({
         isSubmitting: false,
         approvalStatus: "pending",
-        registeredItemId: newItem.data.Id,
+        registeredItemId: createdId,
         errorMessage: "",
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Request approval error:", error);
       this.setState({
         isSubmitting: false,
@@ -214,66 +508,72 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
   };
 
   private handleJoinTraining = (e: React.MouseEvent): void => {
-    e.preventDefault(); // Prevent navigation
+    e.preventDefault();
     e.stopPropagation();
 
-    const { meetingLink } = this.props;
-    if (meetingLink) {
-      window.open(meetingLink, "_blank");
+    const link = String(this.state.joinUrl || "").trim();
+    if (link) {
+      window.open(link, "_blank");
     } else {
       alert("Link will be shared later.");
     }
   };
 
   private handleGiveFeedback = (e: React.MouseEvent): void => {
-    e.preventDefault(); // Prevent navigation
+    e.preventDefault();
     e.stopPropagation();
 
-    const { registeredItemId } = this.state;
-    const { context } = this.props;
-
-    window.location.href = `${context.pageContext.web.absoluteUrl}/SitePages/TrainingFeedback.aspx?registrationId=${registeredItemId}`;
+    if (this.state.isFeedbackSubmitted) return;
+    this.setState({ isFeedbackOpen: true });
   };
 
   // -----------------------------------------
   // Button logic
+  // Rule (B): 1 day before Start Date => "Registered Training"
+  // During Start..End => "Join Training"
   // -----------------------------------------
   private getButtonConfig = () => {
-    const { approvalStatus, isEventCompleted, isSubmitting, isLoading } = this.state;
+    const { approvalStatus, isSubmitting, isLoading } = this.state;
 
     if (isLoading) {
       return {
         text: "Loading...",
         disabled: true,
         className: styles.loadingButton,
-        onClick: undefined
+        onClick: undefined as any,
       };
     }
 
-    if (isEventCompleted && approvalStatus === "none") {
+    const now = new Date();
+    const { start, end } = this.getStartEndDates();
+
+    const isPast = this.isEventCompleted();
+    const isJoinWindow = !!start && !!end && now.getTime() >= start.getTime() && now.getTime() <= end.getTime();
+    const isRegisteredWindow = !!start && now.getTime() >= addDays(start, -1).getTime() && now.getTime() < start.getTime();
+
+    if (isPast) {
+      if (approvalStatus === "approved") {
+        if (this.state.isFeedbackSubmitted) {
+          return {
+            text: "Feedback Submitted",
+            onClick: undefined as any,
+            className: styles.feedbackButton,
+            disabled: true,
+          };
+        }
+        return {
+          text: "Give Feedback",
+          onClick: this.handleGiveFeedback,
+          className: styles.feedbackButton,
+          disabled: false,
+        };
+      }
+
       return {
         text: "Past Training",
         disabled: true,
         className: styles.pastTrainingButton,
-        onClick: undefined
-      };
-    }
-
-    if (isEventCompleted && approvalStatus === "approved") {
-      return {
-        text: "Give Feedback",
-        onClick: this.handleGiveFeedback,
-        className: styles.feedbackButton,
-        disabled: false
-      };
-    }
-
-    if (approvalStatus === "approved") {
-      return {
-        text: "Join Training",
-        onClick: this.handleJoinTraining,
-        className: styles.joinButton,
-        disabled: false
+        onClick: undefined as any,
       };
     }
 
@@ -282,7 +582,7 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
         text: "Request Pending",
         disabled: true,
         className: styles.pendingButton,
-        onClick: undefined
+        onClick: undefined as any,
       };
     }
 
@@ -291,15 +591,42 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
         text: "Request Rejected",
         disabled: true,
         className: styles.rejectedButton,
-        onClick: undefined
+        onClick: undefined as any,
+      };
+    }
+
+    if (approvalStatus === "approved") {
+      if (isJoinWindow) {
+        return {
+          text: "Join Training",
+          onClick: this.handleJoinTraining,
+          className: styles.joinButton,
+          disabled: false,
+        };
+      }
+
+      if (isRegisteredWindow) {
+        return {
+          text: "Registered Training",
+          disabled: true,
+          className: styles.pendingButton,
+          onClick: undefined as any,
+        };
+      }
+
+      return {
+        text: "Approved",
+        disabled: true,
+        className: styles.pendingButton,
+        onClick: undefined as any,
       };
     }
 
     return {
-      text: isSubmitting ? "Submitting..." : "Join",
+      text: isSubmitting ? "Submitting..." : "Request for Approval",
       onClick: this.handleRequestApproval,
       disabled: isSubmitting,
-      className: styles.requestButton
+      className: styles.requestButton,
     };
   };
 
@@ -309,7 +636,6 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
   public render(): React.ReactElement<TrainingCardProps> {
     const {
       startDate,
-      endDate,
       category,
       title,
       time,
@@ -324,41 +650,42 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
 
     const { errorMessage, approvalStatus } = this.state;
 
-    const startDateObj = new Date(startDate);
-    const endDateObj = new Date(endDate);
+    const startDateObj = new Date(extractISODate(startDate));
+    const startMonth = startDateObj.toLocaleDateString("en-US", { month: "short" });
+    const startDay = startDateObj.getDate().toString().padStart(2, "0");
+    const startWeekday = startDateObj.toLocaleDateString("en-US", { weekday: "long" });
 
-    const startMonth = startDateObj.toLocaleDateString('en-US', { month: 'short' });
-    const startDay = startDateObj.getDate().toString().padStart(2, '0');
-    const startWeekday = startDateObj.toLocaleDateString('en-US', { weekday: 'long' });
-
-    const endMonth = endDateObj.toLocaleDateString('en-US', { month: 'short' });
-    const endDay = endDateObj.getDate().toString().padStart(2, '0');
-    const endWeekday = endDateObj.toLocaleDateString('en-US', { weekday: 'long' });
+    const endDateObj = new Date(extractISODate(this.props.endDate));
+    const endDay = endDateObj.getDate().toString().padStart(2, "0");
+    const endWeekday = endDateObj.toLocaleDateString("en-US", { weekday: "long" });
 
     const btn = this.getButtonConfig();
-    const isRegistered = approvalStatus === "approved" || approvalStatus === "pending";
+
+    // Tag: Registered only when approved and (registered window OR join window)
+    const now = new Date();
+    const { start, end } = this.getStartEndDates();
+    const isRegisteredWindow = !!start && now.getTime() >= addDays(start, -1).getTime() && now.getTime() < start.getTime();
+    const isJoinWindow = !!start && !!end && now.getTime() >= start.getTime() && now.getTime() <= end.getTime();
+    const showRegisteredTag = approvalStatus === "approved" && (isRegisteredWindow || isJoinWindow);
 
     return (
-      <a href={pageUrl} className={styles.cardLinkWrapper}>
+      <>
+        <a href={pageUrl} className={styles.cardLinkWrapper}>
         <div className={styles.cardContainer}>
           <div className={styles.dateSection}>
             <div className={styles.dateBox}>
-              <div className={styles.month}>{startWeekday} - {endWeekday}</div>
-              <div className={styles.day}>{startDay} - {endDay} {startMonth}</div>
+              <div className={styles.month}>
+                {startWeekday} - {endWeekday}
+              </div>
+              <div className={styles.day}>
+                {startDay} - {endDay} {startMonth}
+              </div>
             </div>
           </div>
 
           <div className={styles.imageSection}>
-            <img
-              src={imageUrl}
-              alt={title}
-              className={styles.image}
-            />
-            {isRegistered && (
-              <div className={styles.registeredTag}>
-                Registered
-              </div>
-            )}
+            <img src={imageUrl} alt={title} className={styles.image} />
+            {showRegisteredTag && <div className={styles.registeredTag}>Registered</div>}
           </div>
 
           <div className={styles.contentWrapper}>
@@ -387,46 +714,51 @@ class TrainingCard extends React.Component<TrainingCardProps, TrainingCardState>
                 </svg>
                 <span>{location}</span>
               </div>
-                 {instructorName && (
-              <div className={styles.instructorRow}>
-                {instructorImageUrl ? (
-                  <img
-                    src={instructorImageUrl}
-                    alt={instructorName}
-                    className={styles.instructorAvatar}
-                  />
-                ) : (
-                  <div className={styles.instructorAvatarFallback}>
-                    {(instructorName?.trim()?.[0] || "?").toUpperCase()}
-                  </div>
-                )}
+              {instructorName && (
+                <div className={styles.instructorRow}>
+                  {instructorImageUrl ? (
+                    <img src={instructorImageUrl} alt={instructorName} className={styles.instructorAvatar} />
+                  ) : (
+                    <div className={styles.instructorAvatarFallback}>
+                      {(instructorName?.trim()?.[0] || "?").toUpperCase()}
+                    </div>
+                  )}
 
-                <div className={styles.instructorText}>
-                  <div className={styles.instructorName}>{instructorName}</div>
-                  {instructorTitle && <div className={styles.instructorTitle}>{instructorTitle}</div>}
+                  <div className={styles.instructorText}>
+                    <div className={styles.instructorName}>{instructorName}</div>
+                    {instructorTitle && <div className={styles.instructorTitle}>{instructorTitle}</div>}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
             </div>
-            {errorMessage && (
-              <div className={styles.errorMessage}>{errorMessage}</div>
-            )}
+
+            {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
 
             <div className={styles.actionSection}>
-              <button
-              className={styles.actionButton}
-              onClick={btn.onClick}
-              disabled={btn.disabled}
-            >
-              {btn.onClick === this.handleJoinTraining && (
-                <img src={outlookIcon} alt="Outlook" />
-              )}
-              {btn.text}
-            </button>
+              <button className={styles.actionButton} onClick={btn.onClick} disabled={btn.disabled}>
+                {btn.onClick === this.handleJoinTraining && <img src={outlookIcon} alt="Outlook" />}
+                {btn.text}
+              </button>
+
+              {!!this.state.countdown && !this.isEventCompleted() ? (
+                <div className={styles.countdownWrapper}>
+                  <span className={styles.countdownLabel}>Training starts in</span>
+                  <span className={styles.countdownTime}>{this.state.countdown}</span>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
       </a>
+
+        <FeedbackModal
+          isOpen={this.state.isFeedbackOpen}
+          onDismiss={() => this.setState({ isFeedbackOpen: false })}
+          onSubmitted={() => this.setState({ isFeedbackSubmitted: true })}
+          context={this.props.context}
+          trainingId={this.props.trainingId}
+        />
+      </>
     );
   }
 }
