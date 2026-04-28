@@ -1,7 +1,7 @@
 @import "~@fluentui/react/dist/sass/References.scss";
 
 .galleryContainer {
-  width: 100%;
+  // width: 100%;
   max-width: 1440px;
   margin: 0 auto;
   padding: 42px 0 20px;
@@ -119,4 +119,190 @@
 }
 .imageItem {
   cursor: pointer;
+}
+
+
+
+
+
+
+
+/* ===== MOBILE FIX IMPROVED ===== */
+@media (max-width: 768px) {
+
+  .galleryContainer {
+    padding: 24px 16px !important; /* left-right 16px fix */
+  }
+
+  .imageGrid {
+    flex-direction: row;
+    gap: 12px; /* column gap */
+  }
+
+  .row {
+    flex-direction: column;
+    flex-basis: 50%;
+    align-items: stretch !important;
+    gap: 12px; /* 🔥 vertical gap between images */
+  }
+
+  /* Remove hard cut feeling */
+  .imageItem {
+    flex: unset;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden; /* prevent image overflow */
+  }
+
+  /* 🔥 IMAGE FIT FIX (important) */
+  .imageItem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;   /* no distortion */
+    display: block;
+    border-radius: 12px;
+  }
+
+  /* HEIGHT BALANCE (same pattern but smoother) */
+  .row:first-child > :nth-child(odd) {
+    height: 200px;
+  }
+
+  .row:first-child > :nth-child(even) {
+    height: 140px;
+  }
+
+  .row:last-child > :nth-child(odd) {
+    height: 140px;
+  }
+
+  .row:last-child > :nth-child(even) {
+    height: 200px;
+  }
+
+  /* ===== BUTTON FIX ===== */
+  .buttonContainer {
+    margin-top: 24px;
+    padding: 0 16px; /* align with grid */
+  }
+
+  .buttonContainer button {
+    width: 100%;
+    border-radius: 24px;
+  }
+}
+
+
+
+/* ===== FINAL MOBILE GRID FIX (FIGMA STYLE) ===== */
+@media (max-width: 768px) {
+
+  .galleryContainer {
+    padding: 24px 16px !important;
+  }
+
+  /* 🔥 MAIN CHANGE: FLEX → GRID */
+  .imageGrid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;  /* 2 column */
+    gap: 12px !important;
+  }
+
+  /* ❌ row system hata do */
+  .row {
+    display: contents !important;
+  }
+
+  /* ✅ CLEAN CARD */
+  .imageItem {
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    height: auto !important;
+  }
+
+  /* ✅ IMAGE PERFECT FIT */
+  .imageItem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* 🔥 NATURAL HEIGHT (NO RANDOM CUTS) */
+  .imageItem:nth-child(odd) {
+    height: 220px;
+  }
+
+  .imageItem:nth-child(even) {
+    height: 160px;
+  }
+
+  /* ===== BUTTON FIX ===== */
+  .buttonContainer {
+    margin-top: 20px;
+    padding: 0 16px;
+  }
+
+  .buttonContainer button {
+    width: 100%;
+    border-radius: 24px;
+  }
+}
+
+
+
+
+/* ===== FINAL PERFECT MOBILE GRID ===== */
+@media (max-width: 768px) {
+
+  .galleryContainer {
+    padding: 24px 16px !important;
+  }
+
+  /* 🔥 CLEAN GRID (NO FLEX CONFLICT) */
+  .imageGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 12px;
+    row-gap: 16px; /* vertical thoda zyada (figma feel) */
+  }
+
+  /* ❌ row system completely neutralize */
+  .row {
+    display: contents !important;
+  }
+
+  /* ✅ IMAGE CARD */
+  .imageItem {
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  /* 🔥 IMAGE FIT FIX (NO CUT ISSUE) */
+  .imageItem img {
+    width: 100%;
+    height: auto;        /* ⚠️ FIX: remove forced height */
+    display: block;
+    border-radius: 16px;
+    object-fit: cover;
+  }
+
+  /* 🔥 REMOVE ALL FIXED HEIGHTS */
+  .row:first-child > *,
+  .row:last-child > * {
+    height: auto !important;
+  }
+
+  /* ===== BUTTON FIX ===== */
+  .buttonContainer {
+    margin-top: 24px;
+    padding: 0 16px;
+  }
+
+  .buttonContainer button {
+    width: 100%;
+    border-radius: 28px;
+  }
 }
