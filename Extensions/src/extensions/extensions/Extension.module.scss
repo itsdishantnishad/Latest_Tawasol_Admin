@@ -404,6 +404,76 @@
 :global(body.tir-has-floating-nav) :global(#spPageCanvasContent) {
   padding-bottom: var(--tir-floating-nav-safe, 120px) !important;
 }
+
+/* ===== MOBILE FIX (<=480px) ===== */
+@media (max-width: 480px) {
+
+  .TIRFloatingNav {
+    width: calc(100% - 32px) !important;
+    height: 64px !important;   /* thoda bada taki text aa sake */
+    padding: 0 10px !important;
+    zoom: 1 !important;
+  }
+
+  .TIRButtonGroup {
+    gap: 6px !important;
+  }
+
+  .TIRNavItem {
+    height: 52px !important;
+    font-size: 10px !important;
+    gap: 2px !important;
+  }
+
+  .TIRNavIcon {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .TIRNavLabel {
+    display: block !important;        /* force show */
+    font-size: 10px !important;
+    line-height: 12px !important;
+    text-align: center;
+    white-space: nowrap;              /* ek line me */
+  }
+}
+
+
+/* ===== TABLET FIX (481px - 768px) ===== */
+@media (min-width: 481px) and (max-width: 768px) {
+
+  .TIRFloatingNav {
+    width: calc(100% - 48px) !important;
+    height: 70px !important;
+    padding: 0 16px !important;
+    zoom: 1 !important;
+  }
+
+  .TIRButtonGroup {
+    gap: 10px !important;
+  }
+
+  .TIRNavItem {
+    height: 56px !important;
+    font-size: 11px !important;
+    gap: 4px !important;
+  }
+
+  .TIRNavIcon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .TIRNavLabel {
+    display: block !important;
+    font-size: 11px !important;
+    line-height: 14px !important;
+    text-align: center;
+  }
+}
+
+
 /* ===================== FOOTER ===================== */
 .TIRFooter {
   position: relative;
@@ -610,15 +680,35 @@
 
 .TIRSuggestFooter {
   display: flex;
+  margin-left: 280px;
   align-items: center;
-  justify-content: center;
+  // justify-content: center;
   padding: 10px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.45);
+   border: 1px solid rgba(255, 255, 255, 0.45);
   background: rgba(255, 255, 255, 0.72);
   font-size: 14px;
   font-weight: 600;
   color: #1a73e8;
   cursor: pointer;
+}
+
+@media (max-width:768px) {
+
+  .TIRSuggestFooter {   display: flex;
+  margin-left: 280px;
+  align-items: center;
+  // justify-content: center;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  font-weight: 400;
+  color: #1a73e8;
+  cursor: pointer;
+  }
+
+
+  
 }
 
 .TIRSuggestFooter:hover {
@@ -860,6 +950,37 @@
   .TIRNotifRow {
     align-items: start;         /* top align so text grow ho sake */
   }
+}
+
+/* ===== FIX: CENTER + 16px SIDE GAP ===== */
+
+.TIRNotifOverlay {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 16px !important;
+}
+
+.TIRNotifModal {
+  width: 100% !important;
+  max-width: 420px !important;
+  margin: 0 auto !important;
+  max-height: 90vh !important;
+}
+
+/* ===== MOBILE FIX ===== */
+@media (max-width: 480px) {
+
+  .TIRNotifOverlay {
+    padding: 16px !important;
+  }
+
+  .TIRNotifModal {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+
 }
 
 /* ==================== Onboarding ======================= */
