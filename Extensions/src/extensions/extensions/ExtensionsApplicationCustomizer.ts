@@ -23,6 +23,12 @@ import { GlobalBreadcrumbs } from './components/GlobalBreadCrumbs';
 import { PhotoService } from './shared/photoService';
 import { PageMetaRelative } from './components/PageMetaRelative';
 
+import {
+  ThemeProvider,
+  ThemeChangedEventArgs,
+  IReadonlyTheme
+} from "@microsoft/sp-component-base";
+
 export interface IExtensionsApplicationCustomizerProperties {
   testMessage: string;
 }
@@ -80,6 +86,13 @@ export default class ExtensionsApplicationCustomizer
   private breadcrumbs?: GlobalBreadcrumbs;
 
   private pageMeta?: PageMetaRelative;
+
+  private _themeProvider?: ThemeProvider;
+  private _themeVariant?: IReadonlyTheme;
+  private readonly _handleThemeChanged = (args: ThemeChangedEventArgs): void => {
+    this._themeVariant = args.theme;
+    this.rerenderHeader();
+  };
 
   // // =========================================================
   // // Global BREADCRUMB IMPLEMENTATION - PRODUCTION READY
@@ -494,10 +507,64 @@ export default class ExtensionsApplicationCustomizer
   //   }
   // }
 
+  // Theme Helper
+  private rerenderHeader(): void {
+    try {
+      this.header?.dispose();
+    } catch {
+      // ignore
+    }
+
+    const urls = resolveUrls(this.webUrl);
+    const siteBaseUrl = this.context.pageContext.site.absoluteUrl || this.webUrl;
+    const siteUrls = resolveUrls(siteBaseUrl);
+    const currentUpn = (this.userEmail || this.context.pageContext.user.loginName || '').toLowerCase();
+
+    this.header = new Header(
+      this.webUrl,
+      currentUpn,
+      () => { window.location.href = urls.home; },
+      () => { void this.handleBellClick(); },
+      (input: HTMLInputElement) => {
+        if (!this.photoService) {
+          this.photoService = new PhotoService(
+            this.webUrl,
+            currentUpn,
+            this.context.msGraphClientFactory,
+            this.context.pageContext.user.displayName
+          );
+        }
+
+        const headerWrapEl = document.querySelector(`.${styles.TIRHdrWrap}`) as HTMLElement | null;
+        if (headerWrapEl && !this.suggest) {
+          this.suggest = new SuggestBox(
+            headerWrapEl,
+            () => this.webUrl,
+            this.photoService
+          );
+        }
+
+        if (this.suggest) this.wireSearch(input);
+      },
+      `${this.webUrl.replace(/\/$/, '')}/SitePages/Profile.aspx`,
+      (siteUrls as any)?.help || `${siteBaseUrl.replace(/\/$/, '')}/SitePages/Help-Center.aspx`,
+      this.context.msGraphClientFactory,
+      this.context.pageContext.user.displayName,
+      undefined,
+      this._themeVariant
+    );
+
+    this.header.render(IDS.hosts.header);
+  }
+
   public async onInit(): Promise<void> {
 
     console.log(">>> ExtensionsApplicationCustomizer LOADED <<<", window.location.href);
     if (!this.shouldRender()) return;
+
+    this._themeProvider = this.context.serviceScope.consume(ThemeProvider.serviceKey);
+    this._themeVariant = this._themeProvider.tryGetTheme();
+    this._themeProvider.themeChangedEvent.add(this, this._handleThemeChanged);
 
     // Hide SharePoint app bar (left)
     this.hideAppBar();
@@ -658,7 +725,7 @@ export default class ExtensionsApplicationCustomizer
       this.context.msGraphClientFactory,
       this.context.pageContext.user.displayName
     );
-    this.header.render(IDS.hosts.header);
+    this.rerenderHeader();
 
     // (Keep this block to preserve current behaviour, but remove duplicates + reuse the same PhotoService)
     const headerWrap = document.querySelector(`.${styles.TIRHdrWrap}`) as HTMLElement;
@@ -857,6 +924,10 @@ export default class ExtensionsApplicationCustomizer
     window.removeEventListener('scroll', this.updateSuggest, true);
     window.removeEventListener('resize', this.updateSuggest);
     this.onboarding?.dispose();
+
+    if (this._themeProvider) {
+      this._themeProvider.themeChangedEvent.remove(this, this._handleThemeChanged);
+    }
 
     // try {
     // this.context.application.navigatedEvent.remove(this, this.onNavigated);

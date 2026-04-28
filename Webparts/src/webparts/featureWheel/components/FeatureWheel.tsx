@@ -6,12 +6,10 @@ import type { IFeatureWheelProps } from "./IFeatureWheelProps";
 
 import FeatureSelector from "../../widgets/FeatureSelector/FeatureSelector";
 import { EventsTrainingsTabKey } from "../../Components/NavTabs/eventsTrainingsTabs";
-import styles from "./FeatureWheel.module.scss";
-
-// Shared shimmer wrapper (Option 1)
 import { LoadingBoundary } from "../../Components/LoadingShimmer";
+import { getActiveThemeConfig } from "../../../common/themes/themeResolver";
 
-
+import styles from "./FeatureWheel.module.scss";
 
 const toImgSrc = (m: any): string => (typeof m === "string" ? m : m?.default || m);
 
@@ -32,12 +30,15 @@ const featureImageById: Record<string, string> = {
   beverage_menu: toImgSrc(require("../../Components/FeatureContent/assets/Services.webp")),
 };
 
-
 const leftHeadingLine: string = require("../images/leftArrow.svg");
 const rightHeadingLine: string = require("../images/rightArrow.svg");
 
 const leftHeadingLineMobile: string = require("../images/leftArrowMobile.svg");
 const rightHeadingLineMobile: string = require("../images/rightArrowMobile.svg");
+
+const flagSparklesArt: string = require("../images/Flag_Sparkles.svg");
+const uaeFlagsArt: string = require("../images/UAE_Flag.svg");
+const flagTextArt: string = require("../images/Flag_Text.svg");
 
 interface FeatureTitleProps {
   header: string;
@@ -66,14 +67,14 @@ export interface Feature {
   backgroundImage: string;
 }
 
-/** Lets Celebrate tab keys (must match internal webpart URL handling) */
+/** Lets Celebrate tab keys must match internal webpart URL handling. */
 export type CelebrateTabKey =
   | "birthdays"
   | "anniversaries"
   | "newJoiners"
   | "achievements";
 
-/** Helper: append/replace query param safely */
+/** Append/replace query param safely. */
 const withQueryParam = (baseUrl: string, key: string, value: string): string => {
   const raw = (baseUrl || "").trim();
   if (!raw) return raw;
@@ -88,27 +89,19 @@ const withQueryParam = (baseUrl: string, key: string, value: string): string => 
   }
 };
 
-/** Helper: normalize absolute/site-relative/relative urls using current web */
+/** Normalize absolute/site-relative/relative urls using current web. */
 const toAbsoluteFromWeb = (webUrl: string, rawUrl: string, fallbackRel: string): string => {
   const safeWeb = (webUrl || "").replace(/\/$/, "");
   const origin = new URL(safeWeb).origin;
 
   const raw = (rawUrl || "").trim() || fallbackRel;
 
-  // Absolute
   if (/^https?:\/\//i.test(raw)) return raw;
-
-  // Server-relative
   if (raw.startsWith("/")) return `${origin}${raw}`;
 
-  // Web-relative
   return `${safeWeb}/${raw.replace(/^\.\//, "")}`;
 };
 
-/**
- * Lazy load heavy feature modules so initial FeatureWheel load is faster,
- * and show shimmer while a feature module loads.
- */
 const Gallery = React.lazy(() => import("../../Components/Gallery/Gallery"));
 const Documents = React.lazy(() => import("../../Components/FeatureContent/Documents/Documents"));
 const Events = React.lazy(() => import("../../Components/FeatureContent/Events/Events"));
@@ -120,25 +113,25 @@ const Dashboard = React.lazy(() => import("../../Components/FeatureContent/Dashb
 const Offers = React.lazy(() => import("../../Components/FeatureContent/Offers/Offers"));
 const Training = React.lazy(() => import("../../Components/FeatureContent/Training/Training"));
 const AboutDHRE = React.lazy(() => import("../../Components/FeatureContent/AboutDHRE/AboutDHRE"));
-// const Newsletter = React.lazy(() => import("../../Components/FeatureContent/Newsletter/Newsletter"));
 const TaskApprovals = React.lazy(() => import("../../Components/FeatureContent/TaskApprovals/TaskApprovals"));
 const BeverageMenu = React.lazy(() => import("../../Components/FeatureContent/BeverageMenu/BeverageMenu"));
 const Newsletter = React.lazy(() => import("../../Components/FeatureContent/Newsletters/Newsletter"));
+
 const features: Feature[] = [
-  { id: "dashboard", title: "Dashboard", subtitle: "Track, analyze, optimize", backgroundImage: "url('../../Components/FeatureContent/assets/Dashboard.webp')" },
-  { id: "offers", title: "Offers", subtitle: "Exclusive perks just for you", backgroundImage: "url('../../Components/FeatureContent/assets/Offers.webp')" },
-  { id: "training", title: "Trainings", subtitle: "Grow skills, unlock new doors", backgroundImage: "url('../../Components/FeatureContent/assets/Training.webp')" },
-  { id: "gallery", title: "Gallery", subtitle: "Past events images and memories", backgroundImage: "url('../../Components/FeatureContent/assets/ImageGallery.webp')" },
-  { id: "documents", title: "Procedures", subtitle: "All files in one place", backgroundImage: "url('../../Components/FeatureContent/assets/Documents.webp')" },
-  { id: "employee_events", title: "Lets Celebrate", subtitle: "Birthday, anniversary & new joiners", backgroundImage: "url('../../Components/FeatureContent/assets/LetsCelebrate.webp')" },
-  { id: "about_dhre", title: "About DHRE", subtitle: "Journey through DHRE", backgroundImage: "url('../../Components/FeatureContent/assets/AboutDHRE.webp')" },
-  { id: "tasks", title: "Approvals", subtitle: "Get things done with clarity", backgroundImage: "url('../../Components/FeatureContent/assets/Tasks.webp')" },
-  { id: "newsletters", title: "Newsletters", subtitle: "Get things done with clarity", backgroundImage: "url('../../Components/FeatureContent/assets/newsletter.webp')" },
-  { id: "meetings", title: "Meetings", subtitle: "Connect, discuss, move forward", backgroundImage: "url('../../Components/FeatureContent/assets/Meeting.webp')" },
-  { id: "service_links", title: "Links", subtitle: "Quick access, zero hassle", backgroundImage: "url('../../Components/FeatureContent/assets/Service-Links.webp')" },
-  { id: "forms", title: "Forms", subtitle: "All interactive forms In one place", backgroundImage: "url('../../Components/FeatureContent/assets/InteractiveForms.webp')" },
-  { id: "events", title: "Events", subtitle: "Discover whats happening next", backgroundImage: "url('../../Components/FeatureContent/assets/Events.webp')" },
-  { id: "beverage_menu", title: "Services", subtitle: "Simplify your journey ahead", backgroundImage: "url('../../Components/FeatureContent/assets/Services.webp')" },
+  { id: "dashboard", title: "Dashboard", subtitle: "Track, analyze, optimize", backgroundImage: `url(${featureImageById.dashboard})` },
+  { id: "offers", title: "Offers", subtitle: "Exclusive perks just for you", backgroundImage: `url(${featureImageById.offers})` },
+  { id: "training", title: "Trainings", subtitle: "Grow skills, unlock new doors", backgroundImage: `url(${featureImageById.training})` },
+  { id: "gallery", title: "Gallery", subtitle: "Past events images and memories", backgroundImage: `url(${featureImageById.gallery})` },
+  { id: "documents", title: "Procedures", subtitle: "All files in one place", backgroundImage: `url(${featureImageById.documents})` },
+  { id: "employee_events", title: "Lets Celebrate", subtitle: "Birthday, anniversary & new joiners", backgroundImage: `url(${featureImageById.employee_events})` },
+  { id: "about_dhre", title: "About DHRE", subtitle: "Journey through DHRE", backgroundImage: `url(${featureImageById.about_dhre})` },
+  { id: "tasks", title: "Approvals", subtitle: "Get things done with clarity", backgroundImage: `url(${featureImageById.tasks})` },
+  { id: "newsletters", title: "Newsletters", subtitle: "Get things done with clarity", backgroundImage: `url(${featureImageById.newsletters})` },
+  { id: "meetings", title: "Meetings", subtitle: "Connect, discuss, move forward", backgroundImage: `url(${featureImageById.meetings})` },
+  { id: "service_links", title: "Links", subtitle: "Quick access, zero hassle", backgroundImage: `url(${featureImageById.service_links})` },
+  { id: "forms", title: "Forms", subtitle: "All interactive forms In one place", backgroundImage: `url(${featureImageById.forms})` },
+  { id: "events", title: "Events", subtitle: "Discover whats happening next", backgroundImage: `url(${featureImageById.events})` },
+  { id: "beverage_menu", title: "Services", subtitle: "Simplify your journey ahead", backgroundImage: `url(${featureImageById.beverage_menu})` },
 ];
 
 const featureTitleContent: Record<string, { header: string; subHeader: string }> = {
@@ -159,32 +152,39 @@ const featureTitleContent: Record<string, { header: string; subHeader: string }>
 };
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
-  const [selectedFeature, setSelectedFeature] = useState<string>("tasks");
+  const themeConfig = React.useMemo(
+    () => getActiveThemeConfig(props.themeVariant),
+    [props.themeVariant]
+  );
+
+  const [selectedFeature, setSelectedFeature] = useState<string>(() =>
+    themeConfig.key === "uaeNationalDay" ? "employee_events" : "tasks"
+  );
 
   const mobileFeatureTrackRef = useRef<HTMLDivElement | null>(null);
 
-React.useEffect(() => {
-  const track = mobileFeatureTrackRef.current;
-  if (!track) return;
+  React.useEffect(() => {
+    const track = mobileFeatureTrackRef.current;
+    if (!track) return;
 
-  if (!window.matchMedia("(max-width: 768px)").matches) return;
+    if (!window.matchMedia("(max-width: 768px)").matches) return;
 
-  const activeCard = track.querySelector(
-    `[data-feature-id="${selectedFeature}"]`
-  ) as HTMLElement | null;
+    const activeCard = track.querySelector(
+      `[data-feature-id="${selectedFeature}"]`
+    ) as HTMLElement | null;
 
-  if (!activeCard) return;
+    if (!activeCard) return;
 
-  window.setTimeout(() => {
-    activeCard.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  }, 80);
-}, [selectedFeature]);
+    window.setTimeout(() => {
+      activeCard.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      });
+    }, 80);
+  }, [selectedFeature]);
 
-  // Track which LetsCelebrate tab is currently active inside FeaturedWheel
+  // Track which LetsCelebrate tab is currently active inside FeatureWheel.
   const [celebrateTab, _setCelebrateTab] = useState<CelebrateTabKey>("birthdays");
   const celebrateTabRef = useRef<CelebrateTabKey>("birthdays");
 
@@ -199,7 +199,7 @@ React.useEffect(() => {
 
   const webUrl = props.context.pageContext.web.absoluteUrl;
 
-  /** ViewAll: For LetsCelebrate, navigate with ?tab= (even if property is blank) */
+  /** ViewAll: For LetsCelebrate, navigate with ?tab= even if property is blank. */
   const handleViewAll = useCallback(() => {
     // eslint-disable-next-line no-console
     console.log("View all clicked for:", selectedFeature);
@@ -207,13 +207,61 @@ React.useEffect(() => {
     if (selectedFeature !== "employee_events") return;
 
     const tab = celebrateTabRef.current || "birthdays";
-
-    // IMPORTANT: even if props.letsCelebrate is empty, we still navigate using a safe default
     const base = toAbsoluteFromWeb(webUrl, props.letsCelebrate, "SitePages/Lets-Celebrate.aspx");
     const url = withQueryParam(base, "tab", tab);
 
     window.location.assign(url);
   }, [selectedFeature, props.letsCelebrate, webUrl]);
+
+  const renderHeroHeading = (): React.ReactNode => {
+    const hero = themeConfig.featureWheel.hero;
+
+    if (hero.variant === "celebration") {
+      return (
+        <div className={`${styles.headingSection} ${styles.celebrationHeadingSection}`}>
+          <div className={styles.heroArtStack} aria-hidden="true">
+            {hero.showSparkles && (
+              <img
+                src={flagSparklesArt}
+                alt=""
+                className={styles.sparklesArt}
+              />
+            )}
+
+            {hero.showFlags && (
+              <img
+                src={uaeFlagsArt}
+                alt=""
+                className={styles.flagsArt}
+              />
+            )}
+          </div>
+
+          {hero.useTitleArt ? (
+            <img
+              src={flagTextArt}
+              alt={hero.title}
+              className={styles.titleArt}
+            />
+          ) : (
+            <h1 className={styles.celebrationTitle}>{hero.title}</h1>
+          )}
+
+          <h6 className={styles.celebrationSubtitle}>{hero.subTitle}</h6>
+        </div>
+      );
+    }
+
+    return (
+      <div className={styles.headingSection}>
+        <h1>
+          {hero.leadingText ? `${hero.leadingText} ` : ""}
+          <span>{hero.accentText}</span>
+          {hero.trailingText || ""}
+        </h1>
+      </div>
+    );
+  };
 
   const renderFeatureContent = () => {
     switch (selectedFeature) {
@@ -258,9 +306,11 @@ React.useEffect(() => {
       case "forms":
         return <Forms seeAllURL={props.interactiveForms} onViewAll={handleViewAll} />;
 
-      case "about_dhre": return <AboutDHRE context={props.context} />;
+      case "about_dhre":
+        return <AboutDHRE context={props.context} />;
 
-      case "newsletters": return <Newsletter />;
+      case "newsletters":
+        return <Newsletter />;
 
       case "tasks":
         return <TaskApprovals context={props.context} seeAllURL={props.taskApprovals} />;
@@ -292,25 +342,25 @@ React.useEffect(() => {
   const title = featureTitleContent[selectedFeature] || { header: "", subHeader: "" };
 
   const selectedMobileIndex = Math.max(
-  0,
-  features.findIndex((f) => f.id === selectedFeature)
-);
+    0,
+    features.findIndex((f) => f.id === selectedFeature)
+  );
 
-const getMobileCardClass = (index: number): string => {
-  let position = index - selectedMobileIndex;
+  const getMobileCardClass = (index: number): string => {
+    let position = index - selectedMobileIndex;
 
-  if (position > features.length / 2) {
-    position -= features.length;
-  } else if (position < -features.length / 2) {
-    position += features.length;
-  }
+    if (position > features.length / 2) {
+      position -= features.length;
+    } else if (position < -features.length / 2) {
+      position += features.length;
+    }
 
-  if (position === 0) return styles.mobileFeatureCardSelected;
-  if (position === -1) return styles.mobileFeatureCardPrev;
-  if (position === 1) return styles.mobileFeatureCardNext;
+    if (position === 0) return styles.mobileFeatureCardSelected;
+    if (position === -1) return styles.mobileFeatureCardPrev;
+    if (position === 1) return styles.mobileFeatureCardNext;
 
-  return styles.mobileFeatureCardOther;
-};
+    return styles.mobileFeatureCardOther;
+  };
 
   const shimmerFallback = (
     <LoadingBoundary loading={true} preset="details" count={1} ariaLabel="Loading feature content">
@@ -319,44 +369,44 @@ const getMobileCardClass = (index: number): string => {
   );
 
   return (
-    <div className={styles.featureWheelContainer}>
-      <div className={styles.headingSection}>
-        <h1>
-          <span>Tawasol</span>, The smarter way to stay connected
-        </h1>
-      </div>
+    <div
+      className={`${styles.featureWheelContainer} ${
+        themeConfig.key === "uaeNationalDay" ? styles.uaeNationalDayTheme : ""
+      }`}
+    >
+      {renderHeroHeading()}
 
       <div className={styles.desktopFeatureSelector}>
-  <FeatureSelector
-    features={features}
-    selectedFeature={selectedFeature}
-    onFeatureSelect={setSelectedFeature}
-  />
-</div>
+        <FeatureSelector
+          features={features}
+          selectedFeature={selectedFeature}
+          onFeatureSelect={setSelectedFeature}
+        />
+      </div>
 
-<div className={styles.mobileFeatureSelector}>
-  <div className={styles.mobileFeatureTrack} ref={mobileFeatureTrackRef}>
-    {features.map((feature, index) => (
-      <button
-        key={feature.id}
-        type="button"
-        data-feature-id={feature.id}
-        className={`${styles.mobileFeatureCard} ${getMobileCardClass(index)}`}
-        onClick={() => setSelectedFeature(feature.id)}
-      >
-       <span
-  className={styles.mobileFeatureImage}
-  style={{
-    backgroundImage: `url(${featureImageById[feature.id] || ""})`,
-  }}
-/>
-        <span className={styles.mobileFeatureOverlay}>
-          <span>{feature.title}</span>
-        </span>
-      </button>
-    ))}
-  </div>
-</div>
+      <div className={styles.mobileFeatureSelector}>
+        <div className={styles.mobileFeatureTrack} ref={mobileFeatureTrackRef}>
+          {features.map((feature, index) => (
+            <button
+              key={feature.id}
+              type="button"
+              data-feature-id={feature.id}
+              className={`${styles.mobileFeatureCard} ${getMobileCardClass(index)}`}
+              onClick={() => setSelectedFeature(feature.id)}
+            >
+              <span
+                className={styles.mobileFeatureImage}
+                style={{
+                  backgroundImage: `url(${featureImageById[feature.id] || ""})`,
+                }}
+              />
+              <span className={styles.mobileFeatureOverlay}>
+                <span>{feature.title}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       <FeatureTitle header={title.header} subHeader={title.subHeader} />
 
