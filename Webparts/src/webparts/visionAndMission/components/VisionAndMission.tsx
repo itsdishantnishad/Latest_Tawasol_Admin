@@ -7,7 +7,7 @@ import { IVisionAndMissionProps } from "./IVisionAndMissionProps";
 
 
 const VisionAndMission: React.FC<IVisionAndMissionProps> = ({
-  visionText = "",
+  visionText = "",        
   missionPoint1 = "",
   missionPoint2 = "",
   missionPoint3 = "",
@@ -49,7 +49,7 @@ const VisionAndMission: React.FC<IVisionAndMissionProps> = ({
       {/* ---------- Mission Row ---------- */}
       <div className={styles.row}>
         <div className={styles.leftPic}>
-          <img src={targetImg} alt="" />
+          <img className={styles.targetImg} src={targetImg} alt="" />
         </div>
 
         <div className={styles.rightCopy}>

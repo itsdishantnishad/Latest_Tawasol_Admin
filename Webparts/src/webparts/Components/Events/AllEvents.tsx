@@ -4,7 +4,7 @@ import styles from "./Allevents.module.scss";
 import EventCard from "./EventCard";
 import PreviousEventCard from "./PreviousCard/PreviousEvents";
 import CalendarViewComponent from "./Calendarview/CalendarView";
-
+const NoEventsImage = require("../../assets/NoEventsImage.png");
 import { SPFI, spfi, SPFx } from "@pnp/sp";
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
@@ -14,6 +14,7 @@ export interface IAlleventsProps {
   AllEventItems: any;
   context?: any;
   viewtype?: string; // "list" or "calendar"
+  isMobileView?: boolean
 }
 
 const uniqNums = (arr: number[]) =>
@@ -181,11 +182,11 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
         const eventId =
           Number(
             item?.ID ??
-              item?.Id ??
-              item?.id ??
-              item?.ListItemID ??
-              item?.ListItemId ??
-              0
+            item?.Id ??
+            item?.id ??
+            item?.ListItemID ??
+            item?.ListItemId ??
+            0
           ) || 0;
 
         const isReg = eventId ? myRegisteredIds.includes(eventId) : false;
@@ -266,22 +267,36 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
 
   const showCalendar = props.viewtype !== "list";
 
+
+  const sourceList = activeTab === "my" ? myEvents : parsedEvents;
+
+  const todayStart = moment().startOf("day");
+  const todayEnd = moment().endOf("day");
+
+  const hasTodayEvent = sourceList.some((item: any) => {
+    const dt = item?.eventDateTime ? moment(item.eventDateTime) : null;
+    return dt && dt.isBetween(todayStart, todayEnd, undefined, "[]");
+  });
+
+  const todayDividerText = hasTodayEvent
+    ? `${moment().format("MMM D")} • Today`
+    : moment().format("MMM D");
+
+
   return (
     <>
       <div className={styles.tabContainer}>
         <div className={styles.tabContainerInner}>
           <button
-            className={`${styles.tabButton} ${
-              activeTab === "all" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === "all" ? styles.activeTab : ""
+              }`}
             onClick={() => setActiveTab("all")}
           >
             All Events
           </button>
           <button
-            className={`${styles.tabButton} ${
-              activeTab === "my" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === "my" ? styles.activeTab : ""
+              }`}
             onClick={() => setActiveTab("my")}
           >
             My Events
@@ -290,71 +305,109 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
       </div>
 
       {activeTab === "all" ? (
-        showCalendar ? (
-          // ✅ Events tab: NO legend in calendar view
-          <CalendarViewComponent events={parsedEvents} context={props.context} from="Events" />
-        ) : (
-          <div className={styles.eventsContainer}>
-            <div className={styles.eventsWrapper}>
-              {upcomingEvents.length > 0 ? (
-                upcomingEvents.map((event: any, index: any) => (
-                  <EventCard key={index} {...event} />
-                ))
-              ) : (
-                <p>No upcoming events found.</p>
+        <>
+          {showCalendar && (
+            <>
+              <CalendarViewComponent
+                events={parsedEvents}
+                context={props.context}
+                from="Events"
+              />
+              {props.isMobileView && (
+                <div className={styles.mobileDateDivider}>
+                  <span>{todayDividerText}</span>
+                </div>
               )}
-            </div>
+            </>
+          )}
 
-            <div className={styles.previousEventsContainer}>
-              <div className={styles.previousHeaderRow}>
-                <h2 className={styles.heading}>Previous Events</h2>
-
-                {!showAllPrevious && previousEventsSorted.length > 3 && (
-                  <button
-                    type="button"
-                    className={styles.viewAllButton}
-                    onClick={() => setShowAllPrevious(true)}
-                    aria-label="View all previous events"
-                  >
-                    View All
-                  </button>
-                )}
-              </div>
-
-              <div className={styles.gridLayout}>
-                {previousEventsToRender.length > 0 ? (
-                  previousEventsToRender.map((event: any, index: any) => (
-                    <PreviousEventCard
-                      key={index}
-                      title={event.title}
-                      date={event.cardDate}
-                      imageUrl={event.imageUrl}
-                      imageCount={0}
-                      pageUrl={event?.pageUrl}
-                    />
+          {(!showCalendar || props.isMobileView) && (
+            <div className={styles.eventsContainer}>
+              <div className={styles.eventsWrapper}>
+                {upcomingEvents.length > 0 ? (
+                  upcomingEvents.map((event: any, index: any) => (
+                    <EventCard key={index} {...event} />
                   ))
                 ) : (
-                  <p>No previous events found.</p>
+                  <p>No upcoming events found.</p>
+                )}
+              </div>
+
+              <div className={styles.previousEventsContainer}>
+                <div className={styles.previousHeaderRow}>
+                  <h2 className={styles.heading}>Previous Events</h2>
+
+                  {!showAllPrevious && previousEventsSorted.length > 3 && (
+                    <button
+                      type="button"
+                      className={styles.viewAllButton}
+                      onClick={() => setShowAllPrevious(true)}
+                      aria-label="View all previous events"
+                    >
+                      View All
+                    </button>
+                  )}
+                </div>
+
+                <div className={styles.gridLayout}>
+                  {previousEventsToRender.length > 0 ? (
+                    previousEventsToRender.map((event: any, index: any) => (
+                      <PreviousEventCard
+                        key={index}
+                        title={event.title}
+                        date={event.cardDate}
+                        imageUrl={event.imageUrl}
+                        imageCount={0}
+                        pageUrl={event?.pageUrl}
+                      />
+                    ))
+                  ) : (
+                    <p>No previous events found.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {showCalendar && (
+            <>
+              <CalendarViewComponent
+                events={myEvents}
+                context={props.context}
+                from="Events"
+              />
+
+              {props.isMobileView && (
+                <div className={styles.mobileDateDivider}>
+                  <span>{todayDividerText}</span>
+                </div>
+              )}
+            </>
+          )}
+          {(!showCalendar || props.isMobileView) && (
+            <div className={styles.eventsContainer}>
+              <div className={styles.eventsWrapper}>
+                {myEvents.length > 0 ? (
+                  myEvents.map((event: any, index: any) => (
+                    <EventCard key={index} {...event} />
+                  ))
+                ) : (
+                  <div className={styles.noEventsCard}>
+                    <img
+                      src={NoEventsImage}
+                      alt="No Events"
+                      className={styles.noEventsImg}
+                    />
+                    <h3 className={styles.noEventsTitle}>No Events</h3>
+                    <p className={styles.noEventsText}>No upcoming events for you</p>
+                  </div>
                 )}
               </div>
             </div>
-          </div>
-        )
-      ) : showCalendar ? (
-        // ✅ Events tab (My Events): NO legend in calendar view
-        <CalendarViewComponent events={myEvents} context={props.context} from="Events" />
-      ) : (
-        <div className={styles.eventsContainer}>
-          <div className={styles.eventsWrapper}>
-            {myEvents.length > 0 ? (
-              myEvents.map((event: any, index: any) => (
-                <EventCard key={index} {...event} />
-              ))
-            ) : (
-              <p>You haven’t registered for any events yet.</p>
-            )}
-          </div>
-        </div>
+          )}
+        </>
       )}
     </>
   );

@@ -134,3 +134,128 @@
 .phoneLink:hover .phoneText {
   text-decoration: underline;
 }
+
+//  responsive 
+
+@media (max-width: 768px) {
+  /* ── Main wrapper ── */
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: unset;
+    gap: 16px;                        
+    margin-top: 0;
+    width: 343px;
+    place-self: unset;
+    margin: 0 auto;
+    padding: 0 0 96px 0;
+    box-sizing: border-box;
+  }
+
+  /* ── Card ── */
+  .card {
+    width: 100%;
+    max-width: 343px;
+    min-height: auto;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  /* ── Card header ── */
+  .cardHeader {
+    height: 44px;                     
+    padding: 0 16px;
+    margin: 0;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .cardTitle {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+  }
+
+  /* ── Card body ── */
+  .cardBody {
+    padding: 4px 0 4px 0;
+  }
+
+  /* ── Row ── */
+  .row {
+    width: 100%;
+    height: auto;
+    min-height: 52px;
+    padding: 10px 16px;               
+    gap: 8px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f3e0d0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .rowLeft {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .rowLabel {
+    font-size: 14px;
+    line-height: 22px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Right side icons + phone ── */
+  .rowRight {
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .iconImage {
+    width: 18px;
+    height: 18px;
+  }
+
+  .phoneText {
+    font-size: 14px;
+    line-height: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wrapper {
+    width: 100%;
+    max-width: 343px;
+    padding: 0 0 96px 0;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 343px;
+  }
+
+  .row {
+    padding: 10px 16px;
+  }
+
+  .rowLabel {
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .phoneText {
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .iconImage {
+    width: 16px;
+    height: 16px;
+  }
+}

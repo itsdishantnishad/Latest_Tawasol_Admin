@@ -76,6 +76,11 @@ const features: Feature[] = [
     subtitle: "Get things done with clarity"
   },
   {
+    id: "newsletters",
+    title: "Newsletters",
+    subtitle: "Company updates, insights, and highlights - all in one place."
+  },
+  {
     id: "beverage_menu",
     title: "Services",
     subtitle: "Simplify your journey ahead"
@@ -150,6 +155,7 @@ const Wheel: React.FC<FeatureWheelProps> = ({
     forms: styles.interactiveFormsCard,
     dashboard: styles.dashboardCard,
     offers: styles.offersCard,
+    newsletters: styles.newslettersCard,
     training: styles.trainingCard,
     about_dhre: styles.aboutDhreCard,
     tasks: styles.tasksCard,

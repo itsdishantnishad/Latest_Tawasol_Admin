@@ -17,6 +17,14 @@ function normalizeApprovalStatus(v: any): "none" | "pending" | "approved" | "rej
   return "pending";
 }
 
+const safeStr = (v: any): string => String(v ?? "").trim();
+
+const extractTermGuidFromOwstax = (owstax?: string): string => {
+  const s = String(owstax || "");
+  const m = s.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+  return m ? m[0] : "";
+};
+
 
 export interface IAllTrainingCardProps {
   imageUrl: string;
@@ -69,6 +77,108 @@ export class AllTrainingCard extends React.Component<
   private isEventCompleted = (endDateStr: string): boolean => {
     if (!endDateStr) return false;
     return new Date().getTime() > new Date(endDateStr).getTime();
+  };
+
+  // -----------------------------------------
+  // Department (for flow routing)
+  // Reads Site Pages -> TIRDepartment (+ hidden owstaxIdTIRDepartment)
+  // and writes to Registered Training -> Department column
+  // -----------------------------------------
+  private getDepartmentFromTrainingPage = async (trainingId: number): Promise<{ label: string; guid: string }> => {
+    const id = Number(trainingId || 0);
+    if (!id) return { label: "", guid: "" };
+
+    let label = "";
+    let guid = "";
+
+    try {
+      const page: any = await this.sp.web.lists
+        .getByTitle("Site Pages")
+        .items.getById(id)
+        .select("TIRDepartment", "owstaxIdTIRDepartment")();
+
+      label = safeStr(page?.TIRDepartment?.Label || page?.TIRDepartment);
+      guid = extractTermGuidFromOwstax(page?.owstaxIdTIRDepartment);
+    } catch {
+      // ignore
+    }
+
+    if (!label) {
+      try {
+        const text: any = await this.sp.web.lists
+          .getByTitle("Site Pages")
+          .items.getById(id)
+          .fieldValuesAsText();
+
+        label = safeStr(text?.TIRDepartment);
+        if (!label) {
+          const key = Object.keys(text || {}).find((k) => k.toLowerCase().includes("department"));
+          if (key) label = safeStr(text?.[key]);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!guid) {
+      try {
+        const raw: any = await this.sp.web.lists
+          .getByTitle("Site Pages")
+          .items.getById(id)
+          .select("owstaxIdTIRDepartment")();
+
+        guid = extractTermGuidFromOwstax(raw?.owstaxIdTIRDepartment);
+      } catch {
+        // ignore
+      }
+    }
+
+    return { label, guid };
+  };
+
+  private setStagePendingOnRegisteredTraining = async (registrationId: number): Promise<void> => {
+    try {
+      const regItem = this.sp.web.lists.getByTitle("Registered Training").items.getById(registrationId);
+      await regItem.validateUpdateListItem([{ FieldName: "TIRStage", FieldValue: "Pending" }]);
+    } catch {
+      // ignore
+    }
+  };
+
+  private setDepartmentOnRegisteredTraining = async (registrationId: number, trainingId: number): Promise<void> => {
+    const { label, guid } = await this.getDepartmentFromTrainingPage(trainingId);
+    if (!label || !guid) return;
+
+    const regItem = this.sp.web.lists.getByTitle("Registered Training").items.getById(registrationId);
+
+    const fieldCandidates = [
+      "TIRDepartment",
+      "Department_x0020_Name",
+      "DepartmentName",
+      "Department",
+    ];
+
+    const valueCandidates = [
+      `-1;#${label}|${guid}`,
+      `${label}|${guid}`,
+      label,
+    ];
+
+    for (const fieldName of fieldCandidates) {
+      for (const fieldValue of valueCandidates) {
+        try {
+          const res: any = await regItem.validateUpdateListItem([{
+            FieldName: fieldName,
+            FieldValue: fieldValue,
+          }]);
+
+          const hasException = Array.isArray(res) && res.some((r) => r?.HasException);
+          if (!hasException) return;
+        } catch {
+          // continue
+        }
+      }
+    }
   };
 
   private checkExistingRequest = async (): Promise<void> => {
@@ -188,10 +298,34 @@ export class AllTrainingCard extends React.Component<
           Title: title,
         });
 
+      // PnP can return Id differently depending on version
+      const createdId: number | null =
+        (newItem as any)?.data?.Id ??
+        (newItem as any)?.data?.ID ??
+        (newItem as any)?.item?.Id ??
+        (newItem as any)?.item?.ID ??
+        null;
+
+
+      // Ensure Registered Training item has Stage + Department for the approval flow
+      if (createdId) {
+        try {
+          await this.setStagePendingOnRegisteredTraining(createdId);
+        } catch {
+          // ignore
+        }
+        try {
+          await this.setDepartmentOnRegisteredTraining(createdId, trainingId);
+        } catch {
+          // ignore
+        }
+      }
+
+
       this.setState({
         isSubmitting: false,
         approvalStatus: "pending",
-        registeredItemId: newItem.data.Id,
+        registeredItemId: createdId,
         errorMessage: "",
       });
     } catch (error) {

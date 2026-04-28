@@ -69,7 +69,7 @@ export default class PoliciesAndProceduresList extends React.Component<
     return (this.props.searchText || "").trim();
   }
 
-   // Date Formating
+  // Date Formating
   private _formatModifiedDate(value: any): string {
     const dt = value instanceof Date ? value : new Date(value);
     if (isNaN(dt.getTime())) return "-";
@@ -289,8 +289,20 @@ export default class PoliciesAndProceduresList extends React.Component<
           </button>
 
           <div className={styles.meta}>
-            Modified by : {item.modifiedBy || "-"} &nbsp;•&nbsp;
-            Modified on : {item.modifiedOn ? this._formatModifiedDate(item.modifiedOn) : "-"}
+            Modified &nbsp;·&nbsp; {item.modifiedBy || "-"} &nbsp;·&nbsp;
+            {item.modifiedOn ? this._formatModifiedDate(item.modifiedOn) : "-"}
+          </div>
+
+          {/* ── Category + dept on same line ── */}
+          <div className={styles.categoryInline}>
+            <img src={ICON_TAG} alt="" className={styles.categoryIcon} />
+            <span className={styles.categoryText}>{meta.categoryLabel}</span>
+            {!!item.department && (
+              <>
+                <span className={styles.categoryText}> · </span>
+                <span className={styles.cellDept}>{item.department}</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -385,8 +397,10 @@ export default class PoliciesAndProceduresList extends React.Component<
         </div>
 
         <div className={styles.cardMetaRow}>
-          <span className={styles.meta}>{item.modifiedBy || "-"}</span>
-          <span className={styles.meta}>{item.modifiedOn ? item.modifiedOn.toLocaleDateString() : "-"}</span>
+          <span className={styles.meta}>
+            Modified &nbsp;·&nbsp; {item.modifiedBy || "-"} &nbsp;·&nbsp;
+            {item.modifiedOn ? this._formatModifiedDate(item.modifiedOn) : "-"}
+          </span>
         </div>
 
         <div>

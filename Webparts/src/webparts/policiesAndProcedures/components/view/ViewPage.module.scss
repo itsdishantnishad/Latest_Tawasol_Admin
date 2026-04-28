@@ -442,6 +442,7 @@
   font-size: 14px;
   margin: 0;
   text-align: left;
+  font-family: 'Inter';
 }
 
 .folderToolbar {
@@ -465,6 +466,8 @@
   border-color: var(--pp-accent-1);
   // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
+
+
 
 /* ================= Folder content area ================= */
 .folderContent {
@@ -658,7 +661,7 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 14px;
   line-height: 22px;
   color: #000;
@@ -786,4 +789,333 @@
 .shimmerPreviewFrame {
   height: 420px;
   border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+
+ /* ── View toggle icons: 24×24 ── */
+  .viewBtn,
+  .viewBtnActive {
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .viewBtn img,
+  .viewBtnActive img {
+    width: 24px;                   /* Figma: 24px */
+    height: 24px;                  /* Figma: 24px */
+    display: block;
+  }
+
+  /* ── List active (default), Grid dimmed ── */
+  .viewBtn img {
+    opacity: 0.3;                  /* inactive = 30% */
+  }
+
+  .viewBtnActive img {
+    opacity: 1;                    /* active = 100% */
+  }
+
+  /* ── Page wrapper ── */
+  .wrap {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: unset;
+    gap: 0;
+    padding: 0 16px 96px;
+    box-sizing: border-box;
+  }
+
+  /* ── Hide right preview pane ── */
+  .rightPane {
+    display: none;
+  }
+
+  /* ── Left pane full width ── */
+  .left {
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  /* ── Top bar ── */
+  .topBar {
+    padding: 12px 16px;
+    gap: 8px;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  /* ── Hide search ── */
+  .searchSlot {
+    display: none;
+  }
+
+  /* ── Folder block ── */
+  .folderBlock {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+  }
+
+  /* ── Folder header ── */
+  .folderHeader {
+    width: 100%;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+    grid-template-columns: 20px 32px 1fr auto;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
+  }
+
+  .folderTitle {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+    letter-spacing: -0.5px;
+    font-family: 'Inter';
+  }
+
+  /* ── Folder content ── */
+  .folderContent {
+    padding: 0 0 12px 0;
+  }
+
+  /* ── Nested folders ── */
+  .folderNested {
+    margin-left: 16px;
+    margin-top: 4px;
+  }
+
+  /* ── Action bar ── */
+  .actionBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0 12px;
+    margin-bottom: 12px;
+  }
+
+  .actionBarRight {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6C6C6C;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 8px;
+  }
+
+  .actionBarRight .typeIcon {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
+
+  /* ══════════════════════════════════════
+     LIST VIEW
+     layout: [icon 40px] [content 1fr] [dots 32px]
+     gap: 20px between rows
+  ══════════════════════════════════════ */
+  .row {
+    display: grid;
+    grid-template-columns: 40px 1fr 32px;
+    grid-template-rows: auto;
+    align-items: start;
+    gap: 0 8px;
+    padding: 10px 0;
+    border-top: none;
+    border-bottom: none;
+    min-height: auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .row + .row {
+    margin-top: 20px;              /* Figma: gap 20px */
+  }
+
+  .row:first-child {
+    border-top: none;
+  }
+
+  /* ── Hide checkbox ── */
+  .cellCheck {
+    display: none;
+  }
+
+  /* ── File icon ── */
+  .cellType {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 2px;
+    width: 40px;
+    flex-shrink: 0;
+  }
+
+  .typeIcon {
+    width: 32px;
+    height: 32px;
+    display: block;
+    flex-shrink: 0;
+  }
+
+  /* ── Name + meta + category ── */
+  .cellName {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+  }
+
+  /* ── Hide separate category cell (merged into cellName via TSX) ── */
+  .cellCategory {
+    display: none;
+  }
+
+  /* ── Hide dept (shown inline in category row) ── */
+  .cellDept {
+    display: inline;
+    font-size: 11px;
+    color: #A7A7A7;
+  }
+
+  /* ── 3-dot menu only ── */
+  .cellRight {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    align-self: flex-start;
+    padding-top: 2px;
+    gap: 0;
+  }
+
+  /* ── Hide fav + download icons ── */
+  .favBtn,
+  .downloadBtn {
+    display: none;
+  }
+
+  /* ── Meta text ── */
+  .meta {
+    font-size: 11px;
+    line-height: 16px;
+    color: #A7A7A7;
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* ── Category + dept inline ── */
+  .categoryInline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .categoryText {
+    font-size: 11px;
+    color: #6C6C6C;
+  }
+
+  .categoryIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* ══════════════════════════════════════
+     GRID VIEW
+     2 columns, each card 165×168, radius 4px
+  ══════════════════════════════════════ */
+  .gridBody {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .card {
+    width: 100%;
+    height: 168px;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .cardThumb {
+    height: 48px;
+  }
+
+  .cardTitle {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 18px;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cardMetaRow {
+    font-size: 11px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .cardFooter {
+    font-size: 11px;
+    margin-top: auto;
+  }
+
+  .cardTag {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+
+  .tagIcon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wrap {
+    padding: 0 12px 96px;
+  }
+
+  .gridBody {
+    gap: 8px;
+  }
+
+  .card {
+    height: 160px;
+    padding: 8px;
+  }
+
+  .cardTitle {
+    font-size: 12px;
+    line-height: 16px;
+  }
 }
