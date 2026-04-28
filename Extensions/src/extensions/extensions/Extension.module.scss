@@ -319,6 +319,23 @@
 
 .TIRAvatar img { width: 100%; height: 100%; object-fit: cover; }
 
+// Theme Design
+
+.TIRBrandInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.TIRBrandFlag {
+  width: 36px;
+  height: 30px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  display: inline-block;
+  transform: translateY(1px);
+}
+
 /* ===================== FLOATING NAV ===================== */
 .TIRFloatingNav{
   /* tune here */
