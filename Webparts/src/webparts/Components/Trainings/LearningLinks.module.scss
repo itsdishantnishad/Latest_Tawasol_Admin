@@ -58,3 +58,74 @@
     object-fit: cover;
   }
 }
+/* Desktop View Remains Untouched */
+
+@media (max-width: 768px) {
+  .linksGrid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; 
+    width: 100% !important;
+    gap: 16px;
+    padding: 0;
+  }
+
+  .linkCard {
+    width: 343px !important;
+    height: 147px !important;
+    border-radius: 8px !important; 
+    margin-bottom: 16px;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+    border: none;
+
+    /* Base container for the image/logo */
+    .logoContainer {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* DESIGN FOR LEARNING LINKS (Logos like STRYVE) */
+    &.isLogoType {
+      background-color: #fdecdc !important; 
+      
+      .logoContainer {
+        padding: 24px; // Breathing room for logos
+        img {
+          object-fit: contain !important; 
+          width: 100% !important;
+          height: 100% !important;
+        }
+      }
+    }
+
+    /* DESIGN FOR LEARNING CONTENT (Images like Unconscious Bias) */
+    &.isContentType {
+      background-color: transparent !important; 
+      
+      .logoContainer {
+        padding: 0 !important; // NO padding ensures full width
+        width: 100% !important;
+        height: 100% !important;
+
+        img {
+          /* This forces the image to span the full 343x147 card */
+          width: 100% !important;
+          height: 100% !important;
+          min-width: 100% !important;
+          object-fit: cover !important; 
+          display: block !important;
+        }
+      }
+    }
+
+    /* Keep labels hidden */
+    .mobileFooterLabel, .footerLabel, .contentTitle, .mobileTitleBar {
+      display: none !important;
+    }
+  }
+}
