@@ -173,7 +173,7 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
 
   private monthIndex(mon: string): number {
     const m = (mon || '').toUpperCase();
-    const map: any = { JAN:0, FEB:1, MAR:2, APR:3, MAY:4, JUN:5, JUL:6, AUG:7, SEP:8, OCT:9, NOV:10, DEC:11 };
+    const map: any = { JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5, JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11 };
     return map[m];
   }
 
@@ -332,6 +332,7 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
         <div className={styles.wrapOuter}>
           {selectedTab === "birthdays" && (
             <Birthday
+              mode="birthday"
               items={birthdayItems}
               todayTitle="Today's Celebration"
               upcomingTitle="Upcoming Birthdays"
@@ -339,12 +340,12 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
               emptyUpcomingText={birthdayEmptyUpcoming}
               loading={loadingBirthdays}
               error={errorBirthdays}
-              // ✅ onRetry removed (no Retry button)
             />
           )}
 
           {selectedTab === "anniversaries" && (
             <Birthday
+              mode="anniversary"
               items={anniversaryItems}
               todayTitle="Today's Celebration"
               upcomingTitle="Upcoming Anniversaries"
@@ -352,7 +353,6 @@ export default class LetsCelebrate extends React.Component<ILetsCelebrateProps, 
               emptyUpcomingText={anniversaryEmptyUpcoming}
               loading={loadingAnniversaries}
               error={errorAnniversaries}
-              // ✅ onRetry removed (no Retry button)
             />
           )}
 

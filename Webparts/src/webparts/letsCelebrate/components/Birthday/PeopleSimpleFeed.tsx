@@ -85,53 +85,49 @@ const PeopleSimpleFeed: React.FC<PeopleSimpleFeedProps> = ({ items, webAbsoluteU
         const borderClass = (s as any)[`border${idx}`] || "";
 
         // show left anniversary block only when text contains "Anniversary"
-        const isAnniversary = !!(p.extraRightText && /anniversary/i.test(p.extraRightText));
-        const left = isAnniversary ? parseOrdinal(p.extraRightText || "") : null;
+        const anniversaryText = (p.extraRightText || "").trim();
+        const isAnniversary = !!anniversaryText && /anniversar/i.test(anniversaryText);
+        const left = isAnniversary ? parseOrdinal(anniversaryText) : null;
 
         return (
-          <article key={p.id} className={s.row + (isAnniversary ? " " + s.rowWithLeft : "")}>
-            {isAnniversary && left ? (
-              <div className={s.leftCol} aria-label={p.extraRightText}>
-                <div className={s.annivTop}>
-                  <span className={s.annivNum}>{left.num}</span>
-                  {left.suf ? <span className={s.annivSuffix}>{left.suf}</span> : null}
+          <article
+            key={p.id}
+            className={s.row + (isAnniversary ? " " + s.rowWithLeft : "")}
+          >
+            {isAnniversary && left && (
+              <div className={s.anniversaryLabel}>
+                <span className={s.anniversaryNum}>{left.num}</span>
+                <span className={s.anniversarySuf}>{left.suf}</span>
+                <span className={s.anniversaryWord}> {left.word}</span>
+              </div>
+            )}
+
+            <div className={s.contentWrapper}>
+              <div className={s.avatarCol}>
+                <img
+                  className={s.avatar + " " + borderClass}
+                  src={resolveImg(p.imageUrl, webAbsoluteUrl)}
+                  alt={name}
+                />
+              </div>
+
+              <div className={s.mainCol}>
+                <div className={s.name}>{name}</div>
+                <div className={s.sub}>
+                  {(p.designation ? p.designation : "") +
+                    (p.department ? " - " + p.department : "")}
                 </div>
-                <div className={s.annivWord}>{left.word}</div>
               </div>
-            ) : null}
-
-            <div className={s.avatarCol}>
-              <img
-                className={s.avatar + " " + borderClass}
-                src={resolveImg(p.imageUrl, webAbsoluteUrl)}
-                alt={name || "profile"}
-              />
-            </div>
-
-            <div className={s.mainCol}>
-              <div className={s.name}>{name}</div>
-              <div className={s.sub}>
-                {(p.designation ? p.designation : "") + (p.department ? " • " + p.department : "")}
-              </div>
-
-              {/* keep meta ONLY for non-anniversary use-cases */}
-              {!isAnniversary && p.extraRightText ? <div className={s.meta}>{p.extraRightText}</div> : null}
             </div>
 
             <div className={s.ctaCol}>
-              {renderCta
-                ? renderCta(p)
-                : (p.wishLink
-                  ? <a
-                      className={s.wishBtn}
-                      target="_blank"
-                      data-interception="off"
-                      href={p.wishLink}
-                      rel="noreferrer"
-                    >
-                      <span aria-hidden="true">🎉</span>&nbsp; Wish Now
-                    </a>
-                  : null)}
+              {renderCta ? renderCta(p) : (
+                p.wishLink ? (
+                  <a className={s.wishBtn} target="_blank" href={p.wishLink} rel="noreferrer">
+                    <span aria-hidden="true">🎉</span>&nbsp; Wish Now
+                  </a>
+                ) : null
+              )}
             </div>
           </article>
         );

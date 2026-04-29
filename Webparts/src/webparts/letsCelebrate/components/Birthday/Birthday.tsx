@@ -12,7 +12,7 @@ export interface BirthdaysFeedProps {
 
   emptyTodayText: string;
   emptyUpcomingText: string;
-
+  mode?: "birthday" | "anniversary";
   /** Shimmer */
   loading?: boolean;
   error?: unknown;
@@ -79,6 +79,7 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
   emptyTodayText,
   emptyUpcomingText,
   loading = false,
+  mode = "birthday",
   error,
   onRetry,
   shimmerCountToday = 3,
@@ -146,7 +147,7 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
         )}
       </div>
 
-      <div className={styles.section}>
+     <div className={styles.section}>
         <button className={styles.sectionHead + " " + styles.collapsible}>
           <span>{upcomingTitle}</span>
         </button>
@@ -163,27 +164,33 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
               <div />
             </LoadingBoundary>
           </div>
+        ) : !buckets.upcomingGroups || buckets.upcomingGroups.length === 0 ? (
+          <PeopleSimpleFeed
+            items={[]}
+            webAbsoluteUrl={webAbsoluteUrl}
+            emptyText={error ? "Failed to load." : emptyUpcomingText}
+            renderCta={() => null}
+          />
         ) : (
-          (!buckets.upcomingGroups || buckets.upcomingGroups.length === 0) ? (
-            <PeopleSimpleFeed
-              items={[]}
-              webAbsoluteUrl={webAbsoluteUrl}
-              emptyText={error ? "Failed to load." : emptyUpcomingText}
-              renderCta={() => null}
-            />
-          ) : (
-            <div>
-              {buckets.upcomingGroups.map((g) => (
-                <div key={g.key}>
-                  <div
-                    style={{
-                      padding: "10px 0 6px",
-                      fontWeight: 600,
-                      fontSize: "14px",
-                    }}
-                  >
-                    {g.label}
-                  </div>
+          <div>
+            {buckets.upcomingGroups.map((g) => (
+              <div key={g.key}>
+                <div
+                  style={{
+                    padding: "10px 0 6px",
+                    fontWeight: 600,
+                    fontSize: "14px",
+                  }}
+                >
+
+                </div>
+
+                <div key={g.key} className={styles.upcomingGroup}>
+                  {mode !== "anniversary" && (
+                    <div className={styles.upcomingDateLabel}>
+                      {g.label}
+                    </div>
+                  )}
 
                   <PeopleSimpleFeed
                     items={g.items}
@@ -191,9 +198,9 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
                     renderCta={() => null}
                   />
                 </div>
-              ))}
-            </div>
-          )
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
@@ -201,3 +208,5 @@ const Birthday: React.FC<BirthdaysFeedProps> = ({
 };
 
 export default Birthday;
+
+
