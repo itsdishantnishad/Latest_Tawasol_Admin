@@ -1,4 +1,4 @@
-// src/extensions/extensions/ExtensionsApplicationCustomizer.ts
+// ExtensionsApplicationCustomizer.ts
 
 import { BaseApplicationCustomizer } from '@microsoft/sp-application-base';
 require('../../styles/hideNav.css');
@@ -16,6 +16,7 @@ import { IDS, resolveUrls } from './shared/constants';
 import { NotificationService } from './services/notificationService';
 import { FooterService } from './services/FooterService';
 import { AmplitudeService } from './services/AmplitudeService';
+import { GoogleAnalyticsService } from './services/GoogleAnalyticsService';
 import Onbo from './components/Onbo';
 import { IOnboConfig } from './components/Onbo';
 import { HideSocialBarService } from './services/HideSocialBarService';
@@ -39,6 +40,12 @@ export interface IExtensionsApplicationCustomizerProperties {
  */
 const AMPLITUDE_API_KEY: string = '2c3cf0da467f7f779d580f939e4082b9';
 const AMPLITUDE_SECRET_KEY: string = '9865d4234176791ada4da1afca0f8080';
+
+/**
+ * Google Analytics 4 Measurement ID
+ * Replace G-XXXXXXXXXX with the Measurement ID from GA4 > Admin > Data streams > Web.
+ */
+const GOOGLE_ANALYTICS_MEASUREMENT_ID: string = 'G-ENJZS7RHD5';
 
 const MAX_NOTIFS: number = 100;
 
@@ -74,6 +81,9 @@ export default class ExtensionsApplicationCustomizer
 
   //  Amplitude Service
   private amplitude!: AmplitudeService;
+
+  // Google Analytics Service
+  private googleAnalytics!: GoogleAnalyticsService;
 
   private observer?: MutationObserver;
   private topBarObserver?: MutationObserver;
@@ -619,6 +629,13 @@ export default class ExtensionsApplicationCustomizer
     });
     this.amplitude.init(this.context);
 
+    // Google Analytics 4
+    this.googleAnalytics = new GoogleAnalyticsService({
+      measurementId: GOOGLE_ANALYTICS_MEASUREMENT_ID,
+      debugMode: window.location.search.toLowerCase().includes('ga_debug=1')
+    });
+    this.googleAnalytics.init(this.context);
+
     this.injectFont();
     document.body.style.background = '#FFF4EA';
 
@@ -777,6 +794,7 @@ export default class ExtensionsApplicationCustomizer
         this.hideSocialBar?.apply(); // re-apply on modern navigation
         void this.refreshNavAndFooter();
         this.pageMeta?.onNavigated();
+        void this.googleAnalytics?.trackPageView(this.context);
       }, 200);
     });
 

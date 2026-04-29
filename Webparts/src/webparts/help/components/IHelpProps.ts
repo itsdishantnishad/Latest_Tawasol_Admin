@@ -6,8 +6,15 @@ export interface IHelpProps {
   environmentMessage: string;
   hasTeamsContext: boolean;
   userDisplayName: string;
-  context: WebPartContext;   
+  context: WebPartContext;
   listTitle: string;
+
+  // Existing NaviBot
   chatBotDeepLink?: string;
   showChatBot?: boolean;
+
+  // New Metapods widget
+  metapodsChatbotId?: string;
+  metapodsClientId?: string;
+  showMetapodsWidget?: boolean;
 }
