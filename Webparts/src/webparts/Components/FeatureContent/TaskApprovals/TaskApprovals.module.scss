@@ -171,3 +171,82 @@
     display: block;
   }
 }
+
+
+@media (max-width: 640px) {
+
+  /* 🔥 CATEGORY TABS CONTAINER (hash-proof selector) */
+  [class*="categoryContainer"] {
+    display: flex ;
+    flex-wrap: nowrap;
+
+    overflow-x: auto ;
+    overflow-y: hidden ;
+
+    justify-content: flex-start;
+
+    gap: 8px ;
+    padding: 0 16px;
+
+    width: 100%;
+
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* 🔥 SCROLLBAR HIDE */
+  [class*="categoryContainer"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 🔥 EACH TAB ITEM */
+  [class*="categoryContainer"] > * {
+    flex: 0 0 auto;
+    min-width: 120px ;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    white-space: nowrap;
+  }
+
+}
+
+
+
+@media (max-width: 640px) {
+
+  /* 🔥 Container same rahega (scroll already working) */
+  [class*="categoryContainer"] {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+
+    gap: 8px !important;
+    padding: 0 16px !important;
+
+    justify-content: flex-start !important;
+  }
+
+  /* 🔥 EACH TAB FIX SIZE (main fix) */
+  [class*="categoryContainer"] > * {
+    flex: 0 0 144px !important;   /* 👈 exact width */
+    max-width: 144px !important;
+
+    height: 48px !important;
+
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+
+    border-radius: 999px !important;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 👈 text + count align */
+
+    white-space: nowrap;
+  }
+
+}
