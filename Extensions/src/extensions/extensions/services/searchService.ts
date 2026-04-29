@@ -1,5 +1,8 @@
+// searchService.ts
+
 import {
   MSGraphClientV3,
+  MSGraphClientFactory,
   SPHttpClient,
   SPHttpClientResponse
 } from '@microsoft/sp-http';
@@ -34,7 +37,7 @@ export class SearchService {
 
   constructor(
     private readonly webUrl: string,
-    private readonly msGraphClientFactory: { getClient: (v: string) => Promise<MSGraphClientV3> },
+    private readonly msGraphClientFactory: MSGraphClientFactory,
     private readonly spHttpClient: SPHttpClient,
     me?: { upn?: string; email?: string; loginName?: string }
   ) {
