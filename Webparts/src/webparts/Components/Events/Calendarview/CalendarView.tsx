@@ -15,6 +15,7 @@ interface Props {
   events: any[];
   context?: any;
   from?: string; // "All" | "My" | "Events" etc
+   onDateChange?: (date: Date) => void;
 }
 
 type CalendarEvent = {
@@ -124,7 +125,7 @@ const normalizeIsoToUtcIfNoZone = (raw: string): string => {
   return s;
 };
 
-const CalendarViewComponent: React.FC<Props> = ({ events, context, from }) => {
+const CalendarViewComponent: React.FC<Props> = ({ events, context, from,onDateChange }) => {
   const [selectedEvent, setSelectedEvent] = React.useState<any>(null);
 
   const parseDate = (v: any): Date | null => {

@@ -308,3 +308,316 @@
     margin: 0;
   }
 }
+
+
+// responsive 
+
+
+@media (max-width: 768px) {
+  .content {
+    width: 100% !important;
+    min-height: auto !important;
+    display: block !important;
+    align-items: unset !important;
+    padding: 0 0 100px 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Main responsive layout: 343px on 375px screen */
+  .feed {
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
+    margin: 0 16px !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 32px !important;
+
+    box-sizing: border-box !important;
+  }
+
+  .monthSection {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .monthHeader {
+    width: 100% !important;
+    height: 44px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    padding: 0 16px !important;
+    margin: 0 !important;
+
+    background: #feead6 !important;
+    border-radius: 4px !important;
+    border: 0 !important;
+
+    box-sizing: border-box !important;
+  }
+
+  .monthTitle {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    color: #3a3b43 !important;
+    margin: 0 !important;
+  }
+
+  .chevron {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .monthContent {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 32px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Each achievement card */
+  .achievement {
+    width: 100% !important;
+    min-height: 304px !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+
+    padding: 0 0 24px 0 !important;
+    margin: 0 !important;
+
+    border-bottom: 1px solid #f8cca3 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .contentWrapper {
+    display: contents !important;
+  }
+
+  .headerRow {
+    order: 1 !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .nameSection {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .name {
+    width: 100% !important;
+    height: auto !important;
+
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+
+    margin: 0 0 4px 0 !important;
+
+    font-family: "Instrument Serif", serif !important;
+    font-size: 28px !important;
+    font-weight: 400 !important;
+    line-height: 100% !important;
+    color: #000 !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .firstName {
+    color: #da291c !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    font-size: 28px !important;
+    line-height: 100% !important;
+  }
+
+  .lastName {
+    color: #000 !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    font-size: 28px !important;
+    line-height: 100% !important;
+  }
+
+  .role {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    color: #3a3b43 !important;
+
+    margin: 0 !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .imageWrapper {
+    order: 2 !important;
+    width: 100% !important;
+    height: 209px !important;
+
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .photo {
+    width: 100% !important;
+    height: 209px !important;
+
+    display: block !important;
+    object-fit: fill !important;
+    object-position: center !important;
+
+    border-radius: 4px !important;
+    box-shadow: none !important;
+  }
+
+  .noImage {
+    width: 100% !important;
+    height: 209px !important;
+    border-radius: 4px !important;
+  }
+
+  .description {
+    order: 3 !important;
+
+    margin: 0 !important;
+
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    color: #3a3b43 !important;
+
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .description,
+  .description div,
+  .description p,
+  .description span {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    color: #3a3b43 !important;
+  }
+
+  .connect {
+    order: 4 !important;
+
+    height: auto !important;
+    margin: 0 !important;
+
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    color: #3a3b43 !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .sayCongratulations {
+    order: 5 !important;
+
+    width: 100% !important;
+    height: 34px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 16px !important;
+    margin: 0 !important;
+    gap: 8px !important;
+
+    border: 1.5px solid #101820 !important;
+    border-radius: 50px !important;
+    background: #fff !important;
+
+    font-family: "Inter", sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    color: #000 !important;
+    text-decoration: none !important;
+
+    box-sizing: border-box !important;
+  }
+
+  .congratulationsIcon {
+    width: 16px !important;
+    height: auto !important;
+  }
+
+  .loadMoreBtn {
+    margin: 24px auto 0 auto !important;
+  }
+
+   .contentWrapper {
+    display: contents !important;
+  }
+
+  .headerRow {
+    display: contents !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .nameSection {
+    order: 1 !important;
+    width: 100% !important;
+  }
+
+  .imageWrapper {
+    order: 2 !important;
+  }
+
+  .description {
+    order: 3 !important;
+  }
+
+  .connect {
+    order: 4 !important;
+  }
+
+  .sayCongratulations {
+    order: 5 !important;
+    width: 100% !important;
+    height: 34px !important;
+    margin: 0 !important;
+  }
+
+}

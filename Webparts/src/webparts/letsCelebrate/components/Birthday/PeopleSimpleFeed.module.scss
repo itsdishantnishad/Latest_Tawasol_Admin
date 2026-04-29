@@ -128,18 +128,253 @@
   text-align: center;
 }
 
-@media (max-width: 680px) {
-  .row {
-    grid-template-columns: 50px 1fr;
+// @media (max-width: 680px) {
+//   .row {
+//     grid-template-columns: 50px 1fr;
+//   }
+
+//   .rowWithLeft {
+//     grid-template-columns: 90px 50px 1fr;
+//   }
+
+//   .ctaCol {
+//     grid-column: 1 / -1;
+//     justify-content: flex-start;
+//     margin-top: 8px;
+//   }
+// }
+
+/* 1. Add this to your base styles (ABOVE media queries) 
+   This ensures the new wrapper doesn't break the desktop grid */
+.contentWrapper {
+  display: contents; 
+}
+
+@media (max-width: 768px) {
+  .list {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
+    margin: 0 16px 0px 16px !important;
+    padding: 0 !important;
+    gap: 20px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
   }
 
-  .rowWithLeft {
-    grid-template-columns: 90px 50px 1fr;
+  .row {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+
+    /* IMPORTANT: fixed height hatao */
+    height: auto !important;
+    min-height: 106px !important;
+
+    margin: 0 !important;
+    padding: 0 0 16px 0 !important;
+
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid #f3c9aa !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+
+  .contentWrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: flex !important;
+    flex-direction: row !important;   /* image left, text right */
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+
+    gap: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+  }
+
+  .avatarCol {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    flex: 0 0 56px !important;
+    align-self: flex-start !important;
+
+    border-radius: 50% !important;
+    border: 1.5px solid #da291c !important;
+    padding: 3px !important;
+    background: #fff !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+  }
+
+  .avatar {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    display: block !important;
+  }
+
+  .mainCol {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 72px) !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+
+    text-align: left !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .name {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    color: #2d2d35 !important;
+    margin: 0 0 2px 0 !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .sub {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    color: #6b6b6b !important;
+    margin: 0 !important;
+
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
   }
 
   .ctaCol {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
-    margin-top: 8px;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+
+    /* image width 56 + gap 16 = 72 */
+    padding-left: 72px !important;
+    margin-top: 12px !important;
+    box-sizing: border-box !important;
   }
+
+  .wishBtn,
+  .ctaCol > a,
+  .ctaCol > button,
+  .ctaCol > * {
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 16px !important;
+
+    border: 2px solid #101820 !important;
+    border-radius: 100px !important;
+    background: #fff !important;
+    color: #101820 !important;
+
+    font-family: "Inter", sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 18px !important;
+    text-decoration: none !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+  }
+
+   .row {
+    border-bottom: 1px solid #f3c9aa !important;
+    padding-bottom: 16px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .row:last-child {
+    border-bottom: 1px solid #f3c9aa !important;
+  }
+   .rowWithLeft {
+    height: auto !important;
+    min-height: 142px !important;
+    padding-bottom: 16px !important;
+  }
+
+  .anniversaryLabel {
+    width: 94px !important;
+    height: 28px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    margin: 0 0 10px 0 !important;
+    padding: 0 !important;
+
+    font-family: "Inter", sans-serif !important;
+    color: #da291c !important;
+    background: transparent !important;
+
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+  }
+
+  .anniversaryNum {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+    line-height: 24px !important;
+    color: #da291c !important;
+  }
+
+  .anniversarySuf {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 10px !important;
+    line-height: 12px !important;
+    color: #da291c !important;
+
+    position: relative !important;
+    top: -5px !important;
+    margin-left: 1px !important;
+  }
+
+  .anniversaryWord {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    line-height: 16px !important;
+    color: #da291c !important;
+    margin-left: 2px !important;
+  }
+   
+  
 }

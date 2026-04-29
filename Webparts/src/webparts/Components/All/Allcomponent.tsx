@@ -16,6 +16,7 @@ interface IAllComponentProps {
   context?: any;
   viewMode: "list" | "calendar";
   isMobileView?: boolean;
+  onDateChange?: (date: Date) => void;
 }
 
 const safeStr = (v: any) => String(v ?? "").split("\n")[0].trim();
@@ -169,6 +170,8 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
 }) => {
   const now = new Date();
   const [activeTab, setActiveTab] = React.useState<"all" | "my">("all");
+
+  const [selectedCalendarDate, setSelectedCalendarDate] = React.useState<Date>(new Date());
 
   // ----------------------------
   // Graph: resolve instructor name + avatar (cache by email)
@@ -682,7 +685,48 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
     [myUpcomingEvents, myUpcomingTrainings, upcomingMeetings]
   );
 
-  const showLegend = !showCalendar;
+  //const showLegend = !showCalendar;
+
+  const renderLegend = () => (
+  <div className={styles.legend}>
+    <div className={styles.legendItem}>
+      <span className={`${styles.swatch} ${styles.swatchEvent}`} />
+      <span>Events</span>
+    </div>
+    <div className={styles.legendItem}>
+      <span className={`${styles.swatch} ${styles.swatchTraining}`} />
+      <span>Trainings</span>
+    </div>
+    <div className={styles.legendItem}>
+      <span className={`${styles.swatch} ${styles.swatchTeams}`} />
+      <span>Teams Meeting</span>
+    </div>
+  </div>
+);
+
+
+const isSameDate = (a: Date, b: Date) => {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+};
+
+const mobileDateDividerText = React.useMemo(() => {
+  const selectedDate = selectedCalendarDate || new Date();
+  const todayDate = new Date();
+
+  const dateText = `${selectedDate.toLocaleString("en-US", {
+    month: "short",
+  })} ${selectedDate.getDate()}`;
+
+  return isSameDate(selectedDate, todayDate)
+    ? `${dateText}  ·  Today`
+    : dateText;
+}, [selectedCalendarDate]);
+
+
 
   return (
     <>
@@ -706,7 +750,7 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
         </div>
       </div>
 
-      {showLegend && (
+      {/* {showLegend && (
         <div className={styles.legend}>
           <div className={styles.legendItem}>
             <span className={`${styles.swatch} ${styles.swatchEvent}`} />
@@ -721,17 +765,30 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
             <span>Teams Meeting</span>
           </div>
         </div>
-      )}
+      )} */}
 
       {activeTab === "all" ? (
   <>
-    {showCalendar && (
-      <CalendarViewComponent
-        events={allCalendarItems}
-        context={context}
-        from="All"
-      />
+ {showCalendar && (
+  <>
+    <CalendarViewComponent
+      events={allCalendarItems}
+      context={context}
+      from="All"
+      onDateChange={setSelectedCalendarDate}
+    />
+
+    {isMobileView && <div className={styles.mobileModeBar} />}
+
+    {isMobileView && renderLegend()}
+
+    {isMobileView && (
+      <div className={styles.mobileDateDivider}>
+        <span>{mobileDateDividerText}</span>
+      </div>
     )}
+  </>
+)}
 
     {(!showCalendar || showCardsBelowCalendar) && (
       <>
@@ -782,13 +839,26 @@ const Allcomponent: React.FC<IAllComponentProps> = ({
   </>
 ) : (
   <>
-    {showCalendar && (
-      <CalendarViewComponent
-        events={myCalendarItems}
-        context={context}
-        from="My"
-      />
+ {showCalendar && (
+  <>
+    <CalendarViewComponent
+      events={myCalendarItems}
+      context={context}
+      from="My"
+      onDateChange={setSelectedCalendarDate}
+    />
+
+    {isMobileView && <div className={styles.mobileModeBar} />}
+
+    {isMobileView && renderLegend()}
+
+    {isMobileView && (
+      <div className={styles.mobileDateDivider}>
+        <span>{mobileDateDividerText}</span>
+      </div>
     )}
+  </>
+)}
 
     {(!showCalendar || showCardsBelowCalendar) && (
       <>

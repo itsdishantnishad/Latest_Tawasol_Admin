@@ -84,3 +84,41 @@
   border: 1px solid #F0BB82;
   box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
 }
+
+
+@media (max-width: 768px) {
+  .navTabs {
+    width: calc(100% - 32px);
+    max-width: none;
+    min-width: 0;
+    height: 40px;
+    margin: 0 16px;
+    padding: 0;
+    gap: 8px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .navTabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    flex: 0 0 120px;
+    width: 120px;
+    min-width: 120px;
+    height: 40px;
+    border-radius: 360px;
+    border: 1px solid #F0BB82;
+    padding: 0 12px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+  }
+}
