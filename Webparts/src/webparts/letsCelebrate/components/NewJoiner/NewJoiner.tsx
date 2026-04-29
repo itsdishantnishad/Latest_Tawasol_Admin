@@ -16,6 +16,15 @@ const PAGE_SIZE = 5;
 
 const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items = [] }) => {
   const [visibleCount, setVisibleCount] = React.useState<number>(PAGE_SIZE);
+  const [expandedCards, setExpandedCards] = React.useState<{ [key: string]: boolean }>({});
+
+
+  const toggleExpanded = (key: string) => {
+    setExpandedCards((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   const sortedItems = React.useMemo(() => {
     if (!items || items.length === 0) return [];
@@ -51,6 +60,8 @@ const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items = [] }) => {
           {itemsToRender.map((item: any) => {
             const fullName = item.Title || item.name || "";
             const { first, rest } = splitName(fullName);
+            const itemKey = String(item.ID || item.id || item.Title || fullName);
+            const isExpanded = !!expandedCards[itemKey];
 
             const emailToUse: string | undefined = item?.TIRUserEmail?.trim();
             const teamsChatUrl = emailToUse
@@ -58,7 +69,7 @@ const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items = [] }) => {
               : "";
 
             return (
-              <article key={item.ID || item.id || item.Title}>
+              <article key={itemKey}>
                 <div className={styles.cardTop}>
                   <header className={styles.header}>
                     <h2 className={styles.name}>
@@ -97,10 +108,19 @@ const NewJoiner: React.FC<INewJoinersFeedProps> = ({ items = [] }) => {
 
                   <div className={styles.right}>
                     <section className={styles.body}>
-                      <p
-                        className={styles.para}
+                      <div
+                        className={`${styles.para} ${isExpanded ? styles.paraExpanded : ""}`}
                         dangerouslySetInnerHTML={{ __html: item.Description || "" }}
                       />
+
+                      <button
+                        type="button"
+                        className={styles.seeMoreBtn}
+                        onClick={() => toggleExpanded(itemKey)}
+                        aria-expanded={isExpanded}
+                      >
+                        {isExpanded ? "See less" : "See more"}
+                      </button>
                     </section>
                   </div>
                 </div>

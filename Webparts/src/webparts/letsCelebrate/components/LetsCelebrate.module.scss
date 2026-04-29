@@ -87,11 +87,7 @@
 
 
 
-
-/* ================= FINAL NAV BUTTON SLIDER ================= */
 @media (max-width: 768px) {
-
-  /* 🔥 outer wrapper scroll */
   .topWrapper {
     display: block !important;
     overflow-x: auto !important;
@@ -99,42 +95,43 @@
     padding: 0 10px;
   }
 
-  /* 🔥 REMOVE big pill container feel */
   :global([class*="navTabs"]) {
     display: flex !important;
     flex-wrap: nowrap !important;
-
     width: max-content !important;
     gap: 10px;
-
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
   }
 
-  /* 🔥 EACH TAB = SEPARATE BUTTON */
   :global([class*="tab"]) {
     flex: 0 0 auto !important;
     white-space: nowrap;
-
     padding: 8px 16px !important;
     border-radius: 999px;
-
-    border: 1px solid #e5a96c;   /* light border */
+    border: 1px solid #e5a96c;
     background: #fff;
-
     font-size: 13px;
   }
 
-  /* 🔥 active tab */
   :global([class*="tab"][class*="Active"]) {
     background: linear-gradient(245deg, #dda160, #ffdbb4) !important;
     border: none;
   }
 
-  /* scrollbar hide */
   .topWrapper::-webkit-scrollbar {
     display: none;
   }
-}     
+
+  /* ADD THIS */
+  .wrapOuter {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 0 60px 0 !important;
+    margin-top: 32px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+}
