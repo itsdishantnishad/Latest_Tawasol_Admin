@@ -515,14 +515,22 @@
 
 
 @media (max-width: 768px) {
+  @media (max-width: 768px) {
   .eventsWrapper {
     width: 100%;
     max-width: none;
     margin: 16px 0 0;
     padding: 0;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     overflow: visible;
   }
+
+  .eventsWrapper > * {
+    margin-bottom: 0 !important;
+  }
+}
 
   .cardLinkWrapper {
     width: 100%;
@@ -712,4 +720,46 @@
     background: #CCCACA;
   }
 
+.legend {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 18px 0 18px;
+    padding: 0 16px;
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+  }
+
+  .legendItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    line-height: 22px;
+    color: #3A3B43;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+   .mobileModeBar {
+    width: 36px;
+    height: 5px;
+    border-radius: 100px;
+    background: #CCCACA;
+    margin: 14px auto 24px;
+    opacity: 1;
+  }
+ .mobileDateDivider span::before {
+    display: none !important;
+    content: none !important;
+  }
 }

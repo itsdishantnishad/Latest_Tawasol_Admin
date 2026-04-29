@@ -514,7 +514,6 @@
 
 // responsive 
 
-
 @media (max-width: 768px) {
   .courseListing {
     background-color: #fef7f0;
@@ -530,7 +529,7 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
   }
 
   .learningSection {
@@ -571,7 +570,7 @@
     }
   }
 
-    .mobileDateDivider {
+  .mobileDateDivider {
     width: 100%;
     margin: 8px 0 14px;
     display: flex;
@@ -613,8 +612,16 @@
   }
 }
 
+
 /* Mobile / small tablet card width fix */
 @media (max-width: 768px) {
+  .courseListing,
+  .monthSection {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+  }
+
   .cardsGrid,
   .myTrainingsGrid {
     width: 100%;
@@ -624,23 +631,37 @@
     align-items: stretch;
   }
 
-  .cardLinkWrapper {
-    width: 100%;
-    max-width: none;
-    display: block;
-  }
-
-  .courseCard {
+  .cardsGrid > *,
+  .myTrainingsGrid > * {
     width: 100%;
     max-width: none;
     box-sizing: border-box;
   }
 
+  .cardLinkWrapper {
+    display: block;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+  }
+
+  .courseCard,
+  .cardContainer {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
   .imageContainer {
     width: 100%;
+    max-width: none;
   }
 
   .headerImage {
+    display: block;
     width: 100%;
+    max-width: none;
   }
 }
