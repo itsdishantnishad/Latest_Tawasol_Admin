@@ -78,7 +78,7 @@
   color: #000000;
   z-index: 10;
 
-  &:hover {
+  .hover {
     background: rgba(0, 0, 0, 0.05);
     transform: scale(1.05);
   }
@@ -175,6 +175,17 @@
   margin-bottom: 0px;
 }
 
+// .pagination resposnive
+
+@media (max-width: 768px){
+  .pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 0px;
+}
+}
+
 .dot {
   width: 8px;
   height: 8px;
@@ -183,13 +194,33 @@
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  padding: 0;
+  padding: 0; }
 
-  &:hover {
+  // .dot resposive
+
+  @media (max-width: 768px){
+    .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cccaca;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  }}
+
+  .hover {
     background: #9ca3af;
     transform: scale(1.2);
   }
-}
+  // &:hiver resposive----
+  @media (max-width: 768px){
+    .hover {
+    background: #9ca3af;
+    transform: scale(1.2);
+  }
+  }
 
 .activeDot {
   background: #da291c;
@@ -205,54 +236,82 @@
 }
 
 @media (max-width: 768px) {
+
   .serviceLinksContainer {
     padding: 40px 16px;
   }
-
+}
+  /* 🔥 Tabs */
   .tabContainer {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
   }
 
   .tab {
-    padding: 10px 24px;
+    padding: 10px 18px;
     font-size: 13px;
   }
 
+  /* 🔥 MAIN WRAPPER (CUT FIX) */
   .wheelWrapper {
-    gap: 16px;
-    min-height: 350px;
+    gap: 0;
+    min-height: auto;
+    justify-content: center;
+    overflow: visible;        /* 👈 MAIN FIX */
+    // padding: 0 16px; 
+    padding-right: 34px;         /* 👈 side spacing */
   }
 
-  .serviceCard {
-    max-width: 95px;
-  }
-
+  /* 🔥 CIRCLE CONTAINER */
   .circleContainer {
+    width: 343px;
+    height: 343px;
+    margin: 0 auto;
+    position: relative;
     top: 0;
   }
 
+  /* 🔥 OUTER CIRCLE (NO CUT) */
   .outerCircle {
-    width: 90vw;
-    height: 90vw;
+    width: 343px;
+    height: 343px;
+    max-width: 100%;
   }
 
+  /* 🔥 INNER CIRCLE */
   .innerCircle {
-    width: 50vw;
-    height: 50vw;
+    width: 180px;
+    height: 180px;
   }
 
+  /* 🔥 SERVICE CARDS (TEXT CUT FIX) */
+  .serviceCard {
+    width: 95px;
+    height: 88px;
+    overflow: visible;   /* 👈 TEXT FIX */
+  }
+
+  /* 🔥 ICON */
+  .serviceIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* 🔥 TEXT */
+  .serviceName {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+
+@media (max-width: 768px) {
+
+  
+
+
+
+  /* 🔥 NAV HIDE */
   .navButton {
     display: none;
   }
 
-  .serviceName {
-    font-size: 12px;
-    line-height: 18px;
-  }
-
-  .commonButtonArea {
-    margin-top: 30px;
-    gap: 24px;
-    position: static;
-  }
 }
