@@ -287,8 +287,8 @@
   position: absolute;
   top: -2px;
   right: 0;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -437,7 +437,7 @@
   }
 
   .TIRNavItem {
-    height: 52px !important;
+    height: 48px !important;
     font-size: 10px !important;
     gap: 2px !important;
   }
@@ -760,7 +760,7 @@
   grid-template-columns: 1fr auto;
   align-items: center;
   padding: 14px 18px;
-  border-bottom: 1px solid #eee;
+ // border-bottom: 1px solid #eee;
 }
 
 .TIRNotifTitle { font-size: 18px; font-weight: 700; color: #111; }
@@ -772,7 +772,14 @@
 }
 
 .TIRMarkAll { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #333; }
-.TIRMarkAllChk { width: 16px; height: 16px; }
+.TIRMarkAllChk {
+   width: 15px; 
+   height: 15px; 
+   border-radius: 2px;
+   top: 2.5px;
+   left: 2.5px;
+   color: #D3675B;
+  }
 
 .TIRNotifClose {
   width: 32px;
@@ -860,6 +867,31 @@
 }
 
 
+/* ===== MINIMAL FIX : REMOVE CROSS BUTTON BOX ===== */
+/* ===== CLOSE ICON SIZE 20px × 20px ===== */
+.TIRNotifClose{
+  background: transparent !important;
+  border: 1.5px !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  width: 10px !important;
+  height: 10px !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-size: 30px !important;
+  line-height: 20px !important;
+  color: #6C6C6C;
+}
+
+
+
+
+
+
 /* ===================== MOBILE RESPONSIVE ===================== */
 @media (max-width: 480px) {
 
@@ -886,6 +918,15 @@
 
   .TIRMarkAll {
     font-size: 13px;
+  }
+
+  .TIRMarkAllChk {
+   width: 15px; 
+   height: 15px; 
+   border-radius: 2px;
+   top: 2.5px;
+   left: 2.5px;
+   color: #D3675B !important;
   }
 
   .TIRNotifSections {
@@ -985,6 +1026,65 @@
   max-height: 90vh !important;
 }
 
+
+
+/* ===== NOTIFICATION MOBILE/TABLET FIX up to 768px ===== */
+@media (max-width: 768px) {
+
+  .TIRNotifHeader {
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+  }
+
+  .TIRNotifHeaderRight {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  /* Move Mark all as read below header, same row as date */
+  .TIRNotifSections .TIRNotifSection:first-child {
+    position: relative;
+  }
+
+  .TIRNotifSections .TIRNotifSection:first-child .TIRNotifSectionCaption {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding-right: 0 !important;
+  }
+
+  .TIRNotifHeaderRight .TIRMarkAll {
+    position: absolute !important;
+    top: 88px !important;
+    right: 26px !important;
+    z-index: 2;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Keep close icon in header */
+  .TIRNotifClose {
+    position: static !important;
+  }
+
+  /* Time + red dot same row */
+  .TIRNotifRight {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+  }
+
+  .TIRNotifDot {
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+  }
+}
+
 /* ===== MOBILE FIX ===== */
 @media (max-width: 480px) {
 
@@ -992,10 +1092,48 @@
     padding: 16px !important;
   }
 
-  .TIRNotifModal {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
+  .TIRNotifSectionCaption {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 12px;
+    font-family: 'inter';
+    color: #3A3B43;
+  }
+
+  .TIRMarkAll {
+    display: inline-flex !important;
+    align-items: center !important;
+    white-space: nowrap;
+    margin-left: auto;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+    font-family: 'inter';
+    color: #3A3B43;
+  }
+
+  /* 2. Time + Red dot same row */
+  .TIRNotifRight {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    white-space: nowrap;
+  }
+
+  .TIRNotifTime {
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .TIRNotifDot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    margin-top: 0 !important;
   }
 
 }
