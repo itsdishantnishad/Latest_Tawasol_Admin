@@ -352,11 +352,13 @@
 
 // ── Tablet (≤768px) ────────────────────────────────────────────────────────
 @media (max-width: 768px) {
+
   .eventsContainer {
     padding: 24px 0 24px ; // no right padding — lets cards scroll to edge
    //  overflow-x:hidden;
   }
 
+  /* 🔥 GRID → HORIZONTAL SLIDER */
   .eventsGrid {
     display: flex;
     flex-direction: row;
@@ -400,6 +402,7 @@
     width: 100%;
   }
 
+  /* 🔥 BUTTON */
   .buttonContainer {
     margin-top: 24px;
   }
