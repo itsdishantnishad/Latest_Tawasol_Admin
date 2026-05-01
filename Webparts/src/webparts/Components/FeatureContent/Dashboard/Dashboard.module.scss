@@ -1,31 +1,65 @@
 @import "~@fluentui/react/dist/sass/References.scss";
 
 .dashboardContainer {
-  padding: 40px 60px 0px;
-}
-
-.buttonContainer {
-  margin-top: 40px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 40px 60px 0;
 }
 
 .dashboardGrid {
-  display: grid;
-  grid-template-columns: repeat(4,1fr);
-  // gap: 20px;
-  margin: 0 auto;
+  width: 100%;
   max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 20px;
   overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  align-items: flex-start;
+}
+
+.dashboardGrid::-webkit-scrollbar {
+  display: none;
+}
+
+.dashboardCard {
+  flex: 0 0 calc((100% - 60px) / 4);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.dashboardCard :global(a) {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.dashboardCardInner {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.dashboardImageWrap {
+  width: 100%;
+  display: block;
+  line-height: 0;
 }
 
 .dashboardImage {
+  display: block;
   width: 100%;
-  aspect-ratio: 8 / 6;
-  vertical-align: bottom;
+  height: auto;
+  max-width: 100%;
 }
 
 .dashboardInfo {
-  padding: 10px;
-  text-align: center;
+  padding: 10px 0 0;
+  text-align: left;
+  margin-left: 33px;
 }
 
 .dashboardTitle {
@@ -33,11 +67,22 @@
   color: #1a202c;
   font-size: 16px;
   font-weight: 500;
-  line-height: 24px;
+  line-height: 1.35;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  justify-content: flex-start;
+  gap: 7px;
+  min-width: 0;
+}
+
+.dashboardTitleText {
+  min-width: 0;
+}
+
+.titleArrow {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
 }
 
 .mTop8 {
@@ -50,27 +95,72 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 22px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.buttonContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 40px auto 0;
+  display: flex;
+  justify-content: center;
+}
+
+.buttonContainer :global(a) {
+  display: inline-block;
+}
+
+@media (max-width: 1024px) {
+  .dashboardContainer {
+    padding-inline: 32px;
+  }
+
+  .dashboardCard {
+    flex-basis: calc((100% - 20px) / 2);
+  }
 }
 
 @media (max-width: 768px) {
   .dashboardContainer {
-    padding: 0 0 16px 16px;
+    padding: 0 0 96px 16px;
   }
 
-  .headerContent {
-    flex-direction: column;
-    gap: 16px;
+  .dashboardGrid {
+    max-width: none;
+    gap: 20px;
+    padding-right: 16px;
+  }
+
+  .dashboardCard {
+    flex: 0 0 clamp(240px, 72vw, 300px);
   }
 
   .dashboardInfo {
-    text-align: left;
+    padding-top: 8px;
+    margin-left: 33px;
   }
 
   .dashboardTitle {
-    justify-content: flex-start;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .dashboardDescription {
+    font-size: 13px;
+    line-height: 20px;
+    -webkit-line-clamp: 3;
   }
 
   .buttonContainer {
-    margin-top: 24px;
+    width: 100%;
+    max-width: none;
+    margin: 24px 0 0;
+    padding-right: 16px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
   }
 }
