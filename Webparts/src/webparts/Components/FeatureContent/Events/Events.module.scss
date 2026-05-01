@@ -344,98 +344,206 @@
   }
 }
 
-/* Responsive design */
-@media (max-width: 1200px) {
-  .headerContent {
-    gap: 20px;
-  }
-
-  .title {
-    font-size: 36px;
-  }
-}
 
 
+// ─── MOBILE RESPONSIVE OVERRIDES ──────────────────────────────────────────
+// Paste at the bottom of your existing Events.module.scss
+// Desktop styles are completely untouched.
 
-
-
-
-
-
+// ── Tablet (≤768px) ────────────────────────────────────────────────────────
 @media (max-width: 768px) {
 
   .eventsContainer {
-    padding: 40px 16px;
+    padding: 24px 0 24px ; // no right padding — lets cards scroll to edge
+   //  overflow-x:hidden;
   }
 
   /* 🔥 GRID → HORIZONTAL SLIDER */
   .eventsGrid {
     display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     overflow-x: auto;
+    overflow-y: visible;
     gap: 16px;
-
-    padding-left: 16px;
-    padding-right: 16px;
-
+    max-width: 100%;
+    margin: 0;
+    padding: 0 1px; // exposes peek of next card
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
+    margin-left: 16px;
+    // hide scrollbar visually
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
-  /* 🔥 SCROLLBAR HIDE */
-  .eventsGrid::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* 🔥 CARD FIX SIZE (FIGMA EXACT) */
   .eventCard {
-    flex: 0 0 auto;
-
+    flex: 0 0 257px;        // fixed card width — same as desktop spec
     width: 257px;
-    height: 368px;
-
-    border-radius: 12px;
-
+    height: auto;
+    min-height: 368px;
     scroll-snap-align: start;
+     &:last-child {
+      margin-right: 16px; 
+     }
   }
 
-  /* 🔥 IMAGE HEIGHT CONTROL */
   .eventImage {
-    height: 160px;
+    height: 180px;
   }
 
-  /* 🔥 CONTENT ADJUST */
-  .eventContent {
-    padding: 16px;
+  .metaBlock {
+    width: 100%;
   }
 
-  .eventTitle {
-    font-size: 14px;
-    line-height: 20px;
-  }
-
-  .metaText {
-    font-size: 12px;
+  .countdownBar {
+    width: 100%;
   }
 
   /* 🔥 BUTTON */
   .buttonContainer {
     margin-top: 24px;
-    padding: 0 16px;
   }
 
-  .viewAllButton {
-    width: 100%;
-    max-width: 343px;
-    height: 40px;
 
-    border-radius: 167px;
-    padding: 0 12px;
+  .buttonContainer {
+  padding: 0 16px;
+  margin-top: 24px;
+  text-align: center;
+  margin-left: -16px;
+  margin-right: -16px;
+  a,
+  a > *,
+  a > * > * {
+    display: block;
+    width: 100% !important;  
+    max-width: 100% !important;  
+    height: 40px !important;
+    border-radius: 167px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+    text-align: center;
+    margin: 0 auto !important;
+  }
+}
 
+}
+
+// ── Mobile (≤480px) ────────────────────────────────────────────────────────
+@media (max-width: 480px) {
+  .eventsContainer {
+    padding: 20px 0 ;
+   // overflow-x:hidden;
+  }
+
+  .eventsGrid {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: visible;
+    gap: 16px;
+    max-width: 100%;
+    margin: 0;
+     padding: 0 1px; // peek amount — shows ~40px of next card
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    margin-left: 16px;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
-    margin: 0 auto;
+   
   }
 
+  .eventCard {
+    flex: 0 0 240px;        // slightly narrower on small phones
+    width: 240px;
+    height: auto;
+    min-height: 350px;
+    scroll-snap-align: start;
+    border-radius: 12.06px;
+     &:last-child {
+      margin-right: 16px; // ← ADD THIS LINE ONLY
+     }
+  }
+
+  .eventImage {
+    height: 165px;
+  }
+
+  .eventContent {
+    padding: 12px 14px 14px;
+  }
+
+  .eventTitle {
+    font-size: 15px;
+    line-height: 22px;
+    -webkit-line-clamp: 2;
+  }
+
+  .metaBlock {
+    width: 100%;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .metaText {
+    font-size: 12px;
+    line-height: 17px;
+  }
+
+  .countdownBar {
+    width: 100%;
+    height: 38px;
+    border-radius: 4px;
+    padding: 0 10px;
+  }
+
+  .countdownLabel {
+    font-size: 11px;
+  }
+
+  .countdownValue {
+    font-size: 14px;
+  }
+
+  .registerButton {
+    font-size: 13px;
+    padding: 9px 14px;
+  }
+
+  .buttonContainer {
+    padding-right: 16px;
+    margin-top: 20px;
+  }
+
+
+.buttonContainer {
+  padding: 0 16px;
+  margin-top: 24px;
+  text-align: center;
+  margin-left: -16px;
+
+  a,
+  a > *,
+  a > * > * {
+    display: block;
+    width: 100% !important;  // ← CHANGE to 100%
+    max-width: 100% !important;  // ← CHANGE to 100%
+    height: 40px !important;
+    border-radius: 167px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+    text-align: center;
+    margin: 0 auto !important;
+  }
+}
+
+  
 }
