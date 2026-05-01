@@ -550,219 +550,6 @@
   margin-top: 16px;
 }
 
-// Responsive for Achievement Cards
-@media (max-width: 1024px) {
-  .achievementWrapper {
-    gap: 40px;
-  }
-
-  .achievementCardContainer {
-    width: 90%;
-    max-width: 800px;
-  }
-
-  .achievementCard {
-    grid-template-columns: 180px 1fr;
-    gap: 20px;
-  }
-
-  .achievementPhoto,
-  .achievementNoImage {
-    width: 180px;
-    height: 210px;
-  }
-
-  .achievementContentWrapper {
-    width: 100%;
-  }
-
-  .achievementName {
-    font-size: 28px;
-  }
-}
-
-@media (max-width: 768px) {
-  .achievementWrapper {
-    gap: 16px;
-  }
-
-  .achievementCardContainer {
-    width: 100%;
-  }
-
-  .achievementCard {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    height: auto;
-  }
-
-  .achievementPhoto,
-  .achievementNoImage {
-    width: 100%;
-    height: 280px;
-  }
-
-  .achievementContentWrapper {
-    width: 100%;
-  }
-
-  .achievementName {
-    font-size: 24px;
-  }
-
-  .achievementHeaderRow {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .sayCongratulations {
-    align-self: flex-start;
-  }
-}
-
-
-// Responsive Design
-@media (max-width: 1024px) {
-  .wheelWrapper {
-    gap: 40px;
-    min-height: 450px;
-  }
-
-  .circleContainer {
-    width: 60vw;
-    height: 60vw;
-    max-width: 600px;
-    max-height: 600px;
-  }
-
-  .profileImageWrapper {
-    width: 80px;
-    height: 80px;
-  }
-
-  .profileName {
-    font-size: 12px;
-    max-width: 100px;
-  }
-
-  .content {
-    min-height: 450px;
-  }
-}
-
-@media (max-width: 768px) {
-  .celebrateContainer {
-    padding: 30px 16px;
-  }
-
-  .tabs {
-    width: 100%;
-    border: none;
-    background: transparent;
-    box-shadow: unset;
-    border-radius: 0;
-    gap: 8px;
-    padding: 3px;
-    margin-bottom: 30px;
-    justify-content: flex-start;
-    overflow-x: auto;
-  }
-
-  .tab {
-    border: 1px solid #fbbf7f;
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-
-  .count {
-    font-size: 11px;
-    padding: 1px 6px;
-  }
-
-  .wheelWrapper {
-    gap: 16px;
-    min-height: 800px;
-    width: 100%;
-  }
-
-  .circleContainer {
-    width: 70vw;
-    height: 70vw;
-    max-width: 400px;
-    max-height: 400px;
-  }
-
-  .navButton {
-    width: 48px;
-    height: 48px;
-
-    svg {
-      width: 30px;
-      height: 30px;
-    }
-  }
-
-  .profileImageWrapper {
-    width: 70px;
-    height: 70px;
-    border-width: 2px;
-  }
-
-  .profileName {
-    font-size: 11px;
-    max-width: 80px;
-    padding: 3px 8px;
-  }
-
-  .content {
-    min-height: 350px;
-  }
-
-  .bottomSection {
-    margin-top: 30px;
-    position: static;
-  }
-}
-
-@media (max-width: 480px) {
-  .wheelWrapper {
-    flex-direction: column;
-    gap: 20px;
-    // min-height: auto;
-  }
-
-  .navButton {
-    transform: rotate(90deg);
-
-    &:first-child {
-      order: -1;
-    }
-
-    &:last-child {
-      order: 1;
-    }
-  }
-
-  .circleContainer {
-    width: 80vw;
-    height: 80vw;
-    max-width: 300px;
-    max-height: 300px;
-    order: 0;
-  }
-
-  .profileImageWrapper {
-    width: 60px;
-    height: 60px;
-  }
-
-  .profileName {
-    font-size: 10px;
-    max-width: 70px;
-  }
-}
-
-
 /* ============================================
    Achievement 
    ============================================ */
@@ -823,4 +610,708 @@
 .navButton {
   position: relative;
   z-index: 2;
+}
+
+
+//  responsiveness 
+@media (max-width: 768px) {
+  .celebrateContainer {
+    padding: 20px 16px;
+  }
+
+  .tabs {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .tab {
+    border: 1px solid #fbbf7f;
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .content {
+    overflow: visible !important;
+  }
+
+  .wheelWrapper {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0;
+    min-height: 400px;
+    width: 100%;
+    overflow: visible !important;
+  }
+
+  .circleContainer {
+    width: 260px !important;
+    height: 260px !important;
+    min-width: 260px !important;
+    margin: 40px auto 0 !important;
+    top: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .outerCircle {
+    width: 260px !important;
+    height: 260px !important;
+    position: absolute !important;
+  }
+
+  // .innerCircle {
+  //   width: 155px !important;
+  //   height: 125px !important;
+  //   top: 50% !important;
+  //   left: 50% !important;
+  //   transform: translate(-50%, -50%) !important;
+  // }
+
+    .innerCircle {
+  width: 155px !important;
+  height: 155px !important; // was 125px — must equal width
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+  .profileCard {
+    width: 64px !important;
+    max-width: 64px !important;
+    gap: 6px;
+
+    .profileImageWrapper {
+      width: 64px !important;
+      height: 64px !important;
+      border: 1px solid #ff6b57 !important;
+      padding: 4px !important;
+    }
+
+    .profileName {
+      font-size: 11px !important;
+      line-height: 13px !important;
+      width: 100% !important;
+      color: #111 !important;
+      white-space: normal !important;
+      min-height: auto !important;
+    }
+  }
+
+  .centerIllustration {
+    width: 90px !important;
+    height: 90px !important;
+
+    .illustrationImage {
+      width: 70px !important;
+      height: 70px !important;
+    }
+  }
+
+  .bottomSection {
+        bottom: unset !important;
+        gap: 15px;
+        margin-top: 350px !important;
+        position: relative !important;
+    }
+
+  .navButton {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    margin-left: 16px;
+    margin-right: 16px;
+    z-index: 10;
+  }
+  .wheelWrapper {
+    overflow: visible !important;
+    margin-left: -16px;
+    margin-top: -50px;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .content {
+    overflow: visible !important;
+  }
+  .celebrateContainer {
+    padding: 20px 16px;
+  }
+
+  .tabs {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .tab {
+    border: 1px solid #fbbf7f;
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .content {
+    overflow: visible !important;
+  }
+
+  .wheelWrapper {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0;
+    min-height: 400px;
+    width: 100%;
+    overflow: visible !important;
+  }
+
+  .circleContainer {
+    width: 260px !important;
+    height: 260px !important;
+    min-width: 260px !important;
+    margin: 40px auto 0 !important;
+    top: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .outerCircle {
+    width: 260px !important;
+    height: 260px !important;
+    position: absolute !important;
+  }
+
+  // .innerCircle {
+  //   width: 165px !important;
+  //   height: 125px !important;
+  //   top: 50% !important;
+  //   left: 50% !important;
+  //   transform: translate(-50%, -50%) !important;
+  // }
+
+
+
+    .innerCircle {
+  width: 155px !important;
+  height: 155px !important; // was 125px — must equal width
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+
+  .profileCard {
+    width: 54px !important;
+    max-width: 54px !important;
+    gap: 6px;
+
+    .profileImageWrapper {
+      width: 54px !important;
+      height: 54px !important;
+      border: 1px solid #ff6b57 !important;
+      padding: 4px !important;
+    }
+
+    .profileName {
+      font-size: 11px !important;
+      line-height: 13px !important;
+      width: 100% !important;
+      color: #111 !important;
+      white-space: normal !important;
+      min-height: auto !important;
+    }
+  }
+
+  .centerIllustration {
+    width: 90px !important;
+    height: 90px !important;
+
+    .illustrationImage {
+      width: 70px !important;
+      height: 70px !important;
+    }
+  }
+
+  .bottomSection {
+        bottom: unset !important;
+        gap: 15px;
+        margin-top: 350px !important;
+        position: relative !important;
+    }
+
+  .navButton {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    margin-left: 16px;
+    margin-right: 16px;
+    z-index: 10;
+  }
+  .wheelWrapper {
+    overflow: visible !important;
+    margin-left: -16px;
+    margin-top: -50px;
+  }
+
+
+}
+
+
+
+
+// @media (max-width: 480px) {
+//   .content {
+//     overflow: visible !important;
+//   }
+
+//   .wheelWrapper {
+//     overflow: visible !important;
+//     margin-left: -16px;
+//     margin-top: -50px;
+//     align-items: flex-start !important; // arrows use margin-top for vertical centering
+//     position: relative;
+//   }
+
+//   .circleContainer {
+//     width: 343px !important;
+//     height: 343px !important;
+//     min-width: 343px !important;
+//     transform: none !important;
+//     margin: 40px auto 0 !important;
+//   }
+
+//   .outerCircle {
+//     width: 343px !important;
+//     height: 343px !important;
+//   }
+
+//   .innerCircle {
+//     width: 180px !important;
+//     height: 180px !important;
+//     top: 50% !important;
+//     left: 50% !important;
+//     transform: translate(-50%, -50%) !important;
+//   }
+
+//   // Arrows centered to circle: circle margin-top(40px) + half circle(171px) - half button(20px) = 191px
+//   .navButton {
+//     width: 40px;
+//     height: 40px;
+//     flex-shrink: 0;
+//     margin-left: 16px;
+//     margin-right: 16px;
+//     align-self: flex-start;
+//     margin-top: 191px; // 40px (circleContainer margin-top) + 171px (half of 343px) - 20px (half button)
+//   }
+
+//   .profileCard {
+//     width: 86px !important;
+//     max-width: 86px !important;
+//     gap: 6px;
+
+//     .profileImageWrapper {
+//       width: 64px !important;
+//       height: 64px !important;
+//       padding: 4px !important;
+//     }
+
+//     .profileName {
+//       font-size: 11px !important;
+//       line-height: 13px !important;
+//       width: 100% !important;
+//       white-space: normal !important;
+//       min-height: auto !important;
+//     }
+//   }
+
+//   .centerIllustration {
+//     width: 90px !important;
+//     height: 90px !important;
+
+//     .illustrationImage {
+//       width: 70px !important;
+//       height: 70px !important;
+//     }
+//   }
+
+//   // circle height(343px) + circle margin-top(40px) - wheelWrapper margin-top(50px) + gap(20px)
+//   .bottomSection {
+//     position: relative !important;
+//     bottom: unset !important;
+//     margin-top: 353px !important; // 343 + 40 - 50 + 20
+//     gap: 15px;
+//   }
+// }
+
+
+
+@media (max-width: 390px) {
+  .content {
+    overflow: visible !important;
+  }
+
+  .wheelWrapper {
+    overflow: visible !important;
+  }
+
+  .circleContainer {
+    width: 190px !important;
+    height: 190px !important;
+    min-width: 190px !important;
+    transform: none !important;
+  }
+
+  .outerCircle {
+    width: 190px !important;
+    height: 190px !important;
+  }
+
+  // .innerCircle {
+  //   width: 115px !important;
+  //   height: 90px !important;
+  // }
+
+
+    .innerCircle {
+  width: 115px !important;
+  height: 115px !important; // was 90px — must equal width
+}
+
+
+  .navButton {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .profileCard {
+    width: 64px !important;
+    max-width: 64px !important;
+
+    .profileImageWrapper {
+      width: 46px !important;
+      height: 46px !important;
+      padding: 3px !important;
+    }
+
+    .profileName {
+      font-size: 9px !important;
+      line-height: 11px !important;
+    }
+  }
+
+  .centerIllustration {
+    width: 65px !important;
+    height: 65px !important;
+
+    .illustrationImage {
+      width: 50px !important;
+      height: 50px !important;
+    }
+  }
+  
+  .bottomSection {
+    position: relative !important;
+    bottom: unset !important;
+    margin-top: 300px !important;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .content {
+    overflow: visible !important;
+  }
+
+  .wheelWrapper {
+    overflow: visible !important;
+  }
+
+  .circleContainer {
+    width: 170px !important;
+    height: 170px !important;
+    min-width: 170px !important;
+    transform: none !important;
+  }
+
+  .outerCircle {
+    width: 170px !important;
+    height: 170px !important;
+  }
+
+  .innerCircle {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .navButton {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .profileCard {
+    width: 56px !important;
+    max-width: 56px !important;
+
+    .profileImageWrapper {
+      width: 40px !important;
+      height: 40px !important;
+      padding: 2px !important;
+    }
+
+    .profileName {
+      font-size: 8px !important;
+      line-height: 10px !important;
+    }
+  }
+
+  .centerIllustration {
+    width: 55px !important;
+    height: 55px !important;
+
+    .illustrationImage {
+      width: 44px !important;
+      height: 44px !important;
+    }
+  }
+}
+
+// ADD this between @media (max-width: 480px) and @media (max-width: 390px)
+
+@media (min-width: 391px) and (max-width: 450px) {
+  .wheelWrapper {
+    justify-content: center !important; // center the circle, push arrows with gap
+    gap: 8px !important;
+  }
+
+  .navButton {
+    margin-left: 8px !important;
+    margin-right: 8px !important;
+  }
+
+  .circleContainer {
+    width: 240px !important;
+    height: 240px !important;
+    min-width: 240px !important;
+  }
+
+  .outerCircle {
+    width: 240px !important;
+    height: 240px !important;
+  }
+
+  // .innerCircle {
+  //   width: 152px !important;
+  //   height: 115px !important;
+  // }
+
+  .innerCircle {
+  width: 142px !important;
+  height: 142px !important; // was 115px — must equal width
+}
+
+}
+
+
+
+// achievements section 
+
+@media (max-width: 768px) {
+  /* Main Container: Forces equal 16px side padding */
+  .achievementWrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0 !important;
+    min-height: unset !important;
+    padding: 0 16px !important; 
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Remove desktop-only elements */
+  .achievementWrapper .navButton,
+  .achievementCircleContainer {
+    display: none !important;
+  }
+
+  /* Card Container: Fill the width provided by wrapper padding */
+  .achievementCardContainer {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: unset !important;
+    gap: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .achievementCard {
+    width: 100% !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Layout Order Control */
+  .achievementContentWrapper,
+  .achievementHeaderRow {
+    display: contents !important;
+  }
+
+  .achievementNameSection {
+    order: 1 !important;
+    width: 100% !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    margin-top: 50px;
+  }
+
+  .achievementImageWrapper {
+    order: 2 !important;
+    width: 100% !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .achievementPhoto,
+  .achievementNoImage {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 343 / 250 !important;
+    border-radius: 8px !important;
+    object-fit: cover !important;
+    display: block !important;
+    margin-right: 28px;
+  }
+
+  .achievementDescription {
+    order: 3 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    font-family: "Inter", sans-serif !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    color: #3a3b43 !important;
+    display: block !important;
+    overflow: visible !important;
+    -webkit-line-clamp: unset !important;
+    box-sizing: border-box !important;
+    margin-right: 28px;
+  }
+
+  .achievementConnect {
+    order: 4 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    white-space: normal !important;
+    box-sizing: border-box !important;
+  }
+
+  .sayCongratulations {
+    order: 5 !important;
+    width: 100% !important;
+    height: 36px !important;
+    border-radius: 167px !important;
+    border: 1.5px solid #000 !important;
+    padding: 0 12px !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    box-sizing: border-box !important;
+    margin-right: 32px;
+  }
+
+  /* Typography consistency */
+  .achievementName {
+    margin: 0 0 4px 0 !important;
+    font-size: 28px !important;
+    line-height: 1.1 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    margin-top: 50px;
+  }
+
+  .achievementFirstName {
+    font-family: "Instrument Serif", serif !important;
+    font-style: italic !important;
+    font-size: 28px !important;
+    font-weight: 400 !important;
+  }
+
+  .achievementLastName {
+    font-family: "Instrument Serif", serif !important;
+    font-style: normal !important;
+    font-size: 28px !important;
+    font-weight: 400 !important;
+  }
+
+  .achievementRole {
+    margin: 0 !important;
+    font-family: "Inter", sans-serif !important;
+    font-size: 12px !important;
+    line-height: 16px !important;
+    color: #3a3b43 !important;
+  }
+
+   .achievementDescription,
+  .achievementConnect {
+    width: calc(100% - 28px) !important;
+    margin-right: 28px !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+}
+
+/* Fixes specifically for Small Devices (e.g., iPhone SE) */
+@media (max-width: 480px) {
+
+  .achievementNameSection {
+  
+    margin-top: 50px;
+  }
+  .achievementWrapper {
+    padding: 0 16px !important; /* Ensures fixed 16px side margins */
+  }
+
+  .achievementPhoto,
+  .achievementNoImage {
+    aspect-ratio: 343 / 250 !important;
+    width: 100% !important;
+    margin-right: 28px;
+  }
+  
+  /* Forces description text to respect the right edge */
+  .achievementDescription, 
+  .achievementConnect {
+    padding-right: 0 !important;
+    width: 100% !important;
+    margin-right: 28px;
+  }
+   .achievementDescription,
+  .achievementConnect {
+    width: calc(100% - 28px) !important;
+    margin-right: 28px !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+  }
 }
