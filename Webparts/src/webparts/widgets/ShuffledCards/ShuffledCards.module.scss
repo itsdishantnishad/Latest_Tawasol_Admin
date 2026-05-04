@@ -28,11 +28,56 @@
   }
 }
 
+
+// mobile responsiveness 
+
+// @media (max-width: 768px) {
+//   .wrapper {
+//     justify-content: flex-start;
+//     padding: 30px 0;
+//     gap:8px;
+//     overflow-x: auto;
+//     margin-left: 16px;      // ← first card gets left margin
+//     padding-right: 32px;    // ← last card gets trailing space (works in scroll containers)
+//   }
+// }
+
 @media (max-width: 768px) {
   .wrapper {
     justify-content: flex-start;
-    gap: 16px;
-    padding: 30px 16px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    padding-left: 16px;   
+    padding-right: 16px;  // ← last card trailing space
+    gap: 8px;
     overflow-x: auto;
+    margin-left: 0;       // ← remove margin
+    width: 100%;
+    box-sizing: border-box;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .wrapper {
+    justify-content: flex-start;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 8px;
+    overflow-x: auto;
+    margin-left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
