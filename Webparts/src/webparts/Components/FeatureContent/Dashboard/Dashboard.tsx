@@ -154,7 +154,7 @@ export const Dashboard: React.FC<IDashboardProps> = (props) => {
 
       <div className={styles.buttonContainer}>
         <ConditionalLink to={viewAllHref}>
-          <PrimaryButton label="View All" />
+          <PrimaryButton fullWidth label="View All" />
         </ConditionalLink>
       </div>
     </div>

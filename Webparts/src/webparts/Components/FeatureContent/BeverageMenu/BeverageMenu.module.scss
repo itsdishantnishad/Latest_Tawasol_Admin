@@ -2,8 +2,55 @@
   margin-top: 40px;
 }
 
+
+
+
 @media (max-width: 768px) {
   .ctaWrapper {
+    padding: 0 16px;
     margin-top: 24px;
+    text-align: center;
+    margin-left: 0;    // ← remove the negative margin
+    margin-right: 0;
+
+    a,
+    a > *,
+    a > * > * {
+      display: block;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 40px !important;
+      border-radius: 167px !important;
+      padding-left: 0px !important;
+      padding-right: -1px !important;
+      box-sizing: border-box !important;
+      text-align: center;
+      margin: 0 auto !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .ctaWrapper {
+    padding: 0 16px;
+    margin-top: 20px;
+    text-align: center;
+    margin-left: 0;    // ← remove the negative margin
+    margin-right: 0;
+
+    a,
+    a > *,
+    a > * > * {
+      display: block;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 40px !important;
+      border-radius: 167px !important;
+      padding-left: 0px !important;
+      padding-right: -1px !important;
+      box-sizing: border-box !important;
+      text-align: center;
+      margin: 0 auto !important;
+    }
   }
 }
