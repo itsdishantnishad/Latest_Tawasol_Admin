@@ -185,3 +185,341 @@
     height: auto;
   }
 }
+
+
+// ── Tablet (≤780px) ────────────────────────────────────────────────────────
+@media (max-width: 780px) {
+
+  .body ,.header{
+    margin-top: 10px;
+  }
+
+  .trainingContainer {
+    padding: 24px 0 24px;
+  }
+
+  .trainingContainerErr {
+    padding: 24px 16px;
+  }
+
+  .trainingGrid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: visible;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 1px;
+    padding-right: 16px !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    margin-left: 16px;
+    scrollbar-width: none;
+    box-sizing: border-box;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .trainingCard {
+    flex: 0 0 257px;
+    min-width: 257px;
+    width: 257px;
+    height: auto;
+    min-height: 424px;
+    border-radius: 12.06px;
+    border-width: 0.86px;
+    scroll-snap-align: start;
+    box-sizing: border-box;
+
+    &:last-child {
+      margin-right: 16px;
+    }
+  }
+
+  .imageContainer {
+    height: 180px;
+    min-height: 180px;
+    flex-shrink: 0;
+  }
+
+  .trainingInfo {
+    padding: 16px 16px 16px;
+  }
+
+  .trainingTitle {
+    font-size: 16px;
+    line-height: 22px;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .metaRow {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .metaItem {
+    font-size: 12px;
+    line-height: 17px;
+  }
+
+  .instructorRow {
+    margin-bottom: 12px;
+  }
+
+  .instructorAvatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .instructorName {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .instructorTitle {
+    font-size: 10px;
+    line-height: 14px;
+  }
+
+  .mTop16 {
+    margin-top: auto;
+
+    button {
+      width: 257px !important;
+      max-width: 100% !important;
+      height: 40px !important;
+      border-radius: 167px !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      box-sizing: border-box !important;
+      font-size: 13px;
+    }
+  }
+
+  .buttonContainer {
+    padding: 0 16px;
+    margin-top: 24px;
+    text-align: center;
+    margin-left: -16px;
+    margin-right: -16px;
+
+    a,
+    a > *,
+    a > * > * {
+      display: block;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 40px !important;
+      border-radius: 167px !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      box-sizing: border-box !important;
+      text-align: center;
+      margin: 0 auto !important;
+    }
+  }
+
+  .viewAllButton {
+    width: 100%;
+    height: 40px;
+    border-radius: 167px;
+    font-size: 14px;
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
+}
+
+// ── Mobile (≤480px) ────────────────────────────────────────────────────────
+@media (max-width: 480px) {
+
+  .body ,.header{
+    margin-top: 15px;
+  }
+
+  .trainingContainer {
+    padding: 20px 0;
+  }
+
+  .trainingContainerErr {
+    padding: 20px 16px;
+  }
+
+  .trainingGrid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: visible;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 1px;
+    padding-right: 16px !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    margin-left: 16px;
+    scrollbar-width: none;
+    box-sizing: border-box;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .trainingCard {
+    flex: 0 0 257px;
+    min-width: 257px;
+    width: 257px;
+    height: auto;
+    min-height: 424px;
+    border-radius: 12.06px;
+    border-width: 0.86px;
+    scroll-snap-align: start;
+    box-sizing: border-box;
+
+    &:last-child {
+      margin-right: 16px;
+    }
+  }
+
+  .imageContainer {
+    height: 165px;
+    min-height: 165px;
+    flex-shrink: 0;
+  }
+
+  .trainingInfo {
+    padding: 12px 14px 14px;
+  }
+
+  .trainingTitle {
+    font-size: 15px;
+    line-height: 22px;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .metaRow {
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+
+  .metaItem {
+    font-size: 12px;
+    line-height: 17px;
+    gap: 6px;
+  }
+
+  .metaIcon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .instructorAvatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .instructorName {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .instructorTitle {
+    font-size: 10px;
+    line-height: 14px;
+  }
+
+  .instructorRow {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  // button width = card width (257px) minus body padding (14px x 2 = 28px)
+  .mTop16 {
+    margin-top: auto;
+
+    button {
+      width: calc(257px - 28px) !important; // = 229px
+      max-width: 100% !important;
+      height: 40px !important;
+      border-radius: 167px !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      box-sizing: border-box !important;
+      font-size: 13px;
+    }
+  }
+
+  .buttonContainer {
+    padding: 0 16px;
+    margin-top: 20px;
+    text-align: center;
+    margin-left: -16px;
+
+    a,
+    a > *,
+    a > * > * {
+      display: block;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: 40px !important;
+      border-radius: 167px !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      box-sizing: border-box !important;
+      text-align: center;
+      margin: 0 auto !important;
+    }
+  }
+
+  .viewAllButton {
+    width: 100%;
+    height: 40px;
+    border-radius: 167px;
+    font-size: 13px;
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
+}
+
+// ── Very small phones (≤375px) ─────────────────────────────────────────────
+@media (max-width: 375px) {
+
+  .body ,.header{
+    margin-top: 15px;
+  }
+
+  .trainingCard {
+    flex: 0 0 257px;
+    min-width: 257px;
+    width: 257px;
+    min-height: 424px;
+    padding-right: 16px !important;
+  }
+
+  .mTop16 {
+    button {
+      width: calc(257px - 28px) !important;
+    }
+  }
+}
