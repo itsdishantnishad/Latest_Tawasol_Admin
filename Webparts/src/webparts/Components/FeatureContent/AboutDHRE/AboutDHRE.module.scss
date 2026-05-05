@@ -200,8 +200,8 @@
     display: flex !important;
     overflow-x: auto !important;
 
-    width: 100vw !important;
-    max-width: 100vw !important;
+    // width: 100vw !important;
+    // max-width: 100vw !important;
     place-self: unset !important;
 
     gap: 16px;
@@ -260,20 +260,26 @@
   }
 
   .grid {
-    padding: 0 12px !important;   /* 👈 thoda kam spacing */
+    padding: 0 12px !important;  
     gap: 12px !important;
   }
+
+
+  .grid::after {
+  content: "";
+  flex: 0 0 16px; 
+}
 
   /* 🔥 Card thoda chhota kar diya */
   .card {
     flex: 0 0 260px !important;
     max-width: 260px !important;
-    height: auto !important;   /* 👈 cut avoid */
+    height: auto !important;   
   }
 
   /* 🔥 Button fix */
   .viewAllButton {
-    min-width: 100% !important;  /* ❌ 343px hata diya */
+    min-width: 100% !important;  
     width: 100% !important;
 
     height: 44px !important;

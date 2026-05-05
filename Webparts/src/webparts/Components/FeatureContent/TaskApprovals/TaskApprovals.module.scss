@@ -173,80 +173,72 @@
 }
 
 
+
+
+
+
+
+
 @media (max-width: 640px) {
 
-  /* 🔥 CATEGORY TABS CONTAINER (hash-proof selector) */
+  /* 🔥 CONTAINER */
   [class*="categoryContainer"] {
-    display: flex ;
-    flex-wrap: nowrap;
+    display: flex;
+    overflow-x: auto;
+    justify-content: flex-start !important;
 
-    overflow-x: auto ;
-    overflow-y: hidden ;
+    gap: 8px;
 
-    justify-content: flex-start;
-
-    gap: 8px ;
-    padding: 0 16px;
-
-    width: 100%;
+    padding-left: 16px;   
+    padding-right: 16px;
 
     -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
   }
 
-  /* 🔥 SCROLLBAR HIDE */
   [class*="categoryContainer"]::-webkit-scrollbar {
     display: none;
   }
 
-  /* 🔥 EACH TAB ITEM */
+  /* 🔥 TAB */
   [class*="categoryContainer"] > * {
-    flex: 0 0 auto;
-    min-width: 120px ;
+    flex: 0 0 calc(50% - 12px);
+    max-width: calc(50% - 12px);
+
     height: 48px;
 
     display: flex;
     align-items: center;
-    justify-content: center;
+
+    gap: 6px; 
+    padding: 0 8px 0 6px;
+
+    border-radius: 999px;
 
     white-space: nowrap;
+    overflow: hidden;
   }
 
-}
-
-
-
-@media (max-width: 640px) {
-
-  /* 🔥 Container same rahega (scroll already working) */
-  [class*="categoryContainer"] {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-
-    gap: 8px !important;
-    padding: 0 16px !important;
-
-    justify-content: flex-start !important;
+  /* 🔥 IMAGE */
+  [class*="categoryContainer"] img {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    flex-shrink: 0;
   }
 
-  /* 🔥 EACH TAB FIX SIZE (main fix) */
-  [class*="categoryContainer"] > * {
-    flex: 0 0 144px !important;   /* 👈 exact width */
-    max-width: 144px !important;
+  /* 🔥 NAME */
+  [class*="categoryContainer"] span:first-of-type {
+    font-size: 13px;
 
-    height: 48px !important;
+    overflow: hidden;
+    text-overflow: ellipsis; 
+  }
 
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-
-    border-radius: 999px !important;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* 👈 text + count align */
-
-    white-space: nowrap;
+  /* 🔥 COUNT */
+  [class*="categoryContainer"] span:last-of-type {
+    font-size: 13px;
+    margin-left: auto; 
+    flex-shrink: 0;
   }
 
 }
