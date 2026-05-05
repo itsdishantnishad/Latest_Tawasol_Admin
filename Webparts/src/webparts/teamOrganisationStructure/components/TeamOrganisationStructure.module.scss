@@ -468,3 +468,99 @@
   .card { width: 100%; max-width: 280px; margin-left: auto; margin-right: auto; }
   .cardLg { width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; }
 }
+
+/* ===========================
+   Mobile department accordion
+   =========================== */
+
+.deptAccordion {
+  display: none;
+}
+
+.deptAccordionItem {
+  width: 100%;
+}
+
+.deptAccordionHeader {
+  appearance: none;
+  border: 0;
+  width: 100%;
+  min-height: 58px;
+  padding: 0 14px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #DDA160 0%, #FFDBB4 100%);
+  box-shadow: 0px 4px 4px 0px #FED3A4 inset;
+  color: #000;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.deptChevron {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #111;
+  border-bottom: 2px solid #111;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+  margin-right: 4px;
+}
+
+.deptChevronOpen {
+  transform: rotate(225deg);
+}
+
+.deptAccordionPanel {
+  padding: 14px 2px 6px;
+}
+
+@media (max-width: 768px) {
+  .deptRail,
+  .deptGrid {
+    display: none;
+  }
+
+  .deptAccordion {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .deptBand {
+    margin: 18px auto 24px;
+    padding-top: 18px;
+  }
+
+  .deptTitle {
+    margin-bottom: 20px;
+  }
+
+  .deptList {
+    font-size: 15px;
+    line-height: 22px;
+    padding-left: 20px;
+    margin: 0;
+  }
+
+  .deptList li {
+    margin-bottom: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .deptAccordionHeader {
+    min-height: 58px;
+    font-size: 18px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
