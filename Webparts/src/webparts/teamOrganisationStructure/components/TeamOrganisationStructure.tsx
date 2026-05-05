@@ -1,21 +1,18 @@
+// TeamOrganisationStructure.tsx
+
 import * as React from "react";
 import styles from "./TeamOrganisationStructure.module.scss";
 import { ITeamOrganisationStructureProps } from "./ITeamOrganisationStructureProps";
-import {
-  listServices,
-  OrgMember,
-  OrgDepartment,
-} from "../../services/listServices";
+import { listServices, OrgMember } from "../../services/listServices";
 import { ListName } from "../../services/Constants";
+import TeamDepartmentStructure from "./TeamDepartmentStructure";
 
 export interface ITeamOrganisationStructureState {
   items: OrgMember[];
   loading: boolean;
   error?: string | null;
   selectedId?: number | null;
-  selectedLevel?: number | null;
-  departments: OrgDepartment[];
-  loadingDepts: boolean;
+  cardsPerRow: number;
 }
 
 export default class TeamOrganisationStructure extends React.Component<
@@ -31,15 +28,18 @@ export default class TeamOrganisationStructure extends React.Component<
       loading: true,
       error: null,
       selectedId: null,
-      selectedLevel: null,
-      departments: [],
-      loadingDepts: false,
+      cardsPerRow: this.getCardsPerRow(),
     };
     this.spService = new listServices(this.props.context);
   }
 
   public async componentDidMount(): Promise<void> {
+    window.addEventListener("resize", this.handleResize);
     await this.loadMembers();
+  }
+
+  public componentWillUnmount(): void {
+    window.removeEventListener("resize", this.handleResize);
   }
 
   public async componentDidUpdate(
@@ -52,15 +52,29 @@ export default class TeamOrganisationStructure extends React.Component<
     }
   }
 
+  private handleResize = (): void => {
+    const nextCardsPerRow = this.getCardsPerRow();
+    if (nextCardsPerRow !== this.state.cardsPerRow) {
+      this.setState({ cardsPerRow: nextCardsPerRow });
+    }
+  };
+
+  private getCardsPerRow(): number {
+    if (typeof window === "undefined") return 5;
+
+    const width = window.innerWidth;
+    if (width <= 820) return 2;
+    if (width <= 1050) return 3;
+    if (width <= 1300) return 4;
+    return 5;
+  }
+
   private async loadMembers(): Promise<void> {
     try {
       this.setState({
         loading: true,
         error: null,
         selectedId: null,
-        selectedLevel: null,
-        departments: [],
-        loadingDepts: false,
       });
 
       const sourceList =
@@ -76,95 +90,26 @@ export default class TeamOrganisationStructure extends React.Component<
     }
   }
 
-  private onCardClick = (member: OrgMember): void => {
-    this.setState(
-      (prev) => {
-        const isSamePerson = prev.selectedId === member.id;
+  private onCardClick = (member: OrgMember, isRoot: boolean): void => {
+    if (isRoot) return;
 
-        if (isSamePerson) {
-          return {
-            ...prev,
-            selectedId: null,
-            selectedLevel: null,
-            departments: [],
-            loadingDepts: false,
-          };
-        }
-
-        return {
-          ...prev,
-          selectedId: member.id,
-          selectedLevel: member.level,
-          departments: [],
-          loadingDepts: true,
-        };
-      },
-      async () => {
-        const { selectedId } = this.state;
-        if (selectedId !== member.id) return;
-
-        const key = (member.user || "").trim();
-        if (!key) {
-          this.setState((current) =>
-            current.selectedId === member.id
-              ? { ...current, departments: [], loadingDepts: false }
-              : current
-          );
-          return;
-        }
-
-        try {
-          const deptList = (
-            this.props.deptListTitle || ListName.TEAM_ORG_DEPARTMENTS
-          ).trim();
-
-          const depts = await this.spService.getDepartmentsByMember(deptList, key);
-
-          this.setState((current) =>
-            current.selectedId === member.id
-              ? { ...current, departments: depts, loadingDepts: false }
-              : current
-          );
-        } catch {
-          this.setState((current) =>
-            current.selectedId === member.id
-              ? { ...current, departments: [], loadingDepts: false }
-              : current
-          );
-        }
-      }
-    );
+    this.setState((prev) => ({
+      selectedId: prev.selectedId === member.id ? null : member.id,
+    }));
   };
 
-  private normalizeMultiline(raw?: string): string {
-    if (!raw) return "";
-    const s = String(raw);
+  private chunkMembers(members: OrgMember[], size: number): OrgMember[][] {
+    const safeSize = Math.max(size, 1);
+    const chunks: OrgMember[][] = [];
 
-    const looksHtml = /<\/?[a-z][\s\S]*>/i.test(s) || s.indexOf("ExternalClass") > -1;
-    if (looksHtml && typeof document !== "undefined") {
-      const tmp = document.createElement("div");
-      tmp.innerHTML = s;
-      const text = (tmp.innerText || tmp.textContent || "").replace(/\u00A0/g, " ");
-      return text;
+    for (let i = 0; i < members.length; i += safeSize) {
+      chunks.push(members.slice(i, i + safeSize));
     }
-    return s.replace(/\u00A0/g, " ");
+
+    return chunks;
   }
 
-  private parseBullets(raw?: string): string[] {
-    const text = this.normalizeMultiline(raw)
-      .replace(/\u2022/g, "\n")
-      .replace(/\u00B7/g, "\n")
-      .replace(/\r\n/g, "\n")
-      .replace(/\r/g, "\n")
-      .trim();
-
-    return text
-      .split("\n")
-      .map((x) => x.replace(/^[\u2022•\-\*]\s*/g, "").trim())
-      .filter(Boolean);
-  }
-
-  // ✅ Card-by-card shimmer (clean UI)
+  // Card-by-card shimmer (clean UI)
   private renderCardsShimmer(): JSX.Element {
     const ShimmerCard = ({ large }: { large?: boolean }) => (
       <div
@@ -198,21 +143,74 @@ export default class TeamOrganisationStructure extends React.Component<
     );
   }
 
-  private renderDepartmentsShimmer(): JSX.Element {
+  private renderDepartmentFor(member: OrgMember): JSX.Element {
     return (
-      <div className={styles.deptBand} aria-label="Loading departments">
-        <div className={styles.deptTitle}>DEPARTMENTS</div>
-        <div className={styles.deptShimmerGrid} aria-hidden="true">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className={styles.deptShimmerBox} />
-          ))}
-        </div>
-      </div>
+      <TeamDepartmentStructure
+        key={`departments_${member.id}`}
+        member={member}
+        spService={this.spService}
+        deptListTitle={this.props.deptListTitle}
+      />
     );
   }
 
+  private renderMemberRow(
+    rowMembers: OrgMember[],
+    rowKey: string,
+    selectedMember?: OrgMember
+  ): JSX.Element {
+    const rowHasSelectedMember =
+      !!selectedMember && rowMembers.some((person) => person.id === selectedMember.id);
+
+    return (
+      <React.Fragment key={rowKey}>
+        <div className={styles.row}>
+          {rowMembers.map((person) => this.renderCard(person, false))}
+        </div>
+
+        {rowHasSelectedMember && selectedMember
+          ? this.renderDepartmentFor(selectedMember)
+          : null}
+      </React.Fragment>
+    );
+  }
+
+  private renderMobileRows(
+    orderedMembers: OrgMember[],
+    selectedMember?: OrgMember
+  ): JSX.Element[] {
+    return this.chunkMembers(orderedMembers, 2).map((rowMembers, rowIndex) =>
+      this.renderMemberRow(rowMembers, `mobile_${rowIndex}`, selectedMember)
+    );
+  }
+
+  private renderDesktopRows(
+    membersByLevel: Record<number, OrgMember[]>,
+    orderedLevels: number[],
+    selectedMember?: OrgMember
+  ): JSX.Element[] {
+    const rows: JSX.Element[] = [];
+    const { cardsPerRow } = this.state;
+
+    orderedLevels.forEach((level) => {
+      const levelRows = this.chunkMembers(membersByLevel[level], cardsPerRow);
+
+      levelRows.forEach((rowMembers, rowIndex) => {
+        rows.push(
+          this.renderMemberRow(
+            rowMembers,
+            `level_${level}_row_${rowIndex}`,
+            selectedMember
+          )
+        );
+      });
+    });
+
+    return rows;
+  }
+
   public render(): React.ReactElement<ITeamOrganisationStructureProps> {
-    const { items, loading, error, selectedLevel, selectedId, loadingDepts } = this.state;
+    const { items, loading, error, selectedId, cardsPerRow } = this.state;
 
     const rootMember = items.find((m) => m.level === 0);
     const nonRoot = items.filter((m) => m.level !== 0);
@@ -223,6 +221,17 @@ export default class TeamOrganisationStructure extends React.Component<
     const orderedLevels = Object.keys(membersByLevel)
       .map(Number)
       .sort((l, r) => l - r);
+
+    const orderedNonRootMembers = orderedLevels.reduce<OrgMember[]>(
+      (acc, level) => acc.concat(membersByLevel[level]),
+      []
+    );
+
+    const selectedMember = selectedId
+      ? orderedNonRootMembers.find((member) => member.id === selectedId)
+      : undefined;
+
+    const shouldFlattenRows = cardsPerRow <= 2;
 
     return (
       <section className={styles.wrapper} aria-labelledby="teamOrgHeading">
@@ -250,23 +259,9 @@ export default class TeamOrganisationStructure extends React.Component<
               </div>
             )}
 
-            {orderedLevels.map((level) => (
-              <React.Fragment key={level}>
-                <div className={styles.row}>
-                  {membersByLevel[level].map((person) => (
-                    <React.Fragment key={person.id}>
-                      {this.renderCard(person, false)}
-                    </React.Fragment>
-                  ))}
-                </div>
-
-                {selectedLevel === level && selectedId && loadingDepts
-                  ? this.renderDepartmentsShimmer()
-                  : selectedLevel === level
-                  ? this.renderDepartmentsBand()
-                  : null}
-              </React.Fragment>
-            ))}
+            {shouldFlattenRows
+              ? this.renderMobileRows(orderedNonRootMembers, selectedMember)
+              : this.renderDesktopRows(membersByLevel, orderedLevels, selectedMember)}
           </>
         )}
       </section>
@@ -274,24 +269,20 @@ export default class TeamOrganisationStructure extends React.Component<
   }
 
   private renderCard(member: OrgMember, isRoot: boolean): JSX.Element {
-    const isSelected = this.state.selectedId === member.id;
+    const isSelected = !isRoot && this.state.selectedId === member.id;
+    const isInteractive = !isRoot;
 
-    return (
-      <div
-        role="button"
-        tabIndex={0}
-        aria-pressed={isSelected}
-        aria-label={`Select ${member.name}`}
-        onClick={() => this.onCardClick(member)}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && this.onCardClick(member)}
-        className={[
-          styles.card,
-          isRoot ? styles.cardLg : "",
-          isSelected ? styles.cardSelected : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
+    const className = [
+      styles.card,
+      isRoot ? styles.cardLg : "",
+      isRoot ? styles.cardStatic : styles.cardInteractive,
+      isSelected ? styles.cardSelected : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    const content = (
+      <>
         <div
           className={[styles.photoWrap, isRoot ? styles.photoWrapLg : ""]
             .filter(Boolean)
@@ -312,68 +303,26 @@ export default class TeamOrganisationStructure extends React.Component<
         <div className={`${styles.accent} ${isRoot ? styles.accentCenter : ""}`} aria-hidden />
         <div className={styles.name}>{member.name}</div>
         <div className={styles.role}>{member.role}</div>
-      </div>
+      </>
     );
-  }
 
-  private renderDepartmentsBand(): JSX.Element {
-    const { departments, loadingDepts } = this.state;
+    if (!isInteractive) {
+      return <div className={className}>{content}</div>;
+    }
 
     return (
-      <div className={styles.deptBand}>
-        <div className={styles.deptTitle}>DEPARTMENTS</div>
-
-        <div className={styles.deptRail} aria-hidden="true">
-          <div className={styles.stubRow}>
-            {Array.from({ length: Math.max(departments.length, 1) }).map((_, i) => (
-              <span key={i} className={styles.stubGrid} />
-            ))}
-          </div>
-        </div>
-
-        {!loadingDepts && (
-          <div className={styles.deptGrid}>
-            {departments.length === 0 && (
-              <div className={styles.state}>No departments mapped for this person.</div>
-            )}
-
-            {departments.map((d, i) => {
-              const bullets = this.parseBullets((d.itemsText as string) || "");
-
-              const box = (
-                <div className={styles.deptBox} role="group" aria-label={d.name}>
-                  {d.name}
-                </div>
-              );
-
-              return (
-                <div key={i} className={styles.deptCol}>
-                  {d.url ? (
-                    <a
-                      className={styles.deptLink}
-                      href={d.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={d.name}
-                    >
-                      {box}
-                    </a>
-                  ) : (
-                    <div title={d.name}>{box}</div>
-                  )}
-
-                  {bullets.length > 0 && (
-                    <ul className={styles.deptList}>
-                      {bullets.map((b, bi) => (
-                        <li key={bi}>{b}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-pressed={isSelected}
+        aria-label={`Select ${member.name}`}
+        onClick={() => this.onCardClick(member, isRoot)}
+        onKeyDown={(e) =>
+          (e.key === "Enter" || e.key === " ") && this.onCardClick(member, isRoot)
+        }
+        className={className}
+      >
+        {content}
       </div>
     );
   }
