@@ -18,6 +18,7 @@ export interface ITeamDepartmentStructureProps {
 export interface ITeamDepartmentStructureState {
   departments: OrgDepartment[];
   loading: boolean;
+  activeDepartmentIndex: number;
 }
 
 export default class TeamDepartmentStructure extends React.Component<
@@ -32,6 +33,7 @@ export default class TeamDepartmentStructure extends React.Component<
     this.state = {
       departments: [],
       loading: true,
+      activeDepartmentIndex: 0,
     };
   }
 
@@ -62,10 +64,14 @@ export default class TeamDepartmentStructure extends React.Component<
     const currentRequestId = ++this.requestId;
     const key = (this.props.member.user || "").trim();
 
-    this.setState({ departments: [], loading: true });
+    this.setState({ departments: [], loading: true, activeDepartmentIndex: 0 });
 
     if (!key) {
-      this.safeSetState(currentRequestId, { departments: [], loading: false });
+      this.safeSetState(currentRequestId, {
+        departments: [],
+        loading: false,
+        activeDepartmentIndex: -1,
+      });
       return;
     }
 
@@ -79,18 +85,26 @@ export default class TeamDepartmentStructure extends React.Component<
         key
       );
 
-      this.safeSetState(currentRequestId, { departments, loading: false });
+      this.safeSetState(currentRequestId, {
+        departments,
+        loading: false,
+        activeDepartmentIndex: departments.length > 0 ? 0 : -1,
+      });
     } catch {
-      this.safeSetState(currentRequestId, { departments: [], loading: false });
+      this.safeSetState(currentRequestId, {
+        departments: [],
+        loading: false,
+        activeDepartmentIndex: -1,
+      });
     }
   }
 
   private safeSetState(
     requestId: number,
-    nextState: ITeamDepartmentStructureState
+    nextState: Partial<ITeamDepartmentStructureState>
   ): void {
     if (!this.isComponentMounted || requestId !== this.requestId) return;
-    this.setState(nextState);
+    this.setState(nextState as ITeamDepartmentStructureState);
   }
 
   private normalizeMultiline(raw?: string): string {
@@ -122,6 +136,13 @@ export default class TeamDepartmentStructure extends React.Component<
       .filter(Boolean);
   }
 
+  private toggleDepartment = (index: number): void => {
+    this.setState((prev) => ({
+      activeDepartmentIndex:
+        prev.activeDepartmentIndex === index ? -1 : index,
+    }));
+  };
+
   private renderDepartmentsShimmer(): JSX.Element {
     return (
       <div className={styles.deptBand} aria-label="Loading departments">
@@ -131,6 +152,113 @@ export default class TeamDepartmentStructure extends React.Component<
             <div key={i} className={styles.deptShimmerBox} />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  private renderDepartmentBullets(department: OrgDepartment): JSX.Element | null {
+    const bullets = this.parseBullets((department.itemsText as string) || "");
+
+    if (bullets.length === 0) return null;
+
+    return (
+      <ul className={styles.deptList}>
+        {bullets.map((bullet, index) => (
+          <li key={index}>{bullet}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  private renderDesktopDepartments(): JSX.Element {
+    const { departments } = this.state;
+
+    return (
+      <div className={styles.deptGrid}>
+        {departments.length === 0 && (
+          <div className={styles.state}>No departments mapped for this person.</div>
+        )}
+
+        {departments.map((department, index) => {
+          const box = (
+            <div className={styles.deptBox} role="group" aria-label={department.name}>
+              {department.name}
+            </div>
+          );
+
+          return (
+            <div key={`${department.name}_${index}`} className={styles.deptCol}>
+              {department.url ? (
+                <a
+                  className={styles.deptLink}
+                  href={department.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={department.name}
+                >
+                  {box}
+                </a>
+              ) : (
+                <div title={department.name}>{box}</div>
+              )}
+
+              {this.renderDepartmentBullets(department)}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  private renderMobileDepartments(): JSX.Element {
+    const { departments, activeDepartmentIndex } = this.state;
+
+    return (
+      <div className={styles.deptAccordion}>
+        {departments.length === 0 && (
+          <div className={styles.state}>No departments mapped for this person.</div>
+        )}
+
+        {departments.map((department, index) => {
+          const isOpen = activeDepartmentIndex === index;
+          const panelId = `department_panel_${this.props.member.id}_${index}`;
+          const buttonId = `department_button_${this.props.member.id}_${index}`;
+
+          return (
+            <div key={`${department.name}_${index}`} className={styles.deptAccordionItem}>
+              <button
+                id={buttonId}
+                type="button"
+                className={styles.deptAccordionHeader}
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                onClick={() => this.toggleDepartment(index)}
+              >
+                <span>{department.name}</span>
+                <span
+                  className={[
+                    styles.deptChevron,
+                    isOpen ? styles.deptChevronOpen : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  aria-hidden="true"
+                />
+              </button>
+
+              {isOpen && (
+                <div
+                  id={panelId}
+                  role="region"
+                  aria-labelledby={buttonId}
+                  className={styles.deptAccordionPanel}
+                >
+                  {this.renderDepartmentBullets(department)}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -150,47 +278,8 @@ export default class TeamDepartmentStructure extends React.Component<
           </div>
         </div>
 
-        <div className={styles.deptGrid}>
-          {departments.length === 0 && (
-            <div className={styles.state}>No departments mapped for this person.</div>
-          )}
-
-          {departments.map((d, i) => {
-            const bullets = this.parseBullets((d.itemsText as string) || "");
-
-            const box = (
-              <div className={styles.deptBox} role="group" aria-label={d.name}>
-                {d.name}
-              </div>
-            );
-
-            return (
-              <div key={`${d.name}_${i}`} className={styles.deptCol}>
-                {d.url ? (
-                  <a
-                    className={styles.deptLink}
-                    href={d.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={d.name}
-                  >
-                    {box}
-                  </a>
-                ) : (
-                  <div title={d.name}>{box}</div>
-                )}
-
-                {bullets.length > 0 && (
-                  <ul className={styles.deptList}>
-                    {bullets.map((b, bi) => (
-                      <li key={bi}>{b}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        {this.renderDesktopDepartments()}
+        {this.renderMobileDepartments()}
       </div>
     );
   }
