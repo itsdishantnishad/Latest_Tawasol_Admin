@@ -308,12 +308,17 @@
   opacity: 1;
 }
 
+@media(max-width:768px){
+  .navIcon{
+    margin-left: -40PX;
+    margin-right: -40px;
+  }
+}
 
-
-
-
-
-
-
-
+@media(max-width:480px){
+  .navIcon{
+    margin-left: -40PX;
+    margin-right: -40px;
+  }
+}
 
