@@ -162,27 +162,32 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
   );
 
   const mobileFeatureTrackRef = useRef<HTMLDivElement | null>(null);
+React.useEffect(() => {
+  const track = mobileFeatureTrackRef.current;
+  if (!track) return;
+  if (!window.matchMedia("(max-width: 768px)").matches) return;
 
-  React.useEffect(() => {
-    const track = mobileFeatureTrackRef.current;
-    if (!track) return;
+  const activeCard = track.querySelector(
+    `[data-feature-id="${selectedFeature}"]`
+  ) as HTMLElement | null;
 
-    if (!window.matchMedia("(max-width: 768px)").matches) return;
+  if (!activeCard) return;
 
-    const activeCard = track.querySelector(
-      `[data-feature-id="${selectedFeature}"]`
-    ) as HTMLElement | null;
+  window.setTimeout(() => {
+    const container = track.parentElement as HTMLElement;
+    if (!container) return;
 
-    if (!activeCard) return;
+    const containerWidth = container.offsetWidth;
+    const cardLeft = activeCard.offsetLeft;
+    const cardWidth = activeCard.offsetWidth;
 
-    window.setTimeout(() => {
-      activeCard.scrollIntoView({
-        behavior: "smooth",
-        inline: "center",
-        block: "nearest",
-      });
-    }, 80);
-  }, [selectedFeature]);
+    // Scroll programmatically so selected card is always centered
+    container.scrollTo({
+      left: cardLeft - containerWidth / 2 + cardWidth / 2,
+      behavior: "smooth",
+    });
+  }, 80);
+}, [selectedFeature]);
 
   // Track which LetsCelebrate tab is currently active inside FeatureWheel.
   const [celebrateTab, _setCelebrateTab] = useState<CelebrateTabKey>("birthdays");

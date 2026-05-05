@@ -199,12 +199,12 @@
     width: 100vw !important;
     margin-left: 50% !important;
     transform: translateX(-50%) !important;
-    overflow-x: auto !important;
+    overflow-x: hidden !important;
     overflow-y: visible !important;
     padding: 20px 0 40px !important; /* Increased bottom padding for the shadow */
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    touch-action: pan-x;
+    touch-action: none ;
 
     // new 
     scroll-behavior: smooth !important;
