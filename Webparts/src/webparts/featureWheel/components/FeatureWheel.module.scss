@@ -181,8 +181,8 @@
     zoom: 1 !important;
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: hidden !important;
-    overflow-y: visible !important;
+    //overflow-x: hidden !important;
+    //overflow-y: visible !important;
   }
 
   .headingSection {
@@ -226,7 +226,7 @@
     display: flex !important;
     align-items: center !important; /* CHANGED: Centers cards so growth is balanced */
     justify-content: flex-start !important;
-    padding: 0 calc((100vw - 147px) / 2) !important;
+    padding: 0 calc((42vw - 147px) / 2) !important;
     box-sizing: border-box !important;
     overflow: visible !important;
     scroll-snap-type: x mandatory;
