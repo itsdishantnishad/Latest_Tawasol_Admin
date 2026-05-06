@@ -442,7 +442,7 @@
   }
 
   .imgWrap {
-    padding: 16px;
+    padding: 0px;
     border-radius: 12px;
   }
 
@@ -459,5 +459,46 @@
   .menuItem {
     font-size: 13px;
     line-height: 19px;
+  }
+}
+
+
+/* ✅ Beverages mobile left/right spacing fix */
+@media (max-width: 768px) {
+  .wrapper {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .categoriesContainer {
+    width: 100%;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .categoryBlock {
+    width: 100%;
+    margin: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .imgWrap {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .menuTitle,
+  .menuRow {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
   }
 }
