@@ -264,116 +264,42 @@
 /* =========================================================
    Mobile
    ========================================================= */
-
+  
+   
+/* Mobile same as design */
 @media (max-width: 768px) {
-  .card {
-    background: #ffffff;
-    padding: 12px;
-    border-radius: 10px;
-    box-shadow: none;
-    max-width: none;
-    margin: 0;
-    font-family: "Inter", "Segoe UI", sans-serif;
-  }
-
-  .tagsRow {
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-
-  .tagPrimary {
-    padding: 3px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    line-height: 14px;
-    font-weight: 600;
-  }
-
-  .tagSecondary {
-    font-size: 10px;
-    line-height: 14px;
-    font-weight: 500;
-  }
-
-  .title {
-    font-size: 18px;
-    line-height: 24px;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-
-  .row {
-    gap: 6px;
-    margin: 8px 0;
-  }
-
-  .icon {
-    width: 14px;
-    height: 14px;
-  }
-
-  .text {
-    font-size: 12px;
-    line-height: 18px;
-    font-weight: 500;
-  }
-
-  .pastEventLabel,
-  .liveLabel {
-    font-size: 12px;
-    line-height: 18px;
-  }
-
-  /* SharePoint Page Content Mobile */
-  :global([data-automation-id="textBox"]) {
-    font-family: "Inter", "Segoe UI", sans-serif;
-    color: #333333;
-  }
-
   :global([data-automation-id="textBox"] h1),
   :global([data-automation-id="textBox"] h2),
   :global([data-automation-id="textBox"] h3),
-  :global([data-automation-id="textBox"] h4) {
-    font-family: "Inter", "Segoe UI", sans-serif;
-    font-weight: 600;
-    font-size: 18px;
-    line-height: 24px;
-    letter-spacing: 0px;
-    color: #111111;
-    margin: 0 0 16px;
-    padding: 0;
-    vertical-align: middle;
+  :global([data-automation-id="textBox"] h4),
+  :global([data-automation-id="textBox"] h1 *),
+  :global([data-automation-id="textBox"] h2 *),
+  :global([data-automation-id="textBox"] h3 *),
+  :global([data-automation-id="textBox"] h4 *) {
+    font-size: 18px !important;
+    line-height: 24px !important;
+    font-weight: 600 !important;
+  }
+
+  :global([data-automation-id="textBox"] p),
+  :global([data-automation-id="textBox"] p span),
+  :global([data-automation-id="textBox"] div),
+  :global([data-automation-id="textBox"] div span),
+  :global([data-automation-id="textBox"] span) {
+    font-size: 16px !important;
+    line-height: 24px !important;
   }
 
   :global([data-automation-id="textBox"] p) {
-    font-family: "Inter", "Segoe UI", sans-serif;
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 24px;
-    letter-spacing: 0px;
-    color: #333333;
-    margin: 0 0 18px;
-    padding: 0;
+    font-weight: 400 !important;
   }
 
   :global([data-automation-id="textBox"] strong),
-  :global([data-automation-id="textBox"] b) {
-    font-weight: 700;
-    color: #111111;
-  }
-
-  :global([data-automation-id="textBox"] ul),
-  :global([data-automation-id="textBox"] ol) {
-    margin: 8px 0 18px;
-    padding-left: 18px;
-  }
-
-  :global([data-automation-id="textBox"] li) {
-    font-family: "Inter", "Segoe UI", sans-serif;
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 24px;
-    color: #333333;
-    margin-bottom: 6px;
+  :global([data-automation-id="textBox"] b),
+  :global([data-automation-id="textBox"] strong span),
+  :global([data-automation-id="textBox"] b span) {
+    font-weight: 600 !important;
+    font-size: 18px !important;
+    line-height: 24px !important;
   }
 }
