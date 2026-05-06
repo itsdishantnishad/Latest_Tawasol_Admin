@@ -1,3 +1,5 @@
+// Extension.module.scss
+
 /* ===================== GLOBAL FONTS ===================== */
 
 /* Load Inter (keep OUTSIDE :global) */
@@ -337,34 +339,36 @@
 }
 
 /* ===================== FLOATING NAV ===================== */
-.TIRFloatingNav{
-  /* tune here */
-  --float-base-bottom: 12px;   /* default distance from viewport bottom */
-  --float-raise: 0px;          /* JS sets this when footer overlaps */
+.TIRFloatingNav {
+  --float-base-bottom: clamp(6px, 1.5dvh, 16px);
+  --float-raise: 0px;
 
   position: fixed !important;
   left: 50% !important;
-  bottom: var(--float-base-bottom);
-  width: 480px;
+
+  bottom: calc(var(--float-base-bottom) + env(safe-area-inset-bottom, 0px)) !important;
+
+  width: min(480px, calc(100vw - 32px));
   height: 84px;
-  background: rgba(255,255,255,.75);
+
+  background: rgba(255, 255, 255, .75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: 16px;
-  // border: 2px solid #e5e5e5;
-  padding: 0px 16px;
+  padding: 0 16px;
+
   display: flex;
   align-items: center;
-  // justify-content: center;
   font-family: 'Inter', sans-serif;
+
   box-shadow: 0 8px 24px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
   z-index: 10000;
   pointer-events: auto;
 
-  /* smooth, GPU-friendly lift */
   transform: translate(-50%, calc(-1 * var(--float-raise)));
   transition: transform .24s ease;
   will-change: transform;
+
   zoom: 0.8;
 }
 
@@ -426,8 +430,10 @@
 @media (max-width: 480px) {
 
   .TIRFloatingNav {
+    --float-base-bottom: clamp(4px, 1dvh, 12px);
+
     width: calc(100% - 32px) !important;
-    height: 64px !important;   /* thoda bada taki text aa sake */
+    height: 64px !important;
     padding: 0 10px !important;
     zoom: 1 !important;
   }
@@ -1057,12 +1063,13 @@
   .TIRNotifHeaderRight .TIRMarkAll {
     position: absolute !important;
     top: 88px !important;
-    right: 26px !important;
+    // right: 26px !important;
     z-index: 2;
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
     white-space: nowrap !important;
+    margin-left: -143px;
   }
 
   /* Keep close icon in header */
@@ -1315,7 +1322,9 @@
   .TIRBrandLogo { width: 30px; height: 30px; }
   .TIRAvatar { width: 36px; height: 36px; }
   .TIRSearch { width: 300px; }
-  .TIRFloatingNav { width: 360px; bottom: 120px; }
+  .TIRFloatingNav {
+    width: min(360px, calc(100vw - 32px)) !important;
+  }
   .TIRSuggestHost { width: 420px; }
   .onboardingBackdrop { padding: 12px 12px; }
   .onboardingWrapper { width: 96vw; height: min(90dvh, 760px); gap: 10px; }
@@ -1328,7 +1337,10 @@
 @media (max-width: 576px) {
   .TIRSearch { width: 260px; height: 35px; }
   .TIRIconBtn { width: 30px; height: 30px; }
-  .TIRFloatingNav { width: 320px; height: 56px; bottom: 110px; }
+  .TIRFloatingNav {
+    width: min(340px, calc(100vw - 24px)) !important;
+    height: 60px !important;
+  }
   .TIRSuggestHost { width: 320px; }
   .onboardingBackdrop { padding: 10px 10px; }
   .onboardingWrapper { width: 94vw; height: min(92dvh, 680px); gap: 10px; }
@@ -1344,7 +1356,11 @@
   .TIRRight { gap: 10px; }
   .TIRIconBtn { width: 28px; height: 28px; }
   .TIRAvatar { width: 34px; height: 34px; }
-  .TIRFloatingNav { width: 300px; height: 56px; --float-base-bottom: 10px; }
+  .TIRFloatingNav {
+    width: min(340px, calc(100vw - 24px)) !important;
+    height: 60px !important;
+    --float-base-bottom: clamp(4px, 1dvh, 12px);
+  }
   .TIRButtonGroup { height: 48px; }
   .TIRNavLabel { display: none; }
   .TIRFooter { padding: 20px; }

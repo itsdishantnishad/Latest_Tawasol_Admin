@@ -166,7 +166,25 @@
   position: absolute;
   bottom: 0;
   width: 100%;
+ 
 }
+
+
+@media screen and (max-width: 370px) {
+  .commonButtonArea {
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 47px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  margin-left: -36px;
+}
+}
+
+
 
 .pagination {
   display: flex;
@@ -279,15 +297,15 @@
 
   /* 🔥 INNER CIRCLE */
   .innerCircle {
-    width: 180px;
-    height: 180px;
+    width: 152px;
+    height: 152px;
   }
 
-  /* 🔥 SERVICE CARDS (TEXT CUT FIX) */
+  
   .serviceCard {
     width: 95px;
     height: 88px;
-    overflow: visible;   /* 👈 TEXT FIX */
+    overflow: visible;   
   }
 
   /* 🔥 ICON */
@@ -312,6 +330,118 @@
   /* 🔥 NAV HIDE */
   .navButton {
     display: none;
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================
+   PAGINATION 370 x 667
+========================= */
+@media screen and (max-width: 370px) {
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cccaca;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.hover {
+  background: #9ca3af;
+  transform: scale(1.2);
+}
+
+.activeDot {
+  background: #da291c;
+  width: 18px;
+  border-radius: 40px;
+}
+}
+
+
+/* =========================
+   DEFAULT
+========================= */
+
+.serviceIcon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  display: block;
+}
+
+/* =========================
+   MOBILE RESPONSIVE
+   370 × 676 PERFECT FIT
+========================= */
+@media screen and (max-width: 370px) {
+
+  .wheelWrapper {
+    width: 100%;
+    overflow: hidden;
+    padding: 0;
+    min-height: 380px;
+  }
+
+  .circleContainer {
+    width: 280px;
+    height: 280px;
+    margin: 0 auto;
+  }
+
+  .outerCircle {
+    width: 265px;
+    height: 265px;
+    margin-left: -10px;
+  }
+
+  .innerCircle {
+    width: 120px;
+    height: 120px;
+  }
+
+  .serviceCard {
+    width: 82px;
+    height: 78px;
+  }
+
+  .serviceIcon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .serviceName {
+    font-size: 11px;
+    line-height: 14px;
   }
 
 }
