@@ -14,7 +14,7 @@
 .tabs {
   display: flex;
   justify-content: center;
-  gap: 0;
+  gap: 0px;
   background: #fff;
   border: 1px solid #fbbf7f;
   border-radius: 999px;
@@ -750,6 +750,7 @@
     border: none;
     background: transparent;
     box-shadow: none;
+    gap:16px;
   }
 
   .tab {
@@ -1314,4 +1315,56 @@
     padding-right: 0 !important;
     box-sizing: border-box !important;
   }
+}
+
+
+@media (max-width: 768px) {
+  .tabs {
+    scrollbar-width: none !important; 
+    -ms-overflow-style: none !important; 
+    border-bottom: none !important;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none !important; 
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+   .tabs {
+    padding-right: 1px !important;
+    box-sizing: border-box !important;
+  }
+
+  .tabs::after {
+    content: "";
+    flex: 0 0 16px;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+  .tabs {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    border-bottom: none !important;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+   .tabs {
+    padding-right: 1px !important;
+    box-sizing: border-box !important;
+  }
+
+  .tabs::after {
+    content: "";
+    flex: 0 0 16px;
+  }
+
 }

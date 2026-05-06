@@ -209,6 +209,7 @@
 
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
+    margin-right: -16px;
   }
 
   .grid::-webkit-scrollbar {
@@ -253,15 +254,16 @@
 
 
 
-@media (max-width: 350px) {
+@media (max-width: 390px) {
 
   .aboutDhreSection {
     padding: 16px !important;
   }
 
   .grid {
-    padding: 0 12px !important;  
+   // padding: 0 16px !important;  
     gap: 12px !important;
+    margin-right: -46px;
   }
 
 
@@ -270,7 +272,7 @@
   flex: 0 0 16px; 
 }
 
-  /* 🔥 Card thoda chhota kar diya */
+ 
   .card {
     flex: 0 0 260px !important;
     max-width: 260px !important;
