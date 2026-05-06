@@ -120,12 +120,23 @@
    🔽 FIX: TEXT SHOULD NOT CUT
    ========================= */
 
+  //  divider resposive
+
+@media (max-width: 640px) {
+
+  .divider {
+    margin-bottom: 106px;
+  }
+}
+
+
+
 @media (max-width: 480px) {
 
   .banner {
     width: 100%;
-    min-height: 432px; /* ✅ height ki jagah min-height */
-    height: auto;      /* ✅ allow expansion */
+    min-height: 432px; 
+    height: auto;      
     position: relative;
     overflow: hidden;
   }
@@ -144,7 +155,7 @@
 
   /* ✅ MOST IMPORTANT FIX */
   .inner {
-    position: relative;   /* ❌ absolute hata diya */
+    position: relative;   
     bottom: auto;
     left: auto;
 
@@ -155,10 +166,10 @@
     flex-direction: column;
     gap: 16px;
 
-    margin-top: auto; /* pushes content downward */
+    margin-top: auto; 
   }
 
-  /* optional: agar bottom sticking chahiye */
+ 
   .banner {
     display: flex;
     flex-direction: column;
