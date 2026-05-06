@@ -169,52 +169,327 @@
 }
 /* --------------------------------- Responsive --------------------------------- */
 
-@media (max-width: 1600px) {
-  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
+// @media (max-width: 1600px) {
+//   .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+// }
 
-@media (max-width: 1360px) {
-  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
+// @media (max-width: 1360px) {
+//   .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+// }
 
-@media (max-width: 1100px) {
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+// @media (max-width: 1100px) {
+//   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+// }
 
-@media (max-width: 991px) {
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+// @media (max-width: 991px) {
+//   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+// }
 
-@media (max-width: 800px) {
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+// @media (max-width: 800px) {
+//   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+// }
 
-@media (max-width: 640px) {
+// @media (max-width: 640px) {
+//   .root {
+//     padding: 32px 16px;
+//   }
+
+//   .container {
+//     padding: 12px 8px;
+//   }
+
+//   .headingOur,
+//   .headingValues {
+//     font-size: 32px;
+//   }
+
+//   /* hide grid, show mobile carousel */
+//   .grid {
+//     display: none;
+//   }
+
+//   .carousel {
+//     display: block;
+//   }
+
+//   /* mobile heading left-aligned */
+//   .heading {
+//     justify-content: flex-start;
+//     text-align: left;
+//   }
+// }
+
+
+/* --------------------------------- Responsive: Tablet + Mobile --------------------------------- */
+
+
+
+
+@media (max-width: 768px) {
   .root {
-    padding: 32px 16px;
+    padding: 40px 0 !important;
   }
 
   .container {
-    padding: 12px 8px;
+    width: 100% !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .heading {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    margin-bottom: 34px !important;
+    gap: 8px !important;
   }
 
   .headingOur,
   .headingValues {
-    font-size: 32px;
+    font-size: 42px !important;
+    line-height: 48px !important;
   }
 
-  /* hide grid, show mobile carousel */
   .grid {
-    display: none;
+    display: none !important;
   }
 
   .carousel {
-    display: block;
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 266px !important;
+    overflow: visible !important;
+    margin-top: 0 !important;
   }
 
-  /* mobile heading left-aligned */
+  .carouselViewport {
+    width: 100% !important;
+    height: 266px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x proximity !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .carouselViewport::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .carouselTrack {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 16px !important;
+    padding: 0 16px 0 0 !important;
+    width: max-content !important;
+    height: 266px !important;
+    box-sizing: border-box !important;
+  }
+
+  .carouselSlide {
+    flex: 0 0 240px !important;
+    width: 240px !important;
+    height: 208px !important;
+    scroll-snap-align: start !important;
+    display: block !important;
+    box-sizing: border-box !important;
+  }
+
+  .carouselSlide .card {
+    width: 240px !important;
+    height: 208px !important;
+    border: 1px solid #E1DCD6 !important;
+    border-radius: 10px !important;
+    padding:16px !important;
+    gap: 24px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .carouselSlide .icon {
+    max-width: 64px !important;
+    max-height: 64px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .carouselSlide .title {
+    font-family: "Inter", sans-serif !important;
+    color: #3A3B43 !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    line-height: 24px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+  }
+
+  .carouselSlide .description {
+    font-family: "Inter", sans-serif !important;
+    color: #3A3B43 !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    line-height: 24px !important;
+    margin: 0 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .carouselSlide .description :global(p) {
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .root {
+    padding: 32px 0 !important;
+  }
+
+  .container {
+    width: 100% !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
   .heading {
-    justify-content: flex-start;
-    text-align: left;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    margin-bottom: 34px !important;
+    gap: 8px !important;
+  }
+
+  .headingOur,
+  .headingValues {
+    font-size: 42px !important;
+    line-height: 48px !important;
+  }
+
+  .grid {
+    display: none !important;
+  }
+
+  .carousel {
+    display: block !important;
+    width: 100% !important;
+    height: 266px !important;
+    overflow: visible !important;
+    margin-top: 0 !important;
+  }
+
+  .carouselViewport {
+    width: 100% !important;
+    height: 266px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x proximity !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .carouselViewport::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .carouselTrack {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 16px !important;
+    padding: 0 16px 0 0 !important;
+    width: max-content !important;
+    height: 266px !important;
+    box-sizing: border-box !important;
+  }
+
+  .carouselSlide {
+    flex: 0 0 240px !important;
+    width: 240px !important;
+    height: 208px !important;
+    scroll-snap-align: start !important;
+    display: block !important;
+    box-sizing: border-box !important;
+  }
+
+  .carouselSlide .card {
+    width: 240px !important;
+    height: 208px !important;
+    border: 1px solid #E1DCD6 !important;
+    border-radius: 10px !important;
+    padding:16px !important;
+    gap: 24px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .carouselSlide .icon {
+    max-width: 64px !important;
+    max-height: 64px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .carouselSlide .title {
+    font-family: "Inter", sans-serif !important;
+    color: #3A3B43 !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    line-height: 24px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+  }
+
+  .carouselSlide .description {
+    font-family: "Inter", sans-serif !important;
+    color: #3A3B43 !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    line-height: 24px !important;
+    margin: 0 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .carouselSlide .description :global(p) {
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .carouselTrack {
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .carouselTrack {
+    padding: 0 !important;
+    box-sizing: border-box !important;
   }
 }
