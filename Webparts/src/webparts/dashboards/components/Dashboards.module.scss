@@ -374,3 +374,75 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+
+/* ✅ Mobile pills responsive fix */
+@media (max-width: 900px) {
+  .topBar {
+    padding: 0 16px;
+    background: transparent !important;
+  }
+
+  .layout {
+    padding: 0 16px;
+    background: transparent !important;
+    overflow: hidden;
+  }
+
+  .rail {
+    width: 100%;
+    max-width: 100%;
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  .catWrap {
+    width: 100% !important;
+    max-width: 100%;
+    display: flex !important;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: transparent !important;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .catWrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .catBtn {
+    flex: 0 0 auto;
+    width: auto !important;
+    min-width: 194px;
+    height: 52px;
+    padding: 0 24px !important;
+    border-radius: 50px;
+    border: 1px solid #FBBF7F;
+    background: transparent;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+
+  .catBtn span {
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .catBtnActive {
+    background: radial-gradient(
+      245.31% 848.44% at 112.5% -164.06%,
+      #DDA160 0%,
+      #FFDBB4 100%
+    ) !important;
+    border: 1px solid #F0BB82;
+  }
+}

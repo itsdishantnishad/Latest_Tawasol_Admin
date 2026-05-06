@@ -11,21 +11,169 @@ import * as React from 'react';
    - Current: darker + semibold
 */
 const CSS = `
-.__gbc_row{display:inline-flex;align-items:center;gap:12px;height:22px; font-family: 'Inter', sans-serif;}
-.__gbc_back{
-  display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;
-    font-size: 14px; line-height: 24px; letter-spacing: 0; color: #000000; font-weight: 400; }
-.__gbc_back svg{width:18px;height:18px;display:block}
-.__gbc_divider{width:1px;height:16px;background:rgba(58,59,67,.35)}
-.__gbc_wrap{
-  display:inline-flex;align-items:center;gap:10px;height:22px;
-  font-size:14px;line-height:22px;letter-spacing:0;color:#3A3B43;
-  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+.__gbc_row{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  height:22px;
+  max-width:100%;
+  font-family:'Inter', sans-serif;
+  box-sizing:border-box;
 }
-.__gbc_link{color: #A7A7A7;font-weight: 400;text-decoration: none;cursor: pointer;font-size: 14px;line-height: 22px;}
-.__gbc_link:hover{text-decoration:underline}
-.__gbc_sep{color:#B9BCC3;opacity:1;margin:0 2px;user-select:none}
-.__gbc_current{color: #3A3B43;font-weight: 500;font-size: 14px;line-height: 22px;}
+
+.__gbc_back{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:none;
+  border:0;
+  padding:0;
+  cursor:pointer;
+  font-size:14px;
+  line-height:24px;
+  letter-spacing:0;
+  color:#000000;
+  font-weight:400;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+
+.__gbc_back svg{
+  width:18px;
+  height:18px;
+  display:block;
+}
+
+.__gbc_divider{
+  width:1px;
+  height:16px;
+  background:rgba(58,59,67,.35);
+  flex:0 0 auto;
+}
+
+.__gbc_wrap{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  height:22px;
+  min-width:0;
+  max-width:100%;
+  font-size:14px;
+  line-height:22px;
+  letter-spacing:0;
+  color:#3A3B43;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  box-sizing:border-box;
+}
+
+.__gbc_link{
+  color:#A7A7A7;
+  font-weight:400;
+  text-decoration:none;
+  cursor:pointer;
+  font-size:14px;
+  line-height:22px;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+
+.__gbc_link:hover{
+  text-decoration:underline;
+}
+
+.__gbc_sep{
+  color:#B9BCC3;
+  opacity:1;
+  margin:0 2px;
+  user-select:none;
+  flex:0 0 auto;
+}
+
+.__gbc_current{
+  color:#3A3B43;
+  font-weight:500;
+  font-size:14px;
+  line-height:22px;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* ✅ Breadcrumb responsive fix */
+@media (max-width:480px){
+  .__gbc_row{
+    width:100%;
+    max-width:100%;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    height:auto;
+    padding:0;
+    overflow:hidden;
+  }
+
+  .__gbc_back{
+    font-size:14px;
+    line-height:22px;
+    gap:4px;
+  }
+
+  .__gbc_back svg{
+    width:18px;
+    height:18px;
+  }
+
+  .__gbc_divider{
+    height:16px;
+  }
+
+  .__gbc_wrap{
+    flex:1 1 auto;
+    min-width:0;
+    max-width:100%;
+    gap:8px;
+    overflow:hidden;
+  }
+
+  .__gbc_link,
+  .__gbc_sep{
+    flex:0 0 auto;
+  }
+
+  .__gbc_current{
+    flex:1 1 auto;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+
+/* ✅ Very small mobile */
+@media (max-width:360px){
+  .__gbc_row{
+    gap:8px;
+  }
+
+  .__gbc_wrap{
+    gap:6px;
+  }
+
+  .__gbc_back,
+  .__gbc_link,
+  .__gbc_current{
+    font-size:13px;
+    line-height:20px;
+  }
+
+  .__gbc_back svg{
+    width:16px;
+    height:16px;
+  }
+}
 `;
 
 let __gbc_styles = false;

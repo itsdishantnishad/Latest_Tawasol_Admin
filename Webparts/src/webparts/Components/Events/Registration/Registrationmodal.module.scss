@@ -146,46 +146,52 @@
       }
     }
 
-    .choiceGroup {
-      :global(.ms-ChoiceFieldGroup) {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
+.choiceGroup {
+  :global(.ms-ChoiceFieldGroup) {
+    display: block !important;
+  }
 
-      :global(.ms-ChoiceField-field) {
-        vertical-align: sub;
-        display: inline-block;
-        padding-left: 30px;
+  :global(.ms-ChoiceFieldGroup-flexContainer) {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 40px !important;
+    flex-wrap: nowrap !important;
+  }
 
-        &::before {
-          width: 24px;
-          height: 24px;
-          background: #ffffff;
-          border: 1px solid #1a1a1a;
-          /* optional but recommended */
-        }
+  :global(.ms-ChoiceField) {
+    display: inline-flex !important;
+    margin: 0 !important;
+  }
 
-        &::after {
-          width: 12px;
-          height: 12px;
-          left: 6px;
-          top: 6px;
-          background: #1a1a1a;
-          opacity: 0;
-          /* hide dot by default */
-        }
-      }
+  :global(.ms-ChoiceField-field) {
+    display: inline-flex !important;
+    align-items: center !important;
+    vertical-align: middle;
+    padding-left: 34px;
+    min-height: 24px;
 
-      /* ✅ This is the important part */
-      :global(.ms-ChoiceField-input:checked + .ms-ChoiceField-field::after) {
-        opacity: 1;
-        /* show dot when checked */
-      }
-      
+    &::before {
+      width: 24px;
+      height: 24px;
+      background: #ffffff;
+      border: 1px solid #1a1a1a;
     }
 
+    &::after {
+      width: 12px;
+      height: 12px;
+      left: 6px;
+      top: 6px;
+      background: #1a1a1a;
+      opacity: 0;
+    }
+  }
 
+  :global(.ms-ChoiceField-input:checked + .ms-ChoiceField-field::after) {
+    opacity: 1;
+  }
+}
   }
 
   .submitButton {
@@ -232,5 +238,16 @@
 
   &:hover {
     background: #b3b3b8;
+  }
+}
+
+
+@media (max-width: 480px) {
+  .choiceGroup {
+    :global(.ms-ChoiceFieldGroup) {
+      flex-direction: row;
+      gap: 36px;
+      flex-wrap: nowrap;
+    }
   }
 }
