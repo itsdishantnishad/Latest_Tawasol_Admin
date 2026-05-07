@@ -286,12 +286,12 @@ export default class NewsResults extends React.Component<INewsResultsProps, Anim
           </div>
         )}
 
-        {showPinnedPill && (
+        {/* {showPinnedPill && (
           <span className={styles.pinPill} aria-label="Pinned">
             <Icon iconName="Pinned" className={styles.pinGlyph} />
             <span className={styles.pinText}>Pinned</span>
           </span>
-        )}
+        )} */}
 
         <div className={styles.gridTextStack}>
           {newsItem.department && (
