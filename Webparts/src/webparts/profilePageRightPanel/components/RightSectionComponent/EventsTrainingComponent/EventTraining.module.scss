@@ -621,3 +621,94 @@
     white-space: normal;
   }
 }
+
+
+
+
+
+// new one 
+
+/* ===== FINAL EVENTS/TRAINING EMPTY STATE WIDTH FIX ===== */
+
+.card {
+  width: 100%;
+  max-width: 424px;
+  min-height: 488px;
+  padding: 20px 16px 20px 16px;
+  box-sizing: border-box;
+}
+
+/* tab should be full card width minus 16px left/right */
+.segmentWrap {
+  width: 100% !important;
+  max-width: 392px !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  margin: 0 auto !important;
+  border-radius: 360px !important;
+  box-sizing: border-box !important;
+}
+
+.segmentInner {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 50px !important;
+  padding: 7px !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+}
+
+.segBtn {
+  height: 36px !important;
+  min-height: 36px !important;
+  border-radius: 360px !important;
+  flex: 1 1 0 !important;
+}
+
+/* content area keeps layout stable when no event/training */
+.eventCard {
+  width: 100% !important;
+  max-width: 392px !important;
+  min-height: 250px !important;
+  margin: 0 auto !important;
+}
+
+.noEvent {
+  width: 100% !important;
+  min-height: 180px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* View All should be 376px inside 392px content width */
+.cta {
+  width: calc(100% - 16px) !important;
+  max-width: 376px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  margin: 0 auto !important;
+  padding: 0 12px !important;
+  border-radius: 167px !important;
+  border: 1.5px solid #202d39 !important;
+  box-sizing: border-box !important;
+}
+
+/* Mobile safety */
+@media (max-width: 480px) {
+  .card {
+    max-width: 100% !important;
+    padding: 16px !important;
+  }
+
+  .segmentWrap,
+  .eventCard {
+    max-width: 100% !important;
+  }
+
+  .cta {
+    width: calc(100% - 16px) !important;
+    max-width: 100% !important;
+  }
+}
