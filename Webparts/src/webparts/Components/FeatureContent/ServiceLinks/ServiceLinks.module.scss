@@ -13,13 +13,13 @@
   display: flex;
   justify-content: center;
   gap: 0;
-  margin-bottom: 0;
+  margin-bottom: 20px;
   background: #fff;
   border: 1px solid #fbbf7f;
   border-radius: 50px;
   padding: 4px;
   width: fit-content;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .tab {
@@ -38,11 +38,10 @@
 
 .activeTab {
   background: radial-gradient(
-      245.31% 848.44% at 112.5% -164.06%,
-      #dda160 0%,
-      #ffdbb4 100%
-    )
-    /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
+    245.31% 848.44% at 112.5% -164.06%,
+    #dda160 0%,
+    #ffdbb4 100%
+  );
 }
 
 .wheelSection {
@@ -59,8 +58,8 @@
   gap: 120px;
   max-width: 1320px;
   margin: 0 auto;
-  min-height: 500px;
-  overflow: hidden;
+  min-height: 620px;
+  overflow: visible;
 }
 
 .navButton {
@@ -89,13 +88,11 @@
 }
 
 .circleContainer {
-  // height: 50vw;
-  // max-height: 800px;
-  // max-width: 800px;
-  // width: 50vw;
   position: relative;
+  width: 582px;
+  height: 582px;
+  margin: 0 auto;
   top: 0;
-  margin-top: -30px;
 }
 
 .outerCircle {
@@ -103,7 +100,6 @@
   width: 582px;
   height: 582px;
   border-radius: 50%;
-  // border: 1px solid rgba(224, 152, 144, 0.15);
   border: 1px solid #4b4b4b38;
   background: radial-gradient(
     circle,
@@ -139,6 +135,9 @@
   text-decoration: none;
   align-items: center;
   transition: all ease 0.5s;
+  width: 120px;
+  min-height: 110px;
+
   &:hover img {
     transform: scale(1.02);
     transition: all ease 0.5s;
@@ -148,12 +147,11 @@
 .serviceName {
   font-family: "Inter", sans-serif;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 22px;
   color: #000000;
   text-align: center;
   width: 100%;
-  min-width: 100%;
   margin-top: 8px;
 }
 
@@ -166,197 +164,8 @@
   position: absolute;
   bottom: 0;
   width: 100%;
- 
 }
 
-
-@media screen and (max-width: 370px) {
-  .commonButtonArea {
-  margin-top: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 47px;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  margin-left: -36px;
-}
-}
-
-
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 0px;
-}
-
-// .pagination resposnive
-
-@media (max-width: 768px){
-  .pagination {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 0px;
-}
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #cccaca;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0; }
-
-  // .dot resposive
-
-  @media (max-width: 768px){
-    .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #cccaca;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0;
-  }}
-
-  .hover {
-    background: #9ca3af;
-    transform: scale(1.2);
-  }
-  // &:hiver resposive----
-  @media (max-width: 768px){
-    .hover {
-    background: #9ca3af;
-    transform: scale(1.2);
-  }
-  }
-
-.activeDot {
-  background: #da291c;
-  width: 18px;
-  border-radius: 40px;
-}
-
-.serviceIcon {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  display: block;
-}
-
-@media (max-width: 768px) {
-
-  .serviceLinksContainer {
-    padding: 40px 16px;
-  }
-}
-  /* 🔥 Tabs */
-  .tabContainer {
-    margin-bottom: 20px;
-  }
-
-  .tab {
-    padding: 10px 18px;
-    font-size: 13px;
-  }
-
-  /* 🔥 MAIN WRAPPER (CUT FIX) */
-  .wheelWrapper {
-    gap: 0;
-    min-height: auto;
-    justify-content: center;
-    overflow: visible;        /* 👈 MAIN FIX */
-    // padding: 0 16px; 
-    padding-right: 34px;         /* 👈 side spacing */
-  }
-
-  /* 🔥 CIRCLE CONTAINER */
-  .circleContainer {
-    width: 343px;
-    height: 343px;
-    margin: 0 auto;
-    position: relative;
-    top: 0;
-  }
-
-  /* 🔥 OUTER CIRCLE (NO CUT) */
-  .outerCircle {
-    width: 343px;
-    height: 343px;
-    max-width: 100%;
-  }
-
-  /* 🔥 INNER CIRCLE */
-  .innerCircle {
-    width: 152px;
-    height: 152px;
-  }
-
-  
-  .serviceCard {
-    width: 95px;
-    height: 88px;
-    overflow: visible;   
-  }
-
-  /* 🔥 ICON */
-  .serviceIcon {
-    width: 48px;
-    height: 48px;
-  }
-
-  /* 🔥 TEXT */
-  .serviceName {
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-
-@media (max-width: 768px) {
-
-  
-
-
-
-  /* 🔥 NAV HIDE */
-  .navButton {
-    display: none;
-  }
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* =========================
-   PAGINATION 370 x 667
-========================= */
-@media screen and (max-width: 370px) {
 .pagination {
   display: flex;
   justify-content: center;
@@ -385,12 +194,6 @@
   width: 18px;
   border-radius: 40px;
 }
-}
-
-
-/* =========================
-   DEFAULT
-========================= */
 
 .serviceIcon {
   width: 64px;
@@ -400,48 +203,203 @@
 }
 
 /* =========================
-   MOBILE RESPONSIVE
-   370 × 676 PERFECT FIT
+   TABLET RESPONSIVE
 ========================= */
-@media screen and (max-width: 370px) {
+
+@media screen and (max-width: 768px) {
+
+  .serviceLinksContainer {
+    padding: 40px 16px;
+  }
+
+  .tabContainer {
+    margin-bottom: 20px;
+  }
+
+      .serviceName {
+        font-size: 9px;
+        line-height: 15px;
+    }
+
+  .tab {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
 
   .wheelWrapper {
-    width: 100%;
+    gap: 0;
+    min-height: 500px;
+    justify-content: center;
     overflow: hidden;
-    padding: 0;
-    min-height: 380px;
   }
 
   .circleContainer {
-    width: 280px;
-    height: 280px;
+    width: 343px;
+    height: 343px;
     margin: 0 auto;
   }
 
   .outerCircle {
-    width: 265px;
-    height: 265px;
-    margin-left: -10px;
+    width: 343px;
+    height: 343px;
+    max-width: 100%;
   }
 
   .innerCircle {
-    width: 120px;
-    height: 120px;
+    width: 170px;
+    height: 170px;
   }
 
   .serviceCard {
-    width: 82px;
-    height: 78px;
+    width: 90px;
+    min-height: 90px;
+    overflow: visible;
   }
 
   .serviceIcon {
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
+  }
+
+  
+
+  .navButton {
+    display: none;
+  }
+}
+
+/* =========================
+   SMALL MOBILE RESPONSIVE
+========================= */
+
+@media screen and (max-width: 370px) {
+
+  .wheelWrapper {
+    width: 100%;
+    min-height: 420px;
+    overflow: hidden;
+    padding: 0;
+  }
+
+   .tabContainer {
+        margin-bottom: -51px;
+        margin-left: -16px;
+    }
+
+    .commonButtonArea {
+        margin-left: -20px;
+        bottom: 10px;
+       
+    }
+
+  .circleContainer {
+    width: 280px;
+    height: 280px;
+    padding-bottom: 100px;
+  }
+
+  .outerCircle {
+    width: 280px;
+    height: 280px;
+    margin: 84px auto;
+  }
+
+  .innerCircle {
+    width: 145px;
+    height: 145px;
+  }
+
+  .serviceCard {
+    width: 78px;
+    min-height: 75px;
+  }
+
+  .serviceIcon {
+    width: 40px;
+    height: 40px;
   }
 
   .serviceName {
-    font-size: 11px;
-    line-height: 14px;
+    font-size: 10px;
+    line-height: 13px;
   }
 
+  .commonButtonArea {
+    margin-left: -20px;
+  }
 }
+
+
+
+
+
+@media screen and (max-width: 345px) {
+
+      .outerCircle{
+
+        width: 211px;
+        height: 211px;
+        bottom: -83px;
+
+      }
+
+
+      .innerCircle{
+        width: 101px;
+        height: 101px;
+      }
+
+      .serviceName{
+        font-size: 7px;
+        line-height: 8px;
+      }
+
+      .serviceIcon{
+        height: 33px;
+        width: 33px;
+        margin-top: 10px;
+          }
+
+
+      .tabContainer{
+
+        width: 228px;
+        margin-left: -10px;
+
+
+          }
+
+       .tab{
+            font-size: 7px;
+        padding: 3px 18px;
+          }
+
+
+        .commonButtonArea{
+          bottom: 33px;
+        }
+
+    .button {
+
+     border: none;
+     border-radius: 36px;
+     cursor: pointer;
+     font-family: Inter, sans-serif !important;
+     font-size: 10px;
+     font-weight: 300;
+     height: 32px;
+     line-height: 4px;
+     min-width: 88px;
+  }
+
+
+   .wheelWrapper {
+        min-height: 420px;
+        overflow: hidden;
+        padding: 0;
+        width: 100%;
+        margin-top: -84px;
+    }
+}
+
+
