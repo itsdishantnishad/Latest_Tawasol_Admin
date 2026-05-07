@@ -575,6 +575,10 @@ export class GlobalBreadcrumbs {
 }
 `;
 
+ private handleResize = (): void => {
+    window.setTimeout(() => void this.renderIfNeededSafe(), 100);
+};
+
     private readonly _backSvg =
         `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.25 19.25L7.75 12l6.5-7.25" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
@@ -583,6 +587,8 @@ export class GlobalBreadcrumbs {
     }
 
     public init(): void {
+
+        window.addEventListener("resize", this.handleResize);
         void this.renderIfNeededSafe();
 
         window.setTimeout(() => void this.renderIfNeededSafe(), 300);
@@ -620,7 +626,7 @@ export class GlobalBreadcrumbs {
             window.removeEventListener("resize", this.syncBreadcrumbWithScroll);
             this._scrollSyncAttached = false;
         }
-
+        window.removeEventListener("resize", this.handleResize);
         this.unmount();
     }
 
@@ -1072,6 +1078,13 @@ export class GlobalBreadcrumbs {
         this._lastCurrent = current;
 
         this.ensureStyles();
+
+        if (this.isMobile()) {
+            document.body.classList.add("__gbc_mobile_active");
+        } else {
+            document.body.classList.remove("__gbc_mobile_active");
+        }
+
         const host = this.ensureHost();
 
         if (!host) {
@@ -1111,7 +1124,7 @@ export class GlobalBreadcrumbs {
             return;
         }
 
-        if (this.isOfferBenefitsPage()) {
+        if (this.isOfferBenefitsPage() && !this.isMobile()) {
             this.unmount();
             return;
         }

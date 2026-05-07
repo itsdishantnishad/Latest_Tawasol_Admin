@@ -31,7 +31,15 @@
 .isPrivileges { --ob-mode: privileges; }
 
 /* Tabs */
-.segWrap {margin-left: 550px; justify-content: center; }
+/* Tabs */
+.segWrap {
+  grid-column: 2;
+  justify-self: center;
+  margin-left: 0 !important;
+  display: flex;
+  justify-content: center;
+}
+
 .seg {
   background: #fff;
   border: 1px solid #fbbf7f;
@@ -39,6 +47,21 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
   display: inline-flex;
   padding: 4px;
+}
+
+/* Tabs row layout */
+.segRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.breadPosition {
+  grid-column: 1;
+  justify-self: start;
+  margin-left: 0 !important;
 }
 
   // @media(max-width:1100px) {
@@ -933,6 +956,10 @@
 
 /* ================= FINAL WAVE POSITION FIX ================= */
 @media (max-width: 768px) {
+  
+   .breadPosition{
+    display: none ;
+  }
 
   .medBanner {
     overflow: visible !important;
@@ -970,6 +997,10 @@
 /* small mobile */
 @media (max-width: 480px) {
 
+  .breadPosition{
+    display: none ;
+  }
+
   .medBannerRight::before {
     right: -40px !important;
     transform: rotate(8deg) scale(0.7) !important;
@@ -978,5 +1009,157 @@
   .medBannerRight::after {
     right: -20px !important;
     transform: rotate(8deg) scale(0.6) !important;
+  }
+}
+
+
+
+/* ===== FINAL DESKTOP NAVSEGMENT CENTER FIX ===== */
+@media (min-width: 1101px) {
+  .segRow {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    align-items: center !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .breadPosition {
+    grid-column: 1 !important;
+    justify-self: start !important;
+    margin-left: 0 !important;
+  }
+
+  .segWrap {
+    grid-column: 2 !important;
+    justify-self: center !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    width: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .seg {
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+
+/* ===== FINAL MOBILE NAVSEGMENT CENTER FIX ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px !important;
+  }
+
+  // .breadPosition {
+  //   display: none !important;
+  // }
+
+  .segRow {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 0 !important;
+  }
+
+  .segWrap {
+    grid-column: auto !important;
+    justify-self: center !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .seg {
+    width: auto !important;
+    max-width: 100% !important;
+    display: inline-flex !important;
+  }
+
+  .segBtn {
+    flex: 0 0 auto !important;
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+}
+/* ===== FINAL MOBILE NAVSEGMENT FULL WIDTH CENTER FIX ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px !important;
+  }
+
+  // .breadPosition {
+  //   display: none !important;
+  // }
+
+  .segRow {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 0 !important;
+  }
+
+  .segWrap {
+    grid-column: auto !important;
+    justify-self: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .seg {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+  }
+
+  .segBtn {
+    flex: 1 1 0 !important;
+    padding: 10px 6px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+  }
+}
+
+/* ===== FINAL LOCAL BREADCRUMB VISIBILITY FIX ===== */
+
+/* Desktop/tablet: local breadcrumb visible */
+@media (min-width: 769px) {
+  .breadPosition {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    grid-column: 1 !important;
+    justify-self: start !important;
+    margin-left: 0 !important;
+  }
+}
+
+/* Mobile: local breadcrumb hidden */
+@media (max-width: 768px) {
+  .breadPosition {
+    display: none !important;
+  }
+}
+
+
+@media (min-width: 1101px) {
+  .breadPosition {
+    display: block !important;
+    grid-column: 1 !important;
+    justify-self: start !important;
+    margin-left: 0 !important;
   }
 }
