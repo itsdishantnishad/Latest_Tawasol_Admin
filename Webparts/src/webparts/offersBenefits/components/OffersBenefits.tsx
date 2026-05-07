@@ -505,10 +505,9 @@ export default class OffersBenefits extends React.Component<
       >
         <div className={styles.container}>
           <div className={styles.segRow}>
-            {/* <div className={styles.breadPosition}>
+            <div className={styles.breadPosition}>
               <GlobalBreadcrumbs />
-            </div> */}
-
+            </div>
             <div className={styles.segWrap}>
               <div className={styles.seg}>
                 <button
