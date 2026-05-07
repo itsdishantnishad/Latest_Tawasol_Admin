@@ -58,7 +58,7 @@ export const Forms: React.FC<IFormsProps> = (props) => {
 
       <div className={styles.ctaWrapper}>
         <ConditionalLink to={props.seeAllURL}>
-          <PrimaryButton fullWidth label="View All" />
+          <PrimaryButton label="View All" />
         </ConditionalLink>
       </div>
     </div>

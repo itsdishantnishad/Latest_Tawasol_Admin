@@ -96,7 +96,7 @@ export const Documents: React.FC<IDocumentsProps> = (props) => {
 
       <div className={styles.ctaWrapper}>
         <ConditionalLink to={viewAllHref}>
-          <PrimaryButton fullWidth label="View All" />
+          <PrimaryButton  label="View All" />
         </ConditionalLink>
       </div>
     </div>
