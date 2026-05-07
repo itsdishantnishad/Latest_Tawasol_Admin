@@ -764,6 +764,7 @@ export default class ProfilePageHeader extends React.Component<
           qrCodeUrl={this.state.qrCodeUrl}
           // keep safe if ProfileCard props not updated yet
           {...({ qrVcard: this.state.qrVcard } as any)}
+          onClose={() => this.setState({ showProfileCard: false })}
         />
       </div>,
       document.body

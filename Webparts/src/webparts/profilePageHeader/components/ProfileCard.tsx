@@ -9,6 +9,7 @@ export interface IProfileCardProps {
   employeeId?: string;
   qrCodeUrl?: string; // dataURL
   qrVcard?: string;   // vCard payload (download fallback)
+  onClose?: () => void;
 }
 
 const DubaiIcon_URL: string = require("../assets/Dubaiicon.svg");
@@ -32,7 +33,7 @@ const buildSubtitle = (jobTitle?: string, department?: string): string => {
 };
 
 const ProfileCard: React.FC<IProfileCardProps> = (props) => {
-  const { displayName, jobTitle, department, photoUrl, employeeId, qrCodeUrl, qrVcard } = props;
+  const { displayName, jobTitle, department, photoUrl, employeeId, qrCodeUrl, qrVcard, onClose } = props;
 
   const subtitle = buildSubtitle(jobTitle, department);
   const initials = getInitials(displayName);
@@ -58,8 +59,10 @@ const ProfileCard: React.FC<IProfileCardProps> = (props) => {
 
   return (
 
-    <div className={styles.cardContainer}>
-       <div className={styles.card} role="dialog" aria-label="Profile Card">
+    <div className={styles.cardContainer}  onClick={() => {
+    if (onClose) onClose();
+  }} >
+       <div className={styles.card} role="dialog" aria-label="Profile Card" onClick={(e) => e.stopPropagation()} >
       <img className={styles.vectorA} src={VectorB_URL} alt="" aria-hidden="true" />
       <img className={styles.vectorB} src={VectorA_URL} alt="" aria-hidden="true" />
 
