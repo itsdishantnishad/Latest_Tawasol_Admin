@@ -139,6 +139,7 @@
     height: auto;      
     position: relative;
     overflow: hidden;
+    margin-top: 20px;
   }
 
   /* gradient same rakho */
@@ -184,4 +185,10 @@
     font-size: 14px;
     line-height: 22px;
   }
+}
+
+@media (max-width:768px) {
+ .banner{
+  margin-top: 20px;
+ } 
 }

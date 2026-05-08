@@ -575,9 +575,9 @@ export class GlobalBreadcrumbs {
 }
 `;
 
- private handleResize = (): void => {
-    window.setTimeout(() => void this.renderIfNeededSafe(), 100);
-};
+    private handleResize = (): void => {
+        window.setTimeout(() => void this.renderIfNeededSafe(), 100);
+    };
 
     private readonly _backSvg =
         `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.25 19.25L7.75 12l6.5-7.25" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -1133,7 +1133,10 @@ export class GlobalBreadcrumbs {
             this.unmount();
             return;
         }
-
+        if (this.isProfilePage() && this.isMobile()) {
+            this.unmount();
+            return;
+        }
         const info = await this.getCurrentSitePageInfo();
 
         let section =
