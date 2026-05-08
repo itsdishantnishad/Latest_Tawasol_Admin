@@ -23,7 +23,7 @@
 .bannerRoot {
   box-sizing: border-box;
   padding: 30px 60px;
-
+ // margin-top: 76px;
   @media (max-width: 900px) {
     padding: 16px;
   }
@@ -143,4 +143,16 @@
 .textShimmer {
   width: min(680px, 90%);
   margin: 0 auto;
+}
+
+@media(max-width:480px){
+.bannerRoot{
+  margin-top: 76px;
+}
+}
+
+@media(max-width:768px){
+.bannerRoot{
+  margin-top: 76px;
+}
 }

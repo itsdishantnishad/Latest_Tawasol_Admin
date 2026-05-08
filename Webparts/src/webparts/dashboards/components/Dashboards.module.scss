@@ -446,3 +446,96 @@
     border: 1px solid #F0BB82;
   }
 }
+
+
+/* ===== FINAL MOBILE DASHBOARD NAVIGATION TAB FIX ===== */
+@media (max-width: 768px) {
+  .topBar {
+    padding: 0 16px !important;
+  }
+
+  .layout {
+    padding: 0 16px !important;
+    overflow: hidden !important;
+  }
+
+  .rail {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: hidden !important;
+  }
+
+  .catWrap {
+    margin-top: 14px;
+    width: 504px !important;
+    max-width: 100% !important;
+    height: 40px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .catWrap::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .catBtn {
+    flex: 0 0 120px !important;
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 16px !important;
+    gap: 8px !important;
+    border-radius: 360px !important;
+    border: 1px solid #fbbf7f !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .catBtn span {
+    font-size: 14px !important;
+    line-height: 20px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .topBar {
+    padding: 0 16px !important;
+  }
+
+  .layout {
+    padding: 0 16px !important;
+  }
+
+  .catWrap {
+    margin-top: 14px;
+    width: 504px !important;
+    max-width: 100% !important;
+    height: 40px !important;
+    gap: 8px !important;
+  }
+
+  .catBtn {
+    flex: 0 0 120px !important;
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+    height: 40px !important;
+    padding: 0 16px !important;
+    border-radius: 360px !important;
+  }
+}
