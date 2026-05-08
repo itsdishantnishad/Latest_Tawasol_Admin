@@ -132,20 +132,15 @@
 }
 
 .cta {
-  margin-top: 8px;               
-  width: 376px;
-  height: 40px;
-  border-radius: 167px;
-  border: 1.5px solid #C5B9AC;
-  background: #FFFFFF;
-  padding: 0 12px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  min-width: 220px;
+  width: calc(100% - 16px) !important;
+  max-width: 376px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  margin: 0 auto !important;
+  padding: 0 12px !important;
+  border-radius: 167px !important;
+  border: 1.5px solid #202d39 !important;
+  box-sizing: border-box !important;
 }
 .ctaText {
   white-space: nowrap;           
