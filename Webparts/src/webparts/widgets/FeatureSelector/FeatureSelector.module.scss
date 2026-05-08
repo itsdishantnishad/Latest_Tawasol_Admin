@@ -1,7 +1,7 @@
 .featureSelector {
   height: 220px;
   display: grid;
-  grid-template-columns: repeat(14, 110px);
+  grid-template-columns: repeat(var(--feature-count), 110px);
   justify-content: center;
   zoom: 1.2;
   @media(max-width: 1400px){
@@ -28,6 +28,12 @@
   transform: rotate(var(--rotation, 0deg)) translateY(var(--translateY, 0px));
   transform-origin: center center;
   transition: scale 0.3s ease-out;
+}
+
+.customCard {
+  background-size: cover;
+  background-position: center;
+  box-shadow: 15px 7.93px 18.25px -7.93px #00000033;
 }
 
 .cardSelected {

@@ -464,3 +464,139 @@
     font-size: 30px;
   }
 }
+
+.customFeatureContent {
+  width: min(980px, calc(100% - 32px));
+  margin: 24px auto 0;
+}
+
+.customFeatureContentCard {
+  border-radius: 24px;
+  padding: 28px 32px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 14px 35px rgba(99, 54, 17, 0.12);
+  text-align: center;
+}
+
+.customFeatureContentCard h3 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2f241b;
+}
+
+.customFeatureContentCard p {
+  margin: 0 auto 18px;
+  max-width: 640px;
+  font-size: 16px;
+  line-height: 24px;
+  color: #5e6872;
+}
+
+.customFeatureContentCard a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #dc6408;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+
+/* Generic no-code content cards for custom wheel cards */
+.customContentGrid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.customContentTile {
+  position: relative;
+  width: 200px;
+  min-height: 220px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  text-decoration: none;
+  box-shadow: 0 18px 35px rgba(44, 28, 16, 0.18);
+  transform: rotate(-4deg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.customContentTile:nth-child(even) {
+  transform: rotate(4deg);
+}
+
+.customContentTile:hover {
+  transform: translateY(-6px) rotate(0deg);
+  box-shadow: 0 22px 42px rgba(44, 28, 16, 0.24);
+}
+
+.customContentTileShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 35%,
+    rgba(0, 0, 0, 0.72) 100%
+  );
+}
+
+.customContentTileText {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 16px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.customContentTileText strong {
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+}
+
+.customContentTileText small {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.customFeatureButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #dc6408;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .customContentGrid {
+    gap: 12px;
+  }
+
+  .customContentTile {
+    width: 158px;
+    min-height: 176px;
+  }
+}

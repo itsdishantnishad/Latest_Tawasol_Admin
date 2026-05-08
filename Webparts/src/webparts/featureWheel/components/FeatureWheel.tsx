@@ -3,6 +3,10 @@
 import * as React from "react";
 import { useCallback, useRef, useState } from "react";
 import type { IFeatureWheelProps } from "./IFeatureWheelProps";
+import {
+  type IResolvedCustomFeatureCardSettings,
+  parseCustomFeatureCards,
+} from "./FeatureWheelCardSettings";
 
 import FeatureSelector from "../../widgets/FeatureSelector/FeatureSelector";
 import { EventsTrainingsTabKey } from "../../Components/NavTabs/eventsTrainingsTabs";
@@ -65,6 +69,8 @@ export interface Feature {
   title: string;
   subtitle: string;
   backgroundImage: string;
+  targetUrl?: string;
+  isCustom?: boolean;
 }
 
 /** Lets Celebrate tab keys must match internal webpart URL handling. */
@@ -117,7 +123,7 @@ const TaskApprovals = React.lazy(() => import("../../Components/FeatureContent/T
 const BeverageMenu = React.lazy(() => import("../../Components/FeatureContent/BeverageMenu/BeverageMenu"));
 const Newsletter = React.lazy(() => import("../../Components/FeatureContent/Newsletters/Newsletter"));
 
-const features: Feature[] = [
+const allFeatures: Feature[] = [
   { id: "dashboard", title: "Dashboard", subtitle: "Track, analyze, optimize", backgroundImage: `url(${featureImageById.dashboard})` },
   { id: "offers", title: "Offers", subtitle: "Exclusive perks just for you", backgroundImage: `url(${featureImageById.offers})` },
   { id: "training", title: "Trainings", subtitle: "Grow skills, unlock new doors", backgroundImage: `url(${featureImageById.training})` },
@@ -133,6 +139,58 @@ const features: Feature[] = [
   { id: "events", title: "Events", subtitle: "Discover whats happening next", backgroundImage: `url(${featureImageById.events})` },
   { id: "beverage_menu", title: "Services", subtitle: "Simplify your journey ahead", backgroundImage: `url(${featureImageById.beverage_menu})` },
 ];
+
+const isBuiltInFeatureEnabled = (id: string, props: IFeatureWheelProps): boolean => {
+  switch (id) {
+    case "dashboard":
+      return props.showDashboard !== false;
+    case "offers":
+      return props.showOffers !== false;
+    case "training":
+      return props.showTraining !== false;
+    case "gallery":
+      return props.showGallery !== false;
+    case "documents":
+      return props.showDocuments !== false;
+    case "employee_events":
+      return props.showLetsCelebrate !== false;
+    case "about_dhre":
+      return props.showAboutDhre !== false;
+    case "tasks":
+      return props.showTaskApprovals !== false;
+    case "newsletters":
+      // Newsletter was commented out before; keep it hidden until the pane toggle is turned on.
+      return props.showNewsletters === true;
+    case "meetings":
+      return props.showMeetings !== false;
+    case "service_links":
+      return props.showServiceLinks !== false;
+    case "forms":
+      return props.showForms !== false;
+    case "events":
+      return props.showEvents !== false;
+    case "beverage_menu":
+      return props.showBeverageMenu !== false;
+    default:
+      return true;
+  }
+};
+
+const toCssBackgroundImage = (rawUrl?: string): string => {
+  const url = (rawUrl || "").trim();
+  if (!url) return `url(${featureImageById.service_links})`;
+
+  return `url("${url.replace(/"/g, '\\"')}")`;
+};
+
+const toCustomFeature = (card: IResolvedCustomFeatureCardSettings): Feature => ({
+  id: card.id,
+  title: card.title,
+  subtitle: card.subtitle || "",
+  backgroundImage: toCssBackgroundImage(card.imageUrl),
+  targetUrl: card.targetUrl,
+  isCustom: true,
+});
 
 const featureTitleContent: Record<string, { header: string; subHeader: string }> = {
   gallery: { header: "A Glimpse through our lens", subHeader: "Recent milestones and cherished memories we've Immortalised" },
@@ -151,43 +209,150 @@ const featureTitleContent: Record<string, { header: string; subHeader: string }>
   training: { header: "Enroll Yourself in Upcoming Trainings", subHeader: "Grow your skills with tailored learning sessions" },
 };
 
+const CustomFeatureContent: React.FC<{ card: IResolvedCustomFeatureCardSettings }> = ({ card }) => {
+  const contentCards = (card.contentCards || []).filter((contentCard) => contentCard.enabled !== false);
+
+  if (contentCards.length > 0) {
+    return (
+      <section className={styles.customFeatureContent}>
+        <div className={styles.customContentGrid}>
+          {contentCards.map((contentCard) => {
+            const tileStyle: React.CSSProperties = {
+              backgroundImage: toCssBackgroundImage(contentCard.imageUrl || card.imageUrl),
+            };
+
+            const tileContent = (
+              <>
+                <span className={styles.customContentTileShade} />
+                <span className={styles.customContentTileText}>
+                  <strong>{contentCard.title}</strong>
+                  {contentCard.description ? <small>{contentCard.description}</small> : null}
+                </span>
+              </>
+            );
+
+            return contentCard.targetUrl ? (
+              <a
+                key={contentCard.id}
+                href={contentCard.targetUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.customContentTile}
+                style={tileStyle}
+              >
+                {tileContent}
+              </a>
+            ) : (
+              <div key={contentCard.id} className={styles.customContentTile} style={tileStyle}>
+                {tileContent}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }
+
+  if (!card.targetUrl) return null;
+
+  return (
+    <section className={styles.customFeatureContent}>
+      <a href={card.targetUrl} target="_blank" rel="noreferrer" className={styles.customFeatureButton}>
+        Open {card.title}
+      </a>
+    </section>
+  );
+};
+
+
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
   const themeConfig = React.useMemo(
     () => getActiveThemeConfig(props.themeVariant),
     [props.themeVariant]
   );
 
+  const customCardsSignature = JSON.stringify(props.customCards || []);
+  const customFeatureCards = React.useMemo(
+    () => parseCustomFeatureCards(props.customCards),
+    [customCardsSignature]
+  );
+
+  const features = React.useMemo(() => {
+    const builtInFeatures = allFeatures.filter((feature) =>
+      isBuiltInFeatureEnabled(feature.id, props)
+    );
+
+    const usedIds = new Set(builtInFeatures.map((feature) => feature.id));
+    const customFeatures = customFeatureCards
+      .filter((card) => !usedIds.has(card.id))
+      .map(toCustomFeature);
+
+    return [...builtInFeatures, ...customFeatures];
+  }, [
+    props.showDashboard,
+    props.showOffers,
+    props.showTraining,
+    props.showGallery,
+    props.showDocuments,
+    props.showLetsCelebrate,
+    props.showAboutDhre,
+    props.showTaskApprovals,
+    props.showNewsletters,
+    props.showMeetings,
+    props.showServiceLinks,
+    props.showForms,
+    props.showEvents,
+    props.showBeverageMenu,
+    customFeatureCards,
+  ]);
+
+  const customFeatureById = React.useMemo(() => {
+    return customFeatureCards.reduce<Record<string, IResolvedCustomFeatureCardSettings>>((acc, card) => {
+      acc[card.id] = card;
+      return acc;
+    }, {});
+  }, [customFeatureCards]);
+
   const [selectedFeature, setSelectedFeature] = useState<string>(() =>
     themeConfig.key === "uaeNationalDay" ? "employee_events" : "tasks"
   );
 
   const mobileFeatureTrackRef = useRef<HTMLDivElement | null>(null);
-React.useEffect(() => {
-  const track = mobileFeatureTrackRef.current;
-  if (!track) return;
-  if (!window.matchMedia("(max-width: 768px)").matches) return;
 
-  const activeCard = track.querySelector(
-    `[data-feature-id="${selectedFeature}"]`
-  ) as HTMLElement | null;
+  React.useEffect(() => {
+    const firstFeature = features[0];
 
-  if (!activeCard) return;
+    if (firstFeature && !features.some((feature) => feature.id === selectedFeature)) {
+      setSelectedFeature(firstFeature.id);
+    }
+  }, [features, selectedFeature]);
 
-  window.setTimeout(() => {
-    const container = track.parentElement as HTMLElement;
-    if (!container) return;
+  React.useEffect(() => {
+    const track = mobileFeatureTrackRef.current;
+    if (!track) return;
+    if (!window.matchMedia("(max-width: 768px)").matches) return;
 
-    const containerWidth = container.offsetWidth;
-    const cardLeft = activeCard.offsetLeft;
-    const cardWidth = activeCard.offsetWidth;
+    const activeCard = track.querySelector(
+      `[data-feature-id="${selectedFeature}"]`
+    ) as HTMLElement | null;
 
-    // Scroll programmatically so selected card is always centered
-    container.scrollTo({
-      left: cardLeft - containerWidth / 2 + cardWidth / 2,
-      behavior: "smooth",
-    });
-  }, 80);
-}, [selectedFeature]);
+    if (!activeCard) return;
+
+    window.setTimeout(() => {
+      const container = track.parentElement as HTMLElement;
+      if (!container) return;
+
+      const containerWidth = container.offsetWidth;
+      const cardLeft = activeCard.offsetLeft;
+      const cardWidth = activeCard.offsetWidth;
+
+      // Scroll programmatically so selected card is always centered.
+      container.scrollTo({
+        left: cardLeft - containerWidth / 2 + cardWidth / 2,
+        behavior: "smooth",
+      });
+    }, 80);
+  }, [selectedFeature]);
 
   // Track which LetsCelebrate tab is currently active inside FeatureWheel.
   const [celebrateTab, _setCelebrateTab] = useState<CelebrateTabKey>("birthdays");
@@ -339,12 +504,18 @@ React.useEffect(() => {
           />
         );
 
-      default:
-        return null;
+      default: {
+        const customCard = customFeatureById[selectedFeature];
+        return customCard ? <CustomFeatureContent card={customCard} /> : null;
+      }
     }
   };
 
-  const title = featureTitleContent[selectedFeature] || { header: "", subHeader: "" };
+  const customTitle = customFeatureById[selectedFeature];
+  const title = featureTitleContent[selectedFeature] || {
+    header: customTitle?.header || customTitle?.title || "",
+    subHeader: customTitle?.subHeader || customTitle?.description || customTitle?.subtitle || "",
+  };
 
   const selectedMobileIndex = Math.max(
     0,
@@ -402,7 +573,7 @@ React.useEffect(() => {
               <span
                 className={styles.mobileFeatureImage}
                 style={{
-                  backgroundImage: `url(${featureImageById[feature.id] || ""})`,
+                  backgroundImage: feature.backgroundImage,
                 }}
               />
               <span className={styles.mobileFeatureOverlay}>
