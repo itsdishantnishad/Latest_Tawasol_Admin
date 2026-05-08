@@ -487,31 +487,35 @@
 }
 
 // *RESPONSIVE---
-  @media (max-width:470px) {
-    .line {
-      height: 0px;
-      width: 221px;
-      border: 1px solid #B4B2B2;
-    };
+  @media (max-width:480px) {
+  /* ----- Horizontal Divider Fix ----- */
+hr {
+  display: block;
+  border: 0;
+  border-top: 1px solid #d1d1d1; /* Single line color */
+  margin: 20px 0 !important;
+  padding: 0;
+  width: 100% !important;
+  height: 0 !important;
+}
+
+/* If the line is inside .medBody or .privTextPad, 
+   this ensures it touches the edges */
+.medBody hr, .privTextPad hr {
+  width: calc(100% + 32px) !important; /* Offsets the 16px padding */
+  margin-left: -16px !important;
+}
     
   }
 
-/* Responsive */
-@media (max-width: 980px) {
-  .medGridTop { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .privGridTop { grid-template-columns: 1fr; }
-  .medBanner { grid-template-columns: 1fr; }
-}
+/* ================================================================
+   RESPONSIVE 
 
-@media (max-width: 720px) {
-  .medGridTop { grid-template-columns: 1fr; }
-  .privGridBottom { grid-template-columns: 1fr; }
-}
+/* ── 1200px ──────────────────────────────────────────────────── */
 
 @media (max-width: 1200px) {
   .medBanner { grid-template-columns: 1fr; }
 
-  /* ✅ wave tuning for smaller screens */
   .waveOffset {
     --waveShiftX: 10px;
     --waveShiftY: 20px;
@@ -526,37 +530,19 @@
   }
 }
 
-@media (max-width: 1100px) {
-  .medBanner { grid-template-columns: 1fr; }
 
+/* ── 1101px ──────────────────────────────────────────────────── */
+@media (max-width: 1101px) {
   .medBannerImg {
-    width: auto;
-    height: auto;
-    max-width: 100%;
     max-height: 380px;
   }
-}
 
-@media (max-width:1100px){
-.segWrap{
-  margin-top: 10px;
-  margin-left: -13px;
-}
-}
-
-
-@media (max-width:468px){
-.segWrap{
-  margin-top: 10px;
-  margin-left: -27px;
-}
-}
-
-
-@media (max-width: 1100px) {
-  .segRow {
-    grid-template-columns: 1fr;   // single column
+  .segWrap {
+    margin-top: 10px;
+    margin-left: -13px;
   }
+
+  .segRow { grid-template-columns: 1fr; }
 
   .segWrap {
     margin-left: 0 !important;
@@ -572,491 +558,35 @@
   }
 
   .segBtn {
-    flex: 1;                // equal width buttons
-    padding: 12px 10px;     // thoda compact
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 480px) {
-  .segWrap {
-    margin-left: 0 !important;
-    padding: 0 10px;        // side breathing space
-  }
-
-  .seg {
-    width: 100%;
-  }
-
-  .segBtn {
-    font-size: 12px;
-    padding: 10px 6px;
-    white-space: nowrap;    // text break na ho
-  }
-}
-
-
-
-
-
-
-
-
-/* ================= FINAL MOBILE RESPONSIVE FIX ================= */
-@media (max-width: 768px) {
-
-  /* remove fixed grid height */
-  .medGridTop {
-    grid-auto-rows: auto !important;
-  }
-
-  /* remove fixed card height */
-  .medHospitalCard,
-  .medBenefitsCard,
-  .medContactCard {
-    height: auto !important;
-  }
-
-  /* allow card to expand */
-  .medCard {
-    height: auto !important;
-  }
-
-  /* fix image cutting */
-  .medHospitalImg,
-  .medBenefitsImg,
-  .medContactImg,
-  .medImgAny {
-    height: auto !important;
-    max-height: 250px;
-    object-fit: contain;
-  }
-
-  /* fix content overflow */
-  .medBody {
-    height: auto !important;
-  }
-
-  /* important: prevent cutting */
-  .card {
-    overflow: visible !important;
-  }
-}
-
-
-/* small mobile extra fix */
-@media (max-width: 480px) {
-
-  .medHospitalImg,
-  .medBenefitsImg,
-  .medContactImg,
-  .medImgAny {
-    max-height: 200px;
-  }
-
-  .medTitleBase {
-    font-size: 16px;
-    line-height: 22px;
-  }
-
-  .medSubBase {
+    flex: 1;
+    padding: 12px 10px;
     font-size: 13px;
   }
 }
 
 
+/* ── 980px ───────────────────────────────────────────────────── */
+@media (max-width: 980px) {
+  .medGridTop { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .privGridTop { grid-template-columns: 1fr; }
+  .medBanner   { grid-template-columns: 1fr; }
+}
 
 
-
-
-/* ================= FINAL MOBILE PERFECT FIX ================= */
+/* ── 768px ───────────────────────────────────────────────────── */
 @media (max-width: 768px) {
 
-  /* ===== FIX 1: CARD CUT ===== */
-  .medGridTop {
-    grid-auto-rows: auto !important;
-  }
-
-  .medHospitalCard,
-  .medBenefitsCard,
-  .medContactCard {
-    height: auto !important;
-  }
-
-  .medCard {
-    height: auto !important;
-  }
-
-  .medBody {
-    height: auto !important;
-    padding: 16px !important;
-  }
-
-  .card {
-    overflow: visible !important;
-  }
-
-  /* ===== FIX 2: CONTACT CARD SPACING ===== */
-  .medInfoRow {
-    flex-wrap: wrap;
-    font-size: 13px;
-  }
-
-  .medWorkText {
-    font-size: 13px;
-  }
-
-  /* ===== FIX 3: IMAGE FIX ===== */
-  .medHospitalImg,
-  .medBenefitsImg,
-  .medContactImg,
-  .medImgAny {
-    height: auto !important;
-    max-height: 220px;
-    object-fit: contain;
-  }
-
-  /* ===== FIX 4: BANNER (LAST CARD PERFECT LIKE DESIGN) ===== */
-
-  .medBanner {
-    display: flex !important;
-    flex-direction: column !important;
-    padding: 16px !important;
-  }
-
-  .medBannerLeft {
-    padding: 0 !important;
-  }
-
-  /* ❌ hide extra long content */
-  .medBannerBullets,
-  .medBannerSiteRow {
-    display: none !important;
-  }
-
-  /* ✅ short title */
-  .medBannerTitle {
-    font-size: 20px !important;
-    line-height: 26px !important;
-  }
-
-  /* ✅ short description */
-  .medBannerSub {
-    font-size: 13px !important;
-    line-height: 18px !important;
-    max-height: 60px;
-    overflow: hidden;
-  }
-
-  /* ✅ image top */
-  .medBannerRight {
-    order: -1;
-    margin-bottom: 12px;
-  }
-
-  .medBannerImg {
-    max-height: 220px !important;
-  }
-
-  /* ✅ store buttons center */
-  .medBannerBadges {
-    justify-content: center !important;
-    margin-top: 10px;
-  }
-}
-
-
-/* ===== SMALL MOBILE EXTRA ===== */
-@media (max-width: 480px) {
-
-  .medBannerTitle {
-    font-size: 18px !important;
-  }
-
-  .medBannerSub {
-    font-size: 12px !important;
-  }
-
-  .medHospitalImg,
-  .medBenefitsImg,
-  .medContactImg,
-  .medImgAny {
-    max-height: 180px;
-  }
-}
-
-
-
-
-
-
-
-/* ================= PRIVILEGES MOBILE FIX ================= */
-@media (max-width: 768px) {
-
-  /* ✅ grid ko vertical stack karo */
-  .privGridTop,
-  .privGridBottom {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    grid-auto-rows: auto !important;
-  }
-
-  /* ❌ fixed height hatao */
-  .privTopLeftCard,
-  .privTopRightCard,
-  .privBottomLeftCard,
-  .privBottomRightCard {
-    min-height: auto !important;
-    height: auto !important;
-  }
-
-  /* ✅ card expand hone do */
-  .privCard {
-    height: auto !important;
-  }
-
-  /* ✅ text padding control */
-  .privTextPad {
-    padding: 16px !important;
-  }
-
-  /* ✅ title responsive */
-  .privTopLeftTitle,
-  .privBottomRightTitle,
-  .privTitleAny {
-    font-size: 18px !important;
-    line-height: 24px !important;
-  }
-
-  /* ✅ subtitle fix */
-  .privSubBase {
-    font-size: 13px !important;
-    line-height: 18px !important;
-  }
-
-  /* ✅ image cut fix */
-  .privImage {
-    height: auto !important;
-    max-height: 250px;
-    object-fit: contain !important;
-    border-radius: 12px;
-  }
-
-  /* ❌ overlap rokne ke liye */
-  .card {
-    overflow: visible !important;
-  }
-}
-
-
-/* ===== SMALL MOBILE ===== */
-@media (max-width: 480px) {
-
-  .privImage {
-    max-height: 200px;
-    border-radius: 12px;
-  }
-
-  .privTopLeftTitle,
-  .privBottomRightTitle,
-  .privTitleAny {
-    font-size: 16px !important;
-  }
-
-  .privSubBase {
-    font-size: 12px !important;
-  }
-}
-
-
-/* ================= WAVE MOBILE FIX (VISIBLE + PROPER) ================= */
-@media (max-width: 768px) {
-
-  .waveOffset {
-    --waveShiftX: 60px;     /* right side visible */
-    --waveShiftY: -40px;    /* thoda upar */
-    --waveScale: 0.8;       /* balanced size */
-    --waveRotate: 8deg;     /* thoda angle (figma feel) */
-  }
-
-  .medBannerRight::before,
-  .medBannerRight::after {
-    width: 420px !important;
-    height: 420px !important;
-    opacity: 0.9;
-  }
-}
-
-
-/* ===== SMALL MOBILE ===== */
-@media (max-width: 480px) {
-
-  .waveOffset {
-    --waveShiftX: 40px;
-    --waveShiftY: -20px;
-    --waveScale: 0.7;
-  }
-
-  .medBannerRight::before,
-  .medBannerRight::after {
-    width: 360px !important;
-    height: 360px !important;
-    opacity: 0.85;
-  }
-}
-
-
-/* ================= CLEAN WAVE FIX ================= */
-@media (max-width: 768px) {
-
-  .medBanner {
-    overflow: visible !important;
-  }
-
-  .medBannerRight {
-    position: relative;
-    overflow: visible !important;
-  }
-
-  .waveOffset {
-    --waveShiftX: -40px;   /* LEFT lao (important) */
-    --waveShiftY: 20px;    /* thoda niche */
-    --waveScale: 0.7;      /* balanced size */
-    --waveRotate: 5deg;
-  }
-
-  .medBannerRight::before,
-  .medBannerRight::after {
-    width: 320px !important;
-    height: 320px !important;
-    opacity: 0.8;
-  }
-}
-
-
-/* small mobile */
-@media (max-width: 480px) {
-
-  .waveOffset {
-    --waveShiftX: -20px;
-    --waveShiftY: 10px;
-    --waveScale: 0.6;
-  }
-
-  .medBannerRight::before,
-  .medBannerRight::after {
-    width: 260px !important;
-    height: 260px !important;
-  }
-}
-
-
-
-
-/* ================= FINAL WAVE POSITION FIX ================= */
-@media (max-width: 768px) {
-  
-   .breadPosition{
-    display: none ;
-  }
-
-  .medBanner {
-    overflow: visible !important;
-  }
-
-  .medBannerRight {
-    position: relative;
-    overflow: visible !important;
-  }
-
-  /* ❗ MAIN FIX: anchor change */
-  .medBannerRight::before,
-  .medBannerRight::after {
-    top: 0 !important;
-    left: auto !important;
-    right: -60px !important;   /* right side se control */
-    transform: rotate(10deg) scale(0.8) !important;
-  }
-
-  .medBannerRight::after {
-    right: -30px !important;   /* second wave thodi paas */
-    transform: rotate(10deg) scale(0.7) !important;
-  }
-
-  /* size control */
-  .medBannerRight::before,
-  .medBannerRight::after {
-    width: 380px !important;
-    height: 380px !important;
-    opacity: 0.9;
-  }
-}
-
-
-/* small mobile */
-@media (max-width: 480px) {
-
-  .breadPosition{
-    display: none ;
-  }
-
-  .medBannerRight::before {
-    right: -40px !important;
-    transform: rotate(8deg) scale(0.7) !important;
-  }
-
-  .medBannerRight::after {
-    right: -20px !important;
-    transform: rotate(8deg) scale(0.6) !important;
-  }
-}
-
-
-
-/* ===== FINAL DESKTOP NAVSEGMENT CENTER FIX ===== */
-@media (min-width: 1101px) {
-  .segRow {
-    display: grid !important;
-    grid-template-columns: 1fr auto 1fr !important;
-    align-items: center !important;
+  /* ----- Layout ----- */
+  .container { padding: 0 16px !important; }
+
+  .grid {
+    margin-top: 20px !important;
     gap: 16px !important;
-    width: 100% !important;
   }
 
-  .breadPosition {
-    grid-column: 1 !important;
-    justify-self: start !important;
-    margin-left: 0 !important;
-  }
+  .breadPosition { display: none !important; }
 
-  .segWrap {
-    grid-column: 2 !important;
-    justify-self: center !important;
-    margin-left: 0 !important;
-    margin-top: 0 !important;
-    width: auto !important;
-    display: flex !important;
-    justify-content: center !important;
-  }
-
-  .seg {
-    width: auto !important;
-    max-width: none !important;
-  }
-}
-
-
-/* ===== FINAL MOBILE NAVSEGMENT CENTER FIX ===== */
-@media (max-width: 768px) {
-  .container {
-    padding: 0 16px !important;
-  }
-
-  // .breadPosition {
-  //   display: none !important;
-  // }
-
+  /* ----- Segment / Nav ----- */
   .segRow {
     display: flex !important;
     justify-content: center !important;
@@ -1067,49 +597,6 @@
 
   .segWrap {
     grid-column: auto !important;
-    justify-self: center !important;
-    width: auto !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    display: flex !important;
-    justify-content: center !important;
-  }
-
-  .seg {
-    width: auto !important;
-    max-width: 100% !important;
-    display: inline-flex !important;
-  }
-
-  .segBtn {
-    flex: 0 0 auto !important;
-    padding: 10px 12px !important;
-    font-size: 12px !important;
-    white-space: nowrap !important;
-  }
-}
-/* ===== FINAL MOBILE NAVSEGMENT FULL WIDTH CENTER FIX ===== */
-@media (max-width: 768px) {
-  .container {
-    padding: 0 16px !important;
-  }
-
-  // .breadPosition {
-  //   display: none !important;
-  // }
-
-  .segRow {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100% !important;
-    gap: 0 !important;
-  }
-
-  .segWrap {
-    grid-column: auto !important;
-    justify-self: center !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 auto !important;
@@ -1131,11 +618,549 @@
     white-space: nowrap !important;
     text-align: center !important;
   }
+
+  /* ----- Med Grid & Cards ----- */
+  .medGridTop { grid-auto-rows: auto !important; }
+
+  .medHospitalCard,
+  .medBenefitsCard,
+  .medContactCard,
+  .medCard { height: auto !important; }
+
+  .medBody {
+    height: auto !important;
+    padding: 16px !important;
+  }
+
+  .card { overflow: visible !important; }
+
+  /* ----- Med Images ----- */
+  .medHospitalImg,
+  .medBenefitsImg,
+  .medContactImg,
+  .medImgAny {
+    height: auto !important;
+    max-height: 220px;
+    object-fit: contain;
+  }
+
+  /* ----- Med Banner ----- */
+  .medBanner {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 16px !important;
+    overflow: visible !important;
+  }
+
+  .medBannerLeft { padding: 0 !important; }
+
+  .medBannerBullets,
+  .medBannerSiteRow { display: none !important; }
+
+  .medBannerTitle {
+    font-size: 20px !important;
+    line-height: 26px !important;
+  }
+
+  .medBannerSub {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    letter-spacing: -0.5px !important;
+    color: #3a3b43 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .medBannerRight {
+    order: -1;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: visible !important;
+  }
+
+  .medBannerImg { max-height: 220px !important; }
+   .medBannerBadges {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    margin: 16px 16px 0 !important;
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
+    gap: 12px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;   /* ✅ no cutoff */
+  }
+ 
+  .medBannerBadge {
+    display: block !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    object-fit: contain !important; /* ✅ keep aspect ratio, no stretch */
+  }
+ 
+  /* App Store */
+  .medBannerBadges .medBannerBadge:first-child {
+    width: 134px !important;
+    min-width: 134px !important;
+    max-width: 134px !important;
+    height: 44px !important;          /* ✅ fixed height */
+    min-height: 44px !important;
+    max-height: 44px !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+  }
+ 
+  /* Google Play — same height as App Store */
+  .medBannerBadges .medBannerBadge:nth-child(2) {
+    width: 150px !important;          /* slightly wider to preserve ratio */
+    min-width: 150px !important;
+    max-width: 150px !important;
+    height: 44px !important;          /* ✅ SAME as App Store */
+    min-height: 44px !important;
+    max-height: 44px !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+  }
+
+  /* ----- Wave ----- */
+  .medBannerRight::before,
+  .medBannerRight::after {
+    top: 0 !important;
+    left: auto !important;
+    right: -60px !important;
+    width: 380px !important;
+    height: 380px !important;
+    opacity: 0.9;
+    transform: rotate(10deg) scale(0.8) !important;
+  }
+
+  .medBannerRight::after {
+    right: -30px !important;
+    transform: rotate(10deg) scale(0.7) !important;
+  }
+
+  /* ----- Contact Info ----- */
+  .medInfoRow {
+    width: auto !important;
+    min-height: 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 0 !important;
+    margin-bottom: 8px !important;
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    letter-spacing: -0.5px !important;
+    color: #6c6c6c !important;
+    flex-wrap: wrap;
+  }
+
+  .medInfoVal {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    letter-spacing: -0.5px !important;
+    color: #006ecb !important;
+  }
+
+  .medContactHead,
+  .medWorkTitle {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 16px !important;
+    line-height: 24px !important;
+    letter-spacing: 0 !important;
+    color: #000000 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .medWorkText,
+  .medWorkMuted {
+    width: auto !important;
+    min-height: 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    letter-spacing: -0.5px !important;
+    color: #6c6c6c !important;
+  }
+
+  /* ----- Typography (shared) ----- */
+  .medSubBase,
+  .medHospitalSub,
+  .medBenefitsSub,
+  .medSubAny,
+  .privSubBase,
+  .privTopLeftSub,
+  .privBottomRightSub,
+  .privSubAny,
+  .medWorkText {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    letter-spacing: -0.5px !important;
+    color: #6c6c6c !important;
+  }
+
+  /* ----- Privileges Grid ----- */
+  .privGridTop,
+  .privGridBottom {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: auto !important;
+    min-height: unset !important;
+  }
+
+  .privBottomRightCard { order: 1 !important; }
+  .privBottomLeftCard  { order: 2 !important; }
+
+  .privTopLeftCard,
+  .privTopRightCard,
+  .privBottomLeftCard {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 284px !important;
+    min-height: 284px !important;
+    border-radius: 12px !important;
+    margin: 0 auto !important;
+  }
+
+  .privBottomRightCard {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 364px !important;
+    min-height: 364px !important;
+    border-radius: 12px !important;
+    margin: 0 auto !important;
+  }
+
+  .privTopLeftCard .privCard,
+  .privTopRightCard .privCard,
+  .privBottomRightCard .privCard,
+  .privBottomLeftCard .privCard {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+  }
+
+  .privTopLeftCard .privCard,
+  .privBottomRightCard .privCard { background: #feead1 !important; }
+
+  .privBottomLeftCard .privCard { border-radius: 16px !important; }
+
+  .privTextPad {
+    height: 100% !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .privTopRightCard .privImage,
+  .privBottomLeftCard .privImage {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border-radius: 12px !important;
+  }
+
+  .privBottomLeftCard .privImage {
+    object-fit: fill !important;
+    border-radius: 16px !important;
+  }
+
+  .privCard,
+  .privImage { height: auto !important; }
+
+  .privTopLeftTitle,
+  .privBottomRightTitle,
+  .privTitleAny {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 20px !important;
+    line-height: 28px !important;
+    letter-spacing: 0 !important;
+    color: #000000 !important;
+    margin: 0 !important;
+  }
+
+  .privBottomRightTitle,
+  .privTitleRed {
+    color: #ff0000 !important;
+  }
+
+  .privTopLeftSub,
+  .privBottomRightSub {
+    margin-top: 12px !important;
+  }
+
+  .privSubBase {
+    font-size: 14px !important;
+    line-height: 18px !important;
+    font-weight: 400;
+  }
+
+  .privLogoRow { margin-bottom: 20px !important; }
+
+  .privLogo {
+    max-width: 190px !important;
+    width: auto !important;
+    height: auto !important;
+    display: block !important;
+  }
+
+  .privAccentWord {
+    color: #ff0000 !important;
+    font-weight: 600 !important;
+  }
+
+  .privSiteRow { margin-top: 16px !important; }
+
+  .privSiteLink {
+    font-family: "Inter", sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 16px !important;
+    line-height: 24px !important;
+    letter-spacing: 0 !important;
+    color: #ff0000 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .privGlobeIcon {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .privBulletHeading {
+    margin-top: 22px !important;
+    margin-bottom: 12px !important;
+    font-family: "Inter", sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 18px !important;
+    line-height: 24px !important;
+    color: #000000 !important;
+  }
+
+  .privBullets,
+  .privBulletsTwoCol {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  .privBullets li,
+  .privBulletsTwoCol li {
+    list-style: none !important;
+    position: relative !important;
+    padding-left: 22px !important;
+    font-family: "Inter", sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    letter-spacing: -0.5px !important;
+    color: #3a3b43 !important;
+  }
+
+  .privBullets li::before,
+  .privBulletsTwoCol li::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 8px !important;
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    background: #ff0000 !important;
+  }
 }
 
-/* ===== FINAL LOCAL BREADCRUMB VISIBILITY FIX ===== */
 
-/* Desktop/tablet: local breadcrumb visible */
+/* ── 720px ───────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .medGridTop    { grid-template-columns: 1fr; }
+  .privGridBottom { grid-template-columns: 1fr; }
+}
+
+
+/* ── 480px ───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+
+
+hr {
+  display: none !important;
+}
+
+.medWorkTitle {
+  border-top: 1px solid #d1d1d1 !important; 
+  padding-top: 16px !important;            
+  margin-top: 16px !important;             
+  
+  width: calc(100% + 32px) !important; 
+  margin-left: -16px !important; 
+  
+  display: block !important;
+}
+
+.medInfoRow:last-of-type {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
+
+  .segWrap {
+    margin-left: -27px;
+    padding: 0 10px;
+  }
+
+  .segBtn {
+    font-size: 12px;
+    padding: 10px 6px;
+    white-space: nowrap;
+  }
+
+  /* Images */
+  .medHospitalImg,
+  .medBenefitsImg,
+  .medContactImg,
+  .medImgAny { max-height: 180px; }
+
+  /* Typography */
+  .medTitleBase {
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  .medSubBase { font-size: 13px; }
+
+  .medBannerTitle { font-size: 18px !important; }
+
+  /* Badges */
+  .medBannerBadges {
+    margin: 16px 16px 0 !important;
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
+    gap: 10px !important;
+    overflow: visible !important;
+  }
+ 
+  .medBannerBadges .medBannerBadge:first-child {
+    width: 130px !important;
+    min-width: 130px !important;
+    max-width: 130px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+  }
+ 
+  .medBannerBadges .medBannerBadge:nth-child(2) {
+    width: 146px !important;
+    min-width: 146px !important;
+    max-width: 146px !important;
+    height: 42px !important;          /* ✅ SAME as App Store */
+    min-height: 42px !important;
+    max-height: 42px !important;
+  }
+}
+
+  /* Wave */
+  .medBannerRight::before {
+    right: -40px !important;
+    transform: rotate(8deg) scale(0.7) !important;
+  }
+
+  .medBannerRight::after {
+    right: -20px !important;
+    transform: rotate(8deg) scale(0.6) !important;
+  }
+
+  /* Privileges */
+  .privTopLeftCard,
+  .privTopRightCard,
+  .privBottomLeftCard {
+    height: 284px !important;
+    min-height: 284px !important;
+  }
+
+  .privBottomRightCard {
+    height: 364px !important;
+    min-height: 364px !important;
+  }
+
+  .privTextPad { padding: 16px !important; }
+
+  .privTopLeftTitle,
+  .privBottomRightTitle,
+  .privTitleAny { font-size: 16px !important; }
+
+  .privSubBase { 
+    font-size: 14px !important; 
+    font-family: 'inter';
+    font-weight: 400;
+  }
+
+  .privImage {
+    max-height: 200px;
+    border-radius: 12px;
+  }
+
+
+
+/* ── 360px ───────────────────────────────────────────────────── */
+@media (max-width: 360px) {
+  .medBannerBadges {
+    margin: 16px 16px 0 !important;
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
+    gap: 8px !important;
+    overflow: visible !important;
+  }
+ 
+  .medBannerBadges .medBannerBadge:first-child {
+    flex: 0 0 120px !important;
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+  }
+ 
+  .medBannerBadges .medBannerBadge:nth-child(2) {
+    flex: 1 1 auto !important;
+    width: calc(100% - 120px - 8px) !important;
+    min-width: 0 !important;
+    max-width: 140px !important;
+    height: 40px !important;         
+    min-height: 40px !important;
+    max-height: 40px !important;
+    object-fit: contain !important;   
+  }
+}
+
+
+/* ── Desktop min-width overrides ─────────────────────────────── */
 @media (min-width: 769px) {
   .breadPosition {
     display: block !important;
@@ -1147,19 +1172,55 @@
   }
 }
 
-/* Mobile: local breadcrumb hidden */
-@media (max-width: 768px) {
-  .breadPosition {
-    display: none !important;
-  }
-}
-
-
 @media (min-width: 1101px) {
+  .segRow {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    align-items: center !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
   .breadPosition {
     display: block !important;
     grid-column: 1 !important;
     justify-self: start !important;
     margin-left: 0 !important;
   }
+
+  .segWrap {
+    grid-column: 2 !important;
+    justify-self: center !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    width: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .seg {
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+@media(max-width:768px){
+
+hr {
+  display: none !important;
+}
+.medWorkTitle {
+  border-top: 1px solid #d1d1d1 !important; 
+  padding-top: 16px !important;            
+  margin-top: 16px !important;            
+  width: calc(100% + 32px) !important; 
+  margin-left: -16px !important; 
+  
+  display: block !important;
+}
+
+.medInfoRow:last-of-type {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
 }

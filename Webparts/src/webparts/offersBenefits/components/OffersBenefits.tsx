@@ -396,9 +396,9 @@ export default class OffersBenefits extends React.Component<
                 </div>
               )}
 
-              <div className={styles.line}>
+              {/* <div className={styles.line}>
                 <hr />
-              </div>
+              </div> */}
 
               <div className={styles.medWorkTitle}>Working Hours</div>
               {whMain && <div className={styles.medWorkText}>{whMain}</div>}
