@@ -60,7 +60,10 @@ const FeatureSelector: React.FC<FeatureSelectorProps> = ({
   selectedFeature,
 }) => {
   return (
-    <div className={styles.featureSelector}>
+    <div
+      className={styles.featureSelector}
+      style={{ "--feature-count": String(features.length) } as React.CSSProperties}
+    >
       {features.map((feature, i) => {
         const position = calculateCardPosition(i, features.length);
         const isSelected = feature.id === selectedFeature;
@@ -73,13 +76,15 @@ const FeatureSelector: React.FC<FeatureSelectorProps> = ({
             onClick={() => onFeatureSelect(feature.id)}
             className={`
               ${styles.card}
-              ${bgClassById[feature.id]}
+              ${bgClassById[feature.id] || ""}
+              ${feature.isCustom ? styles.customCard : ""}
               ${isSelected ? styles.cardSelected : ""}
             `}
             style={
               {
                 "--rotation": `${position.rotation}deg`,
                 "--translateY": `${position.translateY}px`,
+                backgroundImage: feature.backgroundImage,
               } as React.CSSProperties
             }
           >
