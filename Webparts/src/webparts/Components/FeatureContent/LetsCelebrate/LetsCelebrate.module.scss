@@ -840,12 +840,12 @@
     }
   }
 
-  .bottomSection {
-        bottom: unset !important;
-        gap: 15px;
-        margin-top: 350px !important;
-        position: relative !important;
-    }
+  // .bottomSection {
+  //       bottom: unset !important;
+  //       gap: 15px;
+  //       margin-top: 350px !important;
+  //       position: relative !important;
+  //   }
 
   .navButton {
     width: 44px;
@@ -1020,12 +1020,12 @@
     }
   }
   
-  .bottomSection {
-    position: relative !important;
-    bottom: unset !important;
-    margin-top: 300px !important;
-    gap: 15px;
-  }
+  // .bottomSection {
+  //   position: relative !important;
+  //   bottom: unset !important;
+  //   margin-top: 300px !important;
+  //   gap: 15px;
+  // }
 }
 
 @media (max-width: 360px) {
@@ -1367,4 +1367,18 @@
     flex: 0 0 16px;
   }
 
+}
+
+
+
+@media(max-width:480px){
+  .bottomSection {
+   margin-top: 335px !important;
+  }
+}
+
+@media(max-width:768px){
+  .bottomSection {
+   margin-top: 335px !important;
+  }
 }
