@@ -1224,3 +1224,134 @@ hr {
   margin-bottom: 0 !important;
 }
 }
+
+
+// /* ✅ DESKTOP FIX: Employee Privileges image cards not cutting */
+// @media (min-width: 769px) {
+//   .privGridTop {
+//     grid-template-columns: minmax(0, 0.414fr) minmax(0, 0.586fr) !important;
+//     grid-auto-rows: 360px !important;
+//     min-height: unset !important;
+//   }
+
+//   .privGridBottom {
+//     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+//     grid-auto-rows: 314px !important;
+//     min-height: unset !important;
+//   }
+
+//   .privTopRightCard {
+//     height: 360px !important;
+//     min-height: 360px !important;
+//     max-height: 360px !important;
+//     border-radius: 12px !important;
+//   }
+
+//   .privBottomLeftCard {
+//     height: 314px !important;
+//     min-height: 314px !important;
+//     max-height: 314px !important;
+//     border-radius: 16px !important;
+//   }
+
+//   .privTopRightCard .privCard,
+//   .privBottomLeftCard .privCard {
+//     width: 100% !important;
+//     height: 100% !important;
+//     min-height: 100% !important;
+//     max-height: 100% !important;
+//     overflow: hidden !important;
+//     border-radius: inherit !important;
+//     background: #f4f4f4 !important;
+//   }
+
+//   .privTopRightCard .privImage,
+//   .privBottomLeftCard .privImage {
+//     width: 100% !important;
+//     height: 100% !important;
+//     min-height: 100% !important;
+//     max-height: none !important;
+//     display: block !important;
+//     object-fit: cover !important;
+//     object-position: center center !important;
+//     border-radius: inherit !important;
+//   }
+
+//   .privBottomLeftCard .privImage {
+//     object-position: center top !important;
+//   }
+// }
+
+
+/* ✅ DESKTOP FIX: Employee Privileges image cards not cutting + equal row heights */
+@media (min-width: 769px) {
+  .privGridTop {
+    grid-template-columns: minmax(0, 0.414fr) minmax(0, 0.586fr) !important;
+    grid-auto-rows: 360px !important;
+    min-height: unset !important;
+    align-items: stretch !important;
+  }
+
+  .privGridBottom {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-rows: 314px !important;
+    min-height: unset !important;
+    align-items: stretch !important;
+  }
+
+  .privTopLeftCard,
+  .privTopRightCard {
+    height: 360px !important;
+    min-height: 360px !important;
+    max-height: 360px !important;
+    border-radius: 12px !important;
+  }
+
+  .privBottomLeftCard,
+  .privBottomRightCard {
+    height: 314px !important;
+    min-height: 314px !important;
+    max-height: 314px !important;
+  }
+
+  .privBottomLeftCard {
+    border-radius: 16px !important;
+  }
+
+  .privBottomRightCard {
+    border-radius: 16px !important;
+  }
+
+  .privTopLeftCard .privCard,
+  .privTopRightCard .privCard,
+  .privBottomLeftCard .privCard,
+  .privBottomRightCard .privCard {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    border-radius: inherit !important;
+  }
+
+  .privTopRightCard .privCard,
+  .privBottomLeftCard .privCard {
+    background: #f4f4f4 !important;
+  }
+
+  .privTopRightCard .privImage,
+  .privBottomLeftCard .privImage {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    border-radius: inherit !important;
+  }
+
+  .privBottomLeftCard .privImage {
+    object-position: center top !important;
+  }
+}
