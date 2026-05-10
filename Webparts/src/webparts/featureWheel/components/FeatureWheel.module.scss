@@ -204,8 +204,8 @@
     padding: 20px 0 40px !important; /* Increased bottom padding for the shadow */
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    touch-action: none ;
-
+    // touch-action: none ;
+     touch-action: pan-y !important;
     // new 
     scroll-behavior: smooth !important;
   
