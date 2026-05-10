@@ -192,3 +192,35 @@
   margin-top: 20px;
  } 
 }
+
+
+
+
+
+@media (max-width: 768px) {
+  .banner {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .inner {
+    /* Critical Fixes */
+    width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    box-sizing: border-box !important; 
+  }
+
+  .copy {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    word-wrap: break-word;
+    display: block; 
+  }
+}
