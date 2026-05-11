@@ -1,4 +1,4 @@
-// src/webparts/featureWheel/components/FeatureWheel.tsx
+// FeatureWheel.tsx
 
 import * as React from "react";
 import { useCallback, useRef, useState } from "react";
@@ -314,7 +314,7 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
   }, [customFeatureCards]);
 
   const [selectedFeature, setSelectedFeature] = useState<string>(() =>
-    themeConfig.key === "uaeNationalDay" ? "employee_events" : "tasks"
+    themeConfig.key === "uaeNationalDay" ? "employee_events" : "about_dhre"
   );
 
   const mobileFeatureTrackRef = useRef<HTMLDivElement | null>(null);

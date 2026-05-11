@@ -343,7 +343,10 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
         className: styles.serviceLinkModal,
         showCloseButton: true,
       }}
-      minWidth={"800px"}
+      modalProps={{
+        className: styles.serviceLinksDialog,
+      }}
+      minWidth={0}
     >
       <div className={styles.divider}></div>
 
