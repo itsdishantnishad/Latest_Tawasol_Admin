@@ -515,7 +515,7 @@ export class GlobalBreadcrumbs {
     display:block !important;
     overflow:visible !important;
     background:transparent !important;
-    pointer-events:none !important;
+    pointer-events:auto !important;
     transition:none !important;
     will-change:transform !important;
   }
