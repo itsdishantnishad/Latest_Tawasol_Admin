@@ -1,0 +1,1016 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+.serviceLinkModal {
+  [role="heading"] {
+    font-size: 20px;
+    line-height: 28px !important;
+    font-weight: 500 !important;
+    color: #000000 !important;
+    font-family: 'Inter', sans-serif !important;
+    height: 0;
+  }
+
+  .container {
+    padding: 0 50px 50px;
+  }
+}
+
+.tabContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 30px;
+  background-color: #ffffff66;
+  padding: 6px;
+  border-radius: 25px;
+  width: fit-content;
+  margin: -24px auto 24px;
+  border: 1px solid #FBBF7F;
+}
+
+.tab {
+  background-color: transparent;
+  border: none;
+  border-radius: 20px;
+  color: #3A3B43;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
+  padding: 10px 30px;
+  transition: all .3s ease;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.activeTab {
+  background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #dda160 0, #ffdbb4 100%);
+  color: #3A3B43;
+}
+
+.content {
+  min-height: 400px;
+}
+
+.linksGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(6, 1fr);
+  padding: 0;
+}
+
+.linkItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  // &:hover {
+  //   transform: translateY(-3px);
+  // }
+}
+
+.iconCircle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  // background-color: #ffffff66;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.icon {
+  font-size: 32px;
+}
+
+.appIcon {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+.linkTitle {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+  text-align: center;
+  color: #000000;
+  letter-spacing: -0.5px;
+  font-family: 'Inter', sans-serif;
+}
+
+.addLinkButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.addIcon {
+  font-size: 36px;
+  color: #666;
+}
+
+.customLinkItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+
+  &:hover .menuWrapper,
+  &:focus-within .menuWrapper {
+    display: block;
+  }
+}
+
+.menuVisible {
+  .menuWrapper {
+    display: block;
+  }
+}
+
+.customLinkAnchor {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  font: inherit;
+  text-align: center;
+  pointer-events: auto;
+  touch-action: manipulation;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.deleteButton {
+  position: absolute;
+  top: -5px;
+  right: 20px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background-color: #ff4444;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.addLinkForm {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.formTitle {
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.cancelButton {
+  padding: 10px 24px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  background-color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.saveButton {
+  padding: 10px 24px;
+  font-size: 14px;
+  border: none;
+  background-color: #0078d4;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.emptyState {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  padding: 40px;
+}
+
+:global(.ms-Dialog-main) {
+  background-color: #FDECDC !important;
+  border-radius: 8px;
+}
+
+.optionsButton {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.menuPopup {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  width: 140px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  z-index: 30;
+}
+
+.menuItem {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:hover {
+    background: #fdf4e6;
+  }
+}
+
+.menuItemDelete {
+  padding: 12px 16px;
+  cursor: pointer;
+  color: #c75043;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover {
+    background: #fdecea;
+  }
+}
+
+.deleteConfirm {
+  background: #d9534f;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.menuWrapper {
+  position: absolute;
+  top: -2px;
+  right: 8px;
+  z-index: 5;
+  display: none;
+  pointer-events: none;
+
+  button {
+    background: transparent;
+    min-width: 24px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    pointer-events: auto;
+
+    &:hover {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+  }
+}
+
+.menu {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+  width: 120px;
+  z-index: 1000;
+  padding: 6px 0;
+
+  display: flex;
+  flex-direction: column;
+
+  button {
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: #444;
+
+    &:hover {
+      background-color: #f3f3f3;
+    }
+  }
+}
+
+.inlineForm {
+  background-color: transparent;
+  border: 1px solid #F8CCA3;
+  border-radius: 4px;
+  margin-top: 24px;
+  padding: 16px;
+  font-family: 'Inter', sans-serif;
+}
+
+.formTitle {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  color: #6C6C6C;
+}
+
+.formFields {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 20px;
+
+  .formField {
+    width: 100%;
+
+    .inputLine {
+      font-family: 'Inter', sans-serif;
+
+      label {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        line-height: 22px;
+        font-weight: 500;
+        color: #3A3B43;
+        margin-bottom: 8px;
+      }
+
+      :global {
+        .ms-TextField-fieldGroup {
+          height: 48px;
+          border: 1px solid #F8CCA3;
+          overflow: hidden;
+          border-radius: 8px;
+
+          input {
+            padding: 12px 20px;
+
+            &::placeholder {
+              color: #A7A7A7;
+              font-size: 16px;
+              line-height: 24px;
+              font-weight: 400;
+            }
+          }
+
+          &::after{
+            &:hover {
+              border: 1px solid #F8CCA3;
+            }
+          }
+
+          &::after{
+            &:active {
+              border: 1px solid #F8CCA3;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.formActions {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+
+  button {
+    width: 100%;
+    height: 48px;
+    border-radius: 50px;
+    border: 1.5px solid #101820;
+
+    &:last-child {
+      border: 0;
+      box-shadow: 0px 4px 4px 0px #C7CFD6 inset;
+      background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #A6ABB0 0%, #A3A8AC 100%);
+
+      &:hover {
+        box-shadow: -4px -6px 4px 0px #00000082 inset;
+        background: radial-gradient(245.31% 848.44% at 112.5% -164.06%, #101820 0%, #202D39 100%);
+      }
+    }
+  }
+}
+
+.customAppIcon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  display: block;
+}
+
+// Add these styles to your existing SCSS file
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #F8CCA3;
+  margin: 0;
+}
+
+.successMessage {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #10b981;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.successIcon {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.successText {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  pointer-events: auto;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+}
+
+.menuedit {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  padding: 0;
+  border: 1px solid #F8CCA3;
+  overflow: hidden;
+}
+
+.menuedit button {
+  align-items: center;
+  background: 0 0;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  line-height: 22px;
+  gap: 10px;
+  padding: 10px 14px;
+  text-align: left;
+  width: 100%;
+  color: #3A3B43;
+  font-family: 'Inter', sans-serif;
+}
+
+.menuedit button:hover {
+  background: #f9f1e7; // same as your beige hover look
+}
+
+.menuedit button svg {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+}
+
+
+:global {
+  .ms-Dialog-inner {
+    padding: 0;
+  }
+}
+
+
+.hiddenFileInput {
+  display: none;
+}
+
+.uploadBtn {
+  margin-top: 10px;
+  width: 100%;
+  height: 40px;
+  border: 1px solid rgba(0,0,0,.2);
+  background: #fff;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.uploadBtn:hover {
+  background: rgba(0,0,0,.03);
+}
+
+.uploadIcon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* You already use this in current code; keep it */
+.customAppIcon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  display: block;
+}
+
+
+/* =========================
+   VIEW ALL / SERVICE LINKS DIALOG
+   Popup belongs to AppsAndLinks only.
+   Do not override this popup from ServiceLinks.module.scss.
+========================= */
+
+.serviceLinksDialog {
+  :global(.ms-Dialog-main) {
+    width: 800px;
+    max-width: calc(100vw - 48px);
+    min-width: 0 !important;
+    max-height: calc(100vh - 48px);
+    background-color: #FDECDC !important;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  :global(.ms-Dialog-inner) {
+    padding: 0 !important;
+  }
+
+  :global(.ms-Dialog-content) {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+.tab {
+  &:focus,
+  &:active {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Tablet/mobile dialog layout: matches the supplied mobile image layout. */
+@media screen and (max-width: 768px) {
+  .serviceLinksDialog {
+    :global(.ms-Dialog-main) {
+      width: min(320px, calc(100vw - 20px)) !important;
+      max-width: min(320px, calc(100vw - 20px)) !important;
+      min-width: 0 !important;
+      max-height: calc(100vh - 24px);
+      margin: 0 auto;
+      border-radius: 4px;
+    }
+
+    :global(.ms-Modal-scrollableContent) {
+      max-height: calc(100vh - 24px);
+      overflow: hidden;
+    }
+
+    :global(.ms-Dialog-header) {
+      box-sizing: border-box;
+      min-height: 0;
+      padding: 10px 12px 9px;
+    }
+
+    :global(.ms-Dialog-title) {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 22px;
+      color: #000000;
+    }
+
+    :global(.ms-Dialog-topButton) {
+      top: 6px;
+      right: 6px;
+    }
+
+    :global(.ms-Dialog-inner) {
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 58px);
+      overflow: hidden;
+      padding: 0 !important;
+    }
+
+    :global(.ms-Dialog-content) {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+  }
+
+  .serviceLinkModal {
+    [role="heading"] {
+      height: auto;
+      margin: 0;
+      padding: 0;
+      font-size: 16px;
+      line-height: 22px !important;
+      font-weight: 500 !important;
+    }
+
+    .container {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 0 8px 16px;
+      overflow-x: hidden;
+    }
+  }
+
+  .divider {
+    height: 1px;
+    background-color: #F8CCA3;
+  }
+
+  .tabContainer {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    margin: 10px auto 18px;
+    padding: 3px;
+    gap: 3px;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 7px 4px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 14px;
+    text-align: center;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  .activeTab {
+    box-shadow: none !important;
+  }
+
+  .linksGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-items: center;
+    align-items: start;
+    width: 100%;
+    max-width: 100%;
+    gap: 22px 8px;
+    padding: 0 2px;
+    overflow-x: hidden;
+  }
+
+  .linkItem,
+  .addLinkButton,
+  .customLinkItem {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .iconCircle {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    margin-bottom: 8px;
+  }
+
+  .appIcon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+
+  .customAppIcon {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+  }
+
+  .linkTitle {
+    width: 100%;
+    max-width: 82px;
+    margin: 0 auto;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 15px;
+    letter-spacing: -0.2px;
+    text-align: center;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+  }
+
+  .menuWrapper {
+    top: -4px;
+    right: 4px;
+  }
+
+  .inlineForm {
+    margin-top: 18px;
+    padding: 10px;
+    border-radius: 4px;
+  }
+
+  .formTitle {
+    margin: 0 0 8px;
+    font-size: 10px;
+    line-height: 14px;
+  }
+
+  .formFields {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+
+    .formField {
+      .inputLine {
+        label {
+          margin-bottom: 4px;
+          font-size: 10px;
+          line-height: 14px;
+        }
+
+        :global {
+          .ms-TextField-fieldGroup {
+            height: 32px;
+            border-radius: 4px;
+
+            input {
+              padding: 7px 10px;
+              font-size: 10px;
+              line-height: 14px;
+
+              &::placeholder {
+                font-size: 10px;
+                line-height: 14px;
+              }
+            }
+          }
+
+          .ms-TextField-errorMessage {
+            padding-top: 3px;
+            font-size: 9px;
+            line-height: 12px;
+          }
+        }
+      }
+    }
+  }
+
+  .uploadBtn {
+    height: 30px;
+    margin-top: 6px;
+    padding: 0 10px;
+    border-radius: 4px;
+    font-size: 10px;
+  }
+
+  .uploadIcon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .formActions {
+    gap: 8px;
+
+    button {
+      height: 30px;
+      min-width: 0;
+      border-radius: 999px;
+      font-size: 10px;
+    }
+  }
+
+  .successMessage {
+    box-sizing: border-box;
+    width: min(280px, calc(100vw - 40px));
+    justify-content: center;
+    padding: 8px 10px;
+  }
+
+  .successText {
+    font-size: 10px;
+    line-height: 14px;
+  }
+}
+
+@media screen and (max-width: 370px) {
+  .serviceLinksDialog {
+    :global(.ms-Dialog-main) {
+      width: calc(100vw - 12px) !important;
+      max-width: calc(100vw - 12px) !important;
+    }
+
+    :global(.ms-Dialog-header) {
+      padding: 8px 10px 7px;
+    }
+
+    :global(.ms-Dialog-title) {
+      font-size: 14px;
+      line-height: 20px;
+    }
+  }
+
+  .serviceLinkModal {
+    [role="heading"] {
+      font-size: 14px;
+      line-height: 20px !important;
+    }
+
+    .container {
+      padding: 0 7px 14px;
+    }
+  }
+
+  .tabContainer {
+    margin: 8px auto 16px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .tab {
+    padding: 6px 3px;
+    font-size: 10px;
+    line-height: 13px;
+  }
+
+  .linksGrid {
+    gap: 20px 6px;
+    padding: 0;
+  }
+
+  .iconCircle {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    margin-bottom: 7px;
+  }
+
+  .appIcon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .customAppIcon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .linkTitle {
+    max-width: 72px;
+    font-size: 9px;
+    line-height: 14px;
+  }
+}
+
+@media screen and (max-width: 345px) {
+  .serviceLinksDialog {
+    :global(.ms-Dialog-main) {
+      width: calc(100vw - 10px) !important;
+      max-width: calc(100vw - 10px) !important;
+    }
+  }
+
+  .serviceLinkModal {
+    .container {
+      padding: 0 6px 12px;
+    }
+  }
+
+  .tab {
+    padding: 5px 2px;
+    font-size: 9px;
+    line-height: 12px;
+  }
+
+  .linksGrid {
+    gap: 18px 4px;
+  }
+
+  .linkTitle {
+    max-width: 68px;
+    font-size: 8.5px;
+    line-height: 13px;
+  }
+
+  .formActions {
+    gap: 6px;
+  }
+}
+

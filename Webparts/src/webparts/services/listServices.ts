@@ -746,11 +746,13 @@ private toStoredAbsoluteUrl(serverRelPath: string): string {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getCustomAppLinks(listName: string, userEmail: string): Promise<any[]> {
     let results: any[] = [];
+    const safeUserEmail = (userEmail || "").replace(/'/g, "''");
+
     try {
       results = await this.sp.web.lists
         .getByTitle(listName)
         .items.select("Id", "TIRUserEmail", "TIRCustomLinkAttribute")
-        .filter(`TIRUserEmail eq '${userEmail}'`)();
+        .filter(`TIRUserEmail eq '${safeUserEmail}'`)();
       return results;
     } catch (error) {
       return Promise.reject(error);

@@ -47,6 +47,7 @@ const TOP_ROWS = 4;
 
 const DATE_LOCALE = "en-GB";
 const DATE_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short", year: "numeric" };
+const DATE_MOBILE_DISPLAY_FORMAT: Intl.DateTimeFormatOptions = { day: "2-digit", month: "short", year: "2-digit" };
 
 const PRIORITY_BADGE_BG_BY_LABEL: Record<string, string> = {
   High: "#fdede8",
@@ -75,6 +76,14 @@ const formatDateForDisplay = (value: string): string => {
   const d = new Date(cleaned);
   if (isNaN(d.getTime())) return EMPTY_CELL_TEXT;
   return d.toLocaleDateString(DATE_LOCALE, DATE_DISPLAY_FORMAT);
+};
+
+const formatDateForMobileDisplay = (value: string): string => {
+  if (!value) return EMPTY_CELL_TEXT;
+  const cleaned = normalizeApiDateString(value);
+  const d = new Date(cleaned);
+  if (isNaN(d.getTime())) return EMPTY_CELL_TEXT;
+  return d.toLocaleDateString(DATE_LOCALE, DATE_MOBILE_DISPLAY_FORMAT);
 };
 
 const normalizePriorityLabel = (priority: string): string => {
@@ -343,6 +352,68 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
     </button>
   );
 
+
+  const renderMobileApprovalCard = (row: TaskRow): React.ReactElement => {
+    const priorityLabel = row.priority || EMPTY_CELL_TEXT;
+    const actionContent = row.redirectURL ? (
+      <a
+        href={row.redirectURL}
+        target="_blank"
+        rel="noreferrer"
+        className={styles.mobileViewDetailsLink}
+        aria-label="View Details (opens in new tab)"
+      >
+        View Details
+      </a>
+    ) : (
+      <span className={styles.mobileViewDetailsDisabled}>View Details</span>
+    );
+
+    return (
+      <article className={styles.mobileApprovalCard}>
+        <div className={styles.mobileCardMain}>
+          <div className={styles.mobileCardTopGrid}>
+            <div className={styles.mobileField}>
+              <div className={styles.mobileFieldLabel}>Wflow No.</div>
+              <div className={styles.mobileWorkflowValue}>{row.workflowNumber || EMPTY_CELL_TEXT}</div>
+            </div>
+
+            <div className={`${styles.mobileField} ${styles.mobileTaskTitleField}`}>
+              <div className={styles.mobileFieldLabel}>Task Title</div>
+              <div className={styles.mobileTaskTitle}>{row.taskTitle || EMPTY_CELL_TEXT}</div>
+            </div>
+          </div>
+
+          <div className={styles.mobileCardMetaGrid}>
+            <div className={styles.mobileField}>
+              <div className={styles.mobileFieldLabel}>Priority</div>
+              <Tag
+                label={priorityLabel}
+                backgroundColor={PRIORITY_BADGE_BG_BY_LABEL[priorityLabel] || "#f3f3f3"}
+                textColor={PRIORITY_BADGE_TEXT_BY_LABEL[priorityLabel] || "#333"}
+              />
+            </div>
+
+            <div className={styles.mobileField}>
+              <div className={styles.mobileFieldLabel}>Due Date</div>
+              <div className={styles.mobileDueDate}>{formatDateForMobileDisplay(row.dueDate)}</div>
+            </div>
+
+            <div className={`${styles.mobileField} ${styles.mobileRequestedByField}`}>
+              <div className={styles.mobileFieldLabel}>Request By</div>
+              <div className={styles.mobileRequestorWrapper}>
+                <span className={styles.mobileAvatarCircle}>{getInitials(row.requestorName)}</span>
+                <span className={styles.mobileRequestorName}>{row.requestorName || EMPTY_CELL_TEXT}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.mobileCardAction}>{actionContent}</div>
+      </article>
+    );
+  };
+
   const tableColumns: TableColumn<TaskRow>[] = [
     { columnKey: "workflowNumber", label: "Workflow No." },
     { columnKey: "taskTitle", label: "Task Title" },
@@ -436,12 +507,26 @@ const TaskApprovals: React.FC<TaskApprovalsProps> = (props) => {
                 </div>
               </div>
             ) : (
-              <TableView
-                data={sortedActiveRows}
-                columns={tableColumns}
-                getRowKey={(row) => (row.workitemId || row.workflowNumber) as string}
-                ariaLabel="Task Approvals Table"
-              />
+              <>
+                <div className={styles.desktopTableOnly}>
+                  <TableView
+                    data={sortedActiveRows}
+                    columns={tableColumns}
+                    getRowKey={(row) => (row.workitemId || row.workflowNumber) as string}
+                    ariaLabel="Task Approvals Table"
+                  />
+                </div>
+
+                <div className={styles.mobileCardsOnly} aria-label="Task Approvals Cards">
+                  <div className={styles.mobileCardsScroller}>
+                    {sortedActiveRows.map((row) => (
+                      <React.Fragment key={(row.workitemId || row.workflowNumber) as string}>
+                        {renderMobileApprovalCard(row)}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </>
         )}
