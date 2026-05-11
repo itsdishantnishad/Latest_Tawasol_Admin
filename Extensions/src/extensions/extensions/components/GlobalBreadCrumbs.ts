@@ -545,6 +545,10 @@ export class GlobalBreadcrumbs {
     font-size:14px !important;
     line-height:22px !important;
     letter-spacing:-0.5px !important;
+    position:relative;
+    z-index:1;
+    touch-action:manipulation;
+   -webkit-tap-highlight-color:transparent;
   }
 
   .__gbc_back svg{
@@ -841,7 +845,7 @@ export class GlobalBreadcrumbs {
                 display: "block",
                 overflow: "visible",
                 background: "transparent",
-                pointerEvents: "none",
+                pointerEvents: "auto",
                 boxSizing: "border-box",
                 transition: "none",
                 willChange: "transform"
@@ -1029,7 +1033,8 @@ export class GlobalBreadcrumbs {
         const backBtn = document.createElement("button");
         backBtn.className = "__gbc_back";
         backBtn.type = "button";
-        backBtn.addEventListener("click", this.goBack);
+       backBtn.addEventListener("click", this.goBack);
+       backBtn.addEventListener("touchend", this.goBack, { passive: false } as AddEventListenerOptions);
 
         const svgSpan = document.createElement("span");
         svgSpan.setAttribute("aria-hidden", "true");
@@ -1053,6 +1058,7 @@ export class GlobalBreadcrumbs {
         sectionLink.className = "__gbc_link";
         sectionLink.textContent = section;
         sectionLink.addEventListener("click", this.goBack);
+        sectionLink.addEventListener("touchend", this.goBack, { passive: false } as AddEventListenerOptions);
 
         const sep = document.createElement("span");
         sep.className = "__gbc_sep";
