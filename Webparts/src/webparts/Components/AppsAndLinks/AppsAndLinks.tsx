@@ -1,3 +1,5 @@
+// AppsAndLinks.tsx
+
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import styles from "./AppsAndLinks.module.scss";
@@ -57,6 +59,20 @@ const isValidURL = (urlString: string): boolean => {
   }
 };
 
+const getSafeOpenUrl = (rawUrl: string): string => {
+  const trimmedUrl = (rawUrl || "").trim();
+
+  if (!trimmedUrl) return "#";
+
+  // Existing saved links should already include http/https because of validation,
+  // but this protects older saved data and prevents broken clicks.
+  if (/^https?:\/\//i.test(trimmedUrl)) return trimmedUrl;
+
+  return `https://${trimmedUrl}`;
+};
+
+const escapeODataString = (value: string): string => value.replace(/'/g, "''");
+
 // helper: file -> data URL
 const fileToDataUrl = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -92,6 +108,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
   // Success Message State
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const spService = new listServices(props.context);
 
@@ -155,7 +172,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
       const existingItems: IUserListItem[] = await sp.web.lists
         .getByTitle(LIST_NAME)
         .items.select("Id", USER_EMAIL_COL, APPLINK_COL)
-        .filter(`${USER_EMAIL_COL} eq '${userEmail}'`)();
+        .filter(`${USER_EMAIL_COL} eq '${escapeODataString(userEmail)}'`)();
 
       const payload = {
         [USER_EMAIL_COL]: userEmail,
@@ -169,6 +186,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
       }
     } catch (err) {
       console.error("Error saving link:", err);
+      throw err;
     }
   };
 
@@ -199,6 +217,30 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
     setUploadedImage(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     setIsFormOpen(true);
+    setMenuOpenIndex(null);
+  };
+
+  const openCustomLink = (event: React.MouseEvent<HTMLElement>, url: string) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const safeUrl = getSafeOpenUrl(url);
+
+    if (!safeUrl || safeUrl === "#") {
+      return;
+    }
+
+    // Open only in a new tab/window from the user click.
+    // Do not fall back to window.location.href, because browsers can return null
+    // for noopener/noreferrer even when the new tab opens, which causes the
+    // current SharePoint page to navigate as well.
+    const openedWindow = window.open(safeUrl, "_blank");
+
+    if (openedWindow) {
+      openedWindow.opener = null;
+      openedWindow.focus();
+    }
+
     setMenuOpenIndex(null);
   };
 
@@ -261,7 +303,10 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
   };
 
   const saveForm = async () => {
+    if (isSaving) return;
     if (!validateForm()) return;
+
+    setIsSaving(true);
 
     let iconData: string | undefined;
 
@@ -272,40 +317,53 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
       } catch (e) {
         console.error(e);
         alert("Unable to read the selected image. Please try again.");
+        setIsSaving(false);
         return;
       }
     }
 
+    const previousLinks = customLinks;
     const updatedLinks = [...customLinks];
 
     if (isEditMode && editingIndex !== null) {
       const existing = updatedLinks[editingIndex];
 
       updatedLinks[editingIndex] = {
-        ...existing, // ✅ preserves any other fields
+        ...existing,
         Title: linkTitle.trim(),
         URL: linkURL.trim(),
-        // ✅ keep old icon if new not selected
+        // keep old icon if new not selected
         IconData: iconData ?? existing?.IconData,
       };
     } else {
       updatedLinks.push({
         Title: linkTitle.trim(),
         URL: linkURL.trim(),
-        IconData: iconData, // optional
+        IconData: iconData,
       });
     }
 
+    // Update the UI immediately so the user can click the new/edited link
+    // without waiting for the SharePoint save request to finish.
     setCustomLinks(updatedLinks);
-    await persistToSharePoint(updatedLinks);
-
     setIsFormOpen(false);
     resetFormState();
+    setMenuOpenIndex(null);
 
     setSuccessMessage(isEditMode ? "Successfully updated 1 custom URL" : "Successfully added 1 custom URL");
     setShowSuccessMessage(true);
-
     setTimeout(() => setShowSuccessMessage(false), 3000);
+
+    persistToSharePoint(updatedLinks)
+      .catch((err) => {
+        console.error("Error saving custom links:", err);
+        setCustomLinks(previousLinks);
+        setSuccessMessage("Unable to save custom URL. Please try again.");
+        setShowSuccessMessage(true);
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
   };
 
   const cancelForm = () => {
@@ -402,7 +460,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
             <>
               <div className={styles.linksGrid}>
                 {/* Add button */}
-                <button className={styles.addLinkButton} onClick={openAddForm}>
+                <button type="button" className={styles.addLinkButton} onClick={openAddForm}>
                   <div className={styles.iconCircle}>
                     <img src={addLinkIcon} alt="" />
                   </div>
@@ -410,40 +468,69 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
                 </button>
 
                 {/* Custom link items */}
-                {customLinks.map((link, index) => (
-                  <div key={index} className={styles.customLinkItem}>
-                    <a href={link.URL} target="_blank" rel="noopener noreferrer" className={styles.linkItem}>
-                      <div className={styles.iconCircle}>
-                        {link.IconData ? (
-                          <img src={link.IconData} className={styles.customAppIcon} alt="" />
-                        ) : (
-                          "🔗"
+                {customLinks.map((link, index) => {
+                  return (
+                    <div
+                      key={`${link.Title}-${link.URL}-${index}`}
+                      className={`${styles.customLinkItem} ${menuOpenIndex === index ? styles.menuVisible : ""}`}
+                    >
+                      <button
+                        type="button"
+                        className={`${styles.linkItem} ${styles.customLinkAnchor}`}
+                        onClick={(event) => openCustomLink(event, link.URL)}
+                        aria-label={`Open ${link.Title} in a new tab`}
+                      >
+                        <div className={styles.iconCircle}>
+                          {link.IconData ? (
+                            <img src={link.IconData} className={styles.customAppIcon} alt="" />
+                          ) : (
+                            "🔗"
+                          )}
+                        </div>
+                        <div className={styles.linkTitle}>{link.Title}</div>
+                      </button>
+
+                      <div className={styles.menuWrapper}>
+                        <IconButton
+                          iconProps={{ iconName: "MoreVertical" }}
+                          onMouseDown={(event) => event.stopPropagation()}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setMenuOpenIndex(menuOpenIndex === index ? null : index);
+                          }}
+                        />
+
+                        {menuOpenIndex === index && (
+                          <div ref={menuRef} className={styles.menuedit}>
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                openEditForm(index);
+                              }}
+                            >
+                              <img src={editIcon} alt="" />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                deleteLink(index);
+                              }}
+                            >
+                              <img src={trashIcon} alt="" />
+                              Delete
+                            </button>
+                          </div>
                         )}
                       </div>
-                      <div className={styles.linkTitle}>{link.Title}</div>
-                    </a>
-
-                    <div className={styles.menuWrapper}>
-                      <IconButton
-                        iconProps={{ iconName: "MoreVertical" }}
-                        onClick={() => setMenuOpenIndex(menuOpenIndex === index ? null : index)}
-                      />
-
-                      {menuOpenIndex === index && (
-                        <div ref={menuRef} className={styles.menuedit}>
-                          <button onClick={() => openEditForm(index)}>
-                            <img src={editIcon} alt="" />
-                            Edit
-                          </button>
-                          <button onClick={() => deleteLink(index)}>
-                            <img src={trashIcon} alt="" />
-                            Delete
-                          </button>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Inline Add/Edit Form */}
@@ -501,7 +588,7 @@ const AppsAndLinks = (props: IAppsAndLinksProps) => {
 
                   <div className={styles.formActions}>
                     <DefaultButton text="Cancel" onClick={cancelForm} />
-                    <PrimaryButton text="Save" onClick={saveForm} />
+                    <PrimaryButton text={isSaving ? "Saving..." : "Save"} onClick={saveForm} disabled={isSaving} />
                   </div>
                 </div>
               )}
