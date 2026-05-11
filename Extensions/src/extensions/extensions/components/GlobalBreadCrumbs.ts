@@ -404,6 +404,7 @@ export class GlobalBreadcrumbs {
     private _lastSection: string = "";
     private _lastCurrent: string = "";
     private _scrollSyncAttached: boolean = false;
+    private _lastBackTap: number = 0;
 
     private readonly _breadcrumbCSS = `
 .__gbc_row{
@@ -504,8 +505,7 @@ export class GlobalBreadcrumbs {
   body.__gbc_mobile_active main{
     padding-top:66px !important;
   }
-
-  #tir-global-breadcrumb-bleed{
+#tir-global-breadcrumb-bleed{
     position:fixed !important;
     top:58px !important;
     left:0 !important;
@@ -518,6 +518,8 @@ export class GlobalBreadcrumbs {
     pointer-events:auto !important;
     transition:none !important;
     will-change:transform !important;
+    -webkit-transform:translateZ(0);
+    transform:translateZ(0);
   }
 
   #tir-global-breadcrumb-host{
@@ -539,16 +541,19 @@ export class GlobalBreadcrumbs {
     overflow:hidden !important;
   }
 
-  .__gbc_back{
+ .__gbc_back{
     font-family:'Inter',sans-serif !important;
     font-weight:400 !important;
     font-size:14px !important;
     line-height:22px !important;
     letter-spacing:-0.5px !important;
-    position:relative;
-    z-index:1;
-    touch-action:manipulation;
-   -webkit-tap-highlight-color:transparent;
+    position:relative !important;
+    z-index:2 !important;
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+    -webkit-tap-highlight-color:transparent !important;
+    -webkit-user-select:none !important;
+    user-select:none !important;
   }
 
   .__gbc_back svg{
@@ -944,9 +949,9 @@ export class GlobalBreadcrumbs {
                 if (bleed.parentElement !== document.body) {
                     document.body.appendChild(bleed);
                 }
-
                 bleed.style.position = "fixed";
                 bleed.style.top = "58px";
+                bleed.style.pointerEvents = "auto";
                 this.syncBreadcrumbWithScroll();
             }
         });
@@ -976,6 +981,7 @@ export class GlobalBreadcrumbs {
 
                 bleed.style.position = "fixed";
                 bleed.style.top = "58px";
+                bleed.style.pointerEvents = "auto";
                 this.syncBreadcrumbWithScroll();
             } else {
                 document.body.classList.remove("__gbc_mobile_active");
@@ -990,7 +996,19 @@ export class GlobalBreadcrumbs {
 
     private goBack = (ev?: Event): void => {
         try { ev?.preventDefault(); } catch { }
-        window.history.back();
+        try { ev?.stopPropagation(); } catch { }
+
+        const now = Date.now();
+        if (now - this._lastBackTap < 500) return;
+        this._lastBackTap = now;
+
+        window.setTimeout(() => {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = this._ctx.pageContext.web.absoluteUrl;
+            }
+        }, 0);
     };
 
     private async getCurrentSitePageInfo(): Promise<{ title: string; isNews: boolean; contentType?: string; }> {
@@ -1033,9 +1051,9 @@ export class GlobalBreadcrumbs {
         const backBtn = document.createElement("button");
         backBtn.className = "__gbc_back";
         backBtn.type = "button";
-       backBtn.addEventListener("click", this.goBack);
-       backBtn.addEventListener("touchend", this.goBack, { passive: false } as AddEventListenerOptions);
-
+        backBtn.addEventListener("click", this.goBack);
+        backBtn.addEventListener("touchend", this.goBack, { passive: false, capture: true } as AddEventListenerOptions);
+        backBtn.addEventListener("pointerup", this.goBack, { passive: false, capture: true } as AddEventListenerOptions);
         const svgSpan = document.createElement("span");
         svgSpan.setAttribute("aria-hidden", "true");
         svgSpan.innerHTML = this._backSvg;
@@ -1057,8 +1075,9 @@ export class GlobalBreadcrumbs {
         sectionLink.href = "#";
         sectionLink.className = "__gbc_link";
         sectionLink.textContent = section;
-        sectionLink.addEventListener("click", this.goBack);
-        sectionLink.addEventListener("touchend", this.goBack, { passive: false } as AddEventListenerOptions);
+        backBtn.addEventListener("click", this.goBack);
+        backBtn.addEventListener("touchend", this.goBack, { passive: false, capture: true } as AddEventListenerOptions);
+        backBtn.addEventListener("pointerup", this.goBack, { passive: false, capture: true } as AddEventListenerOptions);
 
         const sep = document.createElement("span");
         sep.className = "__gbc_sep";
