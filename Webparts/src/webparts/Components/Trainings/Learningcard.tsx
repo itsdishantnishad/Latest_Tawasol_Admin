@@ -105,17 +105,20 @@ export const LearningLinks: React.FC<any> = ({ title, description, links }) => {
 
       <div className={styles.linksGrid}>
         {links.map((link: any) => {
-          const isLogoType = !!link.backgroundColor;
+          const isLearningContent =
+            (title || "").toLowerCase().includes("learning content");
+
+          const isLogoType = !!link.backgroundColor && !isLearningContent;
 
           return (
-            <div 
-              key={link.id} 
-              className={`${styles.linkCard} ${isLogoType ? styles.isLogoType : styles.isContentType}`} 
+            <div
+              key={link.id}
+              className={`${styles.linkCard} ${isLogoType ? styles.isLogoType : styles.isContentType}`}
               onClick={() => window.open(link.url, '_blank')}
             >
               {isMobile ? (
-                <div 
-                  className={styles.logoContainer} 
+                <div
+                  className={styles.logoContainer}
                   style={isLogoType ? { backgroundColor: link.backgroundColor } : {}}
                 >
                   <img src={link.logo} alt={link.logoAlt} className={styles.logoImage} />
