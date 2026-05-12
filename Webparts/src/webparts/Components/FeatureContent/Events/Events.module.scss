@@ -430,6 +430,29 @@
   }
 }
 
+
+.eventsGrid {
+  align-items: stretch;
+  overflow-y: hidden;
+  touch-action: pan-x;
+}
+
+.eventCard {
+  transform: none !important;
+  transition: none !important;
+  will-change: auto;
+}
+
+.eventCard:hover {
+  transform: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.registerButton:hover {
+  transform: none !important;
+}
+
+
 }
 
 // ── Mobile (≤480px) ────────────────────────────────────────────────────────
@@ -545,5 +568,27 @@
   }
 }
 
-  
+
+
+.eventsGrid {
+  align-items: stretch;
+  overflow-y: hidden;
+  touch-action: pan-x;
+}
+
+.eventCard {
+  transform: none !important;
+  transition: none !important;
+  will-change: auto;
+}
+
+.eventCard:hover {
+  transform: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.registerButton:hover {
+  transform: none !important;
+}
+
 }
