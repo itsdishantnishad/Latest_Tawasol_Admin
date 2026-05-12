@@ -434,7 +434,7 @@
 .eventsGrid {
   align-items: stretch;
   overflow-y: hidden;
-  touch-action: pan-x;
+   touch-action: pan-x pan-y;;
 }
 
 .eventCard {
@@ -480,7 +480,6 @@
       display: none;
     }
 
-   
   }
 
   .eventCard {
@@ -573,7 +572,7 @@
 .eventsGrid {
   align-items: stretch;
   overflow-y: hidden;
-  touch-action: pan-x;
+   touch-action: pan-x pan-y;
 }
 
 .eventCard {

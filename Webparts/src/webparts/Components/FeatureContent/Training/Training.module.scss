@@ -668,7 +668,7 @@
     scrollbar-width: none;
     box-sizing: border-box;
     align-items: stretch;
-    touch-action: pan-x;
+    touch-action: pan-x pan-y;
     &::-webkit-scrollbar {
       display: none;
     }
@@ -817,7 +817,7 @@
     scrollbar-width: none;
     box-sizing: border-box;
     align-items: stretch;
-    touch-action: pan-x;
+    touch-action: pan-x pan-y;
     &::-webkit-scrollbar {
       display: none;
     }
