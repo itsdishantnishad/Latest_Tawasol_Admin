@@ -61,71 +61,74 @@
 /* Desktop View Remains Untouched */
 
 @media (max-width: 768px) {
-  .linksGrid {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important; 
-    width: 100% !important;
-    gap: 16px;
-    padding: 0;
-  }
-
-  .linkCard {
-    width: 343px !important;
-    height: 147px !important;
-    border-radius: 8px !important; 
-    margin-bottom: 16px;
-    overflow: hidden;
-    display: flex;
-    position: relative;
-    border: none;
-
-    /* Base container for the image/logo */
-    .logoContainer {
+  .learningLinks {
+    .linksGrid {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
       width: 100% !important;
-      height: 100% !important;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      gap: 16px !important;
+      padding: 0 !important;
     }
 
-    /* DESIGN FOR LEARNING LINKS (Logos like STRYVE) */
-    &.isLogoType {
-      background-color: #fdecdc !important; 
-      
+    .linkCard {
+      width: 100% !important;
+      max-width: 343px !important;
+      height: 147px !important;
+      border-radius: 8px !important;
+      margin-bottom: 0 !important;
+      overflow: hidden !important;
+      display: flex !important;
+      position: relative !important;
+      border: none !important;
+      padding: 0 !important;
+
       .logoContainer {
-        padding: 24px; // Breathing room for logos
-        img {
-          object-fit: contain !important; 
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+      }
+
+      &.isLogoType {
+        background-color: #fdecdc !important;
+
+        .logoContainer {
+          padding: 24px !important;
+
+          img {
+            object-fit: contain !important;
+            width: 100% !important;
+            height: 100% !important;
+          }
+        }
+      }
+
+      &.isContentType {
+        background-color: transparent !important;
+
+        .logoContainer {
+          padding: 0 !important;
           width: 100% !important;
           height: 100% !important;
         }
-      }
-    }
-
-    /* DESIGN FOR LEARNING CONTENT (Images like Unconscious Bias) */
-    &.isContentType {
-      background-color: transparent !important; 
-      
-      .logoContainer {
-        padding: 0 !important; // NO padding ensures full width
-        width: 100% !important;
-        height: 100% !important;
 
         img {
-          /* This forces the image to span the full 343x147 card */
           width: 100% !important;
           height: 100% !important;
           min-width: 100% !important;
-          object-fit: cover !important; 
+          object-fit: cover !important;
           display: block !important;
         }
       }
-    }
 
-    /* Keep labels hidden */
-    .mobileFooterLabel, .footerLabel, .contentTitle, .mobileTitleBar {
-      display: none !important;
+      .mobileFooterLabel,
+      .footerLabel,
+      .contentTitle,
+      .mobileTitleBar {
+        display: none !important;
+      }
     }
   }
 }

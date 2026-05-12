@@ -336,17 +336,6 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
               <div className={styles.previousEventsContainer}>
                 <div className={styles.previousHeaderRow}>
                   <h2 className={styles.heading}>Previous Events</h2>
-
-                  {!showAllPrevious && previousEventsSorted.length > 3 && (
-                    <button
-                      type="button"
-                      className={styles.viewAllButton}
-                      onClick={() => setShowAllPrevious(true)}
-                      aria-label="View all previous events"
-                    >
-                      View All
-                    </button>
-                  )}
                 </div>
 
                 <div className={styles.gridLayout}>
@@ -365,6 +354,17 @@ const AllEvents: React.FC<IAlleventsProps> = (props) => {
                     <p>No previous events found.</p>
                   )}
                 </div>
+
+                {!showAllPrevious && previousEventsSorted.length > 3 && (
+                  <button
+                    type="button"
+                    className={styles.viewAllButton}
+                    onClick={() => setShowAllPrevious(true)}
+                    aria-label="View all previous events"
+                  >
+                    View All
+                  </button>
+                )}
               </div>
             </div>
           )}
