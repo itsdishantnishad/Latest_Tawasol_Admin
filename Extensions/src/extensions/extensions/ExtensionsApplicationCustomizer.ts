@@ -19,6 +19,7 @@ import { AmplitudeService } from './services/AmplitudeService';
 import { GoogleAnalyticsService } from './services/GoogleAnalyticsService';
 import Onbo from './components/Onbo';
 import { IOnboConfig } from './components/Onbo';
+import { OnboardingService } from './services/OnboardingService';
 import { HideSocialBarService } from './services/HideSocialBarService';
 import { GlobalBreadcrumbs } from './components/GlobalBreadCrumbs';
 import { PhotoService } from './shared/photoService';
@@ -567,10 +568,97 @@ export default class ExtensionsApplicationCustomizer
     this.header.render(IDS.hosts.header);
   }
 
+  private _hideGlimpse(): void {
+    if (document.getElementById('tir-onboarding-hide-glimpse')) return;
+    
+    // Create the style element
+    const style = document.createElement('style');
+    style.id = 'tir-onboarding-hide-glimpse';
+    style.innerHTML = `
+      #spPageChromeAppDiv, 
+      #sp-appBar, 
+      #SuiteNavWrapper, 
+      .ms-compositeHeader, 
+      #spSiteHeader, 
+      .ms-Inertia-container, 
+      [data-automation-id="contentScrollRegion"],
+      #workbenchPageContent,
+      .SPCanvas,
+      .Canvas,
+      [data-automation-id="pageHeader"] {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+      body {
+        background: #FFF4EA !important;
+      }
+    `;
+    
+    // Prepend to head to ensure it's evaluated as early as possible
+    if (document.head.firstChild) {
+      document.head.insertBefore(style, document.head.firstChild);
+    } else {
+      document.head.appendChild(style);
+    }
+    
+    // Immediate body background set to avoid any white flash
+    document.body.style.backgroundColor = '#FFF4EA';
+    
+    // Extra insurance: if spPageChromeAppDiv already exists, hide it manually
+    const spApp = document.getElementById('spPageChromeAppDiv');
+    if (spApp) {
+      spApp.style.display = 'none';
+    }
+  }
+
+  private _showGlimpse(): void {
+    const el = document.getElementById('tir-onboarding-hide-glimpse');
+    if (el) el.remove();
+  }
+
   public async onInit(): Promise<void> {
 
     console.log(">>> ExtensionsApplicationCustomizer LOADED <<<", window.location.href);
     if (!this.shouldRender()) return;
+
+    // --- Onboarding Fast Track ---
+    const onboardingSvc = new OnboardingService(this.context);
+    const qs = new URLSearchParams(window.location.search);
+    const forceOnboarding = qs.get("onboarding") === "1" || window.location.href.toLowerCase().includes("onboarding=1");
+    const likelyNeedsOnboarding = forceOnboarding || !onboardingSvc.hasSeenLocally();
+
+    if (likelyNeedsOnboarding) {
+      this._hideGlimpse();
+    }
+
+    void (async () => {
+      try {
+        const state = await onboardingSvc.loadState();
+        const shouldShow = forceOnboarding ? true : (!state.hasSeen && !!state.URL);
+
+        if (shouldShow && state.URL) {
+          const urls = resolveUrls(this.webUrl);
+          const cfg: IOnboConfig = {
+            homeUrl: urls.home,
+            URL: state.URL,
+            title: state.title
+          };
+
+          this.onboarding?.dispose();
+          this.onboarding = new Onbo(this.context, cfg);
+          this.onboarding.render();
+          // Once rendered, we can remove the hide-glimpse because the backdrop is up
+          this._showGlimpse();
+          return true;
+        }
+      } catch (err) {
+        console.error("Onboarding load failed", err);
+      }
+      this._showGlimpse();
+      return false;
+    })();
+    // ----------------------------
 
     this._themeProvider = this.context.serviceScope.consume(ThemeProvider.serviceKey);
     this._themeVariant = this._themeProvider.tryGetTheme();
@@ -649,40 +737,6 @@ export default class ExtensionsApplicationCustomizer
     // NEW: resolve Help URL using site absolute url (tenant + site dynamic)
     const siteBaseUrl = this.context.pageContext.site.absoluteUrl || this.webUrl;
     const siteUrls = resolveUrls(siteBaseUrl);
-
-    // Onboarding
-    try {
-      const qs = new URLSearchParams(window.location.search);
-      const forceOnboarding =
-        qs.get("onboarding") === "1" ||
-        window.location.href.toLowerCase().includes("onboarding=1");
-
-      const { OnboardingService } = await import("./services/OnboardingService");
-      const svc = new OnboardingService(this.context);
-
-      const state = await svc.loadState();
-
-      if (forceOnboarding && !state.URL) {
-        console.warn("[Onboarding] Forced via ?onboarding=1 but onboarding URL not found in list response.");
-      }
-
-      // force means ignore hasSeen
-      const shouldShow = forceOnboarding ? true : (!state.hasSeen && !!state.URL);
-
-      if (shouldShow && state.URL) {
-        const cfg: IOnboConfig = {
-          homeUrl: urls.home,
-          URL: state.URL,
-          title: state.title
-        };
-
-        this.onboarding?.dispose();
-        this.onboarding = new Onbo(this.context, cfg);
-        this.onboarding.render();
-      }
-    } catch (err) {
-      console.error("Onboarding load failed", err);
-    }
 
     // Services
     const currentUpn = (this.userEmail || this.context.pageContext.user.loginName || '').toLowerCase();

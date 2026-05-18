@@ -266,6 +266,22 @@ const CustomFeatureContent: React.FC<{ card: IResolvedCustomFeatureCardSettings 
 
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
+  const [isDelaying, setIsDelaying] = useState(true);
+
+  React.useEffect(() => {
+    const delay = props.loadingDelay ?? 0;
+    if (delay <= 0) {
+      setIsDelaying(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setIsDelaying(false);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [props.loadingDelay]);
+
   const themeConfig = React.useMemo(
     () => getActiveThemeConfig(props.themeVariant),
     [props.themeVariant]
@@ -543,6 +559,14 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
       <div />
     </LoadingBoundary>
   );
+
+  if (isDelaying) {
+    return (
+      <div className={styles.featureWheelContainer}>
+        {shimmerFallback}
+      </div>
+    );
+  }
 
   return (
     <div
