@@ -345,15 +345,15 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
     }
   }, [features, selectedFeature]);
 
-    const centerSelectedMobileCard = useCallback(
+  const centerSelectedMobileCard = useCallback(
     (behavior: ScrollBehavior) => {
+      if (!window.matchMedia("(max-width: 768px)").matches) return;
+
       const track = mobileFeatureTrackRef.current;
       if (!track) return;
 
       const container = track.parentElement as HTMLElement | null;
       if (!container) return;
-
-      if (!window.matchMedia("(max-width: 768px)").matches) return;
 
       const activeCard = track.querySelector(
         `[data-feature-id="${selectedFeature}"]`
@@ -369,7 +369,6 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
       const cardCenter = cardRect.left + cardRect.width / 2;
 
       const delta = cardCenter - containerCenter;
-
       if (Math.abs(delta) < 0.5) return;
 
       container.scrollTo({
@@ -384,21 +383,21 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
     // While shimmer is shown, the track isn't mounted, so centering would no-op.
     if (isDelaying) return;
 
-    const behavior: ScrollBehavior = hasCenteredMobileRef.current ? "smooth" : "auto";
-
     let raf1 = 0;
     let raf2 = 0;
     let t2: number | undefined;
 
     // Center once on the next frame (after class changes apply).
+    // Use "auto" to avoid a visible "swing" (smooth scroll + transform transition).
     raf1 = window.requestAnimationFrame(() => {
-      centerSelectedMobileCard(behavior);
+      centerSelectedMobileCard("auto");
     });
 
-    // The selected card animates size/transform; re-center after it finishes.
+    // The selected card animates size/transform; do a final snap correction after it finishes.
+    // Keep it "auto" so users don't see a second smooth scroll.
     t2 = window.setTimeout(() => {
       raf2 = window.requestAnimationFrame(() => {
-        centerSelectedMobileCard("smooth");
+        centerSelectedMobileCard("auto");
       });
     }, 480);
 
@@ -410,6 +409,76 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
       if (t2) window.clearTimeout(t2);
     };
   }, [selectedFeature, isDelaying, centerSelectedMobileCard]);
+
+
+
+  // Disable manual horizontal swiping/scrolling on mobile.
+  // Users should move only by tapping the left/right cards (+1 / -1 feel),
+  // while we still allow programmatic centering via scrollTo.
+  React.useEffect(() => {
+    if (isDelaying) return;
+    if (!window.matchMedia("(max-width: 768px)").matches) return;
+
+    const track = mobileFeatureTrackRef.current;
+    const container = (track?.parentElement as HTMLElement | null) ?? null;
+    if (!container) return;
+
+    // Ensure CSS scroll snapping / smooth scrolling doesn't "fight" our programmatic centering.
+    const prevSnapType = container.style.scrollSnapType;
+    const prevScrollBehavior = container.style.scrollBehavior;
+    container.style.scrollSnapType = "none";
+    container.style.scrollBehavior = "auto";
+
+    let startX = 0;
+    let startY = 0;
+    let active = false;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      active = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!active || e.touches.length !== 1) return;
+
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+
+      // If the gesture is primarily horizontal, block it to prevent card surfing.
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (e.cancelable) e.preventDefault();
+      }
+    };
+
+    const onTouchEnd = () => {
+      active = false;
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      // Prevent horizontal trackpad/mouse wheel scrolling.
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        if (e.cancelable) e.preventDefault();
+      }
+    };
+
+    container.addEventListener("touchstart", onTouchStart, { passive: true });
+    container.addEventListener("touchmove", onTouchMove, { passive: false });
+    container.addEventListener("touchend", onTouchEnd, { passive: true });
+    container.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    container.addEventListener("wheel", onWheel, { passive: false });
+
+    return () => {
+      container.style.scrollSnapType = prevSnapType;
+      container.style.scrollBehavior = prevScrollBehavior;
+      container.removeEventListener("touchstart", onTouchStart);
+      container.removeEventListener("touchmove", onTouchMove);
+      container.removeEventListener("touchend", onTouchEnd);
+      container.removeEventListener("touchcancel", onTouchEnd);
+      container.removeEventListener("wheel", onWheel);
+    };
+  }, [isDelaying]);
 
   // Track which LetsCelebrate tab is currently active inside FeatureWheel.
   const [celebrateTab, _setCelebrateTab] = useState<CelebrateTabKey>("birthdays");
