@@ -266,7 +266,7 @@ const CustomFeatureContent: React.FC<{ card: IResolvedCustomFeatureCardSettings 
 
 
 const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
-  const [isDelaying, setIsDelaying] = useState(true);
+  const [isDelaying, setIsDelaying] = useState(() => (props.loadingDelay ?? 0) > 0);
 
   React.useEffect(() => {
     const delay = props.loadingDelay ?? 0;
@@ -345,38 +345,71 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
     }
   }, [features, selectedFeature]);
 
+    const centerSelectedMobileCard = useCallback(
+    (behavior: ScrollBehavior) => {
+      const track = mobileFeatureTrackRef.current;
+      if (!track) return;
+
+      const container = track.parentElement as HTMLElement | null;
+      if (!container) return;
+
+      if (!window.matchMedia("(max-width: 768px)").matches) return;
+
+      const activeCard = track.querySelector(
+        `[data-feature-id="${selectedFeature}"]`
+      ) as HTMLElement | null;
+
+      if (!activeCard) return;
+
+      // Use visual rects so rotation/scale transitions don't throw off centering.
+      const containerRect = container.getBoundingClientRect();
+      const cardRect = activeCard.getBoundingClientRect();
+
+      const containerCenter = containerRect.left + containerRect.width / 2;
+      const cardCenter = cardRect.left + cardRect.width / 2;
+
+      const delta = cardCenter - containerCenter;
+
+      if (Math.abs(delta) < 0.5) return;
+
+      container.scrollTo({
+        left: container.scrollLeft + delta,
+        behavior,
+      });
+    },
+    [selectedFeature]
+  );
+
   React.useLayoutEffect(() => {
-    // The wheel isn't rendered while the shimmer delay is active, so refs are null.
-    // Re-run after delay ends to ensure the default selected card is centered in mobile view.
+    // While shimmer is shown, the track isn't mounted, so centering would no-op.
     if (isDelaying) return;
 
-    const track = mobileFeatureTrackRef.current;
-    if (!track) return;
-    if (!window.matchMedia("(max-width: 768px)").matches) return;
+    const behavior: ScrollBehavior = hasCenteredMobileRef.current ? "smooth" : "auto";
 
-    const container = track.parentElement as HTMLElement | null;
-    if (!container) return;
+    let raf1 = 0;
+    let raf2 = 0;
+    let t2: number | undefined;
 
-    const activeCard = track.querySelector(
-      `[data-feature-id="${selectedFeature}"]`
-    ) as HTMLElement | null;
-
-    if (!activeCard) return;
-
-    window.requestAnimationFrame(() => {
-      const containerWidth = container.clientWidth || container.offsetWidth;
-      const cardLeft = activeCard.offsetLeft;
-      const cardWidth = activeCard.offsetWidth;
-
-      // Scroll programmatically so selected card is always centered.
-      container.scrollTo({
-        left: cardLeft - containerWidth / 2 + cardWidth / 2,
-        behavior: hasCenteredMobileRef.current ? "smooth" : "auto",
-      });
-
-      hasCenteredMobileRef.current = true;
+    // Center once on the next frame (after class changes apply).
+    raf1 = window.requestAnimationFrame(() => {
+      centerSelectedMobileCard(behavior);
     });
-  }, [selectedFeature, isDelaying, features]);
+
+    // The selected card animates size/transform; re-center after it finishes.
+    t2 = window.setTimeout(() => {
+      raf2 = window.requestAnimationFrame(() => {
+        centerSelectedMobileCard("smooth");
+      });
+    }, 480);
+
+    hasCenteredMobileRef.current = true;
+
+    return () => {
+      window.cancelAnimationFrame(raf1);
+      window.cancelAnimationFrame(raf2);
+      if (t2) window.clearTimeout(t2);
+    };
+  }, [selectedFeature, isDelaying, centerSelectedMobileCard]);
 
   // Track which LetsCelebrate tab is currently active inside FeatureWheel.
   const [celebrateTab, _setCelebrateTab] = useState<CelebrateTabKey>("birthdays");

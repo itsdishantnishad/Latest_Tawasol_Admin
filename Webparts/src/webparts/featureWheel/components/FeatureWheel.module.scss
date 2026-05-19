@@ -178,10 +178,10 @@
 
 @media (max-width: 768px) {
   .featureWheelContainer {
+    overflow-x: hidden !important;
     zoom: 1 !important;
     width: 100% !important;
     max-width: 100% !important;
-    //overflow-x: hidden !important;
     //overflow-y: visible !important;
   }
 
@@ -195,17 +195,17 @@
   }
 
   .mobileFeatureSelector {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    transform: none !important;
     display: block !important;
-    width: 100vw !important;
-    margin-left: 50% !important;
-    transform: translateX(-50%) !important;
     overflow-x: auto !important;
     overflow-y: visible !important;
     padding: 20px 0 40px !important; /* Increased bottom padding for the shadow */
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
     // touch-action: none ;
-     touch-action: pan-x pan-y !important;
+     touch-action: pan-y !important;
     // new 
     scroll-behavior: smooth !important;
   
