@@ -335,6 +335,8 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
 
   const mobileFeatureTrackRef = useRef<HTMLDivElement | null>(null);
 
+  const hasCenteredMobileRef = useRef(false);
+
   React.useEffect(() => {
     const firstFeature = features[0];
 
@@ -343,10 +345,17 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
     }
   }, [features, selectedFeature]);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
+    // The wheel isn't rendered while the shimmer delay is active, so refs are null.
+    // Re-run after delay ends to ensure the default selected card is centered in mobile view.
+    if (isDelaying) return;
+
     const track = mobileFeatureTrackRef.current;
     if (!track) return;
     if (!window.matchMedia("(max-width: 768px)").matches) return;
+
+    const container = track.parentElement as HTMLElement | null;
+    if (!container) return;
 
     const activeCard = track.querySelector(
       `[data-feature-id="${selectedFeature}"]`
@@ -354,21 +363,20 @@ const FeatureWheel: React.FC<IFeatureWheelProps> = (props) => {
 
     if (!activeCard) return;
 
-    window.setTimeout(() => {
-      const container = track.parentElement as HTMLElement;
-      if (!container) return;
-
-      const containerWidth = container.offsetWidth;
+    window.requestAnimationFrame(() => {
+      const containerWidth = container.clientWidth || container.offsetWidth;
       const cardLeft = activeCard.offsetLeft;
       const cardWidth = activeCard.offsetWidth;
 
       // Scroll programmatically so selected card is always centered.
       container.scrollTo({
         left: cardLeft - containerWidth / 2 + cardWidth / 2,
-        behavior: "smooth",
+        behavior: hasCenteredMobileRef.current ? "smooth" : "auto",
       });
-    }, 80);
-  }, [selectedFeature]);
+
+      hasCenteredMobileRef.current = true;
+    });
+  }, [selectedFeature, isDelaying, features]);
 
   // Track which LetsCelebrate tab is currently active inside FeatureWheel.
   const [celebrateTab, _setCelebrateTab] = useState<CelebrateTabKey>("birthdays");
