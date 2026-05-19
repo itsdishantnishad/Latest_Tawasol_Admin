@@ -5,6 +5,7 @@ import {
   type IPropertyPaneConfiguration,
   PropertyPaneTextField,
   PropertyPaneToggle,
+  PropertyPaneSlider,
 } from "@microsoft/sp-property-pane";
 import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
 import {
@@ -54,6 +55,8 @@ export interface IFeatureWheelWebPartProps {
 
   /** Old field kept only so existing pages can be migrated automatically. */
   customCardsJson?: string;
+
+  loadingDelay?: number;
 }
 
 export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureWheelWebPartProps> {
@@ -113,6 +116,7 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
         showBeverageMenu: this.properties.showBeverageMenu,
         customCards: this.properties.customCards,
         customCardsJson: this.properties.customCardsJson,
+        loadingDelay: this.properties.loadingDelay,
         context: this.context,
         themeVariant: this._themeVariant,
       });
@@ -134,6 +138,8 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
 
   private _ensurePropertyDefaults(): void {
     const props = this.properties;
+
+    props.loadingDelay = props.loadingDelay ?? 1500;
 
     props.showDashboard = props.showDashboard !== false;
     props.showOffers = props.showOffers !== false;
@@ -339,6 +345,18 @@ export default class FeatureWheelWebPart extends BaseClientSideWebPart<IFeatureW
                 }),
                 PropertyPaneTextField("taskApprovals", {
                   label: "Please enter URL for 'Task Approvals' view all",
+                }),
+              ],
+            },
+            {
+              groupName: "UI Settings",
+              groupFields: [
+                PropertyPaneSlider("loadingDelay", {
+                  label: "Loading delay (ms)",
+                  min: 0,
+                  max: 5000,
+                  step: 500,
+                  value: this.properties.loadingDelay,
                 }),
               ],
             },
