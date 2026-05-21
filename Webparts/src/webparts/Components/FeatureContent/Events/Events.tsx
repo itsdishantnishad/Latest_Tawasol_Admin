@@ -321,7 +321,7 @@ export const Events: React.FC<IEventsProps> = (props) => {
                   setIsRegisterOpen(true);
                 }}
               >
-                View Details
+                Register
               </button>
             </div>
           </div>
