@@ -50,7 +50,7 @@ export interface IRegistrationData {
 const DEFAULTS = {
   listTitle: "Registered User Event",
   fieldRegisteredUsersInternal: "TIRRegisteredUsers",
-  fieldDivisionInternal: "TIRDivsion",
+  fieldDivisionInternal: "TIRDivisions",
   fieldDepartmentInternal: "TIRDepartment",
   fieldJoinUsInternal: "TIRJoinUs",
 };
