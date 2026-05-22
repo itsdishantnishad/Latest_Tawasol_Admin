@@ -40,7 +40,7 @@ export interface IFeedbackModalProps {
 
   /** Field internals (can be overridden if your internals differ) */
   fieldTrainingIdInternal?: string; // default: "TIRTrainingID"
-  fieldDivisionInternal?: string; // default: "TIRDivision"
+  fieldDivisionInternal?: string; // default: "TIRDivisions"
   fieldDepartmentInternal?: string; // default: "TIRDepartment" (Managed Metadata)
   fieldRatingInternal?: string; // default: "TIRRating"
 }
@@ -61,7 +61,7 @@ const DEFAULTS = {
   title: "Feedback for Training Event",
   listTitle: "Training Feedback",
   fieldTrainingIdInternal: "TIRTrainingID",
-  fieldDivisionInternal: "TIRDivision",
+  fieldDivisionInternal: "TIRDivisions",
   fieldDepartmentInternal: "TIRDepartment",
   fieldRatingInternal: "TIRRating",
 } as const;
